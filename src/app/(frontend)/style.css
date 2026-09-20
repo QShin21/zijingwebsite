@@ -175,7 +175,7 @@ main{max-width:1440px;margin:auto;min-height:65vh;padding:0 var(--gutter) 90px}
 .contact-strip h2{font-size:clamp(22px,2.7vw,35px);margin:0}
 .contact-strip .button{flex-shrink:0}
 
-/* Footer */
+/* Footer: maintain readable contrast even for the oversized decorative text. */
 .site-footer{border-top:1px solid var(--line);padding:58px max(var(--gutter),calc((100vw - 1296px)/2)) 0;background:#0c0d10;overflow:hidden}
 .footer-main{display:grid;grid-template-columns:2fr 1fr 1fr;gap:50px;margin-bottom:50px}
 .footer-identity>p{color:var(--muted);font-size:13px;margin:20px 0;max-width:340px}
@@ -185,8 +185,8 @@ main{max-width:1440px;margin:auto;min-height:65vh;padding:0 var(--gutter) 90px}
 .footer-main a:hover,.footer-bottom a:hover{color:var(--accent)}
 .footer-bottom{border-top:1px solid var(--line);padding:20px 0;display:flex;justify-content:space-between;gap:20px;font-size:10px;color:#9996a3}
 .footer-bottom nav{display:flex;gap:22px;flex-wrap:wrap}
-.footer-wordmark{display:flex;justify-content:space-between;gap:20px;font-family:Arial,sans-serif;font-size:clamp(40px,10.4vw,150px);font-weight:900;letter-spacing:-.07em;line-height:1.1;white-space:nowrap;color:#27272f;padding-top:16px}
-.footer-wordmark>span{color:#534366}
+.footer-wordmark{display:flex;justify-content:space-between;gap:20px;font-family:Arial,sans-serif;font-size:clamp(40px,10.4vw,150px);font-weight:900;letter-spacing:-.07em;line-height:1.1;white-space:nowrap;color:#82798e;padding-top:16px}
+.footer-wordmark>span{color:#a18bbd}
 
 /* Listing, detail, recruitment and editorial pages */
 .page-head{padding:29px 0 42px;border-bottom:1px solid var(--line);margin-bottom:34px}
