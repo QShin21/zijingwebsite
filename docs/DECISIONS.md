@@ -1,5 +1,9 @@
 # 决策记录
 
+## 2026-09-20 测试部署补充
+
+用户明确授权使用 test.yejiaxin.online 测试主页，并保持 FreeKill 的 sgs.thuzijing.top 不变。服务器没有 Docker，本次采用独立账户与 systemd 原生部署；不替换系统 Node，不修改 FreeKill 配置。APP_ENV=staging，数据库复用仓库的本地 PostgreSQL 启动器并仅监听回环接口。此选择用于当前测试，未改变正式生产的独立数据库和备份要求。未导入演示资料，两个管理员通过受控 Local API 按用户指定凭据创建；临时凭据文件已删除。
+
 1. 采用 Next 16.3.5 / Payload 3.90.1；npm 实际 peer 要求 Next >=16.3.3 <17。文档 https://payloadcms.com/docs/getting-started/installation 。
 2. Local API 默认跳过权限（https://payloadcms.com/docs/local-api/overview），所有公开读取显式关闭 overrideAccess，depth:0，匿名身份。
 3. 使用版本草稿保护已发布内容，发布者专属发布权限；公开页动态渲染，时间窗口逐请求计算。
