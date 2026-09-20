@@ -11,7 +11,7 @@ export const sectionMeta: Record<string, { label: string; title: string; descrip
 export const kindLabels: Record<string, string> = { members: "普通社员", teams: "代表队选拔", staff: "骨干招新" };
 /** Only root-relative local links or credential-free HTTPS destinations. */
 export function publicHref(value: unknown, fallback: string): string {
-  if (typeof value !== "string" || /[\s\\\u0000-\u001f]/.test(value)) return fallback;
+  if (typeof value !== "string" || /[\s\\]/.test(value) || Array.from(value).some((char) => char.charCodeAt(0) < 32)) return fallback;
   return (/^\/(?!\/)/.test(value) || safeURL(value)) ? value : fallback;
 }
 export function dateParts(value?: string | null) {

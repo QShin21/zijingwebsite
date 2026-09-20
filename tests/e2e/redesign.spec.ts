@@ -23,7 +23,8 @@ test("mobile menu closes on navigation, Escape and outside interaction", async (
   await expect(menu).not.toHaveAttribute("open");
   await expect(trigger).toBeFocused();
   await trigger.click();
-  await page.locator("main h1").click();
+  // Touch the page gutter, outside the expanded menu and its content.
+  await page.mouse.click(5, 150);
   await expect(menu).not.toHaveAttribute("open");
   await trigger.click();
   await menu.locator('a[href="/events"]').click();
