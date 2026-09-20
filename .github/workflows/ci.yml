@@ -1,0 +1,44 @@
+name: V1 checks
+on: [push, pull_request]
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17.11-bookworm
+        env:
+          POSTGRES_USER: zijing
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_DB: zijing
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U zijing" --health-interval 10s --health-retries 5
+    env:
+      APP_ENV: development
+      DATABASE_URL: postgresql://zijing:ci-only-password@127.0.0.1:5432/zijing
+      PAYLOAD_SECRET: ci-only-secret-not-for-deployment-0000
+      NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+      DB_PUSH: 'false'
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.12.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migrate
+      - run: pnpm typecheck && pnpm lint && pnpm test
+      - run: pnpm seed:demo
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - run: pnpm build
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verification
+          path: |
+            playwright-report
+            docs/evidence

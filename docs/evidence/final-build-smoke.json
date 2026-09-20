@@ -1,0 +1,32 @@
+{
+  "verifiedAt": "2026-09-20T11:14:43.181Z",
+  "build": "pnpm build: PASS",
+  "host": "127.0.0.1:3000",
+  "checks": [
+    {
+      "path": "/health/ready",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/events?game=invalid&type=invalid",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/honors?year=invalid&team=invalid",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/not-a-real-page",
+      "status": 404,
+      "expected": 404
+    }
+  ]
+}

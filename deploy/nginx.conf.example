@@ -1,0 +1,18 @@
+# Include as a separate virtual host after replacing the hostname and certificate paths.
+# Do not replace an existing server's global nginx.conf.
+server {
+    listen 443 ssl;
+    server_name YOUR_AUTHORIZED_HOST;
+    ssl_certificate /YOUR_CERTIFICATE_PATH/fullchain.pem;
+    ssl_certificate_key /YOUR_CERTIFICATE_PATH/privkey.pem;
+    client_max_body_size 10m;
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    location / {
+        proxy_pass http://127.0.0.1:3100;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+    }
+}

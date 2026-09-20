@@ -1,0 +1,29 @@
+{
+  "environment": "local Chromium; no network throttling",
+  "records": [
+    {
+      "route": "/",
+      "violations": 0,
+      "responseMs": 140,
+      "domReadyMs": 145.40000000037253
+    },
+    {
+      "route": "/events",
+      "violations": 0,
+      "responseMs": 7.5,
+      "domReadyMs": 38.59999999962747
+    },
+    {
+      "route": "/join",
+      "violations": 0,
+      "responseMs": 6.5,
+      "domReadyMs": 30.299999998882413
+    },
+    {
+      "route": "/contact",
+      "violations": 0,
+      "responseMs": 7.300000000745058,
+      "domReadyMs": 31.700000001117587
+    }
+  ]
+}

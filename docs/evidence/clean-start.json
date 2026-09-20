@@ -1,0 +1,14 @@
+{
+  "verifiedAt": "2026-09-20T10:57:07.336Z",
+  "database": "zijing_fresh_1789901633087",
+  "cleanDependencyInstall": true,
+  "cleanMigration": true,
+  "productionBuild": true,
+  "productionStartPort": 3102,
+  "anonymousFirstRegisterDenied": true,
+  "adminInitialization": true,
+  "repeatedInitializationDenied": true,
+  "adminLogin": true,
+  "publishedPage": true,
+  "readiness": true
+}

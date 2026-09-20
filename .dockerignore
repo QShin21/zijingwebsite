@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+.env*
+.data
+media
+backups
+test-results
+playwright-report
+*.zip
+docs/evidence/*.png

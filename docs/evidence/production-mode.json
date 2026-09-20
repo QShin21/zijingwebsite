@@ -1,0 +1,11 @@
+{
+  "verifiedAt": "2026-09-20T11:04:21.207Z",
+  "environment": "APP_ENV=production, local isolated database, port3103; no production deployment",
+  "runtimeOrigin": true,
+  "dynamicRobots": true,
+  "sitemapPublishedOnly": true,
+  "draftAndDemoHidden": true,
+  "unverifiedHonorHidden": true,
+  "canonical": true,
+  "productionCSPWithoutEval": true
+}

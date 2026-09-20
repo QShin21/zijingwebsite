@@ -1,0 +1,9 @@
+# Use only after domain/server authorization. Add a site block; preserve existing hosts.
+{$SITE_HOST} {
+  encode zstd gzip
+  request_body {
+    max_size 10MB
+  }
+  reverse_proxy 127.0.0.1:3100
+  header Strict-Transport-Security "max-age=31536000"
+}

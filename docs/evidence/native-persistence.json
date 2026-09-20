@@ -1,0 +1,9 @@
+{
+  "checkedAt": "2026-09-20T11:09:38.470Z",
+  "nativePostgresVersion": "17.10",
+  "eventsAfterRestart": 1,
+  "mediaRecordPreserved": true,
+  "mediaFilePreserved": true,
+  "readinessHTTP": 200,
+  "containerVerified": false
+}

@@ -1,0 +1,7 @@
+{
+  "verifiedAt": "2026-09-20T10:59:59.560Z",
+  "isolatedDatabase": true,
+  "seedRepeatedWithoutDuplicates": true,
+  "cleanupRemovedDemo": true,
+  "unrelatedControlPreserved": true
+}
