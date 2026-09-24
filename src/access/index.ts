@@ -1,14 +1,14 @@
 import type { Access, FieldAccess, Where } from "payload";
-import { canPublish, hasRole, teamIDs, type Identity } from "../lib/rules";
+import { canPublish, hasRole, type Identity } from "../lib/rules";
 export const admin: Access = ({ req }) =>
-  hasRole(req.user as Identity, "admin");
+  hasRole(req.user as Identity, "president");
 export const adminField: FieldAccess = ({ req }) =>
-  hasRole(req.user as Identity, "admin");
+  hasRole(req.user as Identity, "president");
 export const publisher: Access = ({ req }) => canPublish(req.user as Identity);
 export const publisherField: FieldAccess = ({ req }) =>
   canPublish(req.user as Identity);
 export const staff: Access = ({ req }) =>
-  hasRole(req.user as Identity, "admin", "publisher", "editor", "leader");
+  hasRole(req.user as Identity, "president", "vicePresident", "communityAdmin");
 export function publicWhere(honor = false): Where {
   const and: Where[] = [{ _status: { equals: "published" } }];
   if (honor) and.push({ verified: { equals: true } });
@@ -17,20 +17,20 @@ export function publicWhere(honor = false): Where {
   return { and };
 }
 export const readContent =
-  (scoped: boolean, honor = false, self = false): Access =>
+  (_scoped: boolean, honor = false, _self = false): Access =>
   ({ req }) => {
     const user = req.user as Identity;
-    if (hasRole(user, "admin", "publisher", "editor")) return true;
-    if (scoped && hasRole(user, "leader"))
-      return { [self ? "id" : "team"]: { in: teamIDs(user) } } as Where;
+    if (canPublish(user)) return true;
+    if (hasRole(user, "communityAdmin"))
+      return { or: [publicWhere(honor), { submittedBy: { equals: user.id } }] } as Where;
     return publicWhere(honor);
   };
 export const editContent =
-  (scoped: boolean, self = false): Access =>
+  (_scoped: boolean, _self = false): Access =>
   ({ req }) => {
     const user = req.user as Identity;
-    if (hasRole(user, "admin", "publisher", "editor")) return true;
-    if (scoped && hasRole(user, "leader"))
-      return { [self ? "id" : "team"]: { in: teamIDs(user) } } as Where;
+    if (canPublish(user)) return true;
+    if (hasRole(user, "communityAdmin"))
+      return { submittedBy: { equals: user.id } } as Where;
     return false;
   };

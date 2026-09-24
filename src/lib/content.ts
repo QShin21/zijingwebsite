@@ -145,4 +145,5 @@ export const names: Record<string, string> = {
   news: "动态",
   albums: "影像",
   recruitment: "招新批次",
+  announcements: "通知",
 };

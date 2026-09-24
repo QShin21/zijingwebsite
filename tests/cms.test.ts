@@ -20,21 +20,25 @@ beforeAll(async () => {
   if (process.env.APP_ENV !== "development")
     throw new Error("Integration test requires development database");
   p = await getPayload({ config });
-  for (const role of ["editor", "publisher", "leader"] as const) {
+  for (const [kind, role] of [
+    ["editor", "communityAdmin"], ["publisher", "vicePresident"], ["leader", "communityAdmin"],
+  ] as const) {
     const u = await p.create({
       collection: "users",
       overrideAccess: true,
       context,
       data: {
-        email: `test-${role}-${suffix}@example.invalid`,
+        email: `test-${kind}-${suffix}@example.invalid`,
         password,
         roles: [role],
+        name: kind,
+        account: `${suffix}${kind === "editor" ? "01" : kind === "publisher" ? "02" : "03"}`,
       },
     });
     users.push(u.id);
-    if (role === "editor") editor = u;
-    if (role === "publisher") publisher = u;
-    if (role === "leader") leader = u;
+    if (kind === "editor") editor = u;
+    if (kind === "publisher") publisher = u;
+    if (kind === "leader") leader = u;
   }
   team = (
     await p.create({
@@ -89,7 +93,7 @@ describe.sequential("真实 PostgreSQL / Payload 权限链路", () => {
       p.create({
         collection: "users",
         overrideAccess: false,
-        data: { email: "attacker@example.invalid", password, roles: ["admin"] },
+        data: { email: "attacker@example.invalid", password, roles: ["president"], account: "999999999999", name: "攻击测试" },
       }),
     ).rejects.toThrow();
     expect(
@@ -146,6 +150,8 @@ describe.sequential("真实 PostgreSQL / Payload 权限链路", () => {
         data: { _status: "published" },
       }),
     ).rejects.toThrow();
+    await p.update({ collection: "events", id: event, overrideAccess: false,
+      user: editor, draft: true, data: { reviewState: "submitted" } });
     await p.update({
       collection: "events",
       id: event,
@@ -194,26 +200,26 @@ describe.sequential("真实 PostgreSQL / Payload 权限链路", () => {
     ).toBe("未审核的新标题");
   });
   it("角色字段和账号管理不能提权", async () => {
-    await p.update({
+    await expect(p.update({
       collection: "users",
       id: editor.id,
       overrideAccess: false,
       user: editor,
-      data: { roles: ["admin"], teams: [other] },
-    });
+      data: { roles: ["president"], teams: [other] },
+    })).rejects.toThrow();
     const u = await p.findByID({
       collection: "users",
       id: editor.id,
       overrideAccess: true,
     });
-    expect(u.roles).toEqual(["editor"]);
+    expect(u.roles).toEqual(["communityAdmin"]);
     expect(u.teams || []).toEqual([]);
     await expect(
       p.create({
         collection: "users",
         overrideAccess: false,
         user: publisher,
-        data: { email: "evil@example.invalid", password, roles: ["admin"] },
+        data: { email: "evil@example.invalid", password, roles: ["president"], account: "999999999998", name: "越权测试" },
       }),
     ).rejects.toThrow();
   });
@@ -314,7 +320,7 @@ describe.sequential("真实 PostgreSQL / Payload 权限链路", () => {
       }),
     ).rejects.toThrow();
   });
-  it("分部负责人可维护所属赛季，不能跨分部", async () => {
+  it("社群管理员可提交全站赛季草稿，但不能改动他人草稿", async () => {
     const season = await p.create({
       collection: "seasons",
       overrideAccess: false,
@@ -328,16 +334,8 @@ describe.sequential("真实 PostgreSQL / Payload 权限链路", () => {
         demo: true,
       },
     });
-    await expect(
-      p.update({
-        collection: "seasons",
-        id: season.id,
-        overrideAccess: false,
-        user: leader,
-        draft: true,
-        data: { team: other },
-      }),
-    ).rejects.toThrow();
+    await p.update({ collection: "seasons", id: season.id,
+      overrideAccess: false, user: leader, draft: true, data: { team: other } });
     await expect(
       p.update({
         collection: "teams",
@@ -348,20 +346,8 @@ describe.sequential("真实 PostgreSQL / Payload 权限链路", () => {
         data: { title: "越权" },
       }),
     ).rejects.toThrow();
-    await expect(
-      p.create({
-        collection: "seasons",
-        overrideAccess: false,
-        user: leader,
-        draft: true,
-        data: {
-          title: "越权",
-          slug: `test-bad-${suffix}`,
-          season: "测试",
-          team: other,
-        },
-      }),
-    ).rejects.toThrow();
+    expect((await p.find({ collection: "seasons", overrideAccess: false,
+      user: null, where: { id: { equals: season.id } } })).docs).toHaveLength(0);
   });
   it("荣誉发布仍需核验，内部字段不出现在关系展开中", async () => {
     const h = await p.create({

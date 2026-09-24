@@ -6,6 +6,7 @@ import { eventState, formatDate, registrationState, routeFor, safeURL } from "@/
 import { dateParts, kindLabels } from "@/lib/presentation";
 import { Artwork, Icon, type IconName } from "./Identity";
 import { PageHeading } from "./PageHeading";
+import { Comments } from "./Comments";
 
 export function Empty({ text, collection }: { text?: string; collection?: string }) {
   const copy: Record<string, [string, string, IconName]> = {
@@ -15,6 +16,7 @@ export function Empty({ text, collection }: { text?: string; collection?: string
     news: ["新的故事，即将更新", "社团公告与活动回顾会在这里与你见面。", "layers"],
     albums: ["精彩瞬间，等待入镜", "获准公开的社团影像将在这里发布。", "camera"],
     recruitment: ["暂未发布匹配的招新批次", "后续招新安排与报名渠道将在确认后公布。", "team"],
+    announcements: ["暂无通知", "社团通知确认后将在这里发布。", "layers"],
   };
   const entry = copy[collection || ""] || ["内容正在整理", "确认后的公开资料会在这里更新。", "layers"];
   return <div className="empty"><div className="empty-icon"><Icon name={entry[2] as IconName} /></div><div><h3>{text || entry[0]}</h3>{!text && <p>{entry[1]}</p>}</div><Link className="text-link" href="/contact">联系社团 <Icon name="diagonal" /></Link></div>;
@@ -72,6 +74,8 @@ export async function Detail({ doc, collection, photoPage = 1 }: { doc: Content;
       {collection === "albums" && <>{!doc.photos?.length && <Empty text="暂无获准公开的照片。" />}<div className="grid photos">{doc.photos?.slice((photoPage - 1) * 12, photoPage * 12).map((p, i) => <figure key={i}><Picture id={p.image} /><figcaption>{p.caption}</figcaption></figure>)}</div><Pagination page={photoPage} total={Math.ceil((doc.photos?.length || 0) / 12)} path={`/gallery/${doc.slug}`} /></>}
       {history && <>{history[0].docs.length > 0 && <section><h2>赛季档案</h2><nav className="season-nav" aria-label="赛季导航">{history[0].docs.map((s) => <a href={`#season-${s.id}`} key={s.id}>{s.title}</a>)}</nav>{history[0].docs.map((s) => <article className="panel" id={`season-${s.id}`} key={s.id}><h3>{s.title}</h3><Prose doc={s} /><ul className="roster">{s.members?.map((m, i) => <li key={i}><strong>{m.displayName}</strong><span>{m.position}</span></li>)}</ul></article>)}</section>}<section><h2>相关荣誉</h2><Cards docs={history[1].docs} collection="honors" /></section><section><h2>相关活动</h2><Cards docs={history[2].docs} collection="events" /></section></>}
       {related && <><section><h2>活动回顾</h2><Cards docs={related[0].docs} collection="news" /></section><section><h2>活动相册</h2><Cards docs={related[1].docs} collection="albums" /></section></>}
+      {(["events", "albums", "news", "announcements"].includes(collection)) &&
+        <Comments targetType={collection as "events" | "albums" | "news" | "announcements"} targetId={doc.id} />}
     </div><aside className="detail-sidebar">
       {(linkedTeam || linkedEvent) && <div className="panel"><p className="eyebrow">CONNECTED</p><h2>相关档案</h2>{linkedTeam && <p><Link href={`/teams/${linkedTeam.slug}`}>{linkedTeam.title} ↗</Link></p>}{linkedSeason && linkedTeam && <p><Link href={`/teams/${linkedTeam.slug}#season-${linkedSeason.id}`}>{linkedSeason.title} ↗</Link></p>}{linkedEvent && <p><Link href={`/events/${linkedEvent.slug}`}>{linkedEvent.title} ↗</Link></p>}</div>}
       {collection === "events" && <div className="panel"><p className="eyebrow">EVENT DETAILS</p><h2>活动信息</h2><p className="tag">{eventState(doc)}</p><dl><dt>开始</dt><dd>{formatDate(doc.startAt)}</dd><dt>结束</dt><dd>{formatDate(doc.endAt)}</dd><dt>地点</dt><dd>{doc.location || "待公布"}</dd></dl></div>}

@@ -33,9 +33,7 @@ export default async function Preview({
   const { user } = await p.auth({ headers: await headers() });
   if (!user) notFound();
   if (
-    !hasRole(user, "admin", "publisher", "editor") &&
-    (!hasRole(user, "leader") ||
-      !["teams", "seasons", "honors"].includes(collection))
+    !hasRole(user, "president", "vicePresident", "communityAdmin")
   )
     notFound();
   const doc = await p

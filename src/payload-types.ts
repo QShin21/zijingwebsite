@@ -22,6 +22,12 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    'community-applications': CommunityApplication;
+    'community-bans': CommunityBan;
+    'forum-posts': ForumPost;
+    'community-messages': CommunityMessage;
+    'community-posts': CommunityPost;
+    comments: Comment;
     games: Game;
     teams: Team;
     seasons: Season;
@@ -29,6 +35,7 @@ export interface Config {
     events: Event;
     recruitment: Recruitment;
     news: News;
+    announcements: Announcement;
     albums: Album;
     pages: Page;
     redirects: Redirect;
@@ -42,6 +49,12 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'community-applications': CommunityApplicationsSelect<false> | CommunityApplicationsSelect<true>;
+    'community-bans': CommunityBansSelect<false> | CommunityBansSelect<true>;
+    'forum-posts': ForumPostsSelect<false> | ForumPostsSelect<true>;
+    'community-messages': CommunityMessagesSelect<false> | CommunityMessagesSelect<true>;
+    'community-posts': CommunityPostsSelect<false> | CommunityPostsSelect<true>;
+    comments: CommentsSelect<false> | CommentsSelect<true>;
     games: GamesSelect<false> | GamesSelect<true>;
     teams: TeamsSelect<false> | TeamsSelect<true>;
     seasons: SeasonsSelect<false> | SeasonsSelect<true>;
@@ -49,6 +62,7 @@ export interface Config {
     events: EventsSelect<false> | EventsSelect<true>;
     recruitment: RecruitmentSelect<false> | RecruitmentSelect<true>;
     news: NewsSelect<false> | NewsSelect<true>;
+    announcements: AnnouncementsSelect<false> | AnnouncementsSelect<true>;
     albums: AlbumsSelect<false> | AlbumsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
@@ -102,8 +116,11 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
-  name?: string | null;
-  roles: ('admin' | 'editor' | 'publisher' | 'leader')[];
+  account: string;
+  name: string;
+  roles: ('president' | 'vicePresident' | 'communityAdmin' | 'member')[];
+  accountStatus?: ('active' | 'suspended') | null;
+  communities?: (number | Game)[] | null;
   teams?: (number | Team)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -127,9 +144,9 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "teams".
+ * via the `definition` "games".
  */
-export interface Team {
+export interface Game {
   id: number;
   title: string;
   slug: string;
@@ -155,7 +172,9 @@ export interface Team {
   seoTitle?: string | null;
   seoDescription?: string | null;
   internalNotes?: string | null;
-  game?: (number | null) | Game;
+  submittedBy?: (number | null) | User;
+  reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
+  sort?: number | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -193,9 +212,9 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "games".
+ * via the `definition` "teams".
  */
-export interface Game {
+export interface Team {
   id: number;
   title: string;
   slug: string;
@@ -221,10 +240,101 @@ export interface Game {
   seoTitle?: string | null;
   seoDescription?: string | null;
   internalNotes?: string | null;
-  sort?: number | null;
+  submittedBy?: (number | null) | User;
+  reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
+  game?: (number | null) | Game;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-applications".
+ */
+export interface CommunityApplication {
+  id: number;
+  applicant: number | User;
+  game?: (number | null) | Game;
+  proposedGame: string;
+  reason: string;
+  status?: ('pending' | 'approved' | 'rejected') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-bans".
+ */
+export interface CommunityBan {
+  id: number;
+  game: number | Game;
+  member: number | User;
+  active?: boolean | null;
+  reason?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forum-posts".
+ */
+export interface ForumPost {
+  id: number;
+  title: string;
+  body: string;
+  game?: (number | null) | Game;
+  author: number | User;
+  authorName?: string | null;
+  status?: ('visible' | 'hidden') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-messages".
+ */
+export interface CommunityMessage {
+  id: number;
+  body: string;
+  game?: (number | null) | Game;
+  author: number | User;
+  authorName?: string | null;
+  status?: ('visible' | 'hidden') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-posts".
+ */
+export interface CommunityPost {
+  id: number;
+  title: string;
+  body: string;
+  game?: (number | null) | Game;
+  author: number | User;
+  authorName?: string | null;
+  status?: ('visible' | 'hidden') | null;
+  category: 'event' | 'notice';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comments".
+ */
+export interface Comment {
+  id: number;
+  body: string;
+  game?: (number | null) | Game;
+  author: number | User;
+  authorName?: string | null;
+  status?: ('visible' | 'hidden') | null;
+  targetType: 'events' | 'albums' | 'news' | 'announcements' | 'forum-posts';
+  targetId: number;
+  parent?: (number | null) | Comment;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -256,6 +366,8 @@ export interface Season {
   seoTitle?: string | null;
   seoDescription?: string | null;
   internalNotes?: string | null;
+  submittedBy?: (number | null) | User;
+  reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
   team: number | Team;
   season: string;
   /**
@@ -304,6 +416,8 @@ export interface Honor {
   seoTitle?: string | null;
   seoDescription?: string | null;
   internalNotes?: string | null;
+  submittedBy?: (number | null) | User;
+  reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
   team: number | Team;
   season?: (number | null) | Season;
   game?: (number | null) | Game;
@@ -350,6 +464,8 @@ export interface Event {
   seoTitle?: string | null;
   seoDescription?: string | null;
   internalNotes?: string | null;
+  submittedBy?: (number | null) | User;
+  reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
   type?: ('比赛' | '观赛' | '交流' | '训练' | '其他') | null;
   game?: (number | null) | Game;
   team?: (number | null) | Team;
@@ -415,6 +531,8 @@ export interface Recruitment {
   seoTitle?: string | null;
   seoDescription?: string | null;
   internalNotes?: string | null;
+  submittedBy?: (number | null) | User;
+  reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
   kind: 'members' | 'teams' | 'staff';
   game?: (number | null) | Game;
   /**
@@ -479,6 +597,8 @@ export interface News {
   seoTitle?: string | null;
   seoDescription?: string | null;
   internalNotes?: string | null;
+  submittedBy?: (number | null) | User;
+  reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
   type?: ('公告' | '新闻' | '回顾' | '人物故事') | null;
   /**
    * 按后台 Asia/Shanghai 时区输入；数据库保存 UTC。
@@ -486,6 +606,47 @@ export interface News {
   publishedAt?: string | null;
   event?: (number | null) | Event;
   team?: (number | null) | Team;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "announcements".
+ */
+export interface Announcement {
+  id: number;
+  title: string;
+  slug: string;
+  summary?: string | null;
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  cover?: (number | null) | Media;
+  archived?: boolean | null;
+  demo?: boolean | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  internalNotes?: string | null;
+  submittedBy?: (number | null) | User;
+  reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
+  /**
+   * 按后台 Asia/Shanghai 时区输入；数据库保存 UTC。
+   */
+  publishedAt?: string | null;
+  game?: (number | null) | Game;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -520,6 +681,8 @@ export interface Album {
   seoTitle?: string | null;
   seoDescription?: string | null;
   internalNotes?: string | null;
+  submittedBy?: (number | null) | User;
+  reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
   /**
    * 按后台 Asia/Shanghai 时区输入；数据库保存 UTC。
    */
@@ -566,6 +729,8 @@ export interface Page {
   seoTitle?: string | null;
   seoDescription?: string | null;
   internalNotes?: string | null;
+  submittedBy?: (number | null) | User;
+  reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
   key: 'about' | 'contact' | 'privacy' | 'join' | 'join-members' | 'join-teams' | 'join-staff';
   sections?:
     | {
@@ -635,6 +800,30 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
+        relationTo: 'community-applications';
+        value: number | CommunityApplication;
+      } | null)
+    | ({
+        relationTo: 'community-bans';
+        value: number | CommunityBan;
+      } | null)
+    | ({
+        relationTo: 'forum-posts';
+        value: number | ForumPost;
+      } | null)
+    | ({
+        relationTo: 'community-messages';
+        value: number | CommunityMessage;
+      } | null)
+    | ({
+        relationTo: 'community-posts';
+        value: number | CommunityPost;
+      } | null)
+    | ({
+        relationTo: 'comments';
+        value: number | Comment;
+      } | null)
+    | ({
         relationTo: 'games';
         value: number | Game;
       } | null)
@@ -661,6 +850,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'news';
         value: number | News;
+      } | null)
+    | ({
+        relationTo: 'announcements';
+        value: number | Announcement;
       } | null)
     | ({
         relationTo: 'albums';
@@ -725,8 +918,11 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  account?: T;
   name?: T;
   roles?: T;
+  accountStatus?: T;
+  communities?: T;
   teams?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -782,6 +978,89 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-applications_select".
+ */
+export interface CommunityApplicationsSelect<T extends boolean = true> {
+  applicant?: T;
+  game?: T;
+  proposedGame?: T;
+  reason?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-bans_select".
+ */
+export interface CommunityBansSelect<T extends boolean = true> {
+  game?: T;
+  member?: T;
+  active?: T;
+  reason?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forum-posts_select".
+ */
+export interface ForumPostsSelect<T extends boolean = true> {
+  title?: T;
+  body?: T;
+  game?: T;
+  author?: T;
+  authorName?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-messages_select".
+ */
+export interface CommunityMessagesSelect<T extends boolean = true> {
+  body?: T;
+  game?: T;
+  author?: T;
+  authorName?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-posts_select".
+ */
+export interface CommunityPostsSelect<T extends boolean = true> {
+  title?: T;
+  body?: T;
+  game?: T;
+  author?: T;
+  authorName?: T;
+  status?: T;
+  category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comments_select".
+ */
+export interface CommentsSelect<T extends boolean = true> {
+  body?: T;
+  game?: T;
+  author?: T;
+  authorName?: T;
+  status?: T;
+  targetType?: T;
+  targetId?: T;
+  parent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "games_select".
  */
 export interface GamesSelect<T extends boolean = true> {
@@ -795,6 +1074,8 @@ export interface GamesSelect<T extends boolean = true> {
   seoTitle?: T;
   seoDescription?: T;
   internalNotes?: T;
+  submittedBy?: T;
+  reviewState?: T;
   sort?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -815,6 +1096,8 @@ export interface TeamsSelect<T extends boolean = true> {
   seoTitle?: T;
   seoDescription?: T;
   internalNotes?: T;
+  submittedBy?: T;
+  reviewState?: T;
   game?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -835,6 +1118,8 @@ export interface SeasonsSelect<T extends boolean = true> {
   seoTitle?: T;
   seoDescription?: T;
   internalNotes?: T;
+  submittedBy?: T;
+  reviewState?: T;
   team?: T;
   season?: T;
   startAt?: T;
@@ -865,6 +1150,8 @@ export interface HonorsSelect<T extends boolean = true> {
   seoTitle?: T;
   seoDescription?: T;
   internalNotes?: T;
+  submittedBy?: T;
+  reviewState?: T;
   team?: T;
   season?: T;
   game?: T;
@@ -893,6 +1180,8 @@ export interface EventsSelect<T extends boolean = true> {
   seoTitle?: T;
   seoDescription?: T;
   internalNotes?: T;
+  submittedBy?: T;
+  reviewState?: T;
   type?: T;
   game?: T;
   team?: T;
@@ -928,6 +1217,8 @@ export interface RecruitmentSelect<T extends boolean = true> {
   seoTitle?: T;
   seoDescription?: T;
   internalNotes?: T;
+  submittedBy?: T;
+  reviewState?: T;
   kind?: T;
   game?: T;
   registrationStart?: T;
@@ -968,10 +1259,35 @@ export interface NewsSelect<T extends boolean = true> {
   seoTitle?: T;
   seoDescription?: T;
   internalNotes?: T;
+  submittedBy?: T;
+  reviewState?: T;
   type?: T;
   publishedAt?: T;
   event?: T;
   team?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "announcements_select".
+ */
+export interface AnnouncementsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  summary?: T;
+  body?: T;
+  cover?: T;
+  archived?: T;
+  demo?: T;
+  seoTitle?: T;
+  seoDescription?: T;
+  internalNotes?: T;
+  submittedBy?: T;
+  reviewState?: T;
+  publishedAt?: T;
+  game?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -991,6 +1307,8 @@ export interface AlbumsSelect<T extends boolean = true> {
   seoTitle?: T;
   seoDescription?: T;
   internalNotes?: T;
+  submittedBy?: T;
+  reviewState?: T;
   date?: T;
   event?: T;
   photos?:
@@ -1019,6 +1337,8 @@ export interface PagesSelect<T extends boolean = true> {
   seoTitle?: T;
   seoDescription?: T;
   internalNotes?: T;
+  submittedBy?: T;
+  reviewState?: T;
   key?: T;
   sections?:
     | T
@@ -1118,7 +1438,17 @@ export interface Site {
   navigation?:
     | {
         label: string;
-        path: '/about' | '/events' | '/teams' | '/honors' | '/join' | '/news' | '/gallery' | '/contact';
+        path:
+          | '/about'
+          | '/events'
+          | '/teams'
+          | '/honors'
+          | '/join'
+          | '/news'
+          | '/gallery'
+          | '/contact'
+          | '/community'
+          | '/announcements';
         id?: string | null;
       }[]
     | null;

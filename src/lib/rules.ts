@@ -2,13 +2,23 @@ export type Identity = {
   id: number | string;
   roles?: string[] | null;
   teams?: (number | string | { id: number | string })[] | null;
+  communities?: (number | string | { id: number | string })[] | null;
+  accountStatus?: string | null;
 };
 export const hasRole = (
   user: Identity | null | undefined,
   ...roles: string[]
-) => Boolean(user?.roles?.some((role) => roles.includes(role)));
+) => Boolean(user?.accountStatus !== "suspended" &&
+  user?.roles?.some((role) => roles.includes(role)));
 export const canPublish = (user: Identity | null | undefined) =>
-  hasRole(user, "admin", "publisher");
+  hasRole(user, "president", "vicePresident");
+export const canParticipate = (user: Identity | null | undefined) =>
+  Boolean(user?.id && user.accountStatus !== "suspended");
+export const managesGame = (user: Identity | null | undefined, id: unknown) =>
+  canPublish(user) ||
+  (canParticipate(user) && hasRole(user, "communityAdmin") &&
+    (user?.communities ?? []).some((game) =>
+      String(typeof game === "object" ? game.id : game) === String(id)));
 export const teamIDs = (user: Identity | null | undefined) =>
   (user?.teams ?? []).map((t) => String(typeof t === "object" ? t.id : t));
 export function safeURL(value: unknown): boolean {
@@ -84,4 +94,5 @@ export const routeFor: Record<string, string> = {
   news: "news",
   albums: "gallery",
   recruitment: "recruitment",
+  announcements: "announcements",
 };

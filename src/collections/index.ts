@@ -20,11 +20,11 @@ import {
   hasRole,
   routeFor,
   safeURL,
-  teamIDs,
   type Identity,
 } from "../lib/rules";
 import sharp from "sharp";
 import { APIError } from "payload";
+import { SocialCollections } from "./social";
 
 const text = (name: string, label: string, required = false): TextField => ({
   name,
@@ -68,9 +68,9 @@ const internal: Field = {
   type: "textarea",
   access: {
     read: ({ req, doc }) =>
-      hasRole(req.user as Identity, "admin", "publisher", "editor") ||
-      (hasRole(req.user as Identity, "leader") &&
-        teamIDs(req.user as Identity).includes(String(doc?.team ?? doc?.id))),
+      canPublish(req.user as Identity) ||
+      (hasRole(req.user as Identity, "communityAdmin") &&
+        String(doc?.submittedBy) === String(req.user?.id)),
   },
 };
 const common: Field[] = [
@@ -102,6 +102,25 @@ const common: Field[] = [
   text("seoTitle", "SEO 标题"),
   { name: "seoDescription", label: "SEO 描述", type: "textarea" },
   internal,
+  {
+    name: "submittedBy",
+    label: "投稿人",
+    type: "relationship",
+    relationTo: "users",
+    access: { create: () => true, update: () => false, read: ({ req }) => canPublish(req.user as Identity) },
+  },
+  {
+    name: "reviewState",
+    label: "审核状态",
+    type: "select",
+    defaultValue: "editing",
+    options: [
+      { label: "编辑中", value: "editing" },
+      { label: "待审核", value: "submitted" },
+      { label: "退回修改", value: "rejected" },
+      { label: "已审核", value: "approved" },
+    ],
+  },
 ];
 const registration: Field[] = [
   date("registrationStart", "报名开始"),
@@ -116,7 +135,7 @@ const registration: Field[] = [
 ];
 
 const guard =
-  (scoped: boolean, self: boolean): CollectionBeforeChangeHook =>
+  (_scoped: boolean, _self: boolean): CollectionBeforeChangeHook =>
   async ({ data, originalDoc, req, operation, collection }) => {
     if (originalDoc?.id && routeFor[collection.slug]) {
       const published = await req.payload
@@ -134,22 +153,30 @@ const guard =
         "_status" in published &&
         published._status === "published" &&
         "slug" in published
-      )
+      ) {
         req.context.previousPublishedSlug = published.slug;
+        req.context.hasPublishedVersion = true;
+      }
     }
     const user = req.user as Identity;
     if (!req.context.system && !canPublish(user)) {
       data._status = "draft";
-      if (scoped && hasRole(user, "leader") && !hasRole(user, "editor")) {
-        const id = self ? originalDoc?.id : (data.team ?? originalDoc?.team);
-        if (
-          !teamIDs(user).includes(String(typeof id === "object" ? id?.id : id))
-        )
-          throw new Error("无权维护此分部");
-        if (self && operation === "create")
-          throw new Error("分部负责人不能建立新代表队");
-      }
+      if (operation === "create") data.submittedBy = user.id;
+      else if (originalDoc?.submittedBy && data.submittedBy &&
+        String(data.submittedBy) !== String(originalDoc.submittedBy))
+        throw new APIError("投稿人不可修改", 403);
+      // A contributor may revise previously approved content as a new draft.
+      if (operation === "update" && originalDoc?.reviewState === "approved")
+        data.reviewState = data.reviewState === "submitted" ? "submitted" : "editing";
+      if (data.reviewState && !["editing", "submitted"].includes(data.reviewState))
+        throw new APIError("只有审核负责人可以批准或退回", 403);
     }
+    if (!req.context.system && canPublish(user) && data._status === "published" &&
+        originalDoc?.submittedBy && originalDoc?._status !== "published" &&
+        !req.context.hasPublishedVersion && !req.context.isRestoringVersion &&
+        (data.reviewState ?? originalDoc?.reviewState) !== "submitted")
+      throw new APIError("投稿需要先提交审核", 409);
+    if (data._status === "published") data.reviewState = "approved";
     const merged = { ...originalDoc, ...data };
     if (merged.body) validateRichText(merged.body);
     if (
@@ -308,8 +335,7 @@ function content(
     access: {
       read: readContent(scoped, slug === "honors", self),
       create: ({ req }) =>
-        hasRole(req.user as Identity, "admin", "publisher", "editor") ||
-        (scoped && !self && hasRole(req.user as Identity, "leader")),
+        canPublish(req.user as Identity) || hasRole(req.user as Identity, "communityAdmin"),
       update: editContent(scoped, self),
       delete: publisher,
       readVersions: editContent(scoped, self),
@@ -357,57 +383,85 @@ function content(
 }
 export const Users: CollectionConfig = {
   slug: "users",
-  labels: { singular: "后台用户", plural: "后台用户" },
-  admin: { useAsTitle: "email" },
+  labels: { singular: "用户", plural: "用户" },
+  admin: { useAsTitle: "account" },
   auth: {
     maxLoginAttempts: 5,
     lockTime: 600000,
     cookies: { sameSite: "Lax", secure: process.env.APP_ENV === "production" },
   },
   access: {
-    create: admin,
+    create: () => false,
     read: ({ req }) =>
-      hasRole(req.user as Identity, "admin") || {
+      canPublish(req.user as Identity) || {
         id: { equals: req.user?.id },
       },
     update: ({ req }) =>
-      hasRole(req.user as Identity, "admin") || {
+      canPublish(req.user as Identity) || {
         id: { equals: req.user?.id },
       },
     delete: admin,
-    admin: ({ req }) => Boolean(req.user),
+    admin: ({ req }) => canPublish(req.user as Identity) || hasRole(req.user as Identity, "communityAdmin"),
   },
   hooks: {
     beforeChange: [
-      ({ data, operation, req }) => {
+      ({ data, operation, req, originalDoc }) => {
         if (
           operation === "create" &&
           !req.context.system &&
-          !hasRole(req.user as Identity, "admin")
+          !req.context.signupVerified
         )
-          throw new APIError("通过受控初始化或管理员建立账号", 403);
+          throw new APIError("账号必须经过邮箱验证", 403);
+        if (operation === "create" && req.context.signupVerified) {
+          const bootstrap = req.context.presidentClaim &&
+            data.email === process.env.PRESIDENT_CLAIM_EMAIL?.toLowerCase() &&
+            data.account === process.env.PRESIDENT_CLAIM_ACCOUNT;
+          data.roles = [bootstrap ? "president" : "member"];
+          data.accountStatus = "active";
+        }
+        if (operation === "update" && !req.context.system) {
+          if ((data.roles || data.communities || data.accountStatus) &&
+            !hasRole(req.user as Identity, "president"))
+            throw new APIError("只有社长可以调整权限", 403);
+          if (data.account || data.email ||
+            (data.password && !req.context.verifiedPasswordChange))
+            throw new APIError("修改账号身份或密码必须经过受控邮箱验证", 403);
+        }
+        if (operation === "update" && originalDoc &&
+          hasRole(originalDoc as Identity, "president") &&
+          data.roles && !data.roles.includes("president") && !req.context.system)
+          throw new APIError("社长账号不可通过普通编辑降级", 403);
+        if (data.roles && (data.roles.length !== 1 ||
+          !["president", "vicePresident", "communityAdmin", "member"].includes(data.roles[0])))
+          throw new APIError("账号必须且只能拥有一个等级", 400);
         return data;
       },
     ],
     afterChange: [audit],
   },
   fields: [
-    text("name", "显示名称"),
+    { ...text("account", "数字账户", true), unique: true, index: true,
+      validate: (value: unknown) => typeof value === "string" && /^\d{6,20}$/.test(value) || "账户需为 6–20 位数字" },
+    { ...text("name", "昵称", true), maxLength: 40 },
     {
       name: "roles",
       label: "角色",
       type: "select",
       hasMany: true,
       required: true,
-      defaultValue: ["editor"],
+      defaultValue: ["member"],
       options: [
-        { label: "系统管理员", value: "admin" },
-        { label: "内容编辑", value: "editor" },
-        { label: "发布负责人", value: "publisher" },
-        { label: "分部负责人", value: "leader" },
+        { label: "社长", value: "president" },
+        { label: "副社长", value: "vicePresident" },
+        { label: "社群管理员", value: "communityAdmin" },
+        { label: "普通用户", value: "member" },
       ],
-      access: { create: adminField, update: adminField },
+      access: { create: () => true, update: adminField },
     },
+    { name: "accountStatus", label: "账号状态", type: "select", defaultValue: "active",
+      options: ["active", "suspended"], access: { create: adminField, update: adminField } },
+    { name: "communities", label: "管理的游戏社群", type: "relationship", relationTo: "games",
+      hasMany: true, access: { create: adminField, update: adminField } },
     {
       name: "teams",
       label: "负责分部",
@@ -457,6 +511,7 @@ export const Media: CollectionConfig = {
 export const Collections: CollectionConfig[] = [
   Users,
   Media,
+  ...SocialCollections,
   content("games", "游戏项目", [
     { name: "sort", label: "排序", type: "number" },
   ]),
@@ -572,6 +627,10 @@ export const Collections: CollectionConfig[] = [
     date("publishedAt", "发布日期"),
     rel("event", "关联活动", "events"),
     rel("team", "关联队伍", "teams"),
+  ]),
+  content("announcements", "通知", [
+    date("publishedAt", "发布日期"),
+    rel("game", "相关游戏项目", "games"),
   ]),
   content("albums", "相册", [
     date("date", "拍摄日期"),

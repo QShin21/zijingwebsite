@@ -1,10 +1,10 @@
 import type { GlobalConfig } from "payload";
-import { admin } from "../access";
+import { publisher } from "../access";
 import { safeURL } from "../lib/rules";
 export const Site: GlobalConfig = {
   slug: "site",
   label: "站点与首页",
-  access: { read: () => true, update: admin },
+  access: { read: () => true, update: publisher },
   hooks: {
     afterChange: [
       async ({ req, doc }) => {
@@ -90,6 +90,8 @@ export const Site: GlobalConfig = {
             "/news",
             "/gallery",
             "/contact",
+            "/community",
+            "/announcements",
           ],
         },
       ],

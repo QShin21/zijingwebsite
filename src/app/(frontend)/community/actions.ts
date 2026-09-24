@@ -1,0 +1,116 @@
+"use server";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { cms } from "@/lib/content";
+import { canPublish, hasRole, managesGame, routeFor } from "@/lib/rules";
+
+const value = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
+const numeric = (form: FormData, key: string) => {
+  const number = Number(value(form, key));
+  return Number.isSafeInteger(number) && number > 0 ? number : 0;
+};
+const problem = (path: string, message: string) => redirect(`${path}?message=${encodeURIComponent(message)}`);
+async function current() {
+  const p = await cms();
+  const { user } = await p.auth({ headers: await headers() });
+  if (!user || user.accountStatus === "suspended") redirect("/login");
+  return { p, user };
+}
+async function gamePath(id: number) {
+  const game = await (await cms()).findByID({
+    collection: "games", id, user: null, overrideAccess: false, draft: false, depth: 0,
+  }).catch(() => null);
+  return game ? `/community/${game.slug}` : "/community";
+}
+export async function applyAction(form: FormData) {
+  const { p, user } = await current();
+  const game = numeric(form, "game");
+  try {
+    await p.create({ collection: "community-applications", overrideAccess: false, user,
+      data: { game: game || undefined, proposedGame: value(form, "proposedGame"),
+        reason: value(form, "reason"), status: "pending", applicant: user.id } });
+  } catch { problem("/community/apply", "申请提交失败，请核对游戏项目和申请说明"); }
+  redirect("/account?applied=1");
+}
+export async function decideAction(form: FormData) {
+  const { p, user } = await current();
+  if (!canPublish(user)) redirect("/account");
+  const status = value(form, "decision");
+  if (!["approved", "rejected"].includes(status)) problem("/community/review", "决定无效");
+  try {
+    await p.update({ collection: "community-applications", id: numeric(form, "id"),
+      overrideAccess: false, user, data: { status: status as "approved" | "rejected" } });
+  } catch { problem("/community/review", "审核未完成，申请可能已经处理"); }
+  redirect("/community/review?done=1");
+}
+export async function publishCommunityAction(form: FormData) {
+  const { p, user } = await current();
+  const game = numeric(form, "game");
+  const where = await gamePath(game);
+  const kind = value(form, "kind");
+  if (!["forum", "message", "event", "notice"].includes(kind)) problem(where, "发布类型无效");
+  let createdForum: number | null = null;
+  try {
+    if (kind === "forum") {
+      const post = await p.create({ collection: "forum-posts", overrideAccess: false, user,
+        data: { game, author: user.id, title: value(form, "title"), body: value(form, "body") } });
+      createdForum = post.id;
+    }
+    if (kind === "message") await p.create({ collection: "community-messages",
+      overrideAccess: false, user, data: { game, author: user.id, body: value(form, "body") } });
+    if (kind === "event" || kind === "notice") await p.create({
+      collection: "community-posts", overrideAccess: false, user,
+      data: { game, author: user.id, title: value(form, "title"), body: value(form, "body"), category: kind },
+    });
+  } catch { problem(where, "发布未成功，请核对内容、权限或发言频率"); }
+  if (createdForum) redirect(`${where}/forum/${createdForum}`);
+  redirect(where);
+}
+export async function commentAction(form: FormData) {
+  const { p, user } = await current();
+  const targetType = value(form, "targetType");
+  const targetId = numeric(form, "targetId");
+  const collection = (["events", "albums", "news", "announcements", "forum-posts"] as const)
+    .find((name) => name === targetType);
+  if (!collection) redirect("/community");
+  const target = await p.findByID({ collection, id: targetId, user: null,
+    overrideAccess: false, draft: false, depth: 0 }).catch(() => null);
+  if (!target) redirect("/community");
+  const post = target as { id: number; game?: number | null; slug?: string | null };
+  const path = collection === "forum-posts" ? `${await gamePath(Number(post.game))}/forum/${post.id}`
+    : `/${routeFor[collection]}/${post.slug}`;
+  try {
+    await p.create({ collection: "comments", overrideAccess: false, user,
+      data: { targetType: collection, targetId, author: user.id, body: value(form, "body"),
+        parent: numeric(form, "parent") || undefined } });
+  } catch { problem(path, "评论未成功，请检查内容或发言权限"); }
+  redirect(path);
+}
+export async function moderateAction(form: FormData) {
+  const { p, user } = await current();
+  const collection = (["forum-posts", "community-messages", "community-posts", "comments"] as const)
+    .find((name) => name === value(form, "collection"));
+  if (!collection) redirect("/community");
+  const id = numeric(form, "id");
+  const status = value(form, "status");
+  const game = numeric(form, "game");
+  const path = await gamePath(game);
+  if (!managesGame(user, game) || !["visible", "hidden"].includes(status)) redirect(path);
+  try {
+    await p.update({ collection, id, overrideAccess: false, user,
+      data: { status: status as "visible" | "hidden" } });
+  } catch { problem(path, "管理操作未成功"); }
+  redirect(path);
+}
+export async function banAction(form: FormData) {
+  const { p, user } = await current();
+  const game = numeric(form, "game");
+  const path = await gamePath(game);
+  if (!managesGame(user, game) || !hasRole(user, "president", "vicePresident", "communityAdmin"))
+    redirect(path);
+  try {
+    await p.create({ collection: "community-bans", overrideAccess: false, user,
+      data: { game, member: numeric(form, "member"), reason: value(form, "reason"), active: true } });
+  } catch { problem(path, "禁言未完成"); }
+  redirect(path);
+}

@@ -44,7 +44,7 @@ for (const collection of [
 const users = await p.count({
   collection: "users",
   overrideAccess: true,
-  where: { roles: { contains: "admin" } },
+  where: { roles: { contains: "president" } },
 });
 if (!users.totalDocs) errors.push("尚未建立系统管理员");
 const privacy = await p.count({

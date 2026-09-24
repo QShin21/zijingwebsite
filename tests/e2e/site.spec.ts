@@ -24,7 +24,7 @@ test.beforeAll(async () => {
       collection: "users",
       overrideAccess: true,
       context: { system: true },
-      data: { email, password, roles: ["admin"] },
+      data: { email, password, roles: ["president"], account: String(suffix) + "01", name: "测试社长" },
     })
   ).id;
 });
@@ -162,7 +162,9 @@ test("公开 API、预览、首次注册与分部越权拒绝", async ({ request
       data: {
         email: `leader-${suffix}@example.invalid`,
         password,
-        roles: ["leader"],
+        roles: ["communityAdmin"],
+        account: String(suffix) + "02",
+        name: "测试社群管理员",
         teams: [],
       },
     })

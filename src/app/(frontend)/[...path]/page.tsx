@@ -10,7 +10,7 @@ import { kindLabels, sectionMeta } from "@/lib/presentation";
 import { safeURL } from "@/lib/rules";
 
 type Props = { params: Promise<{ path: string[] }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
-const collections: Record<string, CollectionSlug> = { events: "events", teams: "teams", honors: "honors", news: "news", gallery: "albums", recruitment: "recruitment" };
+const collections: Record<string, CollectionSlug> = { events: "events", teams: "teams", honors: "honors", news: "news", gallery: "albums", recruitment: "recruitment", announcements: "announcements" };
 const titles: Record<string, string> = { about: "关于我们", contact: "联系与合作", privacy: "隐私说明", join: "加入紫荆", ...kindLabels };
 const descriptions: Record<string, string> = { about: "了解紫荆，找到与你并肩的伙伴。", contact: "活动咨询、社团交流与合作，欢迎与我们联系。", join: "一起玩，认真赢。找到适合你的参与方式。", members: "寻找同好，参与社团生活。查看本轮招新与加入渠道。", teams: "了解各游戏项目的选拔要求、时间安排和报名方式。", staff: "让想法变成现场。了解岗位职责，一起创造社团的下一次精彩。" };
 async function resolveDetail(collection: CollectionSlug, path: string[]) {

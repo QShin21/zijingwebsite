@@ -62,8 +62,8 @@ describe("权限与外链", () => {
   ])("拒绝 %s", (v) => expect(safeURL(v)).toBe(false));
   it("合法 URL 与角色", () => {
     expect(safeURL("https://example.com/form?a=1")).toBe(true);
-    expect(canPublish({ id: 1, roles: ["editor"] })).toBe(false);
-    expect(canPublish({ id: 1, roles: ["publisher"] })).toBe(true);
+    expect(canPublish({ id: 1, roles: ["communityAdmin"] })).toBe(false);
+    expect(canPublish({ id: 1, roles: ["vicePresident"] })).toBe(true);
     expect(teamIDs({ id: 1, teams: [{ id: 3 }, 4] })).toEqual(["3", "4"]);
   });
 });

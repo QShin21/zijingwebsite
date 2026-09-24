@@ -3,8 +3,8 @@ import { getPayload } from "payload";
 import config from "../src/payload.config";
 const email = process.env.ADMIN_EMAIL,
   password = process.env.ADMIN_PASSWORD;
-if (!email || !password || password.length < 16)
-  throw new Error("通过环境变量提供 ADMIN_EMAIL 和至少 16 位 ADMIN_PASSWORD");
+if (!email || !password || password.length < 16 || !/^\d{6,20}$/.test(process.env.ADMIN_ACCOUNT || ""))
+  throw new Error("通过环境变量提供 ADMIN_EMAIL、6–20 位数字 ADMIN_ACCOUNT 和至少 16 位 ADMIN_PASSWORD");
 const p = await getPayload({ config });
 const existing = await p.count({ collection: "users", overrideAccess: true });
 if (existing.totalDocs)
@@ -13,7 +13,7 @@ await p.create({
   collection: "users",
   overrideAccess: true,
   context: { system: true },
-  data: { email, password, roles: ["admin"], name: "系统管理员" },
+  data: { email, password, account: process.env.ADMIN_ACCOUNT || "", roles: ["vicePresident"], name: "网站管理员" },
 });
 console.log("首位管理员已创建；凭据未输出。");
 await p.destroy();
