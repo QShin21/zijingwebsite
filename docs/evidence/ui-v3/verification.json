@@ -1,0 +1,54 @@
+{
+  "date": "2026-09-25",
+  "environment": "Local Windows Chromium, isolated development database, demo content",
+  "unitDatabaseTests": 60,
+  "browserTests": 26,
+  "records": [
+    {
+      "route": "/",
+      "width": 1440,
+      "status": 200,
+      "screenshot": "home-desktop.png"
+    },
+    {
+      "route": "/",
+      "width": 390,
+      "status": 200,
+      "screenshot": "home-mobile.png"
+    },
+    {
+      "route": "/login",
+      "width": 1440,
+      "status": 200,
+      "screenshot": "login-desktop.png"
+    },
+    {
+      "route": "/register",
+      "width": 390,
+      "status": 200,
+      "screenshot": "register-mobile.png"
+    },
+    {
+      "route": "/events",
+      "width": 1440,
+      "status": 200,
+      "screenshot": "events-desktop.png"
+    },
+    {
+      "route": "/community/demo-game",
+      "width": 390,
+      "status": 200,
+      "screenshot": "community-mobile.png"
+    },
+    {
+      "route": "/events/demo-club-meetup",
+      "width": 1440,
+      "status": 200,
+      "screenshot": "event-detail.png"
+    }
+  ],
+  "typecheck": "passed",
+  "lint": "passed",
+  "productionBuild": "passed",
+  "deployment": "not performed"
+}

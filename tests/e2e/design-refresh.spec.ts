@@ -1,0 +1,72 @@
+import { expect, test } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
+
+for (const width of [320, 390, 768, 1440]) {
+  test(`member and community reading layouts at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    for (const route of [
+      "/login",
+      "/register",
+      "/account/reset",
+      "/community",
+      "/community/demo-game",
+      "/about",
+      "/privacy",
+      "/announcements",
+      "/missing-design-page",
+    ]) {
+      await page.goto(route);
+      await expect(page.locator("main h1")).toHaveCount(1);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth),
+        route,
+      ).toBeLessThanOrEqual(width);
+      if (
+        [390, 1440].includes(width) &&
+        ["/login", "/register", "/account/reset", "/community"].includes(route)
+      ) {
+        const result = await new AxeBuilder({ page })
+          .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+          .analyze();
+        expect(result.violations, route).toEqual([]);
+      }
+    }
+  });
+}
+
+test("registration guidance, server feedback and unique mobile community navigation", async ({
+  page,
+}) => {
+  await page.goto("/register");
+  await expect(
+    page.getByRole("heading", { name: /获取邮箱验证码/ }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /验证并完善账号/ }),
+  ).toBeVisible();
+  await expect(page.locator('input[name="account"]')).toHaveAttribute(
+    "aria-describedby",
+    "account-hint",
+  );
+  await page.goto("/login?reset=1");
+  await expect(page.getByRole("status")).toContainText("密码已更新");
+  await page
+    .getByLabel("数字账户或邮箱")
+    .fill("design-invalid@example.invalid");
+  await page
+    .getByLabel("密码", { exact: true })
+    .fill("invalid-design-password");
+  await page.getByRole("button", { name: "登录", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("错误");
+  await expect(
+    page.getByRole("button", { name: "登录", exact: true }),
+  ).toBeEnabled();
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto("/community");
+  await page.locator(".mobile-nav summary").click();
+  const link = page.locator('.mobile-nav a[href="/community"]');
+  await expect(link).toHaveCount(1);
+  await expect(link).toHaveAttribute("aria-current", "page");
+});

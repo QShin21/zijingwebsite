@@ -382,7 +382,7 @@ test("首页配置即时更新、回顾关联、相册分页和长中文标题",
       overrideAccess: false,
       user,
       data: {
-        heroTitle: settings.heroTitle,
+        heroTitle: settings.heroTitle ?? null,
         modules: settings.modules,
         featuredEvents: settings.featuredEvents,
       },

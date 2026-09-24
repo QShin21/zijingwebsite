@@ -17,6 +17,8 @@ test("mobile menu closes on navigation, Escape and outside interaction", async (
   await page.goto("/");
   const menu = page.locator(".mobile-nav");
   const trigger = menu.locator("summary");
+  // Native details works before hydration; Escape/outside dismissal is a client enhancement.
+  await expect(menu).toHaveAttribute("data-enhanced", "true");
   await trigger.click();
   await expect(menu).toHaveAttribute("open", "");
   await page.keyboard.press("Escape");
