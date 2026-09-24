@@ -163,7 +163,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   UPDATE "users" SET "name" = '成员' || "id"::text WHERE "name" IS NULL OR trim("name") = '';
   ALTER TABLE "users" ALTER COLUMN "name" SET NOT NULL;
   ALTER TABLE "users" ADD COLUMN "account" varchar;
-  UPDATE "users" SET "account" = '9' || "id"::text;
+  UPDATE "users" SET "account" = '9' || lpad("id"::text, greatest(5, length("id"::text)), '0');
   ALTER TABLE "users" ALTER COLUMN "account" SET NOT NULL;
   ALTER TABLE "users" ADD COLUMN "account_status" "enum_users_account_status" DEFAULT 'active';
   ALTER TABLE "users_rels" ADD COLUMN "games_id" integer;
