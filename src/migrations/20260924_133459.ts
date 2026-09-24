@@ -160,6 +160,17 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
     ELSE 'member' END;
   CREATE TYPE "public"."enum_users_roles" AS ENUM('president', 'vicePresident', 'communityAdmin', 'member');
   ALTER TABLE "users_roles" ALTER COLUMN "value" SET DATA TYPE "public"."enum_users_roles" USING "value"::"public"."enum_users_roles";
+  -- Keep the highest legacy privilege when an account had several roles.
+  WITH ranked AS (
+    SELECT "id", row_number() OVER (
+      PARTITION BY "parent_id"
+      ORDER BY CASE "value" WHEN 'vicePresident' THEN 1 WHEN 'communityAdmin' THEN 2 ELSE 3 END, "id"
+    ) AS role_rank FROM "users_roles"
+  )
+  DELETE FROM "users_roles" WHERE "id" IN (SELECT "id" FROM ranked WHERE role_rank > 1);
+  INSERT INTO "users_roles" ("order", "parent_id", "value")
+    SELECT 0, u."id", 'member' FROM "users" u
+    WHERE NOT EXISTS (SELECT 1 FROM "users_roles" r WHERE r."parent_id" = u."id");
   UPDATE "users" SET "name" = '成员' || "id"::text WHERE "name" IS NULL OR trim("name") = '';
   ALTER TABLE "users" ALTER COLUMN "name" SET NOT NULL;
   ALTER TABLE "users" ADD COLUMN "account" varchar;
