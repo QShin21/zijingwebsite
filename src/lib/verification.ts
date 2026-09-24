@@ -4,6 +4,7 @@ import type { Payload } from "payload";
 
 export type Purpose = "register" | "password";
 const allowed = new Set([
+  "tsinghua.edu.cn",
   "mails.tsinghua.edu.cn",
   "mail.tsinghua.edu.cn",
   "tsinghua.org.cn",
