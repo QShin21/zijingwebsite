@@ -9,8 +9,14 @@ type NavItem = { path: string; label: string };
 export function SiteHeader({ name, navigation }: { name: string; navigation: NavItem[] }) {
   const pathname = usePathname();
   const menu = useRef<HTMLDetailsElement>(null);
+  const previousPath = useRef(pathname);
   const close = () => { if (menu.current) menu.current.open = false; };
-  useEffect(() => { if (menu.current) menu.current.open = false; }, [pathname]);
+  useEffect(() => {
+    if (previousPath.current !== pathname) {
+      if (menu.current) menu.current.open = false;
+      previousPath.current = pathname;
+    }
+  }, [pathname]);
   useEffect(() => {
     const dismiss = (event: PointerEvent) => { if (event.target instanceof Node && !menu.current?.contains(event.target)) close(); };
     const escape = (event: KeyboardEvent) => {
