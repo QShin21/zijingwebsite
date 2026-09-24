@@ -8,6 +8,11 @@ import { accountNumber, consumeCode, issueCode, schoolEmail, validPassword } fro
 
 const field = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 const errorURL = (page: string, message: string) => `${page}?message=${encodeURIComponent(message)}`;
+const ownerEmail = (email: string) =>
+  Boolean(process.env.PRESIDENT_CLAIM_EMAIL && process.env.PRESIDENT_CLAIM_ACCOUNT &&
+    email === process.env.PRESIDENT_CLAIM_EMAIL.toLowerCase());
+const ownerClaim = (email: string, account: string) =>
+  ownerEmail(email) && account === process.env.PRESIDENT_CLAIM_ACCOUNT;
 export async function sendCodeAction(form: FormData) {
   const email = schoolEmail(field(form, "email"));
   const purpose = field(form, "purpose") === "password" ? "password" : "register";
@@ -16,7 +21,8 @@ export async function sendCodeAction(form: FormData) {
   const existing = await p.find({ collection: "users", overrideAccess: true,
     where: { email: { equals: email } }, limit: 1, depth: 0 });
   const page = purpose === "register" ? "/register" : "/account/reset";
-  if (purpose === "register" && existing.docs.length) redirect(errorURL(page, "该邮箱已注册，请登录或找回密码"));
+  if (purpose === "register" && existing.docs.length && !ownerEmail(email))
+    redirect(errorURL(page, "该邮箱已注册，请登录或找回密码"));
   // Reset responses do not reveal whether an account exists.
   if (purpose === "password" && !existing.docs.length) redirect(`${page}?sent=1`);
   try {
@@ -41,12 +47,21 @@ export async function registerAction(form: FormData) {
   if (!(await consumeCode(email, "register", field(form, "code"))))
     redirect(errorURL("/register", "验证码错误、过期或尝试次数过多"));
   const p = await cms();
-  const claim = email === process.env.PRESIDENT_CLAIM_EMAIL?.toLowerCase() &&
-    account === process.env.PRESIDENT_CLAIM_ACCOUNT;
+  const claim = ownerClaim(email, account);
+  const existing = await p.find({ collection: "users", overrideAccess: true,
+    where: { email: { equals: email } }, limit: 1, depth: 0 });
+  if (existing.docs[0] && !claim)
+    redirect(errorURL("/register", "该邮箱已注册，请登录或找回密码"));
   try {
-    await p.create({ collection: "users", overrideAccess: true,
-      context: { signupVerified: true, presidentClaim: claim },
-      data: { email, account, name, password, roles: ["member"] } });
+    if (existing.docs[0]) {
+      await p.update({ collection: "users", id: existing.docs[0].id,
+        overrideAccess: true, context: { system: true, ownerClaimVerified: true },
+        data: { account, name, password, roles: ["president"], accountStatus: "active" } });
+    } else {
+      await p.create({ collection: "users", overrideAccess: true,
+        context: { signupVerified: true, presidentClaim: claim },
+        data: { email, account, name, password, roles: ["member"] } });
+    }
   } catch {
     redirect(errorURL("/register", "创建账号失败，请检查邮箱或数字账户是否已被使用，并重新获取验证码"));
   }
