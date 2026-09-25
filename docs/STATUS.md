@@ -1,5 +1,14 @@
 # 当前状态
 
+## SMTP 配置 · 2026-09-25
+
+测试站 `https://test.yejiaxin.online` 已配置 163 邮箱 SMTP：`smtp.163.com:465`，使用 SSL 和授权码认证。服务器上的 `.env` 由 `zijingweb` 用户持有，权限为 `600`；授权码未写入仓库、日志或项目文档。
+
+- `zijingweb` 与 `zijingweb-db` 重启后均为 active，`/health/live` 和 `/health/ready` 均通过。
+- 使用服务器实际安装的 Nodemailer 依赖完成 SMTP authenticated connection verification，验证过程没有发送测试邮件。
+- 临时配置文件已删除。实际邮件投递、注册验证码和密码找回仍需在页面发起一次真实请求后由收件箱确认；社长认领参数仍未配置。
+- 证据摘要见 [smtp-config.json](evidence/smtp-config.json)。
+
 ## UI V3 服务器部署 · 2026-09-25
 
 应用提交 `9cc835b94b34dda6a546f4522b498c7a5d29e46d` 已部署到 https://test.yejiaxin.online。对应 GitHub Actions `36026213209` 全部通过。继续使用现有 staging 配置和禁止搜索收录策略，未变更 DNS。
@@ -10,7 +19,7 @@
 - 首次构建触及 1100 MiB 内存限制；利用现有交换空间重试完成，systemd 结束钩子已恢复 `vm.swappiness=0`。服务器构建、类型检查和页面生成成功；保留构建警告，没有关闭检查。
 - 公网 18 个公开页面返回 200，各有单一主标题；Chromium 实际检查新版登录、桌面截图、390px 手机菜单导航和无横向溢出。已查看线上登录截图；健康端点均正常。未使用真实账号执行登录。
 - FreeKill 进程 PID 和 Nginx 配置哈希前后相同，HTTPS 200、带合法 Origin 的 WebSocket 101。
-- SMTP 与社长邮箱认领配置仍未设置；真实验证码邮件和认领流程未验证。
+- SMTP 已配置并完成认证连接验证；社长邮箱认领配置仍未设置，真实验证码投递和认领流程未验证。
 
 检查摘要见 [deployment-ui-v3.json](evidence/deployment-ui-v3.json)。以下记录按当时执行范围保留。
 

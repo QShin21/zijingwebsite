@@ -31,7 +31,7 @@ docker compose --env-file .env.deploy ps
 
 未配置S3时使用 `MEDIA_DIR` 持久化目录。配置 S3_BUCKET/REGION/ENDPOINT/ACCESS_KEY_ID/SECRET_ACCESS_KEY 后自动启用统一适配器；只使用专属公开媒体桶。对象存储ACL、区域、流量费用由负责人确认，实际供应商集成尚未验证。切换存储前备份并迁移原有对象，不能只改变量后删除旧文件。
 
-SMTP_HOST/PORT/FROM/USER/PASSWORD 开启真实密码重置邮件。未配置时明确拒绝发送，不打印令牌。真实SMTP发送尚未验证。生产配置有效发件身份、TLS和负责人恢复渠道。
+SMTP_HOST/PORT/FROM/USER/PASSWORD 开启真实密码重置邮件。未配置时明确拒绝发送，不打印令牌。测试站已完成 163 SMTP 认证连接验证，实际邮件投递仍需页面请求和收件箱确认。生产配置有效发件身份、TLS和负责人恢复渠道。
 
 ## 迁移与回退
 

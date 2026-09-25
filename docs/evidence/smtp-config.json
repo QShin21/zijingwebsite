@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-25",
+  "environment": "staging",
+  "url": "https://test.yejiaxin.online",
+  "service": "zijingweb",
+  "provider": "163",
+  "host": "smtp.163.com",
+  "port": 465,
+  "transport": "SSL",
+  "configuredKeys": [
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_FROM",
+    "SMTP_USER",
+    "SMTP_PASSWORD"
+  ],
+  "connectionVerification": "passed",
+  "messageDelivery": "not sent",
+  "healthLive": "passed",
+  "healthReady": "passed",
+  "serviceRestart": "passed",
+  "envFileMode": "600",
+  "temporaryCredentialFileRemoved": true,
+  "credentialLogged": false,
+  "presidentClaimConfigured": false
+}
