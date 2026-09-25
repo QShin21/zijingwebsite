@@ -1,0 +1,93 @@
+{
+  "date": "2026-09-25T12:33:21.170Z",
+  "records": [
+    {
+      "route": "/",
+      "status": 200
+    },
+    {
+      "route": "/events",
+      "status": 200
+    },
+    {
+      "route": "/teams",
+      "status": 200
+    },
+    {
+      "route": "/honors",
+      "status": 200
+    },
+    {
+      "route": "/news",
+      "status": 200
+    },
+    {
+      "route": "/announcements",
+      "status": 200
+    },
+    {
+      "route": "/gallery",
+      "status": 200
+    },
+    {
+      "route": "/join",
+      "status": 200
+    },
+    {
+      "route": "/join/members",
+      "status": 200
+    },
+    {
+      "route": "/join/teams",
+      "status": 200
+    },
+    {
+      "route": "/join/staff",
+      "status": 200
+    },
+    {
+      "route": "/community",
+      "status": 200
+    },
+    {
+      "route": "/login",
+      "status": 200
+    },
+    {
+      "route": "/register",
+      "status": 200
+    },
+    {
+      "route": "/account/reset",
+      "status": 200
+    },
+    {
+      "route": "/about",
+      "status": 200
+    },
+    {
+      "route": "/contact",
+      "status": 200
+    },
+    {
+      "route": "/privacy",
+      "status": 200
+    }
+  ],
+  "mobileNavigation": "passed",
+  "loginLayout": "passed",
+  "commit": "9cc835b94b34dda6a546f4522b498c7a5d29e46d",
+  "url": "https://test.yejiaxin.online",
+  "environment": "staging",
+  "healthLive": "alive",
+  "healthReady": "ready",
+  "accountsBefore": 3,
+  "accountsAfter": 3,
+  "oldWebReleaseRemoved": true,
+  "databaseMigrated": false,
+  "freekillHTTPS": 200,
+  "freekillWebSocket": 101,
+  "swappinessRestored": 0,
+  "smtpConfigured": false,
+  "realAccountLogin": "not tested"
+}

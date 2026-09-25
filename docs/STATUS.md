@@ -1,5 +1,20 @@
 # 当前状态
 
+## UI V3 服务器部署 · 2026-09-25
+
+应用提交 `9cc835b94b34dda6a546f4522b498c7a5d29e46d` 已部署到 https://test.yejiaxin.online。对应 GitHub Actions `36026213209` 全部通过。继续使用现有 staging 配置和禁止搜索收录策略，未变更 DNS。
+
+- 独立构建后先在回环 3101 端口验证数据库就绪和新版登录，再替换 `/srv/zijingwebsite/app` 的源码与构建，重启 `zijingweb`。
+- 服务器已应用三项现有迁移，本次没有执行数据库迁移或导入演示资料。部署前后均有 3 个账号；媒体、活动、游戏和论坛记录计数未变。环境配置和持久化目录保留。
+- 按用户要求未备份旧网页，旧 `.next`、上一版本 release 目录和本次临时构建/压缩包均已清理。数据库、媒体和已有数据备份不在本次清理范围。
+- 首次构建触及 1100 MiB 内存限制；利用现有交换空间重试完成，systemd 结束钩子已恢复 `vm.swappiness=0`。服务器构建、类型检查和页面生成成功；保留构建警告，没有关闭检查。
+- 公网 18 个公开页面返回 200，各有单一主标题；Chromium 实际检查新版登录、桌面截图、390px 手机菜单导航和无横向溢出。已查看线上登录截图；健康端点均正常。未使用真实账号执行登录。
+- FreeKill 进程 PID 和 Nginx 配置哈希前后相同，HTTPS 200、带合法 Origin 的 WebSocket 101。
+- SMTP 与社长邮箱认领配置仍未设置；真实验证码邮件和认领流程未验证。
+
+检查摘要见 [deployment-ui-v3.json](evidence/deployment-ui-v3.json)。以下记录按当时执行范围保留。
+
+
 ## 全站前端 UI V3 · 2026-09-25
 
 基于最新主分支 `d98a139`，在 `codex/frontend-design-refresh` 完成前端翻新，按本次授权交付 GitHub main。设计与范围详见 [UI_REDESIGN.md](UI_REDESIGN.md)。此次未部署测试或生产服务器。

@@ -2,7 +2,7 @@
 
 ## 当前边界
 
-尚未上线。当前主机没有 Docker CLI/daemon，容器构建、启动、重启持久化未验证。已完成本地 PostgreSQL 迁移、Next 生产构建、数据库及媒体隔离恢复。不要据此宣称容器已验收或已具备异机灾备。
+现有测试站 https://test.yejiaxin.online 使用独立系统账户、systemd、Node 和 PostgreSQL 原生部署。2026-09-25 已更新应用提交 `9cc835b`，详细执行记录见 STATUS.md。当前仍为 staging、禁止搜索收录；Docker 容器验收及异机灾备不在此次部署验证范围。
 
 ## 独立部署
 
