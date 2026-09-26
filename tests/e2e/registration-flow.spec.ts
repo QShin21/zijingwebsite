@@ -57,7 +57,7 @@ const password = randomBytes(24).toString("hex");
 test.beforeAll(async () => {
   if (process.env.APP_ENV !== "development")
     throw new Error("Local development only");
-  p = await getPayload({ config });
+  p = await getPayload({ config, key: "registration-flow" });
   await new Promise<void>((resolve, reject) => {
     smtp.once("error", reject);
     smtp.listen(2526, "127.0.0.1", resolve);
