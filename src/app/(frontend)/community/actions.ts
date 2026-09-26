@@ -25,12 +25,18 @@ async function gamePath(id: number) {
 export async function applyAction(form: FormData) {
   const { p, user } = await current();
   const game = numeric(form, "game");
+  const image = form.get("wechatQr");
+  if (!(image instanceof File) || !image.size || image.size > 2 * 1024 * 1024 ||
+      !["image/png", "image/jpeg", "image/webp"].includes(image.type))
+    return { error: "请上传 2 MB 以内的 PNG、JPEG 或 WebP 微信名片二维码。" };
   try {
     await p.create({ collection: "community-applications", overrideAccess: false, user,
       data: { game: game || undefined, proposedGame: value(form, "proposedGame"),
+        realName: value(form, "realName"), phone: value(form, "phone"),
+        wechatQr: `data:${image.type};base64,${Buffer.from(await image.arrayBuffer()).toString("base64")}`,
         reason: value(form, "reason"), status: "pending", applicant: user.id } });
-  } catch { problem("/community/apply", "申请提交失败，请核对游戏项目和申请说明"); }
-  redirect("/account?applied=1");
+  } catch { return { error: "申请提交失败，请核对姓名、手机号、二维码、游戏项目和申请说明。" }; }
+  return { success: true };
 }
 export async function decideAction(form: FormData) {
   const { p, user } = await current();

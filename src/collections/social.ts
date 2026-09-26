@@ -1,5 +1,6 @@
 import { APIError, type CollectionConfig, type CollectionBeforeChangeHook, type Access, type Where } from "payload";
 import { canParticipate, canPublish, hasRole, managesGame, type Identity } from "../lib/rules";
+import { normalizeWechatQr, validApplicantName, validApplicantPhone } from "../lib/application-details";
 
 const relation = (name: string, to: "games" | "users" | "forum-posts" | "comments") =>
   ({ name, type: "relationship" as const, relationTo: to, required: true, maxDepth: 0,
@@ -132,73 +133,202 @@ const applications: CollectionConfig = {
   slug: "community-applications",
   labels: { singular: "社群管理员申请", plural: "社群管理员申请" },
   admin: { useAsTitle: "proposedGame" },
-  access: { read: ownOrReviewer, create: ({ req }) => canParticipate(req.user as Identity),
-    update: ({ req }) => canPublish(req.user as Identity), delete: ({ req }) => canPublish(req.user as Identity) },
+  access: {
+    read: ownOrReviewer,
+    create: ({ req }) => canParticipate(req.user as Identity),
+    update: ({ req }) => canPublish(req.user as Identity),
+    delete: ({ req }) => canPublish(req.user as Identity),
+  },
   hooks: {
-    beforeChange: [async ({ data, originalDoc, req, operation }) => {
-      if (operation === "create") {
-        if (!canParticipate(req.user as Identity)) throw new APIError("请登录", 403);
-        const game = data.game ? await openGame(req, data.game) : null;
-        const proposedGame = String(data.proposedGame ?? "").trim();
-        if (!game && (proposedGame.length < 2 || proposedGame.length > 80))
-          throw new APIError("新游戏名称需为 2–80 字", 400);
-        if (String(data.reason ?? "").trim().length < 10) throw new APIError("请填写至少 10 字的申请说明", 400);
-        data.applicant = req.user!.id;
-        data.game = game;
-        data.proposedGame = proposedGame || (game ? "已有游戏社群" : "");
-        data.status = "pending";
-      } else if (!req.context.applicationResolved &&
-        originalDoc?.status !== "pending" && data.status !== originalDoc?.status)
-        throw new APIError("申请已经处理", 409);
-      else if (data.status && !["pending", "approved", "rejected"].includes(data.status))
-        throw new APIError("审核状态无效", 400);
-    if (operation === "update" && !req.context.applicationResolved) for (const field of ["applicant", "game", "proposedGame", "reason"]) {
-        if (data[field] !== undefined && String(idOf(data[field])) !== String(idOf(originalDoc?.[field])))
-          throw new APIError("申请内容不可在审核时更改", 403);
-      }
-      return data;
-    }],
-    afterChange: [async ({ doc, previousDoc, req }) => {
-      if (doc.status !== "approved" || previousDoc?.status === "approved" || req.context.applicationResolved)
-        return doc;
-      let game = doc.game;
-      if (!game) {
-        const existing = await req.payload.find({ collection: "games", overrideAccess: true, req,
-          where: { and: [{ title: { equals: doc.proposedGame } },
-            { _status: { equals: "published" } }] }, limit: 1, depth: 0 });
-        game = existing.docs[0]?.id;
+    beforeChange: [
+      async ({ data, originalDoc, req, operation }) => {
+        if (operation === "create") {
+          if (!canParticipate(req.user as Identity))
+            throw new APIError("请登录", 403);
+          data.realName = String(data.realName ?? "").trim();
+          data.phone = String(data.phone ?? "").trim();
+          if (
+            !validApplicantName(data.realName) ||
+            !validApplicantPhone(data.phone)
+          )
+            throw new APIError("请填写姓名和有效手机号", 400);
+          try {
+            data.wechatQr = await normalizeWechatQr(data.wechatQr);
+          } catch {
+            throw new APIError("请上传 2 MB 以内的有效微信名片二维码图片", 400);
+          }
+          const game = data.game ? await openGame(req, data.game) : null;
+          const proposedGame = String(data.proposedGame ?? "").trim();
+          if (!game && (proposedGame.length < 2 || proposedGame.length > 80))
+            throw new APIError("新游戏名称需为 2–80 字", 400);
+          if (String(data.reason ?? "").trim().length < 10)
+            throw new APIError("请填写至少 10 字的申请说明", 400);
+          data.applicant = req.user!.id;
+          data.game = game;
+          data.proposedGame = game
+            ? (
+                await req.payload.findByID({
+                  collection: "games",
+                  id: game,
+                  overrideAccess: false,
+                  user: null,
+                  draft: false,
+                  depth: 0,
+                  req,
+                })
+              ).title
+            : proposedGame;
+          data.status = "pending";
+        } else if (
+          !req.context.applicationResolved &&
+          originalDoc?.status !== "pending" &&
+          data.status !== originalDoc?.status
+        )
+          throw new APIError("申请已经处理", 409);
+        else if (
+          data.status &&
+          !["pending", "approved", "rejected"].includes(data.status)
+        )
+          throw new APIError("审核状态无效", 400);
+        if (
+          operation === "update" &&
+          data.status === "approved" &&
+          (!originalDoc?.realName ||
+            !originalDoc?.phone ||
+            !originalDoc?.wechatQr)
+        )
+          throw new APIError("旧申请资料不全，请退回后由申请人重新提交", 400);
+        if (operation === "update" && !req.context.applicationResolved)
+          for (const field of [
+            "applicant",
+            "game",
+            "proposedGame",
+            "reason",
+            "realName",
+            "phone",
+            "wechatQr",
+          ]) {
+            if (
+              data[field] !== undefined &&
+              String(idOf(data[field])) !== String(idOf(originalDoc?.[field]))
+            )
+              throw new APIError("申请内容不可在审核时更改", 403);
+          }
+        return data;
+      },
+    ],
+    afterChange: [
+      async ({ doc, previousDoc, req }) => {
+        if (
+          doc.status !== "approved" ||
+          previousDoc?.status === "approved" ||
+          req.context.applicationResolved
+        )
+          return doc;
+        let game = doc.game;
         if (!game) {
-          const created = await req.payload.create({ collection: "games", overrideAccess: true, req,
-            context: { system: true }, data: {
-              title: doc.proposedGame, slug: `community-${doc.id}`,
-              _status: "published", reviewState: "approved",
-            } });
-          game = created.id;
+          const existing = await req.payload.find({
+            collection: "games",
+            overrideAccess: true,
+            req,
+            where: {
+              and: [
+                { title: { equals: doc.proposedGame } },
+                { _status: { equals: "published" } },
+              ],
+            },
+            limit: 1,
+            depth: 0,
+          });
+          game = existing.docs[0]?.id;
+          if (!game) {
+            const created = await req.payload.create({
+              collection: "games",
+              overrideAccess: true,
+              req,
+              context: { system: true },
+              data: {
+                title: doc.proposedGame,
+                slug: `community-${doc.id}`,
+                _status: "published",
+                reviewState: "approved",
+              },
+            });
+            game = created.id;
+          }
         }
-      }
-      const applicant = await req.payload.findByID({ collection: "users", id: idOf(doc.applicant) as number,
-        overrideAccess: true, req, depth: 0 });
-      const assigned = new Set((applicant.communities ?? []).map((v) => Number(idOf(v))));
-      assigned.add(Number(game));
-      await req.payload.update({ collection: "users", id: applicant.id, overrideAccess: true, req,
-        context: { system: true }, data: {
-          roles: canPublish(applicant as Identity) ? applicant.roles : ["communityAdmin"],
-          communities: Array.from(assigned),
-        } });
-      await req.payload.update({ collection: "community-applications", id: doc.id, overrideAccess: true,
-        req, context: { applicationResolved: true }, data: { game } });
-      return doc;
-    }],
+        const applicant = await req.payload.findByID({
+          collection: "users",
+          id: idOf(doc.applicant) as number,
+          overrideAccess: true,
+          req,
+          depth: 0,
+        });
+        const assigned = new Set(
+          (applicant.communities ?? []).map((v) => Number(idOf(v))),
+        );
+        assigned.add(Number(game));
+        await req.payload.update({
+          collection: "users",
+          id: applicant.id,
+          overrideAccess: true,
+          req,
+          context: { system: true },
+          data: {
+            roles: canPublish(applicant as Identity)
+              ? applicant.roles
+              : ["communityAdmin"],
+            communities: Array.from(assigned),
+          },
+        });
+        await req.payload.update({
+          collection: "community-applications",
+          id: doc.id,
+          overrideAccess: true,
+          req,
+          context: { applicationResolved: true },
+          data: { game },
+        });
+        return doc;
+      },
+    ],
   },
   fields: [
-    { name: "applicant", type: "relationship", relationTo: "users", required: true,
-      access: { create: () => true, update: () => false } },
-    { name: "game", type: "relationship", relationTo: "games", maxDepth: 0,
-      access: { update: ({ req }) => canPublish(req.user as Identity) } },
+    {
+      name: "applicant",
+      type: "relationship",
+      relationTo: "users",
+      required: true,
+      access: { create: () => true, update: () => false },
+    },
+    {
+      name: "game",
+      type: "relationship",
+      relationTo: "games",
+      maxDepth: 0,
+      access: { update: ({ req }) => canPublish(req.user as Identity) },
+    },
     { name: "proposedGame", type: "text", required: true },
     { name: "reason", type: "textarea", required: true },
-    { name: "status", type: "select", defaultValue: "pending", options: ["pending", "approved", "rejected"],
-      access: { create: () => false, update: ({ req }) => canPublish(req.user as Identity) } },
+    // Nullable for historical applications; the create hook requires all three.
+    { name: "realName", label: "姓名", type: "text", maxLength: 80 },
+    { name: "phone", label: "手机号", type: "text", maxLength: 21 },
+    {
+      name: "wechatQr",
+      label: "微信名片二维码",
+      type: "textarea",
+      admin: { hidden: true },
+    },
+    {
+      name: "status",
+      type: "select",
+      defaultValue: "pending",
+      options: ["pending", "approved", "rejected"],
+      access: {
+        create: () => false,
+        update: ({ req }) => canPublish(req.user as Identity),
+      },
+    },
   ],
 };
 const bans: CollectionConfig = {

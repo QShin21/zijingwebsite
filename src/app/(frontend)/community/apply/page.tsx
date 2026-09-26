@@ -1,14 +1,13 @@
-import { SubmitButton } from "@/components/SubmitButton";
+import { CommunityApplicationForm } from "@/components/CommunityApplicationForm";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PageHeading } from "@/components/PageHeading";
 import { cms, list } from "@/lib/content";
-import { applyAction } from "../actions";
 export default async function Apply({
   searchParams,
 }: {
-  searchParams: Promise<{ message?: string }>;
+  searchParams: Promise<{ message?: string; submitted?: string }>;
 }) {
   const p = await cms();
   const { user } = await p.auth({ headers: await headers() });
@@ -22,7 +21,9 @@ export default async function Apply({
     sort: "-createdAt",
     limit: 10,
     depth: 0,
+    select: { proposedGame: true, status: true, createdAt: true },
   });
+  const query = await searchParams;
   return (
     <>
       <PageHeading
@@ -31,35 +32,28 @@ export default async function Apply({
         description="可选择已有游戏社群，或填写一个尚未建立的游戏项目；通过后自动建立该游戏社群及论坛。"
       />
       <section className="member-shell">
-        <p role="status">{(await searchParams).message}</p>
-        <form className="member-form" action={applyAction}>
-          <label>
-            已有游戏（申请新游戏则不选）
-            <select name="game">
-              <option value="">申请建立新游戏社群</option>
-              {games.docs.map((game) => (
-                <option value={game.id} key={game.id}>
-                  {game.title}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            新游戏名称（选择已有游戏后可留空）
-            <input name="proposedGame" maxLength={80} />
-          </label>
-          <label>
-            申请说明（至少 10 字）
-            <textarea
-              name="reason"
-              minLength={10}
-              maxLength={3000}
-              required
-              rows={5}
-            />
-          </label>
-          <SubmitButton className="button light">提交审核</SubmitButton>
-        </form>
+        <p role="status">{query.message}</p>
+        {query.submitted ? (
+          <div className="application-confirmation" role="status">
+            <h2>申请已提交</h2>
+            <p>
+              请添加社长微信{" "}
+              <strong className="wechat-account">yz167015</strong> 进行备案。
+            </p>
+            <p>添加时请备注姓名、网站昵称和申请的游戏社群，等待负责人审核。</p>
+            <Link className="button light" href="/account">
+              返回我的账号
+            </Link>
+            <Link href="/community/apply">继续填写新申请</Link>
+          </div>
+        ) : (
+          <CommunityApplicationForm
+            games={games.docs.map((game) => ({
+              id: game.id,
+              title: game.title,
+            }))}
+          />
+        )}
         <h2>我的申请</h2>
         {apps.docs.length ? (
           <ul className="community-list">

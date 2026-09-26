@@ -1,10 +1,13 @@
 import "dotenv/config";
+import sharp from "sharp";
+import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { getPayload, type Payload } from "payload";
 import config from "../src/payload.config";
 import type { User } from "../src/payload-types";
 import { randomBytes } from "node:crypto";
 let p: Payload;
+let qr: string;
 const suffix = String(Date.now());
 const password = randomBytes(24).toString("hex");
 let member: User;
@@ -16,6 +19,7 @@ let announcement: number;
 beforeAll(async () => {
   if (process.env.APP_ENV !== "development") throw new Error("Integration tests require a development database");
   p = await getPayload({ config });
+  qr = "data:image/png;base64," + (await sharp({ create: { width: 40, height: 40, channels: 3, background: "white" } }).png().toBuffer()).toString("base64");
   member = await p.create({ collection: "users", overrideAccess: true, context: { system: true },
     data: { name: "社群测试成员", email: `member-${suffix}@example.invalid`,
       password, roles: ["member"] } });
@@ -40,11 +44,95 @@ describe.sequential("申请、建群、发言与跨级审核", () => {
     await expect(p.create({ collection: "announcements", overrideAccess: false, user: member,
       data: { title: "越权", slug: `unauthorized-${suffix}` } })).rejects.toThrow();
   });
+  it("申请必须提供完整联系资料和有效图片，其他成员不能读取", async () => {
+    const data = {
+      applicant: member.id,
+      proposedGame: "资料检查",
+      reason: "此处为申请资料校验测试说明。",
+      realName: "测试姓名",
+      phone: "13900000000",
+      wechatQr: qr,
+    };
+    for (const missing of [
+      { realName: "" },
+      { phone: "无效" },
+      { wechatQr: "data:image/png;base64,aGVsbG8=" },
+    ]) {
+      await expect(
+        p.create({
+          collection: "community-applications",
+          overrideAccess: false,
+          user: member,
+          data: { ...data, ...missing },
+        }),
+      ).rejects.toThrow();
+    }
+    const request = await p.create({
+      collection: "community-applications",
+      overrideAccess: false,
+      user: member,
+      data,
+    });
+    try {
+      expect(request.wechatQr).toMatch(/^data:image\/png;base64,/);
+      await expect(p.find({ collection: "community-applications", overrideAccess: false, user: null, where: { id: { equals: request.id } } })).rejects.toThrow();
+      await expect(
+        p.findByID({
+          collection: "community-applications",
+          id: request.id,
+          overrideAccess: false,
+          user: { ...member, id: 2147483647 },
+        }),
+      ).rejects.toThrow();
+      await expect(
+        p.update({
+          collection: "community-applications",
+          id: request.id,
+          overrideAccess: false,
+          user: vice,
+          data: { phone: "13800000000" },
+        }),
+      ).rejects.toThrow();
+      const db = new pg.Client({ connectionString: process.env.DATABASE_URL });
+      await db.connect();
+      try {
+        await db.query(
+          "UPDATE community_applications SET real_name = NULL, phone = NULL, wechat_qr = NULL WHERE id = $1",
+          [request.id],
+        );
+      } finally {
+        await db.end();
+      }
+      await expect(
+        p.update({
+          collection: "community-applications",
+          id: request.id,
+          overrideAccess: false,
+          user: vice,
+          data: { status: "approved" },
+        }),
+      ).rejects.toThrow();
+      await p.update({
+        collection: "community-applications",
+        id: request.id,
+        overrideAccess: false,
+        user: vice,
+        data: { status: "rejected" },
+      });
+    } finally {
+      await p.delete({
+        collection: "community-applications",
+        id: request.id,
+        overrideAccess: true,
+      });
+    }
+  });
   it("普通成员申请新社群，副社长审核后创建游戏和管理身份", async () => {
     const request = await p.create({ collection: "community-applications",
       overrideAccess: false, user: member, data: {
         applicant: member.id, proposedGame: `测试游戏-${suffix}`,
         reason: "希望运营这款游戏的日常讨论和活动。",
+        realName: "测试申请人", phone: "13900000000", wechatQr: qr,
       } });
     application = request.id;
     expect(request.status).toBe("pending");

@@ -7,11 +7,13 @@ export function SubmitButton({
   className = "button",
   name,
   value,
+  disabled = false,
 }: {
   children: ReactNode;
   className?: string;
   name?: string;
   value?: string;
+  disabled?: boolean;
 }) {
   const { pending } = useFormStatus();
   return (
@@ -20,7 +22,7 @@ export function SubmitButton({
       className={className}
       name={name}
       value={value}
-      disabled={pending}
+      disabled={pending || disabled}
       aria-busy={pending}
     >
       {pending ? "正在提交…" : children}

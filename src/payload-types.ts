@@ -260,6 +260,9 @@ export interface CommunityApplication {
   game?: (number | null) | Game;
   proposedGame: string;
   reason: string;
+  realName?: string | null;
+  phone?: string | null;
+  wechatQr?: string | null;
   status?: ('pending' | 'approved' | 'rejected') | null;
   updatedAt: string;
   createdAt: string;
@@ -988,6 +991,9 @@ export interface CommunityApplicationsSelect<T extends boolean = true> {
   game?: T;
   proposedGame?: T;
   reason?: T;
+  realName?: T;
+  phone?: T;
+  wechatQr?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
