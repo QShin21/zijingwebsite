@@ -2682,6 +2682,15 @@ textarea:focus-visible,
   font-size: 12px;
   font-weight: 400;
 }
+.registration-email {
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+}
+.registration-email select {
+  width: 100%;
+  min-width: 0;
+}
 .form-heading {
   margin: 0;
   font-size: 22px;

@@ -1,4 +1,5 @@
 import { SubmitButton } from "@/components/SubmitButton";
+import { RegistrationEmail } from "@/components/RegistrationEmail";
 import { MemberLayout, FormStep } from "@/components/MemberUI";
 import Link from "next/link";
 import { PageHeading } from "@/components/PageHeading";
@@ -32,24 +33,12 @@ export default async function Register({
         <form className="member-form" action={sendCodeAction}>
           <FormStep number="01" title="获取邮箱验证码" />
           <input type="hidden" name="purpose" value="register" />
-          <label>
-            清华邮箱
-            <input
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              placeholder="name@mails.tsinghua.edu.cn"
-            />
-          </label>
+          <RegistrationEmail />
           <SubmitButton className="button">发送六位验证码</SubmitButton>
         </form>
         <form className="member-form" action={registerAction}>
           <FormStep number="02" title="验证并完善账号" />
-          <label>
-            清华邮箱
-            <input name="email" type="email" required autoComplete="email" />
-          </label>
+          <RegistrationEmail />
           <label>
             验证码
             <input
