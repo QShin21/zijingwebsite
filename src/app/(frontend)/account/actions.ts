@@ -4,15 +4,14 @@ import { redirect } from "next/navigation";
 import { login, logout } from "@payloadcms/next/auth";
 import config from "@payload-config";
 import { cms } from "@/lib/content";
-import { accountNumber, consumeCode, issueCode, schoolEmail, validPassword } from "@/lib/verification";
+import { consumeCode, issueCode, schoolEmail, validPassword } from "@/lib/verification";
+import { nicknameKey, validNickname } from "@/lib/nickname";
 
 const field = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 const errorURL = (page: string, message: string) => `${page}?message=${encodeURIComponent(message)}`;
 const ownerEmail = (email: string) =>
-  Boolean(process.env.PRESIDENT_CLAIM_EMAIL && process.env.PRESIDENT_CLAIM_ACCOUNT &&
-    email === process.env.PRESIDENT_CLAIM_EMAIL.toLowerCase());
-const ownerClaim = (email: string, account: string) =>
-  ownerEmail(email) && account === process.env.PRESIDENT_CLAIM_ACCOUNT;
+  Boolean(process.env.PRESIDENT_CLAIM_EMAIL &&
+    email === process.env.PRESIDENT_CLAIM_EMAIL.trim().toLowerCase());
 export async function sendCodeAction(form: FormData) {
   const email = schoolEmail(field(form, "email"));
   const purpose = field(form, "purpose") === "password" ? "password" : "register";
@@ -37,48 +36,53 @@ export async function sendCodeAction(form: FormData) {
 }
 export async function registerAction(form: FormData) {
   const email = schoolEmail(field(form, "email"));
-  const account = field(form, "account");
   const name = field(form, "name");
   const password = String(form.get("password") ?? "");
   const confirm = String(form.get("confirm") ?? "");
-  if (!email || !accountNumber(account) || name.length < 2 || name.length > 40 ||
+  if (!email || !validNickname(name) ||
       !validPassword(password) || password !== confirm)
-    redirect(errorURL("/register", "请核对邮箱、数字账户、昵称和至少 12 位且含字母及数字的密码"));
-  if (!(await consumeCode(email, "register", field(form, "code"))))
-    redirect(errorURL("/register", "验证码错误、过期或尝试次数过多"));
+    redirect(errorURL("/register", "请核对邮箱、2–40 位且不含 @ 或控制字符的昵称，以及至少 12 位且含字母及数字的密码"));
   const p = await cms();
-  const claim = ownerClaim(email, account);
+  const claim = ownerEmail(email);
   const existing = await p.find({ collection: "users", overrideAccess: true,
     where: { email: { equals: email } }, limit: 1, depth: 0 });
   if (existing.docs[0] && !claim)
     redirect(errorURL("/register", "该邮箱已注册，请登录或找回密码"));
+  const sameName = await p.find({ collection: "users", overrideAccess: true,
+    where: { nameKey: { equals: nicknameKey(name) } }, limit: 1, depth: 0, select: { email: true } });
+  if (sameName.docs[0] && !(claim && sameName.docs[0].id === existing.docs[0]?.id))
+    redirect(errorURL("/register", "该昵称已被使用，请更换昵称"));
+  if (!(await consumeCode(email, "register", field(form, "code"))))
+    redirect(errorURL("/register", "验证码错误、过期或尝试次数过多"));
   try {
     if (existing.docs[0]) {
       await p.update({ collection: "users", id: existing.docs[0].id,
         overrideAccess: true, context: { system: true, ownerClaimVerified: true },
-        data: { account, name, password, roles: ["president"], accountStatus: "active" } });
+        data: { name, password, roles: ["president"], accountStatus: "active" } });
     } else {
       await p.create({ collection: "users", overrideAccess: true,
         context: { signupVerified: true, presidentClaim: claim },
-        data: { email, account, name, password, roles: ["member"] } });
+        data: { email, name, password, roles: ["member"] } });
     }
   } catch {
-    redirect(errorURL("/register", "创建账号失败，请检查邮箱或数字账户是否已被使用，并重新获取验证码"));
+    redirect(errorURL("/register", "创建账号失败，请检查邮箱或昵称是否已被使用，并重新获取验证码"));
   }
   redirect("/login?registered=1");
 }
 export async function loginAction(form: FormData) {
   const identifier = field(form, "identifier");
-  let email = identifier;
-  if (accountNumber(identifier)) {
-    const users = await (await cms()).find({ collection: "users", overrideAccess: true,
-      where: { account: { equals: identifier } }, limit: 1, depth: 0 });
-    email = users.docs[0]?.email || "unknown@example.invalid";
-  }
   try {
+    let email = identifier.toLowerCase();
+    if (!identifier.includes("@")) {
+      if (!validNickname(identifier)) throw new Error("Invalid nickname");
+      const users = await (await cms()).find({ collection: "users", overrideAccess: true,
+        where: { nameKey: { equals: nicknameKey(identifier) } }, limit: 1, depth: 0, select: { email: true } });
+      if (!users.docs[0]) throw new Error("Unknown nickname");
+      email = users.docs[0].email;
+    }
     await login({ config, collection: "users", email, password: String(form.get("password") ?? "") });
   } catch {
-    redirect(errorURL("/login", "账户或密码错误"));
+    redirect(errorURL("/login", "昵称、邮箱或密码错误"));
   }
   redirect("/account");
 }

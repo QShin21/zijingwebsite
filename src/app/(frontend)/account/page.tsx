@@ -22,7 +22,7 @@ export default async function Account() {
       <PageHeading
         title={user.name || "我的账号"}
         eyebrow="YOUR SPACE"
-        description={`数字账户 ${user.account || "未设置"} · ${roles[user.roles?.[0] || "member"]}`}
+        description={`可使用昵称或已验证邮箱登录 · ${roles[user.roles?.[0] || "member"]}`}
       />
       <section className="member-shell">
         <h2 className="form-heading">账号概览</h2>

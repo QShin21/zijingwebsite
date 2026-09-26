@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { schoolEmail, accountNumber, validPassword } from "../src/lib/verification";
+import { schoolEmail, validPassword } from "../src/lib/verification";
 describe("邮箱身份与密码门槛", () => {
   it("只接受核实的清华学校与校友邮箱域名", () => {
     expect(schoolEmail(" Alice@MAILS.TSINGHUA.EDU.CN ")).toBe("alice@mails.tsinghua.edu.cn");
@@ -11,10 +11,7 @@ describe("邮箱身份与密码门槛", () => {
       expect(schoolEmail(address)).toBeNull();
     }
   });
-  it("数字账户和新密码有边界", () => {
-    expect(accountNumber("1234567890")).toBe(true);
-    expect(accountNumber("012345")).toBe(true);
-    expect(accountNumber("one23456")).toBe(false);
+  it("新密码有边界", () => {
     expect(validPassword("aStrongPassword123!")).toBe(true);
     expect(validPassword("1234567890")).toBe(false);
   });

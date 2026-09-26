@@ -25,6 +25,7 @@ import {
 import sharp from "sharp";
 import { APIError } from "payload";
 import { SocialCollections } from "./social";
+import { nicknameKey, validNickname } from "../lib/nickname";
 
 const text = (name: string, label: string, required = false): TextField => ({
   name,
@@ -384,7 +385,7 @@ function content(
 export const Users: CollectionConfig = {
   slug: "users",
   labels: { singular: "用户", plural: "用户" },
-  admin: { useAsTitle: "account" },
+  admin: { useAsTitle: "name" },
   auth: {
     maxLoginAttempts: 5,
     lockTime: 600000,
@@ -404,6 +405,17 @@ export const Users: CollectionConfig = {
     admin: ({ req }) => canPublish(req.user as Identity) || hasRole(req.user as Identity, "communityAdmin"),
   },
   hooks: {
+    beforeValidate: [({ data }) => {
+      if (data) {
+        // Never trust a key supplied by a REST, GraphQL or Local API caller.
+        delete data.nameKey;
+        if (typeof data.name === "string") {
+          data.name = data.name.trim();
+          data.nameKey = nicknameKey(data.name);
+        }
+      }
+      return data;
+    }],
     beforeChange: [
       ({ data, operation, req, originalDoc }) => {
         if (
@@ -414,8 +426,7 @@ export const Users: CollectionConfig = {
           throw new APIError("账号必须经过邮箱验证", 403);
         if (operation === "create" && req.context.signupVerified) {
           const bootstrap = req.context.presidentClaim &&
-            data.email === process.env.PRESIDENT_CLAIM_EMAIL?.toLowerCase() &&
-            data.account === process.env.PRESIDENT_CLAIM_ACCOUNT;
+            data.email === process.env.PRESIDENT_CLAIM_EMAIL?.trim().toLowerCase();
           data.roles = [bootstrap ? "president" : "member"];
           data.accountStatus = "active";
         }
@@ -423,7 +434,7 @@ export const Users: CollectionConfig = {
           if ((data.roles || data.communities || data.accountStatus) &&
             !hasRole(req.user as Identity, "president"))
             throw new APIError("只有社长可以调整权限", 403);
-          if (data.account || data.email ||
+          if (data.email ||
             (data.password && !req.context.verifiedPasswordChange))
             throw new APIError("修改账号身份或密码必须经过受控邮箱验证", 403);
         }
@@ -440,9 +451,13 @@ export const Users: CollectionConfig = {
     afterChange: [audit],
   },
   fields: [
-    { ...text("account", "数字账户", true), unique: true, index: true,
-      validate: (value: unknown) => typeof value === "string" && /^\d{6,20}$/.test(value) || "账户需为 6–20 位数字" },
-    { ...text("name", "昵称", true), maxLength: 40 },
+    { ...text("name", "昵称", true), minLength: 2, maxLength: 40,
+      validate: (value: unknown) => validNickname(value) || "昵称需为 2–40 个字符，不含 @ 或控制字符",
+      admin: { description: "昵称唯一，登录和重名检查不区分大小写，展示保留输入的大小写。" } },
+    { ...text("nameKey", "昵称匹配键", true), unique: true, index: true,
+      // Derived by the hook; Local API callers should only provide the display name.
+      typescriptSchema: [({ jsonSchema }) => ({ ...jsonSchema, required: false })],
+      admin: { hidden: true }, access: { read: () => false } },
     {
       name: "roles",
       label: "角色",

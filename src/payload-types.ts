@@ -116,8 +116,11 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
-  account: string;
+  /**
+   * 昵称唯一，登录和重名检查不区分大小写，展示保留输入的大小写。
+   */
   name: string;
+  nameKey?: string;
   roles: ('president' | 'vicePresident' | 'communityAdmin' | 'member')[];
   accountStatus?: ('active' | 'suspended') | null;
   communities?: (number | Game)[] | null;
@@ -918,8 +921,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-  account?: T;
   name?: T;
+  nameKey?: T;
   roles?: T;
   accountStatus?: T;
   communities?: T;

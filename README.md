@@ -27,13 +27,11 @@ pnpm dev
 
 ```powershell
 $env:ADMIN_EMAIL = Read-Host '管理员邮箱'
-$env:ADMIN_ACCOUNT = Read-Host '6–20 位数字账户'
 $securePassword = Read-Host '至少16位随机密码' -AsSecureString
 $env:ADMIN_PASSWORD = [Net.NetworkCredential]::new('', $securePassword).Password
 pnpm admin:create
 Remove-Item Env:ADMIN_PASSWORD
 Remove-Item Env:ADMIN_EMAIL
-Remove-Item Env:ADMIN_ACCOUNT
 ```
 
 已有后台用户时初始化拒绝执行，后续由管理员在后台新增账号。密码不写入仓库或命令参数。首次注册 REST 入口也由服务端限制。没有 SMTP 时密码重置明确失败，不打印重置令牌；管理员可在后台重置其他账号。
@@ -64,4 +62,4 @@ Remove-Item Env:ADMIN_ACCOUNT
 
 网站支持清华邮箱验证码注册、四级角色、社群管理员申请、游戏社群、论坛和全站内容审核。
 部署与运营步骤见 [docs/COMMUNITY_V2.md](docs/COMMUNITY_V2.md)。注册需要 SMTP 环境变量；
-社长通过指定邮箱与数字账户在验证后认领，密码只由用户在站内安全输入。
+社长通过指定邮箱的验证码认领，密码只由用户在站内安全输入。普通用户使用唯一昵称或邮箱登录；昵称匹配不区分大小写，显示保留用户输入的大小写。

@@ -46,14 +46,14 @@ test("registration guidance, server feedback and unique mobile community navigat
   await expect(
     page.getByRole("heading", { name: /验证并完善账号/ }),
   ).toBeVisible();
-  await expect(page.locator('input[name="account"]')).toHaveAttribute(
+  await expect(page.locator('input[name="name"]')).toHaveAttribute(
     "aria-describedby",
-    "account-hint",
+    "nickname-hint",
   );
   await page.goto("/login?reset=1");
   await expect(page.getByRole("status")).toContainText("密码已更新");
   await page
-    .getByLabel("数字账户或邮箱")
+    .getByLabel("昵称或邮箱")
     .fill("design-invalid@example.invalid");
   await page
     .getByLabel("密码", { exact: true })

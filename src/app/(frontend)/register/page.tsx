@@ -51,32 +51,18 @@ export default async function Register({
             />
           </label>
           <label>
-            数字账户
-            <input
-              name="account"
-              inputMode="numeric"
-              pattern="[0-9]{6,20}"
-              minLength={6}
-              maxLength={20}
-              required
-              autoComplete="username"
-              aria-describedby="account-hint"
-            />
-            <span id="account-hint" className="field-hint">
-              设置 6–20 位数字，作为你的登录账户。
-            </span>
-          </label>
-          <label>
             昵称
             <input
               name="name"
               minLength={2}
               maxLength={40}
               required
-              autoComplete="nickname"
+              autoComplete="username"
+              pattern="[^@]+"
+              aria-describedby="nickname-hint"
             />
-            <span className="field-hint">
-              2–40 个字符，将作为你的公开昵称。
+            <span id="nickname-hint" className="field-hint">
+              2–40 个字符，不含 @；昵称唯一，可用于登录。登录和重名检查不区分大小写，展示保留你输入的大小写。
             </span>
           </label>
           <label>

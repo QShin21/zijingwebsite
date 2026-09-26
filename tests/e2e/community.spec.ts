@@ -7,7 +7,7 @@ import { randomBytes } from "node:crypto";
 let p: Payload;
 const suffix = Date.now();
 const email = `community-browser-${suffix}@example.invalid`;
-const account = `${suffix}83`;
+const nickname = `Shin-${suffix}`;
 const password = randomBytes(24).toString("hex");
 const slug = `browser-community-${suffix}`;
 let userID: number;
@@ -23,8 +23,7 @@ test.beforeAll(async () => {
       context: { system: true },
       data: {
         email,
-        account,
-        name: "浏览器社群成员",
+        name: nickname,
         password,
         roles: ["member"],
       },
@@ -38,6 +37,35 @@ test.beforeAll(async () => {
       data: { title: "浏览器社群", slug, _status: "published" },
     })
   ).id;
+});
+
+test("邮箱也可登录同一账号，错误登录统一提示", async ({ page }) => {
+  for (const [identifier, secret] of [[nickname, "wrong-password"], [`missing-${suffix}`, password]]) {
+    await page.goto("/login");
+    await page.getByLabel("昵称或邮箱").fill(identifier);
+    await page.getByLabel("密码", { exact: true }).fill(secret);
+    await page.getByRole("button", { name: "登录", exact: true }).click();
+    await expect(page.getByRole("status")).toHaveText("昵称、邮箱或密码错误");
+  }
+  await page.goto("/login");
+  await page.getByLabel("昵称或邮箱").fill(email.toUpperCase());
+  await page.getByLabel("密码", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "登录", exact: true }).click();
+  await expect(page).toHaveURL(/\/account$/);
+  await expect(page.locator("main h1")).toContainText(nickname);
+});
+
+test("注册拒绝已占用昵称且没有数字账户输入", async ({ page }) => {
+  await page.goto("/register");
+  await expect(page.locator('input[name="account"]')).toHaveCount(0);
+  const form = page.locator("form.member-form").nth(1);
+  await form.getByLabel("邮箱 @ 前的部分").fill(`new-${suffix}`);
+  await form.getByLabel("验证码", { exact: true }).fill("123456");
+  await form.locator('input[name="name"]').fill(nickname.toUpperCase());
+  await form.locator('input[name="password"]').fill(password);
+  await form.locator('input[name="confirm"]').fill(password);
+  await form.getByRole("button", { name: "验证并注册" }).click();
+  await expect(page.getByRole("status")).toHaveText("该昵称已被使用，请更换昵称");
 });
 test.afterAll(async () => {
   if (!p) return;
@@ -59,12 +87,13 @@ test.afterAll(async () => {
     context: { system: true },
   });
 });
-test("数字账户登录、社群发帖与论坛回复", async ({ page }) => {
+test("昵称登录、社群发帖与论坛回复", async ({ page }) => {
   await page.goto("/login");
-  await page.getByLabel("数字账户或邮箱").fill(account);
+  await page.getByLabel("昵称或邮箱").fill(nickname.toLowerCase());
   await page.getByLabel("密码", { exact: true }).fill(password);
   await page.getByRole("button", { name: "登录", exact: true }).click();
   await expect(page).toHaveURL(/\/account$/);
+  await expect(page.locator("main h1")).toContainText(nickname);
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     for (const route of [

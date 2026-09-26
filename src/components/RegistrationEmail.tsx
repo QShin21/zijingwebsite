@@ -1,9 +1,13 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, useSyncExternalStore } from "react";
+
+const subscribe = () => () => {};
 
 export function RegistrationEmail() {
   const hintId = useId();
+  // Do not accept typing before handlers can synchronize the submitted email.
+  const ready = useSyncExternalStore(subscribe, () => true, () => false);
   const [domain, setDomain] = useState("mails.tsinghua.edu.cn");
   const [local, setLocal] = useState("");
   const [manual, setManual] = useState("");
@@ -14,6 +18,7 @@ export function RegistrationEmail() {
       <label>
         邮箱后缀
         <select
+          disabled={!ready}
           value={domain}
           onChange={(event) => {
             const next = event.target.value;
@@ -33,6 +38,7 @@ export function RegistrationEmail() {
       <label>
         {isManual ? "完整清华邮箱" : "邮箱 @ 前的部分"}
         <input
+          disabled={!ready}
           key={isManual ? "manual" : "local"}
           type={isManual ? "email" : "text"}
           value={isManual ? manual : local}

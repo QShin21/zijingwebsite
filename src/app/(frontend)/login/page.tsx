@@ -18,13 +18,13 @@ export default async function Login({
       <PageHeading
         title="登录"
         eyebrow="MEMBER ACCESS"
-        description="使用数字账户或已验证的清华邮箱登录。"
+        description="使用昵称或已验证的清华邮箱登录。"
       />
       <MemberLayout
         title="再次相遇，一起上场。"
         description="登录后参与游戏社群、发表讨论，也可以管理自己的账号。"
         steps={[
-          "使用数字账户或清华邮箱登录",
+          "使用昵称或清华邮箱登录",
           "进入感兴趣的游戏社群",
           "分享经验，找到一起玩的伙伴",
         ]}
@@ -40,7 +40,7 @@ export default async function Login({
         <form className="member-form" action={loginAction}>
           <h2 className="form-heading">欢迎回来</h2>
           <label>
-            数字账户或邮箱
+            昵称或邮箱
             <input name="identifier" required autoComplete="username" />
           </label>
           <label>

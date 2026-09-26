@@ -24,8 +24,6 @@ export function validPassword(value: unknown): value is string {
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 4 });
 const digest = (value: string) =>
   createHmac("sha256", process.env.PAYLOAD_SECRET || "missing-server-secret").update(value).digest("hex");
-export const accountNumber = (value: unknown): value is string =>
-  typeof value === "string" && /^\d{6,20}$/.test(value);
 
 async function countRate(client: import("pg").PoolClient, key: string, max: number) {
   const result = await client.query<{ hits: number }>(`

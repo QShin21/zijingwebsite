@@ -17,10 +17,10 @@ beforeAll(async () => {
   if (process.env.APP_ENV !== "development") throw new Error("Integration tests require a development database");
   p = await getPayload({ config });
   member = await p.create({ collection: "users", overrideAccess: true, context: { system: true },
-    data: { account: `${suffix}71`, name: "社群测试成员", email: `member-${suffix}@example.invalid`,
+    data: { name: "社群测试成员", email: `member-${suffix}@example.invalid`,
       password, roles: ["member"] } });
   vice = await p.create({ collection: "users", overrideAccess: true, context: { system: true },
-    data: { account: `${suffix}72`, name: "社群测试审核", email: `review-${suffix}@example.invalid`,
+    data: { name: "社群测试审核", email: `review-${suffix}@example.invalid`,
       password, roles: ["vicePresident"] } });
 });
 afterAll(async () => {

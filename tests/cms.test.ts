@@ -31,8 +31,8 @@ beforeAll(async () => {
         email: `test-${kind}-${suffix}@example.invalid`,
         password,
         roles: [role],
-        name: kind,
-        account: `${suffix}${kind === "editor" ? "01" : kind === "publisher" ? "02" : "03"}`,
+        name: `${kind}-${suffix}`,
+
       },
     });
     users.push(u.id);
@@ -93,7 +93,7 @@ describe.sequential("真实 PostgreSQL / Payload 权限链路", () => {
       p.create({
         collection: "users",
         overrideAccess: false,
-        data: { email: "attacker@example.invalid", password, roles: ["president"], account: "999999999999", name: "攻击测试" },
+        data: { email: "attacker@example.invalid", password, roles: ["president"], name: "攻击测试" },
       }),
     ).rejects.toThrow();
     expect(
@@ -219,7 +219,7 @@ describe.sequential("真实 PostgreSQL / Payload 权限链路", () => {
         collection: "users",
         overrideAccess: false,
         user: publisher,
-        data: { email: "evil@example.invalid", password, roles: ["president"], account: "999999999998", name: "越权测试" },
+        data: { email: "evil@example.invalid", password, roles: ["president"], name: "越权测试" },
       }),
     ).rejects.toThrow();
   });
