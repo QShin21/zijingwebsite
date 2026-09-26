@@ -58,9 +58,8 @@ test("邮箱也可登录同一账号，错误登录统一提示", async ({ page 
 test("注册拒绝已占用昵称且没有数字账户输入", async ({ page }) => {
   await page.goto("/register");
   await expect(page.locator('input[name="account"]')).toHaveCount(0);
-  const form = page.locator("form.member-form").nth(1);
-  await form.getByLabel("邮箱 @ 前的部分").fill(`new-${suffix}`);
-  await form.getByLabel("验证码", { exact: true }).fill("123456");
+  const form = page.locator("form.registration-form");
+  await form.getByLabel("邮箱前缀").fill(`new-${suffix}`);
   await form.locator('input[name="name"]').fill(nickname.toUpperCase());
   await form.locator('input[name="password"]').fill(password);
   await form.locator('input[name="confirm"]').fill(password);

@@ -13,8 +13,16 @@ export default defineConfig({
   },
   webServer: {
     command: "pnpm dev",
+    // Browser tests use a loopback-only SMTP receiver, never a real mailbox.
+    env: {
+      SMTP_HOST: "127.0.0.1",
+      SMTP_PORT: "2526",
+      SMTP_FROM: "test@example.invalid",
+      SMTP_USER: "test",
+      SMTP_PASSWORD: "test",
+    },
     url: "http://localhost:3000/health/live",
-    reuseExistingServer: true,
+    reuseExistingServer: false,
     timeout: 120000,
   },
 });

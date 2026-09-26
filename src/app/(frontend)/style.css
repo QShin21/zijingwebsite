@@ -3207,3 +3207,83 @@ button:disabled {
     order: 2;
   }
 }
+.registration-form fieldset {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+.registration-form .form-feedback:empty,
+.verification-dialog .form-feedback:empty { display: none; }
+.email-address-row {
+  display: grid;
+  grid-template-columns: minmax(60px, 0.75fr) auto minmax(0, 1.65fr);
+  align-items: center;
+  border: 1px solid #cdc4df;
+  border-radius: 10px;
+  background: #fcfbfe;
+}
+.member-form .email-address-row input {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 10px;
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+}
+.email-address-row:focus-within {
+  outline: 2px solid var(--purple);
+  outline-offset: 2px;
+}
+.member-form .email-address-row input:focus-visible { outline: none; box-shadow: none; }
+.email-at { color: var(--muted); padding: 0 2px; }
+.email-domain { position: relative; min-width: 0; }
+.email-domain-options {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(290px, calc(100vw - 64px));
+  padding: 6px;
+  border: 1px solid #cdc4df;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 32px #21133120;
+}
+.member-form .email-domain-options button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--ink);
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+.email-domain-options button:hover,
+.email-domain-options button[aria-selected="true"] { background: #f1ecfb; }
+.email-domain-options small { color: var(--muted); font-size: 12px; }
+.verification-dialog {
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  margin: auto;
+  padding: clamp(20px, 4vw, 32px);
+  border: 1px solid #ddd4e9;
+  border-radius: 20px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 24px 80px #21133140;
+}
+.verification-dialog::backdrop { background: #17102480; }
+.verification-dialog h2 { margin: 0 0 12px; font-size: 24px; }
+.verification-dialog p { overflow-wrap: anywhere; }
+.verification-dialog .member-form { margin-bottom: 0; }
+.verification-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.verification-actions .button { flex: 1 1 160px; font-size: 13px; }

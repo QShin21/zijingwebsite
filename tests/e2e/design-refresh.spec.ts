@@ -40,12 +40,9 @@ test("registration guidance, server feedback and unique mobile community navigat
   page,
 }) => {
   await page.goto("/register");
-  await expect(
-    page.getByRole("heading", { name: /获取邮箱验证码/ }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: /验证并完善账号/ }),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "验证并注册", exact: true })).toBeVisible();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect(page.getByLabel("邮箱前缀")).toHaveCount(1);
   await expect(page.locator('input[name="name"]')).toHaveAttribute(
     "aria-describedby",
     "nickname-hint",
