@@ -70,7 +70,7 @@ async function registrationDetails(form: FormData) {
   )
     return {
       error:
-        "请核对清华邮箱、昵称和密码；密码至少 12 位且含字母及数字，两次输入需一致。",
+        "请核对清华邮箱、昵称和密码；密码至少 8 位，两次输入需一致。",
     } as const;
   const p = await cms();
   const claim = ownerEmail(email);

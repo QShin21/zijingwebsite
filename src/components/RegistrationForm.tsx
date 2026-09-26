@@ -99,13 +99,12 @@ export function RegistrationForm() {
               aria-label="密码"
               type="password"
               required
-              minLength={12}
-              maxLength={128}
+              minLength={8}
               autoComplete="new-password"
               aria-describedby="password-hint"
             />
             <span id="password-hint" className="field-hint">
-              至少 12 位，包含字母和数字。
+              至少 8 位，不限制字符组成。
             </span>
           </label>
           <label>
@@ -114,8 +113,7 @@ export function RegistrationForm() {
               name="confirm"
               type="password"
               required
-              minLength={12}
-              maxLength={128}
+              minLength={8}
               autoComplete="new-password"
             />
           </label>

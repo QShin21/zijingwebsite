@@ -55,11 +55,11 @@ export default async function Reset({
             />
           </label>
           <label>
-            新密码（至少 12 位，含字母和数字）
+            新密码（至少 8 位）
             <input
               name="password"
               type="password"
-              minLength={12}
+              minLength={8}
               required
               autoComplete="new-password"
             />
@@ -69,7 +69,7 @@ export default async function Reset({
             <input
               name="confirm"
               type="password"
-              minLength={12}
+              minLength={8}
               required
               autoComplete="new-password"
             />

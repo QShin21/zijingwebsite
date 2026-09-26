@@ -11,8 +11,12 @@ describe("邮箱身份与密码门槛", () => {
       expect(schoolEmail(address)).toBeNull();
     }
   });
-  it("新密码有边界", () => {
-    expect(validPassword("aStrongPassword123!")).toBe(true);
-    expect(validPassword("1234567890")).toBe(false);
+  it("密码至少八位且不限制字符组成", () => {
+    for (const value of ["12345678", "abcdefgh", "!!!!!!!!", "八个汉字作为密码", "        ", "x".repeat(129)]) {
+      expect(validPassword(value)).toBe(true);
+    }
+    for (const value of ["", "1234567", null, undefined, 12345678]) {
+      expect(validPassword(value)).toBe(false);
+    }
   });
 });

@@ -1,6 +1,6 @@
 import "dotenv/config";
 import net from "node:net";
-import { randomBytes } from "node:crypto";
+import { randomInt } from "node:crypto";
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { getPayload, type Payload } from "payload";
@@ -53,7 +53,7 @@ const names = [
   `Cancelled-${suffix}`,
   `Failed-${suffix}`,
 ];
-const password = randomBytes(24).toString("hex");
+const password = String(randomInt(10_000_000, 100_000_000));
 test.beforeAll(async () => {
   if (process.env.APP_ENV !== "development")
     throw new Error("Local development only");

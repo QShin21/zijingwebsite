@@ -18,8 +18,7 @@ export function schoolEmail(input: unknown): string | null {
   return allowed.has(domain) ? email : null;
 }
 export function validPassword(value: unknown): value is string {
-  return typeof value === "string" && value.length >= 12 && value.length <= 128 &&
-    /[a-zA-Z]/.test(value) && /\d/.test(value);
+  return typeof value === "string" && value.length >= 8;
 }
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 4 });
 const digest = (value: string) =>

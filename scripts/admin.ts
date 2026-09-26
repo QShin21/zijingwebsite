@@ -3,8 +3,8 @@ import { getPayload } from "payload";
 import config from "../src/payload.config";
 const email = process.env.ADMIN_EMAIL,
   password = process.env.ADMIN_PASSWORD;
-if (!email || !password || password.length < 16)
-  throw new Error("通过环境变量提供 ADMIN_EMAIL 和至少 16 位 ADMIN_PASSWORD");
+if (!email || !password || password.length < 8)
+  throw new Error("通过环境变量提供 ADMIN_EMAIL 和至少 8 位 ADMIN_PASSWORD");
 const p = await getPayload({ config });
 const existing = await p.count({ collection: "users", overrideAccess: true });
 if (existing.totalDocs)
