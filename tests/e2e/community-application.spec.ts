@@ -47,10 +47,13 @@ test("完整申请、备案提示、私有二维码、社长查看全部资料�
   await page.getByLabel("姓名", { exact: true }).fill("测试申请人");
   await page.getByLabel("手机号", { exact: true }).fill("13900000000");
   await page.getByLabel("微信名片二维码", { exact: true }).setInputFiles({ name: "card.png", mimeType: "image/png", buffer: qr });
-  await page.getByLabel("新游戏名称", { exact: false }).fill(gameName);
+  await page.getByLabel("新游戏名称", { exact: false }).fill("X");
   await page.getByLabel("申请说明", { exact: false }).fill("希望负责本游戏的日常交流和社群组织工作。");
   await page.setViewportSize({ width: 390, height: 900 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await page.getByRole("button", { name: "提交审核", exact: true }).click();
+  await expect(page.locator("form").getByRole("status")).toContainText("新游戏名称需为 2–80 字");
+  await page.getByLabel("新游戏名称", { exact: false }).fill(gameName);
   await page.getByRole("button", { name: "提交审核", exact: true }).click();
   await expect(page.getByRole("heading", { name: "申请已提交" })).toBeVisible();
   await expect(page.getByText("yz167015", { exact: true })).toBeVisible();

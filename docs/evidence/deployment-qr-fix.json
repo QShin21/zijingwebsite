@@ -1,0 +1,71 @@
+{
+  "revision": "50862aeb35d9e8c7bf54685feeb1469ff054a5b6",
+  "qrLimitFixRevision": "e3261a26c1d6afa7084ff9716add5d615bb176bb",
+  "environment": "staging",
+  "cause": "QR text inherited defaultMaxTextLength 40000; real-size image reproduced ValidationError before fix",
+  "uploadLimitBytes": 2097152,
+  "storedTextLimit": 6000000,
+  "databaseMigrationRequired": false,
+  "checks": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "unitAndDatabaseTests": 72,
+    "errorContractTests": 3,
+    "browserTests": 2,
+    "serverBuild": "passed"
+  },
+  "live": {
+    "checkedAt": "2026-09-26T17:16:50.021Z",
+    "url": "https://test.yejiaxin.online",
+    "syntheticFixtures": true,
+    "qrUploadBytes": 443624,
+    "qrStoredCharacters": 591522,
+    "specificValidationError": true,
+    "eightDigitPasswordLogin": true,
+    "submittedRequiredDetails": true,
+    "presidentWechatNotice": "yz167015",
+    "reviewFields": [
+      "realName",
+      "phone",
+      "nickname",
+      "email",
+      "qr",
+      "reason",
+      "game",
+      "createdAt",
+      "accountStatus"
+    ],
+    "ownerQrStatus": 200,
+    "anonymousQrStatus": 404,
+    "otherMemberQrStatus": 404,
+    "qrNoStore": true,
+    "approvalPromotesApplicant": true,
+    "mobileWidths": [
+      320,
+      390,
+      1440
+    ],
+    "accessibilityViolations": 0,
+    "noRealMessagesSent": true
+  },
+  "cleanup": {
+    "temporaryUsersRemoved": 3,
+    "temporaryApplicationsRemoved": 1,
+    "temporaryGamesRemoved": 1,
+    "credentialsRemoved": true,
+    "usersAfter": 5,
+    "applicationsAfter": 1,
+    "temporaryReleasesRemoved": true
+  },
+  "services": {
+    "healthLive": "alive",
+    "healthReady": "ready",
+    "database": "active",
+    "environmentUnchanged": true,
+    "environmentMode": "600",
+    "swappiness": 0,
+    "freekillHttps": 200,
+    "freekillWebsocket": 101,
+    "freekillProcessesAndNginxUnchanged": true
+  }
+}
