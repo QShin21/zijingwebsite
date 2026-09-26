@@ -1,0 +1,110 @@
+{
+  "revision": "00da687327c9fd9bc82455b28117fc4b9e8a5404",
+  "passwordRevision": "071bb9e8f3997c186e4be4d0e5da8fb8e3c624cc",
+  "environment": "staging",
+  "url": "https://test.yejiaxin.online",
+  "migration": "20260927_004500_application_details",
+  "backup": {
+    "path": "/srv/zijingwebsite/backups/application-details-20260927",
+    "type": "stopped PostgreSQL physical snapshot, environment, source and media",
+    "checksums": "passed",
+    "isolatedRestoreAndMigration": "passed"
+  },
+  "database": {
+    "usersBefore": 5,
+    "usersAfterCleanup": 5,
+    "applicationsBefore": 1,
+    "applicationsAfterCleanup": 1,
+    "incompleteLegacyPending": 1,
+    "unchangedBusinessTablesDuringMigration": 53,
+    "addedNullableColumns": 3,
+    "deletedExistingRecords": 0
+  },
+  "validation": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "unitAndDatabaseTests": 71,
+    "browserTests": 34,
+    "serverOptimizedBuild": "passed"
+  },
+  "services": {
+    "application": "active",
+    "database": "active",
+    "healthLive": "alive",
+    "healthReady": "ready",
+    "environmentFileUnchanged": true,
+    "environmentFileMode": "600",
+    "swappinessRestored": 0
+  },
+  "freekill": {
+    "httpsStatus": 200,
+    "websocketStatus": 101,
+    "processesUnchanged": true,
+    "nginxConfigUnchanged": true
+  },
+  "liveApplication": {
+    "checkedAt": "2026-09-26T16:54:10.351Z",
+    "url": "https://test.yejiaxin.online",
+    "syntheticFixtures": true,
+    "eightDigitPasswordLogin": true,
+    "submittedRequiredDetails": true,
+    "presidentWechatNotice": "yz167015",
+    "reviewFields": [
+      "realName",
+      "phone",
+      "nickname",
+      "email",
+      "qr",
+      "reason",
+      "game",
+      "createdAt",
+      "accountStatus"
+    ],
+    "ownerQrStatus": 200,
+    "anonymousQrStatus": 404,
+    "otherMemberQrStatus": 404,
+    "qrNoStore": true,
+    "approvalPromotesApplicant": true,
+    "mobileWidths": [
+      320,
+      390,
+      1440
+    ],
+    "accessibilityViolations": 0,
+    "noRealMessagesSent": true
+  },
+  "livePasswords": {
+    "checkedAt": "2026-09-26T16:54:04.053Z",
+    "url": "https://test.yejiaxin.online",
+    "routes": [
+      {
+        "route": "/register",
+        "status": 200,
+        "minLength": 8,
+        "pureDigitsAccepted": true,
+        "pureLettersAccepted": true,
+        "pureSymbolsAccepted": true,
+        "sevenCharactersRejected": true
+      },
+      {
+        "route": "/account/reset",
+        "status": 200,
+        "minLength": 8,
+        "pureDigitsAccepted": true,
+        "pureLettersAccepted": true,
+        "pureSymbolsAccepted": true,
+        "sevenCharactersRejected": true
+      }
+    ],
+    "noRealEmailsSent": true
+  },
+  "cleanup": {
+    "syntheticUsers": 3,
+    "syntheticApplications": 1,
+    "syntheticGames": 1,
+    "credentialsRemoved": true,
+    "temporaryReleasesAndRehearsalRemoved": true,
+    "backupsRetained": true
+  },
+  "realMessagesSent": false
+}
