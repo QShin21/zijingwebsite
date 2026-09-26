@@ -1,0 +1,68 @@
+{
+  "applicationRevision": "f35214d6b3b2cd70ad9425bb8cd7e939203f16c9",
+  "testFixtureRevision": "38da6a884c92d94b1aa665b11954ba66386baac0",
+  "environment": "staging",
+  "url": "https://test.yejiaxin.online/register",
+  "database": {
+    "newMigrationRequired": false,
+    "usersBefore": 4,
+    "usersAfter": 4,
+    "completeUserRecordHashesUnchanged": true,
+    "migrationRecordsUnchanged": true,
+    "usersDeleted": 0
+  },
+  "validation": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "unitAndDatabaseTests": 70,
+    "browserTests": 32,
+    "localProductionBuild": "passed",
+    "smtp": "local loopback receiver only",
+    "registrationFlow": [
+      "invalid code does not create user",
+      "valid code creates user and allows nickname login",
+      "cancel preserves form without creating user",
+      "send failure preserves form without creating user",
+      "server resend rate limit enforced"
+    ],
+    "realMailboxDelivery": "not verified"
+  },
+  "server": {
+    "build": "passed after heap limit increase from 768 to 1280 MiB",
+    "smokeBeforeSwitch": "passed",
+    "applicationService": "active",
+    "databaseService": "active",
+    "healthLive": "alive",
+    "healthReady": "ready",
+    "environmentFileUnchanged": true,
+    "environmentFileMode": "600",
+    "noindex": true,
+    "swappinessRestored": 0,
+    "temporaryBuildsCleaned": true,
+    "existingBackupRetained": true
+  },
+  "freekill": {
+    "httpsStatus": 200,
+    "websocketStatus": 101,
+    "processesUnchanged": true,
+    "nginxConfigUnchanged": true
+  },
+  "browser": {
+    "checkedAt": "2026-09-26T16:21:47.193Z",
+    "url": "https://test.yejiaxin.online/register",
+    "emailFields": 1,
+    "editableSuffixOptions": 2,
+    "manualDomain": true,
+    "singleRowWidths": [
+      320,
+      390,
+      1440
+    ],
+    "dialogInitiallyHidden": true,
+    "noInitialCodeButton": true,
+    "invalidEmailRejectedBeforeSending": true,
+    "inputPreservedOnError": true,
+    "accessibilityViolations": 0,
+    "noRealEmailsSent": true
+  }
+}
