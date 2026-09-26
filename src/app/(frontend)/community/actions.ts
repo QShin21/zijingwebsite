@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cms } from "@/lib/content";
 import { canPublish, hasRole, managesGame, routeFor } from "@/lib/rules";
+import { applicationError } from "@/lib/application-error";
 
 const value = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 const numeric = (form: FormData, key: string) => {
@@ -35,7 +36,7 @@ export async function applyAction(form: FormData) {
         realName: value(form, "realName"), phone: value(form, "phone"),
         wechatQr: `data:${image.type};base64,${Buffer.from(await image.arrayBuffer()).toString("base64")}`,
         reason: value(form, "reason"), status: "pending", applicant: user.id } });
-  } catch { return { error: "申请提交失败，请核对姓名、手机号、二维码、游戏项目和申请说明。" }; }
+  } catch (error) { return { error: applicationError(error) }; }
   return { success: true };
 }
 export async function decideAction(form: FormData) {

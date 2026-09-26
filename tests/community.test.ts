@@ -127,6 +127,15 @@ describe.sequential("申请、建群、发言与跨级审核", () => {
       });
     }
   });
+  it("2 MB 以内的真实尺寸二维码图片不受默认文本字段 40000 字符限制", async () => {
+    const picture = await sharp(randomBytes(256 * 256 * 3), { raw: { width: 256, height: 256, channels: 3 } }).png().toBuffer();
+    const image = "data:image/png;base64," + picture.toString("base64");
+    expect(image.length).toBeGreaterThan(40_000);
+    const request = await p.create({ collection: "community-applications", overrideAccess: false, user: member,
+      data: { applicant: member.id, proposedGame: "图片边界回归", reason: "这是一条验证实际尺寸图片可以正常提交的申请。", realName: "测试申请人", phone: "13900000000", wechatQr: image } });
+    try { expect(request.wechatQr!.length).toBeGreaterThan(40_000); }
+    finally { await p.delete({ collection: "community-applications", id: request.id, overrideAccess: true }); }
+  });
   it("普通成员申请新社群，副社长审核后创建游戏和管理身份", async () => {
     const request = await p.create({ collection: "community-applications",
       overrideAccess: false, user: member, data: {

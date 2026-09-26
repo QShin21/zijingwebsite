@@ -1,5 +1,8 @@
 import sharp from "sharp";
 
+// A 1024px RGBA PNG can be larger than the uploaded JPEG after normalization.
+export const MAX_WECHAT_QR_TEXT_LENGTH = 6_000_000;
+
 export const validApplicantName = (value: string) =>
   value.length >= 1 && value.length <= 80 && !/[\p{Cc}]/u.test(value);
 export const validApplicantPhone = (value: string) =>

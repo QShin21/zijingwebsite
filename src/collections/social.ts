@@ -1,6 +1,6 @@
 import { APIError, type CollectionConfig, type CollectionBeforeChangeHook, type Access, type Where } from "payload";
 import { canParticipate, canPublish, hasRole, managesGame, type Identity } from "../lib/rules";
-import { normalizeWechatQr, validApplicantName, validApplicantPhone } from "../lib/application-details";
+import { MAX_WECHAT_QR_TEXT_LENGTH, normalizeWechatQr, validApplicantName, validApplicantPhone } from "../lib/application-details";
 
 const relation = (name: string, to: "games" | "users" | "forum-posts" | "comments") =>
   ({ name, type: "relationship" as const, relationTo: to, required: true, maxDepth: 0,
@@ -147,11 +147,10 @@ const applications: CollectionConfig = {
             throw new APIError("请登录", 403);
           data.realName = String(data.realName ?? "").trim();
           data.phone = String(data.phone ?? "").trim();
-          if (
-            !validApplicantName(data.realName) ||
-            !validApplicantPhone(data.phone)
-          )
-            throw new APIError("请填写姓名和有效手机号", 400);
+          if (!validApplicantName(data.realName))
+            throw new APIError("请填写 1–80 字的姓名", 400);
+          if (!validApplicantPhone(data.phone))
+            throw new APIError("手机号需为 6–20 位数字，可在开头添加 + 国际区号", 400);
           try {
             data.wechatQr = await normalizeWechatQr(data.wechatQr);
           } catch {
@@ -317,6 +316,7 @@ const applications: CollectionConfig = {
       name: "wechatQr",
       label: "微信名片二维码",
       type: "textarea",
+      maxLength: MAX_WECHAT_QR_TEXT_LENGTH,
       admin: { hidden: true },
     },
     {
