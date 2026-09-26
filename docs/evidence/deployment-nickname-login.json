@@ -1,0 +1,101 @@
+{
+  "revision": "a9c17361131980dd5a2229b706c6a0f3cc13b580",
+  "environment": "staging",
+  "url": "https://test.yejiaxin.online",
+  "migration": "20260926_145257_nickname_login",
+  "backup": {
+    "path": "/srv/zijingwebsite/backups/nickname-a9c1736-20260926",
+    "type": "stopped PostgreSQL 17 physical cluster plus environment, source and media",
+    "checksums": "passed",
+    "isolatedRestoreAndMigration": "passed"
+  },
+  "database": {
+    "usersBefore": 4,
+    "usersAfter": 4,
+    "conflictsDeleted": 0,
+    "unchangedBusinessTables": 53,
+    "nicknameDisplayCasePreserved": true,
+    "uniqueNicknameKeyIndex": true,
+    "numericAccountColumnRemoved": true
+  },
+  "services": {
+    "zijingweb": "active",
+    "zijingweb-db": "active",
+    "healthLive": "alive",
+    "healthReady": "ready",
+    "environmentFileUnchanged": true,
+    "environmentFileMode": "600",
+    "noindex": true
+  },
+  "freekill": {
+    "httpsStatus": 200,
+    "websocketStatus": 101,
+    "processesUnchanged": true,
+    "nginxConfigUnchanged": true
+  },
+  "browser": {
+    "checkedAt": "2026-09-26T15:13:27.009Z",
+    "environment": "staging",
+    "baseURL": "https://test.yejiaxin.online",
+    "logins": [
+      {
+        "kind": "lowercase",
+        "login": "passed",
+        "displayCasePreserved": true
+      },
+      {
+        "kind": "uppercase",
+        "login": "passed",
+        "displayCasePreserved": true
+      },
+      {
+        "kind": "original",
+        "login": "passed",
+        "displayCasePreserved": true
+      },
+      {
+        "kind": "email",
+        "login": "passed",
+        "displayCasePreserved": true
+      }
+    ],
+    "routes": [
+      {
+        "path": "/",
+        "status": 200
+      },
+      {
+        "path": "/register",
+        "status": 200
+      },
+      {
+        "path": "/login",
+        "status": 200
+      },
+      {
+        "path": "/community",
+        "status": 200
+      },
+      {
+        "path": "/health/ready",
+        "status": 200
+      }
+    ],
+    "emailOptions": "passed",
+    "numericAccountRemoved": true,
+    "mobileOverflow": false,
+    "noEmailsSent": true
+  },
+  "cleanup": {
+    "testAccountRemoved": true,
+    "testCredentialsRemoved": true,
+    "rehearsalClusterRemoved": true
+  },
+  "ci": {
+    "run": "https://github.com/QShin21/zijingwebsite/actions/runs/36250446965",
+    "conclusion": "success"
+  },
+  "limitations": [
+    "No real verification email was sent; inbox delivery remains unverified."
+  ]
+}
