@@ -208,6 +208,24 @@ describe.sequential("申请、建群、发言与跨级审核", () => {
       await p.delete({ collection: "community-posts", id: notice.id, overrideAccess: true });
     }
   });
+  it("置顶加精限定社群管理员，热度随有效互动增减", async () => {
+    const ordinary = { ...member, roles: ["member"] as User["roles"], communities: [] };
+    await expect(p.update({ collection: "forum-posts", id: forum, overrideAccess: false, user: ordinary, data: { pinned: true, featured: true } })).rejects.toThrow();
+    await p.update({ collection: "forum-posts", id: forum, overrideAccess: false, user: member, data: { pinned: true, featured: true } });
+    const reaction = await p.create({ collection: "community-reactions", overrideAccess: false, user: member,
+      data: { targetType: "forum-posts", targetId: forum, kind: "like", author: member.id, key: "ignored" } });
+    const read = () => p.findByID({ collection: "forum-posts", id: forum, overrideAccess: false, user: null });
+    expect((await read()).heat).toBe(1);
+    expect((await read()).featured).toBe(true);
+    await p.delete({ collection: "community-reactions", id: reaction.id, overrideAccess: false, user: member });
+    expect((await read()).heat).toBe(0);
+    const reply = await p.create({ collection: "comments", overrideAccess: false, user: vice,
+      data: { targetType: "forum-posts", targetId: forum, author: vice.id, body: "热度回复" } });
+    expect((await read()).heat).toBe(1);
+    await p.update({ collection: "comments", id: reply.id, overrideAccess: false, user: member, data: { status: "hidden" } });
+    expect((await read()).heat).toBe(0);
+    await p.delete({ collection: "comments", id: reply.id, overrideAccess: true });
+  });
   it("全站投稿须提交审核，副社长才能公开", async () => {
     const draft = await p.create({ collection: "announcements", overrideAccess: false,
       user: member, draft: true, data: { title: "待审通知", slug: `review-${suffix}` } });

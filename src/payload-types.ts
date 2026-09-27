@@ -308,6 +308,9 @@ export interface ForumPost {
   author: number | User;
   authorName?: string | null;
   status?: ('visible' | 'hidden') | null;
+  pinned?: boolean | null;
+  featured?: boolean | null;
+  heat?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1054,6 +1057,9 @@ export interface ForumPostsSelect<T extends boolean = true> {
   author?: T;
   authorName?: T;
   status?: T;
+  pinned?: T;
+  featured?: T;
+  heat?: T;
   updatedAt?: T;
   createdAt?: T;
 }

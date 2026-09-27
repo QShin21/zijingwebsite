@@ -2,7 +2,8 @@ import Link from "next/link";
 import { SubmitButton } from "@/components/SubmitButton";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { PageHeading } from "@/components/PageHeading";
+import { CommunityReactions } from "@/components/CommunityReactions";
+import { CommunityPager, pageNumber } from "@/components/CommunityPager";
 import { cms, bySlug } from "@/lib/content";
 import { canParticipate, formatDate } from "@/lib/rules";
 import { commentAction } from "../../../actions";
@@ -11,7 +12,7 @@ export default async function ForumThread({
   searchParams,
 }: {
   params: Promise<{ slug: string; id: string }>;
-  searchParams: Promise<{ message?: string }>;
+  searchParams: Promise<{ message?: string; page?: string }>;
 }) {
   const { slug, id } = await params;
   const game = await bySlug("games", slug);
@@ -28,6 +29,8 @@ export default async function ForumThread({
     .catch(() => null);
   if (!post || Number(post.game) !== game.id) notFound();
   const { user } = await p.auth({ headers: await headers() });
+  const query = await searchParams;
+  const page = pageNumber(query.page);
   const comments = await p.find({
     collection: "comments",
     overrideAccess: false,
@@ -39,21 +42,18 @@ export default async function ForumThread({
       ],
     },
     sort: "createdAt",
-    limit: 100,
+    limit: 30,
+    page,
     depth: 0,
   });
   return (
     <>
-      <PageHeading
-        title={post.title}
-        eyebrow="FORUM / DISCUSSION"
-        description={`${post.authorName} · ${formatDate(post.createdAt)}`}
-        parent={{ href: `/community/${slug}`, label: game.title }}
-      />
       <section className="member-shell">
+        <Link href={`/community/${slug}/forum`}>← 返回论坛</Link><h2>{post.title}</h2><p>{post.authorName} · {formatDate(post.createdAt)}</p>
         <p className="preserve thread-body">{post.body}</p>
+        <CommunityReactions targetType="forum-posts" targetId={post.id} />
         <h2>回复</h2>
-        <p role="status">{(await searchParams).message}</p>
+        <p role="status">{query.message}</p>
         {!comments.docs.length && (
           <p className="section-description">暂无回复，欢迎分享你的想法。</p>
         )}
@@ -64,6 +64,7 @@ export default async function ForumThread({
             <p className="preserve">{comment.body}</p>
           </article>
         ))}
+        <CommunityPager page={page} pages={comments.totalPages} base={`/community/${slug}/forum/${post.id}`} />
         {canParticipate(user) && (
           <form className="member-form" action={commentAction}>
             <input type="hidden" name="targetType" value="forum-posts" />

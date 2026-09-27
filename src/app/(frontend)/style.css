@@ -3312,3 +3312,7 @@ button:disabled {
 .community-pagination,.reaction-bar { display:flex; flex-wrap:wrap; align-items:center; gap:1rem; margin:24px 0 }
 .community-article { max-width:860px; margin:32px auto; overflow-wrap:anywhere }
 .reaction-bar [aria-pressed="true"] { background:#6e39cf; color:white }
+
+.forum-list { display:grid; gap:1rem; margin:24px 0 }
+.forum-badges { display:flex; gap:.5rem }
+.forum-badges span { background:#eee4fc; color:#532199; border-radius:8px; padding:3px 10px; font-size:.8rem }

@@ -53,8 +53,8 @@ export async function decideAction(form: FormData) {
 export async function publishCommunityAction(form: FormData) {
   const { p, user } = await current();
   const game = numeric(form, "game");
-  const where = await gamePath(game);
   const kind = value(form, "kind");
+  const where = await gamePath(game);
   if (!["forum", "message", "event", "notice"].includes(kind)) problem(where, "发布类型无效");
   let createdForum: number | null = null;
   try {
@@ -69,7 +69,7 @@ export async function publishCommunityAction(form: FormData) {
       collection: "community-posts", overrideAccess: false, user,
       data: { game, author: user.id, title: value(form, "title"), body: value(form, "body"), category: kind },
     });
-  } catch { problem(where, "发布未成功，请核对内容、权限或发言频率"); }
+  } catch { problem(`${where}/${kind === "forum" ? "forum" : kind === "message" ? "chat" : "updates"}`, "发布未成功，请核对内容、权限或发言频率"); }
   if (createdForum) redirect(`${where}/forum/${createdForum}`);
   redirect(`${where}/${kind === "message" ? "chat" : "updates"}`);
 }
@@ -137,5 +137,18 @@ export async function reactionAction(form: FormData) {
     else await p.create({ collection: "community-reactions", overrideAccess: false, user,
       data: { targetType: collection, targetId: id, kind, author: user.id, key: "server-derived" } });
   } catch { problem(path, "操作未成功，请稍后重试"); }
+  redirect(path);
+}
+
+export async function curateForumAction(form: FormData) {
+  const { p, user } = await current();
+  const post = await p.findByID({ collection: "forum-posts", id: numeric(form, "id"), overrideAccess: false, user, depth: 0 }).catch(() => null);
+  if (!post || !managesGame(user, post.game)) redirect("/community");
+  const path = `${await gamePath(Number(post.game))}/forum`;
+  const field = value(form, "field");
+  if (!["pinned", "featured", "status"].includes(field)) problem(path, "管理操作无效");
+  try { await p.update({ collection: "forum-posts", id: post.id, overrideAccess: false, user,
+    data: field === "status" ? { status: "hidden" } : { [field]: value(form, "enabled") === "true" } }); }
+  catch { problem(path, "管理操作未成功"); }
   redirect(path);
 }

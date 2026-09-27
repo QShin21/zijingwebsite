@@ -110,6 +110,14 @@ function social(slug: string, title: string, kind: "forum" | "message" | "commen
     { name: "status", type: "select", defaultValue: "visible", options: ["visible", "hidden"],
       access: { create: () => false, update: ({ req, doc }) => managesGame(req.user as Identity, doc?.game) } },
   ];
+  if (kind === "forum") fields.push(
+    { name: "pinned", label: "置顶", type: "checkbox", defaultValue: false, index: true,
+      access: { create: () => false, update: ({ req, doc }) => managesGame(req.user as Identity, doc?.game) } },
+    { name: "featured", label: "精华", type: "checkbox", defaultValue: false, index: true,
+      access: { create: () => false, update: ({ req, doc }) => managesGame(req.user as Identity, doc?.game) } },
+    { name: "heat", label: "热度", type: "number", defaultValue: 0, index: true,
+      access: { create: () => false, update: () => false }, admin: { readOnly: true } },
+  );
   if (kind === "comment") fields.push(
     { name: "targetType", type: "select", required: true,
       options: ["events", "albums", "news", "announcements", "forum-posts", "community-posts"] },
