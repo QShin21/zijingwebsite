@@ -3295,3 +3295,13 @@ button:disabled {
 .wechat-account { user-select: all; overflow-wrap: anywhere; }
 .application-qr { margin: 24px 0; }
 .application-qr img { width: min(280px, 100%); height: auto; object-fit: contain; }
+
+.heading-with-action { display:flex; align-items:center; gap:2rem; flex-wrap:wrap }
+.community-join { font-size: .9rem; max-width:100%; white-space:normal }
+.community-dialog { width:min(860px,calc(100% - 2rem)); max-height:85dvh; border:1px solid #ddd4ed; border-radius:24px; padding:24px; color:#242036; background:#fff; overflow:auto }
+.community-dialog::backdrop { background:#21153799 }
+.dialog-top { display:flex; justify-content:space-between; align-items:center; gap:1rem }
+.dialog-top button { flex-shrink:0; padding:.7rem; border-radius:12px; background:#f1eafa; color:#522597; cursor:pointer }
+.contact-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr)); gap:24px }
+.contact-grid article { text-align:center; min-width:0 }
+.contact-grid img { display:block; width:100%; max-width:280px; height:auto; object-fit:contain; margin:1rem auto }

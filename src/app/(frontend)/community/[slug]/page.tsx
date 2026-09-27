@@ -1,3 +1,4 @@
+import { CommunityJoin } from "@/components/CommunityJoin";
 import { SubmitButton } from "@/components/SubmitButton";
 import Link from "next/link";
 import { headers } from "next/headers";
@@ -36,6 +37,7 @@ export default async function GameCommunity({
     <>
       <PageHeading
         title={game.title}
+        action={<CommunityJoin slug={slug} />}
         eyebrow="GAME COMMUNITY / ZIJING"
         description={game.summary || "社群交流、论坛讨论与游戏活动。"}
         parent={{ href: "/community", label: "游戏社群" }}

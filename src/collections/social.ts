@@ -6,6 +6,7 @@ const relation = (name: string, to: "games" | "users" | "forum-posts" | "comment
   ({ name, type: "relationship" as const, relationTo: to, required: true, maxDepth: 0,
     access: { create: () => true, update: () => false } });
 const ownOrReviewer: Access = ({ req }) => {
+  if (req.context.publicCommunityContacts) return { and: [{ game: { equals: req.context.publicCommunityContacts } }, { status: { equals: "approved" } }] } as Where;
   if (canPublish(req.user as Identity)) return true;
   return req.user ? { applicant: { equals: req.user.id } } : false;
 };

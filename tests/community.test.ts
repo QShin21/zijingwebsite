@@ -158,6 +158,17 @@ describe.sequential("申请、建群、发言与跨级审核", () => {
     expect(member.roles).toEqual(["communityAdmin"]);
     expect(member.communities?.map((v) => typeof v === "object" ? v.id : v)).toContain(game);
   });
+  it("公开名片投影只包含当前管理员和已批准申请，原始申请保持私有", async () => {
+    const context = { publicCommunityContacts: game };
+    const users = await p.find({ collection: "users", overrideAccess: false, user: null, context, depth: 0, select: { name: true } });
+    expect(users.docs.map(u => u.id)).toContain(member.id);
+    expect(users.docs[0]).not.toHaveProperty("email");
+    const cards = await p.find({ collection: "community-applications", overrideAccess: false, user: null, context, depth: 0, select: { applicant: true, wechatQr: true } });
+    expect(cards.docs.map(a => a.id)).toContain(application);
+    expect(cards.docs[0]).not.toHaveProperty("phone");
+    expect(cards.docs[0]).not.toHaveProperty("realName");
+    await expect(p.findByID({ collection: "community-applications", id: application, overrideAccess: false, user: null })).rejects.toThrow();
+  });
   it("本社群可直接发通知和论坛帖，跨社群不能管理", async () => {
     forum = (await p.create({ collection: "forum-posts", overrideAccess: false, user: member,
       data: { game, author: member.id, title: "第一条讨论", body: "测试普通论坛的社群交流。" } })).id;

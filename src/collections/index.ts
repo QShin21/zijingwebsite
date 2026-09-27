@@ -1,5 +1,6 @@
 import type {
   CollectionConfig,
+  Where,
   CollectionSlug,
   TextField,
   Field,
@@ -394,6 +395,7 @@ export const Users: CollectionConfig = {
   access: {
     create: () => false,
     read: ({ req }) =>
+      req.context.publicCommunityContacts ? ({ and: [{ communities: { contains: req.context.publicCommunityContacts } }, { roles: { in: ["communityAdmin", "vicePresident", "president"] } }, { accountStatus: { not_equals: "suspended" } }] } as Where) :
       canPublish(req.user as Identity) || {
         id: { equals: req.user?.id },
       },
