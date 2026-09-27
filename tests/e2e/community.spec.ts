@@ -111,7 +111,7 @@ test("昵称登录、社群发帖与论坛回复", async ({ page }) => {
       expect(result.violations, route).toEqual([]);
     }
   }
-  await page.goto(`/community/${slug}`);
+  await page.goto(`/community/${slug}/forum`);
   await page.getByLabel("标题").fill("浏览器真实发帖流程");
   await page.getByLabel("内容").fill("在论坛里测试完整的发表流程。");
   await page.getByRole("button", { name: "发布到论坛" }).click();

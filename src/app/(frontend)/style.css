@@ -3305,3 +3305,6 @@ button:disabled {
 .contact-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr)); gap:24px }
 .contact-grid article { text-align:center; min-width:0 }
 .contact-grid img { display:block; width:100%; max-width:280px; height:auto; object-fit:contain; margin:1rem auto }
+
+.community-home-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr)); gap:24px; margin:32px 0 }
+.community-tabs a[aria-current="page"] { background:#6e39cf; color:white }

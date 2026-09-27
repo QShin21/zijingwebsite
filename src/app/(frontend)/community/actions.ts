@@ -71,7 +71,7 @@ export async function publishCommunityAction(form: FormData) {
     });
   } catch { problem(where, "发布未成功，请核对内容、权限或发言频率"); }
   if (createdForum) redirect(`${where}/forum/${createdForum}`);
-  redirect(where);
+  redirect(`${where}/${kind === "message" ? "chat" : "updates"}`);
 }
 export async function commentAction(form: FormData) {
   const { p, user } = await current();
