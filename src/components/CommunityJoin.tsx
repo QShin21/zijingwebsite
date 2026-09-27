@@ -1,6 +1,7 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 export function CommunityJoin({ slug }: { slug: string }) {
+  const ready = useSyncExternalStore(() => () => {}, () => true, () => false);
   const dialog = useRef<HTMLDialogElement>(null);
   const [contacts, setContacts] = useState<{ id: number; name: string; qr: string }[]>([]);
   const [status, setStatus] = useState("");
@@ -17,7 +18,7 @@ export function CommunityJoin({ slug }: { slug: string }) {
     } catch { setStatus("名片加载失败，请关闭后重试。"); }
   }
   return <>
-    <button className="button community-join" onClick={open}>添加社群管理员微信 · 加入微信社群 ↗</button>
+    <button className="button community-join" disabled={!ready} onClick={open}>添加社群管理员微信 · 加入微信社群 ↗</button>
     <dialog ref={dialog} className="community-dialog" aria-labelledby="join-title" onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
       <div className="dialog-top"><h2 id="join-title">加入微信社群</h2><button autoFocus aria-label="关闭弹窗" onClick={() => dialog.current?.close()}>关闭 ×</button></div>
       <p role="status">{status}</p>

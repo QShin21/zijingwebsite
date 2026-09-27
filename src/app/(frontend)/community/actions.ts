@@ -152,3 +152,19 @@ export async function curateForumAction(form: FormData) {
   catch { problem(path, "管理操作未成功"); }
   redirect(path);
 }
+
+export async function sendChatAction(game: number, body: string) {
+  const p = await cms(); const { user } = await p.auth({ headers: await headers() });
+  if (!user || user.accountStatus === "suspended") return { error: "请重新登录可用账号" };
+  try {
+    await p.create({ collection: "community-messages", overrideAccess: false, user,
+      data: { game, author: user.id, body } });
+    return { success: true };
+  } catch (error) { return { error: applicationError(error) }; }
+}
+export async function hideChatAction(id: number) {
+  const p = await cms(); const { user } = await p.auth({ headers: await headers() });
+  if (!user || user.accountStatus === "suspended") return { error: "请重新登录" };
+  try { await p.update({ collection: "community-messages", id, overrideAccess: false, user, data: { status: "hidden" } }); return { success: true }; }
+  catch { return { error: "无权管理该消息或消息已移除" }; }
+}

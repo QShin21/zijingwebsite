@@ -39,6 +39,38 @@ test.beforeAll(async () => {
   ).id;
 });
 
+test("独立分区、连续聊天、历史翻页与新消息保留", async ({ page }) => {
+  const user = await p.findByID({ collection: "users", id: userID, overrideAccess: true });
+  for (let i = 1; i <= 65; i++) await p.create({ collection: "community-messages", overrideAccess: false, user,
+    data: { game: gameID, author: userID, body: `历史聊天第${i}条`, createdAt: new Date(Date.now() - 3600000 + i * 1000).toISOString() } });
+  await page.goto("/login");
+  await page.getByLabel("昵称或邮箱").fill(nickname);
+  await page.getByLabel("密码", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "登录", exact: true }).click();
+  await expect(page).toHaveURL(/\/account$/);
+  await page.goto(`/community/${slug}`);
+  await expect(page.getByRole("textbox")).toHaveCount(0);
+  for (const [name, section] of [["活动与通知", "updates"], ["论坛讨论", "forum"], ["社群交流", "chat"], ["社群风采", "showcase"]])
+    await expect(page.getByRole("navigation", { name: "社群分区" }).getByRole("link", { name, exact: true })).toHaveAttribute("href", `/community/${slug}/${section}`);
+  await page.getByRole("button", { name: /添加社群管理员微信/ }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await page.goto(`/community/${slug}/chat`);
+  await expect(page.locator(".chat-message")).toHaveCount(50);
+  await page.getByRole("button", { name: "加载更早消息" }).click();
+  await expect(page.locator(".chat-message")).toHaveCount(65);
+  await expect(page.getByText("历史聊天第1条", { exact: true })).toBeVisible();
+  await page.getByLabel("发消息").fill("新发言不会覆盖聊天历史");
+  await page.getByRole("button", { name: "发送", exact: true }).click();
+  await expect(page.getByText("新发言不会覆盖聊天历史", { exact: true })).toBeVisible();
+  await expect(page.locator(".chat-message")).toHaveCount(66);
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  }
+});
+
 test("邮箱也可登录同一账号，错误登录统一提示", async ({ page }) => {
   for (const [identifier, secret] of [[nickname, "wrong-password"], [`missing-${suffix}`, password]]) {
     await page.goto("/login");
@@ -68,6 +100,7 @@ test("注册拒绝已占用昵称且没有数字账户输入", async ({ page }) 
 });
 test.afterAll(async () => {
   if (!p) return;
+  await p.delete({ collection: "community-messages", overrideAccess: true, where: { game: { equals: gameID } } });
   await p.delete({
     collection: "comments",
     overrideAccess: true,
@@ -113,7 +146,7 @@ test("昵称登录、社群发帖与论坛回复", async ({ page }) => {
   }
   await page.goto(`/community/${slug}/forum`);
   await page.getByLabel("标题").fill("浏览器真实发帖流程");
-  await page.getByLabel("内容").fill("在论坛里测试完整的发表流程。");
+  await page.getByLabel("内容", { exact: true }).fill("在论坛里测试完整的发表流程。");
   await page.getByRole("button", { name: "发布到论坛" }).click();
   await expect(page).toHaveURL(new RegExp(`/community/${slug}/forum/\\d+`));
   await expect(
