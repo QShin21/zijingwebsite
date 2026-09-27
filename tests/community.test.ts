@@ -183,6 +183,31 @@ describe.sequential("申请、建群、发言与跨级审核", () => {
         category: "notice", body: "不能在其他社群发布通知。" } })).rejects.toThrow();
     await p.delete({ collection: "games", id: other.id, overrideAccess: true });
   });
+  it("活动点赞和意愿唯一、可取消，通知不接受参加意愿且评论继承社群", async () => {
+    const notice = await p.create({ collection: "community-posts", overrideAccess: false, user: vice,
+      data: { game, author: vice.id, title: "互动测试", category: "event", body: "测试活动点赞与留言" } });
+    const data = { targetType: "community-posts" as const, targetId: notice.id, kind: "attend" as const, author: member.id, key: "ignored" };
+    try {
+      const reaction = await p.create({ collection: "community-reactions", overrideAccess: false, user: member, data });
+      expect(reaction.kind).toBe("attend");
+      await expect(p.create({ collection: "community-reactions", overrideAccess: false, user: member, data })).rejects.toThrow();
+      const own = await p.find({ collection: "community-reactions", overrideAccess: false, user: member, context: { ownReactions: true }, where: { targetType: { equals: "community-posts" }, targetId: { equals: notice.id }, kind: { equals: "attend" } } });
+      expect(own.totalDocs).toBe(1);
+      await expect(p.delete({ collection: "community-reactions", id: reaction.id, overrideAccess: false, user: vice })).rejects.toThrow();
+      await p.delete({ collection: "community-reactions", id: reaction.id, overrideAccess: false, user: member });
+      const comment = await p.create({ collection: "comments", overrideAccess: false, user: member,
+        data: { targetType: "community-posts", targetId: notice.id, author: member.id, body: "期待活动" } });
+      expect(Number(comment.game)).toBe(game);
+      await p.delete({ collection: "comments", id: comment.id, overrideAccess: true });
+      await p.update({ collection: "community-posts", id: notice.id, overrideAccess: false, user: member, data: { category: "notice" } });
+      await expect(p.create({ collection: "community-reactions", overrideAccess: false, user: member, data })).rejects.toThrow();
+      await p.update({ collection: "community-posts", id: notice.id, overrideAccess: false, user: member, data: { status: "hidden" } });
+      await expect(p.create({ collection: "community-reactions", overrideAccess: false, user: member, data: { ...data, kind: "like" } })).rejects.toThrow();
+    } finally {
+      await p.delete({ collection: "community-reactions", overrideAccess: true, where: { targetId: { equals: notice.id } } });
+      await p.delete({ collection: "community-posts", id: notice.id, overrideAccess: true });
+    }
+  });
   it("全站投稿须提交审核，副社长才能公开", async () => {
     const draft = await p.create({ collection: "announcements", overrideAccess: false,
       user: member, draft: true, data: { title: "待审通知", slug: `review-${suffix}` } });

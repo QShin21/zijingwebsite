@@ -24,6 +24,7 @@ export interface Config {
     media: Media;
     'community-applications': CommunityApplication;
     'community-bans': CommunityBan;
+    'community-reactions': CommunityReaction;
     'forum-posts': ForumPost;
     'community-messages': CommunityMessage;
     'community-posts': CommunityPost;
@@ -51,6 +52,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'community-applications': CommunityApplicationsSelect<false> | CommunityApplicationsSelect<true>;
     'community-bans': CommunityBansSelect<false> | CommunityBansSelect<true>;
+    'community-reactions': CommunityReactionsSelect<false> | CommunityReactionsSelect<true>;
     'forum-posts': ForumPostsSelect<false> | ForumPostsSelect<true>;
     'community-messages': CommunityMessagesSelect<false> | CommunityMessagesSelect<true>;
     'community-posts': CommunityPostsSelect<false> | CommunityPostsSelect<true>;
@@ -282,6 +284,20 @@ export interface CommunityBan {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-reactions".
+ */
+export interface CommunityReaction {
+  id: number;
+  targetType: 'community-posts' | 'forum-posts';
+  targetId: number;
+  kind: 'like' | 'attend';
+  author: number | User;
+  key: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forum-posts".
  */
 export interface ForumPost {
@@ -336,7 +352,7 @@ export interface Comment {
   author: number | User;
   authorName?: string | null;
   status?: ('visible' | 'hidden') | null;
-  targetType: 'events' | 'albums' | 'news' | 'announcements' | 'forum-posts';
+  targetType: 'events' | 'albums' | 'news' | 'announcements' | 'forum-posts' | 'community-posts';
   targetId: number;
   parent?: (number | null) | Comment;
   updatedAt: string;
@@ -814,6 +830,10 @@ export interface PayloadLockedDocument {
         value: number | CommunityBan;
       } | null)
     | ({
+        relationTo: 'community-reactions';
+        value: number | CommunityReaction;
+      } | null)
+    | ({
         relationTo: 'forum-posts';
         value: number | ForumPost;
       } | null)
@@ -1007,6 +1027,19 @@ export interface CommunityBansSelect<T extends boolean = true> {
   member?: T;
   active?: T;
   reason?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-reactions_select".
+ */
+export interface CommunityReactionsSelect<T extends boolean = true> {
+  targetType?: T;
+  targetId?: T;
+  kind?: T;
+  author?: T;
+  key?: T;
   updatedAt?: T;
   createdAt?: T;
 }

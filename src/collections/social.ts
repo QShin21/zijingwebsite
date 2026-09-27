@@ -63,7 +63,7 @@ const participationGuard = (kind: "forum" | "message" | "comment" | "local"): Co
     let game = data.game;
     if (kind === "comment") {
       const target = data.targetType as string;
-      if (!["events", "albums", "news", "announcements", "forum-posts"].includes(target) ||
+      if (!["events", "albums", "news", "announcements", "forum-posts", "community-posts"].includes(target) ||
           !Number.isSafeInteger(Number(data.targetId)) || Number(data.targetId) < 1)
         throw new APIError("评论对象无效", 400);
       const found = await req.payload.findByID({
@@ -73,7 +73,7 @@ const participationGuard = (kind: "forum" | "message" | "comment" | "local"): Co
       if (!found || ("_status" in found && found._status !== "published") ||
           ("status" in found && found.status !== "visible"))
         throw new APIError("评论对象不存在或未公开", 404);
-      if (target === "forum-posts") game = found.game;
+      if (target === "forum-posts" || target === "community-posts") game = found.game;
       if (data.parent) {
         const parent = await req.payload.findByID({ collection: "comments",
           id: idOf(data.parent) as number, user: null, overrideAccess: false, req, depth: 0 }).catch(() => null);
@@ -112,7 +112,7 @@ function social(slug: string, title: string, kind: "forum" | "message" | "commen
   ];
   if (kind === "comment") fields.push(
     { name: "targetType", type: "select", required: true,
-      options: ["events", "albums", "news", "announcements", "forum-posts"] },
+      options: ["events", "albums", "news", "announcements", "forum-posts", "community-posts"] },
     { name: "targetId", type: "number", required: true },
     { name: "parent", type: "relationship", relationTo: "comments", maxDepth: 0 },
   );
@@ -356,8 +356,38 @@ const bans: CollectionConfig = {
     { name: "reason", type: "text", maxLength: 300 },
   ],
 };
+const reactions: CollectionConfig = {
+  slug: "community-reactions", labels: { singular: "社群互动", plural: "社群互动" },
+  access: {
+    read: ({ req }) => req.context.ownReactions ? (req.user ? { author: { equals: req.user.id } } : false) : true,
+    create: ({ req }) => canParticipate(req.user as Identity),
+    update: () => false,
+    delete: ({ req }) => canParticipate(req.user as Identity) ? { author: { equals: req.user!.id } } : false,
+  },
+  hooks: { beforeChange: [async ({ data, req }) => {
+    const user = req.user as Identity;
+    if (!canParticipate(user)) throw new APIError("请先登录", 403);
+    if (!["community-posts", "forum-posts"].includes(data.targetType) || !Number.isSafeInteger(data.targetId)) throw new APIError("互动对象无效", 400);
+    const target = await req.payload.findByID({ collection: data.targetType, id: data.targetId,
+      overrideAccess: false, user: null, depth: 0, req }).catch(() => null);
+    if (!target || target.status !== "visible") throw new APIError("内容不可用", 404);
+    const game = await openGame(req, target.game);
+    await notBanned(req, game, user);
+    if (!["like", "attend"].includes(data.kind) || (data.kind === "attend" && (data.targetType !== "community-posts" || target.category !== "event"))) throw new APIError("互动类型无效", 400);
+    data.author = user.id;
+    data.key = `${data.targetType}:${data.targetId}:${data.kind}:${user.id}`;
+    return data;
+  }] },
+  fields: [
+    { name: "targetType", type: "select", options: ["community-posts", "forum-posts"], required: true, index: true },
+    { name: "targetId", type: "number", required: true, index: true },
+    { name: "kind", type: "select", options: ["like", "attend"], required: true },
+    { ...relation("author", "users"), access: { read: () => false, update: () => false } },
+    { name: "key", type: "text", required: true, unique: true, access: { read: () => false, create: () => false, update: () => false } },
+  ],
+};
 export const SocialCollections: CollectionConfig[] = [
-  applications, bans,
+  applications, bans, reactions,
   social("forum-posts", "论坛帖子", "forum"),
   social("community-messages", "社群发言", "message"),
   social("community-posts", "社群活动与通知", "local"),

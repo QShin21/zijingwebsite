@@ -8,7 +8,7 @@ export async function Comments({
   targetType,
   targetId,
 }: {
-  targetType: "events" | "albums" | "news" | "announcements";
+  targetType: "events" | "albums" | "news" | "announcements" | "community-posts";
   targetId: number;
 }) {
   const p = await cms();

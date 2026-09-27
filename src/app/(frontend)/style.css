@@ -3308,3 +3308,7 @@ button:disabled {
 
 .community-home-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr)); gap:24px; margin:32px 0 }
 .community-tabs a[aria-current="page"] { background:#6e39cf; color:white }
+
+.community-pagination,.reaction-bar { display:flex; flex-wrap:wrap; align-items:center; gap:1rem; margin:24px 0 }
+.community-article { max-width:860px; margin:32px auto; overflow-wrap:anywhere }
+.reaction-bar [aria-pressed="true"] { background:#6e39cf; color:white }

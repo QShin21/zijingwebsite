@@ -77,7 +77,7 @@ export async function commentAction(form: FormData) {
   const { p, user } = await current();
   const targetType = value(form, "targetType");
   const targetId = numeric(form, "targetId");
-  const collection = (["events", "albums", "news", "announcements", "forum-posts"] as const)
+  const collection = (["events", "albums", "news", "announcements", "forum-posts", "community-posts"] as const)
     .find((name) => name === targetType);
   if (!collection) redirect("/community");
   const target = await p.findByID({ collection, id: targetId, user: null,
@@ -85,7 +85,7 @@ export async function commentAction(form: FormData) {
   if (!target) redirect("/community");
   const post = target as { id: number; game?: number | null; slug?: string | null };
   const path = collection === "forum-posts" ? `${await gamePath(Number(post.game))}/forum/${post.id}`
-    : `/${routeFor[collection]}/${post.slug}`;
+    : collection === "community-posts" ? `${await gamePath(Number(post.game))}/updates/${post.id}` : `/${routeFor[collection]}/${post.slug}`;
   try {
     await p.create({ collection: "comments", overrideAccess: false, user,
       data: { targetType: collection, targetId, author: user.id, body: value(form, "body"),
@@ -119,5 +119,23 @@ export async function banAction(form: FormData) {
     await p.create({ collection: "community-bans", overrideAccess: false, user,
       data: { game, member: numeric(form, "member"), reason: value(form, "reason"), active: true } });
   } catch { problem(path, "禁言未完成"); }
+  redirect(path);
+}
+
+export async function reactionAction(form: FormData) {
+  const { p, user } = await current();
+  const collection = value(form, "targetType") === "forum-posts" ? "forum-posts" : "community-posts";
+  const id = numeric(form, "targetId");
+  const kind = value(form, "kind") === "attend" ? "attend" : "like";
+  const target = await p.findByID({ collection, id, overrideAccess: false, user: null, depth: 0 }).catch(() => null);
+  if (!target) redirect("/community");
+  const path = `${await gamePath(Number(target.game))}/${collection === "forum-posts" ? "forum" : "updates"}/${id}`;
+  try {
+    const existing = await p.find({ collection: "community-reactions", overrideAccess: false, user,
+      context: { ownReactions: true }, where: { targetType: { equals: collection }, targetId: { equals: id }, kind: { equals: kind } }, depth: 0, limit: 1 });
+    if (existing.docs[0]) await p.delete({ collection: "community-reactions", id: existing.docs[0].id, overrideAccess: false, user });
+    else await p.create({ collection: "community-reactions", overrideAccess: false, user,
+      data: { targetType: collection, targetId: id, kind, author: user.id, key: "server-derived" } });
+  } catch { problem(path, "操作未成功，请稍后重试"); }
   redirect(path);
 }
