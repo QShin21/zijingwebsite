@@ -1,0 +1,57 @@
+{
+  "startedAt": "2026-09-28T08:16:29.035Z",
+  "origin": "https://test.yejiaxin.online",
+  "checks": [
+    "anonymous activity/notice access; other sections and community endpoints require login",
+    "SSE over public HTTPS; three immediate consecutive messages from a separate account",
+    "moderator hiding immediately removes the message on the other client",
+    "network reconnection catches up missed messages"
+  ],
+  "sendToOtherClientMs": [
+    1896,
+    880,
+    2894
+  ],
+  "passed": true,
+  "finishedAt": "2026-09-28T08:17:52.835Z",
+  "deployedRevision": "22c85be88acce72829ae03cb3a3cd9f1927d3e52",
+  "environment": "staging",
+  "ci": {
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/36394061897",
+    "passed": true,
+    "unitAndDatabaseTests": 85,
+    "browserCases": 38,
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": "passed"
+  },
+  "migration": {
+    "rehearsal": "passed",
+    "live": "passed",
+    "unchangedExistingTables": 56,
+    "usersPreserved": 5,
+    "applicationsPreserved": 2
+  },
+  "sourceManifestVerifiedFiles": 192,
+  "backupDirectory": "/srv/zijingwebsite/backups/realtime-20260928",
+  "previousReleaseDirectory": "/srv/zijingwebsite/releases/realtime-previous-22c85be",
+  "preserved": {
+    "environmentHash": "unchanged",
+    "freeKillNginxHash": "unchanged"
+  },
+  "cleanup": {
+    "temporaryUsersAndCommunity": "removed",
+    "testMessages": "removed",
+    "remainingUsers": 5,
+    "remainingApplications": 2
+  },
+  "health": {
+    "websiteReady": 200,
+    "freeKillHTTPS": 200,
+    "freeKillWebSocket": 101,
+    "environmentHash": "unchanged",
+    "freeKillNginxHash": "unchanged",
+    "swappinessRestored": 0
+  },
+  "sourceArchiveSha256": "08e8ff31a9c402ff6cd3fa2dddb6f77f8f349a81fc27fa97b0da2b1bf5e3058e"
+}

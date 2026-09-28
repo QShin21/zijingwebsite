@@ -63,3 +63,12 @@ BACKUP_REMOTE可设为已挂载的异机受控目录；设置前由维护者核�
 应用提交 `3f81075f9e87bdf2c4dad1e08c95912ed0d691bb` 已更新到现有 staging 实例；数据、环境和媒体保留。备份位于 `/srv/zijingwebsite/backups/community-20260928`；三个增量迁移经过隔离恢复演练及线上原表摘要对比。数据库 systemd 启动完成后仍需 `pg_isready` 成功，才能执行迁移；第一次切换尝试因就绪等待不足退出并恢复旧站，补充等待后切换成功。
 
 源码/旧构建保留在 `/srv/zijingwebsite/releases/community-previous-3f81075`，此版数据库为增量扩展。全量数据回退需停写、核验备份、按对应旧应用执行恢复，不能直接运行删表 down。现有测试站 Nginx `client_max_body_size` 为 `16m`，与 Next 14 MB 表单限制和最多六张图片匹配。其余虚拟主机配置不变。线上功能与清理验证见 `docs/evidence/deployment-community-spaces.json`。
+
+
+## 2026-09-28 实时聊天与登录访问
+
+应用提交 `22c85be88acce72829ae03cb3a3cd9f1927d3e52` 已部署至现有 `https://test.yejiaxin.online` staging 实例，保持禁止收录。192 个源码文件逐一核验 SHA-256 与提交一致；服务器独立构建通过后切换。早期构建发生堆不足，代理改为本机会话接口校验并启用 Next.js 低内存编译；最终构建正常退出。
+
+备份位于 `/srv/zijingwebsite/backups/realtime-20260928`，包含数据库快照、环境、媒体与源码。新增 `20260928_120000_chat_notifications` 只创建通知函数和触发器；隔离副本与线上迁移前后 56 张既有表内容摘要一致，保留 5 个账号和 2 条申请。旧源码和构建位于 `/srv/zijingwebsite/releases/realtime-previous-22c85be`，可恢复兼容旧应用；不需要删除业务数据或执行破坏性 down。
+
+SSE 通过 Nginx 公网 HTTPS 验证，响应禁止缓冲，每 15 秒心跳、60 秒重新校验连接；断线重连后按 ID 补齐新增消息。临时 3101 端口还验证了代理对实际监听端口的会话查询。`SERVER_URL` 与运行环境保持原配置，未改 DNS、环境文件或 FreeKill 配置。验收数据见 `docs/evidence/deployment-realtime-community.json`。
