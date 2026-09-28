@@ -1,4 +1,5 @@
 import { communityVideo } from "../lib/community-video";
+import { normalizeChatImage } from "../lib/chat-images";
 import { normalizeShowcaseImage } from "../lib/showcase-images";
 import { APIError, type CollectionConfig, type CollectionBeforeChangeHook, type Access, type Where } from "payload";
 import { canParticipate, canPublish, hasRole, managesGame, type Identity } from "../lib/rules";
@@ -53,6 +54,10 @@ async function notBanned(req: Parameters<CollectionBeforeChangeHook>[0]["req"], 
 const participationGuard = (kind: "forum" | "message" | "comment" | "local" | "showcase"): CollectionBeforeChangeHook =>
   async ({ data, originalDoc, req, operation }) => {
     const user = req.user as Identity;
+    if (kind === "message" && data.image) {
+      try { data.image = await normalizeChatImage(data.image); }
+      catch (error) { throw new APIError(error instanceof Error ? error.message : "图片无效", 400); }
+    }
     if (kind === "showcase") {
       if (data.videoURL && !communityVideo(data.videoURL)) throw new APIError("请填写有效的 HTTPS 视频链接", 400);
       if (data.images !== undefined) {
@@ -101,7 +106,7 @@ const participationGuard = (kind: "forum" | "message" | "comment" | "local" | "s
         throw new APIError("仅对应社群管理员可直接发布", 403);
     } else if (kind !== "comment") throw new APIError("缺少游戏社群", 400);
     const body = String(data.body ?? "").trim();
-    if ((body.length < 1 && (kind !== "showcase" || (!data.images?.length && !data.videoURL))) || body.length > 5000) throw new APIError("内容长度需为 1–5000 字", 400);
+    if ((body.length < 1 && !(kind === "message" && data.image) && (kind !== "showcase" || (!data.images?.length && !data.videoURL))) || body.length > 5000) throw new APIError("请填写文字或添加图片，文字最多 5000 字", 400);
     data.body = body;
     data.author = user.id;
     data.authorName = String((req.user as Identity & { name?: string }).name ?? "社团成员");
@@ -111,13 +116,14 @@ const participationGuard = (kind: "forum" | "message" | "comment" | "local" | "s
 function social(slug: string, title: string, kind: "forum" | "message" | "comment" | "local" | "showcase"): CollectionConfig {
   const fields: CollectionConfig["fields"] = [
     ...(kind === "forum" || kind === "local" || kind === "showcase" ? [{ name: "title", type: "text" as const, required: true, maxLength: 120 }] : []),
-    { name: "body", type: "textarea", required: kind !== "showcase", maxLength: 5000 },
+    { name: "body", type: "textarea", required: kind !== "showcase" && kind !== "message", maxLength: 5000 },
     { name: "game", type: "relationship", relationTo: "games", maxDepth: 0 },
     relation("author", "users"),
     { name: "authorName", type: "text", access: { create: () => false, update: () => false } },
     { name: "status", type: "select", defaultValue: "visible", options: kind === "showcase" ? ["visible", "hidden", "pending", "rejected"] : ["visible", "hidden"],
       access: { create: () => false, update: ({ req, doc }) => managesGame(req.user as Identity, doc?.game) } },
   ];
+  if (kind === "message") fields.push({ name: "image", type: "textarea", maxLength: 11_200_000, admin: { hidden: true } });
   if (kind === "showcase") fields.push(
     { name: "videoURL", label: "视频链接", type: "text", maxLength: 2000 },
     { name: "reviewNote", label: "审核说明", type: "textarea", maxLength: 500,

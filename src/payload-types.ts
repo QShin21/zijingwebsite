@@ -346,11 +346,12 @@ export interface ForumPost {
  */
 export interface CommunityMessage {
   id: number;
-  body: string;
+  body?: string | null;
   game?: (number | null) | Game;
   author: number | User;
   authorName?: string | null;
   status?: ('visible' | 'hidden') | null;
+  image?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1126,6 +1127,7 @@ export interface CommunityMessagesSelect<T extends boolean = true> {
   author?: T;
   authorName?: T;
   status?: T;
+  image?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -10,7 +10,7 @@ export async function proxy(request: NextRequest) {
     try { user = await proxyMember(request.headers); }
     catch { return NextResponse.json({ error: "暂时无法验证登录状态，请稍后重试" }, { status: 503, headers: { "Cache-Control": "private, no-store" } }); }
     if (!canParticipate(user)) {
-      if (privateAPI || /\/(feed|stream|contacts|qr)$/.test(path)) return NextResponse.json({ error: "请先登录" }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
+      if (privateAPI || /\/(feed|stream|contacts|qr|stickers)$/.test(path) || path.startsWith("/community/chat-images/")) return NextResponse.json({ error: "请先登录" }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
       const target = new URL(path === "/" ? "/events" : "/login", request.url);
       if (path !== "/") target.searchParams.set("message", "请登录后访问此栏目");
       const response = NextResponse.redirect(target);

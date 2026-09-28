@@ -15,12 +15,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   else if (Number.isSafeInteger(after) && after > 0) where.id = { greater_than: after };
   const result = await p.find({ collection: "community-messages", overrideAccess: false, user: null, depth: 0,
     where, sort: after > 0 && !before ? "id" : "-id", limit: 50,
-    select: { author: true, authorName: true, body: true, createdAt: true } });
+    select: { author: true, authorName: true, body: true, image: true, createdAt: true } });
   const known = (query.get("known") || "").split(",").map(Number).filter(n => Number.isSafeInteger(n) && n > 0).slice(0, 1000);
   const visible = known.length ? await p.find({ collection: "community-messages", overrideAccess: false, user: null, depth: 0,
     where: { game: { equals: game.id }, id: { in: known } }, limit: 1000, select: { createdAt: true } }) : null;
   return Response.json({
-    messages: result.docs.map(message => ({ id: message.id, name: message.authorName || "社团成员", body: message.body,
+    messages: result.docs.map(message => ({ id: message.id, name: message.authorName || "社团成员", body: message.body || "", image: message.image ? `/community/chat-images/${message.id}` : undefined,
       createdAt: message.createdAt, own: Boolean(user && Number(message.author) === user.id),
       member: managesGame(user, game.id) ? Number(message.author) : undefined })),
     hasMore: result.hasNextPage,

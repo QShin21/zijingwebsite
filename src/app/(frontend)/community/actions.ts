@@ -153,12 +153,12 @@ export async function curateForumAction(form: FormData) {
   redirect(path);
 }
 
-export async function sendChatAction(game: number, body: string) {
+export async function sendChatAction(game: number, body: string, image?: string) {
   const p = await cms(); const { user } = await p.auth({ headers: await headers() });
   if (!user || user.accountStatus === "suspended") return { error: "请重新登录可用账号" };
   try {
     await p.create({ collection: "community-messages", overrideAccess: false, user,
-      data: { game, author: user.id, body } });
+      data: { game, author: user.id, body, image } });
     return { success: true };
   } catch (error) { return { error: applicationError(error) }; }
 }
