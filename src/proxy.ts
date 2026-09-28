@@ -1,4 +1,4 @@
-import { cms } from "@/lib/content";
+import { proxyMember } from "@/lib/proxy-member";
 import { canParticipate } from "@/lib/rules";
 import { isGuestPage } from "@/lib/page-access";
 import { NextResponse, type NextRequest } from "next/server";
@@ -6,7 +6,9 @@ export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const privateAPI = /^\/api\/(games|teams|seasons|honors|news|albums|recruitment|comments|forum-posts|community-[^/]+|graphql)(\/|$)/.test(path);
   if (privateAPI || (!isGuestPage(path) && !path.startsWith("/admin") && !path.startsWith("/preview") && !path.startsWith("/api/") && path !== "/favicon.ico")) {
-    const { user } = await (await cms()).auth({ headers: request.headers });
+    let user;
+    try { user = await proxyMember(request.headers); }
+    catch { return NextResponse.json({ error: "暂时无法验证登录状态，请稍后重试" }, { status: 503, headers: { "Cache-Control": "private, no-store" } }); }
     if (!canParticipate(user)) {
       if (privateAPI || /\/(feed|stream|contacts|qr)$/.test(path)) return NextResponse.json({ error: "请先登录" }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
       const target = new URL(path === "/" ? "/events" : "/login", request.url);
