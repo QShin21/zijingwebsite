@@ -9,9 +9,11 @@ type NavItem = { path: string; label: string };
 export function SiteHeader({
   name,
   navigation,
+  signedIn = true,
 }: {
   name: string;
   navigation: NavItem[];
+  signedIn?: boolean;
 }) {
   const pathname = usePathname();
   const menu = useRef<HTMLDetailsElement>(null);
@@ -77,7 +79,7 @@ export function SiteHeader({
               <Pending />
             </Link>
           ))}
-          {!navigation.some((n) => n.path === "/community") && (
+          {signedIn && !navigation.some((n) => n.path === "/community") && (
             <Link
               href="/community"
               aria-current={active("/community") ? "page" : undefined}
@@ -87,12 +89,12 @@ export function SiteHeader({
             </Link>
           )}
         </nav>
-        <Link className="button compact" href="/join" onClick={close}>
-          加入紫荆 <Icon name="diagonal" />
+        <Link className="button compact" href={signedIn ? "/join" : "/register"} onClick={close}>
+          {signedIn ? "加入紫荆" : "注册"} <Icon name="diagonal" />
           <Pending />
         </Link>
-        <Link className="account-link" href="/account" onClick={close}>
-          账号
+        <Link className="account-link" href={signedIn ? "/account" : "/login"} onClick={close}>
+          {signedIn ? "账号" : "登录"}
         </Link>
         <details
           className="mobile-nav"
@@ -112,13 +114,13 @@ export function SiteHeader({
           </summary>
           <nav aria-label="移动导航">
             <p className="eyebrow">EXPLORE ZIJING</p>
-            <Link
+            {signedIn && <Link
               href="/"
               aria-current={pathname === "/" ? "page" : undefined}
               onClick={close}
             >
               首页 <Icon name="diagonal" />
-            </Link>
+            </Link>}
             {navigation.map((n) => (
               <Link
                 href={n.path}
@@ -130,7 +132,7 @@ export function SiteHeader({
                 <Icon name="diagonal" />
               </Link>
             ))}
-            {!navigation.some((n) => n.path === "/community") && (
+            {signedIn && !navigation.some((n) => n.path === "/community") && (
               <Link
                 href="/community"
                 aria-current={active("/community") ? "page" : undefined}
@@ -139,12 +141,12 @@ export function SiteHeader({
                 游戏社群 <Icon name="diagonal" />
               </Link>
             )}
-            <Link href="/account" onClick={close}>
-              我的账号 <Icon name="diagonal" />
+            <Link href={signedIn ? "/account" : "/login"} onClick={close}>
+              {signedIn ? "我的账号" : "登录"} <Icon name="diagonal" />
             </Link>
-            <Link href="/join" onClick={close}>
+            {signedIn && <Link href="/join" onClick={close}>
               加入紫荆 <Icon name="plus" />
-            </Link>
+            </Link>}
           </nav>
         </details>
       </div>

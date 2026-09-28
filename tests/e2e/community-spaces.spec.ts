@@ -31,6 +31,7 @@ test.afterAll(async () => {
   for (const user of [member, admin, vice]) if (user) await p.delete({ collection: "users", id: user.id, overrideAccess: true, context: { system: true } });
 });
 test("多管理员微信、活动互动、风采投稿审核及B站预览", async ({ page, browser }) => {
+  await page.goto("/login"); await page.getByLabel("昵称或邮箱").fill(member.name); await page.getByLabel("密码", { exact: true }).fill(password); await page.getByRole("button", { name: "登录", exact: true }).click(); await expect(page).toHaveURL(/\/account$/);
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 960 });
     await page.goto(`/community/${slug}`);
@@ -42,7 +43,6 @@ test("多管理员微信、活动互动、风采投稿审核及B站预览", asyn
     await page.screenshot({ path: `.data/community-contacts-${width}.png` });
     await page.getByRole("button", { name: "关闭弹窗" }).click();
   }
-  await page.goto("/login"); await page.getByLabel("昵称或邮箱").fill(member.name); await page.getByLabel("密码", { exact: true }).fill(password); await page.getByRole("button", { name: "登录", exact: true }).click(); await expect(page).toHaveURL(/\/account$/);
   await page.goto(`/community/${slug}/updates/${event}`);
   await page.getByRole("button", { name: "点赞 · 0", exact: true }).click();
   await expect(page.getByRole("button", { name: "已点赞 · 取消 · 1", exact: true })).toBeVisible();

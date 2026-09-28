@@ -1,3 +1,4 @@
+import * as chatNotifications from "./20260928_120000_chat_notifications";
 import * as migration_20260920_102916 from './20260920_102916';
 import * as migration_20260924_133459 from './20260924_133459';
 import * as migration_20260924_134008 from './20260924_134008';
@@ -48,4 +49,5 @@ export const migrations = [
     down: migration_20260927_182940_community_showcase.down,
     name: '20260927_182940_community_showcase'
   },
+  { up: chatNotifications.up, down: chatNotifications.down, name: "20260928_120000_chat_notifications" },
 ];

@@ -1,8 +1,9 @@
+import { memberTest } from "./member-layout-fixture";
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 for (const width of [320, 390, 768, 1440]) {
-  test(`member and community reading layouts at ${width}px`, async ({
+  memberTest(`member and community reading layouts at ${width}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 900 });
@@ -64,6 +65,7 @@ test("registration guidance, server feedback and unique mobile community navigat
   await page.goto("/community");
   await page.locator(".mobile-nav summary").click();
   const link = page.locator('.mobile-nav a[href="/community"]');
-  await expect(link).toHaveCount(1);
-  await expect(link).toHaveAttribute("aria-current", "page");
+  await expect(page).toHaveURL(/\/login\?/);
+  await expect(link).toHaveCount(0);
+  await expect(page.locator(".mobile-nav nav a")).toHaveCount(3);
 });

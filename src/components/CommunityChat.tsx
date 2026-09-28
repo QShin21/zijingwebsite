@@ -14,8 +14,11 @@ export function CommunityChat({ slug, game, signedIn, manager }: { slug: string;
   const scroller = useRef<HTMLDivElement>(null);
   const current = useRef<Message[]>([]);
   const latest = useRef(0);
+  const fetchQueue = useRef<Promise<unknown>>(Promise.resolve());
   const bottom = () => { const box = scroller.current; if (box) box.scrollTop = box.scrollHeight; setUnread(false); };
-  const fetchMessages = useCallback(async (history = false, signal?: AbortSignal) => {
+  const fetchMessages = useCallback((history = false, signal?: AbortSignal) => {
+    const job = fetchQueue.current.catch(() => {}).then(async () => {
+    if (signal?.aborted) return false;
     const existing = current.current;
     const query = new URLSearchParams();
     if (history && existing.length) query.set("before", String(existing[0].id));
@@ -35,23 +38,48 @@ export function CommunityChat({ slug, game, signedIn, manager }: { slug: string;
     if (!latest.current || history) setOlder(data.hasMore);
     if (data.messages.length) latest.current = Math.max(latest.current, ...data.messages.map(m => m.id));
     if (!history && data.messages.length && !wasBottom) setUnread(true);
-    setStatus("已连接 · 每 4 秒更新");
+
     requestAnimationFrame(() => {
       if (!box) return;
       if (history) box.scrollTop = previousTop + box.scrollHeight - previousHeight;
       else if (wasBottom) box.scrollTop = box.scrollHeight;
     });
+    return !history && data.hasMore && data.messages.length > 0;
+    });
+    fetchQueue.current = job;
+    return job;
   }, [slug]);
   useEffect(() => {
-    const controller = new AbortController(); let timer: ReturnType<typeof setTimeout>;
-    async function poll() {
-      try { if (!document.hidden) await fetchMessages(false, controller.signal); }
-      catch { if (!controller.signal.aborted) setStatus("连接暂时中断，将自动重试。"); }
-      if (!controller.signal.aborted) timer = setTimeout(poll, 4000);
+    const controller = new AbortController();
+    let running = false;
+    let pending = false;
+    let retry: ReturnType<typeof setTimeout> | undefined;
+    const source = new EventSource(`/community/${encodeURIComponent(slug)}/chat/stream`);
+    async function refresh() {
+      pending = true;
+      if (running) return;
+      running = true;
+      try {
+        while (pending && !controller.signal.aborted) {
+          pending = false;
+          if (await fetchMessages(false, controller.signal)) pending = true;
+          if (source.readyState === EventSource.OPEN) setStatus("已连接 · 实时更新");
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setStatus("消息同步中断，正在重试…");
+          clearTimeout(retry);
+          retry = setTimeout(() => void refresh(), 1000);
+        }
+      } finally { running = false; }
     }
-    void poll();
-    return () => { controller.abort(); clearTimeout(timer); };
-  }, [fetchMessages]);
+    source.addEventListener("ready", () => { setStatus("已连接 · 实时更新"); void refresh(); });
+    source.addEventListener("change", () => void refresh());
+    source.onerror = () => setStatus("连接暂时中断，将自动重连。");
+    const visible = () => { if (!document.hidden) void refresh(); };
+    document.addEventListener("visibilitychange", visible);
+    return () => { controller.abort(); source.close(); clearTimeout(retry); document.removeEventListener("visibilitychange", visible); };
+  }, [fetchMessages, slug]);
   async function history() { setLoading(true); try { await fetchMessages(true); } catch { setError("历史消息加载失败，请重试。"); } finally { setLoading(false); } }
   async function send() {
     if (sending || !body.trim()) return;

@@ -1,3 +1,6 @@
+import { headers } from "next/headers";
+import { cms } from "@/lib/content";
+import { canParticipate } from "@/lib/rules";
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { site } from "@/lib/content";
@@ -36,6 +39,8 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   const s = await site();
+  const { user } = await (await cms()).auth({ headers: await headers() });
+  const signedIn = canParticipate(user);
   return (
     <html lang="zh-CN" data-scroll-behavior="smooth">
       <body>
@@ -49,7 +54,8 @@ export default async function Layout({
         )}
         <SiteHeader
           name={s.name}
-          navigation={s.navigation?.length ? s.navigation : nav}
+          navigation={signedIn ? (s.navigation?.length ? s.navigation : nav) : nav.filter(item => ["/events", "/announcements"].includes(item.path))}
+          signedIn={signedIn}
         />
         <main id="main" tabIndex={-1}>
           {children}
@@ -69,11 +75,11 @@ export default async function Layout({
             <nav aria-label="探索社团">
               <span className="eyebrow">EXPLORE</span>
               <Link href="/events">社团活动</Link>
-              <Link href="/teams">代表队</Link>
-              <Link href="/honors">荣誉档案</Link>
-              <Link href="/gallery">社团影像</Link>
+              {signedIn && <Link href="/teams">代表队</Link>}
+              {signedIn && <Link href="/honors">荣誉档案</Link>}
+              {signedIn && <Link href="/gallery">社团影像</Link>}
             </nav>
-            <nav aria-label="参与社团">
+            {signedIn && <nav aria-label="参与社团">
               <span className="eyebrow">TAKE PART</span>
               <Link href="/join/members">普通社员</Link>
               <Link href="/join/teams">代表队选拔</Link>
@@ -82,7 +88,7 @@ export default async function Layout({
               <Link href="/contact">
                 联系与合作 <Icon name="diagonal" />
               </Link>
-            </nav>
+            </nav>}
           </div>
           <div className="footer-bottom">
             <span>

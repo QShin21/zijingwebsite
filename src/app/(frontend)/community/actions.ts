@@ -69,7 +69,7 @@ export async function publishCommunityAction(form: FormData) {
       collection: "community-posts", overrideAccess: false, user,
       data: { game, author: user.id, title: value(form, "title"), body: value(form, "body"), category: kind },
     });
-  } catch { problem(`${where}/${kind === "forum" ? "forum" : kind === "message" ? "chat" : "updates"}`, "发布未成功，请核对内容、权限或发言频率"); }
+  } catch { problem(`${where}/${kind === "forum" ? "forum" : kind === "message" ? "chat" : "updates"}`, "发布未成功，请核对内容和权限"); }
   if (createdForum) redirect(`${where}/forum/${createdForum}`);
   redirect(`${where}/${kind === "message" ? "chat" : "updates"}`);
 }

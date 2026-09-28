@@ -1,3 +1,4 @@
+import { memberTest } from "./member-layout-fixture";
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
@@ -14,7 +15,7 @@ test("desktop navigation exposes the current section", async ({ page }) => {
 
 test("mobile menu closes on navigation, Escape and outside interaction", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
+  await page.goto("/announcements");
   const menu = page.locator(".mobile-nav");
   const trigger = menu.locator("summary");
   // Native details works before hydration; Escape/outside dismissal is a client enhancement.
@@ -64,7 +65,7 @@ test("reduced motion and essential interface accessibility", async ({ page }) =>
 });
 
 for (const width of [320, 390, 768, 1080, 1440, 1920]) {
-  test(`redesign responsive routes at ${width}px`, async ({ page }) => {
+  memberTest(`redesign responsive routes at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 1000 });
     for (const route of ["/", "/events", "/teams", "/honors", "/join", "/join/staff", "/news", "/gallery", "/contact"]) {
       await page.goto(route);

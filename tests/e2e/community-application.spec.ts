@@ -60,7 +60,7 @@ test("完整申请、备案提示、私有二维码、社长查看全部资料�
   const application = (await p.find({ collection: "community-applications", overrideAccess: true, where: { applicant: { equals: applicant.id } }, depth: 0 })).docs[0];
   expect(application.realName).toBe("测试申请人");
   const url = `/community/applications/${application.id}/qr`;
-  expect((await request.get(url)).status()).toBe(404);
+  expect((await request.get(url)).status()).toBe(401);
   const ownImage = await page.request.get(url, { headers: { Origin: "http://localhost:3000" } });
   expect(ownImage.status()).toBe(200);
   expect(ownImage.headers()["cache-control"]).toContain("no-store");

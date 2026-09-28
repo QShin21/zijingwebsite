@@ -1,11 +1,13 @@
+import { canParticipate } from "@/lib/rules";
 import { bySlug, cms } from "@/lib/content";
 import { managesGame } from "@/lib/rules";
 import type { Where } from "payload";
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const headers = { "Cache-Control": "private, no-store" };
+  const p = await cms(); const { user } = await p.auth({ headers: request.headers });
+  if (!canParticipate(user)) return Response.json({ error: "请先登录" }, { status: 401, headers });
   const game = await bySlug("games", (await params).slug);
   if (!game) return Response.json({ error: "社群不存在" }, { status: 404, headers });
-  const p = await cms(); const { user } = await p.auth({ headers: request.headers });
   const query = new URL(request.url).searchParams;
   const before = Number(query.get("before")); const after = Number(query.get("after"));
   const where: Where = { game: { equals: game.id } };

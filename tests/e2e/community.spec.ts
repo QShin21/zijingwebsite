@@ -71,6 +71,51 @@ test("独立分区、连续聊天、历史翻页与新消息保留", async ({ pa
   }
 });
 
+test("访客仅活动通知可用，直接社群接口与伪造会话被拒绝", async ({ page, context }) => {
+  for (const path of ["/events", "/announcements"]) {
+    await page.goto(path);
+    await expect(page).toHaveURL(new RegExp(`${path}$`));
+    await expect(page.getByRole("navigation", { name: "主导航", exact: true }).getByRole("link")).toHaveCount(2);
+  }
+  for (const path of ["/community", `/community/${slug}/chat`, "/teams", "/honors", "/news", "/gallery", "/join/members", "/contact"]) {
+    await page.goto(path); await expect(page).toHaveURL(/\/login\?/);
+  }
+  for (const path of [`/community/${slug}/chat/feed`, `/community/${slug}/chat/stream`, `/community/${slug}/contacts`, "/api/community-messages", "/api/games"]) {
+    expect((await page.request.get(path)).status()).toBe(401);
+  }
+  await context.addCookies([{ name: "payload-token", value: "forged", domain: "localhost", path: "/" }]);
+  await page.goto(`/community/${slug}`); await expect(page).toHaveURL(/\/login\?/);
+});
+
+test("实时推送连续发言、隐藏、重连补齐超过50条消息", async ({ page, browser }) => {
+  const observer = await browser.newContext(); const reader = await observer.newPage();
+  const login = async (target: typeof page) => {
+    await target.goto("/login"); await target.getByLabel("昵称或邮箱").fill(nickname);
+    await target.getByLabel("密码", { exact: true }).fill(password);
+    await target.getByRole("button", { name: "登录", exact: true }).click(); await expect(target).toHaveURL(/\/account$/);
+    await target.goto(`/community/${slug}/chat`);
+    await expect(target.getByRole("status")).toContainText("实时更新");
+  };
+  try {
+    await login(page); await login(reader);
+    for (let i = 0; i < 3; i++) {
+      await page.getByLabel("发消息").fill(`实时连续发言${i}`);
+      await page.getByRole("button", { name: "发送", exact: true }).click();
+      await expect(reader.getByText(`实时连续发言${i}`, { exact: true })).toBeVisible({ timeout: 3000 });
+      await expect(page.getByRole("button", { name: "发送", exact: true })).toBeDisabled();
+    }
+    const target = await p.find({ collection: "community-messages", overrideAccess: true, where: { game: { equals: gameID }, body: { equals: "实时连续发言0" } } });
+    await p.update({ collection: "community-messages", id: target.docs[0].id, overrideAccess: true, user: { ...(await p.findByID({ collection: "users", id: userID })), roles: ["vicePresident"] }, data: { status: "hidden" } });
+    await expect(reader.getByText("实时连续发言0", { exact: true })).toHaveCount(0, { timeout: 3000 });
+    await observer.setOffline(true);
+    const user = await p.findByID({ collection: "users", id: userID });
+    for (let i = 0; i < 55; i++) await p.create({ collection: "community-messages", overrideAccess: false, user, data: { game: gameID, author: userID, body: `断线补齐${i}` } });
+    await observer.setOffline(false);
+    await expect(reader.getByText("断线补齐54", { exact: true })).toBeVisible();
+    await expect(reader.locator(".chat-bubble").filter({ hasText: /^断线补齐/ })).toHaveCount(55);
+  } finally { await observer.close(); }
+});
+
 test("邮箱也可登录同一账号，错误登录统一提示", async ({ page }) => {
   for (const [identifier, secret] of [[nickname, "wrong-password"], [`missing-${suffix}`, password]]) {
     await page.goto("/login");

@@ -28,6 +28,12 @@ test.beforeAll(async () => {
     })
   ).id;
 });
+test.beforeEach(async ({ page }, info) => {
+  if (/三类招新|首页配置|布局/.test(info.title)) {
+    expect((await page.request.post("/api/users/login", { data: { email, password } })).ok()).toBe(true);
+  }
+});
+
 test.afterAll(async () => {
   if (eventID)
     await p.delete({ collection: "events", id: eventID, overrideAccess: true });
@@ -114,7 +120,7 @@ test("后台登录、创建活动草稿、预览、发布、访客查看、撤�
   await visitor.close();
 });
 test("404 HTTP 状态与预览环境不收录", async ({ request }) => {
-  expect((await request.get("/missing-page-for-test")).status()).toBe(404);
+  expect((await request.get("/missing-page-for-test", { maxRedirects: 0 })).status()).toBe(307);
   expect((await request.get("/events/missing-event-for-test")).status()).toBe(
     404,
   );
@@ -194,7 +200,7 @@ test("公开 API、预览、首次注册与分部越权拒绝", async ({ request
 });
 test("公开页可访问性、CSP 与实际加载指标", async ({ page }) => {
   const records = [];
-  for (const route of ["/", "/events", "/join", "/contact"]) {
+  for (const route of ["/events", "/announcements", "/login", "/privacy"]) {
     const response = await page.goto(route);
     expect(response?.headers()["content-security-policy"]).toContain(
       "object-src 'none'",

@@ -106,11 +106,6 @@ const participationGuard = (kind: "forum" | "message" | "comment" | "local" | "s
     data.author = user.id;
     data.authorName = String((req.user as Identity & { name?: string }).name ?? "社团成员");
     data.status = kind === "showcase" && !managesGame(user, data.game) ? "pending" : "visible";
-    const existing = await req.payload.find({ collection: kind === "forum" ? "forum-posts" :
-      kind === "message" ? "community-messages" : kind === "local" ? "community-posts" : kind === "showcase" ? "community-showcase" : "comments",
-      where: { and: [{ author: { equals: user.id } }, { createdAt: { greater_than: new Date(Date.now() - 8000).toISOString() } }] },
-      limit: 1, overrideAccess: true, req, depth: 0 });
-    if (existing.docs.length) throw new APIError("发送过于频繁，请稍后重试", 429);
     return data;
   };
 function social(slug: string, title: string, kind: "forum" | "message" | "comment" | "local" | "showcase"): CollectionConfig {
