@@ -64,6 +64,7 @@ test("多管理员微信、活动互动、风采投稿审核及B站预览", asyn
   await managerPage.goto(`/community/${slug}/showcase`); await expect(managerPage.getByRole("heading", { name: "精彩活动图文记录" })).toHaveCount(0);
   await managerPage.goto("/login"); await managerPage.getByLabel("昵称或邮箱").fill(admin.name); await managerPage.getByLabel("密码", { exact: true }).fill(password); await managerPage.getByRole("button", { name: "登录", exact: true }).click(); await expect(managerPage).toHaveURL(/\/account$/);
   await managerPage.goto(`/community/${slug}/showcase?view=review`); await managerPage.getByRole("button", { name: "批准发布" }).click();
+  await expect(managerPage.getByRole("status")).toContainText("审核已保存");
   await page.goto(`/community/${slug}/showcase`); await expect(page.getByRole("heading", { name: "精彩活动图文记录" })).toBeVisible();
   await expect(page.locator(".showcase-images img")).toHaveCount(1);
   await page.getByRole("button", { name: "站内预览 B 站视频" }).click();
