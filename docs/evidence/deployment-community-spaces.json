@@ -1,0 +1,48 @@
+{
+  "startedAt": "2026-09-28T02:48:30.751Z",
+  "origin": "https://test.yejiaxin.online",
+  "checks": [
+    "multiple manager contacts at 390px and 1440px",
+    "notice like, attend, cancellation and comment",
+    "55 historical chat messages, own send and second-user polling",
+    "forum publish, pin, feature and featured collection",
+    "photo submission privacy, approval, public images and Bilibili iframe"
+  ],
+  "passed": true,
+  "finishedAt": "2026-09-28T02:48:41.559Z",
+  "deployedRevision": "3f81075f9e87bdf2c4dad1e08c95912ed0d691bb",
+  "environment": "staging",
+  "localValidation": {
+    "unitAndDatabaseTests": 81,
+    "browserCases": 36,
+    "browserDetail": "35 passed in full run; one legacy demo-dependent case passed after seeding the isolated development database",
+    "typecheck": "passed",
+    "lint": "passed",
+    "productionBuild": "passed"
+  },
+  "migration": {
+    "rehearsal": "passed",
+    "live": "passed",
+    "unchangedExistingTables": 53,
+    "newTables": 3,
+    "usersPreserved": 5,
+    "applicationsPreserved": 2
+  },
+  "cleanup": {
+    "temporaryUsersAndCommunity": "removed",
+    "remainingUsers": 5,
+    "remainingApplications": 2
+  },
+  "preserved": {
+    "environmentHash": "unchanged",
+    "freeKillNginxHash": "unchanged"
+  },
+  "health": {
+    "websiteReady": 200,
+    "freeKillHTTPS": 200,
+    "freeKillWebSocket": 101
+  },
+  "externalVideoPlaybackVerified": false,
+  "backupDirectory": "/srv/zijingwebsite/backups/community-20260928",
+  "nginxUploadLimit": "16m"
+}

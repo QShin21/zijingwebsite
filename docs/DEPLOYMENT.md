@@ -57,3 +57,9 @@ BACKUP_REMOTE可设为已挂载的异机受控目录；设置前由维护者核�
 恢复演练新建 `zijing_restore_<时间>` 库，限制本地/隔离db主机且拒绝APP*ENV=production；从不覆盖已有库。媒体恢复到 `.data/zijing_restore*<时间>/media`；比较所有表内容和媒体哈希后生成 `docs/evidence/restore.json`。恢复库保留供检查。实际生产灾难恢复应先建立隔离替代环境、恢复、核对、冒烟验收，再获准切换连接和流量。
 
 本次恢复记录：44张表、176条记录、1个媒体文件全部核验通过；这是本地演练，源库未修改。后续数据变化不影响这份历史演练结论。
+
+## 2026-09-28 社群功能部署
+
+应用提交 `3f81075f9e87bdf2c4dad1e08c95912ed0d691bb` 已更新到现有 staging 实例；数据、环境和媒体保留。备份位于 `/srv/zijingwebsite/backups/community-20260928`；三个增量迁移经过隔离恢复演练及线上原表摘要对比。数据库 systemd 启动完成后仍需 `pg_isready` 成功，才能执行迁移；第一次切换尝试因就绪等待不足退出并恢复旧站，补充等待后切换成功。
+
+源码/旧构建保留在 `/srv/zijingwebsite/releases/community-previous-3f81075`，此版数据库为增量扩展。全量数据回退需停写、核验备份、按对应旧应用执行恢复，不能直接运行删表 down。现有测试站 Nginx `client_max_body_size` 为 `16m`，与 Next 14 MB 表单限制和最多六张图片匹配。其余虚拟主机配置不变。线上功能与清理验证见 `docs/evidence/deployment-community-spaces.json`。
