@@ -168,3 +168,28 @@ export async function hideChatAction(id: number) {
   try { await p.update({ collection: "community-messages", id, overrideAccess: false, user, data: { status: "hidden" } }); return { success: true }; }
   catch { return { error: "无权管理该消息或消息已移除" }; }
 }
+
+export async function submitShowcaseAction(form: FormData) {
+  const p = await cms(); const { user } = await p.auth({ headers: await headers() });
+  if (!user || user.accountStatus === "suspended") return { error: "请先登录可用账号" };
+  const files = form.getAll("images").filter(f => f instanceof File && f.size) as File[];
+  if (files.length > 6 || files.some(f => f.size > 2 * 1024 * 1024 || !["image/png", "image/jpeg", "image/webp"].includes(f.type))) return { error: "最多 6 张 PNG、JPEG、WebP 照片，每张 2 MB 以内" };
+  try {
+    const images = await Promise.all(files.map(async file => ({ source: `data:${file.type};base64,${Buffer.from(await file.arrayBuffer()).toString("base64")}`, caption: value(form, "caption") })));
+    await p.create({ collection: "community-showcase", overrideAccess: false, user,
+      data: { game: numeric(form, "game"), author: user.id, title: value(form, "title"), body: value(form, "body"), videoURL: value(form, "videoURL"), images } });
+    return { success: true };
+  } catch (error) { return { error: applicationError(error) }; }
+}
+export async function reviewShowcaseAction(form: FormData) {
+  const { p, user } = await current();
+  const post = await p.findByID({ collection: "community-showcase", id: numeric(form, "id"), overrideAccess: false, user, depth: 0 }).catch(() => null);
+  if (!post || !managesGame(user, post.game)) redirect("/community");
+  const path = `${await gamePath(Number(post.game))}/showcase`;
+  const status = value(form, "status");
+  if (!["visible", "rejected", "hidden"].includes(status)) problem(path, "审核决定无效");
+  try { await p.update({ collection: "community-showcase", id: post.id, overrideAccess: false, user,
+    data: { status: status as "visible" | "rejected" | "hidden", reviewNote: value(form, "reviewNote") } }); }
+  catch { problem(path, "审核未成功，请刷新后重试"); }
+  redirect(`${path}?view=review&message=${encodeURIComponent("审核已保存")}`);
+}

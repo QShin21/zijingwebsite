@@ -25,6 +25,7 @@ export interface Config {
     'community-applications': CommunityApplication;
     'community-bans': CommunityBan;
     'community-reactions': CommunityReaction;
+    'community-showcase': CommunityShowcase;
     'forum-posts': ForumPost;
     'community-messages': CommunityMessage;
     'community-posts': CommunityPost;
@@ -53,6 +54,7 @@ export interface Config {
     'community-applications': CommunityApplicationsSelect<false> | CommunityApplicationsSelect<true>;
     'community-bans': CommunityBansSelect<false> | CommunityBansSelect<true>;
     'community-reactions': CommunityReactionsSelect<false> | CommunityReactionsSelect<true>;
+    'community-showcase': CommunityShowcaseSelect<false> | CommunityShowcaseSelect<true>;
     'forum-posts': ForumPostsSelect<false> | ForumPostsSelect<true>;
     'community-messages': CommunityMessagesSelect<false> | CommunityMessagesSelect<true>;
     'community-posts': CommunityPostsSelect<false> | CommunityPostsSelect<true>;
@@ -293,6 +295,30 @@ export interface CommunityReaction {
   kind: 'like' | 'attend';
   author: number | User;
   key: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-showcase".
+ */
+export interface CommunityShowcase {
+  id: number;
+  title: string;
+  body?: string | null;
+  game?: (number | null) | Game;
+  author: number | User;
+  authorName?: string | null;
+  status?: ('visible' | 'hidden' | 'pending' | 'rejected') | null;
+  videoURL?: string | null;
+  reviewNote?: string | null;
+  images?:
+    | {
+        source: string;
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -837,6 +863,10 @@ export interface PayloadLockedDocument {
         value: number | CommunityReaction;
       } | null)
     | ({
+        relationTo: 'community-showcase';
+        value: number | CommunityShowcase;
+      } | null)
+    | ({
         relationTo: 'forum-posts';
         value: number | ForumPost;
       } | null)
@@ -1043,6 +1073,29 @@ export interface CommunityReactionsSelect<T extends boolean = true> {
   kind?: T;
   author?: T;
   key?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-showcase_select".
+ */
+export interface CommunityShowcaseSelect<T extends boolean = true> {
+  title?: T;
+  body?: T;
+  game?: T;
+  author?: T;
+  authorName?: T;
+  status?: T;
+  videoURL?: T;
+  reviewNote?: T;
+  images?:
+    | T
+    | {
+        source?: T;
+        caption?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

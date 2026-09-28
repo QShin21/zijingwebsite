@@ -1,3 +1,5 @@
+import { communityVideo } from "../lib/community-video";
+import { normalizeShowcaseImage } from "../lib/showcase-images";
 import { APIError, type CollectionConfig, type CollectionBeforeChangeHook, type Access, type Where } from "payload";
 import { canParticipate, canPublish, hasRole, managesGame, type Identity } from "../lib/rules";
 import { MAX_WECHAT_QR_TEXT_LENGTH, normalizeWechatQr, validApplicantName, validApplicantPhone } from "../lib/application-details";
@@ -48,9 +50,20 @@ async function notBanned(req: Parameters<CollectionBeforeChangeHook>[0]["req"], 
   });
   if (result.docs.length) throw new APIError("此社群的发言权限已受限", 403);
 }
-const participationGuard = (kind: "forum" | "message" | "comment" | "local"): CollectionBeforeChangeHook =>
+const participationGuard = (kind: "forum" | "message" | "comment" | "local" | "showcase"): CollectionBeforeChangeHook =>
   async ({ data, originalDoc, req, operation }) => {
     const user = req.user as Identity;
+    if (kind === "showcase") {
+      if (data.videoURL && !communityVideo(data.videoURL)) throw new APIError("请填写有效的 HTTPS 视频链接", 400);
+      if (data.images !== undefined) {
+        if (!Array.isArray(data.images) || data.images.length > 6) throw new APIError("最多上传 6 张照片", 400);
+        try {
+          data.images = await Promise.all(data.images.map(async (image: { source?: unknown; caption?: string }) => ({
+            source: await normalizeShowcaseImage(image.source), caption: String(image.caption || "").slice(0,200),
+          })));
+        } catch { throw new APIError("请上传 2 MB 以内的静态 PNG、JPEG 或 WebP 照片", 400); }
+      }
+    }
     if (operation === "update") {
       if (!canPublish(user) && !managesGame(user, originalDoc?.game)) throw new APIError("无权管理此社群", 403);
       for (const key of ["author", "authorName", "game", "targetType", "targetId", "parent"]) {
@@ -88,28 +101,37 @@ const participationGuard = (kind: "forum" | "message" | "comment" | "local"): Co
         throw new APIError("仅对应社群管理员可直接发布", 403);
     } else if (kind !== "comment") throw new APIError("缺少游戏社群", 400);
     const body = String(data.body ?? "").trim();
-    if (body.length < 1 || body.length > 5000) throw new APIError("内容长度需为 1–5000 字", 400);
+    if ((body.length < 1 && (kind !== "showcase" || (!data.images?.length && !data.videoURL))) || body.length > 5000) throw new APIError("内容长度需为 1–5000 字", 400);
     data.body = body;
     data.author = user.id;
     data.authorName = String((req.user as Identity & { name?: string }).name ?? "社团成员");
-    data.status = "visible";
+    data.status = kind === "showcase" && !managesGame(user, data.game) ? "pending" : "visible";
     const existing = await req.payload.find({ collection: kind === "forum" ? "forum-posts" :
-      kind === "message" ? "community-messages" : kind === "local" ? "community-posts" : "comments",
+      kind === "message" ? "community-messages" : kind === "local" ? "community-posts" : kind === "showcase" ? "community-showcase" : "comments",
       where: { and: [{ author: { equals: user.id } }, { createdAt: { greater_than: new Date(Date.now() - 8000).toISOString() } }] },
       limit: 1, overrideAccess: true, req, depth: 0 });
     if (existing.docs.length) throw new APIError("发送过于频繁，请稍后重试", 429);
     return data;
   };
-function social(slug: string, title: string, kind: "forum" | "message" | "comment" | "local"): CollectionConfig {
+function social(slug: string, title: string, kind: "forum" | "message" | "comment" | "local" | "showcase"): CollectionConfig {
   const fields: CollectionConfig["fields"] = [
-    ...(kind === "forum" || kind === "local" ? [{ name: "title", type: "text" as const, required: true, maxLength: 120 }] : []),
-    { name: "body", type: "textarea", required: true, maxLength: 5000 },
+    ...(kind === "forum" || kind === "local" || kind === "showcase" ? [{ name: "title", type: "text" as const, required: true, maxLength: 120 }] : []),
+    { name: "body", type: "textarea", required: kind !== "showcase", maxLength: 5000 },
     { name: "game", type: "relationship", relationTo: "games", maxDepth: 0 },
     relation("author", "users"),
     { name: "authorName", type: "text", access: { create: () => false, update: () => false } },
-    { name: "status", type: "select", defaultValue: "visible", options: ["visible", "hidden"],
+    { name: "status", type: "select", defaultValue: "visible", options: kind === "showcase" ? ["visible", "hidden", "pending", "rejected"] : ["visible", "hidden"],
       access: { create: () => false, update: ({ req, doc }) => managesGame(req.user as Identity, doc?.game) } },
   ];
+  if (kind === "showcase") fields.push(
+    { name: "videoURL", label: "视频链接", type: "text", maxLength: 2000 },
+    { name: "reviewNote", label: "审核说明", type: "textarea", maxLength: 500,
+      access: { create: () => false, update: ({ req, doc }) => managesGame(req.user as Identity, doc?.game) } },
+    { name: "images", label: "活动照片", type: "array", maxRows: 6, fields: [
+      { name: "source", type: "textarea", required: true, maxLength: 6_000_000, admin: { hidden: true } },
+      { name: "caption", label: "图片说明", type: "text", maxLength: 200 },
+    ] },
+  );
   if (kind === "forum") fields.push(
     { name: "pinned", label: "置顶", type: "checkbox", defaultValue: false, index: true,
       access: { create: () => false, update: ({ req, doc }) => managesGame(req.user as Identity, doc?.game) } },
@@ -126,9 +148,15 @@ function social(slug: string, title: string, kind: "forum" | "message" | "commen
   );
   if (kind === "local") fields.push({ name: "category", type: "select", options: ["event", "notice"], required: true });
   return {
-    slug, labels: { singular: title, plural: title }, admin: { useAsTitle: kind === "forum" || kind === "local" ? "title" : "authorName" },
+    slug, labels: { singular: title, plural: title }, admin: { useAsTitle: kind === "forum" || kind === "local" || kind === "showcase" ? "title" : "authorName" },
     access: {
-      read: visibleToPublic,
+      read: kind === "showcase" ? ({ req }) => {
+        if (canPublish(req.user as Identity)) return true;
+        const scope: Where[] = [{ status: { equals: "visible" } }];
+        if (canParticipate(req.user as Identity)) scope.push({ author: { equals: req.user!.id } });
+        if (hasRole(req.user as Identity, "communityAdmin")) scope.push({ game: { in: ((req.user as Identity).communities || []).map(idOf) } });
+        return { or: scope };
+      } : visibleToPublic,
       create: ({ req }) => canParticipate(req.user as Identity),
       update: moderatorWhere,
       delete: ({ req }) => canPublish(req.user as Identity),
@@ -396,6 +424,7 @@ const reactions: CollectionConfig = {
 };
 export const SocialCollections: CollectionConfig[] = [
   applications, bans, reactions,
+  social("community-showcase", "社群风采", "showcase"),
   social("forum-posts", "论坛帖子", "forum"),
   social("community-messages", "社群发言", "message"),
   social("community-posts", "社群活动与通知", "local"),

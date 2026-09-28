@@ -5,6 +5,7 @@ import * as migration_20260926_145257_nickname_login from './20260926_145257_nic
 import * as migration_20260927_004500_application_details from './20260927_004500_application_details';
 import * as migration_20260927_181509_community_reactions from './20260927_181509_community_reactions';
 import * as migration_20260927_181800_forum_curation from './20260927_181800_forum_curation';
+import * as migration_20260927_182940_community_showcase from './20260927_182940_community_showcase';
 
 export const migrations = [
   {
@@ -40,6 +41,11 @@ export const migrations = [
   {
     up: migration_20260927_181800_forum_curation.up,
     down: migration_20260927_181800_forum_curation.down,
-    name: '20260927_181800_forum_curation'
+    name: '20260927_181800_forum_curation',
+  },
+  {
+    up: migration_20260927_182940_community_showcase.up,
+    down: migration_20260927_182940_community_showcase.down,
+    name: '20260927_182940_community_showcase'
   },
 ];

@@ -3298,12 +3298,12 @@ button:disabled {
 
 .heading-with-action { display:flex; align-items:center; gap:2rem; flex-wrap:wrap }
 .community-join { font-size: .9rem; max-width:100%; white-space:normal }
-.community-dialog { width:min(860px,calc(100% - 2rem)); max-height:85dvh; border:1px solid #ddd4ed; border-radius:24px; padding:24px; color:#242036; background:#fff; overflow:auto }
+.community-dialog { margin:auto; inset:0; width:min(860px,calc(100% - 2rem)); max-height:85dvh; border:1px solid #ddd4ed; border-radius:24px; padding:24px; color:#242036; background:#fff; overflow:auto }
 .community-dialog::backdrop { background:#21153799 }
 .dialog-top { display:flex; justify-content:space-between; align-items:center; gap:1rem }
 .dialog-top button { flex-shrink:0; padding:.7rem; border-radius:12px; background:#f1eafa; color:#522597; cursor:pointer }
 .contact-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr)); gap:24px }
-.contact-grid article { text-align:center; min-width:0 }
+.contact-grid article { overflow-wrap:anywhere; text-align:center; min-width:0 }
 .contact-grid img { display:block; width:100%; max-width:280px; height:auto; object-fit:contain; margin:1rem auto }
 
 .community-home-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr)); gap:24px; margin:32px 0 }
@@ -3336,3 +3336,16 @@ button:disabled {
 .chat-shell>p { padding:0 24px; color:#a02139 }
 .chat-empty { text-align:center; color:#6c647b }
 @media(max-width:600px) { .chat-history { padding:12px; height:52dvh } .chat-bubble-wrap { max-width:84% } .chat-compose,.chat-top { padding:12px } .chat-meta { font-size:.7rem; gap:4px } }
+
+.showcase-feed { display:grid; gap:24px; max-width:960px; margin:24px auto }
+.showcase-card { overflow-wrap:anywhere }
+.showcase-images { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr)); gap:12px }
+.showcase-images figure { margin:0; min-width:0 }
+.showcase-images img { width:100%; height:auto; max-height:520px; object-fit:contain; border-radius:12px; background:#f6f3fa }
+.showcase-images figcaption { font-size:.85rem; color:#70657f; padding:6px }
+.community-video iframe { width:100%; aspect-ratio:16/9; border:0; border-radius:12px; background:#191622 }
+.showcase-review { margin-top:24px; padding-top:16px; border-top:1px solid #e5ddf0 }
+.showcase-review label { display:grid; gap:8px }
+.showcase-review input { border:1px solid #d8cfe4; border-radius:8px; padding:10px }
+.showcase-compose { max-width:960px; margin:24px auto }
+.showcase-compose summary { font-weight:bold; font-size:1.2rem; cursor:pointer }

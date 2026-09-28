@@ -226,6 +226,27 @@ describe.sequential("申请、建群、发言与跨级审核", () => {
     expect((await read()).heat).toBe(0);
     await p.delete({ collection: "comments", id: reply.id, overrideAccess: true });
   });
+  it("普通成员图文投稿先审核，跨社群管理和匿名不能读取待审图片", async () => {
+    const ordinary = { ...vice, roles: ["member"] as User["roles"], communities: [] };
+    const post = await p.create({ collection: "community-showcase", overrideAccess: false, user: ordinary,
+      data: { game, author: ordinary.id, title: "活动精彩记录", body: "活动后的精彩瞬间", status: "visible",
+        images: [{ source: qr, caption: "测试照片" }], videoURL: "https://www.bilibili.com/video/BV1B7411m7LV/" } });
+    try {
+      expect(post.status).toBe("pending");
+      expect(post.images?.[0].source).toMatch(/^data:image\/webp;base64,/);
+      await expect(p.findByID({ collection: "community-showcase", id: post.id, overrideAccess: false, user: null })).rejects.toThrow();
+      const outsider = { ...member, communities: [] };
+      await expect(p.findByID({ collection: "community-showcase", id: post.id, overrideAccess: false, user: outsider })).rejects.toThrow();
+      await expect(p.update({ collection: "community-showcase", id: post.id, overrideAccess: false, user: ordinary, data: { status: "visible" } })).rejects.toThrow();
+      await expect(p.update({ collection: "community-showcase", id: post.id, overrideAccess: false, user: outsider, data: { status: "visible" } })).rejects.toThrow();
+      await p.update({ collection: "community-showcase", id: post.id, overrideAccess: false, user: member, data: { status: "rejected", reviewNote: "请核对记录" } });
+      expect((await p.findByID({ collection: "community-showcase", id: post.id, overrideAccess: false, user: ordinary })).reviewNote).toBe("请核对记录");
+      await p.update({ collection: "community-showcase", id: post.id, overrideAccess: false, user: member, data: { status: "visible" } });
+      expect((await p.findByID({ collection: "community-showcase", id: post.id, overrideAccess: false, user: null })).title).toBe("活动精彩记录");
+    } finally { await p.delete({ collection: "community-showcase", id: post.id, overrideAccess: true }); }
+    await expect(p.create({ collection: "community-showcase", overrideAccess: false, user: member,
+      data: { game, author: member.id, title: "伪造图片", body: "无效图片必须拒绝", images: [{ source: "data:image/png;base64,aGVsbG8=" }] } })).rejects.toThrow();
+  });
   it("全站投稿须提交审核，副社长才能公开", async () => {
     const draft = await p.create({ collection: "announcements", overrideAccess: false,
       user: member, draft: true, data: { title: "待审通知", slug: `review-${suffix}` } });
