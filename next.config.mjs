@@ -1,6 +1,9 @@
 import { withPayload } from "@payloadcms/next/withPayload";
 export default withPayload({
-  experimental: { serverActions: { bodySizeLimit: "14mb" } },
+  experimental: {
+    serverActions: { bodySizeLimit: "14mb" },
+    webpackMemoryOptimizations: true,
+  },
   // Resolve status/redirect metadata before streaming an HTML response.
   htmlLimitedBots: /.*/,
   poweredByHeader: false,
