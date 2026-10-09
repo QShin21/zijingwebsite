@@ -1,0 +1,43 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/events/index",
+    "pages/communities/index",
+    "pages/explore/index",
+    "pages/account/index",
+    "pages/list/index",
+    "pages/detail/index",
+    "pages/fixed/index",
+    "pages/auth/index",
+    "pages/community/index",
+    "pages/chat/index",
+    "pages/compose/index",
+    "pages/applications/index",
+    "pages/review/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "紫荆电竞社",
+    "navigationBarBackgroundColor": "#faf8fc",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#faf8fc",
+    "backgroundTextStyle": "dark",
+    "enablePullDownRefresh": true
+  },
+  "tabBar": {
+    "color": "#78717f",
+    "selectedColor": "#6536a6",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/home/index", "text": "紫荆", "iconPath": "assets/home.png", "selectedIconPath": "assets/home-active.png" },
+      { "pagePath": "pages/events/index", "text": "活动", "iconPath": "assets/calendar.png", "selectedIconPath": "assets/calendar-active.png" },
+      { "pagePath": "pages/communities/index", "text": "社群", "iconPath": "assets/community.png", "selectedIconPath": "assets/community-active.png" },
+      { "pagePath": "pages/explore/index", "text": "发现", "iconPath": "assets/explore.png", "selectedIconPath": "assets/explore-active.png" },
+      { "pagePath": "pages/account/index", "text": "我的", "iconPath": "assets/user.png", "selectedIconPath": "assets/user-active.png" }
+    ]
+  },
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
+  "sitemapLocation": "sitemap.json",
+  "networkTimeout": { "request": 70000, "downloadFile": 20000 }
+}

@@ -1,0 +1,53 @@
+page { background: #faf8fc; color: #292332; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; font-size: 28rpx; }
+view, button, input, textarea { box-sizing: border-box; }
+button { font-size: 28rpx; line-height: 1.5; border-radius: 20rpx; padding: 23rpx 30rpx; margin: 0; }
+button::after { border: 0; }
+button[disabled] { opacity: .5; }
+.page { padding: 36rpx 32rpx 70rpx; }
+.eyebrow { display: block; font-size: 21rpx; font-weight: 700; letter-spacing: 4rpx; color: #71449e; margin-bottom: 16rpx; }
+.title { display: block; font-size: 52rpx; font-weight: 750; line-height: 1.35; letter-spacing: -1rpx; }
+.subtitle { display: block; color: #797080; line-height: 1.8; font-size: 27rpx; margin-top: 18rpx; }
+.section { margin-top: 50rpx; }
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24rpx; }
+.section-title { font-size: 34rpx; font-weight: 650; }
+.more { font-size: 25rpx; color: #71449e; padding: 14rpx 0 14rpx 20rpx; }
+.panel, .card { border: 1rpx solid #eae3f0; background: #fff; border-radius: 26rpx; overflow: hidden; }
+.panel { padding: 30rpx; }
+.card { margin-bottom: 24rpx; }
+.card-image { display: block; width: 100%; height: 310rpx; }
+.card-body { padding: 28rpx; }
+.card-title { display: block; font-size: 32rpx; font-weight: 650; line-height: 1.6; margin-top: 13rpx; }
+.card-summary { display: block; font-size: 26rpx; color: #797080; line-height: 1.7; margin-top: 12rpx; }
+.card-footer { margin-top: 28rpx; }
+.meta { display: flex; gap: 16rpx; align-items: center; flex-wrap: wrap; justify-content: space-between; color: #8a8192; font-size: 23rpx; line-height: 1.6; }
+.badge { color: #71449e; background: #f2ecf8; padding: 4rpx 14rpx; border-radius: 10rpx; font-size: 22rpx; }
+.primary { background: #6536a6; color: #fff; font-weight: 600; }
+.secondary { background: #f1eaf8; color: #6536a6; font-weight: 600; }
+.plain { background: transparent; color: #71449e; padding: 18rpx 0; }
+.danger { background: #fff0f1; color: #b33a50; }
+.state, .empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 50rpx 30rpx; gap: 20rpx; margin-top: 32rpx; }
+.state-title { font-size: 33rpx; font-weight: 600; }
+.state button { margin-top: 16rpx; min-width: 270rpx; }
+.state-dot { width: 18rpx; height: 18rpx; border-radius: 100%; background: #71449e; }
+.muted { color: #82788b; font-size: 25rpx; line-height: 1.8; }
+.error { color: #b33a50; padding: 22rpx; background: #fff0f1; border-radius: 14rpx; margin: 20rpx 0; font-size: 26rpx; }
+.chips { display: flex; gap: 14rpx; margin: 28rpx 0; white-space: nowrap; }
+.chip { display: inline-block; padding: 17rpx 27rpx; border-radius: 40rpx; font-size: 25rpx; color: #817587; background: #f0ebf4; margin-right: 14rpx; }
+.chip.active { background: #6536a6; color: #fff; }
+.search { display: flex; gap: 12rpx; margin: 26rpx 0; }
+.search input { flex: 1; background: #fff; border: 1rpx solid #eae3f0; border-radius: 18rpx; padding: 18rpx 24rpx; height: 82rpx; }
+.search button { padding: 18rpx 25rpx; }
+.field { margin: 24rpx 0; }
+.field-label { display: block; margin-bottom: 14rpx; font-weight: 550; }
+.field input, .field textarea, .field picker { border: 1rpx solid #e2d9ea; border-radius: 16rpx; background: #fff; padding: 22rpx; width: 100%; font-size: 28rpx; }
+.field input { height: 92rpx; }
+.field textarea { min-height: 240rpx; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; }
+.actions { display: flex; gap: 16rpx; flex-wrap: wrap; margin: 26rpx 0; }
+.actions button { flex: 1; min-width: 180rpx; }
+.separator { height: 1rpx; background: #ebe5f0; margin: 28rpx 0; }
+.body { line-height: 1.9; font-size: 29rpx; margin-top: 30rpx; white-space: pre-wrap; word-break: break-word; }
+.body rich-text { white-space: normal; }
+.photo { width: 100%; border-radius: 18rpx; margin: 22rpx 0 10rpx; }
+.pressed { opacity: .8; }
+.bottom-note { text-align: center; margin-top: 60rpx; line-height: 1.8; font-size: 23rpx; color: #a097a7; }

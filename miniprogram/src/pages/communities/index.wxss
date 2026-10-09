@@ -1,0 +1,2 @@
+.community-title { font-size: 36rpx; font-weight: 650; }
+.community-hint { display: block; margin-top: 26rpx; font-size: 23rpx; color: #927d9f; }

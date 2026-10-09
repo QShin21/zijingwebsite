@@ -10,3 +10,7 @@ test-results/
 playwright-report/
 *.tsbuildinfo
 *.log
+miniprogram/project.private.config.json
+miniprogram/preview/
+*.private.key
+*.pem

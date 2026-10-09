@@ -1,0 +1,6 @@
+.explore-list { margin-top: 26rpx; padding: 6rpx 26rpx; }
+.explore-row { display: flex; gap: 22rpx; align-items: center; justify-content: space-between; padding: 28rpx 0; border-bottom: 1rpx solid #efe9f4; }
+.explore-row:last-child { border-bottom: 0; }
+.explore-mark { color: #aa91bd; font-size: 25rpx; }
+.explore-main { flex: 1; }
+.explore-title { display: block; font-weight: 600; font-size: 30rpx; margin-bottom: 9rpx; }

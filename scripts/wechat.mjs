@@ -1,0 +1,35 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+const command = process.argv[2];
+if (!['preview', 'upload', 'open', 'auto', 'islogin'].includes(command)) {
+  console.error('Usage: node scripts/wechat.mjs preview|upload|open|auto|islogin [--port PORT]'); process.exit(1);
+}
+const project = path.resolve('miniprogram');
+const config = JSON.parse(fs.readFileSync(path.join(project, 'project.config.json'), 'utf8'));
+if (config.appid !== 'wxccf9f8fc9515ebd5' || config.miniprogramRoot !== 'src/') throw new Error('Unexpected Mini Program identity');
+if (['preview', 'upload'].includes(command)) {
+  const check = spawnSync(process.execPath, ['scripts/check-miniapp.mjs'], { stdio: 'inherit', windowsHide: true });
+  if (check.status !== 0) process.exit(check.status || 1);
+}
+const installRoot = process.env.WECHAT_DEVTOOLS_PATH || 'e:\\Program Files (x86)\\Tencent\\微信web开发者工具';
+const entry = path.join(installRoot, 'resources/app.asar.unpacked/js/common/cli/index.js');
+if (!fs.existsSync(entry)) throw new Error('Set WECHAT_DEVTOOLS_PATH to the installed developer tools directory');
+const possible = [path.join(installRoot, 'resources/app.asar'), path.join(installRoot, 'resources/app.asar').replace(/^[A-Z]:/, value => value.toLowerCase())];
+const selected = possible.find(value => fs.existsSync(path.join(os.homedir(), 'AppData/Local/微信开发者工具/User Data', createHash('md5').update(value).digest('hex'), 'Default'))) || possible[0];
+// Installed Windows CLI versions derive different profile paths from drive-letter case.
+// Use the existing installation profile; the normal CLI still checks its access token.
+const bootstrap = `const path=require('node:path');let selected=${JSON.stringify(selected)};Object.defineProperty(global,'installPath',{configurable:true,get(){return selected},set(){}});const entry=${JSON.stringify(entry)};process.env.cwd=process.cwd();process.argv=[process.execPath,'--ms-enable-electron-run-as-node',entry,'--electron',...process.argv.slice(1)];require(entry);`;
+const args = [command, '--project', project, '--lang', 'zh'];
+const extra = process.argv.slice(3);
+if (!extra.includes('--port') && process.env.WECHAT_DEVTOOLS_PORT) args.push('--port', process.env.WECHAT_DEVTOOLS_PORT);
+args.push(...extra);
+const output = path.join(project, 'preview'); fs.mkdirSync(output, { recursive: true });
+if (command === 'preview') args.push('--qr-format', 'image', '--qr-output', path.join(output, 'preview.png'), '--info-output', path.join(output, 'preview-info.json'));
+if (command === 'upload') args.push('--version', process.env.MINIAPP_VERSION || '0.1.0', '--desc', process.env.MINIAPP_DESCRIPTION || '紫荆电竞社原生小程序：活动、通知、档案、社群与账号', '--info-output', path.join(output, 'upload-info.json'));
+if (command === 'auto') args.push('--auto-port', process.env.MINIAPP_AUTO_PORT || '9420', '--trust-project');
+const result = spawnSync(process.execPath, ['-e', bootstrap, ...args], { stdio: 'inherit', env: process.env, windowsHide: true });
+if (result.error) throw result.error;
+process.exit(result.status || 0);

@@ -16,6 +16,13 @@ export default ts.config(
   js.configs.recommended,
   ...ts.configs.recommended,
   {
+    files: ['miniprogram/**/*.js'],
+    languageOptions: { globals: { wx: 'readonly', App: 'readonly', Page: 'readonly',
+      getApp: 'readonly', getCurrentPages: 'readonly', module: 'readonly', require: 'readonly',
+      setTimeout: 'readonly', clearTimeout: 'readonly', setInterval: 'readonly', clearInterval: 'readonly' } },
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
+  },
+  {
     languageOptions: {
       globals: {
         process: "readonly",

@@ -1,0 +1,3 @@
+.community-card { margin-top: 24rpx; }
+.contact { display: flex; align-items: center; justify-content: space-between; margin-top: 26rpx; }
+.contact-qr { width: 220rpx; height: 220rpx; }

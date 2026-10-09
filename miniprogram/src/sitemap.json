@@ -1,0 +1,1 @@
+{ "desc": "小程序内容沿用网站公开与账号访问范围", "rules": [{ "action": "disallow", "page": "*" }] }

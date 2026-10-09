@@ -1,0 +1,4 @@
+.email-domain { color: #6536a6; padding: 20rpx 0 0; font-size: 26rpx; }
+.code-row { display: flex; gap: 12rpx; }
+.code-row input { flex: 1; }
+.code-row button { white-space: nowrap; padding: 23rpx 20rpx; }

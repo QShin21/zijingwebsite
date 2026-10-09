@@ -1,0 +1,6 @@
+.detail-title { font-size: 46rpx; margin-top: 26rpx; }
+.qr-image { display: block; width: 420rpx; height: 420rpx; margin: 28rpx auto; }
+.roster-row { display: flex; justify-content: space-between; padding: 26rpx 0; border-bottom: 1rpx solid #efe9f4; }
+.comment { margin-top: 22rpx; }
+.comment-name { font-size: 27rpx; font-weight: 600; }
+.comment .body { margin-top: 14rpx; font-size: 27rpx; }

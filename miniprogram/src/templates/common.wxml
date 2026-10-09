@@ -1,0 +1,12 @@
+<template name="feedback">
+  <view wx:if="{{loading}}" class="state"><view class="state-dot"></view><text>正在加载</text></view>
+  <view wx:elif="{{needsLogin}}" class="state panel"><text class="state-title">登录后，继续探索</text><text class="muted">使用网站已有账号，加入熟悉的游戏社群。</text><button class="primary" bindtap="login">登录账号</button></view>
+  <view wx:elif="{{error}}" class="state panel"><text class="state-title">暂时没有加载成功</text><text class="muted">{{error}}</text><button class="secondary" bindtap="retry">重新加载</button></view>
+</template>
+<template name="cards">
+  <view wx:for="{{docs}}" wx:key="id" class="card" bindtap="openContent" data-doc="{{item}}" hover-class="pressed">
+    <image wx:if="{{item.coverImage}}" class="card-image" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt}}" />
+    <view class="card-body"><view class="meta"><text>{{item.kindText || label}}</text><text wx:if="{{item.statusText}}" class="badge">{{item.statusText}}</text><text wx:if="{{item.demo}}" class="badge">演示资料</text></view><text class="card-title">{{item.title}}</text><text wx:if="{{item.summary}}" class="card-summary">{{item.summary}}</text><view class="meta card-footer"><text>{{item.dateText}}</text><text>{{item.location || '查看详情 →'}}</text></view></view>
+  </view>
+  <view wx:if="{{!docs.length}}" class="empty"><text>内容正在准备中</text><text class="muted">新内容发布后会出现在这里。</text></view>
+</template>
