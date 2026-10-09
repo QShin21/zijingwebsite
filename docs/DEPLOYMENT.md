@@ -2,7 +2,7 @@
 
 ## 当前边界
 
-现有测试站 https://test.yejiaxin.online 使用独立系统账户、systemd、Node 和 PostgreSQL 原生部署。2026-09-25 已更新应用提交 `9cc835b`，详细执行记录见 STATUS.md。当前仍为 staging、禁止搜索收录；Docker 容器验收及异机灾备不在此次部署验证范围。
+现有网站入口为 https://home.thuzijing.top，使用独立系统账户、systemd、Node 和 PostgreSQL 原生部署。2026-10-09 按用户授权恢复原有域名，线上应用继续为 `eb0a236963224abe30ac32d06cd42900b6b279cd`；旧 https://test.yejiaxin.online 以 308 跳转到新入口，保留路径和查询参数。当前仍为 staging、禁止搜索收录；Docker 容器验收及异机灾备不在此次域名恢复验证范围。
 
 ## 独立部署
 
@@ -21,11 +21,33 @@ docker compose --env-file .env.deploy ps
 
 验证 `/health/live` 和 `/health/ready`；就绪检查实际查询数据库且不输出凭据/堆栈。先上传测试图、创建测试记录，再重启服务并确认保留。仅在完成容器测试后允许把A26标为通过。部署时不要运行 `down -v`。
 
-反向代理：已有Nginx使用 `deploy/nginx.conf.example` 独立虚拟主机片段；新主机可参考 `deploy/Caddyfile`。替换明确占位、核对端口、证书与域名归属，先配置校验再按授权reload。不要覆盖旧站全局配置，不要修改其他服务。正式上线另需用户明确授权；本任务没有授权购买资源、DNS修改或生产发布。
+反向代理：已有 Nginx 使用 `deploy/nginx.conf.example` 独立虚拟主机片段；新主机可参考 `deploy/Caddyfile`。替换明确占位、核对端口、证书与域名归属，先配置校验再按当次授权 reload。不要覆盖旧站全局配置，不要修改其他服务。2026-10-09 用户已授权恢复现有服务域名，本次未改 DNS 或购买资源；后续正式内容上线及其他生产变更遵循当次授权范围。
 
 生产设置 APP_ENV=production、DB_PUSH=false、HTTPS origin；使用独立生产数据库/秘密，禁止复制开发`.env`。运行 `pnpm preflight`，清理演示并确认隐私、负责人、邮件和备份。预览即便 NODE_ENV=production 也用 APP_ENV=staging，robots禁止收录。
 
 直接托管时同时设置服务端 `SERVER_URL` 为运行环境的精确origin；它优先于构建时可能被内联的 `NEXT_PUBLIC_SERVER_URL`。Compose已将两者映射到同一配置值。
+
+## 2026-10-09 域名恢复与回滚
+
+| 服务 | 当前入口 | 本次操作 |
+| --- | --- | --- |
+| 紫荆网站 | https://home.thuzijing.top | 独立 Nginx HTTPS 虚拟主机；运行时 origin 改为该入口 |
+| FreeKill | https://sgs.thuzijing.top | 原入口保持运行；验证 HTTPS 与 WSS `/ws` |
+| 旧网站地址 | https://test.yejiaxin.online | HTTP / HTTPS 308 跳转，保留路径与查询参数 |
+
+两个服务子域名的 A 记录均已指向原服务器。主域名 `thuzijing.top` 本次盘点没有 A 记录，未调整 DNS。网站配置位于 `/etc/nginx/sites-available/zijing-home`，旧域名跳转位于 `/etc/nginx/sites-available/zijing-test`。新站沿用上传限制、反向代理端口 `127.0.0.1:3100`、关闭缓冲和 noindex 设置；只修改环境中的 `SERVER_URL` 与 `NEXT_PUBLIC_SERVER_URL`，重启网站服务并等待应用及新域名可信 HTTPS 就绪。
+
+home.thuzijing.top 的证书位于 `/etc/letsencrypt/live/home.thuzijing.top/`，当前有效期至 2027-01-07。已有 `certbot.timer` 和 Nginx 重载钩子继续负责续期；实际执行 `certbot renew --cert-name home.thuzijing.top --dry-run --non-interactive --no-random-sleep-on-renew` 成功。HTTP 的 `/.well-known/acme-challenge/` 继续由 `/var/www/acme` 提供，旧域名也保留验证路径与证书。
+
+回滚目录 `/srv/zijingwebsite/backups/domain-20261009` 权限为 `0700`，包含原网站环境、旧网站虚拟主机、FreeKill 配置副本、基线摘要和 `rollback.sh`。原环境文件包含秘密，仅保存在受限服务器目录；不复制到仓库。需要回滚时，以 root 执行：
+
+```sh
+/srv/zijingwebsite/backups/domain-20261009/rollback.sh
+```
+
+脚本恢复旧网站环境和虚拟主机，核对新虚拟主机路径后移除本次新增入口，校验 Nginx 配置、重启网站并重载代理，最后等待应用就绪。新签发证书会保留供后续使用。第一次即时 HTTPS 验证仍读取到旧默认站点证书，触发自动回滚；该恢复路径已实际执行，旧网站健康检查恢复正常。补充 Nginx 重载后的 HTTPS 重试，再次切换成功。
+
+本轮没有替换应用构建、执行数据库迁移、导入演示资料或修改 FreeKill。核验其他虚拟主机、全局 Nginx、FreeKill 配置与进程和数据库进程一致。公网验证涵盖 13 个路由、五项 HTTP / HTTPS 跳转、新域名 CORS、登录表单无效账号分支、后台登录页面、手机布局及 FreeKill WebSocket 握手；真实账号成功登录、邮件送达和实际游戏对局未在本轮验证。脱敏证据见 [domain-restoration-20261009.json](evidence/domain-restoration-20261009.json)。
 
 ## 对象存储与邮件
 

@@ -1,0 +1,367 @@
+{
+  "recordedAt": "2026-10-09T12:38:28.959682+08:00",
+  "task": "Restore existing FreeKill and zijingwebsite subdomains after user-reported ICP filing approval",
+  "websiteOrigin": "https://home.thuzijing.top",
+  "freeKillOrigin": "https://sgs.thuzijing.top",
+  "oldWebsiteOrigin": "https://test.yejiaxin.online",
+  "applicationRevision": "eb0a236963224abe30ac32d06cd42900b6b279cd",
+  "applicationBuildChanged": false,
+  "databaseMigrationsExecuted": false,
+  "existingUncommittedFeatureWorkDeployed": false,
+  "dns": {
+    "changesMade": false,
+    "homeAndSgsARecords": "123.57.220.25",
+    "apexARecordPresentAtInventory": false
+  },
+  "configuration": {
+    "unchangedFileHashes": {
+      "/etc/nginx/sites-available/freekill-sgs": true,
+      "/home/fk/.config/freekill-web.env": true,
+      "/etc/nginx/conf.d/v9beta-auth.conf": true,
+      "/etc/nginx/sites-available/default-reject": true,
+      "/etc/nginx/nginx.conf": true,
+      "/srv/zijingwebsite/app/SOURCE_REVISION": true
+    },
+    "freeKillProcessIdsUnchanged": true,
+    "databaseProcessIdUnchanged": true,
+    "changedEnvironmentKeys": [
+      "NEXT_PUBLIC_SERVER_URL",
+      "SERVER_URL"
+    ],
+    "environmentMode": "0600",
+    "environmentOwner": "zijingweb",
+    "APP_ENV": "staging",
+    "DB_PUSH": "false",
+    "SERVER_URL": "https://home.thuzijing.top",
+    "NEXT_PUBLIC_SERVER_URL": "https://home.thuzijing.top",
+    "backupDirectory": "/srv/zijingwebsite/backups/domain-20261009",
+    "rollbackScript": "/srv/zijingwebsite/backups/domain-20261009/rollback.sh",
+    "revision": "revision=eb0a236963224abe30ac32d06cd42900b6b279cd\nsource=https://github.com/QShin21/zijingwebsite",
+    "renewalTimerActive": true
+  },
+  "verification": {
+    "network": "direct from Windows workstation; proxy disabled; certificate validation enabled",
+    "publicRoutes": [
+      {
+        "url": "https://home.thuzijing.top/",
+        "status": 307,
+        "location": "/events",
+        "contentType": null,
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": "noindex, nofollow",
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/events",
+        "status": 200,
+        "location": null,
+        "contentType": "text/html; charset=utf-8",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": "noindex, nofollow",
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/announcements",
+        "status": 200,
+        "location": null,
+        "contentType": "text/html; charset=utf-8",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": "noindex, nofollow",
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/login",
+        "status": 200,
+        "location": null,
+        "contentType": "text/html; charset=utf-8",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": "noindex, nofollow",
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/register",
+        "status": 200,
+        "location": null,
+        "contentType": "text/html; charset=utf-8",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": "noindex, nofollow",
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/account/reset",
+        "status": 200,
+        "location": null,
+        "contentType": "text/html; charset=utf-8",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": "noindex, nofollow",
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/privacy",
+        "status": 200,
+        "location": null,
+        "contentType": "text/html; charset=utf-8",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": "noindex, nofollow",
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/health/live",
+        "status": 200,
+        "location": null,
+        "contentType": "application/json",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": "noindex, nofollow",
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/health/ready",
+        "status": 200,
+        "location": null,
+        "contentType": "application/json",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": "noindex, nofollow",
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/account",
+        "status": 307,
+        "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE",
+        "contentType": null,
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": "noindex, nofollow",
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/community",
+        "status": 307,
+        "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE",
+        "contentType": null,
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": "noindex, nofollow",
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/robots.txt",
+        "status": 200,
+        "location": null,
+        "contentType": "text/plain",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": "noindex, nofollow",
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/sitemap.xml",
+        "status": 200,
+        "location": null,
+        "contentType": "application/xml",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": "noindex, nofollow",
+        "coop": null,
+        "coep": null
+      }
+    ],
+    "redirects": [
+      {
+        "url": "http://test.yejiaxin.online/",
+        "status": 308,
+        "location": "https://home.thuzijing.top/",
+        "contentType": "text/html",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "http://test.yejiaxin.online/login?next=%2Fcommunity",
+        "status": 308,
+        "location": "https://home.thuzijing.top/login?next=%2Fcommunity",
+        "contentType": "text/html",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://test.yejiaxin.online/",
+        "status": 308,
+        "location": "https://home.thuzijing.top/",
+        "contentType": "text/html",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://test.yejiaxin.online/login?next=%2Fcommunity",
+        "status": 308,
+        "location": "https://home.thuzijing.top/login?next=%2Fcommunity",
+        "contentType": "text/html",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "http://home.thuzijing.top/login?next=%2Fcommunity",
+        "status": 301,
+        "location": "https://home.thuzijing.top/login?next=%2Fcommunity",
+        "contentType": "text/html",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": null,
+        "coop": null,
+        "coep": null
+      }
+    ],
+    "trustedCertificates": [
+      {
+        "host": "home.thuzijing.top",
+        "hostnameAndTrustVerified": true,
+        "notBefore": "Oct  9 03:29:35 2026 GMT",
+        "notAfter": "Jan  7 03:29:34 2027 GMT",
+        "dnsNames": [
+          "home.thuzijing.top"
+        ]
+      },
+      {
+        "host": "sgs.thuzijing.top",
+        "hostnameAndTrustVerified": true,
+        "notBefore": "Sep 20 07:30:56 2026 GMT",
+        "notAfter": "Dec 19 07:30:55 2026 GMT",
+        "dnsNames": [
+          "sgs.thuzijing.top"
+        ]
+      },
+      {
+        "host": "test.yejiaxin.online",
+        "hostnameAndTrustVerified": true,
+        "notBefore": "Sep 20 12:54:36 2026 GMT",
+        "notAfter": "Dec 19 12:54:35 2026 GMT",
+        "dnsNames": [
+          "test.yejiaxin.online"
+        ]
+      }
+    ],
+    "freeKill": {
+      "https": {
+        "url": "https://sgs.thuzijing.top/",
+        "status": 200,
+        "location": null,
+        "contentType": "text/html; charset=utf-8",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "robots": null,
+        "coop": "same-origin",
+        "coep": "require-corp"
+      },
+      "websocket": {
+        "url": "wss://sgs.thuzijing.top/ws",
+        "origin": "https://sgs.thuzijing.top",
+        "status": 101,
+        "acceptVerified": true
+      },
+      "untrustedOrigin": {
+        "url": "wss://sgs.thuzijing.top/ws",
+        "origin": "https://untrusted.invalid",
+        "status": 403,
+        "acceptVerified": false
+      }
+    },
+    "payloadCors": [
+      {
+        "origin": "https://home.thuzijing.top",
+        "status": 200,
+        "allowOrigin": "https://home.thuzijing.top",
+        "allowCredentials": "true"
+      },
+      {
+        "origin": "https://untrusted.invalid",
+        "status": 200,
+        "allowOrigin": null,
+        "allowCredentials": null
+      }
+    ],
+    "payloadInvalidLogin": [
+      {
+        "origin": "https://home.thuzijing.top",
+        "httpStatus": 401
+      },
+      {
+        "origin": "https://untrusted.invalid",
+        "httpStatus": 401
+      }
+    ],
+    "browser": {
+      "checkedAt": "2026-10-09T04:34:43.324Z",
+      "origin": "https://home.thuzijing.top",
+      "certificateValidationEnabled": true,
+      "checks": [
+        "new-domain login form reaches the server action and returns the expected invalid-account error",
+        "desktop public activities page and JavaScript load over trusted HTTPS",
+        "390px activities page has no horizontal overflow",
+        "old HTTPS address redirects with its route and query intact; registration page renders",
+        "Payload admin login page is reachable"
+      ],
+      "successfulAccountLoginTested": false,
+      "pageErrors": [],
+      "failedScripts": [],
+      "passed": true
+    },
+    "certificateRenewal": {
+      "result": "passed",
+      "command": "certbot renew --cert-name home.thuzijing.top --dry-run --non-interactive --no-random-sleep-on-renew",
+      "renewalTimerActive": true,
+      "existingNginxDeployHook": "nginx -t && systemctl reload nginx"
+    },
+    "nginxConfigTest": "passed",
+    "websiteAndDatabaseServices": "active"
+  },
+  "recovery": {
+    "backupDirectory": "/srv/zijingwebsite/backups/domain-20261009",
+    "directoryMode": "0700",
+    "rollbackScript": "/srv/zijingwebsite/backups/domain-20261009/rollback.sh",
+    "shellSyntaxCheck": "passed",
+    "automaticRollbackExecutedAndOldWebsiteReadinessRestored": true,
+    "firstSwitchIssue": "Immediate HTTPS verification raced Nginx reload and received the previous default-host certificate; automatic rollback restored old routing. Retried with verified HTTPS readiness before accepting the switch.",
+    "successfulSwitchAfterRetry": true
+  },
+  "notExercised": [
+    "Successful login using a real account",
+    "Email delivery or password recovery email",
+    "FreeKill gameplay",
+    "Changing APP_ENV from staging to production",
+    "Publishing the uncommitted community-membership feature",
+    "Apex or www domain DNS changes"
+  ],
+  "secretHandling": "Environment and FreeKill backups retained only in the restricted server directory. No passwords, private keys, account records, media or databases included in this evidence."
+}

@@ -1,5 +1,15 @@
 # 当前状态
 
+## thuzijing.top 域名恢复 · 2026-10-09
+
+按用户要求恢复原有子域名入口：紫荆网站使用 https://home.thuzijing.top，FreeKill 使用 https://sgs.thuzijing.top。两个子域名已解析到现有服务器，无需修改 DNS。FreeKill 盘点时已使用该域名，保留原配置和进程，复核公网 HTTPS 200、WebSocket 101 及非白名单 Origin 403。
+
+网站新建独立 Nginx 虚拟主机，签发 home.thuzijing.top 的 Let's Encrypt 证书，有效期至 2027-01-07，模拟自动续期通过。仅将服务端 `SERVER_URL` 和 `NEXT_PUBLIC_SERVER_URL` 改为新入口；旧 test.yejiaxin.online 的 HTTP / HTTPS 返回 308，保留访问路径和查询参数。13 个路由检查通过：活动、通知、账号入口和健康检查可访问，匿名首页仍跳转活动页，账号及社群仍要求登录。新域名 Payload CORS、登录表单的无效账号响应、后台登录页、390px 页面布局及浏览器脚本加载检查通过。
+
+线上应用继续运行 `eb0a236963224abe30ac32d06cd42900b6b279cd`，沿用 `APP_ENV=staging` 和禁止收录设置。此次未部署工作区中的社群成员审批修改，未执行数据库迁移；数据库进程、FreeKill 两个服务进程及配置、其他虚拟主机哈希均保持一致。环境文件仍由 `zijingweb` 持有、权限 `0600`。配置备份和回滚脚本保存在 `/srv/zijingwebsite/backups/domain-20261009`。首次即时 HTTPS 检查早于 Nginx 重载生效，自动回滚后补充实际 HTTPS 就绪重试，再次切换及公网验证通过。
+
+验证范围为域名、HTTPS、跳转、匿名访问边界、无效账号表单和 WebSocket 握手；本轮未使用真实账号完成登录，也未进行 FreeKill 实际对局或邮件投递。详见 [domain-restoration-20261009.json](evidence/domain-restoration-20261009.json) 和 [部署与回滚说明](DEPLOYMENT.md)。
+
 ## 社群四分区与互动 · 2026-09-28
 
 六项需求已逐项提交并推送，工作分支完成必要检查后快进合并到 `origin/main`。应用 `3f81075f9e87bdf2c4dad1e08c95912ed0d691bb` 已部署至 https://test.yejiaxin.online，沿用现有 staging 配置。
