@@ -1,0 +1,252 @@
+{
+  "recordedAt": "2026-10-09T13:00:09.868725+08:00",
+  "task": "Remove the retired domain and its compatibility routing from current project and live deployment",
+  "authorizedOrigins": [
+    "https://home.thuzijing.top",
+    "https://sgs.thuzijing.top"
+  ],
+  "rebuiltSourceRevision": "eb5e9dea21406523bfc2190cbbaebaafac40fb21",
+  "businessSourceFilesMatchedToPreviousDeployment": 102,
+  "businessCodeChanges": false,
+  "databaseMigrationsExecuted": false,
+  "uncommittedFeaturesDeployed": false,
+  "projectCleanup": {
+    "trackedHistoricalFilesSanitized": 14,
+    "temporaryArtifactsSanitized": 72,
+    "obsoleteMigrationHelpersRemoved": 5,
+    "retiredDomainReferencesInCurrentProjectFiles": 0,
+    "originalUncommittedFilesRetained": 27,
+    "historicalEndpointsRemovedWithoutReassigningPastChecksToCurrentOrigin": true
+  },
+  "serverVerification": {
+    "checkedAt": "2026-10-09T04:58:25.243921+00:00",
+    "activeProjectFilesScanned": 670,
+    "retiredDomainReferencesInActiveProject": 0,
+    "excludedFromActiveProjectScan": [
+      "dependency directories",
+      "media and database data",
+      "historical source archives",
+      "restricted recovery backups and Git history"
+    ],
+    "serverTemporaryArtifactsSanitized": 1,
+    "nginxRetiredDomainReferences": 0,
+    "retiredVirtualHostRemoved": true,
+    "retiredCertificateAndRenewalRemoved": true,
+    "remainingCertificates": [
+      "sgs.thuzijing.top",
+      "home.thuzijing.top"
+    ],
+    "preservedFileHashes": {
+      "/srv/zijingwebsite/app/.env": true,
+      "/etc/nginx/sites-available/zijing-home": true,
+      "/etc/nginx/sites-available/freekill-sgs": true,
+      "/home/fk/.config/freekill-web.env": true,
+      "/etc/nginx/conf.d/v9beta-auth.conf": true,
+      "/etc/nginx/nginx.conf": true
+    },
+    "databaseProcessUnchanged": true,
+    "freeKillProcessesUnchanged": true,
+    "swapPolicyRestored": true,
+    "buildResult": "success",
+    "sourceRevision": "revision=eb5e9dea21406523bfc2190cbbaebaafac40fb21\nsource=https://github.com/QShin21/zijingwebsite",
+    "configurationRecoveryScript": "/srv/zijingwebsite/backups/domain-retirement-20261009/restore-current-host.sh"
+  },
+  "publicVerification": {
+    "checkedAt": "2026-10-09T04:58:12.963226+00:00",
+    "network": "Direct workstation connections with proxy disabled and certificate validation enabled",
+    "routes": [
+      {
+        "url": "https://home.thuzijing.top/",
+        "status": 307,
+        "location": "/events",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/events",
+        "status": 200,
+        "location": null,
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/announcements",
+        "status": 200,
+        "location": null,
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/login",
+        "status": 200,
+        "location": null,
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/register",
+        "status": 200,
+        "location": null,
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/account/reset",
+        "status": 200,
+        "location": null,
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/privacy",
+        "status": 200,
+        "location": null,
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/health/live",
+        "status": 200,
+        "location": null,
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/health/ready",
+        "status": 200,
+        "location": null,
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/account",
+        "status": 307,
+        "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/community",
+        "status": 307,
+        "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE",
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/robots.txt",
+        "status": 200,
+        "location": null,
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/sitemap.xml",
+        "status": 200,
+        "location": null,
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "coop": null,
+        "coep": null
+      }
+    ],
+    "cors": [
+      {
+        "url": "https://home.thuzijing.top/api/users/me",
+        "status": 200,
+        "location": null,
+        "allowOrigin": "https://home.thuzijing.top",
+        "allowCredentials": "true",
+        "coop": null,
+        "coep": null
+      },
+      {
+        "url": "https://home.thuzijing.top/api/users/me",
+        "status": 200,
+        "location": null,
+        "allowOrigin": null,
+        "allowCredentials": null,
+        "coop": null,
+        "coep": null
+      }
+    ],
+    "certificates": [
+      {
+        "host": "home.thuzijing.top",
+        "trustAndHostnameVerified": true,
+        "notAfter": "Jan  7 03:29:34 2027 GMT"
+      },
+      {
+        "host": "sgs.thuzijing.top",
+        "trustAndHostnameVerified": true,
+        "notAfter": "Dec 19 07:30:55 2026 GMT"
+      }
+    ],
+    "freeKillHttps": {
+      "url": "https://sgs.thuzijing.top/",
+      "status": 200,
+      "location": null,
+      "allowOrigin": null,
+      "allowCredentials": null,
+      "coop": "same-origin",
+      "coep": "require-corp"
+    },
+    "freeKillWebsocket": {
+      "status": 101,
+      "acceptVerified": true
+    },
+    "passed": true
+  },
+  "browserVerification": {
+    "checkedAt": "2026-10-09T04:58:12.410Z",
+    "origin": "https://home.thuzijing.top",
+    "checks": [
+      "login action returns the expected invalid-account response on the current origin",
+      "public events render without horizontal overflow at 390px",
+      "registration and Payload admin login pages are reachable"
+    ],
+    "passed": true,
+    "pageErrors": []
+  },
+  "build": {
+    "result": "success",
+    "compiledWithGenericWarnings": true,
+    "nodeHeapMiB": 1280,
+    "memoryLimitMiB": 1200,
+    "swapLimitMiB": 1600,
+    "temporaryPortSmoke": "passed",
+    "temporaryPort": 3101,
+    "originalRuntimeSettingsRetained": true
+  },
+  "notExercised": [
+    "Real account successful login",
+    "Email delivery",
+    "FreeKill gameplay",
+    "Production content launch"
+  ],
+  "retentionScope": "Current project files, operational helpers and active build cleaned. Git history, database/media, dependencies and restricted recovery/source archives retained.",
+  "secretHandling": "No private keys, credentials, database records, media or backup contents included."
+}
