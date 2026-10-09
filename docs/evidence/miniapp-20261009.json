@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "checkedAt": "2026-10-09T07:06:50.540Z",
+  "checkedAt": "2026-10-09T07:22:41.854Z",
   "branch": "littleapp",
   "baseRevision": "fb51bbb71009aec66395fb2892402d814ddca744",
   "implementationRevision": "42aa64d64b632f9e4ea206e070d34c04b02cf564",
@@ -48,7 +48,7 @@
     },
     "preview": {
       "status": "passed",
-      "generatedAt": "2026-10-09T07:00:14.351Z",
+      "generatedAt": "2026-10-09T07:22:41.584Z",
       "receiptBytes": 137026,
       "qrSavedLocally": true
     },
@@ -79,7 +79,8 @@
       "userReportedDomainConfigured": true,
       "origin": "https://home.thuzijing.top",
       "observedError": "url not in domain list",
-      "domainInformationRefreshRequested": true
+      "domainInformationRefreshRequested": true,
+      "lastCheckedAt": "2026-10-09T07:17:27.666Z"
     }
   },
   "backend": {
