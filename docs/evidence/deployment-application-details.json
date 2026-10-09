@@ -2,7 +2,7 @@
   "revision": "00da687327c9fd9bc82455b28117fc4b9e8a5404",
   "passwordRevision": "071bb9e8f3997c186e4be4d0e5da8fb8e3c624cc",
   "environment": "staging",
-  "url": "https://test.yejiaxin.online",
+  "url": null,
   "migration": "20260927_004500_application_details",
   "backup": {
     "path": "/srv/zijingwebsite/backups/application-details-20260927",
@@ -44,7 +44,7 @@
   },
   "liveApplication": {
     "checkedAt": "2026-09-26T16:54:10.351Z",
-    "url": "https://test.yejiaxin.online",
+    "url": null,
     "syntheticFixtures": true,
     "eightDigitPasswordLogin": true,
     "submittedRequiredDetails": true,
@@ -75,7 +75,7 @@
   },
   "livePasswords": {
     "checkedAt": "2026-09-26T16:54:04.053Z",
-    "url": "https://test.yejiaxin.online",
+    "url": null,
     "routes": [
       {
         "route": "/register",
@@ -106,5 +106,12 @@
     "temporaryReleasesAndRehearsalRemoved": true,
     "backupsRetained": true
   },
-  "realMessagesSent": false
+  "realMessagesSent": false,
+  "historicalEndpointRedaction": {
+    "date": "2026-10-09",
+    "reason": "User requested removal of the retired domain from project files.",
+    "originalValidationTimeAndScopePreserved": true,
+    "redactedEndpointValuesAreNull": true,
+    "doesNotAssertHistoricalChecksRanOnCurrentDomain": true
+  }
 }

@@ -16,7 +16,7 @@
   },
   "live": {
     "checkedAt": "2026-09-26T17:16:50.021Z",
-    "url": "https://test.yejiaxin.online",
+    "url": null,
     "syntheticFixtures": true,
     "qrUploadBytes": 443624,
     "qrStoredCharacters": 591522,
@@ -67,5 +67,12 @@
     "freekillHttps": 200,
     "freekillWebsocket": 101,
     "freekillProcessesAndNginxUnchanged": true
+  },
+  "historicalEndpointRedaction": {
+    "date": "2026-10-09",
+    "reason": "User requested removal of the retired domain from project files.",
+    "originalValidationTimeAndScopePreserved": true,
+    "redactedEndpointValuesAreNull": true,
+    "doesNotAssertHistoricalChecksRanOnCurrentDomain": true
   }
 }

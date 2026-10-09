@@ -1,6 +1,6 @@
 {
   "startedAt": "2026-09-28T02:48:30.751Z",
-  "origin": "https://test.yejiaxin.online",
+  "origin": null,
   "checks": [
     "multiple manager contacts at 390px and 1440px",
     "notice like, attend, cancellation and comment",
@@ -44,5 +44,12 @@
   },
   "externalVideoPlaybackVerified": false,
   "backupDirectory": "/srv/zijingwebsite/backups/community-20260928",
-  "nginxUploadLimit": "16m"
+  "nginxUploadLimit": "16m",
+  "historicalEndpointRedaction": {
+    "date": "2026-10-09",
+    "reason": "User requested removal of the retired domain from project files.",
+    "originalValidationTimeAndScopePreserved": true,
+    "redactedEndpointValuesAreNull": true,
+    "doesNotAssertHistoricalChecksRanOnCurrentDomain": true
+  }
 }

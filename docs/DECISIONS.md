@@ -1,10 +1,16 @@
 # 决策记录
 
+## 2026-10-09 仅保留当前授权入口
+
+用户要求从项目中完整移除停用域名，不继续提供兼容入口或跳转。仅保留 `home.thuzijing.top` 和 `sgs.thuzijing.top` 的业务配置及证书续期。历史部署说明采用“历史测试入口（已停用）”代称，JSON 验收记录将原入口值置为 null 并注明隐去原因；保留原验证时间和范围，避免把历史测试冒充为新入口验证。
+
+线上 Next.js 构建含有此前被内联的公共 origin 默认值，需要用当前配置重建。构建来源为工作分支的已提交代码，业务源码与现有线上版本保持一致；不发布工作区未提交的社群成员审批代码。配置恢复仅使用当前授权入口，数据库和 FreeKill 服务沿用现有实例。
+
 ## 2026-10-09 恢复原有服务子域名
 
 用户确认 thuzijing.top 已通过备案，并要求把 FreeKill 与紫荆网站恢复至该域名下。沿用已配置 DNS 的原入口 `sgs.thuzijing.top` 和 `home.thuzijing.top`；FreeKill 原本已在目标入口运行，因此以配置、进程和公网连接回归验证完成核验。主域名没有 A 记录，本次没有新增 DNS 记录或引入新的子域名。
 
-网站域名通过现有服务端 `SERVER_URL` 在运行时读取，新证书采用已有 Certbot 账户和 webroot 验证；保留独立反向代理、16 MB 上传限制及关闭代理缓冲的设置。旧测试域名使用 308 并保留路径和查询参数，继续保留它的证书与 ACME 验证路径。Nginx 重载后按实际可信 HTTPS 响应等待就绪，校验失败则执行配置回滚。
+网站域名通过现有服务端 `SERVER_URL` 在运行时读取，新证书采用已有 Certbot 账户和 webroot 验证；保留独立反向代理、16 MB 上传限制及关闭代理缓冲的设置。Nginx 重载后按实际可信 HTTPS 响应等待就绪。域名恢复阶段的兼容入口已按后续要求撤销，当前恢复流程保持现有授权入口。
 
 此次授权覆盖恢复域名和必要的服务配置变更。沿用现有线上应用、数据库、媒体、账号及 `APP_ENV=staging` / noindex 设置；不随域名切换发布工作区的社群成员审批修改，不扩大到数据库迁移或内容正式上线。配置备份和回滚资料仅保存在服务器受限目录；仓库只保存脱敏的说明与验证结果。
 
@@ -52,7 +58,7 @@
 
 ## 2026-09-20 测试部署补充
 
-用户明确授权使用 test.yejiaxin.online 测试主页，并保持 FreeKill 的 sgs.thuzijing.top 不变。服务器没有 Docker，本次采用独立账户与 systemd 原生部署；不替换系统 Node，不修改 FreeKill 配置。APP_ENV=staging，数据库复用仓库的本地 PostgreSQL 启动器并仅监听回环接口。此选择用于当前测试，未改变正式生产的独立数据库和备份要求。未导入演示资料，两个管理员通过受控 Local API 按用户指定凭据创建；临时凭据文件已删除。
+用户明确授权使用 历史测试入口（已停用） 测试主页，并保持 FreeKill 的 sgs.thuzijing.top 不变。服务器没有 Docker，本次采用独立账户与 systemd 原生部署；不替换系统 Node，不修改 FreeKill 配置。APP_ENV=staging，数据库复用仓库的本地 PostgreSQL 启动器并仅监听回环接口。此选择用于当前测试，未改变正式生产的独立数据库和备份要求。未导入演示资料，两个管理员通过受控 Local API 按用户指定凭据创建；临时凭据文件已删除。
 
 1. 采用 Next 16.3.5 / Payload 3.90.1；npm 实际 peer 要求 Next >=16.3.3 <17。文档 https://payloadcms.com/docs/getting-started/installation 。
 2. Local API 默认跳过权限（https://payloadcms.com/docs/local-api/overview），所有公开读取显式关闭 overrideAccess，depth:0，匿名身份。

@@ -3,7 +3,7 @@
   "task": "Restore existing FreeKill and zijingwebsite subdomains after user-reported ICP filing approval",
   "websiteOrigin": "https://home.thuzijing.top",
   "freeKillOrigin": "https://sgs.thuzijing.top",
-  "oldWebsiteOrigin": "https://test.yejiaxin.online",
+  "oldWebsiteOrigin": null,
   "applicationRevision": "eb0a236963224abe30ac32d06cd42900b6b279cd",
   "applicationBuildChanged": false,
   "databaseMigrationsExecuted": false,
@@ -188,7 +188,7 @@
     ],
     "redirects": [
       {
-        "url": "http://test.yejiaxin.online/",
+        "url": null,
         "status": 308,
         "location": "https://home.thuzijing.top/",
         "contentType": "text/html",
@@ -199,7 +199,7 @@
         "coep": null
       },
       {
-        "url": "http://test.yejiaxin.online/login?next=%2Fcommunity",
+        "url": null,
         "status": 308,
         "location": "https://home.thuzijing.top/login?next=%2Fcommunity",
         "contentType": "text/html",
@@ -210,7 +210,7 @@
         "coep": null
       },
       {
-        "url": "https://test.yejiaxin.online/",
+        "url": null,
         "status": 308,
         "location": "https://home.thuzijing.top/",
         "contentType": "text/html",
@@ -221,7 +221,7 @@
         "coep": null
       },
       {
-        "url": "https://test.yejiaxin.online/login?next=%2Fcommunity",
+        "url": null,
         "status": 308,
         "location": "https://home.thuzijing.top/login?next=%2Fcommunity",
         "contentType": "text/html",
@@ -263,12 +263,12 @@
         ]
       },
       {
-        "host": "test.yejiaxin.online",
+        "host": null,
         "hostnameAndTrustVerified": true,
         "notBefore": "Sep 20 12:54:36 2026 GMT",
         "notAfter": "Dec 19 12:54:35 2026 GMT",
         "dnsNames": [
-          "test.yejiaxin.online"
+          null
         ]
       }
     ],
@@ -363,5 +363,12 @@
     "Publishing the uncommitted community-membership feature",
     "Apex or www domain DNS changes"
   ],
-  "secretHandling": "Environment and FreeKill backups retained only in the restricted server directory. No passwords, private keys, account records, media or databases included in this evidence."
+  "secretHandling": "Environment and FreeKill backups retained only in the restricted server directory. No passwords, private keys, account records, media or databases included in this evidence.",
+  "historicalEndpointRedaction": {
+    "date": "2026-10-09",
+    "reason": "User requested removal of the retired domain from project files.",
+    "originalValidationTimeAndScopePreserved": true,
+    "redactedEndpointValuesAreNull": true,
+    "doesNotAssertHistoricalChecksRanOnCurrentDomain": true
+  }
 }

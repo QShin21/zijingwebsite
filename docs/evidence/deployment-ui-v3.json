@@ -77,7 +77,7 @@
   "mobileNavigation": "passed",
   "loginLayout": "passed",
   "commit": "9cc835b94b34dda6a546f4522b498c7a5d29e46d",
-  "url": "https://test.yejiaxin.online",
+  "url": null,
   "environment": "staging",
   "healthLive": "alive",
   "healthReady": "ready",
@@ -89,5 +89,12 @@
   "freekillWebSocket": 101,
   "swappinessRestored": 0,
   "smtpConfigured": false,
-  "realAccountLogin": "not tested"
+  "realAccountLogin": "not tested",
+  "historicalEndpointRedaction": {
+    "date": "2026-10-09",
+    "reason": "User requested removal of the retired domain from project files.",
+    "originalValidationTimeAndScopePreserved": true,
+    "redactedEndpointValuesAreNull": true,
+    "doesNotAssertHistoricalChecksRanOnCurrentDomain": true
+  }
 }

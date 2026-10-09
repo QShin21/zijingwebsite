@@ -1,6 +1,6 @@
 {
   "startedAt": "2026-09-28T08:16:29.035Z",
-  "origin": "https://test.yejiaxin.online",
+  "origin": null,
   "checks": [
     "anonymous activity/notice access; other sections and community endpoints require login",
     "SSE over public HTTPS; three immediate consecutive messages from a separate account",
@@ -53,5 +53,12 @@
     "freeKillNginxHash": "unchanged",
     "swappinessRestored": 0
   },
-  "sourceArchiveSha256": "08e8ff31a9c402ff6cd3fa2dddb6f77f8f349a81fc27fa97b0da2b1bf5e3058e"
+  "sourceArchiveSha256": "08e8ff31a9c402ff6cd3fa2dddb6f77f8f349a81fc27fa97b0da2b1bf5e3058e",
+  "historicalEndpointRedaction": {
+    "date": "2026-10-09",
+    "reason": "User requested removal of the retired domain from project files.",
+    "originalValidationTimeAndScopePreserved": true,
+    "redactedEndpointValuesAreNull": true,
+    "doesNotAssertHistoricalChecksRanOnCurrentDomain": true
+  }
 }

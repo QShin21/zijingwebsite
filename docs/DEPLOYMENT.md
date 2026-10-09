@@ -2,7 +2,7 @@
 
 ## 当前边界
 
-现有网站入口为 https://home.thuzijing.top，使用独立系统账户、systemd、Node 和 PostgreSQL 原生部署。2026-10-09 按用户授权恢复原有域名，线上应用继续为 `eb0a236963224abe30ac32d06cd42900b6b279cd`；旧 https://test.yejiaxin.online 以 308 跳转到新入口，保留路径和查询参数。当前仍为 staging、禁止搜索收录；Docker 容器验收及异机灾备不在此次域名恢复验证范围。
+现有网站入口为 https://home.thuzijing.top，FreeKill 入口为 https://sgs.thuzijing.top。网站使用独立系统账户、systemd、Node 和 PostgreSQL 原生部署，继续保持 staging、禁止搜索收录。2026-10-09 按用户要求撤下已停用的入口、跳转和证书续期配置；项目文档和验收记录中隐去历史入口名称，保留原验证时间和范围。Docker 容器验收及异机灾备不在此次域名清理验证范围。
 
 ## 独立部署
 
@@ -27,27 +27,26 @@ docker compose --env-file .env.deploy ps
 
 直接托管时同时设置服务端 `SERVER_URL` 为运行环境的精确origin；它优先于构建时可能被内联的 `NEXT_PUBLIC_SERVER_URL`。Compose已将两者映射到同一配置值。
 
-## 2026-10-09 域名恢复与回滚
+## 2026-10-09 服务域名与恢复
 
 | 服务 | 当前入口 | 本次操作 |
 | --- | --- | --- |
 | 紫荆网站 | https://home.thuzijing.top | 独立 Nginx HTTPS 虚拟主机；运行时 origin 改为该入口 |
 | FreeKill | https://sgs.thuzijing.top | 原入口保持运行；验证 HTTPS 与 WSS `/ws` |
-| 旧网站地址 | https://test.yejiaxin.online | HTTP / HTTPS 308 跳转，保留路径与查询参数 |
 
-两个服务子域名的 A 记录均已指向原服务器。主域名 `thuzijing.top` 本次盘点没有 A 记录，未调整 DNS。网站配置位于 `/etc/nginx/sites-available/zijing-home`，旧域名跳转位于 `/etc/nginx/sites-available/zijing-test`。新站沿用上传限制、反向代理端口 `127.0.0.1:3100`、关闭缓冲和 noindex 设置；只修改环境中的 `SERVER_URL` 与 `NEXT_PUBLIC_SERVER_URL`，重启网站服务并等待应用及新域名可信 HTTPS 就绪。
+两个服务子域名的 A 记录均已指向原服务器。主域名 `thuzijing.top` 本次盘点没有 A 记录，未调整 DNS。网站配置位于 `/etc/nginx/sites-available/zijing-home`；已移除停用入口的独立虚拟主机。网站沿用上传限制、反向代理端口 `127.0.0.1:3100`、关闭缓冲和 noindex 设置，`SERVER_URL` 与 `NEXT_PUBLIC_SERVER_URL` 均为 `https://home.thuzijing.top`。调整配置或构建后等待应用及可信 HTTPS 实际就绪。
 
-home.thuzijing.top 的证书位于 `/etc/letsencrypt/live/home.thuzijing.top/`，当前有效期至 2027-01-07。已有 `certbot.timer` 和 Nginx 重载钩子继续负责续期；实际执行 `certbot renew --cert-name home.thuzijing.top --dry-run --non-interactive --no-random-sleep-on-renew` 成功。HTTP 的 `/.well-known/acme-challenge/` 继续由 `/var/www/acme` 提供，旧域名也保留验证路径与证书。
+home.thuzijing.top 的证书位于 `/etc/letsencrypt/live/home.thuzijing.top/`，当前有效期至 2027-01-07。已有 `certbot.timer` 和 Nginx 重载钩子继续负责两个当前入口的续期；实际执行 `certbot renew --cert-name home.thuzijing.top --dry-run --non-interactive --no-random-sleep-on-renew` 成功。HTTP 的 `/.well-known/acme-challenge/` 继续由 `/var/www/acme` 提供。停用入口的证书和续期条目已删除。
 
-回滚目录 `/srv/zijingwebsite/backups/domain-20261009` 权限为 `0700`，包含原网站环境、旧网站虚拟主机、FreeKill 配置副本、基线摘要和 `rollback.sh`。原环境文件包含秘密，仅保存在受限服务器目录；不复制到仓库。需要回滚时，以 root 执行：
+当前配置恢复目录 `/srv/zijingwebsite/backups/domain-retirement-20261009` 权限为 `0700`，保存当前网站环境、当前网站虚拟主机及基线摘要。环境文件包含秘密，仅保存在受限服务器目录；不复制到仓库。需要恢复当前入口配置时，以 root 执行：
 
 ```sh
-/srv/zijingwebsite/backups/domain-20261009/rollback.sh
+/srv/zijingwebsite/backups/domain-retirement-20261009/restore-current-host.sh
 ```
 
-脚本恢复旧网站环境和虚拟主机，核对新虚拟主机路径后移除本次新增入口，校验 Nginx 配置、重启网站并重载代理，最后等待应用就绪。新签发证书会保留供后续使用。第一次即时 HTTPS 验证仍读取到旧默认站点证书，触发自动回滚；该恢复路径已实际执行，旧网站健康检查恢复正常。补充 Nginx 重载后的 HTTPS 重试，再次切换成功。
+脚本恢复当前网站环境和 `zijing-home` 虚拟主机，校验 Nginx 配置、重启网站并重载代理，最后等待应用就绪。此前域名切换的恢复脚本已改为调用此脚本，恢复流程仅使用当前授权入口。
 
-本轮没有替换应用构建、执行数据库迁移、导入演示资料或修改 FreeKill。核验其他虚拟主机、全局 Nginx、FreeKill 配置与进程和数据库进程一致。公网验证涵盖 13 个路由、五项 HTTP / HTTPS 跳转、新域名 CORS、登录表单无效账号分支、后台登录页面、手机布局及 FreeKill WebSocket 握手；真实账号成功登录、邮件送达和实际游戏对局未在本轮验证。脱敏证据见 [domain-restoration-20261009.json](evidence/domain-restoration-20261009.json)。
+域名恢复阶段已验证 13 个路由、新域名 CORS、登录表单无效账号分支、后台登录页面、手机布局及 FreeKill WebSocket 握手。历史入口值已从 [域名恢复证据](evidence/domain-restoration-20261009.json) 隐去，不将历史测试改写为在当前入口进行。后续清理包含构建中遗留的域名默认值，单独记录重建和上线验证结果。真实账号成功登录、邮件送达和实际游戏对局未在此次域名清理验证。
 
 ## 对象存储与邮件
 
@@ -89,7 +88,7 @@ BACKUP_REMOTE可设为已挂载的异机受控目录；设置前由维护者核�
 
 ## 2026-09-28 实时聊天与登录访问
 
-应用提交 `22c85be88acce72829ae03cb3a3cd9f1927d3e52` 已部署至现有 `https://test.yejiaxin.online` staging 实例，保持禁止收录。192 个源码文件逐一核验 SHA-256 与提交一致；服务器独立构建通过后切换。早期构建发生堆不足，代理改为本机会话接口校验并启用 Next.js 低内存编译；最终构建正常退出。
+应用提交 `22c85be88acce72829ae03cb3a3cd9f1927d3e52` 已部署至现有 `历史测试入口（已停用）` staging 实例，保持禁止收录。192 个源码文件逐一核验 SHA-256 与提交一致；服务器独立构建通过后切换。早期构建发生堆不足，代理改为本机会话接口校验并启用 Next.js 低内存编译；最终构建正常退出。
 
 备份位于 `/srv/zijingwebsite/backups/realtime-20260928`，包含数据库快照、环境、媒体与源码。新增 `20260928_120000_chat_notifications` 只创建通知函数和触发器；隔离副本与线上迁移前后 56 张既有表内容摘要一致，保留 5 个账号和 2 条申请。旧源码和构建位于 `/srv/zijingwebsite/releases/realtime-previous-22c85be`，可恢复兼容旧应用；不需要删除业务数据或执行破坏性 down。
 

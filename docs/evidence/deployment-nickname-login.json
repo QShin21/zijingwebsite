@@ -1,7 +1,7 @@
 {
   "revision": "a9c17361131980dd5a2229b706c6a0f3cc13b580",
   "environment": "staging",
-  "url": "https://test.yejiaxin.online",
+  "url": null,
   "migration": "20260926_145257_nickname_login",
   "backup": {
     "path": "/srv/zijingwebsite/backups/nickname-a9c1736-20260926",
@@ -36,7 +36,7 @@
   "browser": {
     "checkedAt": "2026-09-26T15:13:27.009Z",
     "environment": "staging",
-    "baseURL": "https://test.yejiaxin.online",
+    "baseURL": null,
     "logins": [
       {
         "kind": "lowercase",
@@ -97,5 +97,12 @@
   },
   "limitations": [
     "No real verification email was sent; inbox delivery remains unverified."
-  ]
+  ],
+  "historicalEndpointRedaction": {
+    "date": "2026-10-09",
+    "reason": "User requested removal of the retired domain from project files.",
+    "originalValidationTimeAndScopePreserved": true,
+    "redactedEndpointValuesAreNull": true,
+    "doesNotAssertHistoricalChecksRanOnCurrentDomain": true
+  }
 }

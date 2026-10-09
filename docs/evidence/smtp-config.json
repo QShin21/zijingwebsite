@@ -1,7 +1,7 @@
 {
   "date": "2026-09-25",
   "environment": "staging",
-  "url": "https://test.yejiaxin.online",
+  "url": null,
   "service": "zijingweb",
   "provider": "163",
   "host": "smtp.163.com",
@@ -22,5 +22,12 @@
   "envFileMode": "600",
   "temporaryCredentialFileRemoved": true,
   "credentialLogged": false,
-  "presidentClaimConfigured": false
+  "presidentClaimConfigured": false,
+  "historicalEndpointRedaction": {
+    "date": "2026-10-09",
+    "reason": "User requested removal of the retired domain from project files.",
+    "originalValidationTimeAndScopePreserved": true,
+    "redactedEndpointValuesAreNull": true,
+    "doesNotAssertHistoricalChecksRanOnCurrentDomain": true
+  }
 }

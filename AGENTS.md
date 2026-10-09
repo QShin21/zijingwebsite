@@ -4,6 +4,7 @@
 - 后续完成项目修改并通过必要检查后，提交并推送到此仓库；如果用户明确要求暂不提交或推送，遵循当次要求。
 - 同步时保留已有修改，避免强制推送；如遇权限或冲突问题，说明实际情况。
 - 不要使用“不是……而是……”等句式。
+- 部署入口仅使用 `home.thuzijing.top`（紫荆网站）和 `sgs.thuzijing.top`（FreeKill）。已停用的历史域名从配置、脚本、文档和验收记录中移除；历史验收保留原时间及验证范围，并注明入口已隐去。
 
 ## V1 工程规则
 - 总任务书：`zijing_esports_codex/ZIJING_ESPORTS_CODEX_BRIEF.md`，持续维护 docs/TASKS.md、STATUS.md、DECISIONS.md。
