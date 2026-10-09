@@ -4,6 +4,12 @@
 
 现有网站入口为 https://home.thuzijing.top，FreeKill 入口为 https://sgs.thuzijing.top。网站使用独立系统账户、systemd、Node 和 PostgreSQL 原生部署，继续保持 staging、禁止搜索收录。2026-10-09 按用户要求撤下已停用的入口、跳转和证书续期配置；项目文档和验收记录中隐去历史入口名称，保留原验证时间和范围。Docker 容器验收及异机灾备不在此次域名清理验证范围。
 
+## 2026-10-09 小程序接口
+
+经用户单独授权，将 `littleapp` 提交 `42aa64d64b632f9e4ea206e070d34c04b02cf564` 的两份新增接口源码部署到现有网站。服务器独立构建、临时端口接口验证完成后切换；现有 102 份业务源码及依赖不变，未执行迁移。网站环境、Nginx 及相关配置摘要和数据库 / FreeKill 进程保持一致，网站就绪 200、FreeKill HTTPS 200 / WebSocket 101。
+
+上一构建、源码、包配置及来源记录保存在 `/srv/zijingwebsite/backups/miniapp-20261009`，目录权限 `0700`。兼容应用回退脚本 `/srv/zijingwebsite/backups/miniapp-20261009/restore-miniapp.sh` 恢复旧构建及来源，仅移除本轮新增桥接源码，保留数据库、环境和媒体；脚本在发布前准备，旧构建实际存在。本轮未实际执行发布后的回退，未执行数据恢复。回退后原生邮箱 REST 登录可继续使用，昵称 / 验证码 / 互动桥接需重新部署。执行证据见 [miniapp-20261009.json](evidence/miniapp-20261009.json)。
+
 ## 独立部署
 
 `Dockerfile` 为 Node 24 非 root 运行应用，附 pg_dump/pg_restore 17；`compose.yaml` 为独立项目名、数据库/媒体/备份卷。PostgreSQL 不映射宿主机端口；应用只绑定 `127.0.0.1:3100`，避免抢占其他站点。应用不会在每次启动时自动迁移。

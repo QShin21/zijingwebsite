@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-09T07:06:50.540Z",
+  "branch": "littleapp",
+  "baseRevision": "fb51bbb71009aec66395fb2892402d814ddca744",
+  "implementationRevision": "42aa64d64b632f9e4ea206e070d34c04b02cf564",
+  "originalWorkspace": {
+    "branch": "main",
+    "existingDirtyEntries": 27,
+    "trackedDiffHashBefore": "56224885689fee07eaf373c4a417ce386a2ca1d4",
+    "trackedDiffHashAfter": "56224885689fee07eaf373c4a417ce386a2ca1d4",
+    "preserved": true
+  },
+  "native": {
+    "appid": "wxccf9f8fc9515ebd5",
+    "version": "0.1.0",
+    "pages": 14,
+    "tabs": 5,
+    "files": 67,
+    "sourceBytes": 130461,
+    "compiledBytes": 137026,
+    "sourceGitTree": "560559bd3c21481af079a274ab2897acf1422ae0",
+    "nativeDependencies": 0,
+    "domainChecking": true,
+    "embeddedDemoData": false
+  },
+  "checks": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "nextProductionBuild": "passed",
+    "unitAndDatabase": {
+      "passed": 106,
+      "files": 14,
+      "added": 18,
+      "isolatedLocalDatabase": true
+    },
+    "nativeStatic": "passed",
+    "nativeCompilation": "passed"
+  },
+  "wechat": {
+    "developerUpload": {
+      "status": "passed",
+      "uploadedAt": "2026-10-09T07:06:48.640Z",
+      "officialUploadSuccess": true,
+      "receiptBytes": 137026,
+      "developmentVersionOnly": true,
+      "wrapperExitCode": 0
+    },
+    "preview": {
+      "status": "passed",
+      "generatedAt": "2026-10-09T07:00:14.351Z",
+      "receiptBytes": 137026,
+      "qrSavedLocally": true
+    },
+    "loginVerified": true,
+    "cliTokenCommitted": false,
+    "qrCommitted": false,
+    "submittedForReview": false,
+    "publishedRelease": false
+  },
+  "simulator": {
+    "appidVerified": true,
+    "fixtureUI": {
+      "status": "passed",
+      "cases": 6,
+      "noOnlineWrites": true,
+      "requestMockRestored": true,
+      "checks": [
+        "reactive loading and empty content",
+        "native login tap navigation",
+        "login field visibility",
+        "registration field visibility",
+        "nested content entries",
+        "anonymous private-content gate"
+      ]
+    },
+    "online": {
+      "status": "blocked_by_domain_list",
+      "userReportedDomainConfigured": true,
+      "origin": "https://home.thuzijing.top",
+      "observedError": "url not in domain list",
+      "domainInformationRefreshRequested": true
+    }
+  },
+  "backend": {
+    "checkedAt": "2026-10-09T06:53:30.634604+00:00",
+    "revision": "42aa64d64b632f9e4ea206e070d34c04b02cf564",
+    "website": "https://home.thuzijing.top",
+    "bridgeDeployed": true,
+    "sourceFilesVerified": 104,
+    "existingBusinessSourceFilesUnchanged": 102,
+    "newMigrations": false,
+    "migrationSourceUnchanged": true,
+    "environmentAndRelatedConfigurationsPreserved": true,
+    "databaseProcessUnchanged": true,
+    "freeKillProcessesUnchanged": true,
+    "swapPolicyRestored": true,
+    "serverBuildResult": "success",
+    "rollbackScript": "/srv/zijingwebsite/backups/miniapp-20261009/restore-miniapp.sh",
+    "rollbackBuildPresent": true
+  },
+  "backendHttpSmoke": {
+    "statusCapability": 200,
+    "anonymousReadReactions": 401,
+    "anonymousWriteReactions": 401,
+    "invalidRegistrationDomain": 400,
+    "invalidPasswordResetDomain": 400,
+    "ready": 200,
+    "freeKillHTTPS": 200,
+    "freeKillWebSocketHandshake": 101,
+    "noTestMailSent": true
+  },
+  "unverified": [
+    "actual phone scan and rendering",
+    "successful real account login through Mini Program",
+    "actual mailbox delivery",
+    "real community chat session",
+    "native image selection and platform privacy authorization"
+  ]
+}
