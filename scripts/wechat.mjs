@@ -4,8 +4,8 @@ import os from 'node:os';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 const command = process.argv[2];
-if (!['preview', 'upload', 'open', 'auto', 'islogin'].includes(command)) {
-  console.error('Usage: node scripts/wechat.mjs preview|upload|open|auto|islogin [--port PORT]'); process.exit(1);
+if (!['preview', 'upload', 'open', 'close', 'cache', 'auto', 'islogin'].includes(command)) {
+  console.error('Usage: node scripts/wechat.mjs preview|upload|open|close|cache|auto|islogin [--port PORT]'); process.exit(1);
 }
 const project = path.resolve('miniprogram');
 const config = JSON.parse(fs.readFileSync(path.join(project, 'project.config.json'), 'utf8'));
