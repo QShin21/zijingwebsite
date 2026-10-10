@@ -1,0 +1,297 @@
+{
+  "date": "2026-10-11",
+  "authorization": {
+    "source": "explicit user reply in this session",
+    "scope": "deploy this chat-removal version"
+  },
+  "baselineRevision": "42aa64d64b632f9e4ea206e070d34c04b02cf564",
+  "serverBranch": "littleapp",
+  "archiveSha256": "23fb98f761bb36f0122b5a076ca2fc35a00720166006796862395706f93dfca5",
+  "checkedAt": "2026-10-10T17:01:06.691468+00:00",
+  "revision": "3ec3eeb855de7c8a6e1c2c36a9f873519ca239a6",
+  "website": "https://home.thuzijing.top",
+  "chatRemovalDeployed": true,
+  "sourceFilesVerified": 95,
+  "baselineSourceFiles": 104,
+  "newMigrations": false,
+  "dataDeletion": false,
+  "migrationSourceUnchanged": true,
+  "environmentAndRelatedConfigurationsPreserved": true,
+  "databaseProcessUnchanged": true,
+  "freeKillProcessesUnchanged": true,
+  "swapPolicyRestored": true,
+  "serverBuildResult": "success",
+  "rollbackScript": "/srv/zijingwebsite/backups/chat-removal-20261011-3ec3eeb/restore-chat-removal.sh",
+  "rollbackBuildPresent": true,
+  "rollbackExecutionTested": false,
+  "temporaryHttpChecks": {
+    "checkedAt": "2026-10-10T17:00:33.078862+00:00",
+    "origin": "http://127.0.0.1:3101",
+    "cases": [
+      {
+        "path": "/health/ready",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/miniapp/status",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/events?limit=1&depth=0",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/login",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/community",
+        "method": "GET",
+        "status": 307
+      },
+      {
+        "path": "/community/removal-check/forum",
+        "method": "GET",
+        "status": 307
+      },
+      {
+        "path": "/api/community-posts?limit=1&depth=0",
+        "method": "GET",
+        "status": 401
+      },
+      {
+        "path": "/community/removal-check/chat",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/community/removal-check/chat/feed",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/community/removal-check/chat/stream",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/community/chat-images/1",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/community/stickers?q=check",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/api/community-messages",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/api/community-messages/1",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/admin/collections/community-messages",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/api/community-messages",
+        "method": "POST",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/api/community-messages/1",
+        "method": "PATCH",
+        "status": 404,
+        "cachePrivateNoStore": true
+      }
+    ]
+  },
+  "liveHttpChecks": {
+    "checkedAt": "2026-10-10T17:01:06.546429+00:00",
+    "origin": "https://home.thuzijing.top",
+    "cases": [
+      {
+        "path": "/health/ready",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/miniapp/status",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/events?limit=1&depth=0",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/login",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/community",
+        "method": "GET",
+        "status": 307
+      },
+      {
+        "path": "/community/removal-check/forum",
+        "method": "GET",
+        "status": 307
+      },
+      {
+        "path": "/api/community-posts?limit=1&depth=0",
+        "method": "GET",
+        "status": 401
+      },
+      {
+        "path": "/community/removal-check/chat",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/community/removal-check/chat/feed",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/community/removal-check/chat/stream",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/community/chat-images/1",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/community/stickers?q=check",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/api/community-messages",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/api/community-messages/1",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/admin/collections/community-messages",
+        "method": "GET",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/api/community-messages",
+        "method": "POST",
+        "status": 404,
+        "cachePrivateNoStore": true
+      },
+      {
+        "path": "/api/community-messages/1",
+        "method": "PATCH",
+        "status": 404,
+        "cachePrivateNoStore": true
+      }
+    ]
+  },
+  "freeKill": {
+    "website": "https://sgs.thuzijing.top",
+    "https": 200,
+    "webSocket": 101
+  },
+  "externalHttps": {
+    "checkedAt": "2026-10-10T17:01:08.570Z",
+    "cases": [
+      {
+        "url": "https://home.thuzijing.top/health/ready",
+        "status": 200,
+        "tlsTrusted": true
+      },
+      {
+        "url": "https://home.thuzijing.top/api/miniapp/status",
+        "status": 200,
+        "tlsTrusted": true
+      },
+      {
+        "url": "https://home.thuzijing.top/community/removal-check/chat",
+        "status": 404,
+        "tlsTrusted": true
+      },
+      {
+        "url": "https://sgs.thuzijing.top/",
+        "status": 200,
+        "tlsTrusted": true
+      }
+    ]
+  },
+  "notVerified": [
+    "actual phone preview",
+    "real account workflows",
+    "real email delivery",
+    "execution of server rollback"
+  ],
+  "postDeploymentSimulator": {
+    "at": "2026-10-10T17:03:09.727Z",
+    "appid": "wxccf9f8fc9515ebd5",
+    "mode": "actual simulator network requests; no request mocks or online writes",
+    "requests": [
+      {
+        "route": "/api/globals/site?depth=0",
+        "status": 200,
+        "json": true
+      },
+      {
+        "route": "/api/events?limit=1&depth=0",
+        "status": 200,
+        "json": true
+      },
+      {
+        "route": "/api/miniapp/status",
+        "status": 200,
+        "json": true
+      },
+      {
+        "route": "/api/community-messages",
+        "status": 404,
+        "json": true
+      }
+    ],
+    "page": {
+      "path": "pages/events/index",
+      "loading": false,
+      "error": ""
+    }
+  }
+}
