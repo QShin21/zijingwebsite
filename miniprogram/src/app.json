@@ -10,7 +10,6 @@
     "pages/fixed/index",
     "pages/auth/index",
     "pages/community/index",
-    "pages/chat/index",
     "pages/compose/index",
     "pages/applications/index",
     "pages/review/index"

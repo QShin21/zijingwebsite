@@ -3,7 +3,6 @@ import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 const require = createRequire(import.meta.url);
 const format = require('../miniprogram/src/lib/format.js');
 const richtext = require('../miniprogram/src/lib/richtext.js');
-const stream = require('../miniprogram/src/lib/stream.js');
 const cms = require('../miniprogram/src/lib/cms.js');
 const session = require('../miniprogram/src/lib/session.js');
 const http = require('../miniprogram/src/lib/http.js');
@@ -89,26 +88,5 @@ describe('小程序内容与日期', () => {
     let nested: unknown = { type: 'text', text: 'too-deep' };
     for (let i = 0; i < 60; i++) nested = { type: 'paragraph', children: [nested] };
     expect(JSON.stringify(richtext.render({ root: { children: [nested] } }))).not.toContain('too-deep');
-  });
-});
-describe('小程序即时聊天', () => {
-  it('分块与 CRLF 边界合并正确，心跳不触发轮询', () => {
-    const change = vi.fn(); const consume = stream.parser(change);
-    for (const text of ['event: rea', 'dy\r', '\ndata: {}\r\n\r', '\n: heartbeat\n\n', 'event: change\ndata: {}\n\n']) consume(new TextEncoder().encode(text).buffer);
-    expect(change).toHaveBeenCalledTimes(2);
-  });
-  it('历史与增量去重排序，服务端隐藏消息及时移除', () => {
-    const result = stream.merge([{ id: 4, body: '旧' }, { id: 2 }, { id: 3 }], [{ id: 4, body: '更新' }, { id: 1 }], [3]);
-    expect(result.map((message: { id: number }) => message.id)).toEqual([1, 2, 4]); expect(result[2].body).toBe('更新');
-    expect(stream.merge([], Array.from({ length: 1010 }, (_, id) => ({ id })))).toHaveLength(1000);
-  });
-  it('离开页面后取消流请求与重连', () => {
-    vi.useFakeTimers(); login();
-    const abort = vi.fn(); let complete: () => void;
-    request.mockImplementation(options => { complete = options.complete; return { abort, onChunkReceived: vi.fn() }; });
-    const stop = stream.subscribe('fixture', vi.fn(), vi.fn());
-    complete!(); stop(); vi.advanceTimersByTime(5000);
-    expect(abort).toHaveBeenCalledTimes(1); expect(request).toHaveBeenCalledTimes(1);
-    vi.useRealTimers();
   });
 });

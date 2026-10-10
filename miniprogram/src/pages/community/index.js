@@ -52,7 +52,6 @@ Page({
   },
   area(event) { this.setData({ area: event.currentTarget.dataset.area, docs: [], page: 1 }); this.loadArea(); },
   sort(event) { this.setData({ sort: event.currentTarget.dataset.sort }); this.loadArea(); },
-  chat() { navigation.go('chat', { slug: this.data.game.slug, id: this.data.game.id, title: this.data.game.title }); },
   compose() { navigation.go('compose', { kind: this.data.area === 'forum' ? 'forum' : this.data.area === 'showcase' ? 'showcase' : 'event', game: this.data.game.id }); },
   review() { navigation.go('review', { game: this.data.game.id, mode: 'showcase' }); },
   async manageShowcase(event) {
