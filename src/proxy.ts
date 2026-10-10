@@ -1,16 +1,19 @@
 import { proxyMember } from "@/lib/proxy-member";
 import { canParticipate } from "@/lib/rules";
-import { isGuestPage } from "@/lib/page-access";
+import { isGuestPage, isRemovedCommunityChatPath } from "@/lib/page-access";
 import { NextResponse, type NextRequest } from "next/server";
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
+  if (isRemovedCommunityChatPath(path)) return NextResponse.json({ error: "社群聊天功能已移除" }, {
+    status: 404, headers: { "Cache-Control": "private, no-store" },
+  });
   const privateAPI = /^\/api\/(games|teams|seasons|honors|news|albums|recruitment|comments|forum-posts|community-[^/]+|graphql)(\/|$)/.test(path);
   if (privateAPI || (!isGuestPage(path) && !path.startsWith("/admin") && !path.startsWith("/preview") && !path.startsWith("/api/") && path !== "/favicon.ico")) {
     let user;
     try { user = await proxyMember(request.headers); }
     catch { return NextResponse.json({ error: "暂时无法验证登录状态，请稍后重试" }, { status: 503, headers: { "Cache-Control": "private, no-store" } }); }
     if (!canParticipate(user)) {
-      if (privateAPI || /\/(feed|stream|contacts|qr|stickers)$/.test(path) || path.startsWith("/community/chat-images/")) return NextResponse.json({ error: "请先登录" }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
+      if (privateAPI || /\/(contacts|qr)$/.test(path)) return NextResponse.json({ error: "请先登录" }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
       const target = new URL(path === "/" ? "/events" : "/login", request.url);
       if (path !== "/") target.searchParams.set("message", "请登录后访问此栏目");
       const response = NextResponse.redirect(target);
