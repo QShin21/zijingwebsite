@@ -1,6 +1,4 @@
 import "dotenv/config";
-import { up as installChatNotifications } from "../src/migrations/20260928_120000_chat_notifications";
-import type { MigrateUpArgs } from "@payloadcms/db-postgres";
 import sharp from "sharp";
 import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -249,40 +247,10 @@ describe.sequential("申请、建群、发言与跨级审核", () => {
     await expect(p.create({ collection: "community-showcase", overrideAccess: false, user: member,
       data: { game, author: member.id, title: "伪造图片", body: "无效图片必须拒绝", images: [{ source: "data:image/png;base64,aGVsbG8=" }] } })).rejects.toThrow();
   });
-  it("连续发言无冷却，提交后通知其他连接，隐藏和删除同样通知", async () => {
-    const listener = new pg.Client({ connectionString: process.env.DATABASE_URL });
-    await listener.connect();
-    const installed = await listener.query("SELECT 1 FROM pg_trigger WHERE tgname = 'community_chat_changed'");
-    if (!installed.rowCount) await installChatNotifications({ db: p.db.drizzle } as MigrateUpArgs);
-    await listener.query("LISTEN community_chat_changed");
-    const notifications: string[] = [];
-    listener.on("notification", event => notifications.push(event.payload || ""));
-    const ids: number[] = [];
-    try {
-      for (let i = 0; i < 3; i++) {
-        const message = await p.create({ collection: "community-messages", overrideAccess: false, user: member,
-          data: { game, author: member.id, body: `连续消息 ${i}` } });
-        ids.push(message.id);
-      }
-      await expect.poll(() => notifications.filter(id => id === String(game)).length).toBe(3);
-      await p.update({ collection: "community-messages", id: ids[0], overrideAccess: false, user: member, data: { status: "hidden" } });
-      await expect.poll(() => notifications.length).toBe(4);
-      const visible = await p.find({ collection: "community-messages", overrideAccess: false, user: null, where: { id: { in: ids } } });
-      expect(visible.docs.map(m => m.id)).not.toContain(ids[0]);
-      await p.delete({ collection: "community-messages", id: ids.pop()!, overrideAccess: true });
-      await expect.poll(() => notifications.length).toBe(5);
-      await expect(p.create({ collection: "community-messages", overrideAccess: false, user: null,
-        data: { game, author: member.id, body: "匿名消息" } })).rejects.toThrow();
-      const ban = await p.create({ collection: "community-bans", overrideAccess: true, user: vice,
-        data: { game, member: member.id, active: true } });
-      try {
-        await expect(p.create({ collection: "community-messages", overrideAccess: false, user: member,
-          data: { game, author: member.id, body: "禁言消息" } })).rejects.toThrow();
-      } finally { await p.delete({ collection: "community-bans", id: ban.id, overrideAccess: true }); }
-    } finally {
-      for (const id of ids) await p.delete({ collection: "community-messages", id, overrideAccess: true });
-      await listener.end();
-    }
+  it("聊天集合不再注册，论坛、评论与风采集合仍可用", () => {
+    expect(p.collections).not.toHaveProperty("community-messages");
+    for (const name of ["forum-posts", "community-posts", "comments", "community-showcase"])
+      expect(p.collections).toHaveProperty(name);
   });
   it("全站投稿须提交审核，副社长才能公开", async () => {
     const draft = await p.create({ collection: "announcements", overrideAccess: false,

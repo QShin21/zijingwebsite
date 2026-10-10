@@ -26,7 +26,7 @@ test.beforeAll(async () => {
 test.afterAll(async () => {
   if (!p) return;
   if (event) await p.delete({ collection: "community-reactions", overrideAccess: true, where: { targetType: { equals: "community-posts" }, targetId: { equals: event } } });
-  if (game) for (const collection of ["comments", "community-showcase", "community-applications", "community-posts", "forum-posts", "community-messages"] as const) await p.delete({ collection, overrideAccess: true, where: { game: { equals: game } } });
+  if (game) for (const collection of ["comments", "community-showcase", "community-applications", "community-posts", "forum-posts"] as const) await p.delete({ collection, overrideAccess: true, where: { game: { equals: game } } });
   if (game) await p.delete({ collection: "games", id: game, overrideAccess: true });
   for (const user of [member, admin, vice]) if (user) await p.delete({ collection: "users", id: user.id, overrideAccess: true, context: { system: true } });
 });

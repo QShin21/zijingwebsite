@@ -27,7 +27,6 @@ export interface Config {
     'community-reactions': CommunityReaction;
     'community-showcase': CommunityShowcase;
     'forum-posts': ForumPost;
-    'community-messages': CommunityMessage;
     'community-posts': CommunityPost;
     comments: Comment;
     games: Game;
@@ -56,7 +55,6 @@ export interface Config {
     'community-reactions': CommunityReactionsSelect<false> | CommunityReactionsSelect<true>;
     'community-showcase': CommunityShowcaseSelect<false> | CommunityShowcaseSelect<true>;
     'forum-posts': ForumPostsSelect<false> | ForumPostsSelect<true>;
-    'community-messages': CommunityMessagesSelect<false> | CommunityMessagesSelect<true>;
     'community-posts': CommunityPostsSelect<false> | CommunityPostsSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
     games: GamesSelect<false> | GamesSelect<true>;
@@ -337,21 +335,6 @@ export interface ForumPost {
   pinned?: boolean | null;
   featured?: boolean | null;
   heat?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "community-messages".
- */
-export interface CommunityMessage {
-  id: number;
-  body?: string | null;
-  game?: (number | null) | Game;
-  author: number | User;
-  authorName?: string | null;
-  status?: ('visible' | 'hidden') | null;
-  image?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -872,10 +855,6 @@ export interface PayloadLockedDocument {
         value: number | ForumPost;
       } | null)
     | ({
-        relationTo: 'community-messages';
-        value: number | CommunityMessage;
-      } | null)
-    | ({
         relationTo: 'community-posts';
         value: number | CommunityPost;
       } | null)
@@ -1114,20 +1093,6 @@ export interface ForumPostsSelect<T extends boolean = true> {
   pinned?: T;
   featured?: T;
   heat?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "community-messages_select".
- */
-export interface CommunityMessagesSelect<T extends boolean = true> {
-  body?: T;
-  game?: T;
-  author?: T;
-  authorName?: T;
-  status?: T;
-  image?: T;
   updatedAt?: T;
   createdAt?: T;
 }

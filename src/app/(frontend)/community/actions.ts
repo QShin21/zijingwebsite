@@ -55,7 +55,7 @@ export async function publishCommunityAction(form: FormData) {
   const game = numeric(form, "game");
   const kind = value(form, "kind");
   const where = await gamePath(game);
-  if (!["forum", "message", "event", "notice"].includes(kind)) problem(where, "发布类型无效");
+  if (!["forum", "event", "notice"].includes(kind)) problem(where, "发布类型无效");
   let createdForum: number | null = null;
   try {
     if (kind === "forum") {
@@ -63,15 +63,13 @@ export async function publishCommunityAction(form: FormData) {
         data: { game, author: user.id, title: value(form, "title"), body: value(form, "body") } });
       createdForum = post.id;
     }
-    if (kind === "message") await p.create({ collection: "community-messages",
-      overrideAccess: false, user, data: { game, author: user.id, body: value(form, "body") } });
     if (kind === "event" || kind === "notice") await p.create({
       collection: "community-posts", overrideAccess: false, user,
       data: { game, author: user.id, title: value(form, "title"), body: value(form, "body"), category: kind },
     });
-  } catch { problem(`${where}/${kind === "forum" ? "forum" : kind === "message" ? "chat" : "updates"}`, "发布未成功，请核对内容和权限"); }
+  } catch { problem(`${where}/${kind === "forum" ? "forum" : "updates"}`, "发布未成功，请核对内容和权限"); }
   if (createdForum) redirect(`${where}/forum/${createdForum}`);
-  redirect(`${where}/${kind === "message" ? "chat" : "updates"}`);
+  redirect(`${where}/updates`);
 }
 export async function commentAction(form: FormData) {
   const { p, user } = await current();
@@ -95,7 +93,7 @@ export async function commentAction(form: FormData) {
 }
 export async function moderateAction(form: FormData) {
   const { p, user } = await current();
-  const collection = (["forum-posts", "community-messages", "community-posts", "comments"] as const)
+  const collection = (["forum-posts", "community-posts", "comments"] as const)
     .find((name) => name === value(form, "collection"));
   if (!collection) redirect("/community");
   const id = numeric(form, "id");
@@ -151,22 +149,6 @@ export async function curateForumAction(form: FormData) {
     data: field === "status" ? { status: "hidden" } : { [field]: value(form, "enabled") === "true" } }); }
   catch { problem(path, "管理操作未成功"); }
   redirect(path);
-}
-
-export async function sendChatAction(game: number, body: string, image?: string) {
-  const p = await cms(); const { user } = await p.auth({ headers: await headers() });
-  if (!user || user.accountStatus === "suspended") return { error: "请重新登录可用账号" };
-  try {
-    await p.create({ collection: "community-messages", overrideAccess: false, user,
-      data: { game, author: user.id, body, image } });
-    return { success: true };
-  } catch (error) { return { error: applicationError(error) }; }
-}
-export async function hideChatAction(id: number) {
-  const p = await cms(); const { user } = await p.auth({ headers: await headers() });
-  if (!user || user.accountStatus === "suspended") return { error: "请重新登录" };
-  try { await p.update({ collection: "community-messages", id, overrideAccess: false, user, data: { status: "hidden" } }); return { success: true }; }
-  catch { return { error: "无权管理该消息或消息已移除" }; }
 }
 
 export async function submitShowcaseAction(form: FormData) {
