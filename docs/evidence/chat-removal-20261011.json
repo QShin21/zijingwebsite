@@ -208,6 +208,38 @@
           "json": true
         }
       ]
+    },
+    "postDeploymentSimulator": {
+      "at": "2026-10-10T17:03:09.727Z",
+      "appid": "wxccf9f8fc9515ebd5",
+      "mode": "actual simulator network requests; no request mocks or online writes",
+      "requests": [
+        {
+          "route": "/api/globals/site?depth=0",
+          "status": 200,
+          "json": true
+        },
+        {
+          "route": "/api/events?limit=1&depth=0",
+          "status": 200,
+          "json": true
+        },
+        {
+          "route": "/api/miniapp/status",
+          "status": 200,
+          "json": true
+        },
+        {
+          "route": "/api/community-messages",
+          "status": 404,
+          "json": true
+        }
+      ],
+      "page": {
+        "path": "pages/events/index",
+        "loading": false,
+        "error": ""
+      }
     }
   },
   "wechat": {
@@ -249,18 +281,30 @@
     "historicalChatTablesRetained": true
   },
   "deployment": {
-    "status": "awaiting_specific_authorization",
-    "currentRevision": "42aa64d64b632f9e4ea206e070d34c04b02cf564",
-    "currentSourceFiles": 104,
-    "readOnlyInventoryVerifiedAgainstCommit": true,
+    "status": "deployed",
+    "authorization": "explicit user reply authorizing this chat-removal version",
+    "deployedRevision": "3ec3eeb855de7c8a6e1c2c36a9f873519ca239a6",
+    "serverBranch": "littleapp",
+    "baselineRevision": "42aa64d64b632f9e4ea206e070d34c04b02cf564",
+    "baselineSourceFiles": 104,
+    "currentSourceFiles": 95,
+    "sourceHashesMatch": true,
     "bridgeRetained": true,
     "target": "https://home.thuzijing.top",
-    "freeKill": "https://sgs.thuzijing.top"
+    "freeKill": {
+      "website": "https://sgs.thuzijing.top",
+      "https": 200,
+      "webSocket": 101
+    },
+    "serverEvidence": "chat-removal-deployment-20261011.json",
+    "newMigrations": false,
+    "dataDeletion": false,
+    "rollbackPrepared": true,
+    "rollbackExecuted": false
   },
   "notVerified": [
     "actual phone preview",
     "real account workflows",
-    "real email delivery",
-    "new website deployment"
+    "real email delivery"
   ]
 }
