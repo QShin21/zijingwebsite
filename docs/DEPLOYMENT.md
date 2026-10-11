@@ -101,3 +101,9 @@ BACKUP_REMOTE可设为已挂载的异机受控目录；设置前由维护者核�
 备份位于 `/srv/zijingwebsite/backups/realtime-20260928`，包含数据库快照、环境、媒体与源码。新增 `20260928_120000_chat_notifications` 只创建通知函数和触发器；隔离副本与线上迁移前后 56 张既有表内容摘要一致，保留 5 个账号和 2 条申请。旧源码和构建位于 `/srv/zijingwebsite/releases/realtime-previous-22c85be`，可恢复兼容旧应用；不需要删除业务数据或执行破坏性 down。
 
 SSE 通过 Nginx 公网 HTTPS 验证，响应禁止缓冲，每 15 秒心跳、60 秒重新校验连接；断线重连后按 ID 补齐新增消息。临时 3101 端口还验证了代理对实际监听端口的会话查询。`SERVER_URL` 与运行环境保持原配置，未改 DNS、环境文件或 FreeKill 配置。验收数据见 `docs/evidence/deployment-realtime-community.json`。
+
+## 2026-10-12 作答修改与新版小程序报名
+
+应用 `00c485fe1e2ae538f556892429e08bfb49da1f46` 已部署至 `home.thuzijing.top`，无新增迁移。完整数据库、源码、媒体、环境和旧构建保存在 `/srv/zijingwebsite/backups/questionnaire-responses-mini-20261012`。完整 pg_restore 到隔离库后逐表核对 58 张表；候选 3101 端口用隔离账号完成新版 JWT 问卷提交/读取/PATCH/冲突/权限/关闭验证，测试对象已清理。线上 127 份源码、58 张表内容、媒体、私有环境、Nginx 和 FreeKill 配置/进程保留检查通过。
+
+该备份目录的 `rollback.sh` 恢复旧应用和构建，保留现有生产数据库。旧版本支持信息组读取，但缺少本轮本人作答 PATCH；回退时需同步处理小程序修改入口与服务端能力。没有实际执行生产回滚。网站就绪 200，FreeKill HTTPS 200 / WebSocket 101，均检查可信证书；完整 CI、原生上传与验证边界见 [本次记录](QUESTIONNAIRE_RESPONSE_EDITING.md)。

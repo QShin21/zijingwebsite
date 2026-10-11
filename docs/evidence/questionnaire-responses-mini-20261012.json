@@ -1,0 +1,480 @@
+{
+  "date": "2026-10-12",
+  "applicationRevision": "00c485fe1e2ae538f556892429e08bfb49da1f46",
+  "branch": "littleapp",
+  "changes": [
+    "prefilled editing and resubmission of own saved response",
+    "record ID and initial signup time retained",
+    "transactional revision conflict protection",
+    "native support for all 16 question types and compound branching"
+  ],
+  "local": {
+    "typecheck": true,
+    "lint": true,
+    "unitAndDatabaseTests": 211,
+    "unitFiles": 25,
+    "websiteProductionBuild": true,
+    "questionnaireBrowserCases": 12,
+    "browserBoundary": "11 passed in complete execution; new case passed after locator assertion repair in targeted final recheck",
+    "browserWidths": [
+      320,
+      390,
+      1440
+    ],
+    "questionnaireAxeViolations": 0
+  },
+  "miniapp": {
+    "version": "0.3.0",
+    "source": {
+      "pages": 14,
+      "files": 89,
+      "bytes": 174016,
+      "domainChecking": true
+    },
+    "officialPreview": {
+      "compiled": true,
+      "bytes": 166342
+    },
+    "simulatorControlledFixtures": {
+      "at": "2026-10-11T16:00:41.082Z",
+      "version": "0.3.0",
+      "environment": "official developer tools simulator; controlled fixtures",
+      "productionWrites": 0,
+      "phoneVerified": false,
+      "cases": [
+        "native template input/radio events update real page state",
+        "team 5–6 entries, no seventh, incomplete sixth rejected",
+        "branch switch clears hidden roster",
+        "submit and receipt display all roster fields",
+        "edit prefills saved roster, cancel keeps original, failure keeps edits, resubmit replaces own receipt",
+        "advanced form management preserves schema and displays native roster receipts",
+        "all 16 question types compile and render native inputs",
+        "compound jump and early ending exclude later required questions"
+      ]
+    },
+    "phoneVerified": false,
+    "wechatReviewSubmitted": false,
+    "wechatPublicReleaseVerified": false,
+    "officialUpload": {
+      "version": "0.3.0",
+      "successful": true,
+      "bytes": 166342,
+      "at": "2026-10-11T16:24:20.970344+00:00",
+      "scope": "WeChat development version; review and public release not performed"
+    },
+    "simulatorActualPublicRequests": {
+      "at": "2026-10-11T16:26:24.546Z",
+      "version": "0.3.0",
+      "environment": "official simulator; actual public HTTPS requests",
+      "requests": [
+        {
+          "path": "/api/globals/site?depth=0",
+          "status": 200,
+          "json": true
+        },
+        {
+          "path": "/api/events?limit=1&depth=0",
+          "status": 200,
+          "json": true
+        },
+        {
+          "path": "/api/miniapp/status",
+          "status": 200,
+          "json": true
+        }
+      ],
+      "eventsPageLoaded": true,
+      "domainChecking": true,
+      "productionWrites": 0,
+      "phoneVerified": false
+    }
+  },
+  "applicationSourceFiles": 127,
+  "productionTestResponsesCreated": 0,
+  "originalWorkspace": {
+    "path": "D:/Users/16701/Documents/ChatGPT/zijingwebsite",
+    "head": "fb51bbb71009aec66395fb2892402d814ddca744",
+    "existingStatusEntries": 27,
+    "untouched": true
+  },
+  "simulatorScreenshotSHA256": {
+    "response-mini-team.png": "b40281f1b13d293384845bb6d2119ff09bf1b67dba275d6b062e6230a691d834",
+    "response-mini-receipt.png": "d3d3b791cd023c459866da9895b43e94284846ed29d626728d82e9bc57138774",
+    "response-mini-advanced.png": "8255d28d727a15f639dc590aaf6ed878cfa3cf6542d7ab59c848017c06aaf0c5"
+  },
+  "ci": {
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38154023565",
+    "runId": 38154023565,
+    "applicationRevision": "00c485fe1e2ae538f556892429e08bfb49da1f46",
+    "conclusion": "success",
+    "unitAndDatabaseTests": 211,
+    "browserTests": 51,
+    "browserFiles": 9,
+    "typecheck": true,
+    "lint": true,
+    "websiteProductionBuild": true
+  },
+  "serverCandidate": {
+    "at": "2026-10-11T16:11:34.190Z",
+    "environment": "optimized server candidate; isolated restored database",
+    "nativeProtocol": 3,
+    "requests": [
+      {
+        "method": "GET",
+        "suffix": "",
+        "protocol": "3",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "suffix": "",
+        "protocol": "",
+        "status": 409
+      },
+      {
+        "method": "POST",
+        "suffix": "",
+        "protocol": "3",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "suffix": "",
+        "protocol": "3",
+        "status": 200
+      },
+      {
+        "method": "PATCH",
+        "suffix": "",
+        "protocol": "3",
+        "status": 200
+      },
+      {
+        "method": "PATCH",
+        "suffix": "",
+        "protocol": "3",
+        "status": 409
+      },
+      {
+        "method": "PATCH",
+        "suffix": "",
+        "protocol": "3",
+        "status": 404
+      },
+      {
+        "method": "PATCH",
+        "suffix": "",
+        "protocol": "3",
+        "status": 400
+      },
+      {
+        "method": "GET",
+        "suffix": "?mode=entries",
+        "protocol": "3",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "suffix": "",
+        "protocol": "3",
+        "status": 200
+      },
+      {
+        "method": "PATCH",
+        "path": "collection REST",
+        "status": 403
+      },
+      {
+        "method": "GET",
+        "suffix": "",
+        "protocol": "3",
+        "status": 200
+      },
+      {
+        "method": "PATCH",
+        "suffix": "",
+        "protocol": "3",
+        "status": 409
+      }
+    ],
+    "groupEntries": 5,
+    "previousAnswersReturned": true,
+    "editingPreservesRecordAndCreatedAt": true,
+    "staleAndOtherUserRejected": true,
+    "invalidSeventhRejected": true,
+    "managerSeesLatest": true,
+    "closedRejected": true,
+    "productionWrites": 0,
+    "isolatedFixturesRemoved": true,
+    "buildExitCode": 0
+  },
+  "serverDeployment": {
+    "at": "2026-10-11T16:24:07.849Z",
+    "revision": "revision=00c485fe1e2ae538f556892429e08bfb49da1f46\napplication_revision=00c485fe1e2ae538f556892429e08bfb49da1f46\n",
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/health/ready",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/api/events?limit=1&depth=0",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/api/miniapp/status",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/community/lol/forum",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "POST",
+        "path": "/community/lol/forum",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "PATCH",
+        "path": "/community/lol/forum",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "DELETE",
+        "path": "/community/lol/forum",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "path": "/community/lol/forum/1",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "POST",
+        "path": "/community/lol/forum/1",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "PATCH",
+        "path": "/community/lol/forum/1",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "DELETE",
+        "path": "/community/lol/forum/1",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/forum-posts",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/forum-posts",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/forum-posts",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/forum-posts",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/comments",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/comments",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/comments",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/comments",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/community-reactions",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/community-reactions",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/community-reactions",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/community-reactions",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/miniapp/reactions",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/miniapp/reactions",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/miniapp/reactions",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/miniapp/reactions",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "path": "/admin/collections/forum-posts",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "POST",
+        "path": "/admin/collections/forum-posts",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "PATCH",
+        "path": "/admin/collections/forum-posts",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "DELETE",
+        "path": "/admin/collections/forum-posts",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/showcase-videos/<unknown>.mp4",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/activities/manage",
+        "status": 403,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/activities/events/1/signup?mode=stats",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/activities/events/1/signup?mode=export",
+        "status": 404,
+        "noStore": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/activities/events/1/signup",
+        "status": 401,
+        "noStore": true
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/activities/events/1/signup",
+        "status": 401,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/activities/invalid/1/signup",
+        "status": 400,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "path": "/api/questionnaires/generate",
+        "status": 401,
+        "noStore": true
+      },
+      {
+        "method": "POST",
+        "path": "/api/questionnaires/generate",
+        "status": 401,
+        "noStore": true
+      }
+    ],
+    "preservedOtherFiles": true,
+    "databaseProcessUnchanged": true,
+    "freeKillProcessesUnchanged": true,
+    "swappiness": "0",
+    "tableCount": 58,
+    "changedTables": [],
+    "sourceFilesMatched": 127,
+    "aiProxyReadTimeoutSeconds": 150,
+    "otherNginxDirectivesUnchanged": true,
+    "aiPrivateConfig": true,
+    "otherEnvironmentUnchanged": true,
+    "keyAbsentFromSourceAndBrowserBundle": true,
+    "bilibiliFrameAllowed": true,
+    "mediaUnchanged": true,
+    "freeKillHTTPS": 200,
+    "restoreRehearsal": "Full pg_restore to isolated database passed before build",
+    "ok": true,
+    "entry": "https://home.thuzijing.top",
+    "buildId": "tUIvxA_ixzYvW1_tJbfq-",
+    "backupPath": "/srv/zijingwebsite/backups/questionnaire-responses-mini-20261012",
+    "rollbackScript": "/srv/zijingwebsite/backups/questionnaire-responses-mini-20261012/rollback.sh",
+    "restoreTablesMatched": 58,
+    "newMigrations": 0,
+    "productionRollbackExecuted": false,
+    "freeKillWebSocket": 101,
+    "tlsVerified": true
+  }
+}
