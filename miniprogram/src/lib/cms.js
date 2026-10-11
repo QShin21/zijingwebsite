@@ -83,17 +83,17 @@ function socialQuery(options = {}) {
     ...(options.targetType ? { 'where[targetType][equals]': options.targetType } : {}),
     ...(options.targetId ? { 'where[targetId][equals]': options.targetId } : {}),
     ...(options.category ? { 'where[category][equals]': options.category } : {}),
-    ...selection(options.fields || ['title', 'body', 'game', 'authorName', 'createdAt', 'status', 'pinned', 'featured', 'heat', 'category', 'videoURL', 'images', 'reviewNote', 'targetType', 'targetId', 'parent']),
+    ...selection(options.fields || ['title', 'body', 'game', 'authorName', 'createdAt', 'status', 'category', 'videoURL', 'images', 'reviewNote']),
     ...(options.visible === false ? {} : { 'where[status][equals]': 'visible' }) };
 }
-const socials = ['forum-posts', 'community-posts', 'community-showcase', 'comments'];
+const socials = ['community-posts', 'community-showcase'];
 async function social(collection, options = {}) {
   if (!socials.includes(collection)) throw new Error('内容类型无效');
   return http.request(`/api/${collection}?${query(socialQuery(options))}`, { required: true });
 }
 async function socialDetail(collection, id) {
   if (!socials.includes(collection)) throw new Error('内容类型无效');
-  const value = await http.request(`/api/${collection}/${encodeURIComponent(id)}?depth=0&${query(selection(['title', 'body', 'game', 'authorName', 'createdAt', 'status', 'pinned', 'featured', 'heat', 'category']))}`, { required: true });
+  const value = await http.request(`/api/${collection}/${encodeURIComponent(id)}?depth=0&${query(selection(['title', 'body', 'game', 'authorName', 'createdAt', 'status', 'category']))}`, { required: true });
   if (value.status !== 'visible') throw new Error('内容暂不可用');
   return { ...value, collection };
 }

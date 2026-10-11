@@ -2,7 +2,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cms } from "@/lib/content";
-import { canPublish, hasRole, managesGame, routeFor } from "@/lib/rules";
+import { canPublish, hasRole, managesGame } from "@/lib/rules";
 import { applicationError } from "@/lib/application-error";
 
 const value = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
@@ -54,46 +54,17 @@ export async function publishCommunityAction(form: FormData) {
   const { p, user } = await current();
   const game = numeric(form, "game");
   const kind = value(form, "kind");
-  const where = await gamePath(game);
-  if (!["forum", "event", "notice"].includes(kind)) problem(where, "发布类型无效");
-  let createdForum: number | null = null;
+  const path = `${await gamePath(game)}/updates`;
+  if (!["event", "notice"].includes(kind)) problem(path, "发布类型无效");
   try {
-    if (kind === "forum") {
-      const post = await p.create({ collection: "forum-posts", overrideAccess: false, user,
-        data: { game, author: user.id, title: value(form, "title"), body: value(form, "body") } });
-      createdForum = post.id;
-    }
-    if (kind === "event" || kind === "notice") await p.create({
-      collection: "community-posts", overrideAccess: false, user,
-      data: { game, author: user.id, title: value(form, "title"), body: value(form, "body"), category: kind },
-    });
-  } catch { problem(`${where}/${kind === "forum" ? "forum" : "updates"}`, "发布未成功，请核对内容和权限"); }
-  if (createdForum) redirect(`${where}/forum/${createdForum}`);
-  redirect(`${where}/updates`);
-}
-export async function commentAction(form: FormData) {
-  const { p, user } = await current();
-  const targetType = value(form, "targetType");
-  const targetId = numeric(form, "targetId");
-  const collection = (["events", "albums", "news", "announcements", "forum-posts", "community-posts"] as const)
-    .find((name) => name === targetType);
-  if (!collection) redirect("/community");
-  const target = await p.findByID({ collection, id: targetId, user: null,
-    overrideAccess: false, draft: false, depth: 0 }).catch(() => null);
-  if (!target) redirect("/community");
-  const post = target as { id: number; game?: number | null; slug?: string | null };
-  const path = collection === "forum-posts" ? `${await gamePath(Number(post.game))}/forum/${post.id}`
-    : collection === "community-posts" ? `${await gamePath(Number(post.game))}/updates/${post.id}` : `/${routeFor[collection]}/${post.slug}`;
-  try {
-    await p.create({ collection: "comments", overrideAccess: false, user,
-      data: { targetType: collection, targetId, author: user.id, body: value(form, "body"),
-        parent: numeric(form, "parent") || undefined } });
-  } catch { problem(path, "评论未成功，请检查内容或发言权限"); }
+    await p.create({ collection: "community-posts", overrideAccess: false, user,
+      data: { game, author: user.id, title: value(form, "title"), body: value(form, "body"), category: kind as "event" | "notice" } });
+  } catch { problem(path, "发布未成功，请核对内容和权限"); }
   redirect(path);
 }
 export async function moderateAction(form: FormData) {
   const { p, user } = await current();
-  const collection = (["forum-posts", "community-posts", "comments"] as const)
+  const collection = (["community-posts"] as const)
     .find((name) => name === value(form, "collection"));
   if (!collection) redirect("/community");
   const id = numeric(form, "id");
@@ -120,37 +91,6 @@ export async function banAction(form: FormData) {
   redirect(path);
 }
 
-export async function reactionAction(form: FormData) {
-  const { p, user } = await current();
-  const collection = value(form, "targetType") === "forum-posts" ? "forum-posts" : "community-posts";
-  const id = numeric(form, "targetId");
-  const kind = value(form, "kind") === "attend" ? "attend" : "like";
-  const target = await p.findByID({ collection, id, overrideAccess: false, user: null, depth: 0 }).catch(() => null);
-  if (!target) redirect("/community");
-  const path = `${await gamePath(Number(target.game))}/${collection === "forum-posts" ? "forum" : "updates"}/${id}`;
-  try {
-    const existing = await p.find({ collection: "community-reactions", overrideAccess: false, user,
-      context: { ownReactions: true }, where: { targetType: { equals: collection }, targetId: { equals: id }, kind: { equals: kind } }, depth: 0, limit: 1 });
-    if (existing.docs[0]) await p.delete({ collection: "community-reactions", id: existing.docs[0].id, overrideAccess: false, user });
-    else await p.create({ collection: "community-reactions", overrideAccess: false, user,
-      data: { targetType: collection, targetId: id, kind, author: user.id, key: "server-derived" } });
-  } catch { problem(path, "操作未成功，请稍后重试"); }
-  redirect(path);
-}
-
-export async function curateForumAction(form: FormData) {
-  const { p, user } = await current();
-  const post = await p.findByID({ collection: "forum-posts", id: numeric(form, "id"), overrideAccess: false, user, depth: 0 }).catch(() => null);
-  if (!post || !managesGame(user, post.game)) redirect("/community");
-  const path = `${await gamePath(Number(post.game))}/forum`;
-  const field = value(form, "field");
-  if (!["pinned", "featured", "status"].includes(field)) problem(path, "管理操作无效");
-  try { await p.update({ collection: "forum-posts", id: post.id, overrideAccess: false, user,
-    data: field === "status" ? { status: "hidden" } : { [field]: value(form, "enabled") === "true" } }); }
-  catch { problem(path, "管理操作未成功"); }
-  redirect(path);
-}
-
 export async function submitShowcaseAction(form: FormData) {
   const p = await cms(); const { user } = await p.auth({ headers: await headers() });
   if (!user || user.accountStatus === "suspended") return { error: "请先登录可用账号" };
@@ -158,7 +98,7 @@ export async function submitShowcaseAction(form: FormData) {
   if (files.length > 6 || files.some(f => f.size > 2 * 1024 * 1024 || !["image/png", "image/jpeg", "image/webp"].includes(f.type))) return { error: "最多 6 张 PNG、JPEG、WebP 照片，每张 2 MB 以内" };
   try {
     const images = await Promise.all(files.map(async file => ({ source: `data:${file.type};base64,${Buffer.from(await file.arrayBuffer()).toString("base64")}`, caption: value(form, "caption") })));
-    await p.create({ collection: "community-showcase", overrideAccess: false, user,
+    await p.create({ collection: "community-showcase", overrideAccess: false, user, context: { webShowcaseWrite: true },
       data: { game: numeric(form, "game"), author: user.id, title: value(form, "title"), body: value(form, "body"), videoURL: value(form, "videoURL"), images } });
     return { success: true };
   } catch (error) { return { error: applicationError(error) }; }
@@ -170,7 +110,7 @@ export async function reviewShowcaseAction(form: FormData) {
   const path = `${await gamePath(Number(post.game))}/showcase`;
   const status = value(form, "status");
   if (!["visible", "rejected", "hidden"].includes(status)) problem(path, "审核决定无效");
-  try { await p.update({ collection: "community-showcase", id: post.id, overrideAccess: false, user,
+  try { await p.update({ collection: "community-showcase", id: post.id, overrideAccess: false, user, context: { webShowcaseWrite: true },
     data: { status: status as "visible" | "rejected" | "hidden", reviewNote: value(form, "reviewNote") } }); }
   catch { problem(path, "审核未成功，请刷新后重试"); }
   redirect(`${path}?view=review&message=${encodeURIComponent("审核已保存")}`);

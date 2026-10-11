@@ -2299,14 +2299,6 @@ main {
   border-radius: 6px;
   cursor: pointer;
 }
-.comments {
-  margin: 3rem 0;
-  border-top: 1px solid #e2d9ef;
-  padding-top: 2rem;
-}
-.comments .community-message {
-  margin: 1rem 0;
-}
 @media (max-width: 1080px) {
   .site-header .account-link {
     display: none;
@@ -2645,8 +2637,7 @@ textarea:focus-visible,
   font-size: 25px;
   margin-top: 32px;
 }
-.member-shell a:not(.button),
-.comments a:not(.button) {
+.member-shell a:not(.button) {
   color: var(--purple);
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -2923,8 +2914,7 @@ p[role="status"]:not(:empty) {
 .community-page > section > h2 {
   font-size: 26px;
 }
-.community-page > section > p,
-.comments > p {
+.community-page > section > p {
   color: var(--muted);
   font-size: 14px;
 }
@@ -2972,9 +2962,6 @@ p[role="status"]:not(:empty) {
   border-bottom: 1px solid var(--line);
   font-size: 17px;
   line-height: 2;
-}
-.comments {
-  border-top-color: var(--line);
 }
 @media (max-width: 1200px) {
   .header {
@@ -3309,14 +3296,8 @@ button:disabled {
 .community-home-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr)); gap:24px; margin:32px 0 }
 .community-tabs a[aria-current="page"] { background:#6e39cf; color:white }
 
-.community-pagination,.reaction-bar { display:flex; flex-wrap:wrap; align-items:center; gap:1rem; margin:24px 0 }
+.community-pagination { display:flex; flex-wrap:wrap; align-items:center; gap:1rem; margin:24px 0 }
 .community-article { max-width:860px; margin:32px auto; overflow-wrap:anywhere }
-.reaction-bar [aria-pressed="true"] { background:#6e39cf; color:white }
-
-.forum-list { display:grid; gap:1rem; margin:24px 0 }
-.forum-badges { display:flex; gap:.5rem }
-.forum-badges span { background:#eee4fc; color:#532199; border-radius:8px; padding:3px 10px; font-size:.8rem }
-
 
 .showcase-feed { display:grid; gap:24px; max-width:960px; margin:24px auto }
 .showcase-card { overflow-wrap:anywhere }

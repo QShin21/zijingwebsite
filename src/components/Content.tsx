@@ -12,7 +12,6 @@ import {
 import { dateParts, kindLabels } from "@/lib/presentation";
 import { Artwork, Icon, type IconName } from "./Identity";
 import { PageHeading } from "./PageHeading";
-import { Comments } from "./Comments";
 
 export function Empty({
   text,
@@ -436,16 +435,6 @@ export async function Detail({
                 <Cards docs={related[1].docs} collection="albums" />
               </section>
             </>
-          )}
-          {["events", "albums", "news", "announcements"].includes(
-            collection,
-          ) && (
-            <Comments
-              targetType={
-                collection as "events" | "albums" | "news" | "announcements"
-              }
-              targetId={doc.id}
-            />
           )}
         </div>
         <aside className="detail-sidebar">

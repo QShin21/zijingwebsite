@@ -1,0 +1,8 @@
+{
+  "date": "2026-10-11",
+  "mode": "controlled UI fixtures; no online writes",
+  "cases": [
+    "two sections; showcase renders; no submit, review, hide or reaction controls",
+    "detail remains read only even with legacy management/comment state"
+  ]
+}

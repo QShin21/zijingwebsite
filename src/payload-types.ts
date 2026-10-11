@@ -24,11 +24,8 @@ export interface Config {
     media: Media;
     'community-applications': CommunityApplication;
     'community-bans': CommunityBan;
-    'community-reactions': CommunityReaction;
     'community-showcase': CommunityShowcase;
-    'forum-posts': ForumPost;
     'community-posts': CommunityPost;
-    comments: Comment;
     games: Game;
     teams: Team;
     seasons: Season;
@@ -52,11 +49,8 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     'community-applications': CommunityApplicationsSelect<false> | CommunityApplicationsSelect<true>;
     'community-bans': CommunityBansSelect<false> | CommunityBansSelect<true>;
-    'community-reactions': CommunityReactionsSelect<false> | CommunityReactionsSelect<true>;
     'community-showcase': CommunityShowcaseSelect<false> | CommunityShowcaseSelect<true>;
-    'forum-posts': ForumPostsSelect<false> | ForumPostsSelect<true>;
     'community-posts': CommunityPostsSelect<false> | CommunityPostsSelect<true>;
-    comments: CommentsSelect<false> | CommentsSelect<true>;
     games: GamesSelect<false> | GamesSelect<true>;
     teams: TeamsSelect<false> | TeamsSelect<true>;
     seasons: SeasonsSelect<false> | SeasonsSelect<true>;
@@ -284,20 +278,6 @@ export interface CommunityBan {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "community-reactions".
- */
-export interface CommunityReaction {
-  id: number;
-  targetType: 'community-posts' | 'forum-posts';
-  targetId: number;
-  kind: 'like' | 'attend';
-  author: number | User;
-  key: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "community-showcase".
  */
 export interface CommunityShowcase {
@@ -322,24 +302,6 @@ export interface CommunityShowcase {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "forum-posts".
- */
-export interface ForumPost {
-  id: number;
-  title: string;
-  body: string;
-  game?: (number | null) | Game;
-  author: number | User;
-  authorName?: string | null;
-  status?: ('visible' | 'hidden') | null;
-  pinned?: boolean | null;
-  featured?: boolean | null;
-  heat?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "community-posts".
  */
 export interface CommunityPost {
@@ -351,23 +313,6 @@ export interface CommunityPost {
   authorName?: string | null;
   status?: ('visible' | 'hidden') | null;
   category: 'event' | 'notice';
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "comments".
- */
-export interface Comment {
-  id: number;
-  body: string;
-  game?: (number | null) | Game;
-  author: number | User;
-  authorName?: string | null;
-  status?: ('visible' | 'hidden') | null;
-  targetType: 'events' | 'albums' | 'news' | 'announcements' | 'forum-posts' | 'community-posts';
-  targetId: number;
-  parent?: (number | null) | Comment;
   updatedAt: string;
   createdAt: string;
 }
@@ -843,24 +788,12 @@ export interface PayloadLockedDocument {
         value: number | CommunityBan;
       } | null)
     | ({
-        relationTo: 'community-reactions';
-        value: number | CommunityReaction;
-      } | null)
-    | ({
         relationTo: 'community-showcase';
         value: number | CommunityShowcase;
       } | null)
     | ({
-        relationTo: 'forum-posts';
-        value: number | ForumPost;
-      } | null)
-    | ({
         relationTo: 'community-posts';
         value: number | CommunityPost;
-      } | null)
-    | ({
-        relationTo: 'comments';
-        value: number | Comment;
       } | null)
     | ({
         relationTo: 'games';
@@ -1045,19 +978,6 @@ export interface CommunityBansSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "community-reactions_select".
- */
-export interface CommunityReactionsSelect<T extends boolean = true> {
-  targetType?: T;
-  targetId?: T;
-  kind?: T;
-  author?: T;
-  key?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "community-showcase_select".
  */
 export interface CommunityShowcaseSelect<T extends boolean = true> {
@@ -1081,23 +1001,6 @@ export interface CommunityShowcaseSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "forum-posts_select".
- */
-export interface ForumPostsSelect<T extends boolean = true> {
-  title?: T;
-  body?: T;
-  game?: T;
-  author?: T;
-  authorName?: T;
-  status?: T;
-  pinned?: T;
-  featured?: T;
-  heat?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "community-posts_select".
  */
 export interface CommunityPostsSelect<T extends boolean = true> {
@@ -1108,22 +1011,6 @@ export interface CommunityPostsSelect<T extends boolean = true> {
   authorName?: T;
   status?: T;
   category?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "comments_select".
- */
-export interface CommentsSelect<T extends boolean = true> {
-  body?: T;
-  game?: T;
-  author?: T;
-  authorName?: T;
-  status?: T;
-  targetType?: T;
-  targetId?: T;
-  parent?: T;
   updatedAt?: T;
   createdAt?: T;
 }

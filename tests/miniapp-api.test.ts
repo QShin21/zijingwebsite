@@ -57,18 +57,16 @@ describe('小程序 JSON 身份接口', () => {
     expect(malformed.status).toBe(400);
   });
 });
-describe('小程序互动与对象权限', () => {
-  it('浏览器 Cookie 与客户端伪造用户均不能授权互动', async () => {
+describe('已关闭的小程序互动接口', () => {
+  it('旧客户端及伪造上下文均不能恢复互动', async () => {
     const response = await POST(req({ targetType: 'forum-posts', targetId: 1, kind: 'like', user, context: { system: true } }, { cookie: 'payload-token=fixture' }), context('reactions/toggle'));
-    expect(response.status).toBe(401); expect(p.auth).not.toHaveBeenCalled(); expect(p.create).not.toHaveBeenCalled();
+    expect(response.status).toBe(404); expect(mocked.cms).not.toHaveBeenCalled(); expect(p.create).not.toHaveBeenCalled();
   });
-  it('公开读取仍关闭 overrideAccess、匿名、最小字段，自己的点赞使用服务端上下文', async () => {
+  it('持有登录令牌的读取请求也返回404且不访问数据库', async () => {
     p.auth.mockResolvedValue({ user }); p.findByID.mockResolvedValue({ id: 1, status: 'visible' });
     p.find.mockResolvedValue({ docs: [{ id: 10, kind: 'like' }] });
     const response = await GET(new Request('https://home.thuzijing.top/api/miniapp/reactions?targetType=forum-posts&targetId=1', { headers: { authorization: 'JWT fixture-token' } }), context('reactions'));
-    expect(response.status).toBe(200); expect(await response.json()).toMatchObject({ liked: true, attending: false });
-    expect(p.findByID.mock.calls[0][0]).toMatchObject({ overrideAccess: false, user: null, depth: 0, select: { status: true } });
-    expect(p.find.mock.calls[0][0]).toMatchObject({ overrideAccess: false, context: { ownReactions: true }, user });
+    expect(response.status).toBe(404); expect(mocked.cms).not.toHaveBeenCalled();
     expect(response.headers.get('Cache-Control')).toBe('private, no-store');
   });
   it('隐藏内容和任意目标类型不能触发创建或删除', async () => {
@@ -76,6 +74,6 @@ describe('小程序互动与对象权限', () => {
     const response = await POST(req({ targetType: 'forum-posts', targetId: 1, kind: 'like' }, { authorization: 'Bearer fixture-token' }), context('reactions/toggle'));
     expect(response.status).toBe(404); expect(p.delete).not.toHaveBeenCalled(); expect(p.create).not.toHaveBeenCalled();
     const invalid = await POST(req({ targetType: 'users', targetId: 5, kind: 'like' }, { authorization: 'Bearer fixture-token' }), context('reactions/toggle'));
-    expect(invalid.status).toBe(400);
+    expect(invalid.status).toBe(404);
   });
 });

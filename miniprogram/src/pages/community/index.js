@@ -1,15 +1,13 @@
 const cms = require('../../lib/cms');
 const http = require('../../lib/http');
-const session = require('../../lib/session');
 const files = require('../../lib/files');
-const navigation = require('../../lib/navigation');
 const format = require('../../lib/format');
 const { render } = require('../../lib/richtext');
 const { actions, error, protect } = require('../../lib/page');
-const areas = { updates: 'community-posts', forum: 'forum-posts', showcase: 'community-showcase' };
+const areas = { updates: 'community-posts', showcase: 'community-showcase' };
 Page({
-  data: { loading: true, error: '', needsLogin: false, game: {}, managed: false, area: 'updates', docs: [], page: 1,
-    hasMore: false, loadingMore: false, contacts: [], sort: 'latest', nodes: [], contentError: '' },
+  data: { loading: true, error: '', needsLogin: false, game: {}, area: 'updates', docs: [], page: 1,
+    hasMore: false, loadingMore: false, contacts: [], nodes: [], contentError: '' },
   ...actions,
   onLoad(options) { this._options = options; },
   onShow() { this.load(); },
@@ -24,7 +22,7 @@ Page({
     try {
       const game = await cms.detail('games', this._options.id, this._options.slug);
       if (ticket !== this._ticket) return;
-      this.setData({ game, loading: false, managed: session.manages(game.id), nodes: render(game.body).nodes });
+      this.setData({ game, loading: false, nodes: render(game.body).nodes });
       wx.setNavigationBarTitle({ title: game.title });
       await this.loadArea();
       const contacts = await http.request(`/community/${encodeURIComponent(game.slug)}/contacts`, { required: true });
@@ -39,7 +37,7 @@ Page({
     try {
       const result = await cms.social(areas[this.data.area], { game: this.data.game.id, page: more ? this.data.page + 1 : 1,
         limit: this.data.area === 'showcase' ? 4 : 15,
-        sort: this.data.area === 'forum' ? (this.data.sort === 'hot' ? '-pinned,-heat,-createdAt' : '-pinned,-createdAt') : '-createdAt' });
+        sort: '-createdAt' });
       const docs = [];
       for (const doc of result.docs) {
         const images = [];
@@ -50,16 +48,6 @@ Page({
       this.setData({ loadingMore: false, docs: more ? this.data.docs.concat(docs) : docs, page: result.page, hasMore: result.hasNextPage });
     } catch (cause) { if (ticket === this._areaTicket) this.setData({ loadingMore: false, contentError: cause.message }); }
   },
-  area(event) { this.setData({ area: event.currentTarget.dataset.area, docs: [], page: 1 }); this.loadArea(); },
-  sort(event) { this.setData({ sort: event.currentTarget.dataset.sort }); this.loadArea(); },
-  compose() { navigation.go('compose', { kind: this.data.area === 'forum' ? 'forum' : this.data.area === 'showcase' ? 'showcase' : 'event', game: this.data.game.id }); },
-  review() { navigation.go('review', { game: this.data.game.id, mode: 'showcase' }); },
-  async manageShowcase(event) {
-    if (!this.data.managed) return;
-    const result = await new Promise(resolve => wx.showModal({ title: '隐藏投稿', content: '确认隐藏这条社群风采投稿？', success: resolve }));
-    if (!result.confirm) return;
-    try { await http.request(`/api/community-showcase/${event.currentTarget.dataset.id}`, { required: true, method: 'PATCH', data: { status: 'hidden' } }); this.loadArea(); }
-    catch (cause) { wx.showToast({ title: cause.message, icon: 'none' }); }
-  },
+  area(event) { if (!areas[event.currentTarget.dataset.area]) return; this.setData({ area: event.currentTarget.dataset.area, docs: [], page: 1 }); this.loadArea(); },
   onShareAppMessage() { return { title: this.data.game.title || '紫荆游戏社群', path: `/pages/community/index?id=${this.data.game.id}&slug=${this.data.game.slug}` }; },
 });

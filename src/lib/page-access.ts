@@ -10,3 +10,9 @@ export function isRemovedCommunityChatPath(path: string) {
     /^\/api\/community-messages(?:\/|$)/.test(path) ||
     /^\/admin\/collections\/community-messages(?:\/|$)/.test(path);
 }
+
+export function isRemovedCommunityInteractionPath(path: string) {
+  return /^\/community\/[^/]+\/forum(?:\/|$)/.test(path) ||
+    /^\/(?:api|admin\/collections)\/(?:forum-posts|comments|community-reactions)(?:\/|$)/.test(path) ||
+    /^\/api\/miniapp\/reactions(?:\/|$)/.test(path);
+}

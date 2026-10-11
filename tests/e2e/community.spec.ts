@@ -52,13 +52,13 @@ async function login(page: import("@playwright/test").Page) {
   await expect(page).toHaveURL(/\/account$/);
 }
 
-test("社群保留三个分区和微信入口，已移除聊天", async ({ page }) => {
+test("社群保留通知、风采和微信入口，已移除论坛与聊天", async ({ page }) => {
   await login(page);
   await page.goto(`/community/${slug}`);
   await expect(page.getByRole("textbox")).toHaveCount(0);
   const sections = page.getByRole("navigation", { name: "社群分区" });
-  await expect(sections.getByRole("link")).toHaveCount(3);
-  for (const [name, section] of [["活动与通知", "updates"], ["论坛讨论", "forum"], ["社群风采", "showcase"]])
+  await expect(sections.getByRole("link")).toHaveCount(2);
+  for (const [name, section] of [["活动与通知", "updates"], ["社群风采", "showcase"]])
     await expect(sections.getByRole("link", { name, exact: true })).toHaveAttribute("href", `/community/${slug}/${section}`);
   await expect(page.locator('a[href*="/chat"]')).toHaveCount(0);
   await page.getByRole("button", { name: /添加社群管理员微信/ }).click();
@@ -90,10 +90,10 @@ test("访客仅活动通知可用，直接社群接口与伪造会话被拒绝",
     await expect(page).toHaveURL(new RegExp(`${path}$`));
     await expect(page.getByRole("navigation", { name: "主导航", exact: true }).getByRole("link")).toHaveCount(2);
   }
-  for (const path of ["/community", `/community/${slug}/forum`, "/teams", "/honors", "/news", "/gallery", "/join/members", "/contact"]) {
+  for (const path of ["/community", "/teams", "/honors", "/news", "/gallery", "/join/members", "/contact"]) {
     await page.goto(path); await expect(page).toHaveURL(/\/login\?/);
   }
-  for (const path of [`/community/${slug}/contacts`, "/api/forum-posts", "/api/games"]) {
+  for (const path of [`/community/${slug}/contacts`, "/api/games"]) {
     expect((await page.request.get(path)).status()).toBe(401);
   }
   await context.addCookies([{ name: "payload-token", value: "forged", domain: "localhost", path: "/" }]);
@@ -129,16 +129,6 @@ test("注册拒绝已占用昵称且没有数字账户输入", async ({ page }) 
 });
 test.afterAll(async () => {
   if (!p) return;
-  await p.delete({
-    collection: "comments",
-    overrideAccess: true,
-    where: { author: { equals: userID } },
-  });
-  await p.delete({
-    collection: "forum-posts",
-    overrideAccess: true,
-    where: { author: { equals: userID } },
-  });
   await p.delete({ collection: "games", id: gameID, overrideAccess: true });
   await p.delete({
     collection: "users",
@@ -147,7 +137,7 @@ test.afterAll(async () => {
     context: { system: true },
   });
 });
-test("昵称登录、社群发帖与论坛回复", async ({ page }) => {
+test("昵称登录、论坛关闭与社群只读导航", async ({ page }) => {
   await page.goto("/login");
   await page.getByLabel("昵称或邮箱").fill(nickname.toLowerCase());
   await page.getByLabel("密码", { exact: true }).fill(password);
@@ -172,21 +162,12 @@ test("昵称登录、社群发帖与论坛回复", async ({ page }) => {
       expect(result.violations, route).toEqual([]);
     }
   }
-  await page.goto(`/community/${slug}/forum`);
-  await page.getByLabel("标题").fill("浏览器真实发帖流程");
-  await page.getByLabel("内容", { exact: true }).fill("在论坛里测试完整的发表流程。");
-  await page.getByRole("button", { name: "发布到论坛" }).click();
-  await expect(page).toHaveURL(new RegExp(`/community/${slug}/forum/\\d+`));
-  await expect(
-    page.getByRole("heading", { name: "浏览器真实发帖流程" }),
-  ).toBeVisible();
-  await page.getByLabel("回复").fill("这是通过浏览器发布的回复。");
-  await page.getByRole("button", { name: "发表回复" }).click();
-  await expect(page.getByText("这是通过浏览器发布的回复。")).toBeVisible();
-  const result = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-    .analyze();
-  expect(result.violations).toEqual([]);
+  for (const path of [`/community/${slug}/forum`, `/community/${slug}/forum/1`, '/api/forum-posts', '/api/comments', '/api/community-reactions', '/api/miniapp/reactions']) {
+    expect((await page.request.get(path)).status()).toBe(404);
+    expect((await page.request.post(path, { data: {} })).status()).toBe(404);
+  }
+  await page.goto(`/community/${slug}`);
+  await expect(page.getByRole("link", { name: /论坛/ })).toHaveCount(0);
   await p.update({
     collection: "users",
     id: userID,

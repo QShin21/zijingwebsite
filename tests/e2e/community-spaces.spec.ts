@@ -25,12 +25,11 @@ test.beforeAll(async () => {
 });
 test.afterAll(async () => {
   if (!p) return;
-  if (event) await p.delete({ collection: "community-reactions", overrideAccess: true, where: { targetType: { equals: "community-posts" }, targetId: { equals: event } } });
-  if (game) for (const collection of ["comments", "community-showcase", "community-applications", "community-posts", "forum-posts"] as const) await p.delete({ collection, overrideAccess: true, where: { game: { equals: game } } });
+  if (game) for (const collection of ["community-showcase", "community-applications", "community-posts"] as const) await p.delete({ collection, overrideAccess: true, where: { game: { equals: game } } });
   if (game) await p.delete({ collection: "games", id: game, overrideAccess: true });
   for (const user of [member, admin, vice]) if (user) await p.delete({ collection: "users", id: user.id, overrideAccess: true, context: { system: true } });
 });
-test("多管理员微信、活动互动、风采投稿审核及B站预览", async ({ page, browser }) => {
+test("多管理员微信、只读活动、网页风采投稿审核及B站预览", async ({ page, browser }) => {
   await page.goto("/login"); await page.getByLabel("昵称或邮箱").fill(member.name); await page.getByLabel("密码", { exact: true }).fill(password); await page.getByRole("button", { name: "登录", exact: true }).click(); await expect(page).toHaveURL(/\/account$/);
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 960 });
@@ -44,14 +43,11 @@ test("多管理员微信、活动互动、风采投稿审核及B站预览", asyn
     await page.getByRole("button", { name: "关闭弹窗" }).click();
   }
   await page.goto(`/community/${slug}/updates/${event}`);
-  await page.getByRole("button", { name: "点赞 · 0", exact: true }).click();
-  await expect(page.getByRole("button", { name: "已点赞 · 取消 · 1", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "我要参加 · 0", exact: true }).click();
-  await expect(page.getByRole("button", { name: "已表达参加意愿 · 取消 · 1", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "已表达参加意愿 · 取消 · 1", exact: true }).click();
-  await expect(page.getByRole("button", { name: "我要参加 · 0", exact: true })).toBeVisible();
-  await page.getByLabel("写留言", { exact: true }).fill("期待周末社群活动"); await page.getByRole("button", { name: "发布留言" }).click();
-  await expect(page.getByText("期待周末社群活动", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /点赞|参加|发布留言/ })).toHaveCount(0);
+  const token = (await page.context().cookies()).find(cookie => cookie.name === 'payload-token')!.value;
+  expect((await page.request.post('/api/community-showcase', { headers: { Authorization: `JWT ${token}` }, data: {
+    game, author: member.id, title: '禁止共享接口投稿', body: '仅网页动作可投稿', context: { webShowcaseWrite: true },
+  } })).status()).toBe(403);
   await page.goto(`/community/${slug}/showcase`); await page.getByText("分享社群风采", { exact: true }).click();
   await page.getByLabel("标题", { exact: true }).fill("精彩活动图文记录"); await page.getByLabel("精彩记录", { exact: true }).fill("与伙伴们一起留下难忘的瞬间。");
   await page.getByLabel(/活动照片/).setInputFiles({ name: "activity.png", mimeType: "image/png", buffer: picture });

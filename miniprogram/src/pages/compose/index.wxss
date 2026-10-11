@@ -1,2 +1,0 @@
-.selected-photo { margin-bottom: 25rpx; }
-.selected-photo image { width: 100%; border-radius: 16rpx; margin-bottom: 16rpx; }

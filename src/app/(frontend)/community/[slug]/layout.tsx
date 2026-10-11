@@ -8,5 +8,5 @@ export default async function CommunityLayout({ params, children }: { params: Pr
   const { slug } = await params;
   const game = await bySlug("games", slug);
   if (!game) notFound();
-  return <><PageHeading title={game.title} eyebrow="GAME COMMUNITY / ZIJING" description={game.summary || "社群交流、论坛讨论与游戏活动。"} parent={{ href: "/community", label: "游戏社群" }} action={<CommunityJoin slug={slug} />} /><CommunityNav slug={slug} />{children}</>;
+  return <><PageHeading title={game.title} eyebrow="GAME COMMUNITY / ZIJING" description={game.summary || "查看社群活动、通知与精彩记录。"} parent={{ href: "/community", label: "游戏社群" }} action={<CommunityJoin slug={slug} />} /><CommunityNav slug={slug} />{children}</>;
 }

@@ -1,13 +1,13 @@
 import { proxyMember } from "@/lib/proxy-member";
 import { canParticipate } from "@/lib/rules";
-import { isGuestPage, isRemovedCommunityChatPath } from "@/lib/page-access";
+import { isGuestPage, isRemovedCommunityChatPath, isRemovedCommunityInteractionPath } from "@/lib/page-access";
 import { NextResponse, type NextRequest } from "next/server";
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
-  if (isRemovedCommunityChatPath(path)) return NextResponse.json({ error: "社群聊天功能已移除" }, {
+  if (isRemovedCommunityChatPath(path) || isRemovedCommunityInteractionPath(path)) return NextResponse.json({ error: "此社群互动功能已移除" }, {
     status: 404, headers: { "Cache-Control": "private, no-store" },
   });
-  const privateAPI = /^\/api\/(games|teams|seasons|honors|news|albums|recruitment|comments|forum-posts|community-[^/]+|graphql)(\/|$)/.test(path);
+  const privateAPI = /^\/api\/(games|teams|seasons|honors|news|albums|recruitment|community-[^/]+|graphql)(\/|$)/.test(path);
   if (privateAPI || (!isGuestPage(path) && !path.startsWith("/admin") && !path.startsWith("/preview") && !path.startsWith("/api/") && path !== "/favicon.ico")) {
     let user;
     try { user = await proxyMember(request.headers); }

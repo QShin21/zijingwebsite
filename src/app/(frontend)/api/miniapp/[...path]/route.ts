@@ -1,9 +1,7 @@
 import { cms } from '@/lib/content';
 import { miniappLogin } from '@/lib/miniapp-auth';
 import { beginRegistrationAction, registerAction } from '@/app/(frontend)/account/actions';
-import { canParticipate } from '@/lib/rules';
 import { schoolEmail, validPassword, issueCode, consumeCode } from '@/lib/verification';
-import type { Payload, Where } from 'payload';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -20,42 +18,10 @@ async function json(request: Request): Promise<Record<string, unknown>> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Invalid request');
   return value as Record<string, unknown>;
 }
-async function member(p: Payload, request: Request) {
-  // This JSON bridge uses explicit credentials; ambient browser cookies cannot authorize writes.
-  const authorization = request.headers.get('authorization');
-  if (!authorization || !/^(JWT|Bearer) [A-Za-z0-9._-]+$/.test(authorization)) return null;
-  const result = await p.auth({ headers: new Headers({ authorization }) });
-  return result.user && canParticipate(result.user) ? result.user : null;
-}
-function reactionTarget(data: Record<string, unknown>) {
-  const collection: 'forum-posts' | 'community-posts' | null = data.targetType === 'forum-posts' ? 'forum-posts'
-    : data.targetType === 'community-posts' ? 'community-posts' : null;
-  const id = Number(data.targetId);
-  if (!collection || !Number.isSafeInteger(id) || id < 1) return null;
-  return { collection, id };
-}
 export async function GET(request: Request, context: Context) {
   const path = (await context.params).path.join('/');
   if (path === 'status') return reply({ version: 1, authentication: ['email', 'nickname'], registration: true });
-  if (path !== 'reactions') return reply({ error: '接口不存在' }, 404);
-  try {
-    const p = await cms(); const user = await member(p, request);
-    if (!user) return reply({ error: '请先登录' }, 401);
-    const target = reactionTarget(Object.fromEntries(new URL(request.url).searchParams));
-    if (!target) return reply({ error: '互动对象无效' }, 400);
-    const doc = await p.findByID({ collection: target.collection, id: target.id,
-      overrideAccess: false, user: null, depth: 0, select: { status: true } }).catch(() => null);
-    if (!doc || doc.status !== 'visible') return reply({ error: '内容暂不可用' }, 404);
-    const where: Where = { targetType: { equals: target.collection }, targetId: { equals: target.id } };
-    const [likes, attends, own] = await Promise.all([
-      p.count({ collection: 'community-reactions', overrideAccess: false, user: null, where: { ...where, kind: { equals: 'like' } } }),
-      p.count({ collection: 'community-reactions', overrideAccess: false, user: null, where: { ...where, kind: { equals: 'attend' } } }),
-      p.find({ collection: 'community-reactions', overrideAccess: false, user, context: { ownReactions: true },
-        where, depth: 0, limit: 2, select: { kind: true } }),
-    ]);
-    return reply({ likes: likes.totalDocs, attends: attends.totalDocs,
-      liked: own.docs.some(value => value.kind === 'like'), attending: own.docs.some(value => value.kind === 'attend') });
-  } catch { return reply({ error: '暂时无法读取互动状态' }, 503); }
+  return reply({ error: '接口不存在' }, 404);
 }
 export async function POST(request: Request, context: Context) {
   const path = (await context.params).path.join('/');
@@ -93,25 +59,6 @@ export async function POST(request: Request, context: Context) {
       const message = cause instanceof Error && /频繁|60 秒/.test(cause.message) ? cause.message : '邮件验证暂不可用，请稍后联系管理员';
       return reply({ error: message }, 400);
     }
-  }
-  if (path === 'reactions/toggle') {
-    try {
-      const p = await cms(); const user = await member(p, request);
-      if (!user) return reply({ error: '请先登录' }, 401);
-      const target = reactionTarget(data);
-      if (!target || !['like', 'attend'].includes(text(data.kind))) return reply({ error: '互动对象无效' }, 400);
-      const kind = data.kind as 'like' | 'attend';
-      const doc = await p.findByID({ collection: target.collection, id: target.id,
-        overrideAccess: false, user: null, depth: 0, select: { status: true } }).catch(() => null);
-      if (!doc || doc.status !== 'visible') return reply({ error: '内容暂不可用' }, 404);
-      const result = await p.find({ collection: 'community-reactions', overrideAccess: false, user,
-        context: { ownReactions: true }, depth: 0, limit: 1,
-        where: { targetType: { equals: target.collection }, targetId: { equals: target.id }, kind: { equals: kind } } });
-      if (result.docs[0]) await p.delete({ collection: 'community-reactions', id: result.docs[0].id, overrideAccess: false, user });
-      else await p.create({ collection: 'community-reactions', overrideAccess: false, user,
-        data: { targetType: target.collection, targetId: target.id, kind, author: user.id, key: 'server-derived' } });
-      return reply({ active: !result.docs[0] });
-    } catch { return reply({ error: '互动未完成，请检查权限后重试' }, 400); }
   }
   return reply({ error: '接口不存在' }, 404);
 }

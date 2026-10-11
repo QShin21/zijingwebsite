@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-11",
+  "scope": "remove forums and interaction from web and miniapp; website keeps showcase submissions; miniapp is read only",
+  "local": {
+    "unitAndDatabaseTests": 102,
+    "browserTests": 7,
+    "typecheck": true,
+    "lint": true,
+    "optimizedBuild": true,
+    "miniappStaticCheck": {
+      "pages": 12,
+      "files": 60,
+      "urlCheck": true
+    }
+  },
+  "miniapp": {
+    "appid": "wxccf9f8fc9515ebd5",
+    "developmentVersion": "0.1.2",
+    "uploadSucceeded": true,
+    "compiledBytes": 105837,
+    "reviewSubmitted": false,
+    "officialReleasePublished": false,
+    "realDeviceVerified": false,
+    "uiEvidence": "forum-miniapp-ui-20261011.json"
+  },
+  "database": {
+    "newMigrations": false,
+    "historicalDataDeleted": false
+  },
+  "deployment": {
+    "status": "pending",
+    "origin": "https://home.thuzijing.top",
+    "backup": "/srv/zijingwebsite/backups/forum-removal-20261011"
+  },
+  "boundaries": [
+    "Simulator UI verification uses controlled fixtures; no online writes.",
+    "Wechat audit approval and real phone workflows are not verified.",
+    "Existing privacy and registration concerns are outside this feature removal."
+  ]
+}

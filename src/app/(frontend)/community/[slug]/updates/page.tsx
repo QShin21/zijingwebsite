@@ -18,7 +18,7 @@ export default async function Updates({ params, searchParams }: { params: Promis
     <div className="community-list">{entries.docs.map(post => <article className="panel" key={post.id}>
       <small>{post.category === "event" ? "社群活动" : "社群通知"} · {formatDate(post.createdAt)}</small>
       <h3><Link href={`/community/${slug}/updates/${post.id}`}>{post.title}</Link></h3>
-      <p className="community-excerpt">{post.body}</p><Link href={`/community/${slug}/updates/${post.id}`}>阅读全文与留言 ↗</Link>
+      <p className="community-excerpt">{post.body}</p><Link href={`/community/${slug}/updates/${post.id}`}>阅读全文 ↗</Link>
     </article>)}</div>{!entries.docs.length && <p>暂无活动与通知。</p>}
     <CommunityPager page={page} pages={entries.totalPages} base={`/community/${slug}/updates`} />
     {managesGame(user, game.id) && <details className="panel"><summary>发布活动与通知</summary><form className="member-form" action={publishCommunityAction}>

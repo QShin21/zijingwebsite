@@ -10,7 +10,6 @@
     "pages/fixed/index",
     "pages/auth/index",
     "pages/community/index",
-    "pages/compose/index",
     "pages/applications/index",
     "pages/review/index"
   ],
@@ -28,15 +27,43 @@
     "backgroundColor": "#ffffff",
     "borderStyle": "white",
     "list": [
-      { "pagePath": "pages/home/index", "text": "紫荆", "iconPath": "assets/home.png", "selectedIconPath": "assets/home-active.png" },
-      { "pagePath": "pages/events/index", "text": "活动", "iconPath": "assets/calendar.png", "selectedIconPath": "assets/calendar-active.png" },
-      { "pagePath": "pages/communities/index", "text": "社群", "iconPath": "assets/community.png", "selectedIconPath": "assets/community-active.png" },
-      { "pagePath": "pages/explore/index", "text": "发现", "iconPath": "assets/explore.png", "selectedIconPath": "assets/explore-active.png" },
-      { "pagePath": "pages/account/index", "text": "我的", "iconPath": "assets/user.png", "selectedIconPath": "assets/user-active.png" }
+      {
+        "pagePath": "pages/home/index",
+        "text": "紫荆",
+        "iconPath": "assets/home.png",
+        "selectedIconPath": "assets/home-active.png"
+      },
+      {
+        "pagePath": "pages/events/index",
+        "text": "活动",
+        "iconPath": "assets/calendar.png",
+        "selectedIconPath": "assets/calendar-active.png"
+      },
+      {
+        "pagePath": "pages/communities/index",
+        "text": "社群",
+        "iconPath": "assets/community.png",
+        "selectedIconPath": "assets/community-active.png"
+      },
+      {
+        "pagePath": "pages/explore/index",
+        "text": "发现",
+        "iconPath": "assets/explore.png",
+        "selectedIconPath": "assets/explore-active.png"
+      },
+      {
+        "pagePath": "pages/account/index",
+        "text": "我的",
+        "iconPath": "assets/user.png",
+        "selectedIconPath": "assets/user-active.png"
+      }
     ]
   },
   "style": "v2",
   "lazyCodeLoading": "requiredComponents",
   "sitemapLocation": "sitemap.json",
-  "networkTimeout": { "request": 70000, "downloadFile": 20000 }
+  "networkTimeout": {
+    "request": 70000,
+    "downloadFile": 20000
+  }
 }
