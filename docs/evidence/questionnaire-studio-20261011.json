@@ -20,15 +20,33 @@
     "lint": "passed",
     "typecheck": "passed",
     "productionBuild": "passed",
-    "unitAndDatabaseTests": { "passed": 191, "files": 22 },
+    "unitAndDatabaseTests": {
+      "passed": 191,
+      "files": 22
+    },
     "browser": {
       "passed": 10,
       "singleCompleteRun": true,
       "elapsed": "1.8 minutes",
-      "widths": [320, 390, 1440],
+      "widths": [
+        320,
+        390,
+        1440
+      ],
       "horizontalOverflow": false,
       "axeViolationsInQuestionnaireEditorAndTemplateDialog": 0,
-      "covers": ["existing signup and private access", "website and JWT compatibility", "creation and CMS editor entry", "conditional review and retry", "advanced types drafts statistics and exports", "template import export undo redo", "complex branch back navigation and actual answer path", "template library preview and safe logic editing", "AI failure retry draft apply edit save", "AI authenticated capability and unauthorized access"]
+      "covers": [
+        "existing signup and private access",
+        "website and JWT compatibility",
+        "creation and CMS editor entry",
+        "conditional review and retry",
+        "advanced types drafts statistics and exports",
+        "template import export undo redo",
+        "complex branch back navigation and actual answer path",
+        "template library preview and safe logic editing",
+        "AI failure retry draft apply edit save",
+        "AI authenticated capability and unauthorized access"
+      ]
     },
     "aiLiveService": {
       "modelAvailable": true,
@@ -46,7 +64,14 @@
     },
     "databaseQuotaChecks": {
       "passed": true,
-      "checks": ["two simultaneous requests", "idempotent release", "six requests per user per hour", "transaction rollback", "sixty requests per site per hour", "expired window resets"],
+      "checks": [
+        "two simultaneous requests",
+        "idempotent release",
+        "six requests per user per hour",
+        "transaction rollback",
+        "sixty requests per site per hour",
+        "expired window resets"
+      ],
       "realUpstreamCalls": 0,
       "isolatedRateLimitRowsRestored": true
     },
@@ -54,16 +79,326 @@
     "privateKeyAbsentFromGitAndBrowserBundle": true
   },
   "deployment": {
-    "status": "pending candidate build and switch",
+    "status": "deployed and verified",
     "backupPath": "/srv/zijingwebsite/backups/questionnaire-studio-20261011",
     "fullDatabaseBackup": true,
     "isolatedRestore": "passed: zijing_studio_rehearsal_20261011",
     "sourceAndMediaBackup": true,
-    "productionTestAccountsOrAnswers": "not created"
+    "productionTestAccountsOrAnswers": "not created",
+    "applicationRevision": "c4d386d2a7c1af791a58f3e5287df58fcdc47504",
+    "at": "2026-10-11T12:53:58.231Z",
+    "rollbackScript": "/srv/zijingwebsite/backups/questionnaire-studio-20261011/rollback.sh",
+    "rollbackBoundary": "Pause questionnaires using new jump rules before application rollback; database and historical answers remain.",
+    "serverBuild": "passed; ExecMainStatus=0; warning summary without diagnostic detail",
+    "candidateSmoke": "passed on port 3101 with restored isolated database",
+    "productionVerification": {
+      "at": "2026-10-11T12:53:58.231Z",
+      "revision": "revision=c4d386d2a7c1af791a58f3e5287df58fcdc47504\napplication_revision=c4d386d2a7c1af791a58f3e5287df58fcdc47504\n",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/health/ready",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/events?limit=1&depth=0",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/miniapp/status",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/community/lol/forum",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/community/lol/forum",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/community/lol/forum",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/community/lol/forum",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/community/lol/forum/1",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/community/lol/forum/1",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/community/lol/forum/1",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/community/lol/forum/1",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/comments",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/comments",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/comments",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/comments",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/community-reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/community-reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/community-reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/community-reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/miniapp/reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/miniapp/reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/miniapp/reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/miniapp/reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/admin/collections/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/admin/collections/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/admin/collections/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/admin/collections/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/showcase-videos/<unknown>.mp4",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/activities/manage",
+          "status": 403,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/activities/events/1/signup?mode=stats",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/activities/events/1/signup?mode=export",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/activities/events/1/signup",
+          "status": 401,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/activities/invalid/1/signup",
+          "status": 400,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/questionnaires/generate",
+          "status": 401,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/questionnaires/generate",
+          "status": 401,
+          "noStore": true
+        }
+      ],
+      "preservedOtherFiles": true,
+      "databaseProcessUnchanged": true,
+      "freeKillProcessesUnchanged": true,
+      "swappiness": "0",
+      "tableCount": 58,
+      "changedTables": [],
+      "sourceFilesMatched": 123,
+      "aiProxyReadTimeoutSeconds": 95,
+      "otherNginxDirectivesUnchanged": true,
+      "aiPrivateConfig": true,
+      "otherEnvironmentUnchanged": true,
+      "keyAbsentFromSourceAndBrowserBundle": true,
+      "bilibiliFrameAllowed": true,
+      "mediaUnchanged": true,
+      "freeKillHTTPS": 200,
+      "restoreRehearsal": "Full pg_restore to isolated database passed before build",
+      "ok": true
+    },
+    "freeKillWebSocket": {
+      "freeKillWebSocket": 101,
+      "tlsVerified": true
+    },
+    "realAIGenerationService": {
+      "at": "2026-10-11T12:54:15.060Z",
+      "environment": "production server direct generation service",
+      "model": "DeepSeek-V4.1-Flash",
+      "realUpstream": true,
+      "validQuestionCount": 3,
+      "elapsedMs": 16263,
+      "savedOrPublished": false,
+      "productionDatabaseWrites": 0
+    },
+    "workstationPublicHTTPS": {
+      "environment": "user Windows workstation public HTTPS",
+      "passed": true,
+      "requests": [
+        {
+          "url": "https://home.thuzijing.top/health/ready",
+          "status": 200,
+          "tlsVerified": true
+        },
+        {
+          "url": "https://home.thuzijing.top/api/questionnaires/generate",
+          "status": 401,
+          "tlsVerified": true
+        },
+        {
+          "url": "https://sgs.thuzijing.top",
+          "status": 200,
+          "tlsVerified": true
+        }
+      ]
+    },
+    "originalCheckoutDirtyEntriesPreserved": 27,
+    "originalCheckoutRevision": "fb51bbb71009aec66395fb2892402d814ddca744"
   },
   "limitations": {
     "miniProgramAdvancedEditorRelease": "not run in this increment",
     "productionAuthenticatedSurveySubmission": "not run; full flow validated locally",
     "earlyEnd": "keeps existing submission-is-signup semantics; no new rejection or review state"
+  },
+  "applicationRevision": "c4d386d2a7c1af791a58f3e5287df58fcdc47504",
+  "ci": {
+    "conclusion": "success",
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38140041162",
+    "unitAndDatabaseTests": 191,
+    "browserScenarios": 49,
+    "browserElapsed": "9.3 minutes",
+    "productionBuild": "passed",
+    "notes": [
+      "Compiler emitted warning summary without additional detail; final compilation and TypeScript succeeded.",
+      "Loopback SMTP receiver connection errors appeared during browser tests; tests passed, no real mailbox delivery was asserted."
+    ]
   }
 }
