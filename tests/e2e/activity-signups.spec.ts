@@ -154,6 +154,20 @@ test("publisher builds questionnaire, member submits once, organizer reads priva
   await expect(
     visitor.getByRole("button", { name: "提交并确认报名" }),
   ).toHaveCount(0);
+  await visitor.getByRole("button", { name: "修改作答", exact: true }).click();
+  await expect(visitor.getByLabel("活动称呼", { exact: true })).toHaveValue("报名测试");
+  await expect(visitor.getByLabel("上午场", { exact: true })).toBeChecked();
+  await visitor.getByLabel("活动称呼", { exact: true }).fill("取消的修改");
+  await visitor.getByRole("button", { name: "取消修改", exact: true }).click();
+  await expect(visitor.locator(".activity-signup dd").first()).toHaveText("报名测试");
+  await visitor.getByRole("button", { name: "修改作答", exact: true }).click();
+  await expect(visitor.getByLabel("活动称呼", { exact: true })).toHaveValue("报名测试");
+  await visitor.getByLabel("活动称呼", { exact: true }).fill("修改后的报名");
+  await visitor.getByRole("button", { name: "核对并提交" }).click();
+  await visitor.getByRole("button", { name: "提交修改", exact: true }).click();
+  await expect(visitor.getByRole("heading", { name: "已报名", exact: true })).toBeVisible();
+  await visitor.reload();
+  await expect(visitor.locator(".activity-signup dd").first()).toHaveText("修改后的报名");
   expect(
     (
       await visitor.request.get(
@@ -168,7 +182,7 @@ test("publisher builds questionnaire, member submits once, organizer reads priva
   ).toBeVisible();
   await page.locator(".signup-management > section summary").click();
   await expect(page.locator(".signup-management dd").first()).toHaveText(
-    "报名测试",
+    "修改后的报名",
   );
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
@@ -1161,6 +1175,59 @@ test("AI streaming, refinement and 5–6 member registration work through save, 
     stats.groups[0].questions.find((q: { id: string }) => q.id === roster.id)
       .counts,
   ).toEqual([{ label: "5 条记录", count: 1, percent: 100 }]);
+});
+
+test("saved roster answers prefill edits, survive failed PATCH and adapt to a changed form", async ({ page }) => {
+  const form = JSON.parse(await readFile('tests/fixtures/questionnaire-team-draft.json', 'utf8')) as SignupForm;
+  const id = await questionnaireEvent(form);
+  await login(page, member);
+  const endpoint = `/api/activities/events/${id}/signup`;
+  const info = await (await page.request.get(endpoint)).json();
+  const answers = { mode: '团队报名', teamName: '本地修改演示队', contact: '13800138000', team: Array.from({ length: 5 }, (_, i) => ({ name: `演示成员${i+1}`, student: `000${i+1}`, game: `ID${i+1}`, position: '辅助' })) };
+  const originalResponse = await page.request.post(endpoint, { data: { version: info.version, answers } });
+  expect(originalResponse.status()).toBe(200);
+  const original = (await originalResponse.json()).signup;
+  await page.goto(`/activities/events/${id}/fill`);
+  const signup = page.locator('.activity-signup');
+  await signup.getByRole('button', { name: '修改作答', exact: true }).click();
+  await expect(signup.getByLabel('团队报名', { exact: true })).toBeChecked();
+  await expect(signup.locator('.questionnaire-group-entry')).toHaveCount(5);
+  await expect(signup.getByLabel('成员名单第 5 条：学号', { exact: true })).toHaveValue('0005');
+  await signup.getByLabel('成员名单第 1 条：姓名', { exact: true }).fill('修改后的演示队长');
+  await signup.getByRole('button', { name: '核对并提交' }).click();
+  await page.route(`**${endpoint}`, route => route.request().method() === 'PATCH' ? route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: '服务暂时不可用，请重试' }) }) : route.continue());
+  await signup.getByRole('button', { name: '提交修改', exact: true }).click();
+  await expect(signup.locator('.questionnaire > p[role=alert]')).toContainText('请重试');
+  await signup.getByRole('button', { name: '返回修改', exact: true }).click();
+  await expect(signup.getByLabel('成员名单第 1 条：姓名', { exact: true })).toHaveValue('修改后的演示队长');
+  await page.unroute(`**${endpoint}`);
+  await signup.getByRole('button', { name: '核对并提交' }).click();
+  await signup.getByRole('button', { name: '提交修改', exact: true }).click();
+  await expect(signup.getByRole('heading', { name: '已报名', exact: true })).toBeVisible();
+  const updated = (await (await page.request.get(endpoint)).json()).signup;
+  expect(updated.id).toBe(original.id);
+  expect(updated.createdAt).toBe(original.createdAt);
+  expect(updated.answers.team[0].name).toBe('修改后的演示队长');
+  expect((await page.request.patch(endpoint, { data: { version: info.version, revision: original.updatedAt, answers } })).status()).toBe(409);
+  const changedForm = { ...form, questions: [...form.questions, { id: 'added', label: '新增必填信息', type: 'text', required: true, options: [] }] };
+  await p.update({ collection: 'events', id, user: admin, overrideAccess: false, context: { manageSignupForm: true }, data: { signupForm: changedForm } });
+  await page.reload();
+  await signup.getByRole('button', { name: '修改作答', exact: true }).click();
+  await expect(signup.getByText('问卷已更新，请检查保留的答案并补充新题目。')).toBeVisible();
+  await expect(signup.getByLabel('成员名单第 1 条：姓名', { exact: true })).toHaveValue('修改后的演示队长');
+  await signup.getByRole('button', { name: '核对并提交' }).click();
+  await expect(signup.locator('.questionnaire-error[role=alert]')).toContainText('新增必填信息');
+  await signup.getByLabel('新增必填信息', { exact: true }).fill('补充内容');
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  }
+  expect((await new AxeBuilder({ page }).include('.activity-signup').analyze()).violations).toEqual([]);
+  await signup.getByRole('button', { name: '核对并提交' }).click();
+  await signup.getByRole('button', { name: '提交修改', exact: true }).click();
+  await expect(signup.getByRole('heading', { name: '已报名', exact: true })).toBeVisible();
+  expect((await (await page.request.get(endpoint)).json()).signup.answers.added).toBe('补充内容');
+  expect((await p.find({ collection: 'event-signups', user: member, overrideAccess: false, where: { activityID: { equals: id } } })).totalDocs).toBe(1);
 });
 
 test("AI endpoint enforces manager authorization and serves a real generated draft", async ({

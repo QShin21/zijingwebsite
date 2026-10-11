@@ -24,17 +24,25 @@ export function Questionnaire({
   busy = false,
   preview = false,
   draftKey,
+  initialAnswers,
+  submitLabel = "提交并确认报名",
 }: {
   form: SignupForm;
   onSubmit?: (answers: Answers) => Promise<void>;
   draftKey?: string;
   busy?: boolean;
   preview?: boolean;
+  initialAnswers?: Answers;
+  submitLabel?: string;
 }) {
   const prefix = useId(),
     root = useRef<HTMLDivElement>(null);
   const [seed] = useState(() => String(Math.random()));
-  const [answers, setAnswers] = useState<Answers>({});
+  const [answers, setAnswers] = useState<Answers>(() => {
+    const clean = sanitizeDraft(form, initialAnswers || {});
+    const ids = new Set(visibleQuestions(form, clean).map((q) => q.id));
+    return Object.fromEntries(Object.entries(clean).filter(([id]) => ids.has(id)));
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [step, setStep] = useState(0),
     [review, setReview] = useState(false);
@@ -226,7 +234,7 @@ export function Questionnaire({
       </h3>
       {review ? (
         <>
-          <p>请核对以下内容，确认提交后即完成报名。</p>
+          <p>请核对以下内容，确认后提交保存。</p>
           <dl className="questionnaire-review">
             {answerable.map((q) => (
               <div key={q.id}>
@@ -439,7 +447,7 @@ export function Questionnaire({
             disabled={locked}
             onClick={() => void submit()}
           >
-            {locked ? "正在提交…" : preview ? "验证预览答案" : "提交并确认报名"}
+            {locked ? "正在提交…" : preview ? "验证预览答案" : submitLabel}
           </button>
         )}
       </div>

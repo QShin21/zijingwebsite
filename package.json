@@ -9,6 +9,7 @@
   },
   "scripts": {
     "miniapp:check": "node scripts/check-miniapp.mjs",
+    "miniapp:generate": "node scripts/build-mini-questionnaire.mjs",
     "miniapp:icons": "node scripts/miniapp-icons.mjs",
     "miniapp:preview": "node scripts/wechat.mjs preview",
     "miniapp:upload": "node scripts/wechat.mjs upload",

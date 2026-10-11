@@ -9,6 +9,8 @@ import { Questionnaire } from "./Questionnaire";
 type Receipt = {
   id: number;
   createdAt: string;
+  updatedAt: string;
+  formVersion: string;
   memberName?: string;
   questions: Question[];
   answers: Answers;
@@ -45,6 +47,9 @@ function ReceiptView({ receipt }: { receipt: Receipt }) {
         报名编号：{receipt.id} ·{" "}
         {new Date(receipt.createdAt).toLocaleString("zh-CN")}
       </p>
+      {receipt.updatedAt !== receipt.createdAt && (
+        <p>最近修改：{new Date(receipt.updatedAt).toLocaleString("zh-CN")}</p>
+      )}
       <dl>
         {receipt.questions
           .filter((q) => Object.hasOwn(receipt.answers, q.id))
@@ -63,6 +68,8 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
     [info, setInfo] = useState<Info | null>(null),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
+    [editing, setEditing] = useState(false),
+    [savedMessage, setSavedMessage] = useState(""),
     [retry, setRetry] = useState(0);
   useEffect(() => {
     let alive = true;
@@ -98,16 +105,42 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
           </Link>
         </p>
       )}
-      {info.signup ? (
+      {info.signup && !editing ? (
         <>
           <h3 aria-live="polite">已报名</h3>
           <p>{info.form.completionMessage || "已收到你的报名信息。"}</p>
           <ReceiptView receipt={info.signup} />
+          {info.state === "报名开放" && info.loggedIn ? (
+            <button type="button" className="button" onClick={() => {
+              setEditing(true);
+              setSavedMessage("");
+            }}>修改作答</button>
+          ) : <p className="muted">{info.state}，暂不能修改作答。</p>}
+          <p role="status">{savedMessage}</p>
         </>
       ) : (
         <>
           <p className="preserve">{info.form.intro}</p>
           <p>{info.state}</p>
+          {editing && (
+            <>
+              <h3>修改作答</h3>
+              <p>已带入上次提交的内容，请修改后再次核对并提交。提交成功前保留原作答。</p>
+              {info.signup?.formVersion !== info.version && <p role="status">问卷已更新，请检查保留的答案并补充新题目。</p>}
+              <button type="button" disabled={busy} onClick={() => setEditing(false)}>取消修改</button>
+              <button type="button" disabled={busy} onClick={async () => {
+                setBusy(true);
+                try {
+                  setInfo(await signupRequest(endpoint));
+                  setEditing(false);
+                  setSavedMessage("已重新加载上次提交的内容，可再次进入修改。");
+                  setError("");
+                } catch (cause) { setError((cause as Error).message); }
+                finally { setBusy(false); }
+              }}>重新加载已提交内容</button>
+              <p role="alert">{error}</p>
+            </>
+          )}
           <p className="muted">
             提交的答案仅供你本人和有权限的活动管理者查看，用于本次活动组织。
           </p>
@@ -119,18 +152,23 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
               </Link>
             ) : (
               <Questionnaire
-                key={info.version}
+                key={`${info.version}:${editing ? info.signup?.updatedAt : "new"}`}
                 form={info.form}
-                draftKey={info.draftKey}
+                initialAnswers={editing ? info.signup?.answers : undefined}
+                draftKey={editing ? undefined : info.draftKey}
+                submitLabel={editing ? "提交修改" : "提交并确认报名"}
                 busy={busy}
                 onSubmit={async (answers) => {
                   setBusy(true);
                   try {
-                    const result = await signupRequest(endpoint, "POST", {
+                    const result = await signupRequest(endpoint, editing ? "PATCH" : "POST", {
                       version: info.version,
+                      ...(editing ? { revision: info.signup?.updatedAt } : {}),
                       answers,
                     });
                     setInfo({ ...info, signup: result.signup });
+                    setEditing(false);
+                    setSavedMessage(result.message);
                   } finally {
                     setBusy(false);
                   }

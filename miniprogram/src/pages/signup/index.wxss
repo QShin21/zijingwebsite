@@ -6,3 +6,14 @@ textarea { height: 180rpx; }
 .answer { margin-top: 22rpx; white-space: pre-wrap; word-break: break-all; }
 .panel > .section-title, .panel > .muted { display: block; }
 .row picker { flex: 1; }
+.question-help, .question-error, .branch-notice { display: block; white-space: pre-wrap; }
+.question-help { margin-bottom: 20rpx; }
+.invalid { border: 2rpx solid #b3261e; }
+.question-error { margin-top: 18rpx; color: #b3261e; }
+.entry-row, .subquestion { margin-top: 24rpx; border-top: 1rpx solid #daceea; padding-top: 12rpx; }
+.entry-row .section-title { font-size: 30rpx; }
+.scale-choices { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 16rpx; }
+.scale-choice { display: flex; align-items: center; min-height: 80rpx; padding: 8rpx; }
+.picker-value { background: #f2edf8; border-radius: 12rpx; padding: 24rpx; }
+.row > button { flex: 1; min-width: 0; }
+.branch-notice { border-radius: 12rpx; background: #eee7f7; padding: 20rpx; }

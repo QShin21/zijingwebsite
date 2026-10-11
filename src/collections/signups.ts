@@ -84,13 +84,27 @@ export const EventSignups: CollectionConfig = {
       }
       return { or: scope };
     },
-    update: () => false,
+    update: ({ req }) =>
+      canParticipate(req.user as Identity) && req.context.updateEventSignup === true
+        ? { member: { equals: req.user!.id } }
+        : false,
     delete: () => false,
   },
   hooks: {
     beforeChange: [
-      ({ req, data }) => {
-        if (req.context.submitEventSignup !== true)
+      ({ req, data, operation, originalDoc }) => {
+        if (operation === "update") {
+          if (
+            req.context.updateEventSignup !== true ||
+            String(originalDoc?.member?.id ?? originalDoc?.member) !== String(req.user?.id) ||
+            Object.keys(data).some((key) =>
+              data[key] !== undefined &&
+              !["answers", "questions", "formVersion", "updatedAt"].includes(key) &&
+              JSON.stringify(data[key]) !== JSON.stringify(originalDoc?.[key]),
+            )
+          )
+            throw new APIError("请从本人报名入口修改作答", 403);
+        } else if (req.context.submitEventSignup !== true)
           throw new APIError("请从活动报名入口提交", 403);
         return data;
       },

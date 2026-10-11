@@ -12,6 +12,7 @@ import {
   saveSignupForm,
   signupState,
   submitSignup,
+  updateSignupAnswers,
 } from "@/lib/activity-signups";
 import { applicationError } from "@/lib/application-error";
 export const runtime = "nodejs";
@@ -28,7 +29,7 @@ const reply = (data: unknown, status = 200) =>
 async function run(
   request: Request,
   context: Context,
-  method: "GET" | "POST" | "PUT",
+  method: "GET" | "POST" | "PUT" | "PATCH",
 ) {
   try {
     const params = await context.params,
@@ -48,11 +49,11 @@ async function run(
       );
       if (
         request.headers.get("authorization")?.startsWith("JWT ") &&
-        request.headers.get("x-questionnaire-version") !== "2" &&
+        !["2", "3"].includes(request.headers.get("x-questionnaire-version") || "") &&
         value.form.questions.some(
           (q) =>
             !["text", "textarea", "single", "multiple"].includes(q.type) ||
-            Boolean(q.jumps?.length),
+            Boolean(q.jumps?.length || q.display || q.showWhen),
         )
       )
         return reply(
@@ -112,6 +113,7 @@ async function run(
             answers: true,
             questions: true,
             createdAt: true,
+            updatedAt: true,
           },
         });
         return reply({
@@ -154,6 +156,11 @@ async function run(
       return reply(
         await saveSignupForm(p, kind, id, user, data.version, data.form),
       );
+    if (method === "PATCH")
+      return reply({
+        signup: await updateSignupAnswers(p, kind, id, user, data.version, data.revision, data.answers),
+        message: "作答修改已保存",
+      });
     return reply({
       signup: await submitSignup(p, kind, id, user, data.version, data.answers),
       message: "报名成功，已确认报名",
@@ -174,3 +181,4 @@ async function run(
 export const GET = (r: Request, c: Context) => run(r, c, "GET");
 export const POST = (r: Request, c: Context) => run(r, c, "POST");
 export const PUT = (r: Request, c: Context) => run(r, c, "PUT");
+export const PATCH = (r: Request, c: Context) => run(r, c, "PATCH");

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { APIError, type Payload } from "payload";
+import { APIError, createLocalReq, type Payload, type PayloadRequest } from "payload";
 import type { User } from "@/payload-types";
 import { canParticipate, canPublish, hasRole, managesGame } from "./rules";
 import {
@@ -129,16 +129,24 @@ export async function ownSignup(
   kind: string,
   id: number,
   user: User | null,
+  req?: Partial<PayloadRequest>,
 ) {
   if (!canParticipate(user)) return null;
   const result = await p.find({
     collection: "event-signups",
     overrideAccess: false,
     user,
+    req,
     depth: 0,
     limit: 1,
     where: { dedupeKey: { equals: `${kind}:${id}:${user!.id}` } },
-    select: { answers: true, questions: true, createdAt: true },
+    select: {
+      answers: true,
+      questions: true,
+      createdAt: true,
+      updatedAt: true,
+      formVersion: true,
+    },
   });
   return result.docs[0] || null;
 }
@@ -192,6 +200,8 @@ export async function submitSignup(
     return {
       id: saved.id,
       createdAt: saved.createdAt,
+      updatedAt: saved.updatedAt,
+      formVersion: saved.formVersion,
       questions: saved.questions,
       answers: saved.answers,
     };
@@ -199,6 +209,70 @@ export async function submitSignup(
     // Database uniqueness also covers simultaneous submissions and network retries.
     const duplicate = await ownSignup(p, kind, id, user);
     if (duplicate) return duplicate;
+    throw error;
+  }
+}
+export async function updateSignupAnswers(
+  p: Payload,
+  kind: "events" | "community-posts",
+  id: number,
+  user: User | null,
+  version: unknown,
+  revision: unknown,
+  answers: unknown,
+) {
+  if (!canParticipate(user)) throw new APIError("请先登录可用账号", 401);
+  const { doc, form, version: current } = await activity(p, kind, id, user);
+  const state = signupState(form, doc);
+  if (state !== "报名开放") throw new APIError(state + "，暂不能修改作答", 409);
+  if (version !== current)
+    throw new APIError("报名问卷已更新，请刷新后再修改作答", 409);
+  let clean;
+  try {
+    clean = validateAnswers(form, answers);
+  } catch (error) {
+    throw new APIError((error as Error).message, 400);
+  }
+  // Payload bulk updates query rows before writing. Use a serializable transaction
+  // so concurrent edits cannot both pass the receipt revision check and overwrite.
+  const transactionID = await p.db.beginTransaction({ isolationLevel: "serializable" });
+  if (transactionID == null) throw new APIError("暂时无法保存修改，请稍后重试", 503);
+  const req = await createLocalReq({ user: user!, context: { updateEventSignup: true } }, p);
+  req.transactionID = transactionID;
+  try {
+    const existing = await ownSignup(p, kind, id, user, req);
+    if (!existing) throw new APIError("尚未提交报名，请先填写问卷", 404);
+    if (typeof revision !== "string" || revision !== existing.updatedAt)
+      throw new APIError("作答记录已更新，请重新加载上次提交的内容后修改", 409);
+    const saved = await p.update({
+      collection: "event-signups",
+      id: existing.id,
+      overrideAccess: false,
+      req,
+      depth: 0,
+      data: {
+        formVersion: current,
+        questions: visibleQuestions(form, clean),
+        answers: clean,
+      },
+    });
+    await p.db.commitTransaction(transactionID);
+    return {
+      id: saved.id,
+      createdAt: saved.createdAt,
+      updatedAt: saved.updatedAt,
+      formVersion: saved.formVersion,
+      questions: saved.questions,
+      answers: saved.answers,
+    };
+  } catch (error) {
+    await p.db.rollbackTransaction(transactionID);
+    let cause: unknown = error;
+    for (let depth = 0; depth < 6 && cause && typeof cause === "object"; depth++) {
+      if ("code" in cause && cause.code === "40001")
+        throw new APIError("作答记录已更新，请重新加载上次提交的内容后修改", 409);
+      cause = "cause" in cause ? cause.cause : null;
+    }
     throw error;
   }
 }

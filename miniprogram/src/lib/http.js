@@ -26,7 +26,7 @@ function request(path, options = {}) {
     wx.request({
       url: url(path), method: options.method || 'GET', data: options.data,
       timeout: options.timeout || 20000,
-      header: { 'content-type': 'application/json', ...(credential ? { Authorization: `JWT ${credential}` } : {}) },
+      header: { 'content-type': 'application/json', ...(credential ? { Authorization: `JWT ${credential}` } : {}), ...(options.questionnaire ? { 'x-questionnaire-version': '3' } : {}) },
       success(response) {
         if (response.statusCode >= 200 && response.statusCode < 300) {
           if (typeof response.data === 'string' && response.data.trim().startsWith('<')) {

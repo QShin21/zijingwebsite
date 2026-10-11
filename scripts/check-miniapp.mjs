@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import { buildQuestionnaireRuntime } from './build-mini-questionnaire.mjs';
+buildQuestionnaireRuntime({ check: true });
 const root = path.resolve('miniprogram');
 const source = path.join(root, 'src');
 const app = JSON.parse(fs.readFileSync(path.join(source, 'app.json'), 'utf8'));

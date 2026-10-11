@@ -9,6 +9,8 @@ import {
   formVersion,
   saveSignupForm,
   submitSignup,
+  ownSignup,
+  updateSignupAnswers,
 } from "../src/lib/activity-signups";
 import {
   normalizeSignup,
@@ -231,6 +233,31 @@ it("confirms once under concurrency and protects answers from other members", as
     ).answers,
   ).toEqual(answers);
 });
+it("updates only the caller's existing receipt, validates and rejects concurrent stale edits", async () => {
+  const current = await activity(p, "events", event, member);
+  const original = (await ownSignup(p, "events", event, member))!;
+  await expect(updateSignupAnswers(p, "events", event, null, current.version, original.updatedAt, answers)).rejects.toMatchObject({ status: 401 });
+  await expect(updateSignupAnswers(p, "events", event, other, current.version, original.updatedAt, answers)).rejects.toMatchObject({ status: 404 });
+  await expect(updateSignupAnswers(p, "events", event, member, "old-form", original.updatedAt, answers)).rejects.toMatchObject({ status: 409 });
+  await expect(updateSignupAnswers(p, "events", event, member, current.version, original.updatedAt, { ...answers, name: "" })).rejects.toMatchObject({ status: 400 });
+  await expect(p.update({ collection: "event-signups", id: original.id, overrideAccess: false, user: other, context: { updateEventSignup: true }, data: { answers } })).rejects.toThrow();
+  await expect(p.update({ collection: "event-signups", id: original.id, overrideAccess: false, user: member, context: { updateEventSignup: true }, data: { member: other.id } })).rejects.toMatchObject({ status: 403 });
+  const results = await Promise.allSettled([
+    updateSignupAnswers(p, "events", event, member, current.version, original.updatedAt, { ...answers, name: "第一次修改" }),
+    updateSignupAnswers(p, "events", event, member, current.version, original.updatedAt, { ...answers, name: "另一页面修改" }),
+  ]);
+  expect(results.filter(result => result.status === "fulfilled"), JSON.stringify(results.map(result => result.status === "rejected" ? { message: result.reason.message, status: result.reason.status } : { status: "saved" }))).toHaveLength(1);
+  expect(results.find(result => result.status === "rejected")).toMatchObject({ reason: { status: 409 } });
+  const latest = (await ownSignup(p, "events", event, member))!;
+  expect(latest.id).toBe(original.id);
+  expect(latest.createdAt).toBe(original.createdAt);
+  expect(latest.updatedAt).not.toBe(original.updatedAt);
+  expect(["第一次修改", "另一页面修改"]).toContain((latest.answers as typeof answers).name);
+  await expect(updateSignupAnswers(p, "events", event, member, current.version, original.updatedAt, answers)).rejects.toMatchObject({ status: 409 });
+  const final = await updateSignupAnswers(p, "events", event, member, current.version, latest.updatedAt, { ...answers, name: "最终修改" });
+  expect((final.answers as typeof answers).name).toBe("最终修改");
+  expect((await p.find({ collection: "event-signups", overrideAccess: false, user: member, where: { activityID: { equals: event } } })).totalDocs).toBe(1);
+});
 it("enforces owner permissions, closed windows and preserves answer snapshots", async () => {
   const old = await activity(p, "events", event, admin, true);
   await expect(
@@ -244,6 +271,7 @@ it("enforces owner permissions, closed windows and preserves answer snapshots", 
   await expect(
     submitSignup(p, "events", event, other, updated.version, answers),
   ).rejects.toThrow("关闭");
+  await expect(updateSignupAnswers(p, "events", event, member, updated.version, (await ownSignup(p, "events", event, member))!.updatedAt, answers)).rejects.toMatchObject({ status: 409 });
   const receipt = await submitSignup(
     p,
     "events",

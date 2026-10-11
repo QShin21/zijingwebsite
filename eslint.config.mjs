@@ -23,6 +23,13 @@ export default ts.config(
     rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
   {
+    files: ['miniprogram/src/lib/generated/*.js'],
+    languageOptions: { globals: { exports: 'readonly' } },
+    // TypeScript emits conditional assignments as expressions. Source is linted
+    // above and miniapp:check verifies every generated module against it.
+    rules: { '@typescript-eslint/no-unused-expressions': 'off' },
+  },
+  {
     languageOptions: {
       globals: {
         process: "readonly",
