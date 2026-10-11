@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-11",
+  "branch": "codex/questionnaire-improvements",
+  "base": "89a76f4cfee44046bae3dc41697b2673eab066ef",
+  "environment": "Isolated local development PostgreSQL on loopback port 55447; Next.js on loopback port 3017; synthetic fixtures only",
+  "checks": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exit_code": 0
+    },
+    {
+      "command": "pnpm migrate",
+      "exit_code": 0,
+      "note": "Existing migrations applied to a new isolated database; no new migration introduced"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exit_code": 0
+    },
+    {
+      "command": "pnpm lint",
+      "exit_code": 0
+    },
+    {
+      "command": "pnpm test",
+      "exit_code": 0,
+      "files": 18,
+      "tests": 136
+    },
+    {
+      "command": "pnpm exec playwright test activity-signups.spec.ts --config .data/playwright.questionnaire.config.ts",
+      "note": "Three existing browser scenarios passed. New scenario initially failed because test expected selection order incorrectly; expectation corrected without changing application behavior."
+    },
+    {
+      "command": "pnpm exec playwright test activity-signups.spec.ts --grep 'conditional questionnaire' --config .data/playwright.questionnaire.config.ts",
+      "exit_code": 0,
+      "tests": 1,
+      "coverage": [
+        "question copy and delete",
+        "advanced setting persistence",
+        "preview without writes",
+        "branching and hidden answer removal",
+        "required/email/multi-select validation",
+        "error focus",
+        "exclusive choice",
+        "review",
+        "503 retry preserves answers",
+        "actual database receipt stores only visible questions",
+        "390px/1440px no horizontal overflow",
+        "axe questionnaire region: zero violations"
+      ]
+    },
+    {
+      "command": "pnpm build",
+      "exit_code": 0
+    }
+  ],
+  "not_run": [
+    "production deployment",
+    "production browser verification",
+    "new Mini Program interactions",
+    "real phone verification"
+  ],
+  "source_sha256": {
+    "src/lib/signup-schema.ts": "e7a480e9814e9739e4002d59b3f85de566c5828278aeb02558041405fe7b8287",
+    "src/lib/activity-signups.ts": "9e16e28605afedded1da5f509c0fe04772a192dbd67d72a08206e05d7c2203b6",
+    "src/components/ActivitySignup.tsx": "08578727aa0cff327b71dfbe2a04e340da12fdace8ffad71f3759302f5fed43d",
+    "src/components/SignupBuilder.tsx": "21d1e64076c7fcf6b2be76cf90c75341200244222eb552c9050ace6f745dc5a5",
+    "src/components/Questionnaire.tsx": "7d2138ccd0db06913739dc31261f7fafb10298d21eff403487dcca6ef87b124a",
+    "src/app/(frontend)/style.css": "d3ceba070d67258550c06ba8a71b6ea554998a31b44a54a5cf7fe7db51933e1b"
+  },
+  "hash_format": "UTF-8 source bytes normalized to LF as committed by Git"
+}

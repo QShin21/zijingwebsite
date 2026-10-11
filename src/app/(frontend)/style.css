@@ -3327,3 +3327,27 @@ button:disabled {
 .signup-management details { padding: 1rem 0; }
 
 .composer-fields { display:grid; gap:1.25rem; border:0; padding:0; margin:0; min-width:0; }
+
+/* Questionnaire: calm, keyboard-accessible controls and mobile-safe review. */
+.questionnaire { display: grid; gap: 1rem; min-width: 0; }
+.questionnaire-progress { display: grid; gap: .5rem; padding: 1rem; background: #f5f1fa; border-radius: 12px; }
+.questionnaire-progress progress { width: 100%; height: .6rem; accent-color: #653a87; }
+.questionnaire-step:focus, .questionnaire .signup-question:focus { outline: 3px solid #8251a5; outline-offset: 4px; }
+.questionnaire .signup-question { min-width: 0; margin: 0; padding: 1rem; }
+.questionnaire-option { padding: .8rem; border: 1px solid #d6cde0; border-radius: 8px; margin-block: .5rem; cursor: pointer; overflow-wrap: anywhere; }
+.questionnaire-option:has(input:checked) { background: #f1e9f8; border-color: #724490; }
+.questionnaire-option input { flex-shrink: 0; }
+.questionnaire-counter { display: block; text-align: right; color: #62576d; }
+.questionnaire-invalid { border-color: #a62536; }
+.questionnaire-error { color: #a62536; margin: .4rem 0 0; }
+.questionnaire-review { margin: 0; }
+.questionnaire-review > div { padding: .8rem 0; border-bottom: 1px solid #ddd5e4; }
+.questionnaire-review dt { font-weight: 650; }
+.questionnaire-review dd { margin: .4rem 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.questionnaire-settings { margin-block: 1rem; padding: .8rem; background: #f8f6fa; border-radius: 8px; }
+.questionnaire-settings summary { cursor: pointer; padding: .4rem 0; }
+.questionnaire-settings label { margin-top: .8rem; }
+.questionnaire-dialog { width: min(720px, calc(100% - 2rem)); max-height: 85dvh; overflow: auto; border: 1px solid #d6cde0; border-radius: 16px; padding: clamp(1rem, 3vw, 2rem); color: #302638; }
+.questionnaire-dialog::backdrop { background: #20112b88; }
+.questionnaire-dialog .signup-tools { justify-content: space-between; }
+.questionnaire-dialog h2 { margin: 0; }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { SignupForm, Question } from "@/lib/signup-schema";
 import { SignupBuilder } from "./SignupBuilder";
+import { Questionnaire } from "./Questionnaire";
 type Receipt = {
   id: number;
   createdAt: string;
@@ -42,16 +43,18 @@ function ReceiptView({ receipt }: { receipt: Receipt }) {
         {new Date(receipt.createdAt).toLocaleString("zh-CN")}
       </p>
       <dl>
-        {receipt.questions.map((q) => (
-          <div key={q.id}>
-            <dt>{q.label}</dt>
-            <dd>
-              {Array.isArray(receipt.answers[q.id])
-                ? (receipt.answers[q.id] as string[]).join("、")
-                : receipt.answers[q.id] || "未填写"}
-            </dd>
-          </div>
-        ))}
+        {receipt.questions
+          .filter((q) => Object.hasOwn(receipt.answers, q.id))
+          .map((q) => (
+            <div key={q.id}>
+              <dt>{q.label}</dt>
+              <dd>
+                {Array.isArray(receipt.answers[q.id])
+                  ? (receipt.answers[q.id] as string[]).join("、")
+                  : receipt.answers[q.id] || "未填写"}
+              </dd>
+            </div>
+          ))}
       </dl>
     </div>
   );
@@ -105,7 +108,9 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
         <>
           <p className="preserve">{info.form.intro}</p>
           <p>{info.state}</p>
-          <p className="muted">提交的答案仅供你本人和有权限的活动管理者查看，用于本次活动组织。</p>
+          <p className="muted">
+            提交的答案仅供你本人和有权限的活动管理者查看，用于本次活动组织。
+          </p>
           {info.form.enabled &&
             info.state === "报名开放" &&
             (!info.loggedIn ? (
@@ -113,77 +118,23 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
                 登录后填写报名
               </Link>
             ) : (
-              <form
-                className="member-form"
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  if (busy) return;
+              <Questionnaire
+                key={info.version}
+                form={info.form}
+                busy={busy}
+                onSubmit={async (answers) => {
                   setBusy(true);
-                  setError("");
-                  const data = new FormData(e.currentTarget),
-                    answers: Record<string, string | string[]> = {};
-                  info.form.questions.forEach((q) => {
-                    answers[q.id] =
-                      q.type === "multiple"
-                        ? data.getAll(q.id).map(String)
-                        : String(data.get(q.id) || "");
-                  });
                   try {
                     const result = await signupRequest(endpoint, "POST", {
                       version: info.version,
                       answers,
                     });
                     setInfo({ ...info, signup: result.signup });
-                  } catch (e) {
-                    setError((e as Error).message);
                   } finally {
                     setBusy(false);
                   }
                 }}
-              >
-                {info.form.questions.map((q, i) => (
-                  <fieldset key={q.id} className="signup-question">
-                    <legend>
-                      {i + 1}. {q.label}
-                      {q.required ? " *" : "（选填）"}
-                    </legend>
-                    {q.type === "text" && (
-                      <input
-                        aria-label={q.label}
-                        name={q.id}
-                        required={q.required}
-                        maxLength={200}
-                      />
-                    )}
-                    {q.type === "textarea" && (
-                      <textarea
-                        aria-label={q.label}
-                        name={q.id}
-                        required={q.required}
-                        maxLength={2000}
-                        rows={4}
-                      />
-                    )}
-                    {["single", "multiple"].includes(q.type) &&
-                      q.options.map((option) => (
-                        <label className="signup-choice" key={option}>
-                          <input
-                            type={q.type === "single" ? "radio" : "checkbox"}
-                            name={q.id}
-                            value={option}
-                            required={q.type === "single" && q.required}
-                          />
-                          {option}
-                        </label>
-                      ))}
-                  </fieldset>
-                ))}
-                <p>提交后即确认报名。填写内容仅供你与活动管理人员查看。</p>
-                <p role="alert">{error}</p>
-                <button className="button" disabled={busy}>
-                  {busy ? "正在提交…" : "提交并确认报名"}
-                </button>
-              </form>
+              />
             ))}
         </>
       )}

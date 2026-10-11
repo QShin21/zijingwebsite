@@ -1,6 +1,9 @@
 "use client";
+import { useRef, useState } from "react";
+import { Questionnaire } from "./Questionnaire";
 import {
   emptySignup,
+  normalizeSignup,
   type SignupForm,
   type Question,
 } from "@/lib/signup-schema";
@@ -22,6 +25,9 @@ export function SignupBuilder({
   value: SignupForm;
   onChange: (value: SignupForm) => void;
 }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [preview, setPreview] = useState<SignupForm | null>(null);
+  const [message, setMessage] = useState("");
   const patch = (data: Partial<SignupForm>) => onChange({ ...value, ...data });
   const question = (index: number, data: Partial<Question>) =>
     patch({
@@ -85,6 +91,22 @@ export function SignupBuilder({
             />
             暂停接收报名
           </label>
+          <label>
+            每页题数
+            <select
+              value={value.pageSize || 5}
+              onChange={(e) => patch({ pageSize: Number(e.target.value) })}
+            >
+              {[1, 3, 5, 10, 20].map((n) => (
+                <option value={n} key={n}>
+                  {n === 20 ? "全部题目" : `每页 ${n} 题`}
+                </option>
+              ))}
+            </select>
+          </label>
+          <p>
+            可为后续题目设置显示条件。调整顺序或选项后，请预览检查关联是否有效。
+          </p>
           {value.questions.map((q, i) => (
             <fieldset className="signup-question" key={q.id}>
               <legend>第 {i + 1} 题</legend>
@@ -102,7 +124,15 @@ export function SignupBuilder({
                 <select
                   value={q.type}
                   onChange={(e) =>
-                    question(i, { type: e.target.value as Question["type"] })
+                    question(i, {
+                      type: e.target.value as Question["type"],
+                      format: undefined,
+                      minLength: undefined,
+                      maxLength: undefined,
+                      minChoices: undefined,
+                      maxChoices: undefined,
+                      exclusiveOption: undefined,
+                    })
                   }
                 >
                   {Object.entries(signupLabels).map(([key, text]) => (
@@ -132,7 +162,185 @@ export function SignupBuilder({
                   />
                 </label>
               )}
+              <details className="questionnaire-settings">
+                <summary>填写提示、校验与显示条件</summary>
+                <label>
+                  填写提示
+                  <textarea
+                    value={q.help || ""}
+                    maxLength={300}
+                    onChange={(e) => question(i, { help: e.target.value })}
+                  />
+                </label>
+                {["text", "textarea"].includes(q.type) && (
+                  <>
+                    <label>
+                      输入占位提示
+                      <input
+                        value={q.placeholder || ""}
+                        maxLength={300}
+                        onChange={(e) =>
+                          question(i, { placeholder: e.target.value })
+                        }
+                      />
+                    </label>
+                    <label>
+                      填写格式
+                      <select
+                        value={q.format || "plain"}
+                        onChange={(e) =>
+                          question(i, {
+                            format: e.target.value as Question["format"],
+                          })
+                        }
+                      >
+                        <option value="plain">普通文本</option>
+                        <option value="email">邮箱地址</option>
+                        <option value="phone">中国大陆手机号</option>
+                        <option value="number">数字</option>
+                      </select>
+                    </label>
+                    <div className="signup-times">
+                      {(["minLength", "maxLength"] as const).map((key) => (
+                        <label key={key}>
+                          {key === "minLength" ? "最少字数" : "最多字数"}
+                          <input
+                            type="number"
+                            min={1}
+                            max={q.type === "textarea" ? 2000 : 200}
+                            value={q[key] ?? ""}
+                            placeholder={
+                              key === "maxLength"
+                                ? String(q.type === "textarea" ? 2000 : 200)
+                                : "不限制"
+                            }
+                            onChange={(e) =>
+                              question(i, {
+                                [key]: e.target.value
+                                  ? Number(e.target.value)
+                                  : undefined,
+                              })
+                            }
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  </>
+                )}
+                {q.type === "multiple" && (
+                  <>
+                    <div className="signup-times">
+                      {(["minChoices", "maxChoices"] as const).map((key) => (
+                        <label key={key}>
+                          {key === "minChoices" ? "最少选择数" : "最多选择数"}
+                          <input
+                            type="number"
+                            min={1}
+                            max={q.options.length || 20}
+                            value={q[key] ?? ""}
+                            placeholder="不限制"
+                            onChange={(e) =>
+                              question(i, {
+                                [key]: e.target.value
+                                  ? Number(e.target.value)
+                                  : undefined,
+                              })
+                            }
+                          />
+                        </label>
+                      ))}
+                    </div>
+                    <label>
+                      互斥选项
+                      <select
+                        value={q.exclusiveOption || ""}
+                        onChange={(e) =>
+                          question(i, {
+                            exclusiveOption: e.target.value || undefined,
+                          })
+                        }
+                      >
+                        <option value="">不设置</option>
+                        {q.options.filter(Boolean).map((option, n) => (
+                          <option key={n} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <small>
+                      例如“均不参加”，选择此项会清除其他选择，可单独提交。
+                    </small>
+                  </>
+                )}
+                <label>
+                  显示条件
+                  <select
+                    value={q.showWhen?.questionId || ""}
+                    onChange={(e) =>
+                      question(i, {
+                        showWhen: e.target.value
+                          ? {
+                              questionId: e.target.value,
+                              option:
+                                value.questions.find(
+                                  (v) => v.id === e.target.value,
+                                )?.options[0] || "",
+                            }
+                          : undefined,
+                      })
+                    }
+                  >
+                    <option value="">始终显示</option>
+                    {value.questions
+                      .slice(0, i)
+                      .filter((v) => ["single", "multiple"].includes(v.type))
+                      .map((previous) => (
+                        <option key={previous.id} value={previous.id}>
+                          {previous.label || "未命名题目"}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+                {q.showWhen && (
+                  <label>
+                    选中以下选项时显示
+                    <select
+                      value={q.showWhen.option}
+                      onChange={(e) =>
+                        question(i, {
+                          showWhen: { ...q.showWhen!, option: e.target.value },
+                        })
+                      }
+                    >
+                      {value.questions
+                        .find((v) => v.id === q.showWhen?.questionId)
+                        ?.options.map((option, n) => (
+                          <option key={n} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                    </select>
+                  </label>
+                )}
+              </details>
               <div className="signup-tools">
+                <button
+                  type="button"
+                  disabled={value.questions.length >= 20}
+                  onClick={() => {
+                    const list = [...value.questions];
+                    list.splice(i + 1, 0, {
+                      ...q,
+                      id: crypto.randomUUID(),
+                      label: `${q.label.slice(0, 115)}（副本）`,
+                      options: [...q.options],
+                    });
+                    patch({ questions: list });
+                  }}
+                >
+                  复制此题
+                </button>
                 <button type="button" disabled={!i} onClick={() => move(i, -1)}>
                   上移
                 </button>
@@ -145,11 +353,27 @@ export function SignupBuilder({
                 </button>
                 <button
                   type="button"
-                  onClick={() =>
+                  onClick={() => {
+                    const dependent = value.questions.some(
+                      (v) => v.showWhen?.questionId === q.id,
+                    );
+                    if (
+                      dependent &&
+                      !window.confirm(
+                        "后续题目关联了本题。删除后，这些题目将改为始终显示，是否继续？",
+                      )
+                    )
+                      return;
                     patch({
-                      questions: value.questions.filter((_, n) => n !== i),
-                    })
-                  }
+                      questions: value.questions
+                        .filter((_, n) => n !== i)
+                        .map((v) =>
+                          v.showWhen?.questionId === q.id
+                            ? { ...v, showWhen: undefined }
+                            : v,
+                        ),
+                    });
+                  }}
                 >
                   删除此题
                 </button>
@@ -178,6 +402,39 @@ export function SignupBuilder({
             添加题目
           </button>
           <p>最多 20 道题。修改问卷后，已有报名保留提交时的题目和答案。</p>
+          <button
+            type="button"
+            className="button light"
+            onClick={() => {
+              try {
+                setPreview(normalizeSignup(value));
+                setMessage("");
+                dialog.current?.showModal();
+              } catch (error) {
+                setMessage((error as Error).message);
+              }
+            }}
+          >
+            预览填写效果
+          </button>
+          <p role="alert">{message}</p>
+          <dialog ref={dialog} className="questionnaire-dialog">
+            <div className="signup-tools">
+              <h2>问卷预览</h2>
+              <button type="button" onClick={() => dialog.current?.close()}>
+                关闭预览
+              </button>
+            </div>
+            <p>预览答案不会保存或提交。</p>
+            <p className="preserve">{preview?.intro}</p>
+            {preview && (
+              <Questionnaire
+                key={JSON.stringify(preview)}
+                form={preview}
+                preview
+              />
+            )}
+          </dialog>
         </>
       )}
     </section>

@@ -5,6 +5,7 @@ import { canParticipate, canPublish, hasRole, managesGame } from "./rules";
 import {
   normalizeSignup,
   validateAnswers,
+  visibleQuestions,
   type SignupForm,
 } from "./signup-schema";
 export function activityKind(value: string): "events" | "community-posts" {
@@ -184,7 +185,7 @@ export async function submitSignup(
         game: Number(idOf(doc.game)) || undefined,
         eventTitle: doc.title,
         formVersion: current,
-        questions: form.questions,
+        questions: visibleQuestions(form, clean),
         answers: clean,
       },
     });

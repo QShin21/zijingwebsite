@@ -4,6 +4,7 @@ import { getPayload, type Payload } from "payload";
 import config from "../../src/payload.config";
 import type { User } from "../../src/payload-types";
 import { randomBytes } from "node:crypto";
+import AxeBuilder from "@axe-core/playwright";
 let p: Payload,
   admin: User,
   member: User,
@@ -127,6 +128,7 @@ test("publisher builds questionnaire, member submits once, organizer reads priva
   await visitor.goto(`/community/signup-ui-${suffix}/updates/${post}`);
   await visitor.getByLabel("活动称呼", { exact: true }).fill("报名测试");
   await visitor.getByLabel("上午场", { exact: true }).check();
+  await visitor.getByRole("button", { name: "核对并提交" }).click();
   await visitor.getByRole("button", { name: "提交并确认报名" }).click();
   await expect(
     visitor.getByRole("heading", { name: "已报名", exact: true }),
@@ -150,7 +152,7 @@ test("publisher builds questionnaire, member submits once, organizer reads priva
   await expect(
     page.getByRole("heading", { name: "报名名单（1 人）" }),
   ).toBeVisible();
-  await page.locator(".signup-management summary").click();
+  await page.locator(".signup-management > section summary").click();
   await expect(page.locator(".signup-management dd").first()).toHaveText(
     "报名测试",
   );
@@ -262,3 +264,163 @@ test("publisher includes questionnaire before publishing and CMS offers editor l
   }
 });
 
+test("conditional questionnaire previews, validates, preserves steps and retries without losing answers", async ({
+  page,
+}) => {
+  await login(page, admin);
+  await page.context().setExtraHTTPHeaders({ "Sec-Fetch-Site": "same-origin" });
+  const endpoint = `/api/activities/community-posts/${post}/signup`;
+  const initial = await (
+    await page.request.get(endpoint + "?mode=manage")
+  ).json();
+  const form = {
+    ...initial.form,
+    enabled: true,
+    pageSize: 1,
+    questions: [
+      {
+        id: "mode",
+        label: "参与方式",
+        type: "single",
+        required: true,
+        options: ["参赛", "观赛"],
+      },
+      {
+        id: "mail",
+        label: "联系邮箱",
+        type: "text",
+        required: true,
+        options: [],
+        format: "email",
+        help: "用于活动通知",
+        showWhen: { questionId: "mode", option: "参赛" },
+      },
+      {
+        id: "slots",
+        label: "可用时段",
+        type: "multiple",
+        required: true,
+        options: ["上午", "下午", "晚上", "均不参加"],
+        minChoices: 2,
+        maxChoices: 2,
+        exclusiveOption: "均不参加",
+      },
+    ],
+  };
+  expect(
+    (
+      await page.request.put(endpoint, {
+        data: { version: initial.version, form },
+      })
+    ).ok(),
+  ).toBeTruthy();
+  await page.goto(`/activities/community-posts/${post}/manage`);
+  const third = page.getByRole("group", { name: "第 3 题", exact: true });
+  await third.getByRole("button", { name: "复制此题" }).click();
+  await expect(
+    page
+      .getByRole("group", { name: "第 4 题", exact: true })
+      .getByLabel("题目标题"),
+  ).toHaveValue("可用时段（副本）");
+  await page
+    .getByRole("group", { name: "第 4 题", exact: true })
+    .getByRole("button", { name: "删除此题" })
+    .click();
+  const second = page.getByRole("group", { name: "第 2 题", exact: true });
+  await second.getByText("填写提示、校验与显示条件", { exact: true }).click();
+  await second.getByLabel("最多字数", { exact: true }).fill("100");
+  await page.getByRole("button", { name: "保存报名问卷" }).click();
+  await expect(page.getByRole("status")).toContainText("已保存");
+  expect(
+    (await (await page.request.get(endpoint + "?mode=manage")).json()).form
+      .questions[1].maxLength,
+  ).toBe(100);
+  await page.getByRole("button", { name: "预览填写效果" }).click();
+  const preview = page.getByRole("dialog");
+  await expect(
+    preview.getByRole("heading", { name: "问卷预览" }),
+  ).toBeVisible();
+  await preview.getByLabel("观赛", { exact: true }).check();
+  await preview.getByRole("button", { name: "下一步" }).click();
+  await preview.getByLabel("均不参加", { exact: true }).check();
+  await preview.getByRole("button", { name: "核对并提交" }).click();
+  await preview.getByRole("button", { name: "验证预览答案" }).click();
+  await expect(preview).toContainText("预览验证通过，未提交报名。");
+  expect((await (await page.request.get(endpoint)).json()).signup).toBeNull();
+  await page.keyboard.press("Escape");
+  await expect(preview).not.toBeVisible();
+  await page.goto(`/community/signup-ui-${suffix}/updates/${post}`);
+  const signup = page.locator(".activity-signup");
+  await signup.getByRole("button", { name: "下一步" }).click();
+  await expect(signup.locator(".questionnaire-error")).toContainText(
+    "参与方式",
+  );
+  await expect(signup.locator("fieldset").first()).toBeFocused();
+  await signup.getByLabel("参赛", { exact: true }).check();
+  await signup.getByRole("button", { name: "下一步" }).click();
+  await signup.getByLabel("联系邮箱", { exact: true }).fill("bad-email");
+  await signup.getByRole("button", { name: "下一步" }).click();
+  await expect(signup.locator(".questionnaire-error")).toContainText(
+    "有效邮箱",
+  );
+  await signup
+    .getByLabel("联系邮箱", { exact: true })
+    .fill("test@example.invalid");
+  await signup.getByRole("button", { name: "上一步" }).click();
+  await signup.getByLabel("观赛", { exact: true }).check();
+  await signup.getByRole("button", { name: "下一步" }).click();
+  await expect(signup.getByLabel("联系邮箱", { exact: true })).toHaveCount(0);
+  await signup.getByLabel("上午", { exact: true }).check();
+  await signup.getByRole("button", { name: "核对并提交" }).click();
+  await expect(signup.locator(".questionnaire-error")).toContainText("2–2");
+  await signup.getByLabel("均不参加", { exact: true }).check();
+  await expect(signup.getByLabel("上午", { exact: true })).not.toBeChecked();
+  await signup.getByLabel("下午", { exact: true }).check();
+  await expect(
+    signup.getByLabel("均不参加", { exact: true }),
+  ).not.toBeChecked();
+  await signup.getByLabel("上午", { exact: true }).check();
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth),
+    ).toBeLessThanOrEqual(width);
+    await page.screenshot({
+      path: `.data/questionnaire-${width}.png`,
+      fullPage: true,
+    });
+  }
+  expect(
+    (await new AxeBuilder({ page }).include(".activity-signup").analyze())
+      .violations,
+  ).toEqual([]);
+  await signup.getByRole("button", { name: "核对并提交" }).click();
+  await expect(signup.locator(".questionnaire-review")).not.toContainText(
+    "联系邮箱",
+  );
+  await page.route("**" + endpoint, async (route) => {
+    if (route.request().method() === "POST")
+      await route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "临时不可用，请重试" }),
+      });
+    else await route.continue();
+  });
+  await signup.getByRole("button", { name: "提交并确认报名" }).click();
+  await expect(signup.getByRole("alert")).toContainText("临时不可用");
+  await expect(signup.locator(".questionnaire-review")).toContainText(
+    "下午、上午",
+  );
+  await page.unroute("**" + endpoint);
+  await signup.getByRole("button", { name: "提交并确认报名" }).click();
+  await expect(
+    signup.getByRole("heading", { name: "已报名", exact: true }),
+  ).toBeVisible();
+  const saved = (await (await page.request.get(endpoint)).json()).signup;
+  expect(saved.answers).toEqual({ mode: "观赛", slots: ["下午", "上午"] });
+  expect(saved.questions.map((q: { id: string }) => q.id)).toEqual([
+    "mode",
+    "slots",
+  ]);
+});
