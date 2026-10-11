@@ -6,9 +6,11 @@ import type { ResponseExportLayout } from "@/lib/questionnaire-export";
 export function QuestionnaireResults({
   endpoint,
   questions,
+  canExport = true,
 }: {
   endpoint: string;
   questions: Question[];
+  canExport?: boolean;
 }) {
   const [filters, setFilters] = useState({
     name: "",
@@ -152,7 +154,7 @@ export function QuestionnaireResults({
         <button type="button" disabled={busy} onClick={() => void run()}>
           查看统计图表
         </button>
-        <button type="button" disabled={busy} onClick={() => void run(true)}>
+        <button type="button" disabled={busy || !canExport} onClick={() => void run(true)}>
           导出筛选答卷 CSV
         </button>
         <button

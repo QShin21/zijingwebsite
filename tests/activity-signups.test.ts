@@ -96,7 +96,7 @@ beforeAll(async () => {
     id: manager.id,
     overrideAccess: true,
     context: { system: true },
-    data: { communities: [game] },
+    data: { communityOffices: [{ game, status: "active", viewSignups: true, exportSignups: true }] },
   });
   event = (
     await p.create({

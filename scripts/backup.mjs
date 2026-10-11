@@ -35,7 +35,7 @@ async function files(dir, root = dir) {
   const output = {};
   for (const e of await fs
     .readdir(dir, { withFileTypes: true })
-    .catch(() => [])) {
+    .catch(error => { if (error.code === "ENOENT") return []; throw error; })) {
     const f = path.join(dir, e.name);
     if (e.isDirectory()) Object.assign(output, await files(f, root));
     else if (e.isFile())
@@ -90,6 +90,8 @@ if (command === "create") {
   await fs.mkdir(media, { recursive: true });
   const before = await census(source);
   const mediaBefore = await files(media);
+  const localVideoDir = path.resolve(process.env.MEDIA_DIR || "media", ".showcase-videos");
+  const localVideosBefore = await files(localVideoDir);
   run(
     "pg_dump",
     [
@@ -102,17 +104,22 @@ if (command === "create") {
     source,
   );
   await fs.cp(media, path.join(directory, "media"), { recursive: true });
+  const videoBackup = path.join(directory, "local-videos");
+  if (await fs.stat(localVideoDir).catch(error => { if (error.code === "ENOENT") return null; throw error; })) await fs.cp(localVideoDir, videoBackup, { recursive: true });
+  else await fs.mkdir(videoBackup);
   const after = await census(source);
   if (
     JSON.stringify(before) !== JSON.stringify(after) ||
-    JSON.stringify(mediaBefore) !== JSON.stringify(await files(media))
+    JSON.stringify(mediaBefore) !== JSON.stringify(await files(media)) ||
+    JSON.stringify(localVideosBefore) !== JSON.stringify(await files(localVideoDir))
   )
     throw new Error("备份期间发生写入；暂停内容维护后重试，不使用此不完整备份");
   const manifest = {
-    version: 1,
+    version: 2,
     createdAt: new Date().toISOString(),
     tables: before,
     media: mediaBefore,
+    localVideos: localVideosBefore,
     databaseSHA256: hash(
       await fs.readFile(path.join(directory, "database.dump")),
     ),
@@ -204,18 +211,24 @@ if (command === "create") {
     JSON.stringify(manifest.media)
   )
     throw new Error("恢复后媒体校验失败");
+  const restoredVideos = path.resolve(".data", name, "local-videos");
+  if (manifest.version >= 2) {
+    await fs.cp(path.join(directory, "local-videos"), restoredVideos, { recursive: true, errorOnExist: true, force: false });
+    if (JSON.stringify(await files(restoredVideos)) !== JSON.stringify(manifest.localVideos)) throw new Error("恢复后本地视频校验失败");
+  }
   const report = {
     verifiedAt: new Date().toISOString(),
     database: name,
     tables: Object.keys(actual).length,
     records: Object.values(actual).reduce((n, v) => n + v.count, 0),
     mediaFiles: Object.keys(manifest.media).length,
+    localVideoFiles: Object.keys(manifest.localVideos || {}).length,
     result: "PASS",
     sourceUntouched: true,
   };
   await fs.mkdir("docs/evidence", { recursive: true });
   await fs.writeFile(
-    "docs/evidence/restore.json",
+    process.env.RESTORE_EVIDENCE_PATH || "docs/evidence/restore.json",
     JSON.stringify(report, null, 2),
   );
   console.log(JSON.stringify(report));

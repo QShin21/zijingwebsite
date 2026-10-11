@@ -1,5 +1,5 @@
 import type { Access, FieldAccess, Where } from "payload";
-import { canPublish, hasRole, type Identity } from "../lib/rules";
+import { canPublish, canSubmitClubContent, hasRole, type Identity } from "../lib/rules";
 export const admin: Access = ({ req }) =>
   hasRole(req.user as Identity, "president");
 export const adminField: FieldAccess = ({ req }) =>
@@ -8,7 +8,7 @@ export const publisher: Access = ({ req }) => canPublish(req.user as Identity);
 export const publisherField: FieldAccess = ({ req }) =>
   canPublish(req.user as Identity);
 export const staff: Access = ({ req }) =>
-  hasRole(req.user as Identity, "president", "vicePresident", "communityAdmin");
+  canSubmitClubContent(req.user as Identity);
 export function publicWhere(honor = false): Where {
   const and: Where[] = [{ _status: { equals: "published" } }];
   if (honor) and.push({ verified: { equals: true } });
@@ -21,7 +21,7 @@ export const readContent =
   ({ req }) => {
     const user = req.user as Identity;
     if (canPublish(user)) return true;
-    if (hasRole(user, "communityAdmin"))
+    if (canSubmitClubContent(user))
       return { or: [publicWhere(honor), { submittedBy: { equals: user.id } }] } as Where;
     return publicWhere(honor);
   };
@@ -30,7 +30,7 @@ export const editContent =
   ({ req }) => {
     const user = req.user as Identity;
     if (canPublish(user)) return true;
-    if (hasRole(user, "communityAdmin"))
+    if (canSubmitClubContent(user))
       return { submittedBy: { equals: user.id } } as Where;
     return false;
   };

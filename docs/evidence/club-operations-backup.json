@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-11T18:54:13.499Z",
+  "result": "PASS",
+  "environment": "isolated synthetic development",
+  "tables": 60,
+  "sourceUntouched": true,
+  "s3MirrorFiles": 1,
+  "separateLocalVideoFiles": 1,
+  "unreadableLocalVideosBlocked": true,
+  "productionAccess": false
+}

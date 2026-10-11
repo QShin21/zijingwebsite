@@ -303,7 +303,7 @@ export default async function Page({ params, searchParams }: Props) {
           <div className="editorial-content">
             <Prose doc={doc} />
           </div>
-        ) : (
+        ) : path[0] !== "contact" ? (
           <Empty
             text={
               path[0] === "privacy"
@@ -311,6 +311,11 @@ export default async function Page({ params, searchParams }: Props) {
                 : "内容正在整理，确认后将在这里发布。"
             }
           />
+        ) : null}
+        {path[0] === "contact" && !s.contacts?.length && (
+          <section className="panel"><h2>联系渠道尚未配置</h2><p>目前没有经过确认的社团公共联系方式。已有游戏可从社群页联系在任管理员；想组织新的游戏社群，可提交站内申请并在我的申请中查看负责人意见。</p>
+            <Link className="button" href="/community">查看游戏社群与管理员名片</Link> <Link className="button light" href="/community/apply">申请组织已有或新游戏社群</Link>
+          </section>
         )}
         {path[0] === "contact" && Boolean(s.contacts?.length) && (
           <div className="grid contact-grid">

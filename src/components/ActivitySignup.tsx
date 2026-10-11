@@ -21,6 +21,8 @@ type Info = {
   version: string;
   state: string;
   canManage: boolean;
+  canViewSignups: boolean;
+  canExportSignups: boolean;
   loggedIn: boolean;
   draftKey?: string;
   signup: Receipt | null;
@@ -101,7 +103,7 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
       {info.canManage && (
         <p>
           <Link href={`/activities/${kind}/${id}/manage`}>
-            编辑报名问卷 / 查看报名名单 ↗
+            管理报名问卷 ↗
           </Link>
         </p>
       )}
@@ -264,11 +266,12 @@ export function SignupManager({ kind, id }: { kind: string; id: number }) {
               {busy ? "正在保存…" : "保存报名问卷"}
             </button>
           </form>
-          <QuestionnaireResults
+          {info.canViewSignups && <QuestionnaireResults
             endpoint={endpoint}
             questions={info.form.questions}
-          />
-          <section className="panel">
+            canExport={info.canExportSignups}
+          />}
+          {info.canViewSignups ? <section className="panel">
             <h2>报名名单{total !== null ? `（${total} 人）` : ""}</h2>
             <button
               className="button light"
@@ -305,7 +308,7 @@ export function SignupManager({ kind, id }: { kind: string; id: number }) {
                 </button>
               </div>
             )}
-          </section>
+          </section> : <p className="panel">你可维护报名问卷。读取或导出个人报名需社长单独授权。</p>}
         </>
       )}
     </section>

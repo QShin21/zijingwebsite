@@ -3347,7 +3347,7 @@ button:disabled {
 .questionnaire-settings { margin-block: 1rem; padding: .8rem; background: #f8f6fa; border-radius: 8px; }
 .questionnaire-settings summary { cursor: pointer; padding: .4rem 0; }
 .questionnaire-settings label { margin-top: .8rem; }
-.questionnaire-dialog { width: min(720px, calc(100% - 2rem)); max-height: 85dvh; overflow: auto; border: 1px solid #d6cde0; border-radius: 16px; padding: clamp(1rem, 3vw, 2rem); color: #302638; }
+.questionnaire-dialog { margin: auto; width: min(720px, calc(100% - 2rem)); max-height: 85dvh; overflow: auto; border: 1px solid #d6cde0; border-radius: 16px; padding: clamp(1rem, 3vw, 2rem); color: #302638; }
 .questionnaire-dialog::backdrop { background: #20112b88; }
 .questionnaire-dialog .signup-tools { justify-content: space-between; }
 .questionnaire-dialog h2 { margin: 0; }

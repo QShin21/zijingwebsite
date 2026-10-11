@@ -9,7 +9,7 @@ export default async function Communities() {
       <PageHeading
         title="游戏社群"
         eyebrow="PLAY / CONNECT / SHARE"
-        description="加入游戏讨论，在论坛分享经验和活动。登录后即可发帖与交流。"
+        description="联系游戏社群管理员，由管理员在微信中人工拉群；也可申请组织已有社群或创建新群。"
       />
       <section className="community-grid">
         {games.docs.length ? (
@@ -21,7 +21,7 @@ export default async function Communities() {
             >
               <small>GAME COMMUNITY</small>
               <h2>{game.title}</h2>
-              <p>{game.summary || "进入社群论坛，和伙伴们继续讨论。"}</p>
+              <p>{game.summary || "查看社群活动、通知与风采，联系管理员加入微信群。"}</p>
               <span>
                 进入社群 <Icon name="arrow" />
               </span>

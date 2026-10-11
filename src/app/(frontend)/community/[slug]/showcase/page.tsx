@@ -3,13 +3,13 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import type { Where } from "payload";
 import { bySlug, cms } from "@/lib/content";
-import { canParticipate, managesGame } from "@/lib/rules";
+import { canParticipate, canReviewShowcase } from "@/lib/rules";
 import { CommunityPager, pageNumber } from "@/components/CommunityPager";
 import { ShowcaseForm } from "@/components/ShowcaseForm";
 import { ShowcaseCard } from "@/components/ShowcaseCard";
 export default async function Showcase({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ page?: string; view?: string; message?: string }> }) {
   const { slug } = await params; const query = await searchParams; const game = await bySlug("games", slug); if (!game) notFound();
-  const p = await cms(); const { user } = await p.auth({ headers: await headers() }); const manager = managesGame(user, game.id);
+  const p = await cms(); const { user } = await p.auth({ headers: await headers() }); const manager = canReviewShowcase(user, game.id);
   const view = query.view === "mine" && canParticipate(user) ? "mine" : query.view === "review" && manager ? "review" : "public";
   const page = pageNumber(query.page);
   const where: Where = { game: { equals: game.id } };

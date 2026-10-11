@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
 import { APIError, createLocalReq, type Payload, type PayloadRequest } from "payload";
 import type { User } from "@/payload-types";
-import { canParticipate, canPublish, hasRole, managesGame } from "./rules";
+import { canParticipate, canPublish, canSubmitClubContent, canReadActivitySignups, canExportActivitySignups, managesGame } from "./rules";
+import { workflowTransaction } from "./workflow-transactions";
 import {
   normalizeSignup,
   validateAnswers,
@@ -29,6 +30,8 @@ export async function activity(
   id: number,
   user: User | null,
   edit = false,
+  req?: PayloadRequest,
+  permission: "edit" | "view" | "export" = "edit",
 ) {
   if (kind === "community-posts" && !canParticipate(user))
     throw new APIError("请先登录", 401);
@@ -38,6 +41,7 @@ export async function activity(
       id,
       overrideAccess: false,
       user: edit ? user : null,
+      req: req ? (edit ? req : { ...req, user: null }) : undefined,
       draft: edit,
       depth: 0,
       select: {
@@ -80,6 +84,7 @@ export async function activity(
               collection: "events",
               id,
               overrideAccess: true,
+              req,
               depth: 0,
               select: { submittedBy: true },
             })
@@ -90,11 +95,13 @@ export async function activity(
     canPublish(user) ||
     (kind === "community-posts"
       ? managesGame(user, idOf(doc.game))
-      : hasRole(user, "communityAdmin") &&
+      : canSubmitClubContent(user) &&
         String(organizer) === String(user?.id));
-  if (edit && !manager) throw new APIError("无权管理此活动报名", 403);
+  const canView = canReadActivitySignups(user, kind, doc.game, organizer);
+  const canExport = canExportActivitySignups(user, kind, doc.game, organizer);
+  if (edit && !(permission === "view" ? canView : permission === "export" ? canExport : manager)) throw new APIError("无权执行此活动报名操作", 403);
   const form = normalizeSignup(doc.signupForm);
-  return { doc, form, version: formVersion(form), manager, organizer };
+  return { doc, form, version: formVersion(form), manager, organizer, canView, canExport };
 }
 export function signupState(
   form: SignupForm,
@@ -284,31 +291,16 @@ export async function saveSignupForm(
   version: unknown,
   value: unknown,
 ) {
-  const current = await activity(p, kind, id, user, true);
-  if (version !== current.version)
-    throw new APIError("报名问卷已被更新，请刷新后再编辑", 409);
-  let form;
-  try {
-    form = normalizeSignup(value);
-  } catch (error) {
-    throw new APIError((error as Error).message, 400);
-  }
-  const draft = kind === "events" && !canPublish(user);
-  await p.update({
-    collection: kind,
-    id,
-    overrideAccess: false,
-    user,
-    context: { manageSignupForm: true },
-    ...(kind === "events" ? { draft } : {}),
-    data: { signupForm: form },
+  return workflowTransaction(p, user, { manageSignupForm: true }, async req => {
+    const actor = req.user as User;
+    const current = await activity(p, kind, id, actor, true, req);
+    if (version !== current.version) throw new APIError("报名问卷已被更新，请刷新后再编辑", 409);
+    let form;
+    try { form = normalizeSignup(value); }
+    catch (error) { throw new APIError((error as Error).message, 400); }
+    const draft = kind === "events" && !canPublish(actor);
+    await p.update({ collection: kind, id, overrideAccess: false, req,
+      ...(kind === "events" ? { draft } : {}), data: { signupForm: form } });
+    return { form, version: formVersion(form), message: draft ? "问卷草稿已保存，需发布负责人审核发布后生效" : "报名问卷已保存", draft };
   });
-  return {
-    form,
-    version: formVersion(form),
-    message: draft
-      ? "问卷草稿已保存，需发布负责人审核发布后生效"
-      : "报名问卷已保存",
-    draft,
-  };
 }

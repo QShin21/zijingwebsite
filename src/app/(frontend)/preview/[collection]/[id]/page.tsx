@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { CollectionSlug } from "payload";
 import { cms, type Content } from "@/lib/content";
 import { Detail } from "@/components/Content";
-import { hasRole } from "@/lib/rules";
+import { canSubmitClubContent } from "@/lib/rules";
 export const dynamic = "force-dynamic";
 export const metadata = {
   title: "内容预览",
@@ -33,7 +33,7 @@ export default async function Preview({
   const { user } = await p.auth({ headers: await headers() });
   if (!user) notFound();
   if (
-    !hasRole(user, "president", "vicePresident", "communityAdmin")
+    !canSubmitClubContent(user)
   )
     notFound();
   const doc = await p

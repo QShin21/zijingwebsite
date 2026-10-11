@@ -1,0 +1,108 @@
+{
+  "at": "2026-10-11T18:55:44.920Z",
+  "phase": "P0/P1 club operations foundation",
+  "version": "1.1.0",
+  "branch": "codex/club-operations-vnext",
+  "baseline": {
+    "main": "2ce3ad87cac78ce97002881469ab5cbaad6b1308",
+    "littleapp": "80a0129d3ea27d564fc456642619239b70a0f819",
+    "historicalMigrations": 11,
+    "tables": 58,
+    "unitTests": 217,
+    "ci": [
+      {
+        "id": 38159488362,
+        "conclusion": "failure",
+        "reason": "obsolete CSV assertion; 51 passed / 1 failed; build skipped"
+      },
+      {
+        "id": 38159490334,
+        "conclusion": "failure",
+        "reason": "E2E failed; build skipped"
+      }
+    ]
+  },
+  "environment": {
+    "workspace": "/workspace/zijingwebsite",
+    "execution": "saved cloud environment only",
+    "node": "24.19.0",
+    "pnpm": "11.25.0",
+    "next": "16.3.5",
+    "react": "19.2.4",
+    "payload": "3.90.1",
+    "isolatedDatabase": true,
+    "productionWrites": false
+  },
+  "sourceTreeSHA256": "bd4062fd4878792f915903c8877f836033d28e67e5110bd0edee64f08593474d",
+  "sourceFiles": 195,
+  "checks": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "vitest": {
+      "files": 27,
+      "tests": 227,
+      "result": "PASS",
+      "log": "/tmp/zijing-final-test.log"
+    },
+    "fullE2E": {
+      "tests": 54,
+      "result": "PASS",
+      "log": "/tmp/zijing-final-e2e.log",
+      "note": "Before final orphan-office maintenance guard; final database suite and relevant browser cases rerun afterward"
+    },
+    "finalRelatedE2E": {
+      "tests": 6,
+      "result": "PASS",
+      "log": "/tmp/zijing-final-e2e-related.log"
+    },
+    "productionBuild": {
+      "result": "PASS",
+      "log": "/tmp/zijing-final-build.log"
+    },
+    "miniappSourceCheck": {
+      "result": "PASS",
+      "pages": 14,
+      "files": 89,
+      "bytes": 173236,
+      "domainChecking": true,
+      "nativeDependencies": 0
+    },
+    "importMap": "PASS - no new imports",
+    "migrationRestore": "PASS - 58 to 60 tables; 57 old business-table column digests unchanged",
+    "ordinaryResidualRelations": "PASS - no new privileges",
+    "rollbackGate": "PASS - compatible baseline allowed; new roles and revoked privacy blocked",
+    "finalCommitGitHubCI": "Report separately after push; not implied by local checks",
+    "expandedSchemaBackup": "PASS - 60-table restore, S3 mirror, separate video; unreadable local video directory fails backup"
+  },
+  "priorFailures": [
+    {
+      "run": "focused initial",
+      "cause": "Concurrent unit/E2E writes triggered serializable conflict; old contact fixture lacked consent"
+    },
+    {
+      "run": "focused retry",
+      "cause": "API fixture needed Origin headers; preview close button label differed; GraphQL is an unopened 404 route"
+    },
+    {
+      "run": "first full E2E",
+      "passed": 53,
+      "failed": 1,
+      "cause": "Old navigation count omitted new join-progress tab",
+      "resolution": "Assertion updated and full 54-case run passed"
+    }
+  ],
+  "artifacts": {
+    "migration": "club-operations-migration.json",
+    "restore": "club-operations-restore.json",
+    "rollback": "club-operations-rollback.json",
+    "backup": "club-operations-backup.json"
+  },
+  "limits": [
+    "No production deploy, migration, account changes, real private signup reads/exports or real outbound email/WeChat QA",
+    "Current production SHA/APP_ENV and safe existing deployment channel unverified",
+    "No native new-business implementation, device validation, WeChat upload/review/public release",
+    "P2 promotions/recruitment and P3 teams/honors pending"
+  ],
+  "migrationDown": "Explicitly refuses data deletion; production execution requires separate review under irreversible-migration boundary",
+  "historicalEvidence": "Generated old evidence files restored to their baseline; new scoped evidence retained"
+}

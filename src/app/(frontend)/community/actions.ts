@@ -2,8 +2,9 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cms } from "@/lib/content";
-import { canPublish, hasRole, managesGame } from "@/lib/rules";
+import { canPublish, canSubmitClubContent, canReviewShowcase, managesGame } from "@/lib/rules";
 import { discardVideo, saveVideo, VIDEO_MAX_BYTES, SUBMISSION_MAX_BYTES } from '@/lib/showcase-videos';
+import { decideCommunityApplication, editCommunityApplication, updateCommunityCard, changeCommunityJoin } from "@/lib/community-operations";
 import { applicationError } from "@/lib/application-error";
 
 const value = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
@@ -27,16 +28,18 @@ async function gamePath(id: number) {
 export async function applyAction(form: FormData) {
   const { p, user } = await current();
   const game = numeric(form, "game");
+  const id = numeric(form, "id");
   const image = form.get("wechatQr");
-  if (!(image instanceof File) || !image.size || image.size > 2 * 1024 * 1024 ||
-      !["image/png", "image/jpeg", "image/webp"].includes(image.type))
+  const file = image instanceof File && image.size ? image : null;
+  if ((!id && !file) || (file && (file.size > 2 * 1024 * 1024 || !["image/png", "image/jpeg", "image/webp"].includes(file.type))))
     return { error: "请上传 2 MB 以内的 PNG、JPEG 或 WebP 微信名片二维码。" };
   try {
-    await p.create({ collection: "community-applications", overrideAccess: false, user,
-      data: { game: game || undefined, proposedGame: value(form, "proposedGame"),
-        realName: value(form, "realName"), phone: value(form, "phone"),
-        wechatQr: `data:${image.type};base64,${Buffer.from(await image.arrayBuffer()).toString("base64")}`,
-        reason: value(form, "reason"), status: "pending", applicant: user.id } });
+    const data = { game: game || null, proposedGame: value(form, "proposedGame"),
+      realName: value(form, "realName"), phone: value(form, "phone"),
+      ...(file ? { wechatQr: `data:${file.type};base64,${Buffer.from(await file.arrayBuffer()).toString("base64")}` } : {}),
+      contactConsent: form.get("contactConsent") === "on", reason: value(form, "reason"), status: "pending" as const, applicant: user.id };
+    if (id) await editCommunityApplication(p, user, id, value(form, "revision"), data);
+    else await p.create({ collection: "community-applications", overrideAccess: false, user, data });
   } catch (error) { return { error: applicationError(error) }; }
   return { success: true };
 }
@@ -44,11 +47,10 @@ export async function decideAction(form: FormData) {
   const { p, user } = await current();
   if (!canPublish(user)) redirect("/account");
   const status = value(form, "decision");
-  if (!["approved", "rejected"].includes(status)) problem("/community/review", "决定无效");
+  if (!["approved", "returned", "rejected"].includes(status)) problem("/community/review", "决定无效");
   try {
-    await p.update({ collection: "community-applications", id: numeric(form, "id"),
-      overrideAccess: false, user, data: { status: status as "approved" | "rejected" } });
-  } catch { problem("/community/review", "审核未完成，申请可能已经处理"); }
+    await decideCommunityApplication(p, user, numeric(form, "id"), status, value(form, "reviewNote"), value(form, "revision"));
+  } catch (error) { problem("/community/review", applicationError(error)); }
   redirect("/community/review?done=1");
 }
 export async function publishCommunityAction(form: FormData) {
@@ -83,7 +85,7 @@ export async function banAction(form: FormData) {
   const { p, user } = await current();
   const game = numeric(form, "game");
   const path = await gamePath(game);
-  if (!managesGame(user, game) || !hasRole(user, "president", "vicePresident", "communityAdmin"))
+  if (!managesGame(user, game) || !canSubmitClubContent(user))
     redirect(path);
   try {
     await p.create({ collection: "community-bans", overrideAccess: false, user,
@@ -114,7 +116,7 @@ export async function submitShowcaseAction(form: FormData) {
 export async function reviewShowcaseAction(form: FormData) {
   const { p, user } = await current();
   const post = await p.findByID({ collection: "community-showcase", id: numeric(form, "id"), overrideAccess: false, user, depth: 0 }).catch(() => null);
-  if (!post || !managesGame(user, post.game)) redirect("/community");
+  if (!post || !canReviewShowcase(user, post.game)) redirect("/community");
   const path = `${await gamePath(Number(post.game))}/showcase`;
   const status = value(form, "status");
   if (!["visible", "rejected", "hidden"].includes(status)) problem(path, "审核决定无效");
@@ -122,4 +124,38 @@ export async function reviewShowcaseAction(form: FormData) {
     data: { status: status as "visible" | "rejected" | "hidden", reviewNote: value(form, "reviewNote") } }); }
   catch { problem(path, "审核未成功，请刷新后重试"); }
   redirect(`${path}?view=review&message=${encodeURIComponent("审核已保存")}`);
+}
+
+export async function withdrawApplicationAction(form: FormData) {
+  const { p, user } = await current();
+  try { await editCommunityApplication(p, user, numeric(form, "id"), value(form, "revision"), { status: "withdrawn" }); }
+  catch (error) { problem("/community/apply", applicationError(error)); }
+  redirect("/community/apply?message=" + encodeURIComponent("网站申请已撤回，微信联系不受此操作影响。"));
+}
+export async function joinAction(form: FormData) {
+  const { p, user } = await current();
+  const game = numeric(form, "game");
+  try { await changeCommunityJoin(p, user, game, value(form, "action"), {
+    id: numeric(form, "id") || undefined, contact: numeric(form, "contact") || undefined,
+    revision: value(form, "revision"), note: value(form, "note"),
+  }); }
+  catch (error) { return { error: applicationError(error) }; }
+  return { success: true };
+}
+export async function handleJoinAction(form: FormData) {
+  const result = await joinAction(form);
+  const path = `${await gamePath(numeric(form, "game"))}/members`;
+  if (result.error) problem(path, result.error);
+  redirect(`${path}?message=${encodeURIComponent("人工处理结果已保存。")}`);
+}
+export async function updateCommunityCardAction(form: FormData) {
+  const { p, user } = await current();
+  const file = form.get("wechatQr");
+  if (file instanceof File && file.size > 2 * 1024 * 1024) problem("/community/apply", "名片最大 2 MB");
+  try { await updateCommunityCard(p, user, numeric(form, "id"), value(form, "revision"), {
+    contactConsent: form.get("contactConsent") === "on",
+    ...(file instanceof File && file.size ? { wechatQr: `data:${file.type};base64,${Buffer.from(await file.arrayBuffer()).toString("base64")}` } : {}),
+  }); }
+  catch (error) { problem("/community/apply", applicationError(error)); }
+  redirect("/community/apply?message=" + encodeURIComponent("名片及展示设置已更新。"));
 }

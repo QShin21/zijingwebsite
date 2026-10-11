@@ -3,24 +3,28 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { PageHeading } from "@/components/PageHeading";
+import { Pagination } from "@/components/Content";
 import { cms } from "@/lib/content";
 import { canPublish } from "@/lib/rules";
 import { decideAction } from "../actions";
 export default async function Review({
   searchParams,
 }: {
-  searchParams: Promise<{ message?: string; done?: string }>;
+  searchParams: Promise<{ message?: string; done?: string; page?: string }>;
 }) {
   const p = await cms();
   const { user } = await p.auth({ headers: await headers() });
   if (!canPublish(user)) notFound();
+  const query = await searchParams;
+  const page = Math.max(1, Math.min(10000, Math.floor(Number(query.page) || 1)));
   const apps = await p.find({
     collection: "community-applications",
     overrideAccess: false,
     user,
     where: { status: { equals: "pending" } },
     sort: "createdAt",
-    limit: 50,
+    limit: 20,
+    page,
     depth: 0,
   });
   const ids = apps.docs.map((app) =>
@@ -32,19 +36,18 @@ export default async function Review({
         overrideAccess: false,
         user,
         where: { id: { in: ids } },
-        limit: 50,
+        limit: 20,
         depth: 0,
         select: { name: true, email: true, accountStatus: true },
       })
     : { docs: [] };
   const byId = new Map(applicants.docs.map((person) => [person.id, person]));
-  const query = await searchParams;
   return (
     <>
       <PageHeading
         title="社群管理员申请审核"
         eyebrow="REVIEW QUEUE"
-        description="审核通过已有游戏的申请，或创建新游戏社群并授予对应管理权限。"
+        description="批准后初始化社群及独立任职，保留原平台角色。退回与拒绝需给出具体意见。微信建群和拉群由管理员人工完成。"
       />
       <section className="member-shell">
         <p role="status">
@@ -127,35 +130,22 @@ export default async function Review({
                 <h3>申请说明</h3>
                 <p className="preserve">{app.reason}</p>
                 <p>{app.game ? "加入已有社群" : "通过后建立新社群"}</p>
-                <div className="review-actions">
-                  <form action={decideAction}>
-                    <input type="hidden" name="id" value={app.id} />
-                    <SubmitButton
-                      className="button light"
-                      name="decision"
-                      value="approved"
-                      disabled={!complete}
-                    >
-                      批准
-                    </SubmitButton>
-                  </form>
-                  <form action={decideAction}>
-                    <input type="hidden" name="id" value={app.id} />
-                    <SubmitButton
-                      className="button"
-                      name="decision"
-                      value="rejected"
-                    >
-                      退回
-                    </SubmitButton>
-                  </form>
-                </div>
+                <form action={decideAction} className="member-form review-actions">
+                  <input type="hidden" name="id" value={app.id} />
+                  <input type="hidden" name="revision" value={app.updatedAt} />
+                  <label>审核意见（退回或拒绝必填）<textarea name="reviewNote" maxLength={1000} rows={3} /></label>
+                  <p>名片展示：{app.contactConsent ? "申请人已同意在任期间展示" : "未授权展示，批准后不提供公开名片"}</p>
+                  <SubmitButton className="button light" name="decision" value="approved" disabled={!complete}>批准</SubmitButton>
+                  <SubmitButton className="button" name="decision" value="returned">退回补充</SubmitButton>
+                  <SubmitButton className="button light" name="decision" value="rejected">拒绝</SubmitButton>
+                </form>
               </article>
             );
           })
         ) : (
           <p>目前没有待审核申请。</p>
         )}
+        <Pagination page={page} total={apps.totalPages} path="/community/review" />
       </section>
     </>
   );

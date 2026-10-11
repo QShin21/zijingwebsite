@@ -23,6 +23,7 @@ export interface Config {
     users: User;
     media: Media;
     'community-applications': CommunityApplication;
+    'community-joins': CommunityJoin;
     'community-bans': CommunityBan;
     'community-showcase': CommunityShowcase;
     'community-posts': CommunityPost;
@@ -49,6 +50,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'community-applications': CommunityApplicationsSelect<false> | CommunityApplicationsSelect<true>;
+    'community-joins': CommunityJoinsSelect<false> | CommunityJoinsSelect<true>;
     'community-bans': CommunityBansSelect<false> | CommunityBansSelect<true>;
     'community-showcase': CommunityShowcaseSelect<false> | CommunityShowcaseSelect<true>;
     'community-posts': CommunityPostsSelect<false> | CommunityPostsSelect<true>;
@@ -119,8 +121,25 @@ export interface User {
    */
   name: string;
   nameKey?: string;
-  roles: ('president' | 'vicePresident' | 'communityAdmin' | 'member')[];
+  roles: ('president' | 'vicePresident' | 'backbone' | 'communityAdmin' | 'member')[];
   accountStatus?: ('active' | 'suspended') | null;
+  department?: ('execution' | 'publicity') | null;
+  communityOffices?:
+    | {
+        game?: (number | null) | Game;
+        status: 'active' | 'revoked';
+        publishContent?: boolean | null;
+        reviewShowcase?: boolean | null;
+        handleJoins?: boolean | null;
+        viewSignups?: boolean | null;
+        exportSignups?: boolean | null;
+        contactConsent?: boolean | null;
+        grantedBy?: (number | null) | User;
+        grantedAt?: string | null;
+        sourceApplication?: (number | null) | CommunityApplication;
+        id?: string | null;
+      }[]
+    | null;
   communities?: (number | Game)[] | null;
   teams?: (number | Team)[] | null;
   updatedAt: string;
@@ -212,6 +231,30 @@ export interface Media {
   };
 }
 /**
+ * 在网站社群申请审核页处理决定、退回及初始化；平台角色不会随审批改变。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-applications".
+ */
+export interface CommunityApplication {
+  id: number;
+  applicant: number | User;
+  game?: (number | null) | Game;
+  proposedGame: string;
+  reason: string;
+  realName?: string | null;
+  phone?: string | null;
+  wechatQr?: string | null;
+  contactConsent?: boolean | null;
+  requestKey?: string | null;
+  status?: ('pending' | 'approved' | 'returned' | 'rejected' | 'withdrawn') | null;
+  reviewNote?: string | null;
+  reviewedBy?: (number | null) | User;
+  reviewedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "teams".
  */
@@ -249,19 +292,22 @@ export interface Team {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * 扫码或网站操作均不证明已进微信群；在社群进群管理页人工处理。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "community-applications".
+ * via the `definition` "community-joins".
  */
-export interface CommunityApplication {
+export interface CommunityJoin {
   id: number;
-  applicant: number | User;
-  game?: (number | null) | Game;
-  proposedGame: string;
-  reason: string;
-  realName?: string | null;
-  phone?: string | null;
-  wechatQr?: string | null;
-  status?: ('pending' | 'approved' | 'rejected') | null;
+  member: number | User;
+  game: number | Game;
+  contact?: (number | null) | User;
+  memberName: string;
+  dedupeKey: string;
+  status: 'requested' | 'friendReported' | 'awaitingInvite' | 'joined' | 'withdrawn';
+  note?: string | null;
+  confirmedBy?: (number | null) | User;
+  confirmedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -840,6 +886,10 @@ export interface PayloadLockedDocument {
         value: number | CommunityApplication;
       } | null)
     | ({
+        relationTo: 'community-joins';
+        value: number | CommunityJoin;
+      } | null)
+    | ({
         relationTo: 'community-bans';
         value: number | CommunityBan;
       } | null)
@@ -954,6 +1004,23 @@ export interface UsersSelect<T extends boolean = true> {
   nameKey?: T;
   roles?: T;
   accountStatus?: T;
+  department?: T;
+  communityOffices?:
+    | T
+    | {
+        game?: T;
+        status?: T;
+        publishContent?: T;
+        reviewShowcase?: T;
+        handleJoins?: T;
+        viewSignups?: T;
+        exportSignups?: T;
+        contactConsent?: T;
+        grantedBy?: T;
+        grantedAt?: T;
+        sourceApplication?: T;
+        id?: T;
+      };
   communities?: T;
   teams?: T;
   updatedAt?: T;
@@ -1020,7 +1087,29 @@ export interface CommunityApplicationsSelect<T extends boolean = true> {
   realName?: T;
   phone?: T;
   wechatQr?: T;
+  contactConsent?: T;
+  requestKey?: T;
   status?: T;
+  reviewNote?: T;
+  reviewedBy?: T;
+  reviewedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-joins_select".
+ */
+export interface CommunityJoinsSelect<T extends boolean = true> {
+  member?: T;
+  game?: T;
+  contact?: T;
+  memberName?: T;
+  dedupeKey?: T;
+  status?: T;
+  note?: T;
+  confirmedBy?: T;
+  confirmedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

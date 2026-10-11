@@ -1,5 +1,5 @@
 import { cms } from "@/lib/content";
-import { canPublish, hasRole } from "@/lib/rules";
+import { canSubmitClubContent } from "@/lib/rules";
 import {
   boundedText,
   generateQuestionnaire,
@@ -94,7 +94,7 @@ async function run(request: Request) {
     const p = await cms(),
       { user } = await p.auth({ headers: request.headers });
     if (!user) return reply({ error: "请先登录。" }, 401);
-    if (!canPublish(user) && !hasRole(user, "communityAdmin"))
+    if (!canSubmitClubContent(user))
       return reply({ error: "仅问卷管理者可使用 AI 制作。" }, 403);
     if (request.method === "GET")
       return reply({

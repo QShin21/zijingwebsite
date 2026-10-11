@@ -1,3 +1,4 @@
+import { communityIDs } from "./rules";
 import { cms, bySlug } from "./content";
 
 // Server-only projection. This context is never taken from HTTP input.
@@ -8,7 +9,8 @@ export async function communityContacts(slug: string) {
   const p = await cms();
   const options = { overrideAccess: false as const, user: null, depth: 0,
     context: { publicCommunityContacts: game.id }, pagination: false };
-  const users = await p.find({ collection: "users", ...options, select: { name: true } });
+  const candidates = await p.find({ collection: "users", ...options, select: { name: true, communityOffices: true } });
+  const users = { docs: candidates.docs.filter(user => communityIDs(user, "contactConsent").includes(String(game.id))) };
   if (!users.docs.length) return [];
   const applications = await p.find({ collection: "community-applications", ...options,
     where: { applicant: { in: users.docs.map(u => u.id) } }, sort: "-createdAt",

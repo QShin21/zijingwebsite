@@ -19,6 +19,8 @@ import {
 } from "../access";
 import {
   canPublish,
+  canSubmitClubContent,
+  relationID,
   hasRole,
   routeFor,
   safeURL,
@@ -72,7 +74,7 @@ const internal: Field = {
   access: {
     read: ({ req, doc }) =>
       canPublish(req.user as Identity) ||
-      (hasRole(req.user as Identity, "communityAdmin") &&
+      (canSubmitClubContent(req.user as Identity) &&
         String(doc?.submittedBy) === String(req.user?.id)),
   },
 };
@@ -276,7 +278,8 @@ export const audit: CollectionAfterChangeHook = async ({
       action:
         collection.slug === "users" &&
         (JSON.stringify(previousDoc?.roles) !== JSON.stringify(doc.roles) ||
-          JSON.stringify(previousDoc?.teams) !== JSON.stringify(doc.teams))
+          JSON.stringify(previousDoc?.teams) !== JSON.stringify(doc.teams) ||
+          JSON.stringify(previousDoc?.communityOffices) !== JSON.stringify(doc.communityOffices))
           ? "permissions-change"
           : operation,
       object: `${collection.slug}:${doc.id}`,
@@ -338,7 +341,7 @@ function content(
     access: {
       read: readContent(scoped, slug === "honors", self),
       create: ({ req }) =>
-        canPublish(req.user as Identity) || hasRole(req.user as Identity, "communityAdmin"),
+        canSubmitClubContent(req.user as Identity),
       update: editContent(scoped, self),
       delete: publisher,
       readVersions: editContent(scoped, self),
@@ -396,7 +399,7 @@ export const Users: CollectionConfig = {
   access: {
     create: () => false,
     read: ({ req }) =>
-      req.context.publicCommunityContacts ? ({ and: [{ communities: { contains: req.context.publicCommunityContacts } }, { roles: { in: ["communityAdmin", "vicePresident", "president"] } }, { accountStatus: { not_equals: "suspended" } }] } as Where) :
+      req.context.publicCommunityContacts ? ({ and: [{ communities: { contains: req.context.publicCommunityContacts } }, { accountStatus: { not_equals: "suspended" } }] } as Where) :
       canPublish(req.user as Identity) || {
         id: { equals: req.user?.id },
       },
@@ -405,9 +408,17 @@ export const Users: CollectionConfig = {
         id: { equals: req.user?.id },
       },
     delete: admin,
-    admin: ({ req }) => canPublish(req.user as Identity) || hasRole(req.user as Identity, "communityAdmin"),
+    admin: ({ req }) => canSubmitClubContent(req.user as Identity),
   },
   hooks: {
+    beforeOperation: [({ args, operation, req }) => {
+      if (["create", "update"].includes(operation)) {
+        const input = args as unknown as { data?: Record<string, unknown> };
+        req.context.legacyCommunitiesInput = input.data?.communities !== undefined && input.data?.communityOffices === undefined;
+        req.context.userSubmittedFields = Object.keys(input.data ?? {});
+      }
+      return args;
+    }],
     beforeValidate: [({ data }) => {
       if (data) {
         // Never trust a key supplied by a REST, GraphQL or Local API caller.
@@ -432,12 +443,15 @@ export const Users: CollectionConfig = {
             data.email === process.env.PRESIDENT_CLAIM_EMAIL?.trim().toLowerCase();
           data.roles = [bootstrap ? "president" : "member"];
           data.accountStatus = "active";
+          data.communityOffices = [];
+          data.communities = [];
+          data.department = undefined;
         }
         if (operation === "update" && !req.context.system) {
-          if ((data.roles || data.communities || data.accountStatus) &&
+          if ((req.context.userSubmittedFields as string[] | undefined)?.some(key => ["roles", "communities", "communityOffices", "department", "accountStatus"].includes(key)) &&
             !hasRole(req.user as Identity, "president"))
             throw new APIError("只有社长可以调整权限", 403);
-          if (data.email ||
+          if ((data.email !== undefined && data.email !== originalDoc?.email) ||
             (data.password && !req.context.verifiedPasswordChange))
             throw new APIError("修改账号身份或密码必须经过受控邮箱验证", 403);
         }
@@ -446,8 +460,35 @@ export const Users: CollectionConfig = {
           data.roles && !data.roles.includes("president") && !req.context.system)
           throw new APIError("社长账号不可通过普通编辑降级", 403);
         if (data.roles && (data.roles.length !== 1 ||
-          !["president", "vicePresident", "communityAdmin", "member"].includes(data.roles[0])))
+          !["president", "vicePresident", "backbone", "communityAdmin", "member"].includes(data.roles[0])))
           throw new APIError("账号必须且只能拥有一个等级", 400);
+        // Preserve legacy controlled assignments, while making the independent office canonical.
+        if (data.communities !== undefined && req.context.legacyCommunitiesInput === true) {
+          const old = originalDoc?.communityOffices ?? [];
+          data.communityOffices = data.communities.map((game: unknown) => old.find((office: { game: unknown }) => String(relationID(office.game)) === String(relationID(game))) ?? {
+            game: relationID(game), status: "active", publishContent: true, reviewShowcase: true,
+            handleJoins: true, viewSignups: false, exportSignups: false, contactConsent: false,
+            grantedAt: new Date().toISOString(), grantedBy: req.user?.id,
+          });
+        }
+        if (data.communityOffices !== undefined) {
+          if (!Array.isArray(data.communityOffices)) throw new APIError("社群任职格式无效", 400);
+          const seen = new Set<string>();
+          for (const office of data.communityOffices) {
+            const game = String(relationID(office.game));
+            if (office.status === "active" && !(Number(game) > 0)) {
+              const oldOffice = originalDoc?.communityOffices?.find((item: { id?: string; game?: unknown }) => item.id === office.id);
+              if (!oldOffice || oldOffice.game != null) throw new APIError("在任授权需选择游戏社群", 400);
+              office.status = "revoked";
+            }
+            if (Number(game) > 0) {
+              if (seen.has(game)) throw new APIError("同一社群只能有一项任职", 400);
+              seen.add(game);
+            }
+            if (office.exportSignups && !office.viewSignups) throw new APIError("导出报名需要同时授予读取报名权限", 400);
+          }
+          data.communities = data.communityOffices.filter((office: { status?: string }) => office.status === "active").map((office: { game: unknown }) => relationID(office.game));
+        }
         return data;
       },
     ],
@@ -463,7 +504,7 @@ export const Users: CollectionConfig = {
       admin: { hidden: true }, access: { read: () => false } },
     {
       name: "roles",
-      label: "角色",
+      label: "平台角色（与社群任职分开）",
       type: "select",
       hasMany: true,
       required: true,
@@ -471,15 +512,35 @@ export const Users: CollectionConfig = {
       options: [
         { label: "社长", value: "president" },
         { label: "副社长", value: "vicePresident" },
-        { label: "社群管理员", value: "communityAdmin" },
+        { label: "骨干", value: "backbone" },
+        { label: "历史社群管理标记（不授社群范围）", value: "communityAdmin" },
         { label: "普通用户", value: "member" },
       ],
       access: { create: () => true, update: adminField },
     },
     { name: "accountStatus", label: "账号状态", type: "select", defaultValue: "active",
       options: ["active", "suspended"], access: { create: adminField, update: adminField } },
-    { name: "communities", label: "管理的游戏社群", type: "relationship", relationTo: "games",
-      hasMany: true, access: { create: adminField, update: adminField } },
+    { name: "department", label: "骨干方向（同权限）", type: "select", options: [
+      { label: "执行部", value: "execution" }, { label: "宣传部", value: "publicity" },
+    ], access: { create: adminField, update: adminField } },
+    { name: "communityOffices", label: "社群任职与能力", type: "array",
+      access: { create: adminField, update: adminField }, fields: [
+        { name: "game", label: "游戏社群（在任必选）", type: "relationship", relationTo: "games", maxDepth: 0 },
+        { name: "status", label: "任职状态", type: "select", required: true, defaultValue: "active", options: [
+          { label: "在任", value: "active" }, { label: "已撤任", value: "revoked" },
+        ] },
+        { name: "publishContent", label: "发布本社群活动与通知", type: "checkbox", defaultValue: true },
+        { name: "reviewShowcase", label: "审核本社群风采", type: "checkbox", defaultValue: true },
+        { name: "handleJoins", label: "人工处理本社群进群", type: "checkbox", defaultValue: true },
+        { name: "viewSignups", label: "读取本社群报名（含个人资料）", type: "checkbox", defaultValue: false },
+        { name: "exportSignups", label: "导出本社群报名", type: "checkbox", defaultValue: false },
+        { name: "contactConsent", label: "同意展示已批准申请的微信名片", type: "checkbox", defaultValue: false },
+        { name: "grantedBy", label: "授予人", type: "relationship", relationTo: "users", maxDepth: 0 },
+        { name: "grantedAt", label: "授予时间", type: "date" },
+        { name: "sourceApplication", label: "来源申请", type: "relationship", relationTo: "community-applications", maxDepth: 0 },
+      ] },
+    { name: "communities", label: "旧客户端社群投影（由任职生成）", type: "relationship", relationTo: "games",
+      hasMany: true, admin: { hidden: true }, access: { create: adminField, update: adminField } },
     {
       name: "teams",
       label: "负责分部",

@@ -2,6 +2,7 @@ import "dotenv/config";
 import { test, expect } from "@playwright/test";
 import { getPayload, type Payload } from "payload";
 import config from "../../src/payload.config";
+import { decideCommunityApplication } from "../../src/lib/community-operations";
 import type { User } from "../../src/payload-types";
 import { discardVideo } from '../../src/lib/showcase-videos';
 import sharp from "sharp";
@@ -18,8 +19,8 @@ test.beforeAll(async () => {
   game = (await p.create({ collection: "games", overrideAccess: true, context: { system: true }, data: { title: "社群功能验收", slug, _status: "published" } })).id;
   for (const user of [admin, vice]) {
     const application = await p.create({ collection: "community-applications", overrideAccess: false, user,
-      data: { game, proposedGame: "社群功能验收", applicant: user.id, realName: "测试联系人", phone: "13900000000", reason: "社群功能自动化验收申请说明", wechatQr: `data:image/png;base64,${picture.toString("base64")}` } });
-    await p.update({ collection: "community-applications", id: application.id, overrideAccess: false, user: vice, data: { status: "approved" } });
+      data: { game, proposedGame: "社群功能验收", applicant: user.id, realName: "测试联系人", phone: "13900000000", reason: "社群功能自动化验收申请说明", wechatQr: `data:image/png;base64,${picture.toString("base64")}`, contactConsent: true } });
+    await decideCommunityApplication(p, vice, application.id, "approved", "", application.updatedAt);
   }
   admin = await p.findByID({ collection: "users", id: admin.id, overrideAccess: true, depth: 0 });
   event = (await p.create({ collection: "community-posts", overrideAccess: false, user: admin, data: { game, author: admin.id, title: "周末社群活动", category: "event", body: "一起来分享游戏体验。" } })).id;

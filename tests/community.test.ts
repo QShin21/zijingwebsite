@@ -4,6 +4,7 @@ import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { getPayload, type Payload } from "payload";
 import config from "../src/payload.config";
+import { decideCommunityApplication } from "../src/lib/community-operations";
 import type { User } from "../src/payload-types";
 import { randomBytes } from "node:crypto";
 let p: Payload;
@@ -49,7 +50,7 @@ describe.sequential("申请、建群、网页投稿与跨级审核", () => {
       reason: "此处为申请资料校验测试说明。",
       realName: "测试姓名",
       phone: "13900000000",
-      wechatQr: qr,
+      wechatQr: qr, contactConsent: true,
     };
     for (const missing of [
       { realName: "" },
@@ -110,13 +111,7 @@ describe.sequential("申请、建群、网页投稿与跨级审核", () => {
           data: { status: "approved" },
         }),
       ).rejects.toThrow();
-      await p.update({
-        collection: "community-applications",
-        id: request.id,
-        overrideAccess: false,
-        user: vice,
-        data: { status: "rejected" },
-      });
+      await decideCommunityApplication(p, vice, request.id, "rejected", "资料不完整，请在新申请中补充。", request.updatedAt);
     } finally {
       await p.delete({
         collection: "community-applications",
@@ -139,21 +134,21 @@ describe.sequential("申请、建群、网页投稿与跨级审核", () => {
       overrideAccess: false, user: member, data: {
         applicant: member.id, proposedGame: `测试游戏-${suffix}`,
         reason: "希望运营这款游戏的日常讨论和活动。",
-        realName: "测试申请人", phone: "13900000000", wechatQr: qr,
+        realName: "测试申请人", phone: "13900000000", wechatQr: qr, contactConsent: true,
       } });
     application = request.id;
     expect(request.status).toBe("pending");
     await expect(p.update({ collection: "community-applications", id: application,
       overrideAccess: false, user: member, data: { status: "approved" } })).rejects.toThrow();
-    await p.update({ collection: "community-applications", id: application,
-      overrideAccess: false, user: vice, data: { status: "approved" } });
+    await decideCommunityApplication(p, vice, application, "approved", "", request.updatedAt);
     const approved = await p.findByID({ collection: "community-applications",
       id: application, overrideAccess: true, depth: 0 });
     game = Number(approved.game);
     expect((await p.findByID({ collection: "games", id: game,
       overrideAccess: false, user: null }))._status).toBe("published");
     member = await p.findByID({ collection: "users", id: member.id, overrideAccess: true });
-    expect(member.roles).toEqual(["communityAdmin"]);
+    expect(member.roles).toEqual(["member"]);
+    expect(member.communityOffices?.[0].viewSignups).toBe(false);
     expect(member.communities?.map((v) => typeof v === "object" ? v.id : v)).toContain(game);
   });
   it("公开名片投影只包含当前管理员和已批准申请，原始申请保持私有", async () => {
@@ -184,7 +179,7 @@ describe.sequential("申请、建群、网页投稿与跨级审核", () => {
       data: { game, author: member.id, title: "禁止共享写入", body: "只能通过网页投稿" } })).rejects.toThrow();
   });
   it("普通成员图文投稿先审核，跨社群管理和匿名不能读取待审图片", async () => {
-    const ordinary = { ...vice, roles: ["member"] as User["roles"], communities: [] };
+    const ordinary = { ...vice, roles: ["member"] as User["roles"], communities: [], communityOffices: [] };
     const post = await p.create({ collection: "community-showcase", overrideAccess: false, user: ordinary, context: { webShowcaseWrite: true },
       data: { game, author: ordinary.id, title: "活动精彩记录", body: "活动后的精彩瞬间", status: "visible",
         images: [{ source: qr, caption: "测试照片" }], videoURL: "https://www.bilibili.com/video/BV1B7411m7LV/" } });
@@ -193,7 +188,7 @@ describe.sequential("申请、建群、网页投稿与跨级审核", () => {
       await expect(p.delete({ collection: "community-showcase", id: post.id, overrideAccess: false, user: vice })).rejects.toThrow();
       expect(post.images?.[0].source).toMatch(/^data:image\/webp;base64,/);
       await expect(p.findByID({ collection: "community-showcase", id: post.id, overrideAccess: false, user: null })).rejects.toThrow();
-      const outsider = { ...member, communities: [] };
+      const outsider = { ...member, communities: [], communityOffices: [] };
       await expect(p.findByID({ collection: "community-showcase", id: post.id, overrideAccess: false, user: outsider })).rejects.toThrow();
       await expect(p.update({ collection: "community-showcase", id: post.id, overrideAccess: false, user: ordinary, data: { status: "visible" } })).rejects.toThrow();
       await expect(p.update({ collection: "community-showcase", id: post.id, overrideAccess: false, user: outsider, data: { status: "visible" } })).rejects.toThrow();

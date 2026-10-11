@@ -1,11 +1,15 @@
 import type { Payload } from 'payload';
 import type { User } from '@/payload-types';
 import { validNickname, nicknameKey } from '@/lib/nickname';
-import { canParticipate } from '@/lib/rules';
+import { canParticipate, canReviewPromotion, canReviewCommunityApplication, canAppoint, communityIDs } from '@/lib/rules';
 
 export function miniappUser(user: User) {
   return { id: user.id, name: user.name, email: user.email, roles: user.roles,
-    accountStatus: user.accountStatus,
+    accountStatus: user.accountStatus, department: user.department,
+    teams: (user.teams || []).map(value => typeof value === "object" ? value.id : value),
+    capabilities: { reviewPromotion: canReviewPromotion(user), reviewCommunityApplication: canReviewCommunityApplication(user), appoint: canAppoint(user),
+      publishCommunities: communityIDs(user, "publishContent"), reviewShowcaseCommunities: communityIDs(user, "reviewShowcase"), handleJoinCommunities: communityIDs(user, "handleJoins"),
+      viewSignupCommunities: communityIDs(user, "viewSignups"), exportSignupCommunities: communityIDs(user, "exportSignups") },
     communities: (user.communities || []).map(value => typeof value === 'object' ? value.id : value) };
 }
 

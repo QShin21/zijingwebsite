@@ -20,7 +20,7 @@ async function json(request: Request): Promise<Record<string, unknown>> {
 }
 export async function GET(request: Request, context: Context) {
   const path = (await context.params).path.join('/');
-  if (path === 'status') return reply({ version: 1, authentication: ['email', 'nickname'], registration: true });
+  if (path === 'status') return reply({ version: 2, authentication: ['email', 'nickname'], registration: true, questionnaireVersion: 3, responseEditing: true, operationsVersion: 1, platformRoles: ['member', 'backbone', 'vicePresident', 'president'], communityOffices: true, manualWechatJoin: true });
   return reply({ error: '接口不存在' }, 404);
 }
 export async function POST(request: Request, context: Context) {

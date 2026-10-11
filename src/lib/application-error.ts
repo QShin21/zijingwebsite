@@ -1,6 +1,7 @@
 const fields: Record<string, string> = {
   realName: "姓名", phone: "手机号", wechatQr: "微信名片二维码",
   game: "已有游戏", proposedGame: "新游戏名称", reason: "申请说明",
+  reviewNote: "处理意见",
 };
 
 export function applicationError(error: unknown): string {
@@ -11,6 +12,7 @@ export function applicationError(error: unknown): string {
       "isPublic" in error && error.isPublic === true) {
     if ("data" in error && error.data && typeof error.data === "object" &&
         "errors" in error.data && Array.isArray(error.data.errors)) {
+      if (error.data.errors.some((item: unknown) => item && typeof item === "object" && "path" in item && item.path === "requestKey")) return "已有同一申请，请在我的申请中继续处理。";
       const messages = error.data.errors.flatMap((item: unknown) => {
         if (!item || typeof item !== "object" || !("path" in item) || !("message" in item) ||
             typeof item.path !== "string" || typeof item.message !== "string" || !fields[item.path]) return [];

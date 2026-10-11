@@ -1,0 +1,55 @@
+{
+  "at": "2026-10-11T18:35:41.792Z",
+  "environment": "isolated synthetic restored database",
+  "baseline": {
+    "exit": 0,
+    "result": {
+      "compatibleWithBaseline": true,
+      "counts": {
+        "backbone": 0,
+        "new_states": 0,
+        "joins": 0,
+        "member_offices": 0,
+        "reduced_grants": 0,
+        "revoked_cards": 0
+      },
+      "preservesExpandedSchema": true,
+      "recommendation": "Keep schema and backups; verify the actual previous build before switching"
+    }
+  },
+  "newRole": {
+    "exit": 1,
+    "result": {
+      "compatibleWithBaseline": false,
+      "counts": {
+        "backbone": 1,
+        "new_states": 0,
+        "joins": 0,
+        "member_offices": 0,
+        "reduced_grants": 0,
+        "revoked_cards": 0
+      },
+      "preservesExpandedSchema": true,
+      "recommendation": "Use a reviewed rollback build retaining club operations, consent and private signup capabilities; do not revert to 1.0 or execute down"
+    }
+  },
+  "revokedPrivacy": {
+    "exit": 1,
+    "result": {
+      "compatibleWithBaseline": false,
+      "counts": {
+        "backbone": 0,
+        "new_states": 0,
+        "joins": 0,
+        "member_offices": 0,
+        "reduced_grants": 1,
+        "revoked_cards": 1
+      },
+      "preservesExpandedSchema": true,
+      "recommendation": "Use a reviewed rollback build retaining club operations, consent and private signup capabilities; do not revert to 1.0 or execute down"
+    }
+  },
+  "productionAccess": false,
+  "gateReadOnly": true,
+  "dataRollbackExecuted": false
+}

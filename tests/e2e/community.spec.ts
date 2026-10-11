@@ -57,8 +57,8 @@ test("社群保留通知、风采和微信入口，已移除论坛与聊天", as
   await page.goto(`/community/${slug}`);
   await expect(page.getByRole("textbox")).toHaveCount(0);
   const sections = page.getByRole("navigation", { name: "社群分区" });
-  await expect(sections.getByRole("link")).toHaveCount(2);
-  for (const [name, section] of [["活动与通知", "updates"], ["社群风采", "showcase"]])
+  await expect(sections.getByRole("link")).toHaveCount(3);
+  for (const [name, section] of [["活动与通知", "updates"], ["社群风采", "showcase"], ["进群进度", "join"]])
     await expect(sections.getByRole("link", { name, exact: true })).toHaveAttribute("href", `/community/${slug}/${section}`);
   await expect(page.locator('a[href*="/chat"]')).toHaveCount(0);
   await page.getByRole("button", { name: /添加社群管理员微信/ }).click();

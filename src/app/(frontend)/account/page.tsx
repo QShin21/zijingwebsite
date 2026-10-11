@@ -5,7 +5,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { PageHeading } from "@/components/PageHeading";
 import { cms } from "@/lib/content";
-import { canPublish, hasRole } from "@/lib/rules";
+import { canPublish, canSubmitClubContent, hasCommunityOffice } from "@/lib/rules";
+import { joinLabels } from "@/lib/community-status";
 import { logoutAction } from "./actions";
 export default async function Account() {
   const p = await cms();
@@ -14,9 +15,14 @@ export default async function Account() {
   const roles: Record<string, string> = {
     president: "社长",
     vicePresident: "副社长",
-    communityAdmin: "社群管理员",
-    member: "普通成员",
+    backbone: "骨干",
+    communityAdmin: "普通用户（历史管理标记）",
+    member: "普通用户",
   };
+  const joins = await p.find({ collection: "community-joins", overrideAccess: false, user, depth: 0, limit: 50, sort: "-updatedAt", where: { member: { equals: user.id } } });
+  const games = await p.find({ collection: "games", overrideAccess: false, user: null, draft: false, depth: 0, pagination: false, select: { title: true, slug: true } });
+  const gameByID = new Map(games.docs.map(game => [game.id, game]));
+  const departments: Record<string, string> = { execution: "执行部", publicity: "宣传部" };
   return (
     <>
       <PageHeading
@@ -32,17 +38,19 @@ export default async function Account() {
             <dd>{user.email}</dd>
           </div>
           <div>
-            <dt>当前身份</dt>
+            <dt>平台身份</dt>
             <dd>
-              <span className="tag">{roles[user.roles?.[0] || "member"]}</span>
+              <span className="tag">{roles[user.roles?.[0] || "member"]}{user.department ? ` · ${departments[user.department]}` : ""}</span>
             </dd>
           </div>
+          <div><dt>网站入社记录</dt><dd>{joins.docs.some(row => row.status === "joined") ? "已有管理员人工确认进群" : "尚未人工确认进群"}</dd></div>
+          <div><dt>社群管理任职</dt><dd>{hasCommunityOffice(user) ? "已获独立社群任职，能力按社群授权" : "暂无在任社群"}</dd></div>
         </dl>
         <div className="account-actions">
           <Link className="account-action" href="/community">
             <Icon name="team" />
-            <strong>游戏社群与论坛</strong>
-            <small>进入社群，继续你的讨论。</small>
+            <strong>游戏社群</strong>
+            <small>查看社群活动并联系管理员加入微信群。</small>
           </Link>
           <Link className="account-action" href="/community/apply">
             <Icon name="plus" />
@@ -54,14 +62,14 @@ export default async function Account() {
             <strong>修改登录密码</strong>
             <small>通过已验证邮箱找回或更新密码。</small>
           </Link>
-          {(canPublish(user) || hasRole(user, "communityAdmin")) && (
+          {canSubmitClubContent(user) && (
             <Link className="account-action" href="/admin">
               <Icon name="layers" />
               <strong>内容管理后台</strong>
               <small>管理权限范围内的社团内容。</small>
             </Link>
           )}
-          {(canPublish(user) || hasRole(user, "communityAdmin")) && (
+          {canSubmitClubContent(user) && (
             <Link className="account-action" href="/activities">
               <Icon name="layers" />
               <strong>问卷工作台</strong>
@@ -76,6 +84,8 @@ export default async function Account() {
             </Link>
           )}
         </div>
+        <h2>我的进群记录</h2>
+        {joins.docs.length ? <ul className="community-list">{joins.docs.map(row => { const game = gameByID.get(typeof row.game === "object" ? row.game.id : row.game); return <li key={row.id}>{game ? <Link href={`/community/${game.slug}/join`}>{game.title}</Link> : <span>历史社群</span>}<span>{joinLabels[row.status]}</span></li>; })}</ul> : <p>暂无记录。网站注册、扫码和申请批准均不等于已进入微信群。</p>}
         <form action={logoutAction}>
           <SubmitButton>退出登录</SubmitButton>
         </form>

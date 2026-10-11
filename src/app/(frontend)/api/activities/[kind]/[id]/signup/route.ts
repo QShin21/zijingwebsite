@@ -50,6 +50,7 @@ async function run(
         id,
         user,
         ["manage", "entries", "stats", "export"].includes(mode || ""),
+        undefined, mode === "export" ? "export" : ["entries", "stats"].includes(mode || "") ? "view" : "edit",
       );
       if (
         request.headers.get("authorization")?.startsWith("JWT ") &&
@@ -76,6 +77,7 @@ async function run(
           url.searchParams,
         );
         if (mode === "export") {
+          await p.create({ collection: "audit", overrideAccess: true, data: { actor: String(user!.id), action: "export-signups", object: `${kind}:${id}`, status: "authorized" } });
           const layout = responseExportLayout(url.searchParams.get("layout"));
           const filename = responseExportFilename(value.doc.title, layout);
           return new Response(
@@ -138,6 +140,8 @@ async function run(
         version: value.version,
         state: signupState(value.form, value.doc),
         canManage: value.manager,
+        canViewSignups: value.canView,
+        canExportSignups: value.canExport,
         loggedIn: Boolean(user),
         draftKey: user
           ? `questionnaire:${kind}:${id}:${user.id}:${value.version}`

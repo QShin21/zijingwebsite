@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-11T18:30:27.869Z",
+  "environment": "cloud isolated synthetic development databases",
+  "sourceTables": 58,
+  "migratedTables": 60,
+  "historicalTablesPreserved": true,
+  "unchangedOriginalColumnTables": 57,
+  "expectedChangedTable": "payload_migrations",
+  "platformRolesPreserved": true,
+  "legacyOfficeCapabilitiesPreserved": true,
+  "ordinaryResidualRelationsDoNotGrantPrivileges": true,
+  "noInventedMembership": true,
+  "s3MirrorAndSeparateLocalVideoRestore": "PASS",
+  "mediaFiles": 1,
+  "localVideoFiles": 2,
+  "sourceUnchangedAfterDrill": true,
+  "productionAccess": false
+}

@@ -1364,7 +1364,10 @@ test("AI streaming, refinement and 5–6 member registration work through save, 
     signup.getByRole("heading", { name: "已报名", exact: true }),
   ).toBeVisible();
   const csv = await page.request.get(endpoint + "?mode=export");
-  expect(await csv.text()).toContain("学号：00005");
+  const rosterExport = readCSV(await csv.text());
+  const studentColumn = rosterExport.headers.findIndex((label: string) => label.includes("第5条 / 学号"));
+  expect(studentColumn).toBeGreaterThan(-1);
+  expect(rosterExport.rows[0][studentColumn]).toBe("00005");
   const stats = await (await page.request.get(endpoint + "?mode=stats")).json();
   expect(
     stats.groups[0].questions.find((q: { id: string }) => q.id === roster.id)

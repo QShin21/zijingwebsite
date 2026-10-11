@@ -4,7 +4,22 @@ export type Identity = {
   teams?: (number | string | { id: number | string })[] | null;
   communities?: (number | string | { id: number | string })[] | null;
   accountStatus?: string | null;
+  department?: string | null;
+  communityOffices?: CommunityOffice[] | null;
 };
+export type CommunityCapability = "publishContent" | "reviewShowcase" | "handleJoins" | "viewSignups" | "exportSignups" | "contactConsent";
+export type CommunityOffice = {
+  game?: number | string | { id: number | string } | null;
+  status?: string | null;
+  publishContent?: boolean | null;
+  reviewShowcase?: boolean | null;
+  handleJoins?: boolean | null;
+  viewSignups?: boolean | null;
+  exportSignups?: boolean | null;
+  contactConsent?: boolean | null;
+};
+export const relationID = (value: unknown): unknown =>
+  value && typeof value === "object" && "id" in value ? value.id : value;
 export const hasRole = (
   user: Identity | null | undefined,
   ...roles: string[]
@@ -14,11 +29,32 @@ export const canPublish = (user: Identity | null | undefined) =>
   hasRole(user, "president", "vicePresident");
 export const canParticipate = (user: Identity | null | undefined) =>
   Boolean(user?.id && user.accountStatus !== "suspended");
+export const communityIDs = (user: Identity | null | undefined, capability?: CommunityCapability) =>
+  canParticipate(user) ? (user?.communityOffices ?? [])
+    .filter(office => office.game != null && office.status === "active" && (!capability || office[capability] === true))
+    .map(office => String(relationID(office.game))) : [];
+export const hasCommunityOffice = (user: Identity | null | undefined) => communityIDs(user).length > 0;
+export const communityCapability = (user: Identity | null | undefined, id: unknown, capability: CommunityCapability) =>
+  canPublish(user) || communityIDs(user, capability).includes(String(relationID(id)));
 export const managesGame = (user: Identity | null | undefined, id: unknown) =>
-  canPublish(user) ||
-  (canParticipate(user) && hasRole(user, "communityAdmin") &&
-    (user?.communities ?? []).some((game) =>
-      String(typeof game === "object" ? game.id : game) === String(id)));
+  communityCapability(user, id, "publishContent");
+export const canReviewShowcase = (user: Identity | null | undefined, id: unknown) => communityCapability(user, id, "reviewShowcase");
+export const canHandleCommunityJoins = (user: Identity | null | undefined, id: unknown) => communityCapability(user, id, "handleJoins");
+export const canReviewCommunityApplication = canPublish;
+export const canAppoint = (user: Identity | null | undefined) => hasRole(user, "president");
+export const canReviewPromotion = (user: Identity | null | undefined) => canPublish(user) || hasRole(user, "backbone");
+export const canSubmitClubContent = (user: Identity | null | undefined) =>
+  canPublish(user) || hasRole(user, "backbone", "communityAdmin") || communityIDs(user, "publishContent").length > 0;
+// Legacy communityAdmin retains its existing club draft permission during the additive transition.
+// It grants no community scope or private signup access. All new approvals preserve platform roles.
+export const canReadActivitySignups = (user: Identity | null | undefined, kind: string, game: unknown, organizer: unknown) =>
+  canPublish(user) || (kind === "community-posts"
+    ? communityIDs(user, "viewSignups").includes(String(relationID(game)))
+    : canParticipate(user) && String(relationID(organizer)) === String(user?.id) && communityIDs(user, "viewSignups").length > 0);
+export const canExportActivitySignups = (user: Identity | null | undefined, kind: string, game: unknown, organizer: unknown) =>
+  canReadActivitySignups(user, kind, game, organizer) && (canPublish(user) || (kind === "community-posts"
+    ? communityIDs(user, "exportSignups").includes(String(relationID(game)))
+    : communityIDs(user, "exportSignups").length > 0));
 export const teamIDs = (user: Identity | null | undefined) =>
   (user?.teams ?? []).map((t) => String(typeof t === "object" ? t.id : t));
 export function safeURL(value: unknown): boolean {

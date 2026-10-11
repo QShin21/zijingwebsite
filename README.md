@@ -1,6 +1,8 @@
 # 清华大学学生紫荆电竞社网站
 
-Next.js + Payload CMS + PostgreSQL 模块化单体。公开内容、招新批次、赛季、相册和首页均由中文后台维护。当前运行于本地，未部署生产。完整验收见 [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)，接手开发先读 [docs/STATUS.md](docs/STATUS.md)。
+Next.js + Payload CMS + PostgreSQL 模块化单体。公开内容、招新批次、赛季、相册和首页均由中文后台维护。已有网站入口为 https://home.thuzijing.top；本轮 1.1.0 社团运营底座仅在保存的云开发环境实现，尚未部署。完整历史验收见 [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)，接手开发先读 [docs/STATUS.md](docs/STATUS.md)。
+
+当前流程、角色矩阵、版本及已测范围见 [社团运营 1.1.0](docs/CLUB_OPERATIONS.md)，完整改版需求与后续清单见 [设计输入](docs/CLUB_OPERATIONS_DESIGN.md)。平台角色与社群任职独立；注册、扫码和提交网站意向不代表进入微信群，微信建群及拉群均由管理员人工完成。
 
 ## 本地启动
 
@@ -55,11 +57,13 @@ Remove-Item Env:ADMIN_EMAIL
 | `pnpm payload migrate:status` | 查看迁移状态 |
 | `pnpm backup` | 数据库与媒体完整备份（需 pg_dump 17+） |
 | `pnpm restore:verify <备份目录>` | 新建隔离库恢复、核验所有表和媒体 |
+| `pnpm club:migration-drill` | 仅历史 58 表开发库：备份、恢复到新库、迁移及旧字段核对 |
+| `pnpm club:rollback-check` | 只读核对旧 1.0 构建的角色、数据状态和权限兼容性 |
 | `pnpm preflight` | 上线缺项检查；不会执行部署 |
 
 `pnpm test` 和浏览器测试会建立并清理虚构测试记录，保留必要审计记录。不要指向生产数据库。容器、反向代理和异机备份说明在 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)。
 # 账号与社群 V2
 
-网站支持清华邮箱验证码注册、四级角色、社群管理员申请、游戏社群、论坛和全站内容审核。
-部署与运营步骤见 [docs/COMMUNITY_V2.md](docs/COMMUNITY_V2.md)。注册需要 SMTP 环境变量；
+网站支持清华邮箱验证码注册、平台角色、独立社群任职、管理员申请、人工进群回执、社群活动与通知及风采审核。聊天、论坛、评论、点赞继续关闭，历史表保留。
+早期部署与运营步骤见 [docs/COMMUNITY_V2.md](docs/COMMUNITY_V2.md)，当前流程以 [社团运营说明](docs/CLUB_OPERATIONS.md) 为准。注册需要 SMTP 环境变量；
 社长通过指定邮箱的验证码认领，密码只由用户在站内安全输入。普通用户使用唯一昵称或邮箱登录；昵称匹配不区分大小写，显示保留用户输入的大小写。

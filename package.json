@@ -1,6 +1,6 @@
 {
   "name": "zijing-esports",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.19.0",
@@ -32,6 +32,8 @@
     "db:stop": "node scripts/dev-db.mjs stop",
     "backup": "node scripts/backup.mjs create",
     "restore:verify": "node scripts/backup.mjs verify",
+    "club:rollback-check": "tsx scripts/club-operations-rollback-check.ts",
+    "club:migration-drill": "tsx scripts/verify-club-migration.ts",
     "format": "prettier --write src scripts tests docs *.mjs *.ts *.json",
     "preflight": "tsx scripts/preflight.ts"
   },

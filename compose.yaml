@@ -28,6 +28,8 @@ services:
       DB_PUSH: "false"
       MEDIA_DIR: /app/media
       BACKUP_DEST: /app/backups
+      BACKUP_REMOTE: ${BACKUP_REMOTE:-}
+      MEDIA_BACKUP_SOURCE: ${MEDIA_BACKUP_SOURCE:-}
       BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}

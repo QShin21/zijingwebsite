@@ -8,7 +8,7 @@ import {
 import {
   canParticipate,
   canPublish,
-  hasRole,
+  communityIDs,
   type Identity,
 } from "../lib/rules";
 import { normalizeSignup } from "../lib/signup-schema";
@@ -69,11 +69,9 @@ export const EventSignups: CollectionConfig = {
       if (!canParticipate(user)) return false;
       if (canPublish(user)) return true;
       const scope: Where[] = [{ member: { equals: user.id } }];
-      if (hasRole(user, "communityAdmin")) {
-        scope.push({ organizer: { equals: user.id } });
-        const games = (user.communities || []).map((v) =>
-          typeof v === "object" ? v.id : v,
-        );
+      if (communityIDs(user, "viewSignups").length) {
+        scope.push({ and: [{ activityType: { equals: "events" } }, { organizer: { equals: user.id } }] });
+        const games = communityIDs(user, "viewSignups");
         if (games.length)
           scope.push({
             and: [

@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useRef, useState, useSyncExternalStore } from "react";
 export function CommunityJoin({ slug }: { slug: string }) {
   const ready = useSyncExternalStore(() => () => {}, () => true, () => false);
@@ -22,6 +23,8 @@ export function CommunityJoin({ slug }: { slug: string }) {
     <dialog ref={dialog} className="community-dialog" aria-labelledby="join-title" onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
       <div className="dialog-top"><h2 id="join-title">加入微信社群</h2><button autoFocus aria-label="关闭弹窗" onClick={() => dialog.current?.close()}>关闭 ×</button></div>
       <p role="status">{status}</p>
+      <p>保存或扫描名片不会自动进群。请加管理员好友，由管理员在微信中人工拉群。</p>
+      <Link className="button light" href={`/community/${slug}/join`} onClick={() => dialog.current?.close()}>记录意向与查看进群进度</Link>
       <div className="contact-grid">{contacts.map(contact => <article key={contact.id}>
         <h3>{contact.name}</h3>
         {/* Normalized PNG data, never remote or user-supplied HTML. */}
