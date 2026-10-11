@@ -1,0 +1,270 @@
+{
+  "at": "2026-10-11T08:22:34.276Z",
+  "revision": "revision=124a47788344af6e63623d99159c67b41f3e02c8\r\napplication_revision=124a47788344af6e63623d99159c67b41f3e02c8\r\n",
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/health/ready",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/events?limit=1&depth=0",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/miniapp/status",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/community/lol/forum",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/community/lol/forum",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/community/lol/forum",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/community/lol/forum",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/community/lol/forum/1",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/community/lol/forum/1",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/community/lol/forum/1",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/community/lol/forum/1",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/comments",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/comments",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/comments",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/comments",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/community-reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/community-reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/community-reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/community-reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/miniapp/reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/miniapp/reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/miniapp/reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/miniapp/reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/admin/collections/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/admin/collections/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/collections/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/admin/collections/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/showcase-videos/<unknown>.mp4",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/activities/manage",
+      "status": 403,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/activities/events/1/signup",
+      "status": 401,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/activities/invalid/1/signup",
+      "status": 400,
+      "noStore": true
+    }
+  ],
+  "unchangedFiles": true,
+  "databaseProcessUnchanged": true,
+  "freeKillProcessesUnchanged": true,
+  "swappiness": "0",
+  "tableCount": 58,
+  "changedTables": [],
+  "sourceFilesMatched": 313,
+  "bilibiliFrameAllowed": true,
+  "mediaUnchanged": true,
+  "freeKillHTTPS": 200,
+  "newSignupRows": 0,
+  "migration": {
+    "mode": "production",
+    "at": "2026-10-11T08:22:27.020Z",
+    "tables": 58,
+    "originalTablesPreserved": 57,
+    "newSignupRows": 0,
+    "migration": "20261011_160000_activity_signups",
+    "ok": true
+  },
+  "restoreRehearsal": {
+    "mode": "rehearsal",
+    "at": "2026-10-11T08:14:30.821Z",
+    "tables": 58,
+    "originalTablesPreserved": 57,
+    "newSignupRows": 0,
+    "migration": "20261011_160000_activity_signups",
+    "ok": true
+  },
+  "ok": true,
+  "freeKillWebSocket": 101,
+  "validation": {
+    "unitDatabaseTests": 114,
+    "signupTestsRechecked": 4,
+    "browserFlows": 3,
+    "lint": "passed",
+    "typecheck": "passed",
+    "localProductionBuild": "passed",
+    "serverProductionBuild": "passed",
+    "nativeSimulatorCases": 4,
+    "realPhone": "not verified",
+    "originalCheckoutUnrelatedChanges": 27
+  },
+  "backup": {
+    "directory": "/srv/zijingwebsite/backups/activity-signups-20261011",
+    "databaseDump": "PostgreSQL custom format; restored to isolated database and migration rehearsed",
+    "rollback": "rollback.sh restores previous application; additive signup tables retained"
+  },
+  "miniapp": {
+    "version": "0.2.0",
+    "appid": "wxccf9f8fc9515ebd5",
+    "officialPreview": "passed",
+    "officialDevelopmentUpload": "passed",
+    "bytes": 127606,
+    "urlCheck": true,
+    "formalReviewRelease": "not performed"
+  }
+}
