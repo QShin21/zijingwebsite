@@ -1,7 +1,42 @@
+import {
+  normalizeQuestionExtras,
+  normalizeFormExtras,
+  validateAdvancedAnswer,
+  matchesDisplay,
+} from "./questionnaire-model";
 export type Question = {
   id: string;
   label: string;
-  type: "text" | "textarea" | "single" | "multiple";
+  type:
+    | "text"
+    | "textarea"
+    | "single"
+    | "multiple"
+    | "select"
+    | "number"
+    | "date"
+    | "time"
+    | "rating"
+    | "nps"
+    | "ranking"
+    | "matrix"
+    | "matrixMultiple"
+    | "blanks"
+    | "description";
+  rows?: string[];
+  min?: number;
+  max?: number;
+  step?: number;
+  pageBreak?: boolean;
+  randomize?: boolean;
+  display?: {
+    mode: "all" | "any";
+    rules: {
+      questionId: string;
+      operator: "equals" | "notEquals" | "answered" | "notAnswered";
+      value: string;
+    }[];
+  };
   required: boolean;
   options: string[];
   help?: string;
@@ -22,6 +57,9 @@ export type SignupForm = {
   intro: string;
   questions: Question[];
   pageSize?: number;
+  title?: string;
+  completionMessage?: string;
+  theme?: "purple" | "blue" | "green";
 };
 export const emptySignup: SignupForm = {
   enabled: false,
@@ -38,6 +76,8 @@ export function normalizeSignup(value: unknown): SignupForm {
   if (value == null) return { ...emptySignup, questions: [] };
   if (typeof value !== "object" || Array.isArray(value))
     fail("报名表格式不正确");
+  if (new TextEncoder().encode(JSON.stringify(value)).length > 200000)
+    fail("问卷配置最多 200 KB");
   const v = value as Record<string, unknown>;
   const date = (x: unknown) => {
     if (!x) return "";
@@ -50,8 +90,8 @@ export function normalizeSignup(value: unknown): SignupForm {
   if (start && end && start >= end) fail("报名截止必须晚于开始");
   const intro = String(v.intro || "").trim();
   if (intro.length > 1000) fail("报名说明最多 1000 字");
-  if (!Array.isArray(v.questions) || v.questions.length > 20)
-    fail("报名表最多 20 道题");
+  if (!Array.isArray(v.questions) || v.questions.length > 100)
+    fail("报名表最多 100 道题");
   const ids = new Set<string>();
   const questions = v.questions.map((raw): Question => {
     if (!raw || typeof raw !== "object") fail("题目格式不正确");
@@ -61,26 +101,59 @@ export function normalizeSignup(value: unknown): SignupForm {
     if (
       !/^[a-zA-Z0-9_-]{1,64}$/.test(id) ||
       ids.has(id) ||
-      ["__proto__", "constructor", "prototype"].includes(id)
+      Object.hasOwn(Object.prototype, id) ||
+      id === "prototype"
     )
       fail("题目标识无效或重复");
     ids.add(id);
     if (!label || label.length > 120) fail("请填写不超过 120 字的题目标题");
-    if (!["text", "textarea", "single", "multiple"].includes(String(q.type)))
+    if (
+      ![
+        "text",
+        "textarea",
+        "single",
+        "multiple",
+        "select",
+        "number",
+        "date",
+        "time",
+        "rating",
+        "nps",
+        "ranking",
+        "matrix",
+        "matrixMultiple",
+        "blanks",
+        "description",
+      ].includes(String(q.type))
+    )
       fail("题型无效");
     const type = q.type as Question["type"];
     const options =
-      ["single", "multiple"].includes(type) && Array.isArray(q.options)
+      [
+        "single",
+        "multiple",
+        "select",
+        "ranking",
+        "matrix",
+        "matrixMultiple",
+      ].includes(type) && Array.isArray(q.options)
         ? q.options.map((o) => String(o).trim())
         : [];
     if (
-      ["single", "multiple"].includes(type) &&
+      [
+        "single",
+        "multiple",
+        "select",
+        "ranking",
+        "matrix",
+        "matrixMultiple",
+      ].includes(type) &&
       (options.length < 2 ||
-        options.length > 20 ||
+        options.length > 50 ||
         options.some((o) => !o || o.length > 120) ||
         new Set(options).size !== options.length)
     )
-      fail("选择题需有 2–20 个不同的选项，每项最多 120 字");
+      fail("选择题需有 2–50 个不同的选项，每项最多 120 字");
     const result: Question = {
       id,
       label,
@@ -149,6 +222,7 @@ export function normalizeSignup(value: unknown): SignupForm {
         option: condition.option,
       };
     }
+    normalizeQuestionExtras(q, result);
     return result;
   });
   questions.forEach((q, index) => {
@@ -158,7 +232,7 @@ export function normalizeSignup(value: unknown): SignupForm {
       .find((previous) => previous.id === q.showWhen!.questionId);
     if (
       !source ||
-      !["single", "multiple"].includes(source.type) ||
+      !["single", "multiple", "select"].includes(source.type) ||
       !source.options.includes(q.showWhen.option)
     )
       fail(`${q.label}：显示条件必须引用前面的选择题及有效选项`);
@@ -179,23 +253,26 @@ export function normalizeSignup(value: unknown): SignupForm {
     end,
     intro,
     questions,
+    ...normalizeFormExtras(v, questions),
     ...(v.pageSize != null ? { pageSize: Number(v.pageSize) } : {}),
   };
 }
-export function validateAnswers(
-  form: SignupForm,
-  raw: unknown,
-): Record<string, string | string[]> {
+export function validateAnswers(form: SignupForm, raw: unknown): Answers {
   if (!raw || typeof raw !== "object" || Array.isArray(raw))
     fail("请填写报名信息");
   const source = raw as Record<string, unknown>,
-    result: Record<string, string | string[]> = {};
+    result: Answers = {};
   if (
     Object.keys(source).some((id) => !form.questions.some((q) => q.id === id))
   )
     fail("报名表已变化，请刷新后重试");
   for (const q of visibleQuestions(form, source)) {
     const value = source[q.id];
+    if (q.type === "description") continue;
+    if (!["text", "textarea", "single", "multiple"].includes(q.type)) {
+      result[q.id] = validateAdvancedAnswer(q, value);
+      continue;
+    }
     if (q.type === "multiple") {
       if (
         value != null &&
@@ -255,11 +332,12 @@ export function validateAnswers(
       result[q.id] = answer;
     }
   }
-  if (JSON.stringify(result).length > 20000) fail("报名内容过长");
+  if (JSON.stringify(result).length > 100000) fail("报名内容过长");
   return result;
 }
 
-export type Answers = Record<string, string | string[]>;
+export type Answer = string | string[] | Record<string, string | string[]>;
+export type Answers = Record<string, Answer>;
 // Only preceding, visible answers may activate a branch. Hidden answers never persist.
 export function visibleQuestions(
   form: SignupForm,
@@ -278,6 +356,7 @@ export function visibleQuestions(
       )
         return false;
     }
+    if (!matchesDisplay(q, answers, visible)) return false;
     visible.add(q.id);
     return true;
   });
@@ -291,7 +370,10 @@ export function answerErrors(
   for (const q of visibleQuestions(form, answers)) {
     try {
       validateAnswers(
-        { ...form, questions: [{ ...q, showWhen: undefined }] },
+        {
+          ...form,
+          questions: [{ ...q, showWhen: undefined, display: undefined }],
+        },
         { [q.id]: answers[q.id] },
       );
     } catch (error) {

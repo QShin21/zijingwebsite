@@ -1,15 +1,17 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import type { SignupForm, Question } from "@/lib/signup-schema";
+import type { SignupForm, Question, Answers } from "@/lib/signup-schema";
+import { QuestionnaireResults } from "./QuestionnaireResults";
 import { SignupBuilder } from "./SignupBuilder";
+import { formatAnswer } from "@/lib/questionnaire-model";
 import { Questionnaire } from "./Questionnaire";
 type Receipt = {
   id: number;
   createdAt: string;
   memberName?: string;
   questions: Question[];
-  answers: Record<string, string | string[]>;
+  answers: Answers;
 };
 type Info = {
   title: string;
@@ -18,6 +20,7 @@ type Info = {
   state: string;
   canManage: boolean;
   loggedIn: boolean;
+  draftKey?: string;
   signup: Receipt | null;
 };
 export async function signupRequest(
@@ -48,11 +51,7 @@ function ReceiptView({ receipt }: { receipt: Receipt }) {
           .map((q) => (
             <div key={q.id}>
               <dt>{q.label}</dt>
-              <dd>
-                {Array.isArray(receipt.answers[q.id])
-                  ? (receipt.answers[q.id] as string[]).join("、")
-                  : receipt.answers[q.id] || "未填写"}
-              </dd>
+              <dd>{formatAnswer(receipt.answers[q.id])}</dd>
             </div>
           ))}
       </dl>
@@ -91,7 +90,7 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
   if (!info.form.enabled && !info.canManage && !info.signup) return null;
   return (
     <section className="panel activity-signup">
-      <h2>活动报名</h2>
+      <h2>{info.form.title || "活动报名"}</h2>
       {info.canManage && (
         <p>
           <Link href={`/activities/${kind}/${id}/manage`}>
@@ -102,6 +101,7 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
       {info.signup ? (
         <>
           <h3 aria-live="polite">已报名</h3>
+          <p>{info.form.completionMessage || "已收到你的报名信息。"}</p>
           <ReceiptView receipt={info.signup} />
         </>
       ) : (
@@ -121,6 +121,7 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
               <Questionnaire
                 key={info.version}
                 form={info.form}
+                draftKey={info.draftKey}
                 busy={busy}
                 onSubmit={async (answers) => {
                   setBusy(true);
@@ -174,6 +175,27 @@ export function SignupManager({ kind, id }: { kind: string; id: number }) {
       <h1>{info?.title || "活动报名管理"}</h1>
       <p role="status">{message}</p>
       {info && (
+        <div className="signup-tools">
+          <Link href={`/activities/${kind}/${id}/fill`}>打开填写页</Link>
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(
+                  `${window.location.origin}/activities/${kind}/${id}/fill`,
+                );
+                setMessage("填写链接已复制");
+              } catch {
+                setMessage("无法自动复制，请打开填写页后复制浏览器地址");
+              }
+            }}
+          >
+            复制填写链接
+          </button>
+          <Link href="/activities">返回问卷工作台</Link>
+        </div>
+      )}
+      {info && (
         <>
           <form
             className="member-form panel"
@@ -204,6 +226,10 @@ export function SignupManager({ kind, id }: { kind: string; id: number }) {
               {busy ? "正在保存…" : "保存报名问卷"}
             </button>
           </form>
+          <QuestionnaireResults
+            endpoint={endpoint}
+            questions={info.form.questions}
+          />
           <section className="panel">
             <h2>报名名单{total !== null ? `（${total} 人）` : ""}</h2>
             <button

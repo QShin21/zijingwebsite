@@ -1,26 +1,38 @@
 "use client";
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import {
   answerErrors,
   validateAnswers,
   visibleQuestions,
   type Answers,
+  type Answer,
   type SignupForm,
 } from "@/lib/signup-schema";
+
+import {
+  formatAnswer,
+  questionPages,
+  sanitizeDraft,
+  randomizedOptions,
+} from "@/lib/questionnaire-model";
+import { QuestionnaireAdvanced } from "./QuestionnaireAdvanced";
 
 export function Questionnaire({
   form,
   onSubmit,
   busy = false,
   preview = false,
+  draftKey,
 }: {
   form: SignupForm;
   onSubmit?: (answers: Answers) => Promise<void>;
+  draftKey?: string;
   busy?: boolean;
   preview?: boolean;
 }) {
   const prefix = useId(),
     root = useRef<HTMLDivElement>(null);
+  const [seed] = useState(() => String(Math.random()));
   const [answers, setAnswers] = useState<Answers>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [step, setStep] = useState(0),
@@ -29,24 +41,74 @@ export function Questionnaire({
     [sending, setSending] = useState(false);
   const visible = visibleQuestions(form, answers),
     size = form.pageSize || 5;
-  const pages = Math.max(1, Math.ceil(visible.length / size)),
+  const grouped = questionPages(visible, size),
+    pages = grouped.length,
     current = Math.min(step, pages - 1);
-  const questions = visible.slice(current * size, (current + 1) * size);
+  const questions = grouped[current];
   const allErrors = answerErrors(form, answers);
-  const completed = visible.filter((q) => {
+  const answerable = visible.filter((q) => q.type !== "description");
+  const completed = answerable.filter((q) => {
     const answer = answers[q.id];
     return (
       !allErrors[q.id] &&
-      (Array.isArray(answer) ? answer.length > 0 : Boolean(answer?.trim()))
+      (Array.isArray(answer)
+        ? answer.length > 0
+        : typeof answer === "object"
+          ? Object.values(answer).some((v) =>
+              Array.isArray(v) ? v.length : v.trim(),
+            )
+          : Boolean(answer?.trim()))
     );
   }).length;
+  const [remember, setRemember] = useState(false),
+    [savedDraft, setSavedDraft] = useState<Answers | null>(null),
+    [draftMessage, setDraftMessage] = useState("");
+  useEffect(() => {
+    if (!draftKey || preview) return;
+    try {
+      const text = localStorage.getItem(draftKey);
+      if (!text || text.length > 120000) return;
+      const draft = JSON.parse(text);
+      if (
+        !Number.isFinite(draft.at) ||
+        draft.at > Date.now() + 60000 ||
+        Date.now() - draft.at > 7 * 86400000
+      ) {
+        localStorage.removeItem(draftKey);
+        return;
+      }
+      if (
+        draft.answers &&
+        typeof draft.answers === "object" &&
+        !Array.isArray(draft.answers)
+      )
+        setSavedDraft(sanitizeDraft(form, draft.answers));
+    } catch {
+      /* Unavailable storage must not prevent filling. */
+    }
+  }, [draftKey, preview]);
+  useEffect(() => {
+    if (!draftKey || !remember || preview) return;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(
+          draftKey,
+          JSON.stringify({ at: Date.now(), answers }),
+        );
+        setDraftMessage("草稿已保存在此浏览器，有效期 7 天。");
+      } catch {
+        setDraftMessage("浏览器无法保存草稿，请保持此页面打开。");
+      }
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [answers, draftKey, remember, preview]);
   const locked = busy || sending;
   function focusHeading() {
     requestAnimationFrame(() =>
       root.current?.querySelector<HTMLElement>(".questionnaire-step")?.focus(),
     );
   }
-  function update(id: string, value: string | string[]) {
+  function update(id: string, value: Answer) {
     const next = { ...answers, [id]: value };
     const ids = new Set(visibleQuestions(form, next).map((q) => q.id));
     setAnswers(
@@ -64,7 +126,7 @@ export function Questionnaire({
     const first = scope.find((q) => relevant[q.id]);
     if (!first) return true;
     setReview(false);
-    setStep(Math.floor(visible.indexOf(first) / size));
+    setStep(grouped.findIndex((page) => page.some((q) => q.id === first.id)));
     requestAnimationFrame(() =>
       document.getElementById(`${prefix}-${first.id}`)?.focus(),
     );
@@ -80,6 +142,13 @@ export function Questionnaire({
     setMessage("");
     try {
       await onSubmit?.(validateAnswers(form, answers));
+      if (draftKey) {
+        try {
+          localStorage.removeItem(draftKey);
+        } catch {
+          /* Storage can be disabled by the browser. */
+        }
+      }
     } catch (e) {
       setMessage((e as Error).message);
     } finally {
@@ -87,15 +156,57 @@ export function Questionnaire({
     }
   }
   return (
-    <div className="questionnaire member-form" ref={root} aria-busy={locked}>
+    <div
+      className={`questionnaire member-form questionnaire-theme-${form.theme || "purple"}`}
+      ref={root}
+      aria-busy={locked}
+    >
+      {draftKey && !preview && (
+        <div className="questionnaire-draft">
+          <label className="signup-choice">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => {
+                setRemember(e.target.checked);
+                if (!e.target.checked) {
+                  try {
+                    localStorage.removeItem(draftKey);
+                  } catch {
+                    /* Storage can be disabled by the browser. */
+                  }
+                  setSavedDraft(null);
+                  setDraftMessage("已关闭并清除此浏览器草稿");
+                }
+              }}
+            />
+            在此浏览器保存草稿（公用设备请勿开启）
+          </label>
+          {savedDraft && (
+            <button
+              type="button"
+              onClick={() => {
+                setAnswers(savedDraft);
+                setSavedDraft(null);
+                setRemember(true);
+                setStep(0);
+                setReview(false);
+              }}
+            >
+              恢复未提交的草稿
+            </button>
+          )}
+          <small role="status">{draftMessage}</small>
+        </div>
+      )}
       <div className="questionnaire-progress">
         <span>
-          已填写 {completed} / {visible.length} 题
+          已填写 {completed} / {answerable.length} 题
         </span>
         <progress
           aria-label="填写进度"
           value={completed}
-          max={Math.max(1, visible.length)}
+          max={Math.max(1, answerable.length)}
         />
         <small>
           带 * 为必填；根据答案显示相关题目。返回上一步会保留已填内容。
@@ -108,20 +219,25 @@ export function Questionnaire({
         <>
           <p>请核对以下内容，确认提交后即完成报名。</p>
           <dl className="questionnaire-review">
-            {visible.map((q) => (
+            {answerable.map((q) => (
               <div key={q.id}>
                 <dt>{q.label}</dt>
-                <dd>
-                  {Array.isArray(answers[q.id])
-                    ? (answers[q.id] as string[]).join("、") || "未填写"
-                    : answers[q.id] || "未填写"}
-                </dd>
+                <dd>{formatAnswer(answers[q.id])}</dd>
               </div>
             ))}
           </dl>
         </>
       ) : (
-        questions.map((q, index) => {
+        questions.map((original) => {
+          const q = original.randomize
+            ? {
+                ...original,
+                options: randomizedOptions(
+                  original.options,
+                  seed + original.id,
+                ),
+              }
+            : original;
           const value = answers[q.id],
             fieldId = `${prefix}-${q.id}`;
           const hint = [
@@ -140,6 +256,13 @@ export function Questionnaire({
           ]
             .filter(Boolean)
             .join(" · ");
+          if (q.type === "description")
+            return (
+              <section className="questionnaire-description" key={q.id}>
+                <h4>{q.label}</h4>
+                <p className="preserve">{q.help}</p>
+              </section>
+            );
           return (
             <fieldset
               key={q.id}
@@ -150,12 +273,18 @@ export function Questionnaire({
               aria-describedby={`${fieldId}-hint${errors[q.id] ? ` ${fieldId}-error` : ""}`}
             >
               <legend>
-                {current * size + index + 1}. {q.label}
+                {visible.findIndex((v) => v.id === q.id) + 1}. {q.label}
                 {q.required ? " *" : "（选填）"}
               </legend>
               <p id={`${fieldId}-hint`} className="muted">
                 {hint}
               </p>
+              <QuestionnaireAdvanced
+                q={q}
+                value={value}
+                name={fieldId}
+                onChange={(answer) => update(q.id, answer)}
+              />
               {["text", "textarea"].includes(q.type) && (
                 <>
                   {q.type === "textarea" ? (

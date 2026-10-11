@@ -5,6 +5,8 @@ import config from "../../src/payload.config";
 import type { User } from "../../src/payload-types";
 import { randomBytes } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
+import { emptySignup, type Question } from "../../src/lib/signup-schema";
+import { readFile } from "node:fs/promises";
 let p: Payload,
   admin: User,
   member: User,
@@ -423,4 +425,210 @@ test("conditional questionnaire previews, validates, preserves steps and retries
     "mode",
     "slots",
   ]);
+});
+
+test("advanced types, account-scoped drafts, statistics, exports and permissions work together", async ({
+  page,
+  browser,
+}) => {
+  await login(page, admin);
+  await page.context().setExtraHTTPHeaders({ "Sec-Fetch-Site": "same-origin" });
+  const endpoint = `/api/activities/events/${event}/signup`;
+  const make = (
+    id: string,
+    label: string,
+    type: Question["type"],
+    extras: Partial<Question> = {},
+  ): Question => ({ id, label, type, required: true, options: [], ...extras });
+  const form = {
+    ...emptySignup,
+    enabled: true,
+    title: "综合问卷验收",
+    pageSize: 20,
+    theme: "blue",
+    questions: [
+      make("select", "参与组别", "select", { options: ["A组", "B组"] }),
+      make("number", "参与次数", "number", { min: 0, max: 10, step: 1 }),
+      make("date", "方便日期", "date"),
+      make("time", "方便时间", "time"),
+      make("rating", "整体评分", "rating"),
+      make("nps", "推荐意愿", "nps"),
+      make("ranking", "活动优先级", "ranking", { options: ["交流", "比赛"] }),
+      make("matrix", "组织评价", "matrix", {
+        rows: ["安排", "通知"],
+        options: ["满意", "一般"],
+      }),
+      make("multi", "时段安排", "matrixMultiple", {
+        rows: ["周末"],
+        options: ["上午", "下午"],
+      }),
+      make("blanks", "补充信息", "blanks", { rows: ["建议", "备注"] }),
+    ],
+  };
+  const info = await (await page.request.get(endpoint + "?mode=manage")).json();
+  const save = await page.request.put(endpoint, {
+    data: { version: info.version, form },
+  });
+  expect(save.ok()).toBeTruthy();
+  const version = (await save.json()).version;
+  expect(
+    (
+      await page.request.post(endpoint, {
+        data: { version, answers: { select: "伪造" } },
+      })
+    ).status(),
+  ).toBe(400);
+  const token = await p.login({
+    collection: "users",
+    data: { email: member.email, password },
+  });
+  const legacy = await page.request.get(endpoint, {
+    headers: { Authorization: `JWT ${token.token}` },
+  });
+  expect(legacy.status()).toBe(409);
+  await page.goto(`/activities/events/${event}/fill`);
+  const signup = page.locator(".activity-signup");
+  await signup.getByLabel("在此浏览器保存草稿", { exact: false }).check();
+  await signup.getByLabel("参与组别", { exact: true }).selectOption("A组");
+  await signup.getByLabel("参与次数", { exact: true }).fill("3");
+  await expect(signup.getByRole("status")).toContainText("草稿已保存");
+  // Wait for the actual persisted latest input, not a previous save notification.
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        Object.entries(localStorage).some(
+          ([key, value]) =>
+            key.startsWith("questionnaire:") && value.includes('"number":"3"'),
+        ),
+      ),
+    )
+    .toBe(true);
+  await page.reload();
+  await signup.getByRole("button", { name: "恢复未提交的草稿" }).click();
+  await expect(signup.getByLabel("参与次数", { exact: true })).toHaveValue("3");
+  await signup.getByLabel("方便日期", { exact: true }).fill("2026-10-15");
+  await signup.getByLabel("方便时间", { exact: true }).fill("18:30");
+  await signup
+    .getByRole("group", { name: /整体评分/ })
+    .getByLabel("5", { exact: true })
+    .check();
+  await signup
+    .getByRole("group", { name: /推荐意愿/ })
+    .getByLabel("10", { exact: true })
+    .check();
+  await signup.getByLabel("第 1 名", { exact: true }).selectOption("比赛");
+  await signup.getByLabel("第 2 名", { exact: true }).selectOption("交流");
+  const matrix = signup.getByRole("group", { name: /组织评价/ });
+  await matrix
+    .getByRole("group", { name: "安排", exact: true })
+    .getByLabel("满意", { exact: true })
+    .check();
+  await matrix
+    .getByRole("group", { name: "通知", exact: true })
+    .getByLabel("一般", { exact: true })
+    .check();
+  await signup
+    .getByRole("group", { name: "周末", exact: true })
+    .getByLabel("上午", { exact: true })
+    .check();
+  await signup.getByLabel("补充信息：建议", { exact: true }).fill("=1+1");
+  await signup.getByLabel("补充信息：备注", { exact: true }).fill("仅本地验收");
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth),
+    ).toBeLessThanOrEqual(width);
+  }
+  expect(
+    (await new AxeBuilder({ page }).include(".activity-signup").analyze())
+      .violations,
+  ).toEqual([]);
+  await signup.getByRole("button", { name: "核对并提交" }).click();
+  await expect(signup.locator(".questionnaire-review")).toContainText(
+    "安排：满意",
+  );
+  await signup.getByRole("button", { name: "提交并确认报名" }).click();
+  await expect(
+    signup.getByRole("heading", { name: "已报名", exact: true }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () =>
+        Object.keys(localStorage).filter((key) =>
+          key.startsWith("questionnaire:"),
+        ).length,
+    ),
+  ).toBe(0);
+  await page.goto(`/activities/events/${event}/manage`);
+  const results = page.locator(".questionnaire-results");
+  await results.getByLabel("填写者姓名", { exact: true }).fill(admin.name);
+  await results.getByRole("button", { name: "查看统计图表" }).click();
+  await expect(results.getByRole("status")).toContainText("1 份答卷");
+  await expect(results).toContainText("NPS 100");
+  await expect(results).toContainText("平均值 3");
+  const csv = await page.request.get(
+    endpoint + "?mode=export&name=" + encodeURIComponent(admin.name),
+  );
+  expect(csv.status()).toBe(200);
+  expect(csv.headers()["cache-control"]).toContain("no-store");
+  expect(await csv.text()).toContain("安排：满意");
+  const context = await browser.newContext(),
+    visitor = await context.newPage();
+  await login(visitor, member);
+  await context.setExtraHTTPHeaders({ "Sec-Fetch-Site": "same-origin" });
+  for (const mode of ["stats", "export"])
+    expect(
+      (await visitor.request.get(endpoint + "?mode=" + mode)).status(),
+    ).toBe(403);
+  await context.close();
+  await page.goto("/activities");
+  await expect(page.getByRole("heading", { name: "问卷工作台" })).toBeVisible();
+});
+
+test("editor templates, text import, undo redo and exported JSON preserve editable settings", async ({
+  page,
+}) => {
+  await login(page, admin);
+  await page.context().setExtraHTTPHeaders({ "Sec-Fetch-Site": "same-origin" });
+  const endpoint = `/api/activities/events/${event}/signup`;
+  const info = await (await page.request.get(endpoint + "?mode=manage")).json();
+  expect(
+    (
+      await page.request.put(endpoint, {
+        data: { version: info.version, form: emptySignup },
+      })
+    ).ok(),
+  ).toBeTruthy();
+  await page.goto(`/activities/events/${event}/manage`);
+  await page.getByLabel("启用填写问卷报名").check();
+  await page.getByText("模板、批量导入与备份", { exact: true }).click();
+  await page.getByRole("button", { name: "满意度反馈模板" }).click();
+  await expect(page.getByLabel("题目标题", { exact: true })).toHaveCount(4);
+  await page
+    .getByLabel("批量题目文本", { exact: true })
+    .fill("[日期]可用日期*");
+  await page.getByRole("button", { name: "导入并追加题目" }).click();
+  await expect(page.getByLabel("题目标题", { exact: true })).toHaveCount(5);
+  await page.getByRole("button", { name: "撤销编辑" }).click();
+  await expect(page.getByLabel("题目标题", { exact: true })).toHaveCount(4);
+  await page.getByRole("button", { name: "重做编辑" }).click();
+  await expect(page.getByLabel("题目标题", { exact: true })).toHaveCount(5);
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "导出问卷模板" }).click();
+  const file = await download;
+  const content = JSON.parse(await readFile((await file.path())!, "utf8"));
+  expect(content.questions.map((q: Question) => q.type)).toEqual([
+    "rating",
+    "matrix",
+    "nps",
+    "textarea",
+    "date",
+  ]);
+  expect(new Set(content.questions.map((q: Question) => q.id)).size).toBe(5);
+  await page.getByRole("button", { name: "保存报名问卷" }).click();
+  await expect(page.getByRole("status")).toContainText("已保存");
+  expect(
+    (await (await page.request.get(endpoint + "?mode=manage")).json()).form
+      .questions,
+  ).toEqual(content.questions);
 });

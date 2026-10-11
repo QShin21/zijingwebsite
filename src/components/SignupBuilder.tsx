@@ -7,12 +7,10 @@ import {
   type SignupForm,
   type Question,
 } from "@/lib/signup-schema";
-export const signupLabels = {
-  text: "单行文本",
-  textarea: "多行文本",
-  single: "单选",
-  multiple: "多选",
-};
+import { questionTypes, hasOptions } from "@/lib/questionnaire-model";
+import { QuestionnaireSettings } from "./QuestionnaireSettings";
+import { QuestionnaireTools } from "./QuestionnaireTools";
+export const signupLabels = questionTypes;
 function localDate(value: string) {
   if (!value) return "";
   const d = new Date(value);
@@ -20,7 +18,7 @@ function localDate(value: string) {
 }
 export function SignupBuilder({
   value = emptySignup,
-  onChange,
+  onChange: onValueChange,
 }: {
   value: SignupForm;
   onChange: (value: SignupForm) => void;
@@ -28,6 +26,13 @@ export function SignupBuilder({
   const dialog = useRef<HTMLDialogElement>(null);
   const [preview, setPreview] = useState<SignupForm | null>(null);
   const [message, setMessage] = useState("");
+  const [past, setPast] = useState<SignupForm[]>([]),
+    [future, setFuture] = useState<SignupForm[]>([]);
+  const onChange = (next: SignupForm) => {
+    setPast((list) => [...list.slice(-29), value]);
+    setFuture([]);
+    onValueChange(next);
+  };
   const patch = (data: Partial<SignupForm>) => onChange({ ...value, ...data });
   const question = (index: number, data: Partial<Question>) =>
     patch({
@@ -44,6 +49,30 @@ export function SignupBuilder({
   return (
     <section className="signup-builder">
       <h3>报名问卷</h3>
+      <div className="signup-tools">
+        <button
+          type="button"
+          disabled={!past.length}
+          onClick={() => {
+            setFuture((list) => [value, ...list]);
+            onValueChange(past.at(-1)!);
+            setPast((list) => list.slice(0, -1));
+          }}
+        >
+          撤销编辑
+        </button>
+        <button
+          type="button"
+          disabled={!future.length}
+          onClick={() => {
+            setPast((list) => [...list, value]);
+            onValueChange(future[0]);
+            setFuture((list) => list.slice(1));
+          }}
+        >
+          重做编辑
+        </button>
+      </div>
       <label className="signup-choice">
         <input
           type="checkbox"
@@ -57,6 +86,38 @@ export function SignupBuilder({
       </p>
       {value.enabled && (
         <>
+          <QuestionnaireTools value={value} onChange={onChange} />
+          <label>
+            问卷标题
+            <input
+              value={value.title || ""}
+              maxLength={120}
+              onChange={(e) => patch({ title: e.target.value })}
+              placeholder="默认使用活动报名"
+            />
+          </label>
+          <label>
+            提交成功提示
+            <textarea
+              value={value.completionMessage || ""}
+              maxLength={1000}
+              onChange={(e) => patch({ completionMessage: e.target.value })}
+              placeholder="已收到你的报名信息"
+            />
+          </label>
+          <label>
+            问卷主题
+            <select
+              value={value.theme || "purple"}
+              onChange={(e) =>
+                patch({ theme: e.target.value as SignupForm["theme"] })
+              }
+            >
+              <option value="purple">紫荆紫</option>
+              <option value="blue">清爽蓝</option>
+              <option value="green">自然绿</option>
+            </select>
+          </label>
           <label>
             报名说明
             <textarea
@@ -126,6 +187,9 @@ export function SignupBuilder({
                   onChange={(e) =>
                     question(i, {
                       type: e.target.value as Question["type"],
+                      min: undefined,
+                      max: undefined,
+                      step: undefined,
                       format: undefined,
                       minLength: undefined,
                       maxLength: undefined,
@@ -150,7 +214,7 @@ export function SignupBuilder({
                 />
                 必填
               </label>
-              {["single", "multiple"].includes(q.type) && (
+              {hasOptions(q.type) && (
                 <label>
                   选项（每行一个）
                   <textarea
@@ -162,6 +226,11 @@ export function SignupBuilder({
                   />
                 </label>
               )}
+              <QuestionnaireSettings
+                q={q}
+                previous={value.questions.slice(0, i)}
+                onChange={(data) => question(i, data)}
+              />
               <details className="questionnaire-settings">
                 <summary>填写提示、校验与显示条件</summary>
                 <label>
@@ -294,7 +363,9 @@ export function SignupBuilder({
                     <option value="">始终显示</option>
                     {value.questions
                       .slice(0, i)
-                      .filter((v) => ["single", "multiple"].includes(v.type))
+                      .filter((v) =>
+                        ["single", "multiple", "select"].includes(v.type),
+                      )
                       .map((previous) => (
                         <option key={previous.id} value={previous.id}>
                           {previous.label || "未命名题目"}
@@ -327,7 +398,7 @@ export function SignupBuilder({
               <div className="signup-tools">
                 <button
                   type="button"
-                  disabled={value.questions.length >= 20}
+                  disabled={value.questions.length >= 100}
                   onClick={() => {
                     const list = [...value.questions];
                     list.splice(i + 1, 0, {
@@ -355,7 +426,9 @@ export function SignupBuilder({
                   type="button"
                   onClick={() => {
                     const dependent = value.questions.some(
-                      (v) => v.showWhen?.questionId === q.id,
+                      (v) =>
+                        v.showWhen?.questionId === q.id ||
+                        v.display?.rules.some((r) => r.questionId === q.id),
                     );
                     if (
                       dependent &&
@@ -368,8 +441,9 @@ export function SignupBuilder({
                       questions: value.questions
                         .filter((_, n) => n !== i)
                         .map((v) =>
-                          v.showWhen?.questionId === q.id
-                            ? { ...v, showWhen: undefined }
+                          v.showWhen?.questionId === q.id ||
+                          v.display?.rules.some((r) => r.questionId === q.id)
+                            ? { ...v, showWhen: undefined, display: undefined }
                             : v,
                         ),
                     });
@@ -383,7 +457,7 @@ export function SignupBuilder({
           <button
             type="button"
             className="button light"
-            disabled={value.questions.length >= 20}
+            disabled={value.questions.length >= 100}
             onClick={() =>
               patch({
                 questions: [
@@ -401,7 +475,7 @@ export function SignupBuilder({
           >
             添加题目
           </button>
-          <p>最多 20 道题。修改问卷后，已有报名保留提交时的题目和答案。</p>
+          <p>最多 100 道题。修改问卷后，已有报名保留提交时的题目和答案。</p>
           <button
             type="button"
             className="button light"

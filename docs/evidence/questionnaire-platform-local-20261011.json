@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-11",
+  "unit_database_tests": 165,
+  "test_files": 19,
+  "browser_scenarios": 6,
+  "browser_runs": "4 baseline scenarios passed in full run; advanced types and editor import scenarios passed in targeted follow-up runs",
+  "viewport_widths": [
+    320,
+    390,
+    1440
+  ],
+  "axe_scope": "activity-signup region, zero violations",
+  "lint": "passed",
+  "typecheck": "passed",
+  "local_production_build": "passed",
+  "database_migrations": "none added",
+  "production_deployment": "pending",
+  "miniapp_advanced_ui": "not implemented",
+  "full_commercial_parity": false
+}

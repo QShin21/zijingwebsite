@@ -61,6 +61,13 @@ export default async function Account() {
               <small>管理权限范围内的社团内容。</small>
             </Link>
           )}
+          {(canPublish(user) || hasRole(user, "communityAdmin")) && (
+            <Link className="account-action" href="/activities">
+              <Icon name="layers" />
+              <strong>问卷工作台</strong>
+              <small>编辑问卷、预览、统计与导出。</small>
+            </Link>
+          )}
           {canPublish(user) && (
             <Link className="account-action" href="/community/review">
               <Icon name="target" />
