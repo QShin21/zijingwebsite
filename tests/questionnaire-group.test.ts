@@ -143,7 +143,8 @@ it("restores bounded group drafts, renders all fields and exports complete membe
     "第 5 条：姓名：演示成员5",
   );
   const csv = responseCSV([record]);
-  expect(csv).toContain("学号：00005");
+  expect(csv).toContain("第5条 / 学号");
+  expect(csv).toContain('"00005"');
   expect(csv).not.toContain("[object Object]");
   const summary = summarizeResponses([record])[0].questions.find(
     (q) => q.id === "team",

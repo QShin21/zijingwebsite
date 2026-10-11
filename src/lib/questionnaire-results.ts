@@ -3,9 +3,11 @@ import { APIError } from "payload";
 import type { User } from "@/payload-types";
 import type { Answers, Question } from "./signup-schema";
 import { formatAnswer } from "./questionnaire-model";
+export { csvCell, responseCSV } from "./questionnaire-export";
 export type ResponseRecord = {
   id: number;
   createdAt: string;
+  updatedAt?: string;
   memberName?: string;
   formVersion?: string;
   questions: Question[];
@@ -107,40 +109,6 @@ export function summarizeResponses(records: ResponseRecord[]) {
     return { version, total: docs.length, questions };
   });
 }
-export function csvCell(value: unknown) {
-  let text = String(value ?? "");
-  if (/^[\s\uFEFF]*[=+@-]/.test(text) || /^[\t\r\n]/.test(text))
-    text = "'" + text;
-  return '"' + text.replaceAll('"', '""') + '"';
-}
-export function responseCSV(records: ResponseRecord[]) {
-  const rows: unknown[][] = [
-    [
-      "报名编号",
-      "提交时间",
-      "填写者",
-      "问卷版本",
-      "题目标识",
-      "题目",
-      "题型",
-      "答案",
-    ],
-  ];
-  for (const r of records)
-    for (const q of r.questions)
-      if (Object.hasOwn(r.answers, q.id))
-        rows.push([
-          r.id,
-          r.createdAt,
-          r.memberName,
-          r.formVersion,
-          q.id,
-          q.label,
-          q.type,
-          formatAnswer(r.answers[q.id], q),
-        ]);
-  return "\uFEFF" + rows.map((row) => row.map(csvCell).join(",")).join("\r\n");
-}
 // Called only after activity(..., edit=true) has authorized this exact activity.
 export async function queryResponses(
   p: Payload,
@@ -196,6 +164,7 @@ export async function queryResponses(
         questions: true,
         formVersion: true,
         createdAt: true,
+        updatedAt: true,
       },
     });
     if (result.totalDocs > 10000)

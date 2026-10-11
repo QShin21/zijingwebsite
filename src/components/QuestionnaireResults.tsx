@@ -2,6 +2,7 @@
 import { useState } from "react";
 import type { Question } from "@/lib/signup-schema";
 import type { QuestionSummary } from "@/lib/questionnaire-results";
+import type { ResponseExportLayout } from "@/lib/questionnaire-export";
 export function QuestionnaireResults({
   endpoint,
   questions,
@@ -20,6 +21,7 @@ export function QuestionnaireResults({
     { version: string; total: number; questions: QuestionSummary[] }[]
   >([]);
   const [message, setMessage] = useState(""),
+    [layout, setLayout] = useState<ResponseExportLayout>("responses"),
     [busy, setBusy] = useState(false),
     [loaded, setLoaded] = useState(false);
   async function run(exportFile = false) {
@@ -33,6 +35,7 @@ export function QuestionnaireResults({
           new URLSearchParams({
             ...filters,
             mode: exportFile ? "export" : "stats",
+            ...(exportFile ? { layout } : {}),
           }),
         { cache: "no-store" },
       );
@@ -45,7 +48,12 @@ export function QuestionnaireResults({
           url = URL.createObjectURL(blob),
           a = document.createElement("a");
         a.href = url;
-        a.download = "questionnaire-responses.csv";
+        const filename = response.headers
+          .get("content-disposition")
+          ?.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+        a.download = filename
+          ? decodeURIComponent(filename)
+          : `questionnaire-${layout}.csv`;
         a.click();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
         setMessage("答卷已导出，请妥善保管个人信息。");
@@ -119,6 +127,24 @@ export function QuestionnaireResults({
           />
         </label>
       </div>
+      <label>
+        导出格式
+        <select value={layout} onChange={(e) => setLayout(e.target.value as ResponseExportLayout)}>
+          <option value="responses">答卷表：每份答卷一行（推荐）</option>
+          <option value="members">成员明细：每条信息组记录一行</option>
+          <option value="long">按题明细：每个答案一行</option>
+        </select>
+      </label>
+      <p className="muted">
+        {layout === "responses"
+          ? "每题分列；多项填空和矩阵按子题拆列，成员名单按序号和字段拆列。多选 1 表示选中、0 表示未选；空白表示未填写或未显示。排序以数字记录名次。"
+          : layout === "members"
+            ? "适用于团队名单等信息组：每条记录一行，字段分列，并带上报名编号、填写者及普通题答案，方便筛选和整理名单。"
+            : "每个答案一行，保留题目标识、题型和完整答案，适合复核历史问卷。"}
+      </p>
+      <p className="muted">
+        学号、电话等文本列在 Excel 导入时请选择文本格式，以保留前导零和长数字。
+      </p>
       <div className="signup-tools">
         <button type="button" disabled={busy} onClick={() => void run()}>
           查看统计图表

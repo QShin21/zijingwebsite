@@ -199,13 +199,14 @@ it("exports safe CSV with formulas, quotes and row answers preserved as text", (
       id: 1,
       createdAt: "2026",
       memberName: "@name",
-      questions: [q("blanks")],
+      questions: [q("blanks", { rows: ["row"] })],
       answers: { q: { row: "a,b\nc" } },
     },
   ]);
   expect(csv.startsWith("\uFEFF")).toBe(true);
   expect(csv).toContain("'@name");
-  expect(csv).toContain('"row：a,b\nc"');
+  expect(csv).toContain('"Q1. 测试题 / row"');
+  expect(csv).toContain('"a,b\nc"');
   expect(formatAnswer({ row: ["A", "B"] })).toBe("row：A、B");
 });
 

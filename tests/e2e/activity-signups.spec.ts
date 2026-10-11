@@ -11,6 +11,7 @@ import {
   type Question,
 } from "../../src/lib/signup-schema";
 import { readFile } from "node:fs/promises";
+import { readCSV } from "../csv";
 let p: Payload,
   admin: User,
   member: User,
@@ -603,7 +604,9 @@ test("advanced types, account-scoped drafts, statistics, exports and permissions
   );
   expect(csv.status()).toBe(200);
   expect(csv.headers()["cache-control"]).toContain("no-store");
-  expect(await csv.text()).toContain("安排：满意");
+  const exported = readCSV(await csv.text());
+  expect(exported.records).toHaveLength(1);
+  expect(Object.values(exported.records[0])).toContain("满意");
   const context = await browser.newContext(),
     visitor = await context.newPage();
   await login(visitor, member);
@@ -615,6 +618,198 @@ test("advanced types, account-scoped drafts, statistics, exports and permissions
   await context.close();
   await page.goto("/activities");
   await expect(page.getByRole("heading", { name: "问卷工作台" })).toBeVisible();
+});
+
+test("organizer downloads one-row responses and member details with filters and private access", async ({
+  page,
+  browser,
+}) => {
+  await login(page, admin);
+  const source = JSON.parse(
+    await readFile("tests/fixtures/questionnaire-team-draft.json", "utf8"),
+  );
+  const form = {
+    ...source,
+    title: "本地演示：导出数据",
+    questions: [
+      ...source.questions,
+      {
+        id: "blanks",
+        label: "补充信息",
+        type: "blanks",
+        required: false,
+        options: [],
+        rows: ["备注", "邮箱"],
+      },
+      {
+        id: "choices",
+        label: "可参赛日期",
+        type: "multiple",
+        required: false,
+        options: ["周一", "周二"],
+      },
+      {
+        id: "matrix",
+        label: "可用时段",
+        type: "matrixMultiple",
+        required: false,
+        options: ["上午", "下午"],
+        rows: ["周一", "周二"],
+      },
+      {
+        id: "rank",
+        label: "志愿顺序",
+        type: "ranking",
+        required: false,
+        options: ["上单", "打野"],
+      },
+    ],
+  };
+  const target = (
+    await p.create({
+      collection: "events",
+      overrideAccess: false,
+      user: admin,
+      context: { manageSignupForm: true },
+      data: {
+        title: "本地演示：CSV导出验收",
+        slug: "export-ui-" + suffix,
+        _status: "published",
+        signupForm: form,
+      },
+    })
+  ).id;
+  extraEvents.push(target);
+  const endpoint = `/api/activities/events/${target}/signup`;
+  const info = await (await page.request.get(endpoint)).json();
+  const members = Array.from({ length: 5 }, (_, i) => ({
+    name: `演示成员${i + 1}`,
+    student: `0000${i + 1}`,
+    game: `演示ID${i + 1}`,
+    position: "上单",
+  }));
+  expect(
+    (
+      await page.request.post(endpoint, {
+        data: {
+          version: info.version,
+          answers: {
+            mode: "团队报名",
+            teamName: "本地演示队",
+            team: members,
+            contact: "13800138000",
+            blanks: {
+              备注: '包含逗号,引号"和\n换行',
+              邮箱: "demo@example.invalid",
+            },
+            choices: ["周一"],
+            matrix: { 周一: ["下午"], 周二: [] },
+            rank: ["打野", "上单"],
+          },
+        },
+      })
+    ).status(),
+  ).toBe(200);
+  const other = await browser.newContext(),
+    visitor = await other.newPage();
+  try {
+    await login(visitor, member);
+    expect(
+      (
+        await visitor.request.post(endpoint, {
+          data: {
+            version: info.version,
+            answers: {
+              mode: "个人报名",
+              name: "演示个人",
+              student: "00009",
+              game: "演示个人ID",
+              position: "打野",
+              contact: "13800138001",
+            },
+          },
+        })
+      ).status(),
+    ).toBe(200);
+    await page.goto(`/activities/events/${target}/manage`);
+    const results = page.locator(".questionnaire-results");
+    await expect(results.getByRole("combobox", { name: "导出格式", exact: true })).toHaveValue(
+      "responses",
+    );
+    const downloading = page.waitForEvent("download");
+    await results.getByRole("button", { name: "导出筛选答卷 CSV" }).click();
+    const download = await downloading;
+    expect(download.suggestedFilename()).toMatch(
+      /CSV导出验收-答卷表-\d+\.csv$/,
+    );
+    const wide = readCSV(await readFile((await download.path())!, "utf8"));
+    expect(wide.records).toHaveLength(2);
+    expect(wide.records[0]).toMatchObject({
+      "Q6. 队伍名称": "本地演示队",
+      "Q7. 成员名单 / 第1条 / 学号": "00001",
+      "Q7. 成员名单 / 第5条 / 姓名": "演示成员5",
+      "Q7. 成员名单 / 第6条 / 姓名": "",
+      "Q9. 补充信息 / 备注": '包含逗号,引号"和\n换行',
+      "Q10. 可参赛日期 / 周一": "1",
+      "Q10. 可参赛日期 / 周二": "0",
+      "Q11. 可用时段 / 周一 / 下午": "1",
+      "Q12. 志愿顺序 / 打野（名次）": "1",
+    });
+    expect(wide.records[1]).toMatchObject({
+      "Q2. 个人姓名": "演示个人",
+      "Q3. 个人学号": "00009",
+      "Q7. 成员名单 / 记录数": "",
+    });
+    expect(wide.records[0]["最后修改时间（北京时间）"]).toMatch(
+      /^\d{4}-\d{2}-\d{2} /,
+    );
+    await expect(results.getByRole("status")).toContainText("已导出");
+    await results
+      .getByRole("combobox", { name: "导出格式", exact: true })
+      .selectOption("members");
+    const memberDownloading = page.waitForEvent("download");
+    await results.getByRole("button", { name: "导出筛选答卷 CSV" }).click();
+    const memberDownload = await memberDownloading;
+    expect(memberDownload.suggestedFilename()).toContain("成员明细");
+    const details = readCSV(
+      await readFile((await memberDownload.path())!, "utf8"),
+    );
+    expect(details.records).toHaveLength(5);
+    expect(details.records[4]).toMatchObject({
+      报名编号: wide.records[0]["报名编号"],
+      "Q6. 队伍名称": "本地演示队",
+      组内序号: "5",
+      "Q7. 成员名单 / 学号": "00005",
+    });
+    const filtered = await page.request.get(
+      endpoint +
+        "?mode=export&question=mode&answer=" +
+        encodeURIComponent("个人报名"),
+    );
+    expect(readCSV(await filtered.text()).records).toHaveLength(1);
+    const empty = await page.request.get(
+      endpoint + "?mode=export&name=" + encodeURIComponent("无匹配" + suffix),
+    );
+    const emptyTable = readCSV(await empty.text());
+    expect(emptyTable.records).toHaveLength(0);
+    expect(emptyTable.headers).toContain("Q7. 成员名单 / 第6条 / 学号");
+    const long = await page.request.get(endpoint + "?mode=export&layout=long");
+    expect(readCSV(await long.text()).records.length).toBeGreaterThan(2);
+    expect(
+      (
+        await page.request.get(endpoint + "?mode=export&layout=invalid")
+      ).status(),
+    ).toBe(400);
+    for (const layout of ["responses", "members", "long"]) {
+      const denied = await visitor.request.get(
+        endpoint + "?mode=export&layout=" + layout,
+      );
+      expect(denied.status()).toBe(403);
+      expect(denied.headers()["cache-control"]).toContain("no-store");
+    }
+  } finally {
+    await other.close();
+  }
 });
 
 test("editor templates, text import, undo redo and exported JSON preserve editable settings", async ({

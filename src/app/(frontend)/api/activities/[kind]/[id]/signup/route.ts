@@ -15,6 +15,10 @@ import {
   updateSignupAnswers,
 } from "@/lib/activity-signups";
 import { applicationError } from "@/lib/application-error";
+import {
+  responseExportFilename,
+  responseExportLayout,
+} from "@/lib/questionnaire-export";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 type Context = { params: Promise<{ kind: string; id: string }> };
@@ -71,16 +75,21 @@ async function run(
           user,
           url.searchParams,
         );
-        if (mode === "export")
-          return new Response(responseCSV(records), {
-            headers: {
-              "Content-Type": "text/csv; charset=utf-8",
-              "Content-Disposition":
-                'attachment; filename="questionnaire-responses.csv"',
-              "Cache-Control": "private, no-store",
-              "X-Content-Type-Options": "nosniff",
+        if (mode === "export") {
+          const layout = responseExportLayout(url.searchParams.get("layout"));
+          const filename = responseExportFilename(value.doc.title, layout);
+          return new Response(
+            responseCSV(records, value.form.questions, layout),
+            {
+              headers: {
+                "Content-Type": "text/csv; charset=utf-8",
+                "Content-Disposition": `attachment; filename="questionnaire-${layout}.csv"; filename*=UTF-8''${encodeURIComponent(filename).replaceAll("'", "%27")}`,
+                "Cache-Control": "private, no-store",
+                "X-Content-Type-Options": "nosniff",
+              },
             },
-          });
+          );
+        }
         return reply({
           total: records.length,
           groups: summarizeResponses(records),
