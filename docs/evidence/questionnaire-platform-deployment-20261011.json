@@ -1,0 +1,246 @@
+{
+  "at": "2026-10-11T09:32:59.467Z",
+  "revision": "revision=6973794bb5f78e559f15de2bb7903dbfa6c097dd\r\napplication_revision=6973794bb5f78e559f15de2bb7903dbfa6c097dd\r\n",
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/health/ready",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/events?limit=1&depth=0",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/miniapp/status",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/community/lol/forum",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/community/lol/forum",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/community/lol/forum",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/community/lol/forum",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/community/lol/forum/1",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/community/lol/forum/1",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/community/lol/forum/1",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/community/lol/forum/1",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/comments",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/comments",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/comments",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/comments",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/community-reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/community-reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/community-reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/community-reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/miniapp/reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/miniapp/reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/miniapp/reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/miniapp/reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/admin/collections/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/admin/collections/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/collections/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/admin/collections/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/showcase-videos/<unknown>.mp4",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/activities/manage",
+      "status": 403,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/activities/events/1/signup?mode=stats",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/activities/events/1/signup?mode=export",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/activities/events/1/signup",
+      "status": 401,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/activities/invalid/1/signup",
+      "status": 400,
+      "noStore": true
+    }
+  ],
+  "unchangedFiles": true,
+  "databaseProcessUnchanged": true,
+  "freeKillProcessesUnchanged": true,
+  "swappiness": "0",
+  "tableCount": 58,
+  "changedTables": [],
+  "sourceFilesMatched": 117,
+  "bilibiliFrameAllowed": true,
+  "mediaUnchanged": true,
+  "freeKillHTTPS": 200,
+  "restoreRehearsal": "Full pg_restore to isolated database passed before build",
+  "ok": true,
+  "freeKillWebSocket": 101,
+  "tlsVerified": true,
+  "application_revision": "6973794bb5f78e559f15de2bb7903dbfa6c097dd",
+  "backup_path": "/srv/zijingwebsite/backups/questionnaire-platform-20261011",
+  "rollback_script": "/srv/zijingwebsite/backups/questionnaire-platform-20261011/rollback.sh",
+  "server_build": "passed; compiler emitted summary warning without detail; TypeScript and final build succeeded",
+  "candidate_smoke": "passed on port 3101 using restored isolated database",
+  "production_authenticated_submission": "not run; no production test accounts or responses created",
+  "full_commercial_parity": false
+}
