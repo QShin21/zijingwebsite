@@ -1,0 +1,111 @@
+{
+  "enabled": true,
+  "closed": false,
+  "start": "",
+  "end": "",
+  "title": "本地演示：比赛报名",
+  "intro": "仅用于本地测试，团队名单包含队长，共5–6人。",
+  "pageSize": 20,
+  "questions": [
+    {
+      "id": "mode",
+      "label": "报名方式",
+      "type": "single",
+      "required": true,
+      "options": ["个人报名", "团队报名"]
+    },
+    {
+      "id": "name",
+      "label": "个人姓名",
+      "type": "text",
+      "required": true,
+      "options": [],
+      "showWhen": { "questionId": "mode", "option": "个人报名" }
+    },
+    {
+      "id": "student",
+      "label": "个人学号",
+      "type": "text",
+      "required": true,
+      "options": [],
+      "showWhen": { "questionId": "mode", "option": "个人报名" }
+    },
+    {
+      "id": "game",
+      "label": "个人游戏ID",
+      "type": "text",
+      "required": true,
+      "options": [],
+      "showWhen": { "questionId": "mode", "option": "个人报名" }
+    },
+    {
+      "id": "position",
+      "label": "个人擅长位置",
+      "type": "select",
+      "required": true,
+      "options": ["上单", "打野", "中单", "下路", "辅助"],
+      "showWhen": { "questionId": "mode", "option": "个人报名" }
+    },
+    {
+      "id": "teamName",
+      "label": "队伍名称",
+      "type": "text",
+      "required": true,
+      "options": [],
+      "showWhen": { "questionId": "mode", "option": "团队报名" }
+    },
+    {
+      "id": "team",
+      "label": "成员名单",
+      "type": "group",
+      "required": true,
+      "options": [],
+      "minEntries": 5,
+      "maxEntries": 6,
+      "display": {
+        "mode": "all",
+        "rules": [
+          { "questionId": "mode", "operator": "equals", "value": "团队报名" }
+        ]
+      },
+      "fields": [
+        {
+          "id": "name",
+          "label": "姓名",
+          "type": "text",
+          "required": true,
+          "options": []
+        },
+        {
+          "id": "student",
+          "label": "学号",
+          "type": "text",
+          "required": true,
+          "options": []
+        },
+        {
+          "id": "game",
+          "label": "游戏ID",
+          "type": "text",
+          "required": true,
+          "options": []
+        },
+        {
+          "id": "position",
+          "label": "擅长位置",
+          "type": "select",
+          "required": true,
+          "options": ["上单", "打野", "中单", "下路", "辅助"]
+        }
+      ]
+    },
+    {
+      "id": "contact",
+      "label": "联系人手机号",
+      "type": "text",
+      "required": true,
+      "options": [],
+      "format": "phone"
+    }
+  ]
+}

@@ -90,3 +90,42 @@ it("does not spend quota when AI is unconfigured", async () => {
   expect((await POST(request())).status).toBe(503);
   expect(state.reserve).not.toHaveBeenCalled();
 });
+it("streams progress and a checked result, releasing the slot exactly once", async () => {
+  state.generate.mockImplementation(async (_input, _signal, progress) => {
+    progress({ stage: "checking", message: "正在校验" });
+    return { title: "test", questions: [] };
+  });
+  const req = request();
+  req.headers.set("accept", "application/x-ndjson");
+  const response = await POST(req);
+  expect(response.headers.get("content-type")).toContain(
+    "application/x-ndjson",
+  );
+  const events = (await response.text())
+    .trim()
+    .split("\n")
+    .map((s) => JSON.parse(s));
+  expect(events.some((e) => e.stage === "checking")).toBe(true);
+  expect(events.at(-1).type).toBe("result");
+  expect(state.release).toHaveBeenCalledOnce();
+});
+it("streams a safe failure and aborts work on browser cancellation", async () => {
+  state.generate.mockRejectedValueOnce(new Error("raw secret"));
+  const req = request();
+  req.headers.set("accept", "application/x-ndjson");
+  expect(await (await POST(req)).text()).not.toContain("raw secret");
+  state.generate.mockImplementationOnce(
+    (_input, signal: AbortSignal) =>
+      new Promise((_resolve, reject) =>
+        signal.addEventListener("abort", () => reject(new Error("cancelled"))),
+      ),
+  );
+  const cancelRequest = request();
+  cancelRequest.headers.set("accept", "application/x-ndjson");
+  const response = await POST(cancelRequest),
+    reader = response.body!.getReader();
+  await reader.read();
+  await reader.cancel();
+  await vi.waitFor(() => expect(state.release).toHaveBeenCalledTimes(2));
+  expect(state.generate.mock.calls.at(-1)![1].aborted).toBe(true);
+});

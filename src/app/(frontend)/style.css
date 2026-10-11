@@ -3441,6 +3441,14 @@ button:disabled {
 .blueprint-apply { border-top: 1px solid #dcd1e5; padding-top: 1rem; }
 .blueprint-apply fieldset { border: 0; margin: 0; padding: .5rem 0; display: grid; gap: .7rem; }
 .ai-questionnaire-form, .questionnaire-import-form { display: grid; gap: 1.1rem; padding-block: 1rem; }
+.ai-examples { display: flex; gap: .6rem; flex-wrap: wrap; }
+.ai-examples button { border: 1px solid #d8c9e5; border-radius: 8px; padding: .5rem .8rem; background: #faf8fc; color: #513567; }
+.ai-refinement { display: grid; gap: .8rem; padding: 1rem; border: 1px solid #d8c9e5; border-radius: 12px; }
+.questionnaire-group, .questionnaire-group-editor { display: grid; gap: 1rem; min-width: 0; }
+.questionnaire-group-entry, .questionnaire-group-editor > fieldset { min-width: 0; padding: 1rem; border: 1px solid #d8c9e5; border-radius: 10px; }
+.questionnaire-group-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: .9rem; margin-bottom: .8rem; }
+.questionnaire-group-fields label { display: grid; gap: .45rem; min-width: 0; }
+.questionnaire-group-fields input, .questionnaire-group-fields select { width: 100%; min-width: 0; }
 .ai-model-label { width: fit-content; }
 .condition-editor { display: grid; gap: .7rem; }
 .condition-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; padding: .8rem; border: 1px solid #ddd1e6; border-radius: 8px; background: #fff; }

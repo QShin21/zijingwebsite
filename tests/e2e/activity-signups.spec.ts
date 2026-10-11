@@ -938,8 +938,8 @@ test("AI creation preserves current content on failure and previews editable gen
   await starter
     .getByLabel("制作需求", { exact: true })
     .fill("制作一份活动意向问卷，暂不参加时提前结束。");
-  await starter.getByLabel("作答题数").selectOption("5");
-  await starter.getByLabel("按需求设计条件显示与跳转").check();
+  await expect(starter.getByLabel("作答题数")).toHaveCount(0);
+  await starter.getByLabel("填写分支").selectOption("auto");
   await starter.getByRole("button", { name: "生成问卷草稿" }).click();
   await expect(starter.getByRole("alert")).toContainText("暂时不可用");
   await expect(page.locator(".designer-question")).toHaveCount(0);
@@ -959,6 +959,208 @@ test("AI creation preserves current content on failure and previews editable gen
   expect(saved.form.questions.some((q: Question) => q.jumps?.length)).toBe(
     true,
   );
+});
+
+test("AI streaming, refinement and 5–6 member registration work through save, validation and export", async ({
+  page,
+}) => {
+  const id = await questionnaireEvent();
+  await login(page, admin);
+  await page.context().setExtraHTTPHeaders({ "Sec-Fetch-Site": "same-origin" });
+  await page.goto(`/activities/events/${id}/manage`);
+  const generated: SignupForm = JSON.parse(
+    await readFile("tests/fixtures/questionnaire-team-draft.json", "utf8"),
+  );
+  const refined: SignupForm = {
+    ...generated,
+    questions: [
+      ...generated.questions,
+      {
+        id: "email",
+        label: "联系邮箱",
+        type: "text",
+        required: false,
+        options: [],
+        format: "email",
+      },
+    ],
+  };
+  let attempts = 0;
+  await page.route("**/api/questionnaires/generate", async (route) => {
+    if (route.request().method() !== "POST")
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ enabled: true }),
+      });
+    const input = route.request().postDataJSON();
+    expect(input).not.toHaveProperty("count");
+    expect(input.logic).toBe("auto");
+    if (++attempts === 2) {
+      expect(input.draft.questions).toHaveLength(8);
+      expect(input.refinement).toContain("邮箱");
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/x-ndjson",
+      body:
+        [
+          {
+            type: "progress",
+            stage: "checking",
+            message: "正在检查人数和分支",
+          },
+          {
+            type: "result",
+            model: "DeepSeek-V4.1-Flash",
+            form: attempts === 1 ? generated : refined,
+          },
+        ]
+          .map((e) => JSON.stringify(e))
+          .join("\n") + "\n",
+    });
+  });
+  await page.getByRole("button", { name: "AI 制作问卷" }).click();
+  const starter = page.getByRole("dialog");
+  await expect(starter.getByLabel("作答题数")).toHaveCount(0);
+  await starter.getByRole("button", { name: "使用比赛报名示例" }).click();
+  await starter.getByRole("button", { name: "生成问卷草稿" }).click();
+  await expect(starter.locator(".blueprint-questions > li")).toHaveCount(8);
+  await expect(starter).toContainText("5–6 条记录");
+  await starter
+    .getByLabel("修改要求")
+    .fill("增加一个选填的联系邮箱，保留其他信息和团队人数限制");
+  await starter.getByRole("button", { name: "按要求完善草稿" }).click();
+  await expect(starter.locator(".blueprint-questions > li")).toHaveCount(9);
+  await starter.getByRole("button", { name: "替换并进入编辑" }).click();
+  const outline = page.locator(".designer-outline");
+  await outline.getByRole("button", { name: /成员名单/ }).click();
+  await expect(page.getByLabel("最少记录条数")).toHaveValue("5");
+  await expect(page.getByLabel("最多记录条数")).toHaveValue("6");
+  await page.getByRole("button", { name: "保存报名问卷" }).click();
+  await expect(
+    page.locator(".signup-management > p[role=status]"),
+  ).toContainText("已保存");
+  const endpoint = `/api/activities/events/${id}/signup`;
+  const saved = await (
+    await page.request.get(endpoint + "?mode=manage")
+  ).json();
+  const mode = saved.form.questions.find(
+      (q: Question) => q.label === "报名方式",
+    ),
+    roster = saved.form.questions.find((q: Question) => q.type === "group"),
+    teamName = saved.form.questions.find(
+      (q: Question) => q.label === "队伍名称",
+    ),
+    contact = saved.form.questions.find(
+      (q: Question) => q.label === "联系人手机号",
+    );
+  const members = (count: number) =>
+    Array.from({ length: count }, (_, i) => ({
+      name: "演示成员" + (i + 1),
+      student: "0000" + (i + 1),
+      game: "演示ID" + (i + 1),
+      position: "辅助",
+    }));
+  for (const count of [4, 7])
+    expect(
+      (
+        await page.request.post(endpoint, {
+          data: {
+            version: saved.version,
+            answers: {
+              [mode.id]: "团队报名",
+              [roster.id]: members(count),
+              [teamName.id]: "演示队伍",
+              [contact.id]: "18800000000",
+            },
+          },
+        })
+      ).status(),
+    ).toBe(400);
+  await page.goto(`/activities/events/${id}/fill`);
+  const signup = page.locator(".activity-signup");
+  await signup.getByLabel("团队报名", { exact: true }).check();
+  await expect(signup.getByLabel("个人姓名", { exact: true })).toHaveCount(0);
+  await signup.getByLabel("队伍名称", { exact: true }).fill("演示队伍");
+  await signup.getByLabel("联系人手机号", { exact: true }).fill("18800000000");
+  await expect(signup.locator(".questionnaire-group-entry")).toHaveCount(5);
+  for (let n = 1; n <= 5; n++) {
+    await signup
+      .getByLabel(`成员名单第 ${n} 条：姓名`, { exact: true })
+      .fill("演示成员" + n);
+    await signup
+      .getByLabel(`成员名单第 ${n} 条：学号`, { exact: true })
+      .fill("0000" + n);
+    await signup
+      .getByLabel(`成员名单第 ${n} 条：游戏ID`, { exact: true })
+      .fill("演示ID" + n);
+    await signup
+      .getByLabel(`成员名单第 ${n} 条：擅长位置`, { exact: true })
+      .selectOption("辅助");
+  }
+  await signup.getByRole("button", { name: "添加一条记录" }).click();
+  await expect(signup.locator(".questionnaire-group-entry")).toHaveCount(6);
+  await expect(
+    signup.getByRole("button", { name: "添加一条记录" }),
+  ).toBeDisabled();
+  await signup.getByRole("button", { name: "核对并提交" }).click();
+  await expect(
+    signup.locator(".questionnaire-error[role=alert]"),
+  ).toContainText("第 6 条");
+  await signup.getByRole("button", { name: "移除第 6 条" }).click();
+  await signup.getByLabel("个人报名", { exact: true }).check();
+  await expect(signup.locator(".questionnaire-group-entry")).toHaveCount(0);
+  await expect(signup.getByLabel("个人姓名", { exact: true })).toBeVisible();
+  await signup.getByLabel("团队报名", { exact: true }).check();
+  await expect(
+    signup.getByLabel("成员名单第 1 条：姓名", { exact: true }),
+  ).toHaveValue("");
+  // Hidden roster answers were removed; complete the final five-person submission.
+  await signup.getByLabel("队伍名称", { exact: true }).fill("演示队伍");
+  for (let n = 1; n <= 5; n++) {
+    await signup
+      .getByLabel(`成员名单第 ${n} 条：姓名`, { exact: true })
+      .fill("演示成员" + n);
+    await signup
+      .getByLabel(`成员名单第 ${n} 条：学号`, { exact: true })
+      .fill("0000" + n);
+    await signup
+      .getByLabel(`成员名单第 ${n} 条：游戏ID`, { exact: true })
+      .fill("演示ID" + n);
+    await signup
+      .getByLabel(`成员名单第 ${n} 条：擅长位置`, { exact: true })
+      .selectOption("辅助");
+  }
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth),
+    ).toBeLessThanOrEqual(width);
+  }
+  expect(
+    (await new AxeBuilder({ page }).include(".activity-signup").analyze())
+      .violations,
+  ).toEqual([]);
+  await page.screenshot({
+    path: ".data/questionnaire-ai-team-1440.png",
+    fullPage: true,
+  });
+  await signup.getByRole("button", { name: "核对并提交" }).click();
+  await expect(signup.locator(".questionnaire-review")).toContainText(
+    "第 5 条：姓名：演示成员5",
+  );
+  await signup.getByRole("button", { name: "提交并确认报名" }).click();
+  await expect(
+    signup.getByRole("heading", { name: "已报名", exact: true }),
+  ).toBeVisible();
+  const csv = await page.request.get(endpoint + "?mode=export");
+  expect(await csv.text()).toContain("学号：00005");
+  const stats = await (await page.request.get(endpoint + "?mode=stats")).json();
+  expect(
+    stats.groups[0].questions.find((q: { id: string }) => q.id === roster.id)
+      .counts,
+  ).toEqual([{ label: "5 条记录", count: 1, percent: 100 }]);
 });
 
 test("AI endpoint enforces manager authorization and serves a real generated draft", async ({
@@ -989,17 +1191,27 @@ test("AI endpoint enforces manager authorization and serves a real generated dra
       Origin: new URL(process.env.SERVER_URL || "http://localhost:3000").origin,
     },
     data: {
-      description: "请制作通用活动反馈问卷，了解整体满意度和改进建议。",
-      audience: "参与者",
-      count: 3,
-      logic: false,
+      description:
+        "请你制作一个英雄联盟校内比赛的报名问卷，收集必要的信息，包括姓名、学号、游戏ID、擅长位置等；报名问卷需要分为团队报名和个人报名，团队上限为6个人，至少需要填写5个人。",
+      audience: "",
+      logic: "auto",
     },
-    timeout: 90000,
+    timeout: 150000,
   });
   expect(response.status()).toBe(200);
   const result = await response.json();
   expect(result.model).toBe("DeepSeek-V4.1-Flash");
-  expect(result.form.questions).toHaveLength(3);
+  const roster = result.form.questions.find(
+    (q: Question) => q.type === "group",
+  );
+  expect(roster).toMatchObject({
+    minEntries: 5,
+    maxEntries: 6,
+    required: true,
+  });
+  expect(
+    roster.fields.every((field: { required: boolean }) => field.required),
+  ).toBe(true);
   expect(response.headers()["cache-control"]).toContain("no-store");
   expect(result).not.toHaveProperty("apiKey");
 });

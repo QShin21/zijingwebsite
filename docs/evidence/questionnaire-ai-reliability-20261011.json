@@ -1,0 +1,145 @@
+{
+  "date": "2026-10-11",
+  "status": "local checked; server deployment pending",
+  "sourceRevision": "pending",
+  "originalReproduction": {
+    "prompt": "user screenshot campus League of Legends registration",
+    "upstreamStatus": 200,
+    "finishReason": "length",
+    "completionTokens": 4600,
+    "reasoningTokens": 4600,
+    "contentLength": 0
+  },
+  "changes": {
+    "model": "DeepSeek-V4.1-Flash",
+    "thinking": "disabled",
+    "format": "JSON",
+    "questionCountControls": false,
+    "maxQuestionCountRemoved": true,
+    "automaticRepairAttempts": 1,
+    "progress": "NDJSON with 8 second heartbeat",
+    "refinement": true,
+    "repeatedEntries": true,
+    "schemaMigration": false
+  },
+  "checks": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "unitAndDatabaseTests": 205,
+    "questionnaireBrowserTests": 11,
+    "browserModels": "fixtures for interaction plus real upstream in authorized local endpoint",
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "axe": "questionnaire area passed",
+    "githubCI": "pending",
+    "productionBuild": "pending"
+  },
+  "realModel": {
+    "at": "2026-10-11T13:51:50.314Z",
+    "model": "DeepSeek-V4.1-Flash",
+    "originalPrompt": true,
+    "countControls": false,
+    "elapsedMs": 24631,
+    "questionCount": 11,
+    "stages": [
+      "generating",
+      "checking",
+      "repairing",
+      "checking"
+    ],
+    "checks": {
+      "team4": true,
+      "team5": true,
+      "team6": true,
+      "team7": true,
+      "personal": true,
+      "incompleteSixth": true
+    },
+    "productionDatabaseWrites": 0,
+    "usage": [
+      {
+        "status": 200,
+        "finish": "stop",
+        "usage": {
+          "completion_tokens": 1220,
+          "prompt_tokens": 1044,
+          "total_tokens": 2264,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      {
+        "status": 200,
+        "finish": "stop",
+        "usage": {
+          "completion_tokens": 809,
+          "prompt_tokens": 2547,
+          "total_tokens": 3356,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens_details": {
+            "cached_tokens": 1024
+          }
+        }
+      },
+      {
+        "status": 200,
+        "finish": "stop",
+        "usage": {
+          "completion_tokens": 1400,
+          "prompt_tokens": 1930,
+          "total_tokens": 3330,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      },
+      {
+        "status": 200,
+        "finish": "stop",
+        "usage": {
+          "completion_tokens": 2501,
+          "prompt_tokens": 1065,
+          "total_tokens": 3566,
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        }
+      }
+    ],
+    "refinement": {
+      "elapsedMs": 6393,
+      "questionCount": 13,
+      "optionalEmail": true,
+      "preservedRosterBounds": true
+    },
+    "longForm": {
+      "elapsedMs": 14987,
+      "questionCount": 35,
+      "promptSpecified": true
+    }
+  },
+  "deployment": {
+    "authorizedSite": "home.thuzijing.top",
+    "backup": "/srv/zijingwebsite/backups/questionnaire-ai-reliability-20261011",
+    "fullDatabaseRestoreRehearsal": "passed",
+    "businessTables": 58,
+    "productionTestAccounts": 0,
+    "productionTestResponses": 0,
+    "status": "pending"
+  }
+}

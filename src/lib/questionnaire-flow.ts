@@ -61,7 +61,7 @@ function validateGroup(
     const source = sources.find((q) => q.id === r.questionId);
     if (
       !source ||
-      ["description", "matrix", "matrixMultiple", "blanks"].includes(
+      ["description", "matrix", "matrixMultiple", "blanks", "group"].includes(
         source.type,
       )
     )

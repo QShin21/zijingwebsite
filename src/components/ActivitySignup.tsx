@@ -51,7 +51,7 @@ function ReceiptView({ receipt }: { receipt: Receipt }) {
           .map((q) => (
             <div key={q.id}>
               <dt>{q.label}</dt>
-              <dd>{formatAnswer(receipt.answers[q.id])}</dd>
+              <dd>{formatAnswer(receipt.answers[q.id], q)}</dd>
             </div>
           ))}
       </dl>

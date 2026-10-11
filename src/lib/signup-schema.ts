@@ -26,7 +26,11 @@ export type Question = {
     | "matrix"
     | "matrixMultiple"
     | "blanks"
+    | "group"
     | "description";
+  fields?: EntryField[];
+  minEntries?: number;
+  maxEntries?: number;
   rows?: string[];
   min?: number;
   max?: number;
@@ -47,6 +51,21 @@ export type Question = {
   exclusiveOption?: string;
   showWhen?: { questionId: string; option: string };
 };
+export type EntryField = Pick<
+  Question,
+  | "id"
+  | "label"
+  | "required"
+  | "options"
+  | "format"
+  | "minLength"
+  | "maxLength"
+  | "min"
+  | "max"
+  | "step"
+  | "placeholder"
+> & { type: "text" | "select" | "number" };
+export type EntryAnswer = Record<string, string>;
 export type SignupForm = {
   enabled: boolean;
   closed: boolean;
@@ -88,8 +107,7 @@ export function normalizeSignup(value: unknown): SignupForm {
   if (start && end && start >= end) fail("报名截止必须晚于开始");
   const intro = String(v.intro || "").trim();
   if (intro.length > 1000) fail("报名说明最多 1000 字");
-  if (!Array.isArray(v.questions) || v.questions.length > 100)
-    fail("报名表最多 100 道题");
+  if (!Array.isArray(v.questions)) fail("请提供问卷题目列表");
   const ids = new Set<string>();
   const questions = v.questions.map((raw): Question => {
     if (!raw || typeof raw !== "object") fail("题目格式不正确");
@@ -121,6 +139,7 @@ export function normalizeSignup(value: unknown): SignupForm {
         "matrix",
         "matrixMultiple",
         "blanks",
+        "group",
         "description",
       ].includes(String(q.type))
     )
@@ -334,7 +353,11 @@ export function validateAnswers(form: SignupForm, raw: unknown): Answers {
   return result;
 }
 
-export type Answer = string | string[] | Record<string, string | string[]>;
+export type Answer =
+  | string
+  | string[]
+  | Record<string, string | string[]>
+  | EntryAnswer[];
 export type Answers = Record<string, Answer>;
 // Only preceding, visible answers may activate a branch. Hidden answers never persist.
 export function visibleQuestions(

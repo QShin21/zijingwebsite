@@ -3,7 +3,15 @@ import {
   validateFlow,
   matchesCondition,
 } from "./questionnaire-flow";
-import type { Answer, Question, SignupForm } from "./signup-schema";
+import {
+  normalizeSignup,
+  validateAnswers,
+  type Answer,
+  type EntryAnswer,
+  type EntryField,
+  type Question,
+  type SignupForm,
+} from "./signup-schema";
 export const questionTypes: Record<Question["type"], string> = {
   text: "单行文本",
   textarea: "多行文本",
@@ -19,6 +27,7 @@ export const questionTypes: Record<Question["type"], string> = {
   matrix: "矩阵单选",
   matrixMultiple: "矩阵多选",
   blanks: "多项填空",
+  group: "可增减信息组",
   description: "段落说明",
 };
 export const hasOptions = (type: string) =>
@@ -43,6 +52,48 @@ export function normalizeQuestionExtras(
   if (raw.randomize === true && hasOptions(q.type) && q.type !== "ranking")
     q.randomize = true;
   if (q.type === "description") q.required = false;
+  if (q.type === "group") {
+    if (
+      !Array.isArray(raw.fields) ||
+      !raw.fields.length ||
+      raw.fields.length > 10
+    )
+      fail(q.label + "：信息组需要 1–10 个字段");
+    const fields = (raw.fields as Record<string, unknown>[]).map((field) => {
+      if (!field || !["text", "select", "number"].includes(String(field.type)))
+        fail(q.label + "：字段仅支持文本、下拉选择和数字");
+      if (field.display || field.showWhen || field.jumps)
+        fail(q.label + "：组内字段不支持分支，请在信息组题目上设置");
+      return Object.fromEntries(
+        [
+          "id",
+          "label",
+          "type",
+          "required",
+          "options",
+          "format",
+          "minLength",
+          "maxLength",
+          "min",
+          "max",
+          "step",
+          "placeholder",
+        ]
+          .filter((key) => field[key] != null)
+          .map((key) => [key, field[key]]),
+      );
+    });
+    q.fields = normalizeSignup({ enabled: true, questions: fields })
+      .questions as EntryField[];
+    for (const key of ["minEntries", "maxEntries"] as const) {
+      const value = raw[key] ?? (key === "minEntries" ? 1 : 10);
+      if (!Number.isInteger(value) || Number(value) < 1 || Number(value) > 20)
+        fail(q.label + "：记录条数应为 1–20 的整数");
+      q[key] = Number(value);
+    }
+    if (q.minEntries! > q.maxEntries!)
+      fail(q.label + "：最少条数不能超过最多条数");
+  }
   if (hasRows(q.type)) {
     if (
       !Array.isArray(raw.rows) ||
@@ -140,6 +191,57 @@ export function matchesDisplay(
 }
 export function validateAdvancedAnswer(q: Question, raw: unknown): Answer {
   const failAnswer = (hint: string): never => fail(q.label + "：" + hint);
+  if (q.type === "group") {
+    if (
+      raw != null &&
+      (!Array.isArray(raw) ||
+        raw.some(
+          (row) => !row || typeof row !== "object" || Array.isArray(row),
+        ))
+    )
+      failAnswer("信息组填写格式无效");
+    const entries = (raw || []) as Record<string, unknown>[];
+    if (
+      entries.some((row) =>
+        Object.keys(row).some(
+          (id) => !q.fields!.some((field) => field.id === id),
+        ),
+      )
+    )
+      failAnswer("字段已变化，请刷新后填写");
+    if (entries.length > q.maxEntries!)
+      failAnswer(`最多填写 ${q.maxEntries} 条记录`);
+    const nonempty = entries.some((row) =>
+      Object.values(row).some((value) => value !== "" && value != null),
+    );
+    if (!q.required && !nonempty) return [];
+    if (entries.length < q.minEntries!)
+      failAnswer(`至少填写 ${q.minEntries} 条记录`);
+    return entries.map((row, index) => {
+      try {
+        const result = validateAnswers(
+          {
+            enabled: true,
+            closed: false,
+            start: "",
+            end: "",
+            intro: "",
+            questions: q.fields!,
+          },
+          row,
+        );
+        if (
+          !Object.values(result).some(
+            (value) => typeof value === "string" && value.trim(),
+          )
+        )
+          throw new Error("请填写此条记录，或移除多余的空记录");
+        return result as EntryAnswer;
+      } catch (error) {
+        return failAnswer(`第 ${index + 1} 条：${(error as Error).message}`);
+      }
+    });
+  }
   if (hasRows(q.type)) {
     if (raw != null && (typeof raw !== "object" || Array.isArray(raw)))
       failAnswer("子题填写格式无效");
@@ -229,9 +331,28 @@ export function validateAdvancedAnswer(q: Question, raw: unknown): Answer {
     failAnswer("请输入有效时间");
   return answer;
 }
-export function formatAnswer(answer: Answer | undefined): string {
+export function formatAnswer(
+  answer: Answer | undefined,
+  question?: Question,
+): string {
   if (answer == null || answer === "") return "未填写";
-  if (Array.isArray(answer)) return answer.join("、") || "未填写";
+  if (Array.isArray(answer))
+    return (
+      answer
+        .map((row, index) =>
+          typeof row === "string"
+            ? row
+            : `第 ${index + 1} 条：` +
+              Object.entries(row)
+                .map(
+                  ([key, value]) =>
+                    `${question?.fields?.find((field) => field.id === key)?.label || key}：${value || "未填写"}`,
+                )
+                .join("；"),
+        )
+        .join(answer.some((v) => typeof v === "object") ? "\n" : "、") ||
+      "未填写"
+    );
   if (typeof answer === "object")
     return Object.entries(answer)
       .map(
@@ -266,7 +387,24 @@ export function sanitizeDraft(form: SignupForm, raw: Record<string, unknown>) {
   const result: Record<string, Answer> = {};
   for (const q of form.questions) {
     const value = raw[q.id];
-    if (hasRows(q.type)) {
+    if (q.type === "group") {
+      if (Array.isArray(value))
+        result[q.id] = value
+          .slice(0, q.maxEntries || 20)
+          .filter(
+            (row) => row && typeof row === "object" && !Array.isArray(row),
+          )
+          .map((row) =>
+            Object.fromEntries(
+              (q.fields || []).map((field) => [
+                field.id,
+                typeof row[field.id] === "string"
+                  ? row[field.id].slice(0, field.maxLength || 200)
+                  : "",
+              ]),
+            ),
+          );
+    } else if (hasRows(q.type)) {
       if (value && typeof value === "object" && !Array.isArray(value)) {
         const rows: Record<string, string | string[]> = {};
         for (const row of q.rows || []) {

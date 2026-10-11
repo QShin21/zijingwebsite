@@ -1,6 +1,7 @@
 "use client";
 import type { Answer, Question } from "@/lib/signup-schema";
 import { hasRows } from "@/lib/questionnaire-model";
+import { QuestionnaireGroup } from "./QuestionnaireGroup";
 export function QuestionnaireAdvanced({
   q,
   value,
@@ -12,6 +13,8 @@ export function QuestionnaireAdvanced({
   onChange: (value: Answer) => void;
   name: string;
 }) {
+  if (q.type === "group")
+    return <QuestionnaireGroup q={q} value={value} onChange={onChange} />;
   if (q.type === "select")
     return (
       <select
@@ -71,7 +74,9 @@ export function QuestionnaireAdvanced({
       </div>
     );
   if (q.type === "ranking") {
-    const ranked = Array.isArray(value) ? value : [];
+    const ranked = Array.isArray(value)
+      ? value.filter((v) => typeof v === "string")
+      : [];
     return (
       <div className="questionnaire-ranking">
         <p>按偏好从高到低选择，第一项为最高优先级。</p>

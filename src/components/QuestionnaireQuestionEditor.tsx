@@ -3,6 +3,10 @@ import type { Question } from "@/lib/signup-schema";
 import { hasOptions, hasRows, questionTypes } from "@/lib/questionnaire-model";
 import { QuestionnaireSettings } from "./QuestionnaireSettings";
 import { QuestionnaireLogic } from "./QuestionnaireLogic";
+import {
+  defaultGroupFields,
+  QuestionnaireGroupEditor,
+} from "./QuestionnaireGroupEditor";
 export function newQuestion(type: Question["type"]): Question {
   return {
     id: crypto.randomUUID(),
@@ -11,6 +15,9 @@ export function newQuestion(type: Question["type"]): Question {
     required: type !== "description",
     options: hasOptions(type) ? ["选项一", "选项二"] : [],
     ...(hasRows(type) ? { rows: ["项目一", "项目二"] } : {}),
+    ...(type === "group"
+      ? { fields: defaultGroupFields(), minEntries: 1, maxEntries: 10 }
+      : {}),
   };
 }
 export function QuestionnaireQuestionEditor({
@@ -64,6 +71,12 @@ export function QuestionnaireQuestionEditor({
                 minChoices: undefined,
                 maxChoices: undefined,
                 exclusiveOption: undefined,
+                fields:
+                  type === "group"
+                    ? q.fields || defaultGroupFields()
+                    : undefined,
+                minEntries: type === "group" ? q.minEntries || 1 : undefined,
+                maxEntries: type === "group" ? q.maxEntries || 10 : undefined,
               });
             }}
           >
@@ -97,6 +110,9 @@ export function QuestionnaireQuestionEditor({
         </label>
       )}
       <QuestionnaireSettings q={q} onChange={onChange} />
+      {q.type === "group" && (
+        <QuestionnaireGroupEditor q={q} onChange={onChange} />
+      )}
       <details className="questionnaire-settings">
         <summary>填写提示与校验</summary>
         <label>

@@ -231,7 +231,7 @@ export function Questionnaire({
             {answerable.map((q) => (
               <div key={q.id}>
                 <dt>{q.label}</dt>
-                <dd>{formatAnswer(answers[q.id])}</dd>
+                <dd>{formatAnswer(answers[q.id], q)}</dd>
               </div>
             ))}
           </dl>
@@ -344,13 +344,16 @@ export function Questionnaire({
                       name={fieldId}
                       checked={
                         q.type === "multiple"
-                          ? Array.isArray(value) && value.includes(option)
+                          ? Array.isArray(value) &&
+                            value.some((v) => v === option)
                           : value === option
                       }
                       onChange={(e) => {
                         if (q.type === "single") update(q.id, option);
                         else {
-                          const previous = Array.isArray(value) ? value : [];
+                          const previous = Array.isArray(value)
+                            ? value.filter((v) => typeof v === "string")
+                            : [];
                           update(
                             q.id,
                             e.target.checked

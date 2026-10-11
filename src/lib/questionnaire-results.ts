@@ -54,12 +54,16 @@ export function summarizeResponses(records: ResponseRecord[]) {
             q.options.forEach((option) => counts.set(option, 0));
           filled.forEach((v) => {
             if (Array.isArray(v))
-              v.forEach((x, i) =>
+              v.filter((x) => typeof x === "string").forEach((x, i) =>
                 add(q.type === "ranking" ? `${i + 1} 名：${x}` : x),
               );
             else if (typeof v === "string") add(v);
           });
         }
+        if (q.type === "group")
+          filled.forEach((v) => {
+            if (Array.isArray(v)) add(`${v.length} 条记录`);
+          });
         if (["matrix", "matrixMultiple"].includes(q.type))
           filled.forEach((v) => {
             if (typeof v === "object" && !Array.isArray(v))
@@ -133,7 +137,7 @@ export function responseCSV(records: ResponseRecord[]) {
           q.id,
           q.label,
           q.type,
-          formatAnswer(r.answers[q.id]),
+          formatAnswer(r.answers[q.id], q),
         ]);
   return "\uFEFF" + rows.map((row) => row.map(csvCell).join(",")).join("\r\n");
 }
@@ -212,7 +216,10 @@ export async function queryResponses(
     ? records.filter(
         (r) =>
           Object.hasOwn(r.answers, question) &&
-          formatAnswer(r.answers[question]).includes(answer),
+          formatAnswer(
+            r.answers[question],
+            r.questions.find((q) => q.id === question),
+          ).includes(answer),
       )
     : records;
 }

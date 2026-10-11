@@ -366,7 +366,6 @@ export function SignupBuilder({
                       <button
                         type="button"
                         key={type}
-                        disabled={value.questions.length >= 100}
                         onClick={() => {
                           const q = newQuestion(type as Question["type"]);
                           patch({ questions: [...value.questions, q] });
@@ -417,7 +416,6 @@ export function SignupBuilder({
                         <div className="signup-tools">
                           <button
                             type="button"
-                            disabled={value.questions.length >= 100}
                             onClick={() => {
                               const copy = structuredClone(q);
                               copy.id = crypto.randomUUID();
@@ -456,7 +454,6 @@ export function SignupBuilder({
                 <button
                   type="button"
                   className="button light"
-                  disabled={value.questions.length >= 100}
                   onClick={() => {
                     const q = newQuestion("text");
                     patch({ questions: [...value.questions, q] });
@@ -474,7 +471,7 @@ export function SignupBuilder({
             </p>
           )}
           <div className="designer-footer">
-            <small>{value.questions.length} / 100 题 · 保存后生效</small>
+            <small>{value.questions.length} 题 · 保存后生效</small>
             <button
               type="button"
               onClick={openPreview}

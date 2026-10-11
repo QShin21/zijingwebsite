@@ -12,6 +12,11 @@ import {
 } from "@/lib/questionnaire-templates";
 import { questionTypes } from "@/lib/questionnaire-model";
 import { Questionnaire } from "./Questionnaire";
+import type {
+  AILogic,
+  GenerationProgress,
+} from "@/lib/questionnaire-ai-contract";
+import { readGeneration } from "@/lib/questionnaire-ai-client";
 type Candidate = {
   form: SignupForm;
   label: string;
@@ -37,8 +42,10 @@ export function QuestionnaireTools({
     [error, setError] = useState("");
   const [description, setDescription] = useState(""),
     [audience, setAudience] = useState(""),
-    [count, setCount] = useState(8),
-    [logic, setLogic] = useState(false);
+    [logic, setLogic] = useState<AILogic>("auto"),
+    [refinement, setRefinement] = useState("");
+  const [progress, setProgress] = useState<GenerationProgress | null>(null),
+    [elapsed, setElapsed] = useState(0);
   const [pending, setPending] = useState(false),
     [capability, setCapability] = useState<boolean | null>(null);
   useEffect(() => {
@@ -60,6 +67,15 @@ export function QuestionnaireTools({
     };
   }, [tab]);
   useEffect(() => () => request.current?.abort(), []);
+  useEffect(() => {
+    if (!pending) return;
+    const started = Date.now();
+    const timer = setInterval(
+      () => setElapsed(Math.floor((Date.now() - started) / 1000)),
+      1000,
+    );
+    return () => clearInterval(timer);
+  }, [pending]);
   function open(next: typeof tab) {
     setTab(next);
     setError("");
@@ -80,6 +96,7 @@ export function QuestionnaireTools({
     setTryFill(false);
     setError("");
     setMode("replace");
+    setRefinement("");
   }
   function apply() {
     if (!candidate) return;
@@ -90,26 +107,45 @@ export function QuestionnaireTools({
       setError((e as Error).message);
     }
   }
-  async function generate() {
+  async function generate(improve = false) {
     if (pending) return;
     const controller = new AbortController();
     request.current = controller;
     setPending(true);
     setError("");
+    setElapsed(0);
+    setProgress({
+      stage: "generating",
+      message: improve ? "正在完善草稿…" : "正在准备制作…",
+    });
     try {
       const res = await fetch("/api/questionnaires/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ description, audience, count, logic }),
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/x-ndjson",
+        },
+        body: JSON.stringify({
+          description,
+          audience,
+          logic,
+          ...(improve && candidate
+            ? { draft: candidate.form, refinement }
+            : {}),
+        }),
         signal: controller.signal,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "AI 制作未完成，请重试。");
+      const data = await readGeneration(res, setProgress);
       preview(data.form, "AI 生成草稿", "ai");
     } catch (e) {
-      if (!controller.signal.aborted) setError((e as Error).message);
+      setError(
+        controller.signal.aborted
+          ? "已取消本次生成，制作需求和已有草稿已保留。"
+          : (e as Error).message,
+      );
     } finally {
       setPending(false);
+      request.current = null;
     }
   }
   const templates = questionnaireTemplates.filter(
@@ -211,7 +247,20 @@ export function QuestionnaireTools({
           <div className="blueprint-preview">
             <div className="blueprint-heading">
               <h3>{candidate.form.title || "导入的问卷"}</h3>
-              <span>{candidate.form.questions.length} 题</span>
+              <span>
+                {candidate.form.questions.length} 题 ·{" "}
+                {
+                  candidate.form.questions.filter(
+                    (q) => q.display || q.showWhen,
+                  ).length
+                }{" "}
+                个条件显示 ·{" "}
+                {candidate.form.questions.reduce(
+                  (n, q) => n + (q.jumps?.length || 0),
+                  0,
+                )}{" "}
+                个跳转
+              </span>
             </div>
             <p className="preserve">
               {candidate.form.intro || "应用后可在问卷设置中补充说明。"}
@@ -254,9 +303,67 @@ export function QuestionnaireTools({
                     {q.rows?.length && (
                       <small>子题：{q.rows.join(" / ")}</small>
                     )}
+                    {q.fields && (
+                      <small>
+                        每条填写：{q.fields.map((f) => f.label).join(" / ")}；
+                        {q.minEntries}–{q.maxEntries} 条记录
+                      </small>
+                    )}
+                    {q.display && (
+                      <small>
+                        显示条件：
+                        {q.display.rules
+                          .map(
+                            (r) =>
+                              `${candidate.form.questions.find((source) => source.id === r.questionId)?.label} ${r.operator === "equals" ? "为" : r.operator} ${r.value}`,
+                          )
+                          .join(q.display.mode === "all" ? "，且 " : "，或 ")}
+                      </small>
+                    )}
                   </li>
                 ))}
               </ol>
+            )}
+            {candidate.source === "ai" && (
+              <div className="ai-refinement">
+                <label>
+                  修改要求
+                  <textarea
+                    aria-label="修改要求"
+                    rows={3}
+                    maxLength={2000}
+                    value={refinement}
+                    disabled={pending}
+                    onChange={(e) => setRefinement(e.target.value)}
+                    placeholder="例如：增加队长联系方式，把游戏位置改为下拉选择，保留个人与团队报名分支。"
+                  />
+                </label>
+                <small>
+                  AI 将收到制作需求、这份草稿及修改要求，生成后仍需试填与保存。
+                </small>
+                <div className="signup-tools">
+                  <button
+                    type="button"
+                    disabled={pending || refinement.trim().length < 5}
+                    onClick={() => generate(true)}
+                  >
+                    按要求完善草稿
+                  </button>
+                  {pending && (
+                    <button
+                      type="button"
+                      onClick={() => request.current?.abort()}
+                    >
+                      取消本次生成
+                    </button>
+                  )}
+                </div>
+                {pending && (
+                  <p role="status">
+                    {progress?.message} 已等待 {elapsed} 秒。
+                  </p>
+                )}
+              </div>
             )}
             <div className="blueprint-apply">
               <fieldset>
@@ -264,6 +371,7 @@ export function QuestionnaireTools({
                 <label className="signup-choice">
                   <input
                     type="radio"
+                    disabled={pending}
                     name={`${titleId}-mode`}
                     checked={mode === "replace"}
                     onChange={() => setMode("replace")}
@@ -273,6 +381,7 @@ export function QuestionnaireTools({
                 <label className="signup-choice">
                   <input
                     type="radio"
+                    disabled={pending}
                     name={`${titleId}-mode`}
                     checked={mode === "append"}
                     onChange={() => setMode("append")}
@@ -289,6 +398,7 @@ export function QuestionnaireTools({
               <div className="signup-tools">
                 <button
                   type="button"
+                  disabled={pending}
                   onClick={() => {
                     setCandidate(null);
                     setTryFill(false);
@@ -297,7 +407,12 @@ export function QuestionnaireTools({
                   返回
                   {candidate.source === "template" ? "模板列表" : "制作需求"}
                 </button>
-                <button type="button" className="button" onClick={apply}>
+                <button
+                  type="button"
+                  className="button"
+                  onClick={apply}
+                  disabled={pending}
+                >
                   {mode === "replace" ? "替换并进入编辑" : "追加并进入编辑"}
                 </button>
               </div>
@@ -368,6 +483,35 @@ export function QuestionnaireTools({
               会整理成题目与选项。生成结果可以先试填，再进入编辑。
             </p>
             <span className="ai-model-label">DeepSeek-V4.1-Flash</span>
+            <div className="ai-examples" aria-label="制作需求示例">
+              {[
+                [
+                  "比赛报名",
+                  "制作一份校园团队比赛报名问卷，分个人与团队报名。收集姓名、学号、游戏ID、擅长位置和联系人信息。团队名单包含队长，至少5人、最多6人，每个人的信息都需要完整填写。",
+                ],
+                [
+                  "活动反馈",
+                  "制作一份活动反馈问卷，了解整体满意度、内容安排、组织体验与改进建议。没有参加的人只回答未参加原因，参加者回答评分及开放建议，避免重复问题。",
+                ],
+                [
+                  "志愿者招募",
+                  "制作一份志愿者意向问卷，收集联系方式、可参与时段、任务偏好及相关经验。有经验者补充经历，无经验者跳过经历题，不编造活动日期。",
+                ],
+              ].map(([label, example]) => (
+                <button
+                  key={label}
+                  type="button"
+                  disabled={pending}
+                  onClick={() => {
+                    setDescription(example);
+                    setLogic("auto");
+                    setError("");
+                  }}
+                >
+                  使用{label}示例
+                </button>
+              ))}
+            </div>
             <label>
               制作需求
               <textarea
@@ -390,32 +534,31 @@ export function QuestionnaireTools({
                   maxLength={200}
                   disabled={pending}
                   onChange={(e) => setAudience(e.target.value)}
-                  placeholder="例如：参加活动的成员"
+                  placeholder="选填，AI 可从制作需求判断"
                 />
               </label>
-              <label>
-                作答题数
-                <select
-                  value={count}
-                  disabled={pending}
-                  onChange={(e) => setCount(Number(e.target.value))}
-                >
-                  {[3, 5, 8, 10, 15, 20, 30].map((n) => (
-                    <option key={n} value={n}>
-                      {n} 道题
-                    </option>
-                  ))}
-                </select>
-              </label>
             </div>
-            <label className="signup-choice">
-              <input
-                type="checkbox"
-                checked={logic}
+            <label>
+              填写分支
+              <select
+                value={logic === "auto" ? "auto" : String(logic)}
                 disabled={pending}
-                onChange={(e) => setLogic(e.target.checked)}
-              />
-              按需求设计条件显示与跳转
+                onChange={(e) =>
+                  setLogic(
+                    e.target.value === "auto"
+                      ? "auto"
+                      : e.target.value === "true",
+                  )
+                }
+              >
+                <option value="auto">按需求自动判断（推荐）</option>
+                <option value="true">设计条件显示与跳转</option>
+                <option value="false">全部按顺序作答</option>
+              </select>
+              <small>
+                分类报名会自动设计分支；多人名单可设置每人的字段和人数上限。题目数量由
+                AI 根据需求安排。
+              </small>
             </label>
             <p className="muted">
               需求将交给 AI 服务处理，请使用通用描述。每个管理账号每小时最多制作
@@ -435,7 +578,7 @@ export function QuestionnaireTools({
                   capability === false ||
                   description.trim().length < 10
                 }
-                onClick={generate}
+                onClick={() => generate()}
               >
                 {pending ? "正在生成题目与逻辑…" : "生成问卷草稿"}
               </button>
@@ -447,8 +590,8 @@ export function QuestionnaireTools({
             </div>
             <p role="status">
               {pending
-                ? "通常需要几十秒。生成期间请保持此窗口打开。"
-                : "草稿通过题目与逻辑检查后会显示在这里。"}
+                ? `${progress?.message} 已等待 ${elapsed} 秒。可以取消，现有问卷会保留。`
+                : "生成后会自动检查题目、人数限制与分支；发现格式问题会在本次制作中尝试修复。请预览各个填写路径后应用。"}
             </p>
           </div>
         ) : (

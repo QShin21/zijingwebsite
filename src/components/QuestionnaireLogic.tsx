@@ -18,7 +18,9 @@ export function ConditionEditor({
 }) {
   const eligible = sources.filter(
     (q) =>
-      !["description", "matrix", "matrixMultiple", "blanks"].includes(q.type),
+      !["description", "matrix", "matrixMultiple", "blanks", "group"].includes(
+        q.type,
+      ),
   );
   return (
     <div className="condition-editor">
@@ -158,7 +160,9 @@ export function QuestionnaireLogic({
 }) {
   const sources = [...previous, q].filter(
     (p) =>
-      !["description", "matrix", "matrixMultiple", "blanks"].includes(p.type),
+      !["description", "matrix", "matrixMultiple", "blanks", "group"].includes(
+        p.type,
+      ),
   );
   const display =
     q.display ||
@@ -200,6 +204,7 @@ export function QuestionnaireLogic({
                     "matrix",
                     "matrixMultiple",
                     "blanks",
+                    "group",
                   ].includes(p.type),
               )
             }
@@ -217,6 +222,7 @@ export function QuestionnaireLogic({
                             "matrix",
                             "matrixMultiple",
                             "blanks",
+                            "group",
                           ].includes(p.type),
                       )!.id,
                       operator: "answered",
