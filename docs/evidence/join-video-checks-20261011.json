@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-11",
+  "applicationRevision": "ed1a4fdacacb13605e540ed77ac02c15dbee204d",
+  "miniappVersion": "0.1.4",
+  "checks": {
+    "lint": "passed",
+    "typecheck": "passed",
+    "unitDatabaseTests": 110,
+    "browserTests": 2,
+    "productionBuild": "passed",
+    "miniappStatic": "passed"
+  },
+  "miniapp": {
+    "officialPreview": "passed",
+    "officialDevelopmentUpload": "passed",
+    "packageBytes": 109715,
+    "domainChecking": true
+  },
+  "limits": [
+    "Mini simulator UI uses controlled fixtures; phone unverified",
+    "Bilibili iframe markup and CSP verified; third-party playback unverified",
+    "Bilibili iframe applies to website; native miniapp plays MP4 sources only",
+    "No production fixture data imported"
+  ]
+}

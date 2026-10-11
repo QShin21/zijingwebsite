@@ -26,4 +26,6 @@ B 站官方 iframe 仅用于网页播放。小程序原生页面不能直接渲�
 
 ## 部署
 
-部署前已创建 /srv/zijingwebsite/backups/join-video-20261011，包含源码、媒体、环境副本、57 张表逻辑行快照和配置/进程基线。逻辑快照恢复未演练；应用回退使用保留的旧源码与构建。构建和切换结果在完成后补充。
+部署前已创建 /srv/zijingwebsite/backups/join-video-20261011，包含源码、媒体、环境副本、57 张表逻辑行快照和配置/进程基线。逻辑快照恢复未演练；应用回退使用保留的旧源码与构建。服务器独立构建、临时实例检查和线上切换通过，应用提交 ed1a4fdacacb13605e540ed77ac02c15dbee204d。182 份源码匹配，57 张表行摘要及媒体不变，环境配置、数据库和 FreeKill 进程不变；网站就绪 200、FreeKill HTTPS 200 / WebSocket 101。swappiness 恢复 0。回退脚本为该备份目录中的 rollback.sh，未执行线上回退演练。
+
+官方 CLI 预览与开发版 0.1.4 上传成功，包大小 109715 字节，urlCheck 保持 true。源码已推送 littleapp、main 及 codex/join-showcase-video。正式微信审核和发布未执行。详细检查见 evidence/join-video-checks-20261011.json 与 evidence/join-video-deployment-20261011.json。
