@@ -207,13 +207,28 @@ function* responseRows(records: ResponseRecord[], defs: Definition[]) {
 function* memberRows(records: ResponseRecord[], defs: Definition[]) {
   const context = columns(defs.filter((d) => d.question.type !== "group"));
   const groups = defs.filter((d) => d.question.type === "group");
-  const fields = groups.flatMap((d) =>
-    d.fields.map((field, index) => ({
-      definition: d,
-      field,
-      heading: `${d.heading} / ${fieldHeading(d, field, index)}`,
-    })),
-  );
+  const shared = new Map<
+    string,
+    { heading: string; sources: Map<string, EntryField> }
+  >();
+  for (const d of groups)
+    d.fields.forEach((field, index) => {
+      const ambiguous =
+        d.fields.filter((f) => f.label === field.label && f.type === field.type)
+          .length > 1;
+      const key = ambiguous
+        ? JSON.stringify([d.key, identity(field)])
+        : JSON.stringify([field.label, field.type]);
+      if (!shared.has(key))
+        shared.set(key, {
+          heading: ambiguous
+            ? `${d.heading} / ${fieldHeading(d, field, index)}`
+            : field.label,
+          sources: new Map(),
+        });
+      shared.get(key)!.sources.set(d.key, field);
+    });
+  const fields = [...shared.values()];
   yield uniqueHeaders([
     ...metadataHeaders,
     ...context.map((c) => c.heading),
@@ -231,11 +246,10 @@ function* memberRows(records: ResponseRecord[], defs: Definition[]) {
           ...prefix,
           q.label,
           index + 1,
-          ...fields.map((f) =>
-            f.definition.key === identity(q)
-              ? fieldValue(entry, f.field, q)
-              : "",
-          ),
+          ...fields.map((f) => {
+            const field = f.sources.get(identity(q));
+            return field ? fieldValue(entry, field, q) : "";
+          }),
         ];
     }
   }
@@ -282,10 +296,14 @@ export function responseExportFilename(
   now = new Date(),
 ) {
   const name =
-    title
-      .replace(/[<>:"/\\|?*\r\n]/g, "_")
-      .trim()
-      .slice(0, 60) || "问卷";
+    [
+      ...title
+        .replace(/[<>:"/\\|?*]/g, "_")
+        .replace(/\p{Cc}/gu, "_")
+        .trim(),
+    ]
+      .slice(0, 60)
+      .join("") || "问卷";
   const label = { responses: "答卷表", members: "成员明细", long: "按题明细" }[
     layout
   ];

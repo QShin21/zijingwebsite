@@ -156,18 +156,21 @@ it("expands member details with response context and preserves multiple independ
   });
   const { records } = readCSV(responseCSV([r], questions, "members"));
   expect(records).toHaveLength(3);
+  expect(
+    Object.keys(records[0]).filter((name) => name === "学号"),
+  ).toHaveLength(1);
   expect(records[0]).toMatchObject({
     报名编号: "1",
     "Q1. 队名": "本地演示队",
     信息组题目: "成员名单",
     组内序号: "1",
-    "Q2. 成员名单 / 学号": "0001",
-    "Q3. 替补名单 / 学号": "",
+    学号: "0001",
+    姓名: "一",
   });
   expect(records[2]).toMatchObject({
     信息组题目: "替补名单",
-    "Q3. 替补名单 / 学号": "0003",
-    "Q2. 成员名单 / 姓名": "",
+    学号: "0003",
+    姓名: "三",
   });
   expect(
     readCSV(responseCSV([record(questions, {})], questions, "members")).rows,
@@ -209,8 +212,23 @@ it("disambiguates separator collisions and repeated field labels without overwri
   expect(records[0]["Q1. m / r / A / B [2]"]).toBe("0");
   expect(records[0]["Q2. 成员名单 / 第1条 / 同名 [1]"]).toBe("姓名");
   expect(records[0]["Q2. 成员名单 / 第1条 / 同名 [2]"]).toBe("学号");
+  const member = readCSV(
+    responseCSV(
+      [record(questions, { 成员名单: [{ name: "姓名", student: "学号" }] })],
+      [],
+      "members",
+    ),
+  ).records[0];
+  expect(member["Q2. 成员名单 / 同名 [1]"]).toBe("姓名");
+  expect(member["Q2. 成员名单 / 同名 [2]"]).toBe("学号");
 });
 it("uses explicit layout validation and activity/time filenames", () => {
+  const unicodeName = responseExportFilename(
+    "a".repeat(59) + "😀更多",
+    "responses",
+  );
+  expect(unicodeName).toContain("😀");
+  expect(() => encodeURIComponent(unicodeName)).not.toThrow();
   expect(responseExportLayout(null)).toBe("responses");
   expect(responseExportLayout("members")).toBe("members");
   expect(() => responseExportLayout("unknown")).toThrow("导出格式无效");

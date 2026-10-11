@@ -779,7 +779,7 @@ test("organizer downloads one-row responses and member details with filters and 
       报名编号: wide.records[0]["报名编号"],
       "Q6. 队伍名称": "本地演示队",
       组内序号: "5",
-      "Q7. 成员名单 / 学号": "00005",
+      "学号": "00005",
     });
     const filtered = await page.request.get(
       endpoint +

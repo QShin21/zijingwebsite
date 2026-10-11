@@ -129,7 +129,10 @@ export function QuestionnaireResults({
       </div>
       <label>
         导出格式
-        <select value={layout} onChange={(e) => setLayout(e.target.value as ResponseExportLayout)}>
+        <select
+          value={layout}
+          onChange={(e) => setLayout(e.target.value as ResponseExportLayout)}
+        >
           <option value="responses">答卷表：每份答卷一行（推荐）</option>
           <option value="members">成员明细：每条信息组记录一行</option>
           <option value="long">按题明细：每个答案一行</option>
@@ -139,7 +142,7 @@ export function QuestionnaireResults({
         {layout === "responses"
           ? "每题分列；多项填空和矩阵按子题拆列，成员名单按序号和字段拆列。多选 1 表示选中、0 表示未选；空白表示未填写或未显示。排序以数字记录名次。"
           : layout === "members"
-            ? "适用于团队名单等信息组：每条记录一行，字段分列，并带上报名编号、填写者及普通题答案，方便筛选和整理名单。"
+            ? "适用于个人与团队名单：每条信息组记录一行，同名字段合并到一列，并带上报名编号、填写者、信息组题目及普通题答案，方便统一整理名单。"
             : "每个答案一行，保留题目标识、题型和完整答案，适合复核历史问卷。"}
       </p>
       <p className="muted">
