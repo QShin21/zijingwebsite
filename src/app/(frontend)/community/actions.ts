@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cms } from "@/lib/content";
 import { canPublish, hasRole, managesGame } from "@/lib/rules";
+import { discardVideo, saveVideo, VIDEO_MAX_BYTES, SUBMISSION_MAX_BYTES } from '@/lib/showcase-videos';
 import { applicationError } from "@/lib/application-error";
 
 const value = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
@@ -96,12 +97,19 @@ export async function submitShowcaseAction(form: FormData) {
   if (!user || user.accountStatus === "suspended") return { error: "请先登录可用账号" };
   const files = form.getAll("images").filter(f => f instanceof File && f.size) as File[];
   if (files.length > 6 || files.some(f => f.size > 2 * 1024 * 1024 || !["image/png", "image/jpeg", "image/webp"].includes(f.type))) return { error: "最多 6 张 PNG、JPEG、WebP 照片，每张 2 MB 以内" };
+  const video = form.get('video');
+  const videoFile = video instanceof File && video.size ? video : null;
+  if (!value(form, 'title')) return { error: '请填写标题' };
+  if (videoFile && value(form, 'videoURL')) return { error: '上传视频与视频链接请选择一种' };
+  if ((videoFile?.size || 0) > VIDEO_MAX_BYTES || files.reduce((sum, file) => sum + file.size, videoFile?.size || 0) > SUBMISSION_MAX_BYTES) return { error: '视频不超过 10 MB，图片与视频合计不超过 12 MB' };
+  let uploaded = '';
   try {
     const images = await Promise.all(files.map(async file => ({ source: `data:${file.type};base64,${Buffer.from(await file.arrayBuffer()).toString("base64")}`, caption: value(form, "caption") })));
+    if (videoFile) uploaded = await saveVideo(videoFile);
     await p.create({ collection: "community-showcase", overrideAccess: false, user, context: { webShowcaseWrite: true },
-      data: { game: numeric(form, "game"), author: user.id, title: value(form, "title"), body: value(form, "body"), videoURL: value(form, "videoURL"), images } });
+      data: { game: numeric(form, "game"), author: user.id, title: value(form, "title"), body: value(form, "body"), videoURL: uploaded || value(form, "videoURL"), images } });
     return { success: true };
-  } catch (error) { return { error: applicationError(error) }; }
+  } catch (error) { if (uploaded) await discardVideo(uploaded); return { error: applicationError(error) }; }
 }
 export async function reviewShowcaseAction(form: FormData) {
   const { p, user } = await current();

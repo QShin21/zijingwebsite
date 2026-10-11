@@ -3311,3 +3311,6 @@ button:disabled {
 .showcase-review input { border:1px solid #d8cfe4; border-radius:8px; padding:10px }
 .showcase-compose { max-width:960px; margin:24px auto }
 .showcase-compose summary { font-weight:bold; font-size:1.2rem; cursor:pointer }
+
+.community-video video { display: block; width: 100%; max-height: 70vh; aspect-ratio: 16 / 9; background: #17131d; border-radius: 12px; }
+.video-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }

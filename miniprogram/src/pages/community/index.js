@@ -4,9 +4,10 @@ const files = require('../../lib/files');
 const format = require('../../lib/format');
 const { render } = require('../../lib/richtext');
 const { actions, error, protect } = require('../../lib/page');
+const video = require('../../lib/video');
 const areas = { updates: 'community-posts', showcase: 'community-showcase' };
 Page({
-  data: { loading: true, error: '', needsLogin: false, game: {}, area: 'updates', docs: [], page: 1,
+  data: { loading: true, error: '', needsLogin: false, game: {}, area: 'contacts', docs: [], page: 1,
     hasMore: false, loadingMore: false, contacts: [], nodes: [], contentError: '' },
   ...actions,
   onLoad(options) { this._options = options; },
@@ -32,6 +33,7 @@ Page({
     } catch (cause) { if (ticket === this._ticket) error(this, cause); }
   },
   async loadArea(more = false) {
+    if (this.data.area === 'contacts') { this._areaTicket = (this._areaTicket || 0) + 1; this.setData({ loadingMore: false, hasMore: false, contentError: '' }); return; }
     const ticket = this._areaTicket = (this._areaTicket || 0) + 1;
     this.setData({ loadingMore: true, contentError: '' });
     try {
@@ -42,12 +44,13 @@ Page({
       for (const doc of result.docs) {
         const images = [];
         for (const image of (doc.images || [])) images.push({ source: await files.localImage(image.source), caption: image.caption });
-        docs.push({ ...doc, collection: areas[this.data.area], dateText: format.date(doc.createdAt), localImages: images });
+        docs.push({ ...doc, collection: areas[this.data.area], dateText: format.date(doc.createdAt), localImages: images, videoSource: video.source(doc.videoURL), videoError: false });
       }
       if (ticket !== this._areaTicket) return;
       this.setData({ loadingMore: false, docs: more ? this.data.docs.concat(docs) : docs, page: result.page, hasMore: result.hasNextPage });
     } catch (cause) { if (ticket === this._areaTicket) this.setData({ loadingMore: false, contentError: cause.message }); }
   },
-  area(event) { if (!areas[event.currentTarget.dataset.area]) return; this.setData({ area: event.currentTarget.dataset.area, docs: [], page: 1 }); this.loadArea(); },
+  area(event) { if (event.currentTarget.dataset.area !== 'contacts' && !areas[event.currentTarget.dataset.area]) return; this.setData({ area: event.currentTarget.dataset.area, docs: [], page: 1 }); this.loadArea(); },
+  videoError(event) { const index = Number(event.currentTarget.dataset.index); this.setData({ [`docs[${index}].videoError`]: true }); },
   onShareAppMessage() { return { title: this.data.game.title || '紫荆游戏社群', path: `/pages/community/index?id=${this.data.game.id}&slug=${this.data.game.slug}` }; },
 });

@@ -205,6 +205,13 @@ describe.sequential("申请、建群、网页投稿与跨级审核", () => {
     await expect(p.create({ collection: "community-showcase", overrideAccess: false, user: member, context: { webShowcaseWrite: true },
       data: { game, author: member.id, title: "伪造图片", body: "无效图片必须拒绝", images: [{ source: "data:image/png;base64,aGVsbG8=" }] } })).rejects.toThrow();
   });
+  it("网页风采只需标题，活动通知仍要求正文", async () => {
+    const post = await p.create({ collection: 'community-showcase', overrideAccess: false, user: member, context: { webShowcaseWrite: true },
+      data: { game, author: member.id, title: '只有标题的风采' } });
+    try { expect(post.title).toBe('只有标题的风采'); expect(post.body || '').toBe(''); }
+    finally { await p.delete({ collection: 'community-showcase', id: post.id, overrideAccess: true }); }
+    await expect(p.create({ collection: 'community-posts', overrideAccess: false, user: member, data: { game, author: member.id, title: '无正文通知', body: '', category: 'notice' } })).rejects.toThrow();
+  });
   it("互动集合不再注册，通知与网页风采仍可用", () => {
     for (const name of ["community-messages", "forum-posts", "comments", "community-reactions"])
       expect(p.collections).not.toHaveProperty(name);

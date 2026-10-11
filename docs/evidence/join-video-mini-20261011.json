@@ -1,0 +1,8 @@
+{
+  "date": "2026-10-11",
+  "mode": "simulator controlled fixtures; no production writes",
+  "cases": [
+    "home ordinary-member link selects Join Us; game opens contacts by default; three peer tabs",
+    "showcase has native video component; play called with local H264 fixture and no error event; contacts absent; no submission controls"
+  ]
+}

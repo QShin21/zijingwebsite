@@ -41,7 +41,7 @@
       },
       {
         "pagePath": "pages/communities/index",
-        "text": "社群",
+        "text": "加入我们",
         "iconPath": "assets/community.png",
         "selectedIconPath": "assets/community-active.png"
       },

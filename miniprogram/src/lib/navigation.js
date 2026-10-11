@@ -17,6 +17,7 @@ function copy(value, label = '链接已复制') {
 }
 function website(path) {
   if (!path || typeof path !== 'string') return;
+  if (path === '/join/members') return go('communities');
   const fixed = { '/about': 'about', '/contact': 'contact', '/privacy': 'privacy', '/join': 'join', '/join/members': 'join-members', '/join/teams': 'join-teams', '/join/staff': 'join-staff' };
   if (fixed[path]) return go('fixed', { key: fixed[path] });
   if (path === '/') return go('home');

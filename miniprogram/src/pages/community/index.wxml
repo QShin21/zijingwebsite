@@ -6,11 +6,12 @@
     <text wx:if="{{game.summary}}" class="subtitle">{{game.summary}}</text>
     <view wx:if="{{nodes.length}}" class="body"><rich-text nodes="{{nodes}}" /></view>
     <scroll-view scroll-x class="chips">
+      <view class="chip {{area === 'contacts' ? 'active' : ''}}" bindtap="area" data-area="contacts">联系管理加入群聊</view>
       <view class="chip {{area === 'updates' ? 'active' : ''}}" bindtap="area" data-area="updates">活动与通知</view>
       <view class="chip {{area === 'showcase' ? 'active' : ''}}" bindtap="area" data-area="showcase">社群风采</view>
     </scroll-view>
     <text wx:if="{{contentError}}" class="error">{{contentError}}</text>
-    <view wx:for="{{docs}}" wx:key="id" class="card community-card">
+    <view wx:if="{{area !== 'contacts'}}" wx:for="{{docs}}" wx:key="id" class="card community-card">
       <view wx:if="{{area === 'updates'}}" class="card-body" bindtap="openContent" data-doc="{{item}}">
         <view class="meta"><text>{{item.authorName}}</text><text>{{item.dateText}}</text></view>
         <text class="card-title">{{item.title}}</text><text class="card-summary">{{item.body}}</text><text class="more">查看详情 →</text>
@@ -20,12 +21,15 @@
         <view wx:for="{{item.localImages}}" wx:for-item="photo" wx:key="source">
           <image class="photo" src="{{photo.source}}" mode="widthFix" bindtap="previewImage" data-url="{{photo.source}}" /><text wx:if="{{photo.caption}}" class="muted">{{photo.caption}}</text>
         </view>
-        <button wx:if="{{item.videoURL}}" class="plain" bindtap="copy" data-value="{{item.videoURL}}">复制视频链接 ↗</button>
+        <video id="showcase-video-{{index}}" wx:if="{{item.videoSource}}" class="showcase-video" src="{{item.videoSource}}" controls="{{true}}" autoplay="{{false}}" object-fit="contain" show-center-play-btn="{{true}}" binderror="videoError" data-index="{{index}}" />
+        <text wx:if="{{item.videoError}}" class="error">视频暂时无法播放，请检查网络或使用下方链接。</text>
+        <text wx:if="{{item.videoURL && !item.videoSource}}" class="muted">此内容使用外部视频页面，暂不能在小程序内播放。</text>
+        <button wx:if="{{item.videoURL}}" class="plain" bindtap="copy" data-value="{{item.videoSource || item.videoURL}}">复制视频链接 ↗</button>
       </view>
     </view>
-    <view wx:if="{{!docs.length && !loadingMore && !contentError}}" class="empty"><text>还没有内容</text><text class="muted">新的活动与记录会出现在这里。</text></view>
+    <view wx:if="{{area !== 'contacts' && !docs.length && !loadingMore && !contentError}}" class="empty"><text>还没有内容</text><text class="muted">新的活动与记录会出现在这里。</text></view>
     <button wx:if="{{hasMore}}" class="plain" loading="{{loadingMore}}" bindtap="onReachBottom">加载更多</button>
-    <view wx:if="{{contacts.length}}" class="section panel"><text class="section-title">联系社群管理员</text>
+    <view wx:if="{{area === 'contacts'}}" class="section panel"><text class="section-title">联系管理加入群聊</text><text class="muted">联系下方管理员，说明希望加入的游戏项目。</text><text wx:if="{{!contacts.length}}" class="empty">该项目暂未公布管理员名片</text>
       <view wx:for="{{contacts}}" wx:key="name" class="contact"><text>{{item.name}}</text><image wx:if="{{item.image}}" class="contact-qr" mode="aspectFit" src="{{item.image}}" show-menu-by-longpress bindtap="previewImage" data-url="{{item.image}}" /></view>
     </view>
   </block>

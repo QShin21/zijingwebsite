@@ -6,7 +6,7 @@ import { reviewShowcaseAction } from "@/app/(frontend)/community/actions";
 const labels = { visible: "已发布", pending: "待审核", rejected: "已退回", hidden: "已隐藏" };
 export function ShowcaseCard({ post, manager = false, privateView = false }: { post: Pick<CommunityShowcase, "id" | "title" | "body" | "images" | "videoURL" | "status" | "authorName" | "createdAt" | "reviewNote">; manager?: boolean; privateView?: boolean }) {
   return <article className="panel showcase-card"><small>{post.authorName} · {formatDate(post.createdAt)}{privateView && ` · ${labels[post.status || "pending"]}`}</small>
-    <h3>{post.title}</h3><p className="preserve">{post.body}</p>
+    <h3>{post.title}</h3>{post.body && <p className="preserve">{post.body}</p>}
     <div className="showcase-images">{post.images?.map((image, index) => <figure key={image.id || index}><a href={image.source} target="_blank" rel="noopener noreferrer"><img src={image.source} alt={image.caption || `${post.title} · 活动照片 ${index + 1}`} loading="lazy" width={800} height={600} /></a>{image.caption && <figcaption>{image.caption}</figcaption>}</figure>)}</div>
     {post.videoURL && <CommunityVideo url={post.videoURL} />}
     {privateView && post.reviewNote && <p>审核说明：{post.reviewNote}</p>}

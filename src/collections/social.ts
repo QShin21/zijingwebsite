@@ -54,7 +54,11 @@ const participationGuard = (kind: "local" | "showcase"): CollectionBeforeChangeH
   async ({ data, originalDoc, req, operation }) => {
     const user = req.user as Identity;
     if (kind === "showcase") {
-      if (data.videoURL && !communityVideo(data.videoURL)) throw new APIError("请填写有效的 HTTPS 视频链接", 400);
+      if (data.videoURL) {
+        const video = communityVideo(data.videoURL);
+        if (!video) throw new APIError("请填写有效的 HTTPS 视频链接或 B 站嵌入代码", 400);
+        data.videoURL = video.url;
+      }
       if (data.images !== undefined) {
         if (!Array.isArray(data.images) || data.images.length > 6) throw new APIError("最多上传 6 张照片", 400);
         try {
@@ -81,7 +85,7 @@ const participationGuard = (kind: "local" | "showcase"): CollectionBeforeChangeH
         throw new APIError("仅对应社群管理员可直接发布", 403);
     } else throw new APIError("缺少游戏社群", 400);
     const body = String(data.body ?? "").trim();
-    if ((body.length < 1 && (kind !== "showcase" || (!data.images?.length && !data.videoURL))) || body.length > 5000) throw new APIError("请填写文字或添加图片，文字最多 5000 字", 400);
+    if ((kind !== "showcase" && body.length < 1) || body.length > 5000) throw new APIError("文字最多 5000 字；活动与通知须填写正文", 400);
     data.body = body;
     data.author = user.id;
     data.authorName = String((req.user as Identity & { name?: string }).name ?? "社团成员");

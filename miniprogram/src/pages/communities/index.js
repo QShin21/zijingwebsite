@@ -4,6 +4,7 @@ const { actions, error, protect } = require('../../lib/page');
 Page({
   data: { loading: false, error: '', needsLogin: false, user: null, docs: [], page: 1, hasMore: false },
   ...actions,
+  onLoad() { wx.setNavigationBarTitle({ title: '加入我们' }); },
   onShow() { this.load(); },
   retry() { this.load(); },
   onPullDownRefresh() { this.load().finally(() => wx.stopPullDownRefresh()); },
