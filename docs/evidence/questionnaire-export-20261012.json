@@ -1,0 +1,255 @@
+{
+  "date": "2026-10-12",
+  "applicationRevision": "b086c56cd1210d2cf7bb33d217c216e26acb43a0",
+  "buildId": "i76h7mNePNLef3LcAE-K4",
+  "local": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "unitDatabaseTestsPassed": 217,
+    "newExportBrowserScenario": "passed on final implementation",
+    "existingAdvancedQuestionnaireBrowserScenario": "passed in prior batch; default export path unchanged",
+    "fixtures": "local demonstration only"
+  },
+  "candidate": {
+    "at": "2026-10-11T17:11:05.062Z",
+    "environment": "optimized server candidate; isolated restored database",
+    "responseRows": 2,
+    "memberRows": 5,
+    "columns": 41,
+    "quotedNewlinesPreserved": true,
+    "allLayoutsFilteredAndPrivate": true,
+    "exportDidNotChangeResponse": true,
+    "productionWrites": 0,
+    "requests": [
+      {
+        "method": "GET",
+        "suffix": "",
+        "status": 200,
+        "noStore": true
+      },
+      {
+        "method": "POST",
+        "suffix": "",
+        "status": 200,
+        "noStore": true
+      },
+      {
+        "method": "POST",
+        "suffix": "",
+        "status": 200,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "suffix": "?mode=export",
+        "status": 200,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "suffix": "?mode=export&layout=members",
+        "status": 200,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "suffix": "?mode=export&layout=long",
+        "status": 200,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "suffix": "?mode=export&question=mode&answer=%E4%B8%AA%E4%BA%BA%E6%8A%A5%E5%90%8D",
+        "status": 200,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "suffix": "?mode=export&name=not-present-1791738664937",
+        "status": 200,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "suffix": "?mode=export&layout=invalid",
+        "status": 400,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "suffix": "?mode=export&layout=responses",
+        "status": 403,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "suffix": "?mode=export&layout=responses",
+        "status": 403,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "suffix": "?mode=export&layout=members",
+        "status": 403,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "suffix": "?mode=export&layout=members",
+        "status": 403,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "suffix": "?mode=export&layout=long",
+        "status": 403,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "suffix": "?mode=export&layout=long",
+        "status": 403,
+        "noStore": true
+      },
+      {
+        "method": "GET",
+        "suffix": "",
+        "status": 200,
+        "noStore": true
+      }
+    ]
+  },
+  "production": {
+    "origin": "https://home.thuzijing.top",
+    "exports": {
+      "at": "2026-10-11T17:14:48.855Z",
+      "environment": "production HTTPS; existing records; read-only",
+      "requests": [
+        {
+          "layout": "responses",
+          "status": 200,
+          "rows": 1,
+          "columns": 54,
+          "uniqueHeaders": true,
+          "utf8BOM": true,
+          "noStore": true
+        },
+        {
+          "layout": "members",
+          "status": 200,
+          "rows": 1,
+          "columns": 17,
+          "uniqueHeaders": true,
+          "utf8BOM": true,
+          "noStore": true
+        },
+        {
+          "layout": "long",
+          "status": 200,
+          "rows": 2,
+          "columns": 9,
+          "uniqueHeaders": true,
+          "utf8BOM": true,
+          "noStore": true
+        },
+        {
+          "layout": "responses",
+          "anonymousStatus": 401
+        },
+        {
+          "layout": "members",
+          "anonymousStatus": 401
+        },
+        {
+          "layout": "long",
+          "anonymousStatus": 401
+        }
+      ],
+      "originalResponseUnchanged": true,
+      "explicitProductionMutationRequests": 0
+    },
+    "sourceFilesMatched": 128,
+    "restoreTablesMatched": 58,
+    "unchangedTables": 54,
+    "runtimeMetadataTablesChanged": [
+      "payload_preferences",
+      "payload_preferences_rels",
+      "users_roles",
+      "users_sessions"
+    ],
+    "effectiveRoleAssignmentsUnchanged": true,
+    "authAudit": {
+      "at": "2026-10-11T17:17:02.539Z",
+      "differences": {
+        "payload_preferences": {
+          "before": 14,
+          "after": 15,
+          "columns": [
+            "id",
+            "key",
+            "value",
+            "updated_at",
+            "created_at"
+          ],
+          "changed": true
+        },
+        "payload_preferences_rels": {
+          "before": 15,
+          "after": 16,
+          "columns": [
+            "id",
+            "order",
+            "parent_id",
+            "path",
+            "users_id"
+          ],
+          "changed": true
+        },
+        "users_roles": {
+          "before": 7,
+          "after": 7,
+          "columns": [
+            "order",
+            "parent_id",
+            "value",
+            "id"
+          ],
+          "changed": true
+        },
+        "users_sessions": {
+          "before": 5,
+          "after": 4,
+          "columns": [
+            "_order",
+            "_parent_id",
+            "id",
+            "created_at",
+            "expires_at"
+          ],
+          "changed": true
+        }
+      },
+      "effectiveRoleAssignmentsUnchanged": true
+    },
+    "originalBusinessRecordsUnchanged": true,
+    "environmentContentsUnchanged": true,
+    "mediaUnchanged": true,
+    "otherNginxDirectivesUnchanged": true,
+    "freeKillHTTPS": 200,
+    "freeKillWebSocket": 101,
+    "tlsVerified": true,
+    "backupPath": "/srv/zijingwebsite/backups/questionnaire-export-20261012",
+    "rollbackScriptAvailable": true,
+    "productionRollbackExecuted": false,
+    "productionBusinessWritesByExportVerification": 0
+  },
+  "originalWorkspace": {
+    "unrelatedDirtyItems": 27,
+    "preserved": true
+  },
+  "githubCI": {
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38158388389",
+    "statusAtRecordCreation": "in_progress",
+    "notClaimedPassed": true
+  }
+}
