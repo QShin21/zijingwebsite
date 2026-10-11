@@ -1,0 +1,219 @@
+{
+  "at": "2026-10-11T07:09:07.880Z",
+  "revision": "revision=fb207adc5c301866c7a29d6e3ae9afbe7cb121c8\r\nsource=github/QShin21/zijingwebsite\r\nbranch=littleapp\r\n",
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/health/ready",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/events?limit=1&depth=0",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/miniapp/status",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/community/lol/forum",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/community/lol/forum",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/community/lol/forum",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/community/lol/forum",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/community/lol/forum/1",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/community/lol/forum/1",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/community/lol/forum/1",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/community/lol/forum/1",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/comments",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/comments",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/comments",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/comments",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/community-reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/community-reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/community-reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/community-reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/miniapp/reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/miniapp/reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/miniapp/reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/miniapp/reactions",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/admin/collections/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "POST",
+      "path": "/admin/collections/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/collections/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "DELETE",
+      "path": "/admin/collections/forum-posts",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/showcase-videos/<unknown>.mp4",
+      "status": 404,
+      "noStore": true
+    }
+  ],
+  "unchangedFiles": true,
+  "databaseProcessUnchanged": true,
+  "freeKillProcessesUnchanged": true,
+  "swappiness": "0",
+  "tableCount": 57,
+  "changedTables": [],
+  "sourceFilesMatched": 182,
+  "bilibiliFrameAllowed": true,
+  "mediaUnchanged": true,
+  "freeKillHTTPS": 200,
+  "ok": true,
+  "freeKillWebSocket": 101,
+  "localChecks": {
+    "lint": "passed",
+    "typecheck": "passed",
+    "browserTests": 2,
+    "productionBuild": "passed"
+  },
+  "rollback": "/srv/zijingwebsite/backups/inline-video-20261011/rollback.sh",
+  "rollbackTested": false,
+  "limits": [
+    "Bilibili iframe visible without a preview toggle; third-party playback depends on network and video permissions",
+    "Miniapp unchanged; official launchApp does not open arbitrary third-party apps"
+  ]
+}
