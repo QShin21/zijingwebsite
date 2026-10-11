@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-12",
+  "version": "0.3.1",
+  "baseRevision": "f19c70e497ded7a990bab17d567b1aa18fba30e8",
+  "change": "Remove the entire response editing notice panel, both redundant buttons and the unused cancel handler.",
+  "package": {
+    "pages": 14,
+    "files": 89,
+    "sourceBytes": 173236,
+    "domainChecking": true,
+    "nativeDependencies": 0
+  },
+  "checks": [
+    { "command": "pnpm miniapp:check", "exitCode": 0 },
+    { "command": "pnpm exec vitest run tests/miniapp-questionnaire.test.ts", "exitCode": 0, "passed": 5 },
+    { "command": "pnpm typecheck", "exitCode": 0 },
+    { "command": "pnpm lint", "exitCode": 0 },
+    { "command": "git diff --check", "exitCode": 0 }
+  ],
+  "officialDeveloperTools": {
+    "preview": { "exitCode": 0, "compiledBytes": 165573 },
+    "upload": {
+      "exitCode": 0,
+      "version": "0.3.1",
+      "compiledBytes": 165573,
+      "receiptWrittenAtUtc": "2026-10-11T16:42:25Z",
+      "releaseChannel": "development"
+    },
+    "simulator": {
+      "at": "2026-10-11T16:40:00.204Z",
+      "environment": "official developer tools simulator; controlled fixtures",
+      "casesPassed": [
+        "entire edit notice panel and both buttons removed",
+        "previously submitted roster prefills",
+        "native back leaves original receipt unchanged",
+        "reopening prefills saved values after discarding edits",
+        "failed save preserves changes",
+        "resubmission updates same receipt"
+      ],
+      "originalLoginStorageRestored": true,
+      "productionWrites": 0
+    }
+  },
+  "verificationLimits": {
+    "phoneVerified": false,
+    "wechatReviewSubmitted": false,
+    "publicReleasePerformed": false
+  }
+}

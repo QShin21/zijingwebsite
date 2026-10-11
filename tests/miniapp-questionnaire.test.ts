@@ -72,7 +72,7 @@ type Event = { currentTarget: { dataset: Record<string, string | number> }; deta
 type MiniPage = {
   data: { [key: string]: unknown; form: SignupForm; answers: Answers; receipt: Receipt; questions: { id: string; entries?: unknown[] }[]; review: boolean; responseEditing: boolean; message: string; answerErrors: Record<string, string> };
   setData(data: unknown): void; onLoad(options: unknown): void; load(): Promise<void>;
-  editAnswers(): void; cancelAnswers(): void; answer(event: Event): void; answerNext(): void;
+  editAnswers(): void; answer(event: Event): void; answerNext(): void;
   addEntry(event: Event): void; removeEntry(event: Event): void; groupAnswer(event: Event): void; submit(): Promise<void>;
 };
 function pageHarness(form: SignupForm, saved: Receipt | null) {
@@ -89,7 +89,7 @@ function pageHarness(form: SignupForm, saved: Receipt | null) {
   return { page, request };
 }
 const event = (id: string, value: string | string[] = '', extra: Record<string, string | number> = {}): Event => ({ currentTarget: { dataset: { id, ...extra } }, detail: { value } });
-it('native edit starts from the saved roster, cancel preserves it and failed resubmission keeps changes', async () => {
+it('native edit starts from the saved roster, leaves the receipt intact and failed resubmission keeps changes', async () => {
   const saved: Receipt = { id: 12, createdAt: '2026-10-11T01:00:00Z', updatedAt: '2026-10-11T01:00:00Z', formVersion: 'form-v1', questions: teamForm.questions, answers: teamAnswers };
   const { page, request } = pageHarness(teamForm, saved);
   await page.load();
@@ -97,11 +97,8 @@ it('native edit starts from the saved roster, cancel preserves it and failed res
   page.editAnswers();
   expect(page.data.answers).toEqual(teamAnswers);
   page.groupAnswer(event('team', '修改后的成员', { index: 0, field: 'name' }));
-  page.cancelAnswers();
   expect(page.data.receipt.answers).toEqual(teamAnswers);
   expect(request).toHaveBeenCalledTimes(1);
-  page.editAnswers();
-  page.groupAnswer(event('team', '修改后的成员', { index: 0, field: 'name' }));
   page.addEntry(event('team'));
   page.answerNext();
   expect(page.data.review).toBe(false);

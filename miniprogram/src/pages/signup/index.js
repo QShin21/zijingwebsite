@@ -39,7 +39,6 @@ Page({
   answerNext() { if(this.data.busy||!this.checkAnswers(this.data.step===this.data.answerPages-1))return;if(this.data.step<this.data.answerPages-1){this.setData({step:this.data.step+1});this.renderQuestions();}else{const answers=questionnaire.validateAnswers(this.data.form,this.data.answers);this.setData({review:true,reviewRows:receipt({questions:questionnaire.visibleQuestions(this.data.form,answers),answers}).rows,message:''});}wx.pageScrollTo({scrollTop:0,duration:200}); },
   answerPrevious() { if(this.data.busy)return;this.setData(this.data.review?{review:false}:{step:Math.max(0,this.data.step-1)});this.renderQuestions();wx.pageScrollTo({scrollTop:0,duration:200}); },
   editAnswers() { if(this.data.busy||!this.data.receipt||this.data.info.state!=='报名开放')return;this.setData({responseEditing:true,answers:questionnaire.initialAnswers(this.data.form,this.data.receipt.answers),answerErrors:{},step:0,review:false,message:''});this.renderQuestions(); },
-  cancelAnswers() { if(this.data.busy)return;this.setData({responseEditing:false,answers:{},review:false,step:0,answerErrors:{},message:'已取消修改，原作答保留。'});this.renderQuestions(); },
   async submit() {
     if(this.data.busy||!this.data.review||!this.checkAnswers(true))return;
     this.setData({busy:true,message:''});
