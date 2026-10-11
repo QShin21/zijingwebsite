@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-11",
+  "branch": "codex/questionnaire-flow-ai",
+  "features": {
+    "forwardJumpBranches": true,
+    "compoundAndOrConditions": true,
+    "numericComparisons": true,
+    "firstMatchPriorityAndDefaultBranch": true,
+    "earlyEndWithExplicitReviewAndSubmit": true,
+    "serverRouteValidationAndSkippedAnswerRemoval": true,
+    "completeTemplates": 8,
+    "templateSearchPreviewTryFillReplaceAppend": true,
+    "designerOutlineCanvasSettingsPreviewUndoRedo": true,
+    "questionTypes": 15,
+    "aiModel": "DeepSeek-V4.1-Flash",
+    "aiDraftPreviewEditApply": true,
+    "newDatabaseMigrations": 0
+  },
+  "localValidation": {
+    "lint": "passed",
+    "typecheck": "passed",
+    "productionBuild": "passed",
+    "unitAndDatabaseTests": { "passed": 191, "files": 22 },
+    "browser": {
+      "passed": 10,
+      "singleCompleteRun": true,
+      "elapsed": "1.8 minutes",
+      "widths": [320, 390, 1440],
+      "horizontalOverflow": false,
+      "axeViolationsInQuestionnaireEditorAndTemplateDialog": 0,
+      "covers": ["existing signup and private access", "website and JWT compatibility", "creation and CMS editor entry", "conditional review and retry", "advanced types drafts statistics and exports", "template import export undo redo", "complex branch back navigation and actual answer path", "template library preview and safe logic editing", "AI failure retry draft apply edit save", "AI authenticated capability and unauthorized access"]
+    },
+    "aiLiveService": {
+      "modelAvailable": true,
+      "provider": "https://llmapi.paratera.com/v1",
+      "validQuestionCount": 5,
+      "jumpBranches": 1,
+      "elapsedMs": 13009
+    },
+    "aiLiveAuthenticatedEndpoint": {
+      "realProvider": true,
+      "model": "DeepSeek-V4.1-Flash",
+      "validQuestionCount": 3,
+      "environment": "isolated local PostgreSQL and browser test account",
+      "command": "QUESTIONNAIRE_AI_LIVE_TEST=1 pnpm exec playwright test -c .data/playwright.questionnaire.config.ts tests/e2e/activity-signups.spec.ts --grep AI.endpoint"
+    },
+    "databaseQuotaChecks": {
+      "passed": true,
+      "checks": ["two simultaneous requests", "idempotent release", "six requests per user per hour", "transaction rollback", "sixty requests per site per hour", "expired window resets"],
+      "realUpstreamCalls": 0,
+      "isolatedRateLimitRowsRestored": true
+    },
+    "aiBrowserInteraction": "explicit local fixture and failure responses; real provider verified separately",
+    "privateKeyAbsentFromGitAndBrowserBundle": true
+  },
+  "deployment": {
+    "status": "pending candidate build and switch",
+    "backupPath": "/srv/zijingwebsite/backups/questionnaire-studio-20261011",
+    "fullDatabaseBackup": true,
+    "isolatedRestore": "passed: zijing_studio_rehearsal_20261011",
+    "sourceAndMediaBackup": true,
+    "productionTestAccountsOrAnswers": "not created"
+  },
+  "limitations": {
+    "miniProgramAdvancedEditorRelease": "not run in this increment",
+    "productionAuthenticatedSurveySubmission": "not run; full flow validated locally",
+    "earlyEnd": "keeps existing submission-is-signup semantics; no new rejection or review state"
+  }
+}

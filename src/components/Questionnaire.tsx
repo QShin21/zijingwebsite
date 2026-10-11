@@ -15,6 +15,7 @@ import {
   sanitizeDraft,
   randomizedOptions,
 } from "@/lib/questionnaire-model";
+import { questionRoute, endTarget } from "@/lib/questionnaire-flow";
 import { QuestionnaireAdvanced } from "./QuestionnaireAdvanced";
 
 export function Questionnaire({
@@ -39,7 +40,8 @@ export function Questionnaire({
     [review, setReview] = useState(false);
   const [message, setMessage] = useState(""),
     [sending, setSending] = useState(false);
-  const visible = visibleQuestions(form, answers),
+  const route = questionRoute(form, answers);
+  const visible = route.questions,
     size = form.pageSize || 5;
   const grouped = questionPages(visible, size),
     pages = grouped.length,
@@ -186,7 +188,14 @@ export function Questionnaire({
             <button
               type="button"
               onClick={() => {
-                setAnswers(savedDraft);
+                const ids = new Set(
+                  visibleQuestions(form, savedDraft).map((q) => q.id),
+                );
+                setAnswers(
+                  Object.fromEntries(
+                    Object.entries(savedDraft).filter(([id]) => ids.has(id)),
+                  ),
+                );
                 setSavedDraft(null);
                 setRemember(true);
                 setStep(0);
@@ -377,6 +386,19 @@ export function Questionnaire({
           );
         })
       )}
+      {!review &&
+        route.jumps.some((j) => questions.some((q) => q.id === j.from)) && (
+          <p className="questionnaire-branch-notice" role="status">
+            {route.jumps
+              .filter((j) => questions.some((q) => q.id === j.from))
+              .map((j) =>
+                j.target === endTarget
+                  ? "当前答案将提前结束问卷，下一步核对并提交。"
+                  : `当前答案将进入“${form.questions.find((q) => q.id === j.target)?.label || "后续题目"}”，跳过中间 ${j.skipped} 题。`,
+              )
+              .join(" ")}
+          </p>
+        )}
       <p role="alert">{message}</p>
       <div className="signup-tools">
         {(review || current > 0) && (

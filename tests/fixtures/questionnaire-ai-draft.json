@@ -1,0 +1,91 @@
+{
+  "enabled": true,
+  "closed": false,
+  "start": "",
+  "end": "",
+  "intro": "本地制作流程验证用草稿。问卷需要登录，答案仅供本人和有权限的活动管理者查看。",
+  "questions": [
+    {
+      "id": "participate_intention",
+      "label": "目前你对参加校园活动的意向是？",
+      "type": "single",
+      "required": true,
+      "options": [
+        "愿意参加",
+        "暂不参加"
+      ],
+      "jumps": [
+        {
+          "when": {
+            "mode": "all",
+            "rules": [
+              {
+                "questionId": "participate_intention",
+                "operator": "equals",
+                "value": "暂不参加"
+              }
+            ]
+          },
+          "target": "$end"
+        }
+      ]
+    },
+    {
+      "id": "available_time",
+      "label": "哪些时间段对你来说比较方便？（可多选）",
+      "type": "multiple",
+      "required": true,
+      "options": [
+        "周一至周五 上午",
+        "周一至周五 下午",
+        "周一至周五 晚间",
+        "周六、周日 上午",
+        "周六、周日 下午",
+        "周六、周日 晚间"
+      ],
+      "help": "时间段为大致区间，具体安排以后续通知为准。"
+    },
+    {
+      "id": "activity_format",
+      "label": "你希望校园活动采用哪些形式？（可多选）",
+      "type": "multiple",
+      "required": true,
+      "options": [
+        "讲座或主题分享",
+        "工作坊或动手实践",
+        "比赛或竞赛",
+        "展览或成果展示",
+        "志愿服务或公益",
+        "文艺或体育活动",
+        "线上互动或直播",
+        "其他（可在最后一题说明）"
+      ]
+    },
+    {
+      "id": "duration_preference",
+      "label": "你更倾向的单次活动时长是？",
+      "type": "single",
+      "required": true,
+      "options": [
+        "30分钟以内",
+        "30分钟至1小时",
+        "1至2小时",
+        "2至3小时",
+        "3小时以上",
+        "暂时不确定"
+      ]
+    },
+    {
+      "id": "suggestion",
+      "label": "你对校园活动还有哪些建议或期待？（如主题、组织方式、场地等）",
+      "type": "textarea",
+      "required": false,
+      "options": [],
+      "help": "选填，请勿填写身份证号、联系方式等个人敏感信息。"
+    }
+  ],
+  "title": "校园活动意向调查",
+  "completionMessage": "感谢你的填写！你的反馈会作为活动安排的重要参考。若你表示愿意参加，后续相关信息将通过常规渠道发布，请注意查看。祝你学习生活愉快！",
+  "theme": "purple",
+  "pageSize": 5
+}

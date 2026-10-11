@@ -50,7 +50,9 @@ async function run(
         request.headers.get("authorization")?.startsWith("JWT ") &&
         request.headers.get("x-questionnaire-version") !== "2" &&
         value.form.questions.some(
-          (q) => !["text", "textarea", "single", "multiple"].includes(q.type),
+          (q) =>
+            !["text", "textarea", "single", "multiple"].includes(q.type) ||
+            Boolean(q.jumps?.length),
         )
       )
         return reply(

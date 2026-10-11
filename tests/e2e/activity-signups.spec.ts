@@ -5,7 +5,11 @@ import config from "../../src/payload.config";
 import type { User } from "../../src/payload-types";
 import { randomBytes } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
-import { emptySignup, type Question } from "../../src/lib/signup-schema";
+import {
+  emptySignup,
+  type SignupForm,
+  type Question,
+} from "../../src/lib/signup-schema";
 import { readFile } from "node:fs/promises";
 let p: Payload,
   admin: User,
@@ -13,6 +17,7 @@ let p: Payload,
   game: number,
   post: number,
   event: number;
+const extraEvents: number[] = [];
 const suffix = Date.now(),
   password = randomBytes(18).toString("hex");
 test.beforeAll(async () => {
@@ -89,6 +94,8 @@ test.afterAll(async () => {
     });
   if (event)
     await p.delete({ collection: "events", id: event, overrideAccess: true });
+  for (const id of extraEvents)
+    await p.delete({ collection: "events", id, overrideAccess: true });
   if (game)
     await p.delete({ collection: "games", id: game, overrideAccess: true });
   for (const u of [admin, member])
@@ -106,6 +113,7 @@ async function login(page: Page, user: User) {
   await page.getByLabel("密码", { exact: true }).fill(password);
   await page.getByRole("button", { name: "登录", exact: true }).click();
   await expect(page).toHaveURL(/\/account$/);
+  await page.context().setExtraHTTPHeaders({ "Sec-Fetch-Site": "same-origin" });
 }
 test("publisher builds questionnaire, member submits once, organizer reads private answers", async ({
   page,
@@ -114,7 +122,9 @@ test("publisher builds questionnaire, member submits once, organizer reads priva
   await login(page, admin);
   await page.goto(`/activities/community-posts/${post}/manage`);
   await page.getByLabel("启用填写问卷报名").check();
+  await page.getByRole("button", { name: "2 · 问卷设置" }).click();
   await page.getByLabel("报名说明").fill("请填写参与信息");
+  await page.getByRole("button", { name: /1 · 编辑题目/ }).click();
   await page.getByRole("button", { name: "添加题目" }).click();
   await page.getByLabel("题目标题").fill("活动称呼");
   await page.getByRole("button", { name: "添加题目" }).click();
@@ -123,7 +133,9 @@ test("publisher builds questionnaire, member submits once, organizer reads priva
   await second.getByLabel("题型").selectOption("single");
   await second.getByLabel("选项（每行一个）").fill("上午场\n下午场");
   await page.getByRole("button", { name: "保存报名问卷" }).click();
-  await expect(page.getByRole("status")).toContainText("报名问卷已保存");
+  await expect(
+    page.locator(".signup-management > p[role=status]"),
+  ).toContainText("报名问卷已保存");
   const other = await browser.newContext();
   const visitor = await other.newPage();
   await login(visitor, member);
@@ -176,7 +188,9 @@ test("site event management and API token submission share the same questionnair
   await page.getByRole("button", { name: "添加题目" }).click();
   await page.getByLabel("题目标题").fill("参加理由");
   await page.getByRole("button", { name: "保存报名问卷" }).click();
-  await expect(page.getByRole("status")).toContainText("已保存");
+  await expect(
+    page.locator(".signup-management > p[role=status]"),
+  ).toContainText("已保存");
   await page.goto(`/events/signup-ui-${suffix}`);
   await expect(page.getByLabel("参加理由", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "暂无报名渠道" })).toHaveCount(
@@ -318,6 +332,7 @@ test("conditional questionnaire previews, validates, preserves steps and retries
   ).toBeTruthy();
   await page.goto(`/activities/community-posts/${post}/manage`);
   const third = page.getByRole("group", { name: "第 3 题", exact: true });
+  await third.locator(".designer-question-toggle").click();
   await third.getByRole("button", { name: "复制此题" }).click();
   await expect(
     page
@@ -329,10 +344,13 @@ test("conditional questionnaire previews, validates, preserves steps and retries
     .getByRole("button", { name: "删除此题" })
     .click();
   const second = page.getByRole("group", { name: "第 2 题", exact: true });
-  await second.getByText("填写提示、校验与显示条件", { exact: true }).click();
+  await second.locator(".designer-question-toggle").click();
+  await second.getByText("填写提示与校验", { exact: true }).click();
   await second.getByLabel("最多字数", { exact: true }).fill("100");
   await page.getByRole("button", { name: "保存报名问卷" }).click();
-  await expect(page.getByRole("status")).toContainText("已保存");
+  await expect(
+    page.locator(".signup-management > p[role=status]"),
+  ).toContainText("已保存");
   expect(
     (await (await page.request.get(endpoint + "?mode=manage")).json()).form
       .questions[1].maxLength,
@@ -601,18 +619,24 @@ test("editor templates, text import, undo redo and exported JSON preserve editab
   ).toBeTruthy();
   await page.goto(`/activities/events/${event}/manage`);
   await page.getByLabel("启用填写问卷报名").check();
-  await page.getByText("模板、批量导入与备份", { exact: true }).click();
-  await page.getByRole("button", { name: "满意度反馈模板" }).click();
-  await expect(page.getByLabel("题目标题", { exact: true })).toHaveCount(4);
-  await page
+  await page.getByRole("button", { name: "从模板开始" }).click();
+  const starter = page.getByRole("dialog");
+  await starter.getByRole("button", { name: "预览「满意度反馈」" }).click();
+  await expect(starter.locator(".blueprint-questions > li")).toHaveCount(7);
+  await starter.getByRole("button", { name: "替换并进入编辑" }).click();
+  await expect(page.locator(".designer-question")).toHaveCount(7);
+  await page.getByRole("button", { name: "导入已有问卷" }).click();
+  await starter
     .getByLabel("批量题目文本", { exact: true })
     .fill("[日期]可用日期*");
-  await page.getByRole("button", { name: "导入并追加题目" }).click();
-  await expect(page.getByLabel("题目标题", { exact: true })).toHaveCount(5);
+  await starter.getByRole("button", { name: "检查并预览文本" }).click();
+  await starter.getByLabel("追加题目", { exact: false }).check();
+  await starter.getByRole("button", { name: "追加并进入编辑" }).click();
+  await expect(page.locator(".designer-question")).toHaveCount(8);
   await page.getByRole("button", { name: "撤销编辑" }).click();
-  await expect(page.getByLabel("题目标题", { exact: true })).toHaveCount(4);
+  await expect(page.locator(".designer-question")).toHaveCount(7);
   await page.getByRole("button", { name: "重做编辑" }).click();
-  await expect(page.getByLabel("题目标题", { exact: true })).toHaveCount(5);
+  await expect(page.locator(".designer-question")).toHaveCount(8);
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "导出问卷模板" }).click();
   const file = await download;
@@ -621,14 +645,361 @@ test("editor templates, text import, undo redo and exported JSON preserve editab
     "rating",
     "matrix",
     "nps",
+    "multiple",
+    "textarea",
+    "single",
     "textarea",
     "date",
   ]);
-  expect(new Set(content.questions.map((q: Question) => q.id)).size).toBe(5);
+  expect(new Set(content.questions.map((q: Question) => q.id)).size).toBe(8);
   await page.getByRole("button", { name: "保存报名问卷" }).click();
-  await expect(page.getByRole("status")).toContainText("已保存");
+  await expect(
+    page.locator(".signup-management > p[role=status]"),
+  ).toContainText("已保存");
   expect(
     (await (await page.request.get(endpoint + "?mode=manage")).json()).form
       .questions,
   ).toEqual(content.questions);
+});
+async function questionnaireEvent(form: SignupForm = emptySignup) {
+  const doc = await p.create({
+    collection: "events",
+    user: admin,
+    overrideAccess: false,
+    context: { manageSignupForm: true },
+    data: {
+      title: "问卷工作流本地验证",
+      slug: "studio-" + randomBytes(8).toString("hex"),
+      _status: "published",
+      signupForm: form,
+    },
+  });
+  extraEvents.push(doc.id);
+  return doc.id;
+}
+
+test("complex branches recompute on back navigation and persist only the actual path", async ({
+  page,
+  browser,
+}) => {
+  const make = (
+    id: string,
+    label: string,
+    type: Question["type"],
+    extras: Partial<Question> = {},
+  ): Question => ({ id, label, type, required: true, options: [], ...extras });
+  const form: SignupForm = {
+    ...emptySignup,
+    enabled: true,
+    pageSize: 5,
+    questions: [
+      make("interest", "是否参与", "single", {
+        options: ["愿意", "暂不参加"],
+        jumps: [
+          {
+            when: {
+              mode: "all",
+              rules: [
+                {
+                  questionId: "interest",
+                  operator: "equals",
+                  value: "暂不参加",
+                },
+              ],
+            },
+            target: "$end",
+          },
+        ],
+      }),
+      make("hours", "可参与小时数", "number", {
+        min: 0,
+        max: 24,
+        step: 0.5,
+        jumps: [
+          {
+            when: {
+              mode: "all",
+              rules: [
+                { questionId: "interest", operator: "equals", value: "愿意" },
+                { questionId: "hours", operator: "lt", value: "1" },
+              ],
+            },
+            target: "short",
+          },
+        ],
+      }),
+      make("full", "完整活动需求", "text", { jumps: [{ target: "notes" }] }),
+      make("short", "短时活动需求", "text"),
+      make("notes", "补充说明", "text", { required: false }),
+    ],
+  };
+  const id = await questionnaireEvent(form),
+    endpoint = `/api/activities/events/${id}/signup`;
+  await login(page, admin);
+  await page.goto(`/activities/events/${id}/fill`);
+  const signup = page.locator(".activity-signup");
+  await signup.getByLabel("愿意", { exact: true }).check();
+  await signup.getByRole("button", { name: "下一步" }).click();
+  await signup.getByLabel("可参与小时数", { exact: true }).fill("3");
+  await signup.getByRole("button", { name: "下一步" }).click();
+  await signup
+    .getByLabel("完整活动需求", { exact: true })
+    .fill("应清除的旧分支答案");
+  await signup.getByRole("button", { name: "上一步" }).click();
+  await signup.getByLabel("可参与小时数", { exact: true }).fill("0.5");
+  await expect(signup.locator(".questionnaire-branch-notice")).toContainText(
+    "短时活动需求",
+  );
+  await signup.getByRole("button", { name: "下一步" }).click();
+  await expect(signup.getByLabel("完整活动需求", { exact: true })).toHaveCount(
+    0,
+  );
+  await signup.getByLabel("短时活动需求", { exact: true }).fill("短时交流");
+  await signup.getByRole("button", { name: "上一步" }).click();
+  await signup.getByLabel("可参与小时数", { exact: true }).fill("2");
+  await signup.getByRole("button", { name: "下一步" }).click();
+  await expect(signup.getByLabel("完整活动需求", { exact: true })).toHaveValue(
+    "",
+  );
+  await signup.getByRole("button", { name: "上一步" }).click();
+  await signup.getByLabel("可参与小时数", { exact: true }).fill("0.5");
+  await signup.getByRole("button", { name: "下一步" }).click();
+  await signup.getByLabel("短时活动需求", { exact: true }).fill("短时交流");
+  await signup.getByRole("button", { name: "核对并提交" }).click();
+  await expect(signup.locator(".questionnaire-review")).not.toContainText(
+    "完整活动需求",
+  );
+  await signup.getByRole("button", { name: "提交并确认报名" }).click();
+  await expect(
+    signup.getByRole("heading", { name: "已报名", exact: true }),
+  ).toBeVisible();
+  const saved = (await (await page.request.get(endpoint)).json()).signup;
+  expect(saved.answers).toEqual({
+    interest: "愿意",
+    hours: "0.5",
+    short: "短时交流",
+    notes: "",
+  });
+  expect(saved.questions.map((q: Question) => q.id)).toEqual([
+    "interest",
+    "hours",
+    "short",
+    "notes",
+  ]);
+  const context = await browser.newContext(),
+    other = await context.newPage();
+  await login(other, member);
+  await other.goto(`/activities/events/${id}/fill`);
+  const otherForm = other.locator(".activity-signup");
+  await otherForm.getByLabel("暂不参加", { exact: true }).check();
+  await expect(otherForm.locator(".questionnaire-branch-notice")).toContainText(
+    "提前结束",
+  );
+  await otherForm.getByRole("button", { name: "核对并提交" }).click();
+  await expect(otherForm.locator(".questionnaire-review")).not.toContainText(
+    "可参与小时数",
+  );
+  await otherForm.getByRole("button", { name: "提交并确认报名" }).click();
+  await expect(
+    otherForm.getByRole("heading", { name: "已报名", exact: true }),
+  ).toBeVisible();
+  expect(
+    (await (await other.request.get(endpoint)).json()).signup.answers,
+  ).toEqual({ interest: "暂不参加" });
+  await context.close();
+});
+
+test("template library previews real branches and designer manages logic safely", async ({
+  page,
+}) => {
+  const id = await questionnaireEvent();
+  await login(page, admin);
+  await page.goto(`/activities/events/${id}/manage`);
+  await page.getByRole("button", { name: "从模板开始" }).click();
+  const starter = page.getByRole("dialog");
+  await starter.getByLabel("搜索模板").fill("不存在的模板");
+  await expect(starter).toContainText("没有找到匹配模板");
+  await starter.getByLabel("搜索模板").fill("");
+  await starter
+    .getByRole("combobox", { name: "场景", exact: true })
+    .selectOption("报名与组织");
+  await expect(starter.locator(".template-card")).toHaveCount(3);
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth),
+    ).toBeLessThanOrEqual(width);
+  }
+  expect(
+    (
+      await new AxeBuilder({ page })
+        .include(".questionnaire-starter-dialog")
+        .analyze()
+    ).violations,
+  ).toEqual([]);
+  await starter.getByRole("button", { name: "预览「活动报名」" }).click();
+  await starter.getByRole("button", { name: "预览试填", exact: true }).click();
+  await starter.getByLabel("如何称呼你？", { exact: true }).fill("预览称呼");
+  await starter.getByLabel("暂不参加", { exact: true }).check();
+  await starter.getByRole("button", { name: "核对并提交" }).click();
+  await expect(starter.locator(".questionnaire-review")).not.toContainText(
+    "方便参加的时段",
+  );
+  await starter.getByRole("button", { name: "替换并进入编辑" }).click();
+  await expect(page.locator(".designer-question")).toHaveCount(6);
+  await page.getByRole("button", { name: "2 · 问卷设置" }).click();
+  await expect(page.getByLabel("问卷标题", { exact: true })).toHaveValue(
+    "活动报名",
+  );
+  await page.getByLabel("报名说明").fill("仅本地模板流程验收");
+  await page.getByRole("button", { name: /1 · 编辑题目/ }).click();
+  const second = page.getByRole("group", { name: "第 2 题", exact: true });
+  await second.locator(".designer-question-toggle").click();
+  await second.getByText(/条件跳转 · 2 个分支/).click();
+  await expect(second.locator(".jump-rule")).toHaveCount(2);
+  await second.getByRole("button", { name: "下移", exact: true }).click();
+  await page
+    .locator(".designer-question.is-active")
+    .getByRole("button", { name: "下移", exact: true })
+    .click();
+  await expect(page.locator(".signup-builder > p[role=status]")).toContainText(
+    "跳转目标",
+  );
+  await page
+    .locator(".designer-question.is-active")
+    .getByRole("button", { name: "上移", exact: true })
+    .click();
+  await page.getByRole("button", { name: "2 · 问卷设置" }).click();
+  await page.getByRole("button", { name: /1 · 编辑题目/ }).click();
+  const fourth = page.getByRole("group", { name: "第 4 题", exact: true });
+  await fourth.locator(".designer-question-toggle").click();
+  page.once("dialog", (d) => d.accept());
+  await fourth.getByRole("button", { name: "删除此题" }).click();
+  await expect(page.locator(".designer-question")).toHaveCount(5);
+  await page.getByRole("button", { name: "撤销编辑" }).click();
+  await expect(page.locator(".designer-question")).toHaveCount(6);
+  await page.getByRole("button", { name: "保存报名问卷" }).click();
+  await expect(
+    page.locator(".signup-management > p[role=status]"),
+  ).toContainText("已保存");
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth),
+    ).toBeLessThanOrEqual(width);
+    await page.screenshot({
+      path: `.data/questionnaire-studio-${width}.png`,
+      fullPage: true,
+    });
+  }
+  expect(
+    (
+      await new AxeBuilder({ page })
+        .include(".questionnaire-designer")
+        .analyze()
+    ).violations,
+  ).toEqual([]);
+});
+
+test("AI creation preserves current content on failure and previews editable generated drafts", async ({
+  page,
+}) => {
+  const id = await questionnaireEvent();
+  await login(page, admin);
+  await page.goto(`/activities/events/${id}/manage`);
+  const generated = JSON.parse(
+    await readFile("tests/fixtures/questionnaire-ai-draft.json", "utf8"),
+  );
+  let attempts = 0;
+  await page.route("**/api/questionnaires/generate", async (route) => {
+    if (route.request().method() !== "POST") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ enabled: true, model: "DeepSeek-V4.1-Flash" }),
+      });
+      return;
+    }
+    const data = route.request().postDataJSON();
+    expect(data.description).toContain("意向");
+    expect(data).not.toHaveProperty("apiKey");
+    await route.fulfill({
+      status: ++attempts === 1 ? 503 : 200,
+      contentType: "application/json",
+      body: JSON.stringify(
+        attempts === 1
+          ? { error: "AI 服务暂时不可用，请稍后重试。" }
+          : { form: generated, model: "DeepSeek-V4.1-Flash" },
+      ),
+    });
+  });
+  await page.getByRole("button", { name: "AI 制作问卷" }).click();
+  const starter = page.getByRole("dialog");
+  await starter
+    .getByLabel("制作需求", { exact: true })
+    .fill("制作一份活动意向问卷，暂不参加时提前结束。");
+  await starter.getByLabel("作答题数").selectOption("5");
+  await starter.getByLabel("按需求设计条件显示与跳转").check();
+  await starter.getByRole("button", { name: "生成问卷草稿" }).click();
+  await expect(starter.getByRole("alert")).toContainText("暂时不可用");
+  await expect(page.locator(".designer-question")).toHaveCount(0);
+  await starter.getByRole("button", { name: "生成问卷草稿" }).click();
+  await expect(starter.locator(".blueprint-questions > li")).toHaveCount(5);
+  await starter.getByRole("button", { name: "替换并进入编辑" }).click();
+  await expect(page.locator(".designer-question")).toHaveCount(5);
+  await page.getByLabel("题目标题", { exact: true }).fill("修改后的意向问题");
+  await page.getByRole("button", { name: "保存报名问卷" }).click();
+  await expect(
+    page.locator(".signup-management > p[role=status]"),
+  ).toContainText("已保存");
+  const saved = await (
+    await page.request.get(`/api/activities/events/${id}/signup?mode=manage`)
+  ).json();
+  expect(saved.form.questions[0].label).toBe("修改后的意向问题");
+  expect(saved.form.questions.some((q: Question) => q.jumps?.length)).toBe(
+    true,
+  );
+});
+
+test("AI endpoint enforces manager authorization and serves a real generated draft", async ({
+  page,
+  browser,
+}) => {
+  const context = await browser.newContext(),
+    anonymous = await context.newPage();
+  expect(
+    (await anonymous.request.get("/api/questionnaires/generate")).status(),
+  ).toBe(401);
+  await context.setExtraHTTPHeaders({ "Sec-Fetch-Site": "same-origin" });
+  await login(anonymous, member);
+  expect(
+    (await anonymous.request.get("/api/questionnaires/generate")).status(),
+  ).toBe(403);
+  await context.close();
+  await login(page, admin);
+  await page.context().setExtraHTTPHeaders({ "Sec-Fetch-Site": "same-origin" });
+  const rejected = await page.request.post("/api/questionnaires/generate", {
+    headers: { Origin: "https://untrusted.example" },
+    data: {},
+  });
+  expect([401, 403]).toContain(rejected.status());
+  if (process.env.QUESTIONNAIRE_AI_LIVE_TEST !== "1") return;
+  const response = await page.request.post("/api/questionnaires/generate", {
+    headers: {
+      Origin: new URL(process.env.SERVER_URL || "http://localhost:3000").origin,
+    },
+    data: {
+      description: "请制作通用活动反馈问卷，了解整体满意度和改进建议。",
+      audience: "参与者",
+      count: 3,
+      logic: false,
+    },
+    timeout: 90000,
+  });
+  expect(response.status()).toBe(200);
+  const result = await response.json();
+  expect(result.model).toBe("DeepSeek-V4.1-Flash");
+  expect(result.form.questions).toHaveLength(3);
+  expect(response.headers()["cache-control"]).toContain("no-store");
+  expect(result).not.toHaveProperty("apiKey");
 });

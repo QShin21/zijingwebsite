@@ -1,8 +1,12 @@
 import {
+  questionRoute,
+  type ConditionGroup,
+  type JumpRule,
+} from "./questionnaire-flow";
+import {
   normalizeQuestionExtras,
   normalizeFormExtras,
   validateAdvancedAnswer,
-  matchesDisplay,
 } from "./questionnaire-model";
 export type Question = {
   id: string;
@@ -29,14 +33,8 @@ export type Question = {
   step?: number;
   pageBreak?: boolean;
   randomize?: boolean;
-  display?: {
-    mode: "all" | "any";
-    rules: {
-      questionId: string;
-      operator: "equals" | "notEquals" | "answered" | "notAnswered";
-      value: string;
-    }[];
-  };
+  display?: ConditionGroup;
+  jumps?: JumpRule[];
   required: boolean;
   options: string[];
   help?: string;
@@ -343,23 +341,7 @@ export function visibleQuestions(
   form: SignupForm,
   answers: Record<string, unknown>,
 ): Question[] {
-  const visible = new Set<string>();
-  return form.questions.filter((q) => {
-    const condition = q.showWhen;
-    if (condition) {
-      const answer = answers[condition.questionId];
-      if (
-        !visible.has(condition.questionId) ||
-        !(Array.isArray(answer)
-          ? answer.includes(condition.option)
-          : answer === condition.option)
-      )
-        return false;
-    }
-    if (!matchesDisplay(q, answers, visible)) return false;
-    visible.add(q.id);
-    return true;
-  });
+  return questionRoute(form, answers).questions;
 }
 
 export function answerErrors(
@@ -372,7 +354,9 @@ export function answerErrors(
       validateAnswers(
         {
           ...form,
-          questions: [{ ...q, showWhen: undefined, display: undefined }],
+          questions: [
+            { ...q, showWhen: undefined, display: undefined, jumps: undefined },
+          ],
         },
         { [q.id]: answers[q.id] },
       );

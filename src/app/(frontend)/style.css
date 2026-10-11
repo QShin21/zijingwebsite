@@ -3373,3 +3373,92 @@ button:disabled {
 .questionnaire-stat th, .questionnaire-stat td { padding: .6rem .3rem; text-align: left; overflow-wrap: anywhere; }
 .questionnaire-stat progress { max-width: 100%; height: .6rem; }
 .questionnaire-stat th:first-child { width: 45%; }
+/* Questionnaire studio: readable content, a compact outline and deliberate creation steps. */
+.signup-management { max-width: 1180px; }
+.questionnaire-designer { gap: 1.2rem; }
+.designer-heading, .blueprint-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.designer-heading h2 { margin: .4rem 0; font-size: 1.5rem; }
+.designer-heading p { margin: .3rem 0; color: #63586c; }
+.designer-eyebrow { color: #654184; font-size: .78rem; letter-spacing: .08em; font-weight: 650; }
+.designer-starts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .85rem; }
+.designer-starts > button { width: 100%; justify-self: stretch; padding: 1.2rem; min-height: 128px; background: #faf8fc; border: 1px solid #ded4e8; border-radius: 14px; color: #36223f; text-align: left; display: grid; gap: .45rem; cursor: pointer; }
+.designer-starts > button:hover { border-color: #8a62a2; background: #f4eef8; }
+.start-icon { font-size: 1.25rem; color: #6c3f87; }
+.designer-starts small { color: #63586c; line-height: 1.6; }
+.designer-export { text-align: right; }
+.designer-export button { text-decoration: underline; text-underline-offset: 4px; color: #603c78; }
+.designer-tabs { display: flex; flex-wrap: wrap; gap: .6rem; padding: .7rem 0; border-bottom: 1px solid #e3dce9; }
+.designer-tabs button { padding: .7rem 1rem; min-height: 44px; border-radius: 9px; background: #f3eff7; color: #52445c; }
+.designer-tabs button[aria-pressed="true"] { background: #633c7b; color: #fff; }
+.designer-tabs span { margin-left: .4rem; font-size: .8rem; }
+.designer-workspace { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 1.1rem; align-items: start; }
+.designer-outline { min-width: 0; background: #f8f6fa; border: 1px solid #e1d9e8; border-radius: 12px; padding: 1rem; position: sticky; top: 90px; max-height: calc(100dvh - 115px); overflow-y: auto; }
+.designer-outline h3 { margin: .2rem 0 1rem; }
+.designer-outline ol { list-style: none; padding: 0; margin: 0; display: grid; gap: .4rem; }
+.designer-outline li button { width: 100%; display: flex; align-items: flex-start; gap: .7rem; text-align: left; border: 1px solid transparent; padding: .7rem; border-radius: 8px; color: #4f425b; overflow-wrap: anywhere; }
+.designer-outline li button[aria-current="step"] { background: #eee4f5; border-color: #c5acd6; color: #48215d; }
+.designer-outline li button > span:first-child { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.designer-outline small { display: block; color: #6a5b72; font-size: .72rem; margin-top: .25rem; }
+.designer-palette { border-top: 1px solid #ded4e7; margin-top: 1rem; }
+.designer-palette summary { cursor: pointer; font-weight: 650; padding: .7rem 0; }
+.designer-palette > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .4rem; }
+.designer-palette button { width: 100%; justify-self: stretch; padding: .65rem .4rem; background: white; border: 1px solid #d9cfe2; border-radius: 8px; font-size: .8rem; min-height: 44px; }
+.designer-canvas, .question-editor-fields, .designer-form-settings { display: grid; gap: 1rem; min-width: 0; }
+.designer-canvas > fieldset { margin: 0; background: #fff; scroll-margin-top: 100px; }
+.designer-question { border-color: #e0d7e8; }
+.designer-question.is-active { border-color: #a683bd; box-shadow: 0 3px 16px #45245808; }
+.designer-question legend { color: #675571; font-size: .8rem; }
+.designer-question-toggle { display: grid; gap: .5rem; text-align: left; width: 100%; padding: .3rem 0; overflow-wrap: anywhere; }
+.designer-question-toggle > span { font-weight: 650; font-size: 1.05rem; }
+.designer-question-toggle small { color: #6b5d72; }
+.designer-empty { padding: 2.5rem 1.5rem; border: 1px dashed #cbb7db; border-radius: 14px; text-align: center; color: #665475; background: #faf8fc; }
+.designer-form-settings { max-width: 760px; padding: .75rem 0; }
+.designer-validation { padding: 1rem; border: 1px solid #d9b990; background: #fff7ea; border-radius: 9px; color: #744c20; }
+.designer-footer { display: flex; justify-content: space-between; align-items: center; gap: .8rem; flex-wrap: wrap; padding-top: .8rem; border-top: 1px solid #ded5e7; }
+.questionnaire-starter-dialog { width: min(1040px, calc(100% - 2rem)); max-height: 90dvh; margin: auto; inset: 0; border: 1px solid #d9cde3; border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); color: #35263e; background: #fff; overflow-y: auto; }
+.questionnaire-starter-dialog::backdrop { background: #27133399; }
+.questionnaire-starter-dialog .dialog-top { margin-bottom: .8rem; }
+.questionnaire-starter-dialog h2 { margin: .3rem 0; }
+.questionnaire-starter-dialog label { display: grid; gap: .55rem; }
+.questionnaire-starter-dialog input, .questionnaire-starter-dialog textarea, .questionnaire-starter-dialog select { width: 100%; min-width: 0; border: 1px solid #c8b8d3; border-radius: 8px; padding: .7rem; background: #fff; color: #35263e; }
+.questionnaire-starter-dialog input[type="radio"], .questionnaire-starter-dialog input[type="checkbox"] { accent-color: #653a87; }
+.questionnaire-starter-dialog button { min-height: 44px; }
+.template-filters { display: grid; grid-template-columns: minmax(0, 2fr) minmax(150px, 1fr); gap: 1rem; margin-block: 1.2rem; }
+.template-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.template-card { display: flex; flex-direction: column; gap: .7rem; min-width: 0; border: 1px solid #ded5e7; border-radius: 14px; padding: 1.25rem; background: #fcfbfd; }
+.template-card h3 { margin: 0; font-size: 1.15rem; }
+.template-card p { margin: 0; color: #64566f; }
+.template-card > small { color: #6e5b7a; line-height: 1.6; }
+.template-card button { margin-top: auto; text-align: left; padding: .6rem 0; color: #60337c; font-weight: 650; }
+.template-tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+.template-tags span, .ai-model-label { padding: .3rem .6rem; border-radius: 6px; background: #ede6f5; color: #593575; font-size: .75rem; }
+.blueprint-preview { display: grid; gap: 1rem; padding-top: 1rem; }
+.blueprint-heading h3 { margin: 0; }
+.blueprint-heading > span { background: #f1eaf7; border-radius: 8px; padding: .4rem .7rem; color: #5e3b77; }
+.blueprint-questions { list-style-position: inside; padding: 0; margin: 0; display: grid; gap: .7rem; }
+.blueprint-questions li { padding: 1rem; background: #faf8fc; border: 1px solid #e7dfed; border-radius: 10px; overflow-wrap: anywhere; }
+.blueprint-questions li > span, .blueprint-questions li > small { display: block; margin-top: .5rem; color: #6c5c75; font-size: .82rem; }
+.blueprint-apply { border-top: 1px solid #dcd1e5; padding-top: 1rem; }
+.blueprint-apply fieldset { border: 0; margin: 0; padding: .5rem 0; display: grid; gap: .7rem; }
+.ai-questionnaire-form, .questionnaire-import-form { display: grid; gap: 1.1rem; padding-block: 1rem; }
+.ai-model-label { width: fit-content; }
+.condition-editor { display: grid; gap: .7rem; }
+.condition-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; padding: .8rem; border: 1px solid #ddd1e6; border-radius: 8px; background: #fff; }
+.condition-row > button { justify-self: start; align-self: end; color: #764457; }
+.jump-rule { display: grid; gap: .9rem; min-width: 0; margin-block: 1rem; padding: 1rem; border: 1px solid #d2c1df; border-radius: 10px; }
+.questionnaire-branch-notice { border-left: 3px solid #7a4d99; background: #f4edf9; padding: .85rem 1rem; border-radius: 6px; color: #553565; }
+@media (max-width: 780px) {
+  .designer-workspace { grid-template-columns: minmax(0, 1fr); }
+  .designer-outline { position: static; max-height: none; }
+  .designer-outline ol { display: flex; overflow-x: auto; padding-bottom: .5rem; }
+  .designer-outline li { flex: 0 0 165px; }
+  .designer-palette > div { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .designer-starts, .template-grid, .template-filters, .condition-row { grid-template-columns: minmax(0, 1fr); }
+  .designer-starts > button { min-height: 96px; }
+  .questionnaire-starter-dialog { width: calc(100% - 1rem); padding: 1rem; border-radius: 14px; }
+  .designer-heading .signup-tools { gap: .35rem; }
+  .designer-heading .signup-tools button { padding: .6rem; }
+  .designer-tabs button { flex: 1 1 110px; text-align: center; padding: .65rem .5rem; }
+}

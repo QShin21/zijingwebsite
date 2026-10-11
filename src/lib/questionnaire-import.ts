@@ -4,6 +4,7 @@ import {
   type Question,
   type SignupForm,
 } from "./signup-schema";
+import { questionnaireTemplates } from "./questionnaire-templates";
 import { hasOptions, questionTypes } from "./questionnaire-model";
 export function parseQuestionText(text: string): Question[] {
   if (text.length > 100000) throw new Error("导入文本过长");
@@ -38,19 +39,9 @@ export function parseQuestionText(text: string): Question[] {
     .questions;
 }
 export function templateForm(name: string): SignupForm {
-  const templates: Record<string, string> = {
-    feedback:
-      "[评分量表]整体体验*\n[矩阵单选]请评价以下方面*\n> 活动安排\n> 沟通通知\n- 满意\n- 一般\n- 不满意\n[NPS 推荐度]你愿意推荐给朋友吗*\n[多行文本]意见与建议",
-    signup:
-      "[单行文本]称呼*\n[下拉选择]参与方式*\n- 参与者\n- 观众\n[多选]方便参与的时段*\n- 上午\n- 下午\n- 晚上\n[多行文本]其他需要说明的事项",
-    preference:
-      "[排序]按偏好排列以下活动*\n- 交流分享\n- 友谊赛\n- 观赛\n[多项填空]补充建议\n> 希望举办的活动\n> 建议的时间",
-  };
-  return {
-    ...emptySignup,
-    enabled: true,
-    questions: parseQuestionText(templates[name] || templates.feedback),
-  };
+  const template = questionnaireTemplates.find((t) => t.id === name);
+  if (!template) throw new Error("模板不存在");
+  return normalizeSignup(template.form);
 }
 export function downloadText(
   filename: string,

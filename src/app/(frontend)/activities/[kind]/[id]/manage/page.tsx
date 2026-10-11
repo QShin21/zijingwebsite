@@ -1,3 +1,16 @@
-import { notFound } from 'next/navigation';
-import { SignupManager } from '@/components/ActivitySignup';
-export default async function Page({params}:{params:Promise<{kind:string;id:string}>}) { const {kind,id}=await params; if(!['events','community-posts'].includes(kind)||!/^\d+$/.test(id))notFound();return <main className="page-content"><SignupManager kind={kind} id={Number(id)}/></main>; }
+import { notFound } from "next/navigation";
+import { SignupManager } from "@/components/ActivitySignup";
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ kind: string; id: string }>;
+}) {
+  const { kind, id } = await params;
+  if (!["events", "community-posts"].includes(kind) || !/^\d+$/.test(id))
+    notFound();
+  return (
+    <div className="page-content">
+      <SignupManager kind={kind} id={Number(id)} />
+    </div>
+  );
+}

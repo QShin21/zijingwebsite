@@ -1,3 +1,8 @@
+import {
+  normalizeCondition,
+  validateFlow,
+  matchesCondition,
+} from "./questionnaire-flow";
 import type { Answer, Question, SignupForm } from "./signup-schema";
 export const questionTypes: Record<Question["type"], string> = {
   text: "单行文本",
@@ -90,36 +95,18 @@ export function normalizeQuestionExtras(
       fail(q.label + "：最大值应大于最小值");
     if (q.step != null && q.step <= 0) fail(q.label + "：步长应大于零");
   }
-  if (raw.display != null) {
-    const d = raw.display as Question["display"];
-    if (
-      !d ||
-      !["all", "any"].includes(d.mode) ||
-      !Array.isArray(d.rules) ||
-      !d.rules.length ||
-      d.rules.length > 10
-    )
-      fail(q.label + "：复合条件应包含 1–10 条规则");
-    q.display = {
-      mode: d.mode,
-      rules: d.rules.map((r) => {
-        if (
-          !r ||
-          typeof r.questionId !== "string" ||
-          !["equals", "notEquals", "answered", "notAnswered"].includes(
-            r.operator,
-          ) ||
-          typeof r.value !== "string" ||
-          r.value.length > 200
-        )
-          fail(q.label + "：条件规则无效");
-        return {
-          questionId: r.questionId,
-          operator: r.operator,
-          value: r.value,
-        };
-      }),
-    };
+  if (raw.display != null) q.display = normalizeCondition(raw.display);
+  if (raw.jumps != null) {
+    if (!Array.isArray(raw.jumps) || !raw.jumps.length || raw.jumps.length > 10)
+      fail(q.label + "：跳转应包含 1–10 条分支");
+    q.jumps = raw.jumps.map((raw) => {
+      if (!raw || typeof raw !== "object" || typeof raw.target !== "string")
+        fail(q.label + "：跳转规则无效");
+      return {
+        ...(raw.when != null ? { when: normalizeCondition(raw.when) } : {}),
+        target: raw.target,
+      };
+    });
   }
 }
 export function normalizeFormExtras(
@@ -139,26 +126,7 @@ export function normalizeFormExtras(
       fail("主题无效");
     result.theme = raw.theme as SignupForm["theme"];
   }
-  questions.forEach((q, index) =>
-    q.display?.rules.forEach((r) => {
-      const source = questions
-        .slice(0, index)
-        .find((p) => p.id === r.questionId);
-      if (
-        !source ||
-        ["description", "matrix", "matrixMultiple", "blanks"].includes(
-          source.type,
-        )
-      )
-        fail(q.label + "：条件只能引用前面的非矩阵作答题");
-      if (
-        ["equals", "notEquals"].includes(r.operator) &&
-        (!r.value ||
-          (hasOptions(source.type) && !source.options.includes(r.value)))
-      )
-        fail(q.label + "：条件选项或值无效");
-    }),
-  );
+  validateFlow(questions);
   if (raw.enabled === true && !questions.some((q) => q.type !== "description"))
     fail("问卷至少需要一道作答题");
   return result;
@@ -168,23 +136,7 @@ export function matchesDisplay(
   answers: Record<string, unknown>,
   visible: Set<string>,
 ): boolean {
-  if (!q.display) return true;
-  const results = q.display.rules.map((r) => {
-    if (!visible.has(r.questionId)) return false;
-    const answer = answers[r.questionId],
-      filled = Array.isArray(answer)
-        ? answer.length > 0
-        : typeof answer === "string" && answer.trim().length > 0;
-    if (r.operator === "answered") return filled;
-    if (r.operator === "notAnswered") return !filled;
-    const equal = Array.isArray(answer)
-      ? answer.includes(r.value)
-      : typeof answer === "string" && answer.trim() === r.value;
-    return r.operator === "equals" ? equal : filled && !equal;
-  });
-  return q.display.mode === "all"
-    ? results.every(Boolean)
-    : results.some(Boolean);
+  return matchesCondition(q.display, answers, visible);
 }
 export function validateAdvancedAnswer(q: Question, raw: unknown): Answer {
   const failAnswer = (hint: string): never => fail(q.label + "：" + hint);
@@ -294,14 +246,17 @@ export function questionPages(
   size: number,
 ): Question[][] {
   const pages: Question[][] = [];
+  let afterJump = false;
   for (const q of questions) {
     if (
+      afterJump ||
       !pages.length ||
       (q.pageBreak && pages.at(-1)!.length) ||
       pages.at(-1)!.filter((v) => v.type !== "description").length >= size
     )
       pages.push([]);
     pages.at(-1)!.push(q);
+    afterJump = Boolean(q.jumps?.length);
   }
   return pages.length ? pages : [[]];
 }
