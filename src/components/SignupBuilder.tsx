@@ -348,6 +348,7 @@ export function SignupBuilder({
                     value={q.showWhen?.questionId || ""}
                     onChange={(e) =>
                       question(i, {
+                        display: undefined,
                         showWhen: e.target.value
                           ? {
                               questionId: e.target.value,

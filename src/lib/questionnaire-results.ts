@@ -50,7 +50,8 @@ export function summarizeResponses(records: ResponseRecord[]) {
             q.type,
           )
         ) {
-          q.options.forEach((option) => counts.set(option, 0));
+          if (q.type !== "ranking")
+            q.options.forEach((option) => counts.set(option, 0));
           filled.forEach((v) => {
             if (Array.isArray(v))
               v.forEach((x, i) =>
