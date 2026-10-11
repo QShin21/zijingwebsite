@@ -1,0 +1,48 @@
+{
+  "at": "2026-10-11T00:15:20.852Z",
+  "mode": "live production requests from DevTools simulator; no online writes",
+  "requests": [
+    {
+      "path": "/api/globals/site?depth=0",
+      "status": 200
+    },
+    {
+      "path": "/api/events?limit=1&depth=0",
+      "status": 200
+    },
+    {
+      "path": "/api/miniapp/status",
+      "status": 200
+    },
+    {
+      "path": "/api/miniapp/reactions",
+      "status": 404
+    },
+    {
+      "path": "/api/forum-posts",
+      "status": 404
+    },
+    {
+      "path": "/api/comments",
+      "status": 404
+    }
+  ],
+  "pages": [
+    {
+      "path": "pages/home/index",
+      "error": "",
+      "loading": false
+    },
+    {
+      "path": "pages/events/index",
+      "error": "",
+      "loading": false
+    },
+    {
+      "path": "pages/communities/index",
+      "error": "",
+      "loading": false
+    }
+  ],
+  "ok": true
+}

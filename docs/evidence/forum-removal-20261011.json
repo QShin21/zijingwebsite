@@ -21,16 +21,41 @@
     "reviewSubmitted": false,
     "officialReleasePublished": false,
     "realDeviceVerified": false,
-    "uiEvidence": "forum-miniapp-ui-20261011.json"
+    "uiEvidence": "forum-miniapp-ui-20261011.json",
+    "liveSimulatorEvidence": "forum-miniapp-live-20261011.json"
   },
   "database": {
     "newMigrations": false,
-    "historicalDataDeleted": false
+    "historicalDataDeleted": false,
+    "backup": "57-table logical row snapshot plus preserved existing schema/migrations; restoration not tested"
   },
   "deployment": {
-    "status": "pending",
+    "status": "verified",
     "origin": "https://home.thuzijing.top",
-    "backup": "/srv/zijingwebsite/backups/forum-removal-20261011"
+    "backup": "/srv/zijingwebsite/backups/forum-removal-20261011",
+    "applicationRevision": "9a2500ff3075caea3f587ee85a2d46f5fdd35db2",
+    "optimizedServerBuild": true,
+    "temporaryPortSmokeCases": 12,
+    "productionRequests": 31,
+    "retiredMethods": [
+      "GET",
+      "POST",
+      "PATCH",
+      "DELETE"
+    ],
+    "retiredResponses": "404; private,no-store",
+    "sourceFilesMatched": 160,
+    "databaseTablesVerified": 57,
+    "changedTables": [],
+    "databaseProcessUnchanged": true,
+    "protectedConfigUnchanged": true,
+    "freeKillHTTPS": 200,
+    "freeKillWSS": 101,
+    "freeKillProcessesUnchanged": true,
+    "swappinessRestored": 0,
+    "rollback": "/srv/zijingwebsite/backups/forum-removal-20261011/rollback.sh",
+    "rollbackExecuted": false,
+    "serverBuildCompilerWarnings": true
   },
   "boundaries": [
     "Simulator UI verification uses controlled fixtures; no online writes.",
