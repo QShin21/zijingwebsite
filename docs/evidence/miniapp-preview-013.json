@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-11",
+  "version": "0.1.3",
+  "mode": "DevTools simulator with live anonymous requests; one explicit 503 fixture; no phone/WeChat desktop preview validation",
+  "results": [
+    {
+      "page": "pages/home/index",
+      "textLength": 100,
+      "loading": false
+    },
+    {
+      "page": "pages/events/index",
+      "textLength": 92,
+      "loading": false
+    },
+    {
+      "page": "pages/communities/index",
+      "textLength": 79,
+      "loading": false
+    },
+    {
+      "page": "pages/explore/index",
+      "textLength": 211,
+      "loading": false
+    },
+    {
+      "page": "pages/account/index",
+      "textLength": 86,
+      "loading": false
+    },
+    {
+      "case": "request failure retains static home and retry",
+      "passed": true
+    }
+  ],
+  "exceptions": []
+}

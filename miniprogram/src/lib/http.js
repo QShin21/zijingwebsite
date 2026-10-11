@@ -1,5 +1,6 @@
 const config = require('../config');
 const session = require('./session');
+const brand = require('./brand');
 
 function url(path) {
   if (typeof path !== 'string' || !/^\/(?!\/)/.test(path) || /[\s\\]/.test(path) ||
@@ -30,7 +31,7 @@ function request(path, options = {}) {
         if (response.statusCode >= 200 && response.statusCode < 300) {
           if (typeof response.data === 'string' && response.data.trim().startsWith('<')) {
             reject(Object.assign(new Error('此功能需要更新网站服务接口'), { status: 404 }));
-          } else resolve(response.data);
+          } else resolve(brand.display(response.data));
         } else {
           if (response.statusCode === 401 && credential) session.clear();
           reject(Object.assign(new Error(message(response.data, response.statusCode)), { status: response.statusCode }));

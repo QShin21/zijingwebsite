@@ -34,5 +34,5 @@ Page({
       this.setData({ loading: false, loadingMore: false, docs: more ? this.data.docs.concat(docs) : docs, page: result.page, hasMore: result.hasNextPage });
     } catch (cause) { if (ticket === this._ticket) { error(this, cause); this.setData({ loadingMore: false }); } }
   },
-  onShareAppMessage() { return { title: `紫荆电竞社 · ${this.data.title}`, path: `/pages/list/index?collection=${this.data.collection}` }; },
+  onShareAppMessage() { return { title: `竞在紫荆 · ${this.data.title}`, path: `/pages/list/index?collection=${this.data.collection}` }; },
 });

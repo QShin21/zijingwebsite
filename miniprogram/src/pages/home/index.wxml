@@ -1,6 +1,6 @@
 <import src="../../templates/common.wxml" />
 <view class="page">
-  <view class="brand"><view class="brand-mark">Z</view><view><text class="brand-name">紫荆电竞社</text><text class="brand-sub">ZIJING ESPORTS</text></view></view>
+  <view class="brand"><view class="brand-mark">Z</view><view><text class="brand-name">竞在紫荆</text><text class="brand-sub">ZIJING ESPORTS</text></view></view>
   <view class="hero"><text class="eyebrow">{{user ? 'WELCOME BACK' : 'HELLO, ZIJING'}}</text><text class="hero-title">{{site.heroTitle || '因热爱相遇。'}}</text><text wx:if="{{site.heroSubtitle}}" class="hero-description">{{site.heroSubtitle}}</text><image wx:if="{{hero}}" class="hero-image" src="{{hero.url}}" mode="aspectFill" /><button class="primary hero-button" bindtap="{{user ? 'openWebsite' : 'login'}}" data-url="{{site.heroButtonURL}}">{{user ? site.heroButtonLabel : '登录，加入你的社群'}} <text>↗</text></button><text wx:if="{{!user}}" class="hero-hint">活动与通知可直接浏览</text></view>
   <template is="feedback" data="{{loading, error}}" />
   <block wx:if="{{!loading && !error}}">

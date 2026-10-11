@@ -1,13 +1,10 @@
-const session = require('./lib/session');
-const files = require('./lib/files');
-
 App({
   globalData: { user: null },
-  onLaunch() {
-    this.globalData.user = session.user();
-    files.clearPrivate();
-  },
-  onHide() {
-    // Pages stop their live requests in onHide; credentials stay on this device.
+  onLaunch: function () {
+    // Private-file cleanup must not prevent the first page from starting.
+    try { this.globalData.user = require('./lib/session').user(); }
+    catch (error) { console.warn('Account initialization unavailable', error && error.name); }
+    try { require('./lib/files').clearPrivate(); }
+    catch (error) { console.warn('Private image cleanup unavailable', error && error.name); }
   },
 });

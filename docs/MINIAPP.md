@@ -1,8 +1,8 @@
-# 紫荆电竞社微信小程序
+# 竞在紫荆微信小程序
 
 开发分支为 `littleapp`，起点为网站已提交版本 `fb51bbb71009aec66395fb2892402d814ddca744`。原网站工作目录的未提交社群成员审批修改保留在原处。本分支继续保留 Next.js / Payload / PostgreSQL 服务端，新增原生 WXML / WXSS / JavaScript 小程序客户端，日常内容共用原有 CMS。
 
-小程序 AppID 为 `wxccf9f8fc9515ebd5`，项目入口是 `miniprogram/project.config.json`，代码根目录是 `miniprogram/src`，当前源码版本为 `0.1.2`。
+小程序 AppID 为 `wxccf9f8fc9515ebd5`，项目入口是 `miniprogram/project.config.json`，代码根目录是 `miniprogram/src`，当前源码版本为 `0.1.3`。
 
 ## 功能与来源
 
@@ -57,3 +57,5 @@ pnpm miniapp:upload
 用户于 2026-10-11 明确授权此次聊天移除版本部署，网页版已运行 `3ec3eeb855de7c8a6e1c2c36a9f873519ca239a6`，保留现有账号桥接接口、数据库、媒体、环境及同机 FreeKill。95 份线上源码与发布提交一致，17 项 HTTPS 接口检查通过，旧聊天接口返回不可缓存的 404；FreeKill HTTPS 200 / WebSocket 101。上线后的模拟器实际请求网站配置、活动和能力接口仍为 200，旧消息接口为 404，活动页加载完成且无错误。具体改动与恢复方案见 [聊天移除记录](CHAT_REMOVAL.md)，执行结果见 [本次证据](evidence/chat-removal-20261011.json) 和 [部署证据](evidence/chat-removal-deployment-20261011.json)。
 
 `0.1.0` 首次制作、106 项测试、六项模拟器交互检查以及首次接口发布的历史验收保留在 [原始执行证据](evidence/miniapp-20261009.json)，对应 2026-10-09 的版本和范围。
+
+小程序品牌统一使用“竞在紫荆”。共享网站接口返回的历史品牌名称只在小程序显示层转换，不改写服务端资料、链接、账号凭证或个人名片。微信公众平台账号名称需要在平台后台单独核对；本次代码更新覆盖包内展示名称。

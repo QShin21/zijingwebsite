@@ -1,7 +1,7 @@
 {
   "appid": "wxccf9f8fc9515ebd5",
-  "projectname": "紫荆电竞社",
-  "description": "紫荆电竞社微信小程序",
+  "projectname": "竞在紫荆",
+  "description": "竞在紫荆微信小程序",
   "compileType": "miniprogram",
   "miniprogramRoot": "src/",
   "libVersion": "3.16.0",
@@ -11,12 +11,18 @@
     "postcss": true,
     "minified": true,
     "minifyWXSS": true,
-    "minifyWXML": true,
+    "minifyWXML": false,
     "compileHotReLoad": true,
-    "uploadWithSourceMap": false
+    "uploadWithSourceMap": false,
+    "enhance": true
   },
   "packOptions": {
-    "ignore": [{ "type": "folder", "value": "preview" }],
+    "ignore": [
+      {
+        "type": "folder",
+        "value": "preview"
+      }
+    ],
     "include": []
   }
 }

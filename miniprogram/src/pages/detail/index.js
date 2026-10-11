@@ -46,5 +46,5 @@ Page({
     if (this.data.registration !== '报名开放') return;
     navigation.copy(this.data.doc.registrationURL || this.data.doc.channelText || '', '报名渠道已复制');
   },
-  onShareAppMessage() { return { title: this.data.doc.title || '紫荆电竞社', path: `/pages/detail/index?collection=${this.data.collection}&id=${this.data.doc.id}` }; },
+  onShareAppMessage() { return { title: this.data.doc.title || '竞在紫荆', path: `/pages/detail/index?collection=${this.data.collection}&id=${this.data.doc.id}` }; },
 });

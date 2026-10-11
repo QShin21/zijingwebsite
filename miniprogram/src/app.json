@@ -14,7 +14,7 @@
     "pages/review/index"
   ],
   "window": {
-    "navigationBarTitleText": "紫荆电竞社",
+    "navigationBarTitleText": "竞在紫荆",
     "navigationBarBackgroundColor": "#faf8fc",
     "navigationBarTextStyle": "black",
     "backgroundColor": "#faf8fc",
@@ -60,7 +60,6 @@
     ]
   },
   "style": "v2",
-  "lazyCodeLoading": "requiredComponents",
   "sitemapLocation": "sitemap.json",
   "networkTimeout": {
     "request": 70000,

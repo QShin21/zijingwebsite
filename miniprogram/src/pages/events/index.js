@@ -22,5 +22,5 @@ Page({
       this.setData({ loading: false, loadingMore: false, docs: more ? this.data.docs.concat(docs) : docs, page: result.page, hasMore: result.hasNextPage });
     } catch (cause) { if (ticket === this._ticket) { error(this, cause); this.setData({ loadingMore: false }); } }
   },
-  onShareAppMessage() { return { title: '紫荆电竞社 · 活动与通知', path: '/pages/events/index' }; },
+  onShareAppMessage() { return { title: '竞在紫荆 · 活动与通知', path: '/pages/events/index' }; },
 });

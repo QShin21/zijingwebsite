@@ -53,7 +53,7 @@ async function detail(collection, id, slug) {
 }
 async function site() {
   const raw = await http.request('/api/globals/site?depth=0', { auth: false });
-  return { name: raw.name || '清华大学学生紫荆电竞社', heroTitle: raw.heroTitle || '因热爱相遇。',
+  return { name: raw.name || '竞在紫荆', heroTitle: raw.heroTitle || '因热爱相遇。',
     heroSubtitle: raw.heroSubtitle || '', heroImage: raw.heroImage, heroButtonLabel: raw.heroButtonLabel || '加入紫荆',
     heroButtonURL: raw.heroButtonURL || '/join', footer: raw.footer || '', description: raw.description || '',
     contacts: (raw.contacts || []).map(contact => ({ label: contact.label, text: contact.text, url: contact.url })),
