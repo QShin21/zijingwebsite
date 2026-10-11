@@ -1,7 +1,7 @@
 {
   "date": "2026-10-11",
-  "status": "local checked; server deployment pending",
-  "sourceRevision": "pending",
+  "status": "deployed and verified",
+  "sourceRevision": "e64763acc5cfa6824096b9ce18e27f3f0ff3a447",
   "originalReproduction": {
     "prompt": "user screenshot campus League of Legends registration",
     "upstreamStatus": 200,
@@ -34,8 +34,16 @@
       1440
     ],
     "axe": "questionnaire area passed",
-    "githubCI": "pending",
-    "productionBuild": "pending"
+    "githubCI": {
+      "status": "passed",
+      "runId": 38145283508,
+      "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38145283508",
+      "applicationRevision": "e64763acc5cfa6824096b9ce18e27f3f0ff3a447",
+      "unitAndDatabaseTests": 205,
+      "fullWebsiteBrowserTests": 50,
+      "productionBuild": "passed"
+    },
+    "productionBuild": "local, GitHub CI and isolated server candidate passed"
   },
   "realModel": {
     "at": "2026-10-11T13:51:50.314Z",
@@ -140,6 +148,360 @@
     "businessTables": 58,
     "productionTestAccounts": 0,
     "productionTestResponses": 0,
-    "status": "pending"
-  }
+    "status": "passed",
+    "at": "2026-10-11T14:12:16.218Z",
+    "sourceFilesMatched": 127,
+    "changedBusinessTables": [],
+    "buildId": "I6DVdKWHZnmVdfIRibkWT",
+    "verification": {
+      "at": "2026-10-11T14:12:16.218Z",
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/health/ready",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/events?limit=1&depth=0",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/miniapp/status",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/community/lol/forum",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/community/lol/forum",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/community/lol/forum",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/community/lol/forum",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/community/lol/forum/1",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/community/lol/forum/1",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/community/lol/forum/1",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/community/lol/forum/1",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/comments",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/comments",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/comments",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/comments",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/community-reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/community-reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/community-reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/community-reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/miniapp/reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/miniapp/reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/miniapp/reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/miniapp/reactions",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/admin/collections/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/admin/collections/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "PATCH",
+          "path": "/admin/collections/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "DELETE",
+          "path": "/admin/collections/forum-posts",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/showcase-videos/<unknown>.mp4",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/activities/manage",
+          "status": 403,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/activities/events/1/signup?mode=stats",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/activities/events/1/signup?mode=export",
+          "status": 404,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/activities/events/1/signup",
+          "status": 401,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/activities/invalid/1/signup",
+          "status": 400,
+          "noStore": true
+        },
+        {
+          "method": "GET",
+          "path": "/api/questionnaires/generate",
+          "status": 401,
+          "noStore": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/questionnaires/generate",
+          "status": 401,
+          "noStore": true
+        }
+      ],
+      "preservedOtherFiles": true,
+      "databaseProcessUnchanged": true,
+      "freeKillProcessesUnchanged": true,
+      "swappiness": "0",
+      "tableCount": 58,
+      "changedTables": [],
+      "sourceFilesMatched": 127,
+      "aiProxyReadTimeoutSeconds": 150,
+      "otherNginxDirectivesUnchanged": true,
+      "aiPrivateConfig": true,
+      "otherEnvironmentUnchanged": true,
+      "keyAbsentFromSourceAndBrowserBundle": true,
+      "bilibiliFrameAllowed": true,
+      "mediaUnchanged": true,
+      "freeKillHTTPS": 200,
+      "restoreRehearsal": "Full pg_restore to isolated database passed before build",
+      "ok": true
+    },
+    "freeKillWebSocket": {
+      "freeKillWebSocket": 101,
+      "tlsVerified": true
+    },
+    "publicWorkstation": {
+      "environment": "user Windows workstation public HTTPS",
+      "passed": true,
+      "requests": [
+        {
+          "url": "https://home.thuzijing.top/health/ready",
+          "status": 200,
+          "tlsVerified": true
+        },
+        {
+          "url": "https://home.thuzijing.top/api/questionnaires/generate",
+          "status": 401,
+          "tlsVerified": true
+        },
+        {
+          "url": "https://sgs.thuzijing.top",
+          "status": 200,
+          "tlsVerified": true
+        }
+      ]
+    },
+    "isolatedCandidateHTTPGeneration": {
+      "environment": "optimized production candidate on isolated restored database",
+      "at": "2026-10-11T14:05:04.000Z",
+      "authorizedHTTP": 200,
+      "realModel": true,
+      "model": "DeepSeek-V4.1-Flash",
+      "progressEvents": 4,
+      "firstByteMs": 52,
+      "elapsedMs": 13533,
+      "questionCount": 10,
+      "rosterMin": 5,
+      "rosterMax": 6,
+      "savedOrPublished": false,
+      "productionDatabaseWrites": 0
+    },
+    "productionDirectGenerationService": {
+      "at": "2026-10-11T14:12:23.420Z",
+      "environment": "production server direct generation service",
+      "realModel": true,
+      "model": "DeepSeek-V4.1-Flash",
+      "questionCount": 11,
+      "roster": {
+        "min": 5,
+        "max": 6,
+        "fields": [
+          {
+            "label": "姓名",
+            "required": true,
+            "type": "text"
+          },
+          {
+            "label": "学号",
+            "required": true,
+            "type": "text"
+          },
+          {
+            "label": "游戏ID",
+            "required": true,
+            "type": "text"
+          },
+          {
+            "label": "擅长位置",
+            "required": true,
+            "type": "select"
+          },
+          {
+            "label": "是否队长",
+            "required": true,
+            "type": "select"
+          }
+        ]
+      },
+      "stages": [
+        "generating",
+        "checking"
+      ],
+      "elapsedMs": 6705,
+      "savedOrPublished": false,
+      "productionDatabaseWrites": 0
+    },
+    "productionDatabaseMigration": false,
+    "productionFullSubmission": "not run; full submission, stats and CSV validated in isolated environment",
+    "originalCheckoutChangesPreserved": 27,
+    "rollback": {
+      "script": "/srv/zijingwebsite/backups/questionnaire-ai-reliability-20261011/rollback.sh",
+      "retainsProductionDatabaseAndHistoricalResponses": true,
+      "refusesIncompatibleOldApplicationIfGroupFormsOrAnswerSnapshotsExist": true,
+      "requiresCompatibleRollbackCodeAfterGroupUse": true,
+      "readOnlyPreflight": "passed before deployment; no group forms at that time",
+      "productionRollbackExecuted": false
+    }
+  },
+  "applicationRevision": "e64763acc5cfa6824096b9ce18e27f3f0ff3a447"
 }
