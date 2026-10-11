@@ -105,6 +105,7 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
         <>
           <p className="preserve">{info.form.intro}</p>
           <p>{info.state}</p>
+          <p className="muted">提交的答案仅供你本人和有权限的活动管理者查看，用于本次活动组织。</p>
           {info.form.enabled &&
             info.state === "报名开放" &&
             (!info.loggedIn ? (

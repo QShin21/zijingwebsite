@@ -22,7 +22,7 @@
 <block wx:else>
  <button wx:if="{{info.canManage}}" class="plain" bindtap="manage">编辑报名问卷 / 查看名单 →</button>
  <view wx:if="{{receipt}}" class="panel section"><text class="section-title">已报名</text><text class="body">报名编号：{{receipt.id}}</text><view wx:for="{{receipt.rows}}" wx:key="label" class="answer"><text class="label">{{item.label}}</text><text selectable>{{item.answer}}</text></view></view>
- <block wx:else><text class="body">{{form.intro}}</text><text class="badge">{{info.state}}</text>
+ <block wx:else><text class="body">{{form.intro}}</text><text class="badge">{{info.state}}</text><text class="muted">提交的答案仅供你本人和有权限的活动管理者查看，用于本次活动组织。</text>
  <block wx:if="{{form.enabled && info.state === '报名开放'}}"><view wx:for="{{questions}}" wx:for-item="question" wx:for-index="qindex" wx:key="id" class="panel section"><text class="label">{{qindex+1}}. {{question.label}}{{question.required ? ' *' : '（选填）'}}</text>
  <input wx:if="{{question.type === 'text'}}" value="{{answers[question.id] || ''}}" maxlength="200" bindinput="answer" data-id="{{question.id}}" placeholder="请输入" />
  <textarea wx:if="{{question.type === 'textarea'}}" value="{{answers[question.id] || ''}}" maxlength="2000" bindinput="answer" data-id="{{question.id}}" placeholder="请输入" />
