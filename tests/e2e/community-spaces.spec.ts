@@ -81,21 +81,42 @@ test('仅标题投稿与 MP4 审核、播放、拖动和隐藏权限', async ({ 
   await page.getByLabel('标题', { exact: true }).fill('只有标题也能投稿'); await page.getByRole('button', { name: '提交审核', exact: true }).click();
   await expect(page.getByText('投稿已提交，请在“我的投稿”查看审核状态。')).toBeVisible();
   await page.getByLabel('标题', { exact: true }).fill('双端预览视频');
-  // Generate a synthetic clip in memory; never commit or import real media.
-  const clip = await page.evaluate(async () => {
+  // Generate and inspect synthetic media outside the site's media CSP.
+  const fixturePage = await browser.newPage();
+  const clip = await fixturePage.evaluate(async () => {
     const canvas = document.createElement('canvas'); canvas.width = 320; canvas.height = 180;
-    const ctx = canvas.getContext('2d')!; ctx.fillStyle = '#6633aa'; ctx.fillRect(0, 0, 320, 180);
+    const ctx = canvas.getContext('2d')!;
+    let frame = 0;
+    const drawFrame = () => {
+      ctx.fillStyle = '#6633aa'; ctx.fillRect(0, 0, 320, 180);
+      // Identical repaints can be coalesced into a single captured frame.
+      ctx.fillStyle = '#ffffff'; ctx.fillRect((frame++ * 7) % 280, 70, 40, 40);
+    };
+    drawFrame();
     const stream = canvas.captureStream(24), chunks: Blob[] = [];
     const recorder = new MediaRecorder(stream, { mimeType: 'video/mp4;codecs=avc1.42001E' });
     const blob = await new Promise<Blob>((resolve, reject) => {
       recorder.ondataavailable = event => chunks.push(event.data); recorder.onerror = reject;
       recorder.onstop = () => resolve(new Blob(chunks, { type: 'video/mp4' }));
-      recorder.start(); const timer = setInterval(() => ctx.fillRect(0, 0, 320, 180), 40);
+      recorder.start(); const timer = setInterval(drawFrame, 40);
       setTimeout(() => { clearInterval(timer); recorder.stop(); stream.getTracks().forEach(track => track.stop()); }, 1800);
     });
-    return Array.from(new Uint8Array(await blob.arrayBuffer()));
-  });
-  await page.getByLabel('上传 MP4 视频', { exact: false }).setInputFiles({ name: 'synthetic.mp4', mimeType: 'video/mp4', buffer: Buffer.from(clip) });
+    const probe = document.createElement('video');
+    const objectURL = URL.createObjectURL(blob);
+    try {
+      const duration = await new Promise<number>((resolve, reject) => {
+        probe.onloadedmetadata = () => resolve(probe.duration);
+        probe.onerror = () => reject(new Error('Synthetic MP4 metadata could not be decoded'));
+        probe.src = objectURL;
+      });
+      return { bytes: Array.from(new Uint8Array(await blob.arrayBuffer())), duration };
+    } finally {
+      probe.removeAttribute('src'); probe.load(); URL.revokeObjectURL(objectURL);
+    }
+  }).finally(() => fixturePage.close());
+  expect(Number.isFinite(clip.duration), 'Synthetic MP4 must have a finite duration').toBe(true);
+  expect(clip.duration, 'Synthetic MP4 must cover playback and the one-second seek').toBeGreaterThanOrEqual(1.5);
+  await page.getByLabel('上传 MP4 视频', { exact: false }).setInputFiles({ name: 'synthetic.mp4', mimeType: 'video/mp4', buffer: Buffer.from(clip.bytes) });
   await page.getByRole('button', { name: '提交审核', exact: true }).click();
   await expect(page.getByLabel('标题', { exact: true })).toHaveValue('');
   await page.goto(`/community/${slug}/showcase?view=mine`);
