@@ -33,5 +33,12 @@
       "passed": true
     }
   ],
-  "exceptions": []
+  "exceptions": [],
+  "delivery": {
+    "sourceRevision": "5ecb9b932d37a27dd8d48ebd95c57c021648b437",
+    "previewGenerated": true,
+    "developmentUploadSucceeded": true,
+    "compiledBytes": 107693,
+    "reviewSubmitted": false
+  }
 }
