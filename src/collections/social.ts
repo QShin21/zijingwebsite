@@ -1,3 +1,4 @@
+import { signupFields, validateSignupForm } from './signups';
 import { communityVideo } from "../lib/community-video";
 import { normalizeShowcaseImage } from "../lib/showcase-images";
 import { APIError, type CollectionConfig, type CollectionBeforeChangeHook, type Access, type Where } from "payload";
@@ -111,6 +112,7 @@ function social(slug: string, title: string, kind: "local" | "showcase"): Collec
       { name: "caption", label: "图片说明", type: "text", maxLength: 200 },
     ] },
   );
+  if (kind === "local") fields.push(...signupFields);
   if (kind === "local") fields.push({ name: "category", type: "select", options: ["event", "notice"], required: true });
   return {
     slug, labels: { singular: title, plural: title }, admin: { useAsTitle: "title" },
@@ -126,7 +128,7 @@ function social(slug: string, title: string, kind: "local" | "showcase"): Collec
       update: kind === "showcase" ? (args) => args.req.context.webShowcaseWrite === true ? moderatorWhere(args) : false : moderatorWhere,
       delete: ({ req }) => canPublish(req.user as Identity) && (kind !== "showcase" || req.context.webShowcaseWrite === true),
     },
-    hooks: { beforeChange: [participationGuard(kind)] },
+    hooks: { beforeChange: [participationGuard(kind), ...(kind === "local" ? [validateSignupForm] : [])] },
     fields,
   };
 }

@@ -1,0 +1,8 @@
+input, textarea { box-sizing: border-box; width: 100%; background: #f2edf8; border-radius: 12rpx; padding: 20rpx; min-height: 84rpx; }
+textarea { height: 180rpx; }
+.label { display: block; margin: 20rpx 0 12rpx; font-weight: 600; }
+.choice { display: flex; align-items: center; padding: 18rpx 0; }
+.picker { padding: 24rpx 0; color: #6835ad; }
+.answer { margin-top: 22rpx; white-space: pre-wrap; word-break: break-all; }
+.panel > .section-title, .panel > .muted { display: block; }
+.row picker { flex: 1; }

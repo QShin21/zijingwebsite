@@ -11,7 +11,9 @@
     "pages/auth/index",
     "pages/community/index",
     "pages/applications/index",
-    "pages/review/index"
+    "pages/review/index",
+    "pages/signup/index",
+    "pages/activity-manage/index"
   ],
   "window": {
     "navigationBarTitleText": "竞在紫荆",

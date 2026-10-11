@@ -58,8 +58,8 @@ export async function publishCommunityAction(form: FormData) {
   const path = `${await gamePath(game)}/updates`;
   if (!["event", "notice"].includes(kind)) problem(path, "发布类型无效");
   try {
-    await p.create({ collection: "community-posts", overrideAccess: false, user,
-      data: { game, author: user.id, title: value(form, "title"), body: value(form, "body"), category: kind as "event" | "notice" } });
+    await p.create({ collection: "community-posts", overrideAccess: false, user, context: { manageSignupForm: true },
+      data: { game, author: user.id, title: value(form, "title"), body: value(form, "body"), category: kind as "event" | "notice", signupForm: kind === "event" && value(form,"signupForm") ? JSON.parse(value(form,"signupForm")) : undefined } });
   } catch { problem(path, "发布未成功，请核对内容和权限"); }
   redirect(path);
 }

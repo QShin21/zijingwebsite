@@ -26,6 +26,7 @@ export interface Config {
     'community-bans': CommunityBan;
     'community-showcase': CommunityShowcase;
     'community-posts': CommunityPost;
+    'event-signups': EventSignup;
     games: Game;
     teams: Team;
     seasons: Season;
@@ -51,6 +52,7 @@ export interface Config {
     'community-bans': CommunityBansSelect<false> | CommunityBansSelect<true>;
     'community-showcase': CommunityShowcaseSelect<false> | CommunityShowcaseSelect<true>;
     'community-posts': CommunityPostsSelect<false> | CommunityPostsSelect<true>;
+    'event-signups': EventSignupsSelect<false> | EventSignupsSelect<true>;
     games: GamesSelect<false> | GamesSelect<true>;
     teams: TeamsSelect<false> | TeamsSelect<true>;
     seasons: SeasonsSelect<false> | SeasonsSelect<true>;
@@ -312,7 +314,52 @@ export interface CommunityPost {
   author: number | User;
   authorName?: string | null;
   status?: ('visible' | 'hidden') | null;
+  signupForm?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   category: 'event' | 'notice';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-signups".
+ */
+export interface EventSignup {
+  id: number;
+  activityType: string;
+  activityID: number;
+  dedupeKey: string;
+  member: number | User;
+  organizer?: (number | null) | User;
+  game?: (number | null) | Game;
+  memberName: string;
+  eventTitle: string;
+  formVersion: string;
+  questions:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  answers:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -446,6 +493,15 @@ export interface Event {
   internalNotes?: string | null;
   submittedBy?: (number | null) | User;
   reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
+  signupForm?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   type?: ('比赛' | '观赛' | '交流' | '训练' | '其他') | null;
   game?: (number | null) | Game;
   team?: (number | null) | Team;
@@ -796,6 +852,10 @@ export interface PayloadLockedDocument {
         value: number | CommunityPost;
       } | null)
     | ({
+        relationTo: 'event-signups';
+        value: number | EventSignup;
+      } | null)
+    | ({
         relationTo: 'games';
         value: number | Game;
       } | null)
@@ -1010,7 +1070,27 @@ export interface CommunityPostsSelect<T extends boolean = true> {
   author?: T;
   authorName?: T;
   status?: T;
+  signupForm?: T;
   category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-signups_select".
+ */
+export interface EventSignupsSelect<T extends boolean = true> {
+  activityType?: T;
+  activityID?: T;
+  dedupeKey?: T;
+  member?: T;
+  organizer?: T;
+  game?: T;
+  memberName?: T;
+  eventTitle?: T;
+  formVersion?: T;
+  questions?: T;
+  answers?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1137,6 +1217,7 @@ export interface EventsSelect<T extends boolean = true> {
   internalNotes?: T;
   submittedBy?: T;
   reviewState?: T;
+  signupForm?: T;
   type?: T;
   game?: T;
   team?: T;

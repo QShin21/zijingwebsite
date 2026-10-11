@@ -4,8 +4,8 @@ import { notFound } from "next/navigation";
 import { bySlug, cms } from "@/lib/content";
 import { managesGame, formatDate } from "@/lib/rules";
 import { CommunityPager, pageNumber } from "@/components/CommunityPager";
-import { SubmitButton } from "@/components/SubmitButton";
-import { publishCommunityAction } from "../../actions";
+import { CommunityActivityComposer } from "@/components/CommunityActivityComposer";
+
 export default async function Updates({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ page?: string; message?: string }> }) {
   const { slug } = await params; const query = await searchParams;
   const game = await bySlug("games", slug); if (!game) notFound();
@@ -21,9 +21,6 @@ export default async function Updates({ params, searchParams }: { params: Promis
       <p className="community-excerpt">{post.body}</p><Link href={`/community/${slug}/updates/${post.id}`}>阅读全文 ↗</Link>
     </article>)}</div>{!entries.docs.length && <p>暂无活动与通知。</p>}
     <CommunityPager page={page} pages={entries.totalPages} base={`/community/${slug}/updates`} />
-    {managesGame(user, game.id) && <details className="panel"><summary>发布活动与通知</summary><form className="member-form" action={publishCommunityAction}>
-      <input type="hidden" name="game" value={game.id} /><label>类型<select name="kind"><option value="event">社群活动</option><option value="notice">社群通知</option></select></label>
-      <label>标题<input name="title" maxLength={120} required /></label><label>内容<textarea name="body" rows={8} maxLength={5000} required /></label><SubmitButton className="button">发布</SubmitButton>
-    </form></details>}
+    {managesGame(user, game.id) && <CommunityActivityComposer game={game.id} />}
   </section>;
 }

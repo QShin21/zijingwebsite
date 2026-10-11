@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-11",
+  "version": "0.2.0",
+  "mode": "controlled simulator fixtures; no production writes",
+  "cases": [
+    "question text and multiple choices render and update",
+    "successful submission replaces inputs with receipt",
+    "editor adds, changes type, reorders, deletes and saves questions",
+    "manager sees submitted answer snapshots"
+  ],
+  "phoneVerified": false
+}

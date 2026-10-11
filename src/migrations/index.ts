@@ -1,3 +1,4 @@
+import * as activitySignups from './20261011_160000_activity_signups';
 import * as chatNotifications from "./20260928_120000_chat_notifications";
 import * as chatImages from "./20260929_010000_chat_images";
 import * as migration_20260920_102916 from './20260920_102916';
@@ -10,6 +11,7 @@ import * as migration_20260927_181800_forum_curation from './20260927_181800_for
 import * as migration_20260927_182940_community_showcase from './20260927_182940_community_showcase';
 
 export const migrations = [
+
   {
     up: migration_20260920_102916.up,
     down: migration_20260920_102916.down,
@@ -52,4 +54,5 @@ export const migrations = [
   },
   { up: chatNotifications.up, down: chatNotifications.down, name: "20260928_120000_chat_notifications" },
   { up: chatImages.up, down: chatImages.down, name: "20260929_010000_chat_images" },
+  { up: activitySignups.up, down: activitySignups.down, name: '20261011_160000_activity_signups' },
 ];

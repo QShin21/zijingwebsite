@@ -4,6 +4,7 @@ import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical
 import type { Window } from "./rules";
 export type Content = Window & {
   id: number;
+  signupForm?: { enabled?: boolean };
   slug: string;
   title: string;
   summary?: string;
@@ -79,6 +80,7 @@ const publicSelect = Object.fromEntries(
     "sections",
     "archived",
     "lifecycle",
+    "signupForm",
     "registrationClosed",
     "registrationStart",
     "registrationEnd",

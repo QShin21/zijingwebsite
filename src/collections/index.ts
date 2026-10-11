@@ -1,3 +1,4 @@
+import { EventSignups, signupFields, validateSignupForm } from './signups';
 import type {
   CollectionConfig,
   Where,
@@ -367,7 +368,7 @@ function content(
           return args;
         },
       ],
-      beforeChange: [guard(scoped, self)],
+      beforeChange: [guard(scoped, self), ...(slug === 'events' ? [validateSignupForm] : [])],
       afterChange: [audit],
     },
     fields: [
@@ -529,6 +530,7 @@ export const Collections: CollectionConfig[] = [
   Users,
   Media,
   ...SocialCollections,
+  EventSignups,
   content("games", "游戏项目", [
     { name: "sort", label: "排序", type: "number" },
   ]),
@@ -582,6 +584,7 @@ export const Collections: CollectionConfig[] = [
     true,
   ),
   content("events", "活动", [
+    ...signupFields,
     {
       name: "type",
       label: "类型",

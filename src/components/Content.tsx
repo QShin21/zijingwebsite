@@ -1,3 +1,4 @@
+import { ActivitySignup } from './ActivitySignup';
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { RichText } from "@payloadcms/richtext-lexical/react";
@@ -482,7 +483,8 @@ export async function Detail({
               </dl>
             </div>
           )}
-          {["events", "recruitment"].includes(collection) && (
+          {collection === "events" && <ActivitySignup kind="events" id={doc.id} />}
+          {(collection === "recruitment" || (collection === "events" && !doc.signupForm?.enabled)) && (
             <div className="panel registration-panel">
               <p className="eyebrow">TAKE PART</p>
               <h2>{state}</h2>

@@ -1,3 +1,4 @@
+const http = require('../../lib/http');
 const cms = require('../../lib/cms');
 const session = require('../../lib/session');
 const { render } = require('../../lib/richtext');
@@ -16,7 +17,7 @@ Page({
   onPullDownRefresh() { this.load().finally(() => wx.stopPullDownRefresh()); },
   async load() {
     const ticket = this._ticket = (this._ticket || 0) + 1;
-    this.setData({ loading: true, error: '', needsLogin: false, user: session.user() });
+    this.setData({ loading: true, error: '', needsLogin: false, user: session.user(), signupInfo: null, signupFailed: false });
     try {
       const { collection, id, slug } = this._options;
       const social = socialCollections.includes(collection);
@@ -40,8 +41,13 @@ Page({
         endDateText: doc.endAt ? format.date(doc.endAt) : '',
         registration: ['events', 'recruitment'].includes(collection) ? format.registrationState(doc) : '' });
       wx.setNavigationBarTitle({ title: doc.title || '内容详情' });
+      if (collection === 'events' || (collection === 'community-posts' && doc.category === 'event')) {
+        try { const signupInfo = await http.request('/api/activities/'+collection+'/'+doc.id+'/signup'); if(ticket===this._ticket)this.setData({signupInfo,registration:signupInfo.form.enabled?'':this.data.registration}); }
+        catch { if(ticket===this._ticket)this.setData({signupFailed:true}); }
+      }
     } catch (cause) { if (ticket === this._ticket) error(this, cause); }
   },
+  signup() { if(navigation.requireUser())navigation.go('signup',{kind:this.data.collection,id:this.data.doc.id}); },
   register() {
     if (this.data.registration !== '报名开放') return;
     navigation.copy(this.data.doc.registrationURL || this.data.doc.channelText || '', '报名渠道已复制');
