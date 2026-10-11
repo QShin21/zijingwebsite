@@ -1,5 +1,9 @@
 # 决策记录
 
+## 视频直接展示 · 2026-10-11
+
+使用服务端渲染直接输出 B 站 iframe，移除客户端预览开关；保持禁止自动播放和现有 iframe 安全限制。依据微信官方 launchApp 文档（https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/launchApp.html），该能力用于返回来源 App，当前产品无法为普通扫码用户指定打开 B 站 App；保留复制链接，不使用绕过平台限制的中转。
+
 ## 风采视频的两端实现 · 2026-10-11
 
 网页使用 B 站官方 iframe，粘贴代码只提取 src 并重建合法参数。小程序使用原生 video 播放上传的 MP4/HTTPS 直链；B 站 iframe 受微信业务域名约束，现有 B 站网页链接保留复制路径。视频采用私有媒体存储及逐次权限验证、Range 和 no-store，无新数据迁移；网页投稿仅标题必填。

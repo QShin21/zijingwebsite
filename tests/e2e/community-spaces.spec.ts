@@ -65,7 +65,8 @@ test("多管理员微信、只读活动、网页风采投稿审核及B站预览"
   await expect(managerPage.getByRole("status")).toContainText("审核已保存");
   await page.goto(`/community/${slug}/showcase`); await expect(page.getByRole("heading", { name: "精彩活动图文记录" })).toBeVisible();
   await expect(page.locator(".showcase-images img")).toHaveCount(1);
-  await page.getByRole("button", { name: "站内预览 B 站视频" }).click();
+  await expect(page.getByRole("button", { name: /站内预览 B 站视频|收起预览/ })).toHaveCount(0);
+  await expect(page.getByTitle("B站视频预览")).toBeVisible();
   await expect(page.getByTitle("B站视频预览")).toHaveAttribute("src", /https:\/\/player\.bilibili\.com\/player\.html.*bvid=BV1B7411m7LV/);
   await expect(page.getByRole("link", { name: "前往 B 站观看 ↗" })).toHaveAttribute("href", "https://www.bilibili.com/video/BV1B7411m7LV/");
   for (const width of [390, 1440]) { await page.setViewportSize({ width, height: 960 }); expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width); await page.screenshot({ path: `.data/community-showcase-${width}.png` }); }
