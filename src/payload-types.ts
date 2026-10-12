@@ -35,6 +35,7 @@ export interface Config {
     'team-join-applications': TeamJoinApplication;
     'team-memberships': TeamMembership;
     'team-member-profiles': TeamMemberProfile;
+    'team-honor-records': TeamHonorRecord;
     'event-signups': EventSignup;
     games: Game;
     teams: Team;
@@ -70,6 +71,7 @@ export interface Config {
     'team-join-applications': TeamJoinApplicationsSelect<false> | TeamJoinApplicationsSelect<true>;
     'team-memberships': TeamMembershipsSelect<false> | TeamMembershipsSelect<true>;
     'team-member-profiles': TeamMemberProfilesSelect<false> | TeamMemberProfilesSelect<true>;
+    'team-honor-records': TeamHonorRecordsSelect<false> | TeamHonorRecordsSelect<true>;
     'event-signups': EventSignupsSelect<false> | EventSignupsSelect<true>;
     games: GamesSelect<false> | GamesSelect<true>;
     teams: TeamsSelect<false> | TeamsSelect<true>;
@@ -698,6 +700,64 @@ export interface TeamMemberProfile {
   createdAt: string;
 }
 /**
+ * 请从代表队与荣誉工作台投稿、审核和隐藏；成员资格来自唯一 team-memberships。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-honor-records".
+ */
+export interface TeamHonorRecord {
+  id: number;
+  team: number | Team;
+  game: number | Game;
+  season?: (number | null) | Season;
+  author: number | User;
+  authorName: string;
+  membershipRef: number;
+  title: string;
+  competition?: string | null;
+  placing?: string | null;
+  date?: string | null;
+  description?: string | null;
+  images?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  videoURL?: string | null;
+  state: 'draft' | 'pending' | 'withdrawn' | 'returned' | 'rejected' | 'approved' | 'hidden';
+  revision: number;
+  submittedVersion?: string | null;
+  submittedAt?: string | null;
+  approvedVersion?: string | null;
+  approvedSnapshot?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  approvedAt?: string | null;
+  reviewedBy?: (number | null) | User;
+  reviewNote?: string | null;
+  history?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "event-signups".
  */
@@ -1208,6 +1268,10 @@ export interface PayloadLockedDocument {
         value: number | TeamMemberProfile;
       } | null)
     | ({
+        relationTo: 'team-honor-records';
+        value: number | TeamHonorRecord;
+      } | null)
+    | ({
         relationTo: 'event-signups';
         value: number | EventSignup;
       } | null)
@@ -1618,6 +1682,37 @@ export interface TeamMemberProfilesSelect<T extends boolean = true> {
   avatar?: T;
   visible?: T;
   revision?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-honor-records_select".
+ */
+export interface TeamHonorRecordsSelect<T extends boolean = true> {
+  team?: T;
+  game?: T;
+  season?: T;
+  author?: T;
+  authorName?: T;
+  membershipRef?: T;
+  title?: T;
+  competition?: T;
+  placing?: T;
+  date?: T;
+  description?: T;
+  images?: T;
+  videoURL?: T;
+  state?: T;
+  revision?: T;
+  submittedVersion?: T;
+  submittedAt?: T;
+  approvedVersion?: T;
+  approvedSnapshot?: T;
+  approvedAt?: T;
+  reviewedBy?: T;
+  reviewNote?: T;
+  history?: T;
   updatedAt?: T;
   createdAt?: T;
 }

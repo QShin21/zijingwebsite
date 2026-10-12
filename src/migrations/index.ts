@@ -4,6 +4,7 @@ import * as clubOperations from './20261011_180000_club_operations';
 import * as contentPromotions from './20261012_030000_content_promotions';
 import * as staffRecruitment from './20261012_050000_staff_recruitment';
 import * as teamMemberProfiles from './20261012_170000_team_member_profiles';
+import * as teamHonorRecords from './20261012_080000_team_honor_records';
 import * as chatNotifications from "./20260928_120000_chat_notifications";
 import * as chatImages from "./20260929_010000_chat_images";
 import * as migration_20260920_102916 from './20260920_102916';
@@ -63,6 +64,7 @@ export const migrations = [
   { up: clubOperations.up, down: clubOperations.down, name: '20261011_180000_club_operations' },
   { up: contentPromotions.up, down: contentPromotions.down, name: '20261012_030000_content_promotions' },
   { up: staffRecruitment.up, down: staffRecruitment.down, name: '20261012_050000_staff_recruitment' },
+  { up: teamHonorRecords.up, down: teamHonorRecords.down, name: '20261012_080000_team_honor_records' },
   { up: teamCore.up, down: teamCore.down, name: '20261012_160000_team_core' },
   // Integration prerequisite: register the core 20261012_160000 migration before this entry.
   { up: teamMemberProfiles.up, down: teamMemberProfiles.down, name: '20261012_170000_team_member_profiles' },
