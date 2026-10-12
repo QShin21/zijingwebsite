@@ -708,4 +708,154 @@ describe.sequential("代表队核心合成数据库", () => {
       ).updatedAt,
     );
   });
+  it("离队后新批次复用同一成员ID，跨队赛季拒绝，归档立即使投稿资格失效", async () => {
+    const original = await getTeamMembership(p, {
+      teamID: team,
+      userID: member.id,
+    });
+    const previous = await p.findByID({
+      collection: "team-recruitments",
+      id: batch,
+      user: manager,
+      overrideAccess: false,
+    });
+    await closeTeamRecruitment(p, manager, batch, "closed", previous.updatedAt);
+    const next = await saveTeamRecruitment(p, manager, {
+      teamID: team,
+      title: "合成重新入队批次",
+      status: "open",
+      form,
+    });
+    const info = await teamRecruitmentInfo(p, member, next.id);
+    const application = await saveTeamJoinApplication(p, member, next.id, {
+      action: "submit",
+      version: info.version,
+      answers,
+    });
+    const oldTeam = (
+      await p.find({
+        collection: "teams",
+        overrideAccess: true,
+        depth: 0,
+        limit: 1,
+        where: {
+          and: [
+            { game: { equals: game } },
+            { establishmentApplication: { exists: false } },
+          ],
+        },
+      })
+    ).docs[0];
+    const wrong = await p.create({
+      collection: "seasons",
+      user: leader,
+      overrideAccess: false,
+      data: {
+        title: "合成其他队赛季",
+        slug: `foreign-season-${suffix}`,
+        season: "合成旧赛季",
+        team: oldTeam.id,
+        _status: "published",
+      },
+    });
+    await expect(
+      decideTeamJoinApplication(
+        p,
+        manager,
+        application.id,
+        "approved",
+        "",
+        application.updatedAt,
+        wrong.id,
+      ),
+    ).rejects.toThrow("赛季必须属于");
+    await decideTeamJoinApplication(
+      p,
+      manager,
+      application.id,
+      "approved",
+      "",
+      application.updatedAt,
+    );
+    const current = await getActiveTeamMembership(p, {
+      teamID: team,
+      userID: member.id,
+    });
+    expect(current!.id).toBe(original!.id);
+    const record = await p.findByID({
+      collection: "teams",
+      id: team,
+      user: leader,
+      overrideAccess: false,
+    });
+    await changeTeamLifecycle(p, manager, team, "archived", record.updatedAt);
+    expect(
+      await getActiveTeamMembership(p, { teamID: team, userID: member.id }),
+    ).toBeNull();
+    expect(
+      (await getTeamMembership(p, { teamID: team, userID: member.id }))?.status,
+    ).toBe("active");
+    expect(
+      (
+        await p.findByID({
+          collection: "team-join-applications",
+          id: application.id,
+          user: member,
+          overrideAccess: false,
+        })
+      ).status,
+    ).toBe("approved");
+  });
+  it("仍标open但服务器截止时间已到时拒绝保存与重提，原稿仍可自查撤回", async () => {
+    const idTeam = Number((await createTeam("合成到点队")).team);
+    let recruitment = await saveTeamRecruitment(p, manager, {
+      teamID: idTeam,
+      title: "合成到点截止批次",
+      status: "open",
+      form,
+    });
+    const info = await teamRecruitmentInfo(p, member, recruitment.id);
+    const draft = await saveTeamJoinApplication(p, member, recruitment.id, {
+      action: "draft",
+      version: info.version,
+      answers: { gameID: "合成原稿" },
+    });
+    await expect(
+      p.findByID({
+        collection: "team-join-applications",
+        id: draft.id,
+        user: manager,
+        overrideAccess: false,
+      }),
+    ).rejects.toThrow();
+    // Synthetic fixture clock boundary, without waiting or altering server/system time.
+    recruitment = await p.update({
+      collection: "team-recruitments",
+      id: recruitment.id,
+      overrideAccess: true,
+      context: { teamCoreWrite: true },
+      data: {
+        signupForm: { ...form, end: new Date(Date.now() - 1000).toISOString() },
+      },
+    });
+    expect((await teamRecruitmentInfo(p, member, recruitment.id)).state).toBe(
+      "招新已截止",
+    );
+    await expect(
+      saveTeamJoinApplication(p, member, recruitment.id, {
+        action: "submit",
+        version: info.version,
+        revision: draft.updatedAt,
+        answers,
+      }),
+    ).rejects.toThrow("招新已截止");
+    const receipt = await withdrawTeamJoinApplication(
+      p,
+      member,
+      draft.id,
+      draft.updatedAt,
+    );
+    expect(receipt.status).toBe("withdrawn");
+    expect((receipt.answers as { gameID: string }).gameID).toBe("合成原稿");
+  });
 });

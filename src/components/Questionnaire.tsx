@@ -21,6 +21,7 @@ import { QuestionnaireAdvanced } from "./QuestionnaireAdvanced";
 export function Questionnaire({
   form,
   onSubmit,
+  onSaveDraft,
   busy = false,
   preview = false,
   draftKey,
@@ -29,6 +30,7 @@ export function Questionnaire({
 }: {
   form: SignupForm;
   onSubmit?: (answers: Answers) => Promise<void>;
+  onSaveDraft?: (answers: Answers) => Promise<void>;
   draftKey?: string;
   busy?: boolean;
   preview?: boolean;
@@ -412,6 +414,15 @@ export function Questionnaire({
         )}
       <p role="alert">{message}</p>
       <div className="signup-tools">
+        {onSaveDraft && !preview && (
+          <button type="button" disabled={locked} onClick={async () => {
+            setSending(true);
+            setMessage("");
+            try { await onSaveDraft(answers); setMessage("草稿已保存，尚未提交人工审核。"); }
+            catch (error) { setMessage((error as Error).message); }
+            finally { setSending(false); }
+          }}>保存草稿</button>
+        )}
         {(review || current > 0) && (
           <button
             type="button"
