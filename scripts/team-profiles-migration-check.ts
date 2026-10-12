@@ -210,7 +210,7 @@ try {
   };
   await mkdir("docs/evidence", { recursive: true });
   await writeFile(
-    "docs/evidence/team-profiles-migration-20261012.json",
+    process.env.TEAM_PROFILES_MIGRATION_EVIDENCE || "docs/evidence/team-profiles-migration-20261012.json",
     JSON.stringify(evidence, null, 2) + "\n",
   );
   await f.cleanup();

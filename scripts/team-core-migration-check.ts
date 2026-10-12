@@ -37,10 +37,11 @@ try {
   });
   const db = p.db as unknown as PostgresAdapter;
   const list = migrations.map(migration => ({ name: migration.name, up: (args: unknown) => migration.up(args as MigrateUpArgs), down: (args: unknown) => migration.down(args as MigrateDownArgs) }));
+  const coreIndex = list.findIndex(m => m.name === "20261012_160000_team_core");
+  if (coreIndex < 0) throw new Error("Core migration must be registered once");
+  const baseline = list.slice(0, coreIndex), throughCore = list.slice(0, coreIndex + 1);
   await db.migrate({
-    migrations: list.filter(
-      (m) => m.name !== "20261012_160000_team_core",
-    ),
+    migrations: baseline,
   });
   const pool = db.pool;
   const tableRows = (
@@ -106,7 +107,7 @@ try {
       await pool.query(`SELECT * FROM "${table}" ORDER BY ctid`)
     ).rows;
   }
-  await db.migrate({ migrations: list });
+  await db.migrate({ migrations: throughCore });
   const after: Record<string, unknown[]> = {};
   for (const table of legacyTables)
     after[table] = (
@@ -134,7 +135,7 @@ try {
     throw new Error("Legacy roles/roster implicitly became membership");
   const stable = JSON.stringify(after),
     hash = createHash("sha256").update(stable).digest("hex");
-  await db.migrate({ migrations: list }); // runner records migration once; repeat must be a no-op.
+  await db.migrate({ migrations: throughCore }); // Later dependent modules are exercised by their own staged drill.
   const listed = (
     await pool.query(
       "SELECT count(*)::int n FROM payload_migrations WHERE name='20261012_160000_team_core'",

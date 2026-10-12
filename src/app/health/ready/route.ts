@@ -22,6 +22,10 @@ export async function GET() {
     await db.pool.query("SELECT request_key,status FROM staff_applications LIMIT 0");
     const staffMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261012_050000_staff_recruitment"]);
     if (!staffMigration.rowCount) throw new Error("Required staff migration unavailable");
+    await db.pool.query("SELECT membership_key,status,joined_at FROM team_memberships LIMIT 0");
+    await db.pool.query("SELECT membership_id,membership_joined_at,visible,revision FROM team_member_profiles LIMIT 0");
+    const teamMigrations = await db.pool.query("SELECT name FROM payload_migrations WHERE name=ANY($1::text[])", [["20261012_160000_team_core", "20261012_170000_team_member_profiles"]]);
+    if (teamMigrations.rowCount !== 2) throw new Error("Required team migrations unavailable");
     return Response.json({ status: "ready", schema: "club-operations-1" });
   } catch {
     return Response.json({ status: "unavailable" }, { status: 503 });

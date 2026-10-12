@@ -51,6 +51,7 @@ try {
     "teams",
     "_teams_v",
     "payload_locked_documents_rels",
+    ...(snapshot.tables["public.team_member_profiles"] ? ["team_member_profiles"] : []),
   ];
   for (const table of owned) {
     const definition = snapshot.tables[`public.${table}`];
