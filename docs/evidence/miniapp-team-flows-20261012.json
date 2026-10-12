@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-12",
+  "branch": "codex/miniapp-club-flows-20261012",
+  "phase": "baseline-frozen-before-team-integration",
+  "preTeamBaseline": {
+    "headSha": "72f580f7806d09b8e249f45c63ae215f190f5fcf",
+    "lifecycleFixCommit": "b2adf41c350c4ac27388fdf427450a8d8b5d7938",
+    "independentReview": "parent confirmed lifecycle P2 closed",
+    "syntheticTestsPassed": 253,
+    "lifecycleTestsPassed": 72,
+    "package": { "pages": 17, "files": 105, "bytes": 259536, "domainChecking": true },
+    "ci": {
+      "runId": 38218742756,
+      "headSha": "72f580f7806d09b8e249f45c63ae215f190f5fcf",
+      "status": "completed",
+      "conclusion": "success",
+      "completedAt": "2026-10-12T08:03:24Z",
+      "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38218742756"
+    },
+    "evidence": "docs/evidence/miniapp-club-flows-20261012.json"
+  },
+  "coreDependency": {
+    "requiredCommit": "5f28f95377e9ea4fbf6e4afc54b6cb88e969d33a",
+    "ci": {
+      "runId": 38218255813,
+      "headSha": "5f28f95377e9ea4fbf6e4afc54b6cb88e969d33a",
+      "status": "completed",
+      "conclusion": "success",
+      "completedAt": "2026-10-12T07:57:16Z",
+      "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38218255813"
+    },
+    "historicalReceiptCorrection": "pending final parent contract; no client ACL bypass"
+  },
+  "currentSourceUploaded": false,
+  "officialSimulatorVerified": false,
+  "physicalDeviceVerified": false,
+  "platformConfigurationVerified": false
+}
