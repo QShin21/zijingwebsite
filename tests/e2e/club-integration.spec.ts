@@ -136,6 +136,18 @@ test("骨干录用独立于入队；成立/招新/录取→简介opt-in→荣誉
     };
     const ownJoin = await join(recruitment.id);
     const membership = await getActiveTeamMembership(p, { teamID, userID: member.id }); expect(membership).not.toBeNull();
+    const nativeRecruitmentURL = "/api/miniapp/team/recruitment/" + recruitment.id;
+    const nativeRecruitment = await page.request.get(nativeRecruitmentURL, { headers: origin });
+    expect(nativeRecruitment.status()).toBe(200); expect(nativeRecruitment.headers()["cache-control"]).toContain("no-store");
+    expect(await nativeRecruitment.json()).toMatchObject({ application: { id: ownJoin.id, status: "approved" }, actions: { draft: false, submit: false, edit: false } });
+    expect((await page.request.get("/api/miniapp/team/" + teamID + "/workbench", { headers: origin })).status()).toBe(403);
+    const nativeLogin = await p.login({ collection: "users", data: { email: member.email!, password } });
+    expect(nativeLogin.token).toBeTruthy();
+    const nativeCredential = { Authorization: "JWT " + nativeLogin.token };
+    const nativeHub = await request.get("/api/miniapp/team", { headers: nativeCredential }); expect(nativeHub.status()).toBe(200);
+    const nativeMemberships = (await nativeHub.json()).memberships.docs;
+    expect(nativeMemberships).toEqual(expect.arrayContaining([expect.objectContaining({ teamID, status: "active" })]));
+    expect(nativeMemberships.some((row: object) => "memberID" in row)).toBe(false);
     const qualified = await (await page.request.get(profileURL)).json(); expect(qualified.own.eligible).toBe(true); expect(qualified.own.profile).toBeNull();
     const team = await p.findByID({ collection: "teams", id: teamID, overrideAccess: true, depth: 0 });
     await page.goto("/teams/" + team.slug);
@@ -162,7 +174,10 @@ test("骨干录用独立于入队；成立/招新/录取→简介opt-in→荣誉
       expect((await actor.request.get("/api/team-honors/" + history.id)).status()).toBe(404);
       await honor(actor, "approve", history, undefined, 404);
     }
-    expect((await page.request.get("/api/team-honors/" + history.id)).status()).toBe(200);
+    const nativeHonor = await request.get("/api/team-honors/" + history.id, { headers: nativeCredential }); expect(nativeHonor.status()).toBe(200);
+    expect((await nativeHonor.json()).record.actions).toMatchObject({ edit: true, withdraw: true, reviewActions: [] });
+    const nativeMine = await request.get(`/api/team-honors?view=mine&team=${teamID}&game=${game}`, { headers: nativeCredential }); expect(nativeMine.status()).toBe(200);
+    expect((await nativeMine.json()).teams.map((row: { id: number }) => row.id)).toEqual([teamID]);
     expect((await reviewer.request.get("/api/team-honors/" + history.id)).status()).toBe(200);
     expect((await leader.request.get("/api/team-honors/" + history.id)).status()).toBe(200);
     await honor(page, "approve", history, undefined, 403);
@@ -192,6 +207,8 @@ test("骨干录用独立于入队；成立/招新/录取→简介opt-in→荣誉
     await honor(page, "save", edited, { description: "合成撤权后擅改" }, 403);
     await honor(page, "submit", undefined, honorInput, 403);
     await honor(reviewer, "approve", edited, undefined, 403);
+    const revokedNativeHonor = await request.get("/api/team-honors/" + edited.id, { headers: nativeCredential }); expect(revokedNativeHonor.status()).toBe(200);
+    expect((await revokedNativeHonor.json()).record.actions).toMatchObject({ edit: false, save: false, submit: false, withdraw: false, hide: false, reviewActions: [] });
     const afterExit = await (await request.get(archiveURL)).json(); expect(afterExit.records).toHaveLength(1); expect(afterExit.records[0].title).toBe("合成跨模块历史荣誉");
     await operation(reviewer, { operation: "close-recruitment", id: recruitment.id, revision: recruitment.updatedAt, status: "closed" });
     const second = await operation(reviewer, { operation: "save-recruitment", teamID, title: "合成再次录取新批次", status: "open", form });
@@ -204,6 +221,10 @@ test("骨干录用独立于入队；成立/招新/录取→简介opt-in→荣誉
     const archive = await leader.request.patch("/api/teams/" + teamID, { headers: origin, data: { archived: true } }); expect(archive.status()).toBe(200);
     const historical = await (await page.request.get("/api/team-core?mode=recruitment&id=" + recruitment.id, { headers: origin })).json();
     expect(historical).toMatchObject({ readOnly: true, state: "历史申请只读", application: { id: ownJoin.id } });
+    const nativeHistorical = await request.get(nativeRecruitmentURL, { headers: nativeCredential }); expect(nativeHistorical.status()).toBe(200);
+    expect(await nativeHistorical.json()).toMatchObject({ readOnly: true, application: { id: ownJoin.id }, actions: { draft: false, submit: false, edit: false } });
+    expect((await other.request.get(nativeRecruitmentURL, { headers: origin })).status()).toBe(404);
+    expect((await request.get(nativeRecruitmentURL)).status()).toBe(401);
     expect((await (await other.request.get(profileURL)).json()).profiles).toEqual([]);
     expect((await request.get(archiveURL)).status()).toBe(404);
     expect((await other.request.get("/api/team-core?mode=recruitment&id=" + recruitment.id, { headers: origin })).status()).toBe(404);
