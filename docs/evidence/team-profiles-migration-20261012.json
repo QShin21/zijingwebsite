@@ -1,8 +1,8 @@
 {
-  "at": "2026-10-12T07:11:20.063Z",
-  "profileCodeSHA": "9e25eb15f232264b042d096d970be842a3825d10",
+  "at": "2026-10-12T07:46:43.323Z",
+  "profileCodeSHA": "223d9ebaf8d2ae976b03f4960ec4a3be337bfe01",
   "environment": "new empty synthetic loopback database, DB_PUSH=false",
-  "database": "team_profiles_migration_9bbbbc2b55a5",
+  "database": "team_profiles_migration_b1052b948673",
   "baselineTables": 61,
   "beforeProfileTables": 65,
   "finalTables": 66,
