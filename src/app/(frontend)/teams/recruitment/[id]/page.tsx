@@ -33,6 +33,7 @@ export default async function Recruitment({
           form={info.form}
           version={info.version}
           state={info.state}
+          readOnly={info.readOnly}
           initial={teamJoinReceipt(info.own)}
         />
       </section>

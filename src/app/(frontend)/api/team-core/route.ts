@@ -43,6 +43,7 @@ export async function GET(request: Request) {
         title: info.doc.title,
         teamID: Number(info.doc.team),
         state: info.state,
+        readOnly: info.readOnly,
         form: info.form,
         version: info.version,
         application: teamJoinReceipt(info.own),

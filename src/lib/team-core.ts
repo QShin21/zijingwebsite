@@ -427,7 +427,10 @@ export async function changeTeamLifecycle(
       !["active", "resting", "archived"].includes(String(status))
     )
       throw new APIError("队伍运营状态无效", 409);
-    if (team.teamStatus === "archived" && !canPublish(req.user as User))
+    if (
+      (team.teamStatus === "archived" || team.archived === true) &&
+      !canPublish(req.user as User)
+    )
       throw new APIError("归档队伍恢复需高权限管理审核", 403);
     if (status !== "active") {
       const batches = await p.find({
@@ -605,19 +608,6 @@ export async function teamRecruitmentInfo(
   if (!canParticipate(fresh)) throw new APIError("请先登录可用账号", 401);
   const fullActor: User = { ...actor!, ...fresh!, collection: "users" };
   const currentReq = req ? { ...req, user: fullActor } : undefined;
-  const doc = await p.findByID({
-    collection: "team-recruitments",
-    id,
-    req: currentReq,
-    user: fullActor,
-    overrideAccess: false,
-    depth: 0,
-  });
-  const form = normalizeTeamForm(doc.signupForm);
-  const established = await isEstablishedTeam(p, teamID(doc.team), req);
-  const state = established
-    ? teamRecruitmentState(doc, form)
-    : "队伍未开放招新";
   const own =
     (
       await p.find({
@@ -635,7 +625,46 @@ export async function teamRecruitmentInfo(
         },
       })
     ).docs[0] ?? null;
-  return { doc, form, version: formVersion(form), state, own };
+  const doc = await p
+    .findByID({
+      collection: "team-recruitments",
+      id,
+      req: currentReq,
+      user: fullActor,
+      overrideAccess: false,
+      depth: 0,
+    })
+    .catch((error: unknown) => {
+      if (error instanceof APIError && [403, 404].includes(error.status))
+        return null;
+      throw error;
+    });
+  if (!doc) {
+    if (!own || positiveID(own.applicant) !== fresh!.id)
+      throw new APIError("招新批次未开放", 404);
+    // No privileged/anonymous read of the hidden batch. Only the owner's saved version is returned.
+    const snapshot = normalizeSignup(own.formSnapshot);
+    const historical = {
+      id,
+      title: own.title,
+      team: teamID(own.team),
+      game: teamID(own.game),
+    };
+    return {
+      doc: historical,
+      form: { ...snapshot, enabled: false, closed: true },
+      version: own.formVersion,
+      state: "历史申请只读",
+      own,
+      readOnly: true,
+    };
+  }
+  const form = normalizeTeamForm(doc.signupForm);
+  const established = await isEstablishedTeam(p, teamID(doc.team), req);
+  const state = established
+    ? teamRecruitmentState(doc, form)
+    : "队伍未开放招新";
+  return { doc, form, version: formVersion(form), state, own, readOnly: false };
 }
 export async function saveTeamJoinApplication(
   p: Payload,

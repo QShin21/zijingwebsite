@@ -374,12 +374,14 @@ export function TeamCoreApplicant({
   form,
   version,
   state,
+  readOnly = false,
   initial,
 }: {
   id: number;
   form: SignupForm;
   version: string;
   state: string;
+  readOnly?: boolean;
   initial: TeamCoreReceipt | null;
 }) {
   const [receipt, setReceipt] = useState(initial),
@@ -387,6 +389,7 @@ export function TeamCoreApplicant({
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false);
   const editable =
+    !readOnly &&
     state === "招新开放" &&
     (!receipt ||
       ["draft", "pending", "returned", "withdrawn"].includes(receipt.status));
@@ -436,12 +439,15 @@ export function TeamCoreApplicant({
       {receipt?.reviewNote && (
         <p className="preserve">处理意见：{receipt.reviewNote}</p>
       )}
-      {receipt && receipt.formVersion !== version && (
+      {readOnly && (
+        <p>该批次或队伍已不再开放，此处只展示本人的历史表单和答案。</p>
+      )}
+      {receipt && !readOnly && receipt.formVersion !== version && (
         <p role="status">
           申请表已更新。原提交答案和版本仍保留，修改重提时请核对新题目。
         </p>
       )}
-      {receipt && !editing && (
+      {receipt && (!editing || !editable) && (
         <>
           <p>申请编号：{receipt.id}</p>
           <TeamCoreAnswers
@@ -471,37 +477,41 @@ export function TeamCoreApplicant({
               : "修改申请"}
           </button>
         ))}
-      {receipt && ["draft", "pending", "returned"].includes(receipt.status) && (
-        <button
-          className="button light"
-          disabled={busy}
-          onClick={async () => {
-            setBusy(true);
-            setMessage("");
-            try {
-              const result = await teamRequest({
-                operation: "withdraw-join",
-                id: receipt.id,
-                revision: receipt.updatedAt,
-              });
-              setReceipt(result.result);
-              setEditing(false);
-              setMessage("申请已撤回。开放期可修改重提。");
-            } catch (error) {
-              setMessage((error as Error).message);
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          撤回入队申请
-        </button>
-      )}
+      {receipt &&
+        !readOnly &&
+        ["draft", "pending", "returned"].includes(receipt.status) && (
+          <button
+            className="button light"
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              setMessage("");
+              try {
+                const result = await teamRequest({
+                  operation: "withdraw-join",
+                  id: receipt.id,
+                  revision: receipt.updatedAt,
+                });
+                setReceipt(result.result);
+                setEditing(false);
+                setMessage("申请已撤回。开放期可修改重提。");
+              } catch (error) {
+                setMessage((error as Error).message);
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            撤回入队申请
+          </button>
+        )}
       {!editable && (
         <p>
-          {receipt?.status === "approved"
-            ? "请在我的代表队记录查看成员状态或办理离队。"
-            : "目前不能修改或重提申请，待审核申请仍可撤回。"}
+          {readOnly
+            ? "历史回执无法继续填写或提交。"
+            : receipt?.status === "approved"
+              ? "请在我的代表队记录查看成员状态或办理离队。"
+              : "目前不能修改或重提申请，待审核申请仍可撤回。"}
         </p>
       )}
       <p role="status">{message}</p>
