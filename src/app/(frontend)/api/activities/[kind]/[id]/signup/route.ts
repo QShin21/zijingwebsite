@@ -169,7 +169,7 @@ async function run(
       return reply(
         await saveSignupForm(p, kind, id, user, data.version, data.form),
       );
-    if (method === "PATCH")
+    if (method === "PATCH" || (method === "POST" && data.action === "edit"))
       return reply({
         signup: await updateSignupAnswers(p, kind, id, user, data.version, data.revision, data.answers),
         message: "作答修改已保存",

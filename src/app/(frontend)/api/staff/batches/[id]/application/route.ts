@@ -27,7 +27,7 @@ async function run(request: Request, context: Context, method: string) {
         loggedIn: Boolean(user), draftKey: user ? "staff:" + batchID + ":" + user.id + ":" + version : undefined, application: own }, { headers });
     }
     const body = await request.json();
-    const action = method === "PATCH" ? "edit" : body.action === "withdraw" ? "withdraw" : body.action === "review" ? "review" : "submit";
+    const action = method === "PATCH" || (method === "POST" && body.action === "edit") ? "edit" : body.action === "withdraw" ? "withdraw" : body.action === "review" ? "review" : "submit";
     const saved = await changeStaffApplication(p, user, batchID, action, { id: body.id, revision: body.revision, version: body.version, answers: body.answers,
       status: body.status, feedback: body.feedback, reviewNotes: body.reviewNotes });
     return Response.json({ application: saved }, { headers });
