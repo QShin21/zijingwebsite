@@ -84,9 +84,17 @@ function deferred<T>() {
 function commonJS<T>(path: string, wx: Record<string, unknown>, dependencies: Record<string, unknown> = {}): T {
   const localRequire = createRequire(new URL('../' + path, import.meta.url));
   const module = { exports: {} };
+  const isPrivacy = path === 'miniprogram/src/lib/privacy.js';
+  // Standalone privacy consumers start with published text and prior agreement.
+  const policy = { loaded: true, text: '合成已发布网站隐私正文：主动选择后读取名片。' };
+  const dialog = { available: () => policy.loaded && Boolean(policy.text.trim()),
+    present: (request: { start(needAuthorization: boolean): void }) => request.start(false), close: vi.fn() };
+  const pages = isPrivacy ? [{ selectComponent: (selector: string) => selector === '#privacyConsent' ? dialog : null }] : [];
+  const modules = isPrivacy ? { './session': { user: () => firstUser, subscribe: () => () => {} }, ...dependencies } : dependencies;
   runInNewContext(readFileSync(path, 'utf8'), {
-    module, wx, require: (name: string) => dependencies[name] ?? localRequire(name),
-    getCurrentPages: () => [],
+    module, wx: isPrivacy ? { onNeedPrivacyAuthorization: vi.fn(), getPrivacySetting: vi.fn(), ...wx } : wx,
+    require: (name: string) => modules[name] ?? localRequire(name),
+    getCurrentPages: () => pages,
   });
   return module.exports as T;
 }
@@ -116,6 +124,8 @@ function pageHarness<T extends BasePage>(name: string, options: Record<string, s
     '../../lib/http': { request }, '../../lib/session': session,
     '../../lib/navigation': navigation, '../../lib/page': pageModule, ...extra,
   };
+  const privacyFactory = extra['../../lib/privacy'];
+  if (typeof privacyFactory === 'function') dependencies['../../lib/privacy'] = privacyFactory(session);
   runInNewContext(readFileSync(path, 'utf8'), {
     Page: (value: T) => { page = value; },
     require: (name: string) => dependencies[name] ?? localRequire(name), wx,
@@ -186,7 +196,7 @@ describe('原生骨干申请：服务端动作和本人回执', () => {
     expect(visibleGuard('miniprogram/src/pages/signup/index.wxml', 'form.enabled && (team ?', page.data)).toBe(false);
   });
 
-  it('returned 修改沿用申请编号，通过 PATCH 与旧 revision 写入，再从 helper 获取新能力', async () => {
+  it('returned 修改沿用申请编号，通过 POST edit 与旧 revision 写入，再从 helper 获取新能力', async () => {
     const original = saved();
     const { page, request } = await signupHarness(info({ state: '服务端提示补充资料', application: original, actions: { edit: true, withdraw: true } }));
     page.editAnswers();
@@ -198,8 +208,8 @@ describe('原生骨干申请：服务端动作和本人回执', () => {
     await page.submit();
     expect(writes(request)).toEqual([[
       '/api/staff/batches/71/application',
-      expect.objectContaining({ method: 'PATCH', required: true, questionnaire: true, data: {
-        version: 'synthetic-v1', revision: original.updatedAt, answers: updated.answers,
+      expect.objectContaining({ method: 'POST', required: true, questionnaire: true, data: {
+        action: 'edit', version: 'synthetic-v1', revision: original.updatedAt, answers: updated.answers,
       } }),
     ]]);
     expect(request).toHaveBeenLastCalledWith('/api/miniapp/staff/71', expect.objectContaining({ required: true }));
@@ -378,7 +388,7 @@ describe('原生骨干申请：服务端动作和本人回执', () => {
     expect(listeners.size).toBe(0);
   });
 
-  it('旧账号在途 PATCH 成功后不会向切换后的账号恢复回执或答案', async () => {
+  it('旧账号在途 POST edit 成功后不会向切换后的账号恢复回执或答案', async () => {
     const { page, request, changeUser } = await signupHarness(info({ application: saved(), actions: { edit: true } }));
     page.editAnswers();
     page.answer(event('motivation', '合成甲账号私有修改'));
@@ -656,7 +666,8 @@ describe('原生导航、私有字段投影和隐私辅助接口', () => {
   it('申请页面启动不索取隐私授权，显式选图拒绝后不读取图片并可重试', async () => {
     const requirePrivacyAuthorize = vi.fn<(options: CallbackOptions) => void>();
     const openPrivacyContract = vi.fn<(options: CallbackOptions) => void>();
-    const privacy = commonJS<Privacy>('miniprogram/src/lib/privacy.js', { requirePrivacyAuthorize, openPrivacyContract });
+    const privacy = (session: { user(): User | null; subscribe(listener: (value: User | null) => void): () => void }) =>
+      commonJS<Privacy>('miniprogram/src/lib/privacy.js', { requirePrivacyAuthorize, openPrivacyContract }, { './session': session });
     const files = { choose: vi.fn().mockResolvedValue(['/synthetic/qr.png']), readImage: vi.fn().mockResolvedValue('data:image/png;base64,c3ludGhldGlj') };
     const { page, request } = pageHarness<ApplicationsPage>('applications', { apply: '1' }, {
       '../../lib/privacy': privacy, '../../lib/files': files, '../../lib/cms': cmsStub(),
@@ -685,7 +696,8 @@ describe('原生导航、私有字段投影和隐私辅助接口', () => {
   it('授权等待期间重复选图不会重复申请，切换账号后的迟到授权不会读取图片', async () => {
     let authorization!: CallbackOptions;
     const requirePrivacyAuthorize = vi.fn<(options: CallbackOptions) => void>(options => { authorization = options; });
-    const privacy = commonJS<Privacy>('miniprogram/src/lib/privacy.js', { requirePrivacyAuthorize });
+    const privacy = (session: { user(): User | null; subscribe(listener: (value: User | null) => void): () => void }) =>
+      commonJS<Privacy>('miniprogram/src/lib/privacy.js', { requirePrivacyAuthorize, openPrivacyContract: vi.fn() }, { './session': session });
     const files = { choose: vi.fn(), readImage: vi.fn() };
     const { page, request, changeUser } = pageHarness<ApplicationsPage>('applications', { apply: '1' }, {
       '../../lib/privacy': privacy, '../../lib/files': files, '../../lib/cms': cmsStub(),

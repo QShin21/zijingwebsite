@@ -115,7 +115,7 @@ it('native edit starts from the saved roster, leaves the receipt intact and fail
   const updated = { ...saved, updatedAt: '2026-10-11T02:00:00Z', answers: page.data.answers };
   request.mockResolvedValueOnce({ signup: updated, message: '作答修改已保存' });
   await page.submit();
-  expect(request).toHaveBeenLastCalledWith(expect.any(String), expect.objectContaining({ method: 'PATCH', questionnaire: true, data: expect.objectContaining({ revision: saved.updatedAt }) }));
+  expect(request).toHaveBeenLastCalledWith(expect.any(String), expect.objectContaining({ method: 'POST', questionnaire: true, data: expect.objectContaining({ action: 'edit', revision: saved.updatedAt }) }));
   expect(page.data.responseEditing).toBe(false);
   expect(page.data.receipt.answers).toEqual(updated.answers);
 });

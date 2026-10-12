@@ -1,1 +1,1 @@
-{ "navigationBarTitleText": "队员简介", "enablePullDownRefresh": true }
+{ "navigationBarTitleText": "队员简介", "enablePullDownRefresh": true, "usingComponents": {"privacy-consent": "/components/privacy-consent/index"} }

@@ -41,6 +41,8 @@ function publicProjection(doc) {
 async function list(collection, options = {}) {
   const data = await http.request(`/api/${collection}?${query(contentQuery(collection, options))}`, {
     auth: !publicCollections.includes(collection), required: !publicCollections.includes(collection),
+    // A privacy notice must preserve the published operator/contact wording.
+    ...(collection === 'pages' && options.key === 'privacy' ? { raw: true } : {}),
   });
   if (!data || !Array.isArray(data.docs)) throw new Error('栏目数据暂不可用');
   const docs = data.docs.filter(doc => doc._status === 'published' && (collection !== 'honors' || doc.verified === true));

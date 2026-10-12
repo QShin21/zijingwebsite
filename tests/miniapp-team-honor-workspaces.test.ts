@@ -25,6 +25,7 @@ type NativePage = { data: PageData; setData(values: Values): void; onLoad(option
 type Request = { url: string; method: string; header: Record<string, string>; data?: Values;
   success(result: { statusCode: number; data: unknown }): void; fail(): void };
 type Callback = { success(): void; fail(): void };
+type PrivacyRequest = { start(needAuthorization: boolean): void };
 type Modal = { success(value: { confirm: boolean }): void; fail(): void };
 type Selection = { mediaType: string[]; success(value: { tempFiles: { tempFilePath: string; size?: number; fileType?: string }[] }): void; fail(): void };
 type FileRead = { filePath: string; success(value: { data: ArrayBuffer }): void; fail(): void };
@@ -54,10 +55,16 @@ function harness(name: 'workspace' | 'edit', options: { route?: Record<string, s
     stat(value: { success(result: { stats: { size: number; isFile(): boolean } }): void }) { value.success({ stats: { size: 64, isFile: () => true } }); },
     copyFile(value: { success(): void }) { value.success(); },
     readdir(value: { success(result: { files: string[] }): void }) { value.success({ files: [] }); } };
+  // This fixture starts after nonempty website policy text and prior agreement.
+  const policy = { loaded: true, text: '合成已发布网站隐私正文：仅主动选择后读取荣誉证据。' };
+  const dialog = { available: () => policy.loaded && Boolean(policy.text.trim()),
+    present: (request: PrivacyRequest) => request.start(false), close: vi.fn() };
+  const currentPages = [{}, { selectComponent: (selector: string) => selector === '#privacyConsent' ? dialog : null }];
   const wx = { request: vi.fn((value: Request) => requests.push(value)), env: { USER_DATA_PATH: '/synthetic-private' }, getFileSystemManager: () => fs,
     getStorageSync: () => stored, setStorageSync: (_key: string, value: unknown) => { stored = value; }, removeStorageSync: () => { stored = null; },
     requirePrivacyAuthorize: vi.fn((value: Callback) => { authorizations.push(value); if (options.privacyAuto !== false) value.success(); }),
     openPrivacyContract: vi.fn((value: Callback) => value.success()),
+    onNeedPrivacyAuthorization: vi.fn(), getPrivacySetting: vi.fn(),
     chooseMedia: vi.fn((value: Selection) => { selections.push(value); if (options.selectionAuto !== false) value.success({ tempFiles: [{ tempFilePath: value.mediaType.includes('video') ? '/synthetic-selected.mp4' : '/synthetic-selected.png', size: 64, fileType: value.mediaType.includes('video') ? 'video' : 'image' }] }); }),
     arrayBufferToBase64: (value: ArrayBuffer) => Buffer.from(value).toString('base64'),
     showModal: vi.fn((value: Modal) => { modals.push(value); if (options.modalAuto !== false) value.success({ confirm: true }); }),
@@ -69,7 +76,7 @@ function harness(name: 'workspace' | 'edit', options: { route?: Record<string, s
   function load(filename: string): unknown {
     filename = resolve(filename); if (modules.has(filename)) return modules.get(filename)!.exports;
     const module = { exports: {} as unknown }; modules.set(filename, module);
-    runInNewContext(readFileSync(filename, 'utf8'), { module, wx, getCurrentPages: () => [{}, {}], require: (path: string) => load(resolve(dirname(filename), path + '.js')) });
+    runInNewContext(readFileSync(filename, 'utf8'), { module, wx, getCurrentPages: () => currentPages, require: (path: string) => load(resolve(dirname(filename), path + '.js')) });
     return module.exports;
   }
   const session = load('miniprogram/src/lib/session.js') as { save(value: unknown): void; clear(): void; user(): { id: number } | null };

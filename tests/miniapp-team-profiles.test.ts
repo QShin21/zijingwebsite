@@ -21,6 +21,7 @@ type NativePage = {
 type RequestOptions = { url: string; method: string; header: Record<string, string>; data?: Data;
   success(value: { statusCode: number; data: unknown }): void; fail(): void };
 type Callback = { success(): void; fail(): void };
+type PrivacyRequest = { start(needAuthorization: boolean): void };
 type FileWrite = Callback & { filePath: string; data: string; encoding: string };
 type FileRead = { filePath: string; success(result: { data: ArrayBuffer }): void; fail(): void };
 type Modal = { success(value: { confirm: boolean }): void; fail(): void };
@@ -52,10 +53,16 @@ function harness(options: { loggedIn?: boolean; autoWrite?: boolean; autoRead?: 
     unlink,
     readdir(value: { success(result: { files: string[] }): void }) { value.success({ files: [] }); },
   };
+  // Published policy/first agreement are tested by the real consent component.
+  const policy = { loaded: true, text: '合成已发布网站隐私正文：用户主动选择后读取头像。' };
+  const dialog = { available: () => policy.loaded && Boolean(policy.text.trim()),
+    present: (request: PrivacyRequest) => request.start(false), close: vi.fn() };
+  const currentPages = [{}, { selectComponent: (selector: string) => selector === '#privacyConsent' ? dialog : null }];
   const wx = {
     request: vi.fn((value: RequestOptions) => requests.push(value)), env: { USER_DATA_PATH: '/synthetic' }, getFileSystemManager: () => fs,
     getStorageSync: () => saved, setStorageSync: (_key: string, value: unknown) => { saved = value; }, removeStorageSync: () => { saved = null; },
     requirePrivacyAuthorize: vi.fn((value: Callback) => authorizations.push(value)), openPrivacyContract: vi.fn((value: Callback) => contracts.push(value)),
+    onNeedPrivacyAuthorization: vi.fn(), getPrivacySetting: vi.fn(),
     chooseMedia: vi.fn((value: Selection) => selections.push(value)), showModal: vi.fn((value: Modal) => modals.push(value)),
     arrayBufferToBase64: (value: ArrayBuffer) => Buffer.from(value).toString('base64'),
     setNavigationBarTitle: vi.fn(), stopPullDownRefresh: vi.fn(), navigateTo: vi.fn(), navigateBack: vi.fn(), switchTab: vi.fn(),
@@ -66,7 +73,7 @@ function harness(options: { loggedIn?: boolean; autoWrite?: boolean; autoRead?: 
     filename = resolve(filename);
     if (modules.has(filename)) return modules.get(filename)!.exports;
     const module = { exports: {} as unknown }; modules.set(filename, module);
-    runInNewContext(readFileSync(filename, 'utf8'), { module, wx, getCurrentPages: () => [{}, {}],
+    runInNewContext(readFileSync(filename, 'utf8'), { module, wx, getCurrentPages: () => currentPages,
       require: (name: string) => load(resolve(dirname(filename), name + '.js')) });
     return module.exports;
   }

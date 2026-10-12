@@ -1,0 +1,25 @@
+<view wx:if="{{shown}}" class="privacy-mask" catchtouchmove="stop">
+  <view class="privacy-dialog" aria-role="dialog" aria-label="隐私说明与授权">
+    <text class="privacy-title">隐私说明与授权</text>
+    <text class="privacy-note">你正在主动选择图片或视频。请选择自己的资料，并确认其中涉及他人的内容已获授权。</text>
+    <scroll-view scroll-y class="privacy-body">
+      <text wx:if="{{loading}}" class="privacy-note">正在读取网站隐私正文与微信平台设置…</text>
+      <block wx:if="{{docReady}}">
+        <text class="privacy-heading">网站隐私说明 · {{title}}</text>
+        <rich-text nodes="{{nodes}}" user-select />
+        <view wx:for="{{sections}}" wx:key="index"><text class="privacy-heading">{{item.heading}}</text><text class="privacy-text" selectable>{{item.text}}</text></view>
+        <view wx:for="{{links}}" wx:key="url"><text class="privacy-note">{{item.label}}</text><text class="privacy-text" selectable>{{item.url}}</text></view>
+        <text class="privacy-note">以上为网站已发布说明。下方为微信平台配置的《{{contractName}}》；打开指引不会替你同意。</text>
+        <button class="privacy-secondary" bindtap="openPlatform" loading="{{contractOpening}}" disabled="{{contractOpening}}">{{contractOpened ? '再次打开微信平台隐私指引' : '打开微信平台隐私指引'}}</button>
+        <text wx:if="{{contractOpened}}" class="privacy-note">已打开平台指引。是否同意由你决定。</text>
+      </block>
+      <text wx:if="{{error}}" class="privacy-error" aria-role="alert">{{error}}</text>
+      <button wx:if="{{error && !docReady}}" class="privacy-secondary" bindtap="retry" disabled="{{loading}}">重试读取正文</button>
+    </scroll-view>
+    <view class="privacy-actions">
+      <button class="privacy-secondary" bindtap="deny">拒绝并返回</button>
+      <button wx:if="{{docReady && sdkReady && contractOpened && !contractOpening}}" id="zijing-privacy-agree" class="privacy-primary" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="agree">同意隐私授权</button>
+      <button wx:else class="privacy-primary" disabled>同意隐私授权</button>
+    </view>
+  </view>
+</view>

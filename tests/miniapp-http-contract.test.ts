@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 const path = 'miniprogram/src/lib/http.js';
 const localRequire = createRequire(new URL('../' + path, import.meta.url));
 type Options = { method?: string; required?: boolean; auth?: boolean; raw?: boolean; siteWrite?: boolean; data?: unknown; header?: Record<string, string> };
-type NativeRequest = { url: string; header: Record<string, string>; success(response: { statusCode: number; data: unknown }): void; fail(): void };
+type NativeRequest = { url: string; method: string; header: Record<string, string>; success(response: { statusCode: number; data: unknown }): void; fail(): void };
 function harness(credential = 'synthetic-token') {
   const native = vi.fn<(options: NativeRequest) => void>(), clear = vi.fn(), module = { exports: {} };
   runInNewContext(readFileSync(path, 'utf8'), { module, wx: { request: native }, require: (name: string) => name === './session'
@@ -66,5 +66,24 @@ describe('原生HTTP传输的简介周期契约', () => {
     const fresh = request('/api/miniapp/team', { required: true });
     expect(native.mock.calls[1][0].header.Authorization).toBe('JWT ' + current);
     native.mock.calls[1][0].success({ statusCode: 200, data: {} }); await fresh;
+  });
+});
+
+describe('微信request method边界：未支持方式在调用SDK前拒绝', () => {
+  it.each(['PATCH', 'patch', 'MERGE', 'post', '', 'POST '])('本地拒绝%s，不向SDK发送或自动fallback', async method => {
+    const { request, native } = harness();
+    native.mockImplementation(options => options.fail());
+    await expect(request('/api/miniapp/status', { method, required: true, siteWrite: true })).rejects.toThrow('请求方式不受小程序支持');
+    expect(native).not.toHaveBeenCalled();
+  });
+  it.each([undefined, 'OPTIONS', 'GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'TRACE', 'CONNECT'])('保留官方允许的%s，Origin仅加入明确本站写入', async method => {
+    const { request, native } = harness();
+    const pending = request('/api/miniapp/status', { method, required: true, siteWrite: true });
+    const sent = native.mock.calls[0][0];
+    expect(sent.method).toBe(method ?? 'GET');
+    if (method && ['POST', 'PUT', 'DELETE'].includes(method)) expect(sent.header.Origin).toBe('https://home.thuzijing.top');
+    else expect(sent.header).not.toHaveProperty('Origin');
+    sent.success({ statusCode: 200, data: {} }); await pending;
+    expect(native).toHaveBeenCalledOnce();
   });
 });

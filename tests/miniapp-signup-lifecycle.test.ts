@@ -373,7 +373,9 @@ describe.each(modes)('$label 真实 Page 加载生命周期', ({ kind }) => {
     const sending = page.submit();
     expect(writes(request)).toHaveLength(1);
     expect(writes(request)[0][0]).toBe(writePath(route));
-    expect(writes(request)[0][1]?.method).toBe(existing ? 'PATCH' : 'POST');
+    expect(writes(request)[0][1]?.method).toBe('POST');
+    if (existing) expect(writes(request)[0][1]?.data?.action).toBe('edit');
+    else expect(writes(request)[0][1]?.data).not.toHaveProperty('action');
     page.onHide();
     await page.submit();
     expect(page.data.busy).toBe(true);
@@ -436,7 +438,9 @@ describe.each(modes)('$label 真实 Page 加载生命周期', ({ kind }) => {
     expect(page.data.busy).toBe(false);
     expect(reads(request).map(([path]) => path)).toEqual([readPath(route), readPath(route)]);
     expect(writes(request)).toHaveLength(1);
-    expect(writes(request)[0][1]?.method).toBe(existing ? 'PATCH' : 'POST');
+    expect(writes(request)[0][1]?.method).toBe('POST');
+    if (existing) expect(writes(request)[0][1]?.data?.action).toBe('edit');
+    else expect(writes(request)[0][1]?.data).not.toHaveProperty('action');
   });
 
   it.each([false, true])('后台失败后的对账 GET 失败可显式 retry，原记录未变时仍恢复草稿（已存回执=%s）', async existing => {

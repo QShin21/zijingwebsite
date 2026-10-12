@@ -52,3 +52,4 @@
     <button wx:if="{{locked || conflict}}" class="secondary section" bindtap="reload" disabled="{{busy || loading}}">重新加载已保存资料</button>
   </view>
 </view>
+<privacy-consent id="privacyConsent" />

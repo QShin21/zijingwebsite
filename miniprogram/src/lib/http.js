@@ -20,14 +20,16 @@ function message(data, status) {
     ? value : '操作未完成，请核对内容后重试';
 }
 function request(path, options = {}) {
+  const method = options.method === undefined ? 'GET' : options.method;
+  if (!['OPTIONS', 'GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'TRACE', 'CONNECT'].includes(method)) return Promise.reject(new Error('请求方式不受小程序支持'));
   const credential = options.auth === false ? '' : session.token();
   if (options.required && !credential) return Promise.reject(Object.assign(new Error('请先登录'), { status: 401 }));
   return new Promise((resolve, reject) => {
     wx.request({
-      url: url(path), method: options.method || 'GET', data: options.data,
+      url: url(path), method, data: options.data,
       timeout: options.timeout || 20000,
       header: { 'content-type': 'application/json', ...(credential ? { Authorization: `JWT ${credential}` } : {}), ...(options.questionnaire ? { 'x-questionnaire-version': '3' } : {}),
-        ...(options.siteWrite === true && options.required && credential && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method) ? { Origin: config.origin } : {}) },
+        ...(options.siteWrite === true && options.required && credential && ['POST', 'PUT', 'DELETE'].includes(method) ? { Origin: config.origin } : {}) },
       success(response) {
         if (response.statusCode >= 200 && response.statusCode < 300) {
           if (typeof response.data === 'string' && response.data.trim().startsWith('<')) {

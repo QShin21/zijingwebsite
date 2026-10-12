@@ -134,7 +134,7 @@ Page({
     const draft={userId,context:this._context,endpoint:this._readEndpoint,version:this.data.info.version,receiptId:this.data.receipt&&this.data.receipt.id,
       revision:this.data.receipt&&this.data.receipt.updatedAt,answers:this.data.answers,responseEditing:this.data.responseEditing,review:this.data.review,step:this.data.step};
     this.setData({busy:true,message:''});
-    try{const updating=this.data.responseEditing,reapplying=this._staff&&this.data.receipt&&this.data.receipt.status==='withdrawn',result=await http.request(this._endpoint,{raw:true,method:updating&&!reapplying?'PATCH':'POST',required:true,questionnaire:true,data:{version:this.data.info.version,...(this.data.receipt&&(updating||this._staff)?{revision:this.data.receipt.updatedAt}:{}),answers:questionnaire.validateAnswers(this.data.form,this.data.answers)}});
+    try{const updating=this.data.responseEditing,reapplying=this._staff&&this.data.receipt&&this.data.receipt.status==='withdrawn',result=await http.request(this._endpoint,{raw:true,method:'POST',required:true,questionnaire:true,data:{...(updating&&!reapplying?{action:'edit'}:{}),version:this.data.info.version,...(this.data.receipt&&(updating||this._staff)?{revision:this.data.receipt.updatedAt}:{}),answers:questionnaire.validateAnswers(this.data.form,this.data.answers)}});
       if(ticket!==this._ticket||String(session.user()&&session.user().id)!==String(userId))return;
       const message=this._staff?'骨干申请已保存，请查看本人回执':result.message||'报名已保存';
       this.setData({receipt:this._staff?staff.receipt(result.application):receipt(result.signup),responseEditing:false,review:false,answers:{},message});

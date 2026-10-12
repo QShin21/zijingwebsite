@@ -44,3 +44,4 @@
     </view>
   </block>
 </view>
+<privacy-consent id="privacyConsent" />

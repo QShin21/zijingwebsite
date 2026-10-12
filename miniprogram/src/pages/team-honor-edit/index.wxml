@@ -28,3 +28,4 @@
     <view class="actions"><button class="plain" bindtap="retry" disabled="{{busy || loading}}">重新读取当前状态</button><button wx:if="{{record}}" class="plain" bindtap="reload" disabled="{{busy || loading}}">重新加载已保存资料</button><button class="plain" bindtap="mine" disabled="{{busy || loading}}">荣誉工作台 / 我的记录 →</button></view>
   </block>
 </view>
+<privacy-consent id="privacyConsent" />

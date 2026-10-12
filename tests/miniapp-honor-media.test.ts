@@ -14,6 +14,7 @@ type Scope = { isCurrent(): boolean; sameContext(): boolean; onTask?: (task: Tas
 type Media = { chooseVideo(options: Scope): Promise<Video>; uploadVideo(record: RecordDTO | null, input: Input, video: Video, options: Scope): Promise<{ record: RecordDTO }>;
   privateVideo(record: RecordDTO, options: Scope): Promise<string>; removeMedia(paths: string[]): void };
 type Callback = { success(): void; fail(): void };
+type PrivacyRequest = { start(needAuthorization: boolean): void };
 type Selection = { count: number; mediaType: string[]; sourceType: string[]; sizeType: string[];
   success(value: { tempFiles: { tempFilePath: string; size: number; fileType: string }[] }): void; fail(): void };
 type Stat = { path: string; success(value: { stats: { size: number; isFile(): boolean } }): void; fail(): void };
@@ -82,10 +83,17 @@ function harness(options: { autoStat?: boolean; autoRead?: boolean; autoCopy?: b
       onHeadersReceived(value: (data: { header: { 'Content-Length'?: string; 'content-length'?: string } }) => void) { headers = value; },
       progress(value: Progress) { progress?.(value); }, headers(value: { 'Content-Length'?: string; 'content-length'?: string }) { headers?.({ header: value }); } };
   }
+  // The dialog fixture already has nonempty published policy text and a prior
+  // platform agreement. Policy loading/first consent are covered separately.
+  const policy = { loaded: true, text: '合成已发布网站隐私正文：仅在用户主动选择后读取媒体。' };
+  const dialog = { available: () => policy.loaded && Boolean(policy.text.trim()),
+    present: vi.fn((request: PrivacyRequest) => request.start(false)), close: vi.fn() };
+  const currentPage = { selectComponent: (selector: string) => selector === '#privacyConsent' ? dialog : null };
   const wx = {
     env: { USER_DATA_PATH: '/synthetic' }, getFileSystemManager: () => fs,
     getStorageSync: () => saved, setStorageSync: (_key: string, value: unknown) => { saved = value; }, removeStorageSync: () => { saved = null; },
     requirePrivacyAuthorize: vi.fn((value: Callback) => authorizations.push(value)), openPrivacyContract: vi.fn(),
+    onNeedPrivacyAuthorization: vi.fn(), getPrivacySetting: vi.fn(),
     chooseMedia: vi.fn((value: Selection) => selections.push(value)), request: vi.fn(), requestSubscribeMessage: vi.fn(),
     uploadFile: vi.fn((value: Upload) => { uploads.push(value); const task = makeTask(value.fail); tasks.push(task); return task; }),
     downloadFile: vi.fn((value: Download) => { downloads.push(value); const task = makeTask(value.fail); tasks.push(task); return task; }),
@@ -95,7 +103,7 @@ function harness(options: { autoStat?: boolean; autoRead?: boolean; autoCopy?: b
     filename = resolve(filename);
     if (modules.has(filename)) return modules.get(filename)!.exports;
     const module = { exports: {} as unknown }; modules.set(filename, module);
-    runInNewContext(readFileSync(filename, 'utf8'), { module, wx,
+    runInNewContext(readFileSync(filename, 'utf8'), { module, wx, getCurrentPages: () => [currentPage],
       require: (name: string) => load(resolve(dirname(filename), name + '.js')) });
     return module.exports;
   }
