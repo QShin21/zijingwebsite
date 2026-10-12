@@ -139,7 +139,15 @@ export function nextHonorState(
     return action === "submit" ? "pending" : "draft";
   if (
     action === "submit" &&
-    ["draft", "returned", "rejected", "withdrawn", "hidden"].includes(state)
+    [
+      "draft",
+      "pending",
+      "returned",
+      "rejected",
+      "withdrawn",
+      "approved",
+      "hidden",
+    ].includes(state)
   )
     return "pending";
   if (action === "withdraw" && state === "pending") return "withdrawn";
@@ -195,4 +203,18 @@ export function honorArchiveHref(slug: string, team: number) {
     "/showcase/team-honors/" +
     honorID(team)
   );
+}
+export function legacyHonorDate(value?: string | null): string | null {
+  if (!value) return null;
+  // The existing honor CMS uses Asia/Shanghai; preserve its calendar day in the new day-only archive.
+  const parts = new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(value));
+  const day = ["year", "month", "day"]
+    .map((type) => parts.find((part) => part.type === type)!.value)
+    .join("-");
+  return day + "T00:00:00.000Z";
 }

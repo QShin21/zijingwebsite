@@ -32,6 +32,7 @@ import { APIError } from "payload";
 import { SocialCollections } from "./social";
 import { ContentPromotions } from "./promotions";
 import { StaffBatches, StaffApplications } from "./staff-recruitment";
+import { protectLegacyTeamHonors } from "./team-honor-legacy";
 import { TeamCoreCollections, teamLifecycleFields, guardTeamLifecycle } from "./team-core";
 import { TeamMemberProfiles } from "./team-profiles";
 import { TeamHonorRecords } from "./team-honor-records";
@@ -647,7 +648,7 @@ export const Collections: CollectionConfig[] = [
     ],
     true,
   ),
-  content(
+  protectLegacyTeamHonors(content(
     "honors",
     "荣誉",
     [
@@ -668,7 +669,7 @@ export const Collections: CollectionConfig[] = [
       },
     ],
     true,
-  ),
+  )),
   content("events", "活动", [
     ...signupFields,
     {

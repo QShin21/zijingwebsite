@@ -88,7 +88,11 @@ export default async function HonorRecord({
         editable={editable}
       />
       {editable && (
-        <TeamHonorEditor record={record} memberships={memberships} />
+        <TeamHonorEditor
+          key={record.id + ":" + record.revision}
+          record={record}
+          memberships={memberships}
+        />
       )}
     </section>
   );

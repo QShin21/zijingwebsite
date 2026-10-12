@@ -45,7 +45,13 @@ export async function TeamHonorsPanel({
       membershipError = honorError(error);
     }
   const records = privateView
-    ? await honorWorkspace(p, user, view === "review" ? "review" : "mine", page)
+    ? await honorWorkspace(
+        p,
+        user,
+        view === "review" ? "review" : "mine",
+        page,
+        { team, game },
+      )
     : null;
   const writableMemberships = memberships.filter(
     (item) => !team || item.team === team,

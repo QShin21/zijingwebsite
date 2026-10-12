@@ -11,10 +11,11 @@ import { workflowTransaction } from "./workflow-transactions";
 import { controlledVideoName, controlledVideoVersion } from "./showcase-videos";
 import { normalizeShowcaseImage } from "./showcase-images";
 import {
-  pendingHonorAuthority,
   type HonorMembershipAuthority,
   type HonorTeam,
 } from "./team-honor-authority";
+import { getActiveTeamMembership } from "./team-memberships";
+import { createCoreTeamHonorAuthority } from "./team-honor-core-adapter";
 import { withHonorProjection, withHonorWrite } from "./team-honor-grants";
 import {
   completeHonor,
@@ -23,6 +24,7 @@ import {
   honorReviewNote,
   honorText,
   honorVersion,
+  legacyHonorDate,
   nextHonorState,
   type HonorAction,
   type HonorContent,
@@ -158,6 +160,7 @@ async function lockHonorActor(req: PayloadRequest) {
   );
 }
 export type PublicHonor = HonorContent & {
+  legacyRevision?: string;
   key: string;
   authorName: string;
   approvedAt: string | null;
@@ -410,6 +413,16 @@ export function createTeamHonorService(authority: HonorMembershipAuthority) {
           reviewNote: null,
           reviewedBy: null,
         });
+        if (
+          current?.state === "pending" &&
+          version === current.submittedVersion
+        )
+          throw new APIError("记录已经待审核；修改内容后可重新提交", 409);
+        if (
+          current?.state === "approved" &&
+          version === current.approvedVersion
+        )
+          throw new APIError("已批准内容未变化；修改后才需要重新审核", 409);
       }
       if (action === "approve") {
         completeHonor(content);
@@ -551,12 +564,14 @@ export function createTeamHonorService(authority: HonorMembershipAuthority) {
         select: {
           title: true,
           team: true,
+          game: true,
           competition: true,
           placing: true,
           date: true,
           summary: true,
           sourceURL: true,
           slug: true,
+          updatedAt: true,
         },
       });
       const result = new Map<number, HonorArchive>(),
@@ -589,13 +604,16 @@ export function createTeamHonorService(authority: HonorMembershipAuthority) {
         target.records.push(projectRecord(row, observed));
       }
       for (const row of legacy.docs) {
-        const target = await archive(honorID(row.team));
+        const legacyTeam = Number(relationID(row.team));
+        if (!Number.isSafeInteger(legacyTeam) || legacyTeam <= 0) continue;
+        const target = await archive(legacyTeam);
         if (!target) continue;
+        if (row.game && honorID(row.game) !== target.team.game) continue;
         target.records.push({
           title: row.title,
           competition: row.competition,
           placing: row.placing,
-          date: row.date || null,
+          date: legacyHonorDate(row.date),
           description: row.summary || "",
           images: [],
           videoURL: null,
@@ -603,6 +621,7 @@ export function createTeamHonorService(authority: HonorMembershipAuthority) {
           authorName: "历史荣誉档案",
           approvedAt: null,
           legacy: true,
+          legacyRevision: row.updatedAt,
           videoVersion: null,
           videoHref: null,
           sourceHref: "/honors/" + row.slug,
@@ -627,4 +646,6 @@ export function createTeamHonorService(authority: HonorMembershipAuthority) {
   }
   return { availableTeams, change, archives, publicRecord };
 }
-export const teamHonorService = createTeamHonorService(pendingHonorAuthority);
+export const teamHonorService = createTeamHonorService(
+  createCoreTeamHonorAuthority({ getActiveTeamMembership }),
+);
