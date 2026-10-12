@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-10-12T18:43:03Z",
+  "testedCommit": "c906f67d3ed29cac6febf5f15e1e8bd06d80081e",
+  "codeSourceCommit": "e3a935c33d4a79695fa656cb51a0977a72117465",
+  "runID": 38292646763,
+  "jobID": 114956158231,
+  "runURL": "https://github.com/QShin21/zijingwebsite/actions/runs/38292646763",
+  "status": "completed",
+  "conclusion": "failure",
+  "jobStartedOnRunner": false,
+  "runnerID": 0,
+  "steps": [],
+  "annotationFailureSummary": "GitHub报告近期账户支付失败，或需要提高支出额度；任务未启动，需仓库账户负责人检查Billing & plans。",
+  "originalFailureMessageSHA256": "50bb56fefaf723c0d0c313ef4c3956b162021cd5415576fa872c2245e9fc53f1",
+  "testStepsExecuted": 0,
+  "localChecksRemain": {
+    "nativeSynthetic": 799,
+    "realHTTPJWTSQL": 19,
+    "independentPrivacy": 14,
+    "lint": 0,
+    "typecheck": 0,
+    "static": 0,
+    "legacyWXML": 29,
+    "legacyWXSS": 27
+  },
+  "rerunRequestedByThisTask": false,
+  "billingSettingsAccessedOrChanged": false,
+  "nextStep": "账户负责人核对支付状态/Actions额度；恢复后重跑已有workflow一次，不需要重推相同代码。"
+}

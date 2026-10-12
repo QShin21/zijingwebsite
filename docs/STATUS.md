@@ -406,3 +406,5 @@ cb1f0de修复归档恢复权限、审核与队伍分页串动，以及隐藏批�
 ## 原生平台缺项最小收尾 · 2026-10-12
 
 独立分支 codex/miniapp-platform-fixes-20261012 从6f862c7推进：46a7506两条网站POST edit别名复用原PATCH服务；e3a935c原生固定POST改稿及已发布正文门槛、微信正式按钮、明确拒绝、SDK取消后归属锁。799原生合成+19真HTTP/JWT/SQL通过，14独立时序复核通过；类型/全仓lint/静态与原始历史官方29WXML/27WXSS通过。代码source e3a935c冻结，仍0.3.1/25页/16类表单。草案仅列运营者/contact、保留删除、实际配置服务方三组核定事项，未发布。父整合网站补丁、发布正文及现代微信工具/平台/真机验证仍待完成，本轮没有更新部署或生产数据库。见 [收尾记录](MINIAPP_PLATFORM_FIXES_20261012.md)。
+
+推送后的c906f67 CI38292646763因GitHub账户支付/Actions额度失败，runner_id=0、steps为空，测试和构建未开始；本地799原生/19HTTP与14独立验证保留通过。见 [CI阻塞证据](evidence/miniapp-platform-ci-blocked-20261012.json)。账户负责人处理后重跑已有workflow；本轮没有改账单或重复触发。代码仍精确e3a935c，记录阻塞的后续文档使用[skip ci]。

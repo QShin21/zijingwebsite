@@ -80,3 +80,7 @@ python3 scripts/package-miniapp.py \
   --evidence docs/evidence/miniapp-platform-fixes-20261012.json \
   --privacy-draft docs/MINIAPP_PRIVACY_DRAFT_20261012.md
 ```
+
+## 推送后CI外部阻塞
+
+精确文档头c906f67d3ed29cac6febf5f15e1e8bd06d80081e的 [CI38292646763](https://github.com/QShin21/zijingwebsite/actions/runs/38292646763) 于18:41:49UTC结束failure。GitHub注释报告账户支付或Actions支出额度问题：quality未分配runner（runner_id=0），steps为空，测试/构建均未启动。[阻塞证据](evidence/miniapp-platform-ci-blocked-20261012.json)保留来源和范围。本轮没有访问账单设置或请求重跑；由仓库账户负责人处理后可重跑该既有workflow一次。本地通过不代报这次完整CI成功；后续仅记录此事实的文档提交使用[skip ci]，代码source仍为e3a935c。
