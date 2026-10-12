@@ -5,7 +5,6 @@ import config from "../src/payload.config";
 import { saveTeamProfile, readTeamProfiles } from "../src/lib/team-profiles";
 import { emptyTeamProfile } from "../src/lib/team-profiles-model";
 import { getActiveTeamMembership } from "../src/lib/team-memberships";
-import { changeTeamLifecycle } from "../src/lib/team-core";
 import { profileFixture } from "./team-profiles-fixture";
 
 let p: Payload, f: Awaited<ReturnType<typeof profileFixture>>;
@@ -145,6 +144,91 @@ describe.sequential("真实核心成员服务 + 简介数据库（仅合成账�
         },
       }),
     ).rejects.toThrow();
+  });
+  it("裸 active 关系不足：建队批准、队伍状态和游戏状态均由真实核心实时核对", async () => {
+    const applicationID =
+      typeof f.first.establishmentApplication === "object"
+        ? f.first.establishmentApplication!.id
+        : f.first.establishmentApplication!;
+    const core = {
+      user: f.admin,
+      overrideAccess: false,
+      context: { teamCoreWrite: true },
+    } as const;
+    await p.update({
+      ...core,
+      collection: "team-establishment-applications",
+      id: applicationID,
+      data: { status: "pending" },
+    });
+    expect(
+      await getActiveTeamMembership(p, {
+        teamID: f.first.id,
+        userID: f.member.id,
+      }),
+    ).toBeNull();
+    expect((await readTeamProfiles(p, f.viewer, f.first.id)).profiles).toEqual(
+      [],
+    );
+    await expect(
+      saveTeamProfile(p, f.member, f.first.id, 2, {
+        ...draft(),
+        visible: true,
+      }),
+    ).rejects.toThrow("入队资格");
+    await p.update({
+      ...core,
+      collection: "team-establishment-applications",
+      id: applicationID,
+      data: { status: "approved" },
+    });
+    await p.update({
+      ...core,
+      collection: "teams",
+      id: f.first.id,
+      data: { teamStatus: "unestablished" },
+    });
+    expect(
+      await getActiveTeamMembership(p, {
+        teamID: f.first.id,
+        userID: f.member.id,
+      }),
+    ).toBeNull();
+    await p.update({
+      ...core,
+      collection: "teams",
+      id: f.first.id,
+      data: { teamStatus: "active" },
+    });
+    await p.update({
+      collection: "games",
+      id: f.game.id,
+      user: f.admin,
+      overrideAccess: false,
+      data: { archived: true },
+    });
+    expect((await readTeamProfiles(p, f.viewer, f.first.id)).profiles).toEqual(
+      [],
+    );
+    await expect(
+      saveTeamProfile(p, f.member, f.first.id, 2, {
+        ...draft(),
+        visible: true,
+      }),
+    ).rejects.toThrow("入队资格");
+    await p.update({
+      collection: "games",
+      id: f.game.id,
+      user: f.admin,
+      overrideAccess: false,
+      data: { archived: false },
+    });
+    expect(
+      await getActiveTeamMembership(p, {
+        teamID: f.first.id,
+        userID: f.member.id,
+      }),
+    ).not.toBeNull();
   });
   it("重复保存幂等；不同旧版本修改拒绝且保留既有资料", async () => {
     const retry = await saveTeamProfile(p, f.member, f.first.id, 1, {
@@ -288,19 +372,14 @@ describe.sequential("真实核心成员服务 + 简介数据库（仅合成账�
       context: { system: true },
       data: { accountStatus: "active" },
     });
-    const current = await p.findByID({
+    await p.update({
       collection: "teams",
       id: f.first.id,
-      overrideAccess: true,
-      depth: 0,
+      overrideAccess: false,
+      user: f.admin,
+      context: { teamCoreWrite: true },
+      data: { teamStatus: "archived" },
     });
-    await changeTeamLifecycle(
-      p,
-      f.admin,
-      current.id,
-      "archived",
-      current.updatedAt,
-    );
     expect((await readTeamProfiles(p, f.viewer, f.first.id)).profiles).toEqual(
       [],
     );
