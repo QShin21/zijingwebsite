@@ -2364,38 +2364,12 @@
         }
       },
       "indexes": {
-        "team_establishment_applications_game_idx": {
-          "name": "team_establishment_applications_game_idx",
-          "columns": [
-            {
-              "expression": "game_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "team_establishment_applications_applicant_idx": {
-          "name": "team_establishment_applications_applicant_idx",
-          "columns": [
-            {
-              "expression": "applicant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "team_establishment_applications_request_key_idx": {
           "name": "team_establishment_applications_request_key_idx",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "request_key",
@@ -2403,14 +2377,44 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": true,
-          "concurrently": false,
+          ]
+        },
+        "team_establishment_applications_game_idx": {
+          "name": "team_establishment_applications_game_idx",
+          "isUnique": false,
           "method": "btree",
-          "with": {}
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "game_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_establishment_applications_applicant_idx": {
+          "name": "team_establishment_applications_applicant_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "applicant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
         },
         "team_establishment_applications_status_idx": {
           "name": "team_establishment_applications_status_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "status",
@@ -2418,29 +2422,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "team_establishment_applications_reviewed_by_idx": {
-          "name": "team_establishment_applications_reviewed_by_idx",
-          "columns": [
-            {
-              "expression": "reviewed_by_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "team_establishment_applications_team_idx": {
           "name": "team_establishment_applications_team_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "team_id",
@@ -2448,14 +2437,29 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
+          ]
+        },
+        "team_establishment_applications_reviewed_by_idx": {
+          "name": "team_establishment_applications_reviewed_by_idx",
           "isUnique": false,
-          "concurrently": false,
           "method": "btree",
-          "with": {}
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "reviewed_by_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
         },
         "team_establishment_applications_updated_at_idx": {
           "name": "team_establishment_applications_updated_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "updated_at",
@@ -2463,14 +2467,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "team_establishment_applications_created_at_idx": {
           "name": "team_establishment_applications_created_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "created_at",
@@ -2478,63 +2482,43 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         }
       },
       "foreignKeys": {
-        "team_establishment_applications_game_id_games_id_fk": {
-          "name": "team_establishment_applications_game_id_games_id_fk",
+        "team_establishment_applications_game_id_fkey": {
+          "name": "team_establishment_applications_game_id_fkey",
           "tableFrom": "team_establishment_applications",
           "tableTo": "games",
-          "columnsFrom": [
-            "game_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
+          "columnsFrom": "{game_id}",
+          "columnsTo": "{id}",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "team_establishment_applications_applicant_id_users_id_fk": {
-          "name": "team_establishment_applications_applicant_id_users_id_fk",
+        "team_establishment_applications_applicant_id_fkey": {
+          "name": "team_establishment_applications_applicant_id_fkey",
           "tableFrom": "team_establishment_applications",
           "tableTo": "users",
-          "columnsFrom": [
-            "applicant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
+          "columnsFrom": "{applicant_id}",
+          "columnsTo": "{id}",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "team_establishment_applications_reviewed_by_id_users_id_fk": {
-          "name": "team_establishment_applications_reviewed_by_id_users_id_fk",
+        "team_establishment_applications_reviewed_by_id_fkey": {
+          "name": "team_establishment_applications_reviewed_by_id_fkey",
           "tableFrom": "team_establishment_applications",
           "tableTo": "users",
-          "columnsFrom": [
-            "reviewed_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{reviewed_by_id}",
+          "columnsTo": "{id}",
           "onDelete": "set null",
           "onUpdate": "no action"
         },
-        "team_establishment_applications_team_id_teams_id_fk": {
-          "name": "team_establishment_applications_team_id_teams_id_fk",
+        "team_establishment_applications_team_id_fkey": {
+          "name": "team_establishment_applications_team_id_fkey",
           "tableFrom": "team_establishment_applications",
           "tableTo": "teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{team_id}",
+          "columnsTo": "{id}",
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -2611,6 +2595,100 @@
       "indexes": {
         "team_recruitments_team_idx": {
           "name": "team_recruitments_team_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "team_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_recruitments_game_idx": {
+          "name": "team_recruitments_game_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "game_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_recruitments_status_idx": {
+          "name": "team_recruitments_status_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_recruitments_created_by_idx": {
+          "name": "team_recruitments_created_by_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "created_by_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_recruitments_updated_at_idx": {
+          "name": "team_recruitments_updated_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_recruitments_created_at_idx": {
+          "name": "team_recruitments_created_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_recruitments_one_open_team_idx": {
+          "name": "team_recruitments_one_open_team_idx",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "team_id",
@@ -2619,125 +2697,35 @@
               "nulls": "last"
             }
           ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "team_recruitments_game_idx": {
-          "name": "team_recruitments_game_idx",
-          "columns": [
-            {
-              "expression": "game_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "team_recruitments_status_idx": {
-          "name": "team_recruitments_status_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "team_recruitments_created_by_idx": {
-          "name": "team_recruitments_created_by_idx",
-          "columns": [
-            {
-              "expression": "created_by_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "team_recruitments_updated_at_idx": {
-          "name": "team_recruitments_updated_at_idx",
-          "columns": [
-            {
-              "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "team_recruitments_created_at_idx": {
-          "name": "team_recruitments_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          "where": "(status = 'open'::enum_team_recruitments_status)"
         }
       },
       "foreignKeys": {
-        "team_recruitments_team_id_teams_id_fk": {
-          "name": "team_recruitments_team_id_teams_id_fk",
+        "team_recruitments_team_id_fkey": {
+          "name": "team_recruitments_team_id_fkey",
           "tableFrom": "team_recruitments",
           "tableTo": "teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
+          "columnsFrom": "{team_id}",
+          "columnsTo": "{id}",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "team_recruitments_game_id_games_id_fk": {
-          "name": "team_recruitments_game_id_games_id_fk",
+        "team_recruitments_game_id_fkey": {
+          "name": "team_recruitments_game_id_fkey",
           "tableFrom": "team_recruitments",
           "tableTo": "games",
-          "columnsFrom": [
-            "game_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
+          "columnsFrom": "{game_id}",
+          "columnsTo": "{id}",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "team_recruitments_created_by_id_users_id_fk": {
-          "name": "team_recruitments_created_by_id_users_id_fk",
+        "team_recruitments_created_by_id_fkey": {
+          "name": "team_recruitments_created_by_id_fkey",
           "tableFrom": "team_recruitments",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
+          "columnsFrom": "{created_by_id}",
+          "columnsTo": "{id}",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -2853,68 +2841,12 @@
         }
       },
       "indexes": {
-        "team_join_applications_team_idx": {
-          "name": "team_join_applications_team_idx",
-          "columns": [
-            {
-              "expression": "team_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "team_join_applications_game_idx": {
-          "name": "team_join_applications_game_idx",
-          "columns": [
-            {
-              "expression": "game_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "team_join_applications_recruitment_idx": {
-          "name": "team_join_applications_recruitment_idx",
-          "columns": [
-            {
-              "expression": "recruitment_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "team_join_applications_applicant_idx": {
-          "name": "team_join_applications_applicant_idx",
-          "columns": [
-            {
-              "expression": "applicant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "team_join_applications_request_key_idx": {
           "name": "team_join_applications_request_key_idx",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "request_key",
@@ -2922,14 +2854,95 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
+          ]
+        },
+        "team_join_applications_recruitment_applicant_idx": {
+          "name": "team_join_applications_recruitment_applicant_idx",
           "isUnique": true,
-          "concurrently": false,
           "method": "btree",
-          "with": {}
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "recruitment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "applicant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_join_applications_team_idx": {
+          "name": "team_join_applications_team_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "team_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_join_applications_game_idx": {
+          "name": "team_join_applications_game_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "game_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_join_applications_recruitment_idx": {
+          "name": "team_join_applications_recruitment_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "recruitment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_join_applications_applicant_idx": {
+          "name": "team_join_applications_applicant_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "applicant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
         },
         "team_join_applications_status_idx": {
           "name": "team_join_applications_status_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "status",
@@ -2937,14 +2950,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "team_join_applications_reviewed_by_idx": {
           "name": "team_join_applications_reviewed_by_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "reviewed_by_id",
@@ -2952,14 +2965,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "team_join_applications_updated_at_idx": {
           "name": "team_join_applications_updated_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "updated_at",
@@ -2967,14 +2980,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "team_join_applications_created_at_idx": {
           "name": "team_join_applications_created_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "created_at",
@@ -2982,76 +2995,52 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         }
       },
       "foreignKeys": {
-        "team_join_applications_team_id_teams_id_fk": {
-          "name": "team_join_applications_team_id_teams_id_fk",
+        "team_join_applications_team_id_fkey": {
+          "name": "team_join_applications_team_id_fkey",
           "tableFrom": "team_join_applications",
           "tableTo": "teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
+          "columnsFrom": "{team_id}",
+          "columnsTo": "{id}",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "team_join_applications_game_id_games_id_fk": {
-          "name": "team_join_applications_game_id_games_id_fk",
+        "team_join_applications_game_id_fkey": {
+          "name": "team_join_applications_game_id_fkey",
           "tableFrom": "team_join_applications",
           "tableTo": "games",
-          "columnsFrom": [
-            "game_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
+          "columnsFrom": "{game_id}",
+          "columnsTo": "{id}",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "team_join_applications_recruitment_id_team_recruitments_id_fk": {
-          "name": "team_join_applications_recruitment_id_team_recruitments_id_fk",
+        "team_join_applications_recruitment_id_fkey": {
+          "name": "team_join_applications_recruitment_id_fkey",
           "tableFrom": "team_join_applications",
           "tableTo": "team_recruitments",
-          "columnsFrom": [
-            "recruitment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
+          "columnsFrom": "{recruitment_id}",
+          "columnsTo": "{id}",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "team_join_applications_applicant_id_users_id_fk": {
-          "name": "team_join_applications_applicant_id_users_id_fk",
+        "team_join_applications_applicant_id_fkey": {
+          "name": "team_join_applications_applicant_id_fkey",
           "tableFrom": "team_join_applications",
           "tableTo": "users",
-          "columnsFrom": [
-            "applicant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
+          "columnsFrom": "{applicant_id}",
+          "columnsTo": "{id}",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "team_join_applications_reviewed_by_id_users_id_fk": {
-          "name": "team_join_applications_reviewed_by_id_users_id_fk",
+        "team_join_applications_reviewed_by_id_fkey": {
+          "name": "team_join_applications_reviewed_by_id_fkey",
           "tableFrom": "team_join_applications",
           "tableTo": "users",
-          "columnsFrom": [
-            "reviewed_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{reviewed_by_id}",
+          "columnsTo": "{id}",
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -3173,53 +3162,12 @@
         }
       },
       "indexes": {
-        "team_memberships_team_idx": {
-          "name": "team_memberships_team_idx",
-          "columns": [
-            {
-              "expression": "team_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "team_memberships_game_idx": {
-          "name": "team_memberships_game_idx",
-          "columns": [
-            {
-              "expression": "game_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "team_memberships_member_idx": {
-          "name": "team_memberships_member_idx",
-          "columns": [
-            {
-              "expression": "member_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "team_memberships_membership_key_idx": {
           "name": "team_memberships_membership_key_idx",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "membership_key",
@@ -3227,14 +3175,80 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
+          ]
+        },
+        "team_memberships_team_member_idx": {
+          "name": "team_memberships_team_member_idx",
           "isUnique": true,
-          "concurrently": false,
           "method": "btree",
-          "with": {}
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "team_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "member_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_memberships_team_idx": {
+          "name": "team_memberships_team_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "team_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_memberships_game_idx": {
+          "name": "team_memberships_game_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "game_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_memberships_member_idx": {
+          "name": "team_memberships_member_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "member_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
         },
         "team_memberships_status_idx": {
           "name": "team_memberships_status_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "status",
@@ -3242,29 +3256,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "team_memberships_season_idx": {
-          "name": "team_memberships_season_idx",
-          "columns": [
-            {
-              "expression": "season_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "team_memberships_source_application_idx": {
           "name": "team_memberships_source_application_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "source_application_id",
@@ -3272,14 +3271,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "team_memberships_granted_by_idx": {
           "name": "team_memberships_granted_by_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "granted_by_id",
@@ -3287,14 +3286,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "team_memberships_revoked_by_idx": {
           "name": "team_memberships_revoked_by_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "revoked_by_id",
@@ -3302,14 +3301,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "team_memberships_updated_at_idx": {
           "name": "team_memberships_updated_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "updated_at",
@@ -3317,14 +3316,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "team_memberships_created_at_idx": {
           "name": "team_memberships_created_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "created_at",
@@ -3332,102 +3331,70 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         }
       },
       "foreignKeys": {
-        "team_memberships_team_id_teams_id_fk": {
-          "name": "team_memberships_team_id_teams_id_fk",
+        "team_memberships_team_id_fkey": {
+          "name": "team_memberships_team_id_fkey",
           "tableFrom": "team_memberships",
           "tableTo": "teams",
-          "columnsFrom": [
-            "team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
+          "columnsFrom": "{team_id}",
+          "columnsTo": "{id}",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "team_memberships_game_id_games_id_fk": {
-          "name": "team_memberships_game_id_games_id_fk",
+        "team_memberships_game_id_fkey": {
+          "name": "team_memberships_game_id_fkey",
           "tableFrom": "team_memberships",
           "tableTo": "games",
-          "columnsFrom": [
-            "game_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
+          "columnsFrom": "{game_id}",
+          "columnsTo": "{id}",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "team_memberships_member_id_users_id_fk": {
-          "name": "team_memberships_member_id_users_id_fk",
+        "team_memberships_member_id_fkey": {
+          "name": "team_memberships_member_id_fkey",
           "tableFrom": "team_memberships",
           "tableTo": "users",
-          "columnsFrom": [
-            "member_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
+          "columnsFrom": "{member_id}",
+          "columnsTo": "{id}",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "team_memberships_season_id_seasons_id_fk": {
-          "name": "team_memberships_season_id_seasons_id_fk",
+        "team_memberships_season_id_fkey": {
+          "name": "team_memberships_season_id_fkey",
           "tableFrom": "team_memberships",
           "tableTo": "seasons",
-          "columnsFrom": [
-            "season_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{season_id}",
+          "columnsTo": "{id}",
           "onDelete": "set null",
           "onUpdate": "no action"
         },
-        "team_memberships_source_application_id_team_join_applications_id_fk": {
-          "name": "team_memberships_source_application_id_team_join_applications_id_fk",
+        "team_memberships_source_application_id_fkey": {
+          "name": "team_memberships_source_application_id_fkey",
           "tableFrom": "team_memberships",
           "tableTo": "team_join_applications",
-          "columnsFrom": [
-            "source_application_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
+          "columnsFrom": "{source_application_id}",
+          "columnsTo": "{id}",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "team_memberships_granted_by_id_users_id_fk": {
-          "name": "team_memberships_granted_by_id_users_id_fk",
+        "team_memberships_granted_by_id_fkey": {
+          "name": "team_memberships_granted_by_id_fkey",
           "tableFrom": "team_memberships",
           "tableTo": "users",
-          "columnsFrom": [
-            "granted_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
+          "columnsFrom": "{granted_by_id}",
+          "columnsTo": "{id}",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "team_memberships_revoked_by_id_users_id_fk": {
-          "name": "team_memberships_revoked_by_id_users_id_fk",
+        "team_memberships_revoked_by_id_fkey": {
+          "name": "team_memberships_revoked_by_id_fkey",
           "tableFrom": "team_memberships",
           "tableTo": "users",
-          "columnsFrom": [
-            "revoked_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{revoked_by_id}",
+          "columnsTo": "{id}",
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -4394,6 +4361,10 @@
       "indexes": {
         "teams_slug_idx": {
           "name": "teams_slug_idx",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "slug",
@@ -4401,14 +4372,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "teams_cover_idx": {
           "name": "teams_cover_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "cover_id",
@@ -4416,29 +4387,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "teams_submitted_by_idx": {
-          "name": "teams_submitted_by_idx",
-          "columns": [
-            {
-              "expression": "submitted_by_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "teams_game_idx": {
           "name": "teams_game_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "game_id",
@@ -4446,14 +4402,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "teams_updated_at_idx": {
           "name": "teams_updated_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "updated_at",
@@ -4461,14 +4417,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "teams_created_at_idx": {
           "name": "teams_created_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "created_at",
@@ -4476,14 +4432,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "teams__status_idx": {
           "name": "teams__status_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "_status",
@@ -4491,14 +4447,29 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
+          ]
+        },
+        "teams_submitted_by_idx": {
+          "name": "teams_submitted_by_idx",
           "isUnique": false,
-          "concurrently": false,
           "method": "btree",
-          "with": {}
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "submitted_by_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
         },
         "teams_establishment_application_idx": {
           "name": "teams_establishment_application_idx",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "establishment_application_id",
@@ -4506,11 +4477,7 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         }
       },
       "foreignKeys": {
@@ -4518,25 +4485,8 @@
           "name": "teams_cover_id_media_id_fk",
           "tableFrom": "teams",
           "tableTo": "media",
-          "columnsFrom": [
-            "cover_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "teams_submitted_by_id_users_id_fk": {
-          "name": "teams_submitted_by_id_users_id_fk",
-          "tableFrom": "teams",
-          "tableTo": "users",
-          "columnsFrom": [
-            "submitted_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{cover_id}",
+          "columnsTo": "{id}",
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -4544,25 +4494,26 @@
           "name": "teams_game_id_games_id_fk",
           "tableFrom": "teams",
           "tableTo": "games",
-          "columnsFrom": [
-            "game_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{game_id}",
+          "columnsTo": "{id}",
           "onDelete": "set null",
           "onUpdate": "no action"
         },
-        "teams_establishment_application_id_team_establishment_applications_id_fk": {
-          "name": "teams_establishment_application_id_team_establishment_applications_id_fk",
+        "teams_submitted_by_id_users_id_fk": {
+          "name": "teams_submitted_by_id_users_id_fk",
+          "tableFrom": "teams",
+          "tableTo": "users",
+          "columnsFrom": "{submitted_by_id}",
+          "columnsTo": "{id}",
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "teams_establishment_application_id_fkey": {
+          "name": "teams_establishment_application_id_fkey",
           "tableFrom": "teams",
           "tableTo": "team_establishment_applications",
-          "columnsFrom": [
-            "establishment_application_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{establishment_application_id}",
+          "columnsTo": "{id}",
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -4729,6 +4680,10 @@
       "indexes": {
         "_teams_v_parent_idx": {
           "name": "_teams_v_parent_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "parent_id",
@@ -4736,14 +4691,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "_teams_v_version_version_slug_idx": {
           "name": "_teams_v_version_version_slug_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "version_slug",
@@ -4751,14 +4706,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "_teams_v_version_version_cover_idx": {
           "name": "_teams_v_version_version_cover_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "version_cover_id",
@@ -4766,29 +4721,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "_teams_v_version_version_submitted_by_idx": {
-          "name": "_teams_v_version_version_submitted_by_idx",
-          "columns": [
-            {
-              "expression": "version_submitted_by_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "_teams_v_version_version_game_idx": {
           "name": "_teams_v_version_version_game_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "version_game_id",
@@ -4796,14 +4736,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "_teams_v_version_version_updated_at_idx": {
           "name": "_teams_v_version_version_updated_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "version_updated_at",
@@ -4811,14 +4751,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "_teams_v_version_version_created_at_idx": {
           "name": "_teams_v_version_version_created_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "version_created_at",
@@ -4826,14 +4766,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "_teams_v_version_version__status_idx": {
           "name": "_teams_v_version_version__status_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "version__status",
@@ -4841,14 +4781,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "_teams_v_created_at_idx": {
           "name": "_teams_v_created_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "created_at",
@@ -4856,14 +4796,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "_teams_v_updated_at_idx": {
           "name": "_teams_v_updated_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "updated_at",
@@ -4871,14 +4811,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "_teams_v_latest_idx": {
           "name": "_teams_v_latest_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "latest",
@@ -4886,14 +4826,29 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
-        "_teams_v_version_version_establishment_application_idx": {
-          "name": "_teams_v_version_version_establishment_application_idx",
+        "_teams_v_version_version_submitted_by_idx": {
+          "name": "_teams_v_version_version_submitted_by_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "version_submitted_by_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "_teams_v_version_establishment_application_idx": {
+          "name": "_teams_v_version_establishment_application_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "version_establishment_application_id",
@@ -4901,11 +4856,7 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         }
       },
       "foreignKeys": {
@@ -4913,12 +4864,8 @@
           "name": "_teams_v_parent_id_teams_id_fk",
           "tableFrom": "_teams_v",
           "tableTo": "teams",
-          "columnsFrom": [
-            "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{parent_id}",
+          "columnsTo": "{id}",
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -4926,25 +4873,8 @@
           "name": "_teams_v_version_cover_id_media_id_fk",
           "tableFrom": "_teams_v",
           "tableTo": "media",
-          "columnsFrom": [
-            "version_cover_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "_teams_v_version_submitted_by_id_users_id_fk": {
-          "name": "_teams_v_version_submitted_by_id_users_id_fk",
-          "tableFrom": "_teams_v",
-          "tableTo": "users",
-          "columnsFrom": [
-            "version_submitted_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{version_cover_id}",
+          "columnsTo": "{id}",
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -4952,25 +4882,26 @@
           "name": "_teams_v_version_game_id_games_id_fk",
           "tableFrom": "_teams_v",
           "tableTo": "games",
-          "columnsFrom": [
-            "version_game_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{version_game_id}",
+          "columnsTo": "{id}",
           "onDelete": "set null",
           "onUpdate": "no action"
         },
-        "_teams_v_version_establishment_application_id_team_establishment_applications_id_fk": {
-          "name": "_teams_v_version_establishment_application_id_team_establishment_applications_id_fk",
+        "_teams_v_version_submitted_by_id_users_id_fk": {
+          "name": "_teams_v_version_submitted_by_id_users_id_fk",
+          "tableFrom": "_teams_v",
+          "tableTo": "users",
+          "columnsFrom": "{version_submitted_by_id}",
+          "columnsTo": "{id}",
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "_teams_v_version_establishment_application_id_fkey": {
+          "name": "_teams_v_version_establishment_application_id_fkey",
           "tableFrom": "_teams_v",
           "tableTo": "team_establishment_applications",
-          "columnsFrom": [
-            "version_establishment_application_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{version_establishment_application_id}",
+          "columnsTo": "{id}",
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -12228,6 +12159,10 @@
       "indexes": {
         "payload_locked_documents_rels_order_idx": {
           "name": "payload_locked_documents_rels_order_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "order",
@@ -12235,14 +12170,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "payload_locked_documents_rels_parent_idx": {
           "name": "payload_locked_documents_rels_parent_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "parent_id",
@@ -12250,14 +12185,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "payload_locked_documents_rels_path_idx": {
           "name": "payload_locked_documents_rels_path_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "path",
@@ -12265,14 +12200,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "payload_locked_documents_rels_users_id_idx": {
           "name": "payload_locked_documents_rels_users_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "users_id",
@@ -12280,14 +12215,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "payload_locked_documents_rels_media_id_idx": {
           "name": "payload_locked_documents_rels_media_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "media_id",
@@ -12295,134 +12230,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "payload_locked_documents_rels_community_applications_id_idx": {
-          "name": "payload_locked_documents_rels_community_applications_id_idx",
-          "columns": [
-            {
-              "expression": "community_applications_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "payload_locked_documents_rels_community_bans_id_idx": {
-          "name": "payload_locked_documents_rels_community_bans_id_idx",
-          "columns": [
-            {
-              "expression": "community_bans_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "payload_locked_documents_rels_community_reactions_id_idx": {
-          "name": "payload_locked_documents_rels_community_reactions_id_idx",
-          "columns": [
-            {
-              "expression": "community_reactions_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "payload_locked_documents_rels_community_showcase_id_idx": {
-          "name": "payload_locked_documents_rels_community_showcase_id_idx",
-          "columns": [
-            {
-              "expression": "community_showcase_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "payload_locked_documents_rels_forum_posts_id_idx": {
-          "name": "payload_locked_documents_rels_forum_posts_id_idx",
-          "columns": [
-            {
-              "expression": "forum_posts_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "payload_locked_documents_rels_community_messages_id_idx": {
-          "name": "payload_locked_documents_rels_community_messages_id_idx",
-          "columns": [
-            {
-              "expression": "community_messages_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "payload_locked_documents_rels_community_posts_id_idx": {
-          "name": "payload_locked_documents_rels_community_posts_id_idx",
-          "columns": [
-            {
-              "expression": "community_posts_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "payload_locked_documents_rels_comments_id_idx": {
-          "name": "payload_locked_documents_rels_comments_id_idx",
-          "columns": [
-            {
-              "expression": "comments_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "payload_locked_documents_rels_games_id_idx": {
           "name": "payload_locked_documents_rels_games_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "games_id",
@@ -12430,14 +12245,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "payload_locked_documents_rels_teams_id_idx": {
           "name": "payload_locked_documents_rels_teams_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "teams_id",
@@ -12445,14 +12260,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "payload_locked_documents_rels_seasons_id_idx": {
           "name": "payload_locked_documents_rels_seasons_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "seasons_id",
@@ -12460,14 +12275,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "payload_locked_documents_rels_honors_id_idx": {
           "name": "payload_locked_documents_rels_honors_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "honors_id",
@@ -12475,14 +12290,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "payload_locked_documents_rels_events_id_idx": {
           "name": "payload_locked_documents_rels_events_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "events_id",
@@ -12490,14 +12305,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "payload_locked_documents_rels_recruitment_id_idx": {
           "name": "payload_locked_documents_rels_recruitment_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "recruitment_id",
@@ -12505,14 +12320,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "payload_locked_documents_rels_news_id_idx": {
           "name": "payload_locked_documents_rels_news_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "news_id",
@@ -12520,29 +12335,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "payload_locked_documents_rels_announcements_id_idx": {
-          "name": "payload_locked_documents_rels_announcements_id_idx",
-          "columns": [
-            {
-              "expression": "announcements_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "payload_locked_documents_rels_albums_id_idx": {
           "name": "payload_locked_documents_rels_albums_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "albums_id",
@@ -12550,14 +12350,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "payload_locked_documents_rels_pages_id_idx": {
           "name": "payload_locked_documents_rels_pages_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "pages_id",
@@ -12565,14 +12365,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "payload_locked_documents_rels_redirects_id_idx": {
           "name": "payload_locked_documents_rels_redirects_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "redirects_id",
@@ -12580,14 +12380,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "payload_locked_documents_rels_audit_id_idx": {
           "name": "payload_locked_documents_rels_audit_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "audit_id",
@@ -12595,104 +12395,149 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
-        "payload_locked_documents_rels_community_joins_id_idx": {
-          "name": "payload_locked_documents_rels_community_joins_id_idx",
+        "payload_locked_documents_rels_community_applications_id_idx": {
+          "name": "payload_locked_documents_rels_community_applications_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
-              "expression": "community_joins_id",
+              "expression": "community_applications_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
-        "payload_locked_documents_rels_content_promotions_id_idx": {
-          "name": "payload_locked_documents_rels_content_promotions_id_idx",
+        "payload_locked_documents_rels_community_bans_id_idx": {
+          "name": "payload_locked_documents_rels_community_bans_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
-              "expression": "content_promotions_id",
+              "expression": "community_bans_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
-        "payload_locked_documents_rels_team_establishment_applica_idx": {
-          "name": "payload_locked_documents_rels_team_establishment_applica_idx",
+        "payload_locked_documents_rels_forum_posts_id_idx": {
+          "name": "payload_locked_documents_rels_forum_posts_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
-              "expression": "team_establishment_applications_id",
+              "expression": "forum_posts_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
-        "payload_locked_documents_rels_team_recruitments_id_idx": {
-          "name": "payload_locked_documents_rels_team_recruitments_id_idx",
+        "payload_locked_documents_rels_community_messages_id_idx": {
+          "name": "payload_locked_documents_rels_community_messages_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
-              "expression": "team_recruitments_id",
+              "expression": "community_messages_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
-        "payload_locked_documents_rels_team_join_applications_id_idx": {
-          "name": "payload_locked_documents_rels_team_join_applications_id_idx",
+        "payload_locked_documents_rels_community_posts_id_idx": {
+          "name": "payload_locked_documents_rels_community_posts_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
-              "expression": "team_join_applications_id",
+              "expression": "community_posts_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
-        "payload_locked_documents_rels_team_memberships_id_idx": {
-          "name": "payload_locked_documents_rels_team_memberships_id_idx",
+        "payload_locked_documents_rels_comments_id_idx": {
+          "name": "payload_locked_documents_rels_comments_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
-              "expression": "team_memberships_id",
+              "expression": "comments_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             }
-          ],
+          ]
+        },
+        "payload_locked_documents_rels_announcements_id_idx": {
+          "name": "payload_locked_documents_rels_announcements_id_idx",
           "isUnique": false,
-          "concurrently": false,
           "method": "btree",
-          "with": {}
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "announcements_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "payload_locked_documents_rels_community_reactions_id_idx": {
+          "name": "payload_locked_documents_rels_community_reactions_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "community_reactions_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "payload_locked_documents_rels_community_showcase_id_idx": {
+          "name": "payload_locked_documents_rels_community_showcase_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "community_showcase_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
         },
         "payload_locked_documents_rels_event_signups_id_idx": {
           "name": "payload_locked_documents_rels_event_signups_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "event_signups_id",
@@ -12700,11 +12545,97 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
+          ]
+        },
+        "payload_locked_documents_rels_community_joins_id_idx": {
+          "name": "payload_locked_documents_rels_community_joins_id_idx",
           "isUnique": false,
-          "concurrently": false,
           "method": "btree",
-          "with": {}
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "community_joins_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "payload_locked_documents_rels_content_promotions_id_idx": {
+          "name": "payload_locked_documents_rels_content_promotions_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "content_promotions_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "payload_locked_documents_rels_team_establishment_applications_i": {
+          "name": "payload_locked_documents_rels_team_establishment_applications_i",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "team_establishment_applications_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "payload_locked_documents_rels_team_recruitments_id_idx": {
+          "name": "payload_locked_documents_rels_team_recruitments_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "team_recruitments_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "payload_locked_documents_rels_team_join_applications_id_idx": {
+          "name": "payload_locked_documents_rels_team_join_applications_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "team_join_applications_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "payload_locked_documents_rels_team_memberships_id_idx": {
+          "name": "payload_locked_documents_rels_team_memberships_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "team_memberships_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
         }
       },
       "foreignKeys": {
@@ -12712,12 +12643,8 @@
           "name": "payload_locked_documents_rels_parent_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "payload_locked_documents",
-          "columnsFrom": [
-            "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{parent_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -12725,12 +12652,8 @@
           "name": "payload_locked_documents_rels_users_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "users",
-          "columnsFrom": [
-            "users_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{users_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -12738,116 +12661,8 @@
           "name": "payload_locked_documents_rels_media_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "media",
-          "columnsFrom": [
-            "media_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "payload_locked_documents_rels_community_applications_fk": {
-          "name": "payload_locked_documents_rels_community_applications_fk",
-          "tableFrom": "payload_locked_documents_rels",
-          "tableTo": "community_applications",
-          "columnsFrom": [
-            "community_applications_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "payload_locked_documents_rels_community_bans_fk": {
-          "name": "payload_locked_documents_rels_community_bans_fk",
-          "tableFrom": "payload_locked_documents_rels",
-          "tableTo": "community_bans",
-          "columnsFrom": [
-            "community_bans_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "payload_locked_documents_rels_community_reactions_fk": {
-          "name": "payload_locked_documents_rels_community_reactions_fk",
-          "tableFrom": "payload_locked_documents_rels",
-          "tableTo": "community_reactions",
-          "columnsFrom": [
-            "community_reactions_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "payload_locked_documents_rels_community_showcase_fk": {
-          "name": "payload_locked_documents_rels_community_showcase_fk",
-          "tableFrom": "payload_locked_documents_rels",
-          "tableTo": "community_showcase",
-          "columnsFrom": [
-            "community_showcase_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "payload_locked_documents_rels_forum_posts_fk": {
-          "name": "payload_locked_documents_rels_forum_posts_fk",
-          "tableFrom": "payload_locked_documents_rels",
-          "tableTo": "forum_posts",
-          "columnsFrom": [
-            "forum_posts_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "payload_locked_documents_rels_community_messages_fk": {
-          "name": "payload_locked_documents_rels_community_messages_fk",
-          "tableFrom": "payload_locked_documents_rels",
-          "tableTo": "community_messages",
-          "columnsFrom": [
-            "community_messages_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "payload_locked_documents_rels_community_posts_fk": {
-          "name": "payload_locked_documents_rels_community_posts_fk",
-          "tableFrom": "payload_locked_documents_rels",
-          "tableTo": "community_posts",
-          "columnsFrom": [
-            "community_posts_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "payload_locked_documents_rels_comments_fk": {
-          "name": "payload_locked_documents_rels_comments_fk",
-          "tableFrom": "payload_locked_documents_rels",
-          "tableTo": "comments",
-          "columnsFrom": [
-            "comments_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{media_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -12855,12 +12670,8 @@
           "name": "payload_locked_documents_rels_games_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "games",
-          "columnsFrom": [
-            "games_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{games_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -12868,12 +12679,8 @@
           "name": "payload_locked_documents_rels_teams_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "teams",
-          "columnsFrom": [
-            "teams_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{teams_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -12881,12 +12688,8 @@
           "name": "payload_locked_documents_rels_seasons_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "seasons",
-          "columnsFrom": [
-            "seasons_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{seasons_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -12894,12 +12697,8 @@
           "name": "payload_locked_documents_rels_honors_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "honors",
-          "columnsFrom": [
-            "honors_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{honors_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -12907,12 +12706,8 @@
           "name": "payload_locked_documents_rels_events_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "events",
-          "columnsFrom": [
-            "events_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{events_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -12920,12 +12715,8 @@
           "name": "payload_locked_documents_rels_recruitment_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "recruitment",
-          "columnsFrom": [
-            "recruitment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{recruitment_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -12933,25 +12724,8 @@
           "name": "payload_locked_documents_rels_news_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "news",
-          "columnsFrom": [
-            "news_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "payload_locked_documents_rels_announcements_fk": {
-          "name": "payload_locked_documents_rels_announcements_fk",
-          "tableFrom": "payload_locked_documents_rels",
-          "tableTo": "announcements",
-          "columnsFrom": [
-            "announcements_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{news_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -12959,12 +12733,8 @@
           "name": "payload_locked_documents_rels_albums_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "albums",
-          "columnsFrom": [
-            "albums_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{albums_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -12972,12 +12742,8 @@
           "name": "payload_locked_documents_rels_pages_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "pages",
-          "columnsFrom": [
-            "pages_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{pages_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -12985,12 +12751,8 @@
           "name": "payload_locked_documents_rels_redirects_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "redirects",
-          "columnsFrom": [
-            "redirects_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{redirects_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -12998,25 +12760,107 @@
           "name": "payload_locked_documents_rels_audit_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "audit",
-          "columnsFrom": [
-            "audit_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{audit_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "payload_locked_documents_rels_community_joins_fk": {
-          "name": "payload_locked_documents_rels_community_joins_fk",
+        "payload_locked_documents_rels_community_applications_fk": {
+          "name": "payload_locked_documents_rels_community_applications_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "community_applications",
+          "columnsFrom": "{community_applications_id}",
+          "columnsTo": "{id}",
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_community_bans_fk": {
+          "name": "payload_locked_documents_rels_community_bans_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "community_bans",
+          "columnsFrom": "{community_bans_id}",
+          "columnsTo": "{id}",
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_forum_posts_fk": {
+          "name": "payload_locked_documents_rels_forum_posts_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "forum_posts",
+          "columnsFrom": "{forum_posts_id}",
+          "columnsTo": "{id}",
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_community_messages_fk": {
+          "name": "payload_locked_documents_rels_community_messages_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "community_messages",
+          "columnsFrom": "{community_messages_id}",
+          "columnsTo": "{id}",
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_community_posts_fk": {
+          "name": "payload_locked_documents_rels_community_posts_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "community_posts",
+          "columnsFrom": "{community_posts_id}",
+          "columnsTo": "{id}",
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_comments_fk": {
+          "name": "payload_locked_documents_rels_comments_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "comments",
+          "columnsFrom": "{comments_id}",
+          "columnsTo": "{id}",
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_announcements_fk": {
+          "name": "payload_locked_documents_rels_announcements_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "announcements",
+          "columnsFrom": "{announcements_id}",
+          "columnsTo": "{id}",
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_community_reactions_fk": {
+          "name": "payload_locked_documents_rels_community_reactions_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "community_reactions",
+          "columnsFrom": "{community_reactions_id}",
+          "columnsTo": "{id}",
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_community_showcase_fk": {
+          "name": "payload_locked_documents_rels_community_showcase_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "community_showcase",
+          "columnsFrom": "{community_showcase_id}",
+          "columnsTo": "{id}",
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_event_signups_id_fkey": {
+          "name": "payload_locked_documents_rels_event_signups_id_fkey",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "event_signups",
+          "columnsFrom": "{event_signups_id}",
+          "columnsTo": "{id}",
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_community_joins_id_fkey": {
+          "name": "payload_locked_documents_rels_community_joins_id_fkey",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "community_joins",
-          "columnsFrom": [
-            "community_joins_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{community_joins_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13024,77 +12868,44 @@
           "name": "payload_locked_documents_rels_content_promotions_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "content_promotions",
-          "columnsFrom": [
-            "content_promotions_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{content_promotions_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "payload_locked_documents_rels_team_establishment_applicat_fk": {
-          "name": "payload_locked_documents_rels_team_establishment_applicat_fk",
+        "payload_locked_documents_rels_team_establishment_applicati_fkey": {
+          "name": "payload_locked_documents_rels_team_establishment_applicati_fkey",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "team_establishment_applications",
-          "columnsFrom": [
-            "team_establishment_applications_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{team_establishment_applications_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "payload_locked_documents_rels_team_recruitments_fk": {
-          "name": "payload_locked_documents_rels_team_recruitments_fk",
+        "payload_locked_documents_rels_team_recruitments_id_fkey": {
+          "name": "payload_locked_documents_rels_team_recruitments_id_fkey",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "team_recruitments",
-          "columnsFrom": [
-            "team_recruitments_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{team_recruitments_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "payload_locked_documents_rels_team_join_applications_fk": {
-          "name": "payload_locked_documents_rels_team_join_applications_fk",
+        "payload_locked_documents_rels_team_join_applications_id_fkey": {
+          "name": "payload_locked_documents_rels_team_join_applications_id_fkey",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "team_join_applications",
-          "columnsFrom": [
-            "team_join_applications_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{team_join_applications_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "payload_locked_documents_rels_team_memberships_fk": {
-          "name": "payload_locked_documents_rels_team_memberships_fk",
+        "payload_locked_documents_rels_team_memberships_id_fkey": {
+          "name": "payload_locked_documents_rels_team_memberships_id_fkey",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "team_memberships",
-          "columnsFrom": [
-            "team_memberships_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "payload_locked_documents_rels_event_signups_fk": {
-          "name": "payload_locked_documents_rels_event_signups_fk",
-          "tableFrom": "payload_locked_documents_rels",
-          "tableTo": "event_signups",
-          "columnsFrom": [
-            "event_signups_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": "{team_memberships_id}",
+          "columnsTo": "{id}",
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -15543,6 +15354,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "27968447-4e91-443c-8ad4-0dc31c1b0b4b",
+  "id": "9af5092f-c7de-497a-a19d-2b84be741b29",
   "prevId": "c1afbdf7-3ab6-480d-9cec-53196085400a"
 }

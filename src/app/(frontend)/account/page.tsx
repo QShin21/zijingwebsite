@@ -47,6 +47,8 @@ export default async function Account() {
           <div><dt>社群管理任职</dt><dd>{hasCommunityOffice(user) ? "已获独立社群任职，能力按社群授权" : "暂无在任社群"}</dd></div>
         </dl>
         <div className="account-actions">
+          <Link className="account-action" href="/teams/recruitment"><Icon name="team" /><strong>我的代表队与入队申请</strong><small>查看选拔状态、修改申请与成员记录。</small></Link>
+          {(canPublish(user) || communityIDs(user, "handleJoins").length > 0) && <Link className="account-action" href="/teams/manage"><Icon name="target" /><strong>代表队工作台</strong><small>按社群审核队员申请与管理招新。</small></Link>}
           {(canReviewPromotion(user) || communityIDs(user, "publishContent").length > 0) && <Link className="account-action" href={canReviewPromotion(user) ? "/community/promotions?view=review" : "/community/promotions"}>
             <Icon name="layers" /><strong>{canReviewPromotion(user) ? "审核社群升推" : "我的社群升推"}</strong><small>申请、审核及管理社团首页展示。</small>
           </Link>}

@@ -3470,3 +3470,18 @@ button:disabled {
   .designer-heading .signup-tools button { padding: .6rem; }
   .designer-tabs button { flex: 1 1 110px; text-align: center; padding: .65rem .5rem; }
 }
+
+/* Team core: controls wrap at narrow widths; private answer values stay readable. */
+.team-core-answers > div { margin-block: 1rem; }
+.team-core-answers dt { font-weight: 650; }
+.team-core-answers dd { margin: .35rem 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.team-core-operation { margin-block: .65rem; }
+.team-core-operation p:empty { display: none; }
+.team-core-editor { margin-block: 2rem; min-width: 0; }
+.member-shell .signup-tools { flex-wrap: wrap; gap: .65rem; }
+.member-shell .panel, .team-core-editor, .team-core-operation { overflow-wrap: anywhere; }
+.member-shell .team-core-operation textarea { max-width: 100%; }
+@media (max-width: 480px) {
+  .member-shell .signup-tools > .button { white-space: normal; }
+  .team-core-editor .signup-builder { max-width: 100%; }
+}
