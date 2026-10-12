@@ -532,3 +532,121 @@ describe('原生简介真实Page/SDK：主动隐私和受控图片', () => {
     expect(h.page.data.imageError).toBe(''); expect(h.page.data.draftAvatar).toBe(h.writes[3].filePath); expect(puts(h)).toHaveLength(0);
   });
 });
+
+describe('原生简介前台ACK最低修订：实际Page/HTTP补充回归', () => {
+  const confirmed: Own = { ...original, displayName: '合成服务端已确认昵称', biography: '合成服务端已确认介绍', revision: 4 };
+  async function foreground(outcome: '500' | 'network' | 'missing' | 'older' = 'network') {
+    const h = await ready(); edit(h); const sending = h.page.save();
+    h.reply(1, { profile: confirmed }); await flush(); expect(reads(h)).toHaveLength(2);
+    if (outcome === '500') h.reply(2, { error: 'SQL synthetic-after-ACK-error' }, 500);
+    else if (outcome === 'network') h.requests[2].fail();
+    else h.reply(2, view(outcome === 'missing' ? null : original));
+    await sending; return h;
+  }
+  async function noSecondPut(h: Harness) {
+    h.page.preview(); const saving = h.page.save(); await flush();
+    // Finish an unexpected synthetic PUT so a failed assertion never waits on a live request.
+    if (puts(h).length > 1 && h.requests.at(-1)?.method === 'PUT') h.requests.at(-1)!.fail();
+    await saving; expect(puts(h)).toHaveLength(1);
+  }
+  function startRead(h: Harness, method: 'retry' | 'reload') {
+    const dialogs = h.modals.length, reading = h.page[method]();
+    if (h.modals.length > dialogs) h.modals.at(-1)!.success({ confirm: true });
+    return reading;
+  }
+
+  it.each(['500', 'network', 'missing', 'older'] as const)('前台PUT已确认rev4，后GET %s保持实际回执并禁止重复PUT；fresh retry才恢复', async outcome => {
+    const h = await foreground(outcome);
+    expect(h.page.data.draft).toMatchObject({ displayName: confirmed.displayName, biography: confirmed.biography });
+    await noSecondPut(h); expect(h.page.data.confirmationPending).toBe(true);
+    const retry = h.page.retry(); h.reply(3, view(confirmed)); await retry;
+    expect(h.page.data.confirmationPending).toBe(false); expect(h.page.data.draft.displayName).toBe(confirmed.displayName);
+    h.page.edit(); h.page.input(input('biography', '合成成功核对后新的修改')); h.page.preview();
+    const next = h.page.save(); expect(puts(h)[1].data).toMatchObject({ revision: 4, membershipVersion: periodOne, profile: { biography: '合成成功核对后新的修改' } });
+    h.reply(4, { profile: { ...confirmed, revision: 5, biography: '合成成功核对后新的修改' } }); await flush();
+    h.reply(5, view({ ...confirmed, revision: 5, biography: '合成成功核对后新的修改' })); await next; expect(puts(h)).toHaveLength(2);
+  });
+
+  it.each((['retry', 'reload'] as const).flatMap(method => ['missing', 'older'].map(snapshot => ({ method, snapshot }))))('$method不能用同周期$snapshot结果绕过ACK最低rev4，真实rev4恢复后才解锁', async ({ method, snapshot }) => {
+    const h = await foreground(); const reading = startRead(h, method); await flush();
+    expect(reads(h)).toHaveLength(3); h.reply(3, view(snapshot === 'missing' ? null : original)); await reading;
+    expect(h.page.data.draft).toMatchObject({ displayName: confirmed.displayName, biography: confirmed.biography });
+    await noSecondPut(h); expect(h.page.data.confirmationPending).toBe(true);
+    const fresh = startRead(h, method); await flush(); h.reply(4, view(confirmed)); await fresh;
+    expect(h.page.data.confirmationPending).toBe(false); expect(h.page.data.draft.displayName).toBe(confirmed.displayName); expect(puts(h)).toHaveLength(1);
+  });
+
+  it('取消修改不能清掉已确认ACK最低修订，reload读取旧rev3仍只读', async () => {
+    const h = await foreground(); await h.page.cancel(); h.page.edit(); await noSecondPut(h);
+    const reloading = startRead(h, 'reload'); await flush(); h.reply(3, view(original)); await reloading;
+    h.page.edit(); await noSecondPut(h); expect(h.page.data.confirmationPending).toBe(true);
+    const fresh = h.page.retry(); h.reply(4, view(confirmed)); await fresh; expect(h.page.data.confirmationPending).toBe(false);
+  });
+
+  it.each(['older', '500', 'network'] as const)('前台ACK后hide/show，对账旧GET迟到%s不能覆盖确认结果或提前释放写锁', async late => {
+    const h = await ready(); edit(h); const sending = h.page.save(); h.reply(1, { profile: confirmed }); await flush();
+    h.page.onHide(); await h.page.onShow(); await h.page.save(); expect(puts(h)).toHaveLength(1); expect(h.page.data.busy).toBe(true); expect(reads(h)).toHaveLength(2);
+    if (late === 'network') h.requests[2].fail(); else h.reply(2, late === '500' ? { error: '合成旧读取迟到错误' } : view(original), late === '500' ? 500 : 200);
+    await flush(); expect(reads(h)).toHaveLength(3); h.reply(3, view(original)); await sending;
+    expect(h.page.data.busy).toBe(false); expect(h.page.data.draft.displayName).toBe(confirmed.displayName); await noSecondPut(h);
+    const fresh = h.page.retry(); h.reply(4, view(confirmed)); await fresh; expect(h.page.data.confirmationPending).toBe(false);
+  });
+
+  it.each(['older', '500'] as const)('fresh GET确认rev4后旧前台retry晚到%s不能倒退资料或恢复ACK阻塞', async late => {
+    const h = await foreground(); const stale = h.page.retry(); h.page.onHide(); const fresh = h.page.onShow();
+    h.reply(4, view(confirmed)); await fresh; expect(h.page.data.confirmationPending).toBe(false);
+    h.reply(3, late === '500' ? { error: '合成已过期读取错误' } : view(original), late === '500' ? 500 : 200); await stale;
+    expect(h.page.data.draft.displayName).toBe(confirmed.displayName); expect(h.page.data.error).toBe(''); expect(h.page.data.confirmationPending).toBe(false); expect(puts(h)).toHaveLength(1);
+  });
+
+  it.each(['actor_roundtrip', 'route'] as const)('未结束PUT在$scope期间保持锁，旧ACK最低修订不能进入新scope', async scope => {
+    const h = await ready(); edit(h); const sending = h.page.save();
+    if (scope === 'actor_roundtrip') {
+      h.session.save({ token: 'synthetic-roundtrip-b', exp: 9999999999, user: { id: 8, name: '合成账号乙', roles: ['member'], accountStatus: 'active' } });
+      h.session.save({ token: 'synthetic-roundtrip-new-a', exp: 9999999999, user: { id: 7, name: '合成账号甲新会话', roles: ['member'], accountStatus: 'active' } });
+    } else { h.page.onLoad({ team: '52' }); await h.page.onShow(); }
+    noPrivate(h); expect(h.page.data.busy).toBe(true); await h.page.save(); expect(puts(h)).toHaveLength(1);
+    h.reply(1, { profile: confirmed }); await flush(); noPrivate(h); expect(reads(h)).toHaveLength(2);
+    const current = view(null, 'synthetic-new-scope-period'); current.profiles = []; h.reply(2, current); await sending;
+    noPrivate(h); expect(h.page.data.confirmationPending).toBe(false); expect(h.page.data.busy).toBe(false); expect(puts(h)).toHaveLength(1);
+    if (scope === 'actor_roundtrip') expect(h.requests[2].header.Authorization).toBe('JWT synthetic-roundtrip-new-a'); else expect(h.requests[2].url).toBe(origin + '/api/team-profiles/52');
+  });
+
+  it('前台ACK后卸载，未结束确认GET不恢复资料、不再GET也不再次PUT', async () => {
+    const h = await ready(); edit(h); const sending = h.page.save(); h.reply(1, { profile: confirmed }); await flush(); h.page.onUnload();
+    const unloaded = structuredClone(h.page.data); h.reply(2, view(original)); await sending; await h.page.onShow();
+    expect(h.page.data).toEqual(unloaded); expect(reads(h)).toHaveLength(2); expect(puts(h)).toHaveLength(1);
+  });
+
+  it('前台ACK后发现新周期仍默认hidden，明确reload及新的主动consent才可公开保存', async () => {
+    const h = await foreground(); const reading = h.page.retry(); h.reply(3, view({ ...confirmed, visible: true }, periodTwo)); await reading;
+    expect(h.page.data.locked).toBe(true); expect(h.page.data.draft.visible).toBe(false); await noSecondPut(h);
+    const reloading = startRead(h, 'reload'); await flush(); h.reply(4, view({ ...confirmed, visible: true }, periodTwo)); await reloading;
+    expect(h.page.data.locked).toBe(false); expect(h.page.data.confirmationPending).toBe(false); expect(h.page.data.draft.visible).toBe(false); expect(puts(h)).toHaveLength(1);
+    h.page.edit(); h.page.consent(input('', true)); h.page.preview(); const saving = h.page.save();
+    expect(puts(h)[1].data).toMatchObject({ revision: 4, membershipVersion: periodTwo, profile: { visible: true } });
+    h.reply(5, { profile: { ...confirmed, revision: 5, visible: true } }); await flush(); h.reply(6, view({ ...confirmed, revision: 5, visible: true }, periodTwo)); await saving;
+    expect(puts(h)).toHaveLength(2);
+  });
+
+  it.each(['missing', 'older'])('ACK4经freshGET4确认后，reload/reset的$snapshot仍不得清除当前周期最低修订', async snapshot => {
+    const h = await ready(); edit(h); const sending = h.page.save(); h.reply(1, { profile: confirmed }); await flush(); h.reply(2, view(confirmed)); await sending;
+    expect(h.page.data.confirmationPending).toBe(false);
+    const reloading = startRead(h, 'reload'); await flush(); h.reply(3, view(snapshot === 'missing' ? null : original)); await reloading;
+    expect(h.page.data.draft.displayName).toBe(confirmed.displayName); await noSecondPut(h);
+    const fresh = h.page.retry(); h.reply(4, view(confirmed)); await fresh;
+    expect(h.page.data.confirmationPending).toBe(false); expect(h.page.data.draft.displayName).toBe(confirmed.displayName); expect(puts(h)).toHaveLength(1);
+  });
+
+  it('ACK4后新周期锁hidden，头像render中hide/show及恢复GET失败均不能复活旧checked ACK', async () => {
+    const h = harness({ autoWrite: false }); h.page.onLoad({ team: '51' }); const initial = h.page.onShow(); h.reply(0, view()); await initial; edit(h);
+    const saved = { ...confirmed, avatar: png, visible: true }, sending = h.page.save(); h.reply(1, { profile: saved }); await flush();
+    h.reply(2, view({ ...saved, visible: false }, periodTwo)); await flush();
+    expect(h.page.data.locked).toBe(true); expect(h.page.data.draft.visible).toBe(false); expect(h.writes).toHaveLength(1);
+    h.page.onHide(); await h.page.onShow(); expect(h.page.data.busy).toBe(true); expect(reads(h)).toHaveLength(2);
+    h.writes[0].success(); await flush(); expect(reads(h)).toHaveLength(3);
+    h.requests[3].fail(); await sending;
+    expect(h.page.data.locked).toBe(true); expect(h.page.data.draft.visible).toBe(false); expect(h.page.data.draft.displayName).toBe(confirmed.displayName);
+    h.page.preview(); await h.page.save(); expect(puts(h)).toHaveLength(1); expect(h.page.data.busy).toBe(false);
+  });
+});

@@ -28,7 +28,7 @@ Page({
   syncBusy() { if (!this._disposed) this.setData({ busy: this.pending() }); },
   resetPrivate() {
     this.clearPictures(); this._loading = null; this._editor = null; this._original = null; this._draft = profile.empty();
-    this._profiles = []; this._viewPeriod = null; this._reconcile = null; this._dirty = false; this._reconsent = false;
+    this._profiles = []; this._viewPeriod = null; this._reconcile = null; this._acknowledged = null; this._dirty = false; this._reconsent = false;
     this.setData({ loading: false, loaded: false, needsLogin: !account(), error: '', operationError: '', message: '', busy: this.pending(),
       profiles: [], eligible: false, editing: false, previewing: false, locked: false, conflict: false, confirmationPending: false,
       draft: profile.display(this._draft), draftAvatar: '', imageError: '' });
@@ -57,12 +57,13 @@ Page({
     this.setData({ loading: false, loaded: false, profiles: [], draftAvatar: '', busy: this.pending() });
   },
   onUnload() {
-    this.onHide(); this._disposed = true; this._editor = null; this._original = null; this._draft = profile.empty(); this._profiles = [];
+    this.onHide(); this._disposed = true; this._editor = null; this._original = null; this._draft = profile.empty(); this._profiles = []; this._reconcile = null; this._acknowledged = null;
     if (this._unsubscribe) this._unsubscribe();
   },
   retry() { return this.load(); },
   onPullDownRefresh() { return this.load().finally(() => wx.stopPullDownRefresh()); },
   initialize(view) {
+    if (this._acknowledged && this._acknowledged.period !== view.period) this._acknowledged = null;
     this._editor = view.eligible && view.period ? { period: view.period, revision: view.profile ? view.profile.revision : null } : null;
     this._original = view.profile; this._draft = view.profile ? profile.draft(view.profile) : profile.empty();
     if (this._reconsent) this._draft.visible = false;
@@ -79,6 +80,7 @@ Page({
     if (!pending || pending.context !== context || pending.actor !== actor || pending.team !== team || !pending.saved || pending.applied || !this._editor || pending.period !== this._editor.period) return;
     pending.applied = true; this._original = pending.saved; this._editor.revision = pending.saved.revision;
     this._draft = profile.draft(pending.saved); this._dirty = false;
+    if (this._reconsent || this.data.locked) this._draft.visible = false;
     this.setData({ draft: profile.display(this._draft), previewing: true, confirmationPending: true, operationError: '',
       message: '简介已确认保存，请成功刷新资料核对当前周期后继续。' });
   },
@@ -96,9 +98,21 @@ Page({
       try {
         const view = await profile.load(team);
         if (!this.valid(context, epoch, actor, team)) return;
+        const pending = this._reconcile;
+        const acknowledged = this._acknowledged;
+        const sameAcknowledgement = acknowledged && acknowledged.context === context && acknowledged.actor === actor && acknowledged.team === team;
+        // A successful PUT establishes a revision floor for this identity and period, including explicit reloads.
+        if (sameAcknowledgement && view.eligible && view.period === acknowledged.period) {
+          if (!view.profile || view.profile.revision < acknowledged.minimum) {
+            this._reconcile = pending || acknowledged; this.setData({ confirmationPending: true });
+            throw new Error('保存已确认，读取结果尚未更新，请重新读取资料核对。');
+          }
+          acknowledged.minimum = Math.max(acknowledged.minimum, view.profile.revision);
+        }
         this._profiles = view.profiles; this._viewPeriod = view.period;
         this.setData({ loaded: true, eligible: view.eligible });
-        if (reset || !this._editor && !this.data.locked) {
+        if (pending && (!view.eligible || view.period !== pending.period)) this.lockPeriod();
+        else if (reset || !this._editor && !this.data.locked) {
           if (reset && this._editor && view.period !== this._editor.period) this._reconsent = true;
           this.initialize(view); this.setData({ operationError: '', message: '' });
         }
@@ -109,7 +123,9 @@ Page({
           if (freshRevision !== this._reconcile.revision) {
             this._original = view.profile; this._editor.revision = freshRevision;
             this._draft = view.profile ? profile.draft(view.profile) : profile.empty(); this._dirty = false;
-            this.setData({ previewing: false, conflict: false, draft: profile.display(this._draft), message: '保存状态已刷新，请核对当前资料。' });
+            const message = this._reconcile.foreground && this._reconcile.saved && freshRevision === this._reconcile.saved.revision
+              ? this._reconcile.saved.visible ? '简介已保存并选择展示' : '简介已保存并隐藏' : '保存状态已刷新，请核对当前资料。';
+            this.setData({ previewing: false, conflict: false, draft: profile.display(this._draft), message });
           }
           this._reconcile = null; this.setData({ confirmationPending: false });
         }
@@ -172,9 +188,14 @@ Page({
     this.setData({ operationError: '', message: '' });
     try {
       const saved = await profile.save(team, revision, period, value);
-      if (this.sameScope(context, actor, team) && this._editor && this._editor.period === period) acknowledgement = saved;
+      if (this.sameScope(context, actor, team) && this._editor && this._editor.period === period) {
+        acknowledgement = saved;
+        this._reconcile = { context, actor, team, revision, period, saved, minimum: saved.revision, foreground: this.valid(context, epoch, actor, team) };
+        this._acknowledged = this._reconcile; this.setData({ confirmationPending: true });
+      }
       if (!this.valid(context, epoch, actor, team)) return;
       this._original = saved; this._editor.revision = saved.revision; this._draft = profile.draft(saved); this._dirty = false;
+      this._reconcile.applied = true;
       this.setData({ draft: profile.display(this._draft), previewing: false, message: saved.visible ? '简介已保存并选择展示' : '简介已保存并隐藏' });
       await this.load(false, id);
     } catch (cause) {
@@ -183,7 +204,7 @@ Page({
       else if ([401, 403, 404].includes(cause.status)) { this._draft.visible = false; this.setData({ locked: true, eligible: false, draft: profile.display(this._draft), operationError: cause.message }); }
       else this.setData({ operationError: cause.message || '保存失败，输入已保留，请重试', conflict: cause.status === 409 });
     } finally {
-      if (!this.valid(context, epoch, actor, team) && this.sameScope(context, actor, team)) {
+      if (!acknowledgement && !this._reconcile && !this.data.locked && !this.valid(context, epoch, actor, team) && this.sameScope(context, actor, team)) {
         this._reconcile = { context, actor, team, revision, period, saved: acknowledgement };
         this.setData({ confirmationPending: true });
       }
