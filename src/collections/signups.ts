@@ -64,22 +64,29 @@ export const EventSignups: CollectionConfig = {
     create: ({ req }) =>
       canParticipate(req.user as Identity) &&
       req.context.submitEventSignup === true,
-    read: ({ req }) => {
-      const user = req.user as Identity;
-      if (!canParticipate(user)) return false;
+    read: async ({ req }) => {
+      if (!canParticipate(req.user as Identity)) return false;
+      const fresh = await req.payload.findByID({ collection: "users", id: req.user!.id, req, overrideAccess: true, depth: 0,
+        select: { roles: true, accountStatus: true, communityOffices: true } }).catch(() => null);
+      if (!canParticipate(fresh)) return false;
+      const user = fresh!;
       if (canPublish(user)) return true;
       const scope: Where[] = [{ member: { equals: user.id } }];
-      if (communityIDs(user, "viewSignups").length) {
-        const games = communityIDs(user, "viewSignups");
-        scope.push({ and: [{ activityType: { equals: "events" } }, { organizer: { equals: user.id } },
-          { or: [{ game: { in: games } }, { game: { exists: false } }] }] });
-        if (games.length)
-          scope.push({
-            and: [
-              { activityType: { equals: "community-posts" } },
-              { game: { in: games } },
-            ],
-          });
+      const games = communityIDs(user, "viewSignups");
+      if (games.length) {
+        const currentReq = { ...req, user: { ...req.user!, ...user, accountStatus: user.accountStatus, communityOffices: user.communityOffices } };
+        // Historic attribution is retained, but private reads use the activity's current authority.
+        // Organizer is a protected field: this lookup is only for authorization IDs, never returned.
+        const events = await req.payload.find({ collection: "events", req: currentReq, overrideAccess: true, draft: true,
+          depth: 0, pagination: false, limit: 0, select: { submittedBy: true, game: true }, where: { and: [
+            { submittedBy: { equals: user.id } }, { or: [{ game: { in: games } }, { game: { exists: false } }] },
+          ] } });
+        const posts = await req.payload.find({ collection: "community-posts", req: currentReq, overrideAccess: false,
+          depth: 0, pagination: false, limit: 0, select: { title: true }, where: { and: [
+            { category: { equals: "event" } }, { game: { in: games } },
+          ] } });
+        if (events.docs.length) scope.push({ and: [{ activityType: { equals: "events" } }, { activityID: { in: events.docs.map(doc => doc.id) } }] });
+        if (posts.docs.length) scope.push({ and: [{ activityType: { equals: "community-posts" } }, { activityID: { in: posts.docs.map(doc => doc.id) } }] });
       }
       return { or: scope };
     },

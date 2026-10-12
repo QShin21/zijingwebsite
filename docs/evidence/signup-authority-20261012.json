@@ -1,0 +1,92 @@
+{
+  "branch": "codex/club-operations-recovery",
+  "base": "01c8c3fd39991dae335320626fe203c466082cb9",
+  "atUTC": "2026-10-12T01:43:35.710194+00:00",
+  "scope": [
+    "active office orphaned by game deletion",
+    "legacy organizer access to retained answers after source deletion",
+    "current activity authority for raw signup collection when A/NULL moves to B"
+  ],
+  "reproduction": {
+    "tests": 4,
+    "failedAsExpectedBeforeFix": 4,
+    "syntheticOnly": true,
+    "answersPreservedBeforeAssertions": true
+  },
+  "checks": {
+    "focusedRegressions": {
+      "tests": 4,
+      "result": "PASS",
+      "explicitCounterAssertions": [
+        "orphan office raises legacy_owner_private_access",
+        "deleted source raises legacy_historical_private_access while legacy_owner_private_access remains zero"
+      ]
+    },
+    "unitDatabase": {
+      "files": 29,
+      "tests": 234,
+      "result": "PASS",
+      "reportedDuration": "55.63s"
+    },
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "miniappStatic": {
+      "result": "PASS",
+      "pages": 14,
+      "files": 89,
+      "bytes": 173236
+    },
+    "affectedHTTPE2E": {
+      "tests": 3,
+      "passed": 3,
+      "failed": 0,
+      "reportedDuration": "59.7s",
+      "result": "PASS"
+    },
+    "fullE2E": {
+      "tests": 57,
+      "passed": 57,
+      "failed": 0,
+      "reportedDuration": "9.6m",
+      "result": "PASS"
+    },
+    "build": "PASS",
+    "cleanSyntheticRollbackControl": {
+      "compatibleWithBaseline": true,
+      "counts": {
+        "backbone": 0,
+        "new_states": 0,
+        "joins": 0,
+        "revoked_grants": 0,
+        "legacy_owner_private_access": 0,
+        "legacy_historical_private_access": 0,
+        "member_offices": 0,
+        "reduced_grants": 0,
+        "revoked_cards": 0
+      },
+      "preservesExpandedSchema": true,
+      "recommendation": "Keep schema and backups; verify the actual previous build before switching"
+    }
+  },
+  "permissionProof": [
+    "orphan active office with NULL game is not a valid private grant",
+    "retained foreign answers after source deletion block legacy rollback",
+    "list and single raw reads use current source IDs rather than historical game/organizer stamps",
+    "view, entries, statistics and export deny former A scope after A/NULL to B",
+    "own historic answers remain readable",
+    "bare backbone cannot read foreign answers or export",
+    "fresh account and office fields are loaded before private collection authorization"
+  ],
+  "historicalAnswerOrAttributionRewrite": false,
+  "newMigration": false,
+  "migrationRunThisReview": false,
+  "dependencyVersionsChanged": false,
+  "productionAccess": false,
+  "productionMigration": false,
+  "promotionImplementation": "Paused per review priority; no promotion source change",
+  "merge": false,
+  "PR": false,
+  "deploy": false,
+  "protectedBranchesUpdated": false,
+  "finalCommitCI": "Verify the exact new recovery SHA after push; report its terminal result separately from previous successful CI."
+}
