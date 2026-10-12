@@ -20,10 +20,8 @@ export default async function Manage({
   const actor = await currentTeamActor(p, user),
     scope = communityIDs(actor, "handleJoins"),
     query = await searchParams;
-  const page = Math.max(
-    1,
-    Math.min(10000, Math.floor(Number(query.page) || 1)),
-  );
+  const page = teamPage(query.page);
+  const reviewPage = teamPage(query.reviewPage);
   const games = await p.find({
     collection: "games",
     user: null,
@@ -44,7 +42,7 @@ export default async function Manage({
     draft: false,
     depth: 0,
     limit: 20,
-    page: teamPage(query.page),
+    page,
     where: { game: { in: game ? [game.id] : allowed.map((g) => g.id) } },
     select: { title: true, game: true, teamStatus: true },
   });
@@ -55,7 +53,7 @@ export default async function Manage({
         overrideAccess: false,
         depth: 0,
         limit: 20,
-        page,
+        page: reviewPage,
         sort: "createdAt",
         where: { status: { equals: "pending" } },
       })
@@ -105,7 +103,7 @@ export default async function Manage({
           <p>暂无当前可管理的队伍。建立代表队须先完成建队审核。</p>
         )}
         <TeamCorePagination
-          page={teamPage(query.page)}
+          page={page}
           total={teams.totalPages}
           path="/teams/manage"
           parameter="page"
@@ -139,7 +137,7 @@ export default async function Manage({
               <p>暂无待审核建队申请。</p>
             )}
             <TeamCorePagination
-              page={page}
+              page={reviewPage}
               total={queue.totalPages}
               path="/teams/manage"
               parameter="reviewPage"

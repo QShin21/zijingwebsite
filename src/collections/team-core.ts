@@ -330,9 +330,10 @@ export const teamLifecycleFields: Field[] = [
     },
   },
 ];
-export const guardTeamLifecycle: CollectionBeforeChangeHook = ({
+export const guardTeamLifecycle: CollectionBeforeChangeHook = async ({
   data,
   originalDoc,
+  req,
 }) => {
   if (
     originalDoc?.establishmentApplication &&
@@ -340,5 +341,34 @@ export const guardTeamLifecycle: CollectionBeforeChangeHook = ({
     String(relationID(data.game)) !== String(relationID(originalDoc.game))
   )
     throw new APIError("已成立代表队不可更换所属社群", 409);
+  if (originalDoc?.establishmentApplication) {
+    const workflow = req.context.teamCoreWrite === true;
+    const archiveChanged =
+      data.archived !== undefined && data.archived !== originalDoc.archived;
+    const previousArchived =
+      originalDoc.archived === true || originalDoc.teamStatus === "archived";
+    const restores =
+      (workflow && ["active", "resting"].includes(data.teamStatus)) ||
+      (!workflow && archiveChanged && data.archived === false);
+    if ((!workflow && archiveChanged) || (previousArchived && restores)) {
+      const actor = await currentTeamActor(
+        req.payload,
+        req.user as User | null,
+        req,
+      );
+      if (!canPublish(actor))
+        throw new APIError("归档或恢复代表队需高权限管理审核", 403);
+    }
+    if (!workflow && archiveChanged) {
+      // Existing CMS/REST checkbox is a supported high-authority lifecycle write.
+      data.teamStatus = data.archived === true ? "archived" : "active";
+    } else if (
+      (data.archived ?? originalDoc.archived) === true ||
+      (data.teamStatus ?? originalDoc.teamStatus) === "archived"
+    ) {
+      data.archived = true;
+      data.teamStatus = "archived";
+    }
+  }
   return data;
 };
