@@ -45,3 +45,13 @@
 `src/collections/index.ts`（四集合注册、teams 状态字段/钩子）、`src/payload-types.ts`（在统一配置上重新生成）、`src/migrations/index.ts`（追加迁移）、新增模块快照（统一后重新生成）、`src/components/Questionnaire.tsx`（可选 onSaveDraft，不改变既有默认提交）、`src/components/Content.tsx`、`src/app/(frontend)/[...path]/page.tsx`、`src/app/(frontend)/account/page.tsx`（入口）、`src/app/(frontend)/style.css`（核心窄屏样式）及三份状态文档均为小补丁。禁止整文件覆盖另一分支，勿把 UI 历史阵容复制成成员名单。
 
 验证证据见 [合成验收记录](evidence/team-core-20261012.json)。合成 SMTP 断连修复只涉及 tests/e2e/registration-flow.spec.ts 的预期 ECONNRESET/EPIPE；此测试补丁在集成时合并，注册断言和正式代码均保持。
+
+## 独立复核修正
+
+原 `/teams/manage` 审核链接使用 reviewPage 而读取 page，导致两列表串页。现分别读取 page/reviewPage，原生分页互相保留另一参数和 game；真实23条队伍与21条待审申请跨页已验证。
+
+归档恢复同时检查 teamStatus 和旧 archived 标记。既有 teams CMS/REST 归档写口同步两状态，任何归档记录恢复 active/resting 要求当前高权限。已覆盖高权限从既有写口归档、低权限REST并发恢复拒绝、过期revision、历史不一致记录、active/list接口失效及高权限明确恢复。
+
+隐藏招新批次、归档队伍下，本人可查看提交时的回执和旧表单快照。回退不读取隐藏批次当前配置，只给本人返回 readOnly:true 与“历史申请只读”，禁用填写/修改/重提，普通旁人和未报名用户保持拒绝。该字段为兼容性新增，详情见合同；不依赖匿名或特权读取隐藏批次。
+
+本轮实测：完整270项单元/数据库、17项核心、4项新增真实网页/API单独运行通过；已有4项队伍网页仍通过。一次并行执行数据库与浏览器时批量建队夹具遇到NotFound，保留该失败记录；复核4项单独运行全部通过。最终精确SHA完整CI由交付回复核实，不以已有5f28 CI替代。无新schema/迁移或类型字段变化。

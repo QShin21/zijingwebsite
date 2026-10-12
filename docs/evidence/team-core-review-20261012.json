@@ -1,0 +1,46 @@
+{
+  "module": "team-core-independent-review",
+  "branch": "codex/team-core-20261012",
+  "fixSha": "cb1f0de04df959cb95099898c309bb02926abdbe",
+  "checkedAt": "2026-10-12T08:31:19.090Z",
+  "issues": [
+    "legacy archived restoration authority",
+    "independent page/reviewPage",
+    "owner-only historical receipt fallback"
+  ],
+  "checks": {
+    "fullUnitDatabase": 270,
+    "coreUnitDatabase": 17,
+    "newRealWebHTTP": 4,
+    "existingTeamWebHTTP": 4,
+    "syntheticOnly": true,
+    "qualifiedArchiveQueriesDisabled": true,
+    "highAuthorityRestore": true,
+    "historicalInconsistentArchiveProtected": true,
+    "staleAndConcurrentRestoreDenied": true,
+    "independentPagination": {
+      "teams": 23,
+      "pendingApplications": 21
+    },
+    "historicalSnapshot": {
+      "draft": true,
+      "teamArchived": true,
+      "currentHiddenConfigurationExcluded": true,
+      "outsidersDenied": true,
+      "saveAndResubmit409": true,
+      "readOnly": true
+    },
+    "build": "passed",
+    "typecheck": "passed",
+    "lint": "passed"
+  },
+  "failures": {
+    "initialWeb": "3 passed / 1 locator matched two receipt links; selector now targets batch ID",
+    "parallelUnitAndWeb": "7 passed / 1 bulk workflow fixture NotFound before pagination assertions",
+    "isolatedNewWebRecheck": "4 passed"
+  },
+  "schemaChanges": false,
+  "migrationsAdded": false,
+  "profilesHonorsChanged": false,
+  "finalCI": "Verify exact final SHA and complete run in delivery response"
+}
