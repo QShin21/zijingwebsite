@@ -33,13 +33,27 @@ async function run(request: Request, context: Context, write: boolean) {
       return reply({ error: "请从本站简介页面保存" }, 403);
     const max = 2_900_000;
     if (
-      !request.headers.get("content-type")?.startsWith("application/json") ||
+      !/^application\/json(?:;|$)/i.test(
+        request.headers.get("content-type") || "",
+      ) ||
       Number(request.headers.get("content-length")) > max
     )
       return reply({ error: "请求格式无效或内容过长" }, 400);
-    const raw = await request.text();
-    if (Buffer.byteLength(raw) > max)
-      return reply({ error: "简介内容过长" }, 400);
+    const reader = request.body?.getReader();
+    if (!reader) return reply({ error: "简介格式无效" }, 400);
+    const chunks: Uint8Array[] = [];
+    let bytes = 0;
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      bytes += chunk.value.byteLength;
+      if (bytes > max) {
+        await reader.cancel();
+        return reply({ error: "简介内容过长" }, 400);
+      }
+      chunks.push(chunk.value);
+    }
+    const raw = Buffer.concat(chunks).toString("utf8");
     let data: Record<string, unknown>;
     try {
       data = JSON.parse(raw);
