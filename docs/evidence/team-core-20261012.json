@@ -1,0 +1,98 @@
+{
+  "module": "team-core",
+  "branch": "codex/team-core-20261012",
+  "baseline": "beac037eafe88b9b82e171e15cfddcca351b838b",
+  "checkedAt": "2026-10-12T07:31:47.761Z",
+  "runtimeFingerprintSha256": "e78158370897a594c740db37c35f03f5a618b97d23468284f93db04a8ee6897e",
+  "runtimeFingerprintFiles": [
+    "src/collections/team-core.ts",
+    "src/lib/team-core.ts",
+    "src/lib/team-memberships.ts",
+    "src/components/TeamCoreControls.tsx",
+    "src/components/TeamCorePagination.tsx",
+    "src/app/(frontend)/api/team-core/route.ts",
+    "src/migrations/20261012_160000_team_core.ts"
+  ],
+  "environment": {
+    "syntheticOnly": true,
+    "database": "isolated-loopback-postgresql",
+    "noRealPrivateData": true,
+    "noRealNotifications": true,
+    "noProductionMigration": true,
+    "noDeployment": true,
+    "noPRorMerge": true
+  },
+  "contract": {
+    "file": "docs/contracts/TEAM_CORE_20261012.md",
+    "firstContractSha": "5866adcd8a638273f23f2f66e3992e48f2a46873",
+    "stableInterfaceSha": "567e359907418a2ebdb14833cfc5838901a09892",
+    "collection": "team-memberships",
+    "accountField": "member",
+    "statuses": [
+      "active",
+      "revoked"
+    ],
+    "left": "revoked + leftAt",
+    "rolesUnchangedOnApproval": true
+  },
+  "local": {
+    "unitAndDatabase": {
+      "passed": 267,
+      "files": 32
+    },
+    "coreDatabaseAndSchema": {
+      "passed": 14,
+      "mocked": false
+    },
+    "web": {
+      "corePassed": 4,
+      "registrationRecheckPassed": 3,
+      "initialWholeRun": {
+        "passed": 64,
+        "failed": 1,
+        "total": 65,
+        "failure": "loopback SMTP uncaught ECONNRESET, receiver fixture fixed without weakening registration assertions"
+      },
+      "viewports": [
+        360,
+        390,
+        768,
+        1440
+      ],
+      "accessibility": "passed"
+    },
+    "typecheck": "passed",
+    "lint": "passed",
+    "miniappStatic": "passed",
+    "build": "passed"
+  },
+  "migration": {
+    "database": "isolated-disposable",
+    "cleanSequentialMigrations": true,
+    "legacyTablesPreserved": 60,
+    "legacyRowsPreserved": 9,
+    "legacyHash": "ca51e136e8c939e40bdfe9c87c27a07577ad6697992638aa0e2ce14972f87286",
+    "noImplicitMembership": true,
+    "legacyTeamUnestablished": true,
+    "migrationRepeatNoop": true,
+    "destructiveDownBlocked": true
+  },
+  "snapshot": {
+    "readOnly": true,
+    "target": "src/migrations/20261012_160000_team_core.json",
+    "tables": 65,
+    "reconciledConstraintTables": 7,
+    "noDDL": true
+  },
+  "ci": {
+    "earlierCompleteSha": "88c0653dbc32dd36b706fd3a8f6e97925711eca6",
+    "earlierRun": "https://github.com/QShin21/zijingwebsite/actions/runs/38214790001",
+    "earlierResult": "success",
+    "finalHeadResult": "verify exact SHA and final run in delivery response"
+  },
+  "parallelIntegration": {
+    "profilesHonorsMerged": false,
+    "mockedIntegrationClaimed": false,
+    "remaining": "Parent integrates registrations/types/migrations/UI patches and reruns cross-module tests."
+  }
+}

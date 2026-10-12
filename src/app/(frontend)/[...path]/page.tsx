@@ -161,6 +161,7 @@ export default async function Page({ params, searchParams }: Props) {
           eyebrow={`ZIJING / ${sectionMeta[c]?.label || path[0].toUpperCase()}`}
           description={sectionMeta[c]?.description}
         />
+        {c === "teams" && <nav className="signup-tools" aria-label="代表队入口"><Link className="button" href="/teams/recruitment">代表队招新与我的记录</Link><Link href="/teams/manage">代表队工作台</Link><Link href="/teams/apply">申请建立代表队</Link></nav>}
         {games && (
           <form className="filters" method="get" aria-label="筛选内容">
             <label>
@@ -275,6 +276,7 @@ export default async function Page({ params, searchParams }: Props) {
           </div>
         )}
         <JoinCards selected={path[1]} />
+        {path[1] === "teams" && <section className="panel"><h2>站内代表队申请</h2><p>普通入社、骨干招新和入队申请分别处理。由本社群管理员人工审核，录取不授予管理角色。</p><Link className="button" href="/teams/recruitment">查看代表队招新与我的记录</Link></section>}
         {batches && (
           <section className="join-history">
             <p className="eyebrow">RECRUITMENT ARCHIVE</p>
