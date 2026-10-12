@@ -342,3 +342,58 @@ describe('Native honor page integration with the frozen private MP4 helper', () 
     expect(h.page.data.record?.title).toBe('合成当前scope资料'); expect(h.uploads).toHaveLength(1); expect(writes(h)).toHaveLength(0);
   });
 });
+
+describe('Native honor successful-read then denied-detail regression', () => {
+  it.each([403, 404, 409])('closes stale workspace actions after inspect GET %s and restores only a successful list GET', async status => {
+    const value = record({ state: 'pending', actions: reviewer }), h = await ready('workspace', value);
+    h.page.note(event({ id: 31 }, '合成未提交审核意见：请核对成果说明'));
+    const inspecting = h.page.inspect(event({ id: 31 })); expect(h.page.data.busy).toBe(true);
+    h.reply(1, { error: '合成证据读取被拒绝' }, status); await inspecting;
+    expect(h.page.data.ready).toBe(false); expect(h.page.data.busy).toBe(false); expect(h.page.data.detail).toBeNull(); expect(h.page.data.detailImages).toEqual([]);
+    expect((h.page._records as Map<number, RecordDTO>).has(31)).toBe(false);
+    expect(h.page.data.docs[0].actions).toEqual({}); expect(h.page.data.docs[0].decisions).toEqual([]);
+    expect(h.page.data.docs[0].noteDraft).toBe('合成未提交审核意见：请核对成果说明');
+    await h.page.perform(event({ id: 31, action: 'approve' })); expect(writes(h)).toHaveLength(0);
+    const retry = h.page.retry(); const fresh = record({ state: 'pending', actions: { ...reviewer, reviewActions: ['return'] } }); h.reply(2, list([fresh])); await retry;
+    expect(h.page.data.ready).toBe(true); expect(h.page.data.docs[0].decisions).toEqual([{ action: 'return', label: '退回修改' }]);
+    expect(h.page.data.docs[0].noteDraft).toBe('合成未提交审核意见：请核对成果说明'); expect(writes(h)).toHaveLength(0);
+  });
+
+  it.each((['workspace', 'edit'] as const).flatMap(name => [403, 404, 409].map(status => ({ name, status }))))('$name clears prior private playback and stale actions after download $status, preserves text drafts and waits for GET', async ({ name, status }) => {
+    const value = record({ state: 'pending', videoHref: '/api/team-honor-evidence/31/video?revision=3', actions: name === 'workspace' ? reviewer : owner }), h = await ready(name, value);
+    if (name === 'workspace') {
+      h.page.note(event({ id: 31 }, '合成尚未提交的处理意见')); const inspecting = h.page.inspect(event({ id: 31 })); h.reply(1, { record: value }); await inspecting;
+    } else fill(h, '合成视频拒绝后保留的未保存文字');
+    const initial = h.page.viewVideo(); await flush(); h.downloads[0].success({ statusCode: 200, filePath: h.downloads[0].filePath }); await initial;
+    const oldPath = h.page.data.videoSource, stops = h.wx.createVideoContext.mock.calls.length;
+    const denied = h.page.viewVideo(); await flush(); expect(h.page.data.busy).toBe(true);
+    h.downloads[1].success({ statusCode: status, filePath: h.downloads[1].filePath }); await denied;
+    expect(h.page.data.videoSource).toBe(''); expect(h.unlink).toHaveBeenCalledWith(expect.objectContaining({ filePath: oldPath }));
+    expect(h.wx.createVideoContext.mock.calls.length).toBeGreaterThan(stops); expect(h.page.data.ready).toBe(false); expect(h.page.data.busy).toBe(false);
+    if (name === 'workspace') {
+      expect(h.page.data.detail).toBeNull(); expect(h.page.data.docs[0].actions).toEqual({}); expect(h.page.data.docs[0].noteDraft).toBe('合成尚未提交的处理意见');
+      await h.page.perform(event({ id: 31, action: 'approve' }));
+    } else {
+      expect(h.page.data.canSave).toBe(false); expect(h.page.data.canSubmit).toBe(false); expect(h.page.data.record?.actions).toEqual({});
+      expect(h.page.data.fields.description).toBe('合成视频拒绝后保留的未保存文字'); await h.page.save();
+    }
+    expect(writes(h)).toHaveLength(0); const retry = h.page.retry();
+    const fresh = record({ ...value, actions: name === 'workspace' ? { ...reviewer, reviewActions: ['return'] } : { ...owner, submit: false } });
+    h.reply(name === 'workspace' ? 2 : 1, name === 'workspace' ? list([fresh]) : { record: fresh }); await retry;
+    expect(h.page.data.ready).toBe(true); expect(writes(h)).toHaveLength(0);
+    if (name === 'workspace') expect(h.page.data.docs[0].decisions).toEqual([{ action: 'return', label: '退回修改' }]);
+    else { expect(h.page.data.canSave).toBe(true); expect(h.page.data.canSubmit).toBe(false); expect(h.page.data.fields.description).toBe('合成视频拒绝后保留的未保存文字'); }
+  });
+
+  it.each((['workspace', 'edit'] as const).flatMap(name => [500, 'network'].map(status => ({ name, status }))))('$name download $status preserves draft text while withholding old write actions', async ({ name, status }) => {
+    const value = record({ state: 'pending', videoHref: '/api/team-honor-evidence/31/video?revision=3', actions: name === 'workspace' ? reviewer : owner }), h = await ready(name, value);
+    if (name === 'workspace') { h.page.note(event({ id: 31 }, '合成断网保留审核意见')); const inspecting = h.page.inspect(event({ id: 31 })); h.reply(1, { record: value }); await inspecting; }
+    else fill(h, '合成断网保留原输入');
+    const reading = h.page.viewVideo(); await flush();
+    if (status === 'network') h.downloads[0].fail(); else h.downloads[0].success({ statusCode: Number(status), filePath: h.downloads[0].filePath }); await reading;
+    expect(h.page.data.ready).toBe(false); expect(h.page.data.busy).toBe(false);
+    if (name === 'workspace') { expect(h.page.data.docs[0].noteDraft).toBe('合成断网保留审核意见'); await h.page.perform(event({ id: 31, action: 'approve' })); }
+    else { expect(h.page.data.fields.description).toBe('合成断网保留原输入'); await h.page.save(); }
+    expect(writes(h)).toHaveLength(0);
+  });
+});

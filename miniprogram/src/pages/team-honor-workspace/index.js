@@ -79,6 +79,15 @@ Page({
     const index = this.data.docs.findIndex(doc => doc.id === Number(event.currentTarget.dataset.id));
     if (index >= 0) this.setData({ [`docs[${index}].noteDraft`]: event.detail.value });
   },
+  readFailed(id, cause, field) {
+    this._fresh = false;
+    const denied = [401, 403, 404, 409].includes(cause.status);
+    if (denied || field === 'operationError') this.clearMedia();
+    if (denied) this._records.delete(id);
+    this._records = new Map(Array.from(this._records, ([key, value]) => [key, { ...value, actions: {} }]));
+    this.setData({ ready: false, actions: {}, docs: this.data.docs.map(doc => ({ ...doc, actions: {}, decisions: [] })),
+      [field]: cause.message || '本次证据读取失败，请重新加载核对操作' });
+  },
   async inspect(event) {
     const id = flow.id(event.currentTarget.dataset.id);
     if (!id || !this._records.has(id) || !this._visible || this.data.loading || flow.pending(this)) return;
@@ -97,7 +106,7 @@ Page({
       this._paths = paths.filter(Boolean);
       this.setData({ detailImages: value.images.map((item, index) => ({ index, caption: item.caption, path: paths[index] })),
         imageError: paths.some(path => !path) ? '部分图片暂时无法显示，文字与审核说明仍可查看；可再次查看证据重试。' : '' });
-    } catch (cause) { if (flow.visible(this, token)) this.setData({ operationError: cause.message || '证据读取失败，请重试' }); }
+    } catch (cause) { if (flow.visible(this, token)) this.readFailed(id, cause, 'operationError'); }
     finally {
       if (!flow.visible(this, token) || turn !== this._mediaTurn) flow.removePictures(paths);
       await flow.finish(this, token);
@@ -120,7 +129,7 @@ Page({
       if (!flow.visible(this, token)) return;
       media.removeMedia(this._videoSource ? [this._videoSource] : []); this._videoSource = source; this._videoRecord = value;
       this.setData({ videoSource: source });
-    } catch (cause) { if (flow.visible(this, token)) this.setData({ videoError: cause.message || '视频证据读取失败，可重试' }); }
+    } catch (cause) { if (flow.visible(this, token)) this.readFailed(value.id, cause, 'videoError'); }
     finally { if (!flow.visible(this, token)) media.removeMedia(source ? [source] : []); this._videoReadTask = null; await flow.finish(this, token); }
   },
   videoError(event) {

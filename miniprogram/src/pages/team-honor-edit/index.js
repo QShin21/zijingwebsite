@@ -181,7 +181,14 @@ Page({
         onTask: task => { this._videoReadTask = task; } });
       if (!flow.visible(this, token)) return;
       media.removeMedia(this._videoSource ? [this._videoSource] : []); this._videoSource = source; this._videoRecord = value; this.setData({ videoSource: source });
-    } catch (cause) { if (flow.visible(this, token)) this.setData({ videoError: cause.message || '视频证据读取失败，可重试' }); }
+    } catch (cause) {
+      if (flow.visible(this, token)) {
+        this._fresh = false;
+        if ([401, 403, 404, 409].includes(cause.status)) this.clearMedia();
+        if (this._record) this._record = { ...this._record, actions: {} };
+        this.project(); this.setData({ videoError: cause.message || '视频证据读取失败，请重新加载核对操作' });
+      }
+    }
     finally { if (!flow.visible(this, token)) media.removeMedia(source ? [source] : []); this._videoReadTask = null; await flow.finish(this, token); }
   },
   videoError(event) {
