@@ -1,0 +1,153 @@
+import "dotenv/config";
+import { randomBytes } from "node:crypto";
+import { beforeAll, beforeEach, afterEach, afterAll, expect, it } from "vitest";
+import { getPayload, type Payload } from "payload";
+import config from "../src/payload.config";
+import type { ContentPromotion, User } from "../src/payload-types";
+import { changePromotion, promotedContent, readPromotionSource } from "../src/lib/content-promotions";
+import type { PromotionAction } from "../src/lib/promotion-model";
+import { activity, submitSignup, saveSignupForm } from "../src/lib/activity-signups";
+import { canAppoint, canPublish } from "../src/lib/rules";
+
+let p: Payload, leader: User, vice: User, admin: User, execution: User, publicity: User, member: User, outsider: User;
+let game: number, otherGame: number, post: number;
+const suffix = randomBytes(6).toString("hex"), actors: User[] = [], posts: number[] = [], receipts: number[] = [];
+const form = { enabled: true, questions: [{ id: "name", label: "合成称呼", type: "text", required: true }] };
+async function event() {
+  const row = await p.create({ collection: "community-posts", overrideAccess: false, user: admin, context: { manageSignupForm: true },
+    data: { game, author: admin.id, title: "合成升推活动", body: "只有合成内容的社群活动", category: "event", signupForm: form } });
+  posts.push(row.id); return row.id;
+}
+async function change(actor: User, action: PromotionAction, row?: ContentPromotion, reason = "适合社团成员共同参与的合成活动", id = post) {
+  const source = await readPromotionSource(p, "community-posts", id).catch(() => null);
+  return changePromotion(p, actor, "community-posts", id, action, { revision: row?.updatedAt ?? "", sourceVersion: source?.version ?? row?.requestedVersion, reason });
+}
+async function row(id = post) {
+  return (await p.find({ collection: "content-promotions", overrideAccess: true, depth: 0, where: { sourceKey: { equals: "community-posts:" + id } } })).docs[0];
+}
+beforeAll(async () => {
+  if (process.env.APP_ENV !== "development" || !["127.0.0.1", "localhost"].includes(new URL(process.env.DATABASE_URL!).hostname)) throw new Error("Synthetic loopback only");
+  p = await getPayload({ config });
+  const create = async (label: string, roles: User["roles"], department?: User["department"]) => {
+    const actor = await p.create({ collection: "users", overrideAccess: true, context: { system: true }, data: { name: label + "-" + suffix, email: label + "-" + suffix + "@example.invalid", password: randomBytes(24).toString("hex"), roles, department } });
+    actors.push(actor); return actor;
+  };
+  leader = await create("promotion-leader", ["president"]); vice = await create("promotion-vice", ["vicePresident"]);
+  admin = await create("promotion-admin", ["member"]); execution = await create("promotion-execution", ["backbone"], "execution");
+  publicity = await create("promotion-publicity", ["backbone"], "publicity"); member = await create("promotion-member", ["member"]); outsider = await create("promotion-outsider", ["member"]);
+  const createGame = async (label: string) => (await p.create({ collection: "games", overrideAccess: true, context: { system: true }, data: { title: "合成升推社群" + label, slug: "promotion-" + label + "-" + suffix, _status: "published" } })).id;
+  game = await createGame("a"); otherGame = await createGame("b");
+  admin = await p.update({ collection: "users", id: admin.id, user: leader, overrideAccess: false, data: { communityOffices: [{ game, status: "active", publishContent: true, reviewShowcase: true, viewSignups: false, exportSignups: false }] } });
+  outsider = await p.update({ collection: "users", id: outsider.id, user: leader, overrideAccess: false, data: { communityOffices: [{ game: otherGame, status: "active", publishContent: true, viewSignups: false, exportSignups: false }] } });
+});
+beforeEach(async () => { post = await event(); });
+afterEach(async () => {
+  if (receipts.length) await p.delete({ collection: "event-signups", overrideAccess: true, where: { id: { in: receipts } } });
+  const own = await p.find({ collection: "content-promotions", overrideAccess: true, pagination: false, where: { sourceKey: { in: posts.map(id => "community-posts:" + id) } } });
+  if (own.docs.length) {
+    await p.delete({ collection: "audit", overrideAccess: true, where: { object: { in: own.docs.map(doc => "content-promotions:" + doc.id) } } });
+    await p.delete({ collection: "content-promotions", overrideAccess: true, where: { id: { in: own.docs.map(doc => doc.id) } } });
+  }
+  for (const id of posts) await p.delete({ collection: "community-posts", id, overrideAccess: true }).catch(() => null);
+  posts.length = 0; receipts.length = 0;
+});
+afterAll(async () => {
+  if (!p) return;
+  for (const actor of actors) await p.delete({ collection: "users", id: actor.id, overrideAccess: true, context: { system: true } });
+  for (const id of [game, otherGame]) await p.delete({ collection: "games", id, overrideAccess: true });
+  await p.destroy();
+});
+
+it("只允许当前社群管理员申请，原始写入/伪造上下文不能跳过动作授权", async () => {
+  await expect(change(outsider, "submit")).rejects.toThrow();
+  await expect(change(member, "submit")).rejects.toThrow();
+  await expect(change(admin, "promote")).rejects.toThrow();
+  await expect(p.create({ collection: "content-promotions", user: admin, overrideAccess: false, data: {
+    sourceCollection: "community-posts", sourceID: post, sourceKey: "community-posts:" + post, game, kind: "event", status: "approved",
+  } })).rejects.toThrow();
+  const pending = await change(admin, "submit");
+  await expect(p.update({ collection: "content-promotions", id: pending.id, user: execution, overrideAccess: false, data: { status: "approved" } })).rejects.toThrow();
+  await expect(p.findByID({ collection: "content-promotions", id: pending.id, user: outsider, overrideAccess: false })).rejects.toThrow();
+});
+it("升推不复制活动或报名、不移动game，两部门骨干审核同权且无私人答案能力", async () => {
+  const source = await activity(p, "community-posts", post, member);
+  const receipt = await submitSignup(p, "community-posts", post, member, source.version, { name: "保留的合成答案" }); receipts.push(receipt.id);
+  const before = (await p.count({ collection: "events", overrideAccess: true })).totalDocs;
+  const pending = await change(admin, "submit"), approved = await change(execution, "approve", pending);
+  expect(approved.status).toBe("approved"); expect(approved.sourceID).toBe(post); expect(Number(approved.game)).toBe(game);
+  expect((await p.findByID({ collection: "community-posts", id: post, overrideAccess: true, depth: 0 })).game).toBe(game);
+  expect((await p.count({ collection: "events", overrideAccess: true })).totalDocs).toBe(before);
+  expect((await submitSignup(p, "community-posts", post, member, source.version, { name: "保留的合成答案" })).id).toBe(receipt.id);
+  expect((await promotedContent(p, "event")).find(item => item.sourceKey === "community-posts:" + post)?.href).toContain("/updates/" + post);
+  for (const actor of [admin, execution, publicity]) {
+    await expect(p.findByID({ collection: "event-signups", id: receipt.id, user: actor, overrideAccess: false })).rejects.toThrow();
+    await expect(activity(p, "community-posts", post, actor, true, undefined, "view")).rejects.toThrow();
+  }
+  for (const actor of [execution, publicity]) { expect(canPublish(actor)).toBe(false); expect(canAppoint(actor)).toBe(false); }
+  const demoted = await change(publicity, "demote", approved, "合成降级理由");
+  expect(demoted.status).toBe("demoted");
+  expect((await change(vice, "promote", demoted, "重新确认适合社团级展示")).status).toBe("approved");
+});
+it("退回/拒绝需理由，撤回和重提使用同一记录，历史与审核决定可追踪", async () => {
+  let current = await change(admin, "submit");
+  await expect(change(publicity, "return", current, "")).rejects.toThrow();
+  current = await change(publicity, "return", current, "请补充活动安排");
+  const id = current.id; current = await change(admin, "submit", current);
+  current = await change(admin, "withdraw", current, "");
+  expect(current.status).toBe("withdrawn"); current = await change(admin, "submit", current);
+  current = await change(leader, "reject", current, "需要进一步准备");
+  current = await change(admin, "submit", current); current = await change(vice, "approve", current);
+  expect(current.id).toBe(id); expect(current.history).toHaveLength(8);
+  const audits = await p.find({ collection: "audit", overrideAccess: true, where: { object: { equals: "content-promotions:" + id } }, limit: 20 });
+  expect(audits.docs).toHaveLength(8);
+});
+it("改稿/问卷修改立即撤下并复审，旧批准快照保留且旧版本不能通过", async () => {
+  let current = await change(admin, "submit"); current = await change(execution, "approve", current);
+  const approvedVersion = current.approvedVersion, approvedSnapshot = current.approvedSnapshot;
+  await p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, data: { title: "合成改稿活动" } });
+  current = await row(); expect(current.status).toBe("needsReview"); expect(current.approvedVersion).toBe(approvedVersion); expect(current.approvedSnapshot).toEqual(approvedSnapshot);
+  expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + post)).toBe(false);
+  current = await change(admin, "submit", current);
+  const oldPending = current, source = await activity(p, "community-posts", post, admin, true);
+  await saveSignupForm(p, "community-posts", post, admin, source.version, { ...source.form, title: "合成更新问卷" });
+  expect((await row()).status).toBe("returned");
+  await expect(change(execution, "approve", oldPending)).rejects.toThrow();
+  current = await change(admin, "submit", await row()); current = await change(publicity, "approve", current);
+  expect(current.approvedVersion).not.toBe(approvedVersion); expect((current.approvedSnapshot as { title: string }).title).toBe("合成改稿活动");
+});
+it("源隐藏/删除关闭展示，保留升推决定与既有本人答卷", async () => {
+  const value = await activity(p, "community-posts", post, member);
+  const receipt = await submitSignup(p, "community-posts", post, member, value.version, { name: "历史合成答案" }); receipts.push(receipt.id);
+  await change(publicity, "promote", undefined, "合成主动升推理由");
+  await p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, data: { status: "hidden" } });
+  expect((await row()).status).toBe("needsReview"); expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + post)).toBe(false);
+  await p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, data: { status: "visible" } });
+  const current = await change(execution, "promote", await row(), "合成重新升推");
+  await p.delete({ collection: "community-posts", id: post, overrideAccess: true });
+  expect((await row()).approvedSnapshot).toEqual(current.approvedSnapshot); expect((await row()).status).toBe("needsReview");
+  expect((await p.findByID({ collection: "event-signups", id: receipt.id, user: member, overrideAccess: false })).answers).toEqual({ name: "历史合成答案" });
+});
+it("重复申请唯一，审核与撤回/其他审核竞争仅一项决定生效", async () => {
+  const submitted = await Promise.allSettled([change(admin, "submit"), change(admin, "submit")]);
+  expect(submitted.filter(result => result.status === "fulfilled")).toHaveLength(1);
+  expect((await p.find({ collection: "content-promotions", overrideAccess: true, where: { sourceKey: { equals: "community-posts:" + post } } })).docs).toHaveLength(1);
+  const pending = await row();
+  const decisions = await Promise.allSettled([change(execution, "approve", pending), change(publicity, "return", pending, "合成退回理由"), change(admin, "withdraw", pending, "")]);
+  expect(decisions.filter(result => result.status === "fulfilled")).toHaveLength(1);
+  expect((await row()).history).toHaveLength(2);
+});
+it.each([1, 2, 3])("审核与改稿竞态 %i：新稿不能静默替换审核版本", async () => {
+  const pending = await change(admin, "submit");
+  await Promise.allSettled([change(execution, "approve", pending), p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, data: { title: "合成竞态新稿" } })]);
+  const latest = await readPromotionSource(p, "community-posts", post), current = await row();
+  if (latest.snapshot.title === "合成竞态新稿") { expect(current.status).not.toBe("approved"); expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + post)).toBe(false); }
+  else if (current.status === "approved") expect(current.approvedVersion).toBe(latest.version);
+  expect(current.history).toBeDefined();
+});
+it("旧身份不能在撤任/撤销骨干后继续申请或审核", async () => {
+  const pending = await change(admin, "submit"), staleAdmin = admin, staleReviewer = execution;
+  await p.update({ collection: "users", id: admin.id, user: leader, overrideAccess: false, data: { communityOffices: [] } });
+  await expect(change(staleAdmin, "withdraw", pending, "")).rejects.toThrow();
+  await p.update({ collection: "users", id: execution.id, user: leader, overrideAccess: false, data: { roles: ["member"] } });
+  await expect(change(staleReviewer, "approve", pending)).rejects.toThrow();
+});

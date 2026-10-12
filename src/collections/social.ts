@@ -4,6 +4,7 @@ import { normalizeShowcaseImage } from "../lib/showcase-images";
 import { APIError, type CollectionConfig, type CollectionBeforeChangeHook, type Access, type Where } from "payload";
 import { canParticipate, canPublish, communityIDs, canReviewShowcase, canSubmitClubContent, managesGame, type Identity } from "../lib/rules";
 import { CommunityApplications, CommunityJoins } from "./community-operations";
+import { promotionSourceChanged, promotionSourceDeleted } from "../lib/content-promotions";
 
 const relation = (name: string, to: "games" | "users") =>
   ({ name, type: "relationship" as const, relationTo: to, required: true, maxDepth: 0,
@@ -123,7 +124,8 @@ function social(slug: string, title: string, kind: "local" | "showcase"): Collec
       update: kind === "showcase" ? (args) => args.req.context.webShowcaseWrite === true ? (canPublish(args.req.user as Identity) || { game: { in: communityIDs(args.req.user as Identity, "reviewShowcase") } }) : false : moderatorWhere,
       delete: ({ req }) => canPublish(req.user as Identity) && (kind !== "showcase" || req.context.webShowcaseWrite === true),
     },
-    hooks: { beforeChange: [participationGuard(kind), ...(kind === "local" ? [validateSignupForm] : [])] },
+    hooks: { beforeChange: [participationGuard(kind), ...(kind === "local" ? [validateSignupForm] : [])],
+      afterChange: [promotionSourceChanged], afterDelete: [promotionSourceDeleted] },
     fields,
   };
 }

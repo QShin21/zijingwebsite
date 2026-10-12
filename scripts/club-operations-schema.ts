@@ -63,7 +63,7 @@ try {
     const key = fk as { columnsFrom: string[]; onDelete: string };
     if (["member_id", "game_id"].includes(key.columnsFrom[0])) key.onDelete = "no action";
   }
-  await fs.writeFile("src/migrations/20261011_180000_club_operations.json", JSON.stringify(snapshot, null, 2) + "\n");
+  await fs.writeFile(process.argv[2] || "src/migrations/20261011_180000_club_operations.json", JSON.stringify(snapshot, null, 2) + "\n");
   console.log(JSON.stringify({ readOnly: true, tables: Object.keys(snapshot.tables).length, baselineTables: new Set(columns.rows.map(row => row.table_name)).size, newTables: Object.values(snapshot.tables).map(table => (table as { name: string }).name).filter(name => !columns.rows.some(row => row.table_name === name)) }));
 } finally { await p.destroy(); void (p.db as unknown as PostgresAdapter).pool.end(); }
 // Payload holds a reconnect client; all reads/writes above have completed before ending this CLI.

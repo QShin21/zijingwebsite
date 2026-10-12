@@ -27,6 +27,7 @@ export interface Config {
     'community-bans': CommunityBan;
     'community-showcase': CommunityShowcase;
     'community-posts': CommunityPost;
+    'content-promotions': ContentPromotion;
     'event-signups': EventSignup;
     games: Game;
     teams: Team;
@@ -54,6 +55,7 @@ export interface Config {
     'community-bans': CommunityBansSelect<false> | CommunityBansSelect<true>;
     'community-showcase': CommunityShowcaseSelect<false> | CommunityShowcaseSelect<true>;
     'community-posts': CommunityPostsSelect<false> | CommunityPostsSelect<true>;
+    'content-promotions': ContentPromotionsSelect<false> | ContentPromotionsSelect<true>;
     'event-signups': EventSignupsSelect<false> | EventSignupsSelect<true>;
     games: GamesSelect<false> | GamesSelect<true>;
     teams: TeamsSelect<false> | TeamsSelect<true>;
@@ -373,6 +375,57 @@ export interface CommunityPost {
     | boolean
     | null;
   category: 'event' | 'notice';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * 通过网站升推工作台申请、审核与降级；原内容和报名归属不变。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "content-promotions".
+ */
+export interface ContentPromotion {
+  id: number;
+  sourceCollection: 'community-posts' | 'community-showcase';
+  sourceID: number;
+  sourceKey: string;
+  game?: (number | null) | Game;
+  kind: 'event' | 'notice' | 'showcase';
+  status: 'pending' | 'returned' | 'rejected' | 'withdrawn' | 'approved' | 'demoted' | 'needsReview';
+  requestedBy?: (number | null) | User;
+  reason?: string | null;
+  requestedVersion?: string | null;
+  requestedSnapshot?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  approvedVersion?: string | null;
+  approvedSnapshot?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  approvedBy?: (number | null) | User;
+  approvedAt?: string | null;
+  reviewNote?: string | null;
+  history?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -905,6 +958,10 @@ export interface PayloadLockedDocument {
         value: number | CommunityPost;
       } | null)
     | ({
+        relationTo: 'content-promotions';
+        value: number | ContentPromotion;
+      } | null)
+    | ({
         relationTo: 'event-signups';
         value: number | EventSignup;
       } | null)
@@ -1164,6 +1221,30 @@ export interface CommunityPostsSelect<T extends boolean = true> {
   status?: T;
   signupForm?: T;
   category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "content-promotions_select".
+ */
+export interface ContentPromotionsSelect<T extends boolean = true> {
+  sourceCollection?: T;
+  sourceID?: T;
+  sourceKey?: T;
+  game?: T;
+  kind?: T;
+  status?: T;
+  requestedBy?: T;
+  reason?: T;
+  requestedVersion?: T;
+  requestedSnapshot?: T;
+  approvedVersion?: T;
+  approvedSnapshot?: T;
+  approvedBy?: T;
+  approvedAt?: T;
+  reviewNote?: T;
+  history?: T;
   updatedAt?: T;
   createdAt?: T;
 }

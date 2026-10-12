@@ -5,6 +5,7 @@ import { ArenaArt, Icon } from "@/components/Identity";
 import type { CollectionSlug, Where } from "payload";
 import { routeFor } from "@/lib/rules";
 import { publicHref, sectionMeta } from "@/lib/presentation";
+import { PromotedContent } from "@/components/PromotedContent";
 
 type HomeModule = { kind: string; enabled?: boolean | null; title?: string | null };
 const defaults: HomeModule[] = ["events", "teams", "honors", "join", "news", "albums", "about"].map((kind) => ({ kind, enabled: true }));
@@ -27,6 +28,7 @@ export default async function Home() {
       <div className="hero-foot"><span>PLAY TOGETHER. GO FURTHER.</span><a href="#explore">向下探索 <span aria-hidden="true">↓</span></a></div>
     </section>
     <nav className="quick-links" aria-label="快捷入口" id="explore">{[{ href: "/events", label: "社团活动", en: "WHAT'S ON" }, { href: "/community", label: "游戏社群", en: "PLAY TOGETHER" }, { href: "/honors", label: "荣誉档案", en: "OUR LEGACY" }, { href: "/join/staff", label: "骨干招新", en: "BUILD WITH US" }].map((item, index) => <Link key={item.href} href={item.href}><span className="quick-index">0{index + 1}</span><span><strong>{item.label}</strong><small>{item.en}</small></span><Icon name="diagonal" /></Link>)}</nav>
+    <PromotedContent kind="event" />
     {await Promise.all(modules.map(async (m, index) => {
       const number = String(index + 1).padStart(2, "0");
       if (m.kind === "join") return <section key={m.kind} className="home-section join-section"><div className="section-title"><div><p className="eyebrow">{number} / FIND YOUR PLACE</p><h2>{m.title || "总有你的位置。"}</h2></div><p className="section-note">一起玩，认真赢，<br />也一起把社团变得更好。</p></div><JoinCards /></section>;

@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { PageHeading } from "@/components/PageHeading";
 import { cms } from "@/lib/content";
-import { canPublish, canSubmitClubContent, communityIDs, hasCommunityOffice } from "@/lib/rules";
+import { canPublish, canReviewPromotion, canSubmitClubContent, communityIDs, hasCommunityOffice } from "@/lib/rules";
 import { joinLabels } from "@/lib/community-status";
 import { logoutAction } from "./actions";
 export default async function Account() {
@@ -47,6 +47,9 @@ export default async function Account() {
           <div><dt>社群管理任职</dt><dd>{hasCommunityOffice(user) ? "已获独立社群任职，能力按社群授权" : "暂无在任社群"}</dd></div>
         </dl>
         <div className="account-actions">
+          {(canReviewPromotion(user) || communityIDs(user, "publishContent").length > 0) && <Link className="account-action" href={canReviewPromotion(user) ? "/community/promotions?view=review" : "/community/promotions"}>
+            <Icon name="layers" /><strong>{canReviewPromotion(user) ? "审核社群升推" : "我的社群升推"}</strong><small>申请、审核及管理社团首页展示。</small>
+          </Link>}
           <Link className="account-action" href="/community">
             <Icon name="team" />
             <strong>游戏社群</strong>

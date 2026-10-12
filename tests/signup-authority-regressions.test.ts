@@ -100,4 +100,10 @@ it.each([["A", true], ["NULL", false]] as const)("活动 %s→B 后，列表/单
   await expect(p.findByID({ collection: "event-signups", id: foreign.id, user: backbone, overrideAccess: false })).rejects.toThrow();
   expect((await p.findByID({ collection: "event-signups", id: foreign.id, user: member, overrideAccess: false })).answers).toEqual({ name: "他人的合成答案" });
   expect((await p.findByID({ collection: "event-signups", id: own.id, user: owner, overrideAccess: false })).answers).toEqual({ name: "本人的合成答案" });
+  owner = await p.update({ collection: "users", id: owner.id, user: leader, overrideAccess: false, data: { communityOffices: [...owner.communityOffices!, { game: b, status: "active", publishContent: false, reviewShowcase: false, handleJoins: false, viewSignups: true, exportSignups: false }] } });
+  expect((await p.findByID({ collection: "event-signups", id: foreign.id, user: owner, overrideAccess: false })).id).toBe(foreign.id);
+  expect((await activity(p, "events", id, owner, true, undefined, "view")).canView).toBe(true);
+  await expect(activity(p, "events", id, owner, true, undefined, "export")).rejects.toThrow();
+  const restored = await p.find({ collection: "event-signups", user: owner, overrideAccess: false, where: { and: [{ activityType: { equals: "events" } }, { activityID: { equals: id } }] } });
+  expect(new Set(restored.docs.map(row => row.id))).toEqual(new Set([own.id, foreign.id]));
 });

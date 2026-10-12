@@ -47,5 +47,16 @@ for (const linked of [true, false]) test(`站点活动${linked ? "A" : "NULL"}�
     const bonePage = await boneContext.newPage(); await login(bonePage, backbone);
     expect((await bonePage.request.get(`/api/event-signups/${foreign.id}`, { headers: origin })).status()).toBe(404);
     expect((await bonePage.request.get(endpoint + "?mode=export", { headers: origin })).status()).toBe(403);
+    const offices = (await p.findByID({ collection: "users", id: reader.id, overrideAccess: true, depth: 0 })).communityOffices!;
+    const isB = (office: typeof offices[number]) => Number(typeof office.game === "object" ? office.game?.id : office.game) === b;
+    const grant = { game: b, status: "active" as const, publishContent: false, reviewShowcase: false, handleJoins: false, viewSignups: true, exportSignups: false };
+    await p.update({ collection: "users", id: reader.id, user: leader, overrideAccess: false, data: { communityOffices: offices.some(isB) ? offices.map(office => isB(office) ? { ...office, ...grant } : office) : [...offices, grant] } });
+    expect((await page.request.get(`/api/event-signups/${foreign.id}`, { headers: origin })).status()).toBe(200);
+    expect((await page.request.get(endpoint + "?mode=view", { headers: origin })).status()).toBe(200);
+    expect((await page.request.get(endpoint + "?mode=export", { headers: origin })).status()).toBe(403);
+    const restored = await page.request.get(`/api/event-signups?where[activityType][equals]=events&where[activityID][equals]=${event.id}`, { headers: origin });
+    expect(new Set((await restored.json()).docs.map((row: { id: number }) => row.id))).toEqual(new Set([own.id, foreign.id]));
+    // Restore the shared reader's A-only scope for the next case.
+    reader = await p.update({ collection: "users", id: reader.id, user: leader, overrideAccess: false, data: { communityOffices: (await p.findByID({ collection: "users", id: reader.id, overrideAccess: true, depth: 0 })).communityOffices!.filter(office => Number(typeof office.game === "object" ? office.game?.id : office.game) !== b) } });
   } finally { await memberContext.close(); await boneContext.close(); }
 });

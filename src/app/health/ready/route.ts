@@ -13,8 +13,11 @@ export async function GET() {
     await db.pool.query("SELECT department FROM users LIMIT 0");
     await db.pool.query("SELECT game_id,view_signups,export_signups FROM users_community_offices LIMIT 0");
     await db.pool.query("SELECT status,confirmed_at FROM community_joins LIMIT 0");
+    await db.pool.query("SELECT source_key,approved_version,history FROM content_promotions LIMIT 0");
     const migration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261011_180000_club_operations"]);
     if (!migration.rowCount) throw new Error("Required migration unavailable");
+    const promotionMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261012_030000_content_promotions"]);
+    if (!promotionMigration.rowCount) throw new Error("Required promotion migration unavailable");
     return Response.json({ status: "ready", schema: "club-operations-1" });
   } catch {
     return Response.json({ status: "unavailable" }, { status: 503 });

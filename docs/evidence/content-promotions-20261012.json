@@ -1,0 +1,52 @@
+{
+  "branch": "codex/club-operations-recovery",
+  "base": "e67d55e93a2f6dd0338b301fa7ffcfe3eb4753a7",
+  "atUTC": "2026-10-12T02:50:55.990152+00:00",
+  "slice": "activity",
+  "scope": "original content reference, approved version, web request/review/home projection; no recruitment or teams",
+  "checks": {
+    "unitDatabase": {
+      "tests": 14,
+      "result": "PASS",
+      "promotionTests": 10,
+      "authorityRegressions": 4
+    },
+    "affectedWebHTTP": {
+      "tests": 3,
+      "result": "PASS",
+      "reportedDuration": "1.3m"
+    },
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "miniappStatic": "PASS",
+    "build": "PASS"
+  },
+  "migration": {
+    "result": "PASS",
+    "environment": "isolated synthetic loopback development",
+    "beforeTables": 60,
+    "afterTables": 61,
+    "unchangedOriginalColumnTables": 59,
+    "expectedChangedTables": [
+      "payload_migrations"
+    ],
+    "promotionsInitiallyEmpty": true,
+    "productionAccess": false
+  },
+  "sourceGameActivityAndSignupIDsPreserved": true,
+  "approvedSnapshotPreservedAfterEdit": true,
+  "policy": "Source save withdraws promoted projection and requires new request/review; homepage verifies current public source hash against approval.",
+  "authorityPositiveProof": "After A/NULL to B, legitimately grant B view: historical list/single/view recover, export remains denied.",
+  "priorResolvedTestIssues": [
+    "first browser attempt interrupted after wrong submit button locator; corrected existing two-step submission",
+    "shared reader re-added revoked B office; changed fixture to legitimately reactivate its unique office"
+  ],
+  "fullSuiteAndExactCI": "Pending final three-content source; intermediate slice results are not final-source CI evidence.",
+  "productionMigration": false,
+  "productionAccess": false,
+  "newMiniappUI": false,
+  "protectedBranchesUpdated": false,
+  "PR": false,
+  "merge": false,
+  "deploy": false
+}
