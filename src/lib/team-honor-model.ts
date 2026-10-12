@@ -52,6 +52,8 @@ export type HonorHistory = {
   revision: number;
   note: string;
   version?: string;
+  /** Private immutable evidence for each approval, retained when later approvals replace the current snapshot. */
+  approvedSnapshot?: Record<string, unknown>;
 };
 
 export function honorID(value: unknown): number {

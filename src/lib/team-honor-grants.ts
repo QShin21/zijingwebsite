@@ -6,8 +6,21 @@ type HonorWriteGrant = {
   id?: number;
   data: Record<string, unknown>;
 };
-const writeGrants = new WeakMap<object, HonorWriteGrant>();
-const projectionGrants = new WeakSet<object>();
+type HonorGrantRegistry = {
+  write: WeakMap<object, HonorWriteGrant>;
+  projection: WeakSet<object>;
+};
+const registryKey = Symbol.for("zijing.team-honor-server-grants.v1");
+const registryHost = globalThis as typeof globalThis & {
+  [registryKey]?: HonorGrantRegistry;
+};
+const registry = (registryHost[registryKey] ??= {
+  write: new WeakMap<object, HonorWriteGrant>(),
+  projection: new WeakSet<object>(),
+});
+// Next's route/action/CMS bundles share a process cache, but may evaluate this module more than once.
+const writeGrants = registry.write;
+const projectionGrants = registry.projection;
 function token(value: unknown): object | null {
   return value !== null && typeof value === "object" ? value : null;
 }

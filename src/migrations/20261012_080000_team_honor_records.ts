@@ -15,7 +15,7 @@ export async function up({ db }: MigrateUpArgs) {
       season_id integer CONSTRAINT team_honor_records_season_id_seasons_id_fk REFERENCES seasons(id) ON DELETE RESTRICT,
       author_id integer NOT NULL CONSTRAINT team_honor_records_author_id_users_id_fk REFERENCES users(id) ON DELETE RESTRICT,
       author_name varchar NOT NULL, membership_ref numeric NOT NULL,
-      title varchar NOT NULL, competition varchar, placing varchar, date timestamptz(3), description varchar,
+      title varchar NOT NULL, competition varchar, "placing" varchar, date timestamptz(3), description varchar,
       images jsonb, video_u_r_l varchar,
       state enum_team_honor_records_state NOT NULL, revision numeric NOT NULL,
       submitted_version varchar, submitted_at timestamptz(3), approved_version varchar, approved_snapshot jsonb, approved_at timestamptz(3),

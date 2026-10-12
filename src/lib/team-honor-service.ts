@@ -447,6 +447,14 @@ export function createTeamHonorService(authority: HonorMembershipAuthority) {
         revision: data.revision as number,
         note,
         ...(version ? { version } : {}),
+        ...(action === "approve"
+          ? {
+              approvedSnapshot: data.approvedSnapshot as Record<
+                string,
+                unknown
+              >,
+            }
+          : {}),
       };
       data.history = [
         ...(Array.isArray(current?.history)

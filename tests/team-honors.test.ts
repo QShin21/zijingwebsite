@@ -7,12 +7,10 @@ import pg from "pg";
 import { afterAll, afterEach, beforeAll, beforeEach, expect, it } from "vitest";
 import config from "../src/payload.config";
 import type { TeamHonorRecord, User } from "../src/payload-types";
-import {
-  createTeamHonorService,
-  teamHonorService,
-} from "../src/lib/team-honor-service";
+import { createTeamHonorService } from "../src/lib/team-honor-service";
 import {
   readPublicHonorTeam,
+  pendingHonorAuthority,
   type HonorMembership,
   type HonorMembershipAuthority,
 } from "../src/lib/team-honor-authority";
@@ -114,7 +112,7 @@ beforeAll(async () => {
   if (
     process.env.APP_ENV !== "development" ||
     !["127.0.0.1", "localhost"].includes(url.hostname) ||
-    !url.pathname.endsWith("_synthetic")
+    (!url.pathname.endsWith("_synthetic") && process.env.CI !== "true")
   )
     throw new Error("Dedicated synthetic loopback database required");
   p = await getPayload({ config, key: "team-honor-synthetic" });
@@ -279,7 +277,9 @@ afterAll(async () => {
 
 it("隔离适配器默认关闭写入；社群成员、旧分部范围与跨队不是入队资格", async () => {
   await expect(
-    teamHonorService.change(p, player, "submit", { input: input() }),
+    createTeamHonorService(pendingHonorAuthority).change(p, player, "submit", {
+      input: input(),
+    }),
   ).rejects.toThrow("尚未接入");
   await expect(pending(nonplayer)).rejects.toThrow("有效队员");
   const legacyUser = await p.update({
@@ -486,6 +486,14 @@ it("改稿和隐藏实时撤下投影，重提复审更新同一队伍档案，�
   expect(await service.archives(p, { team })).toEqual([]);
   current = await change(player, "submit", current);
   current = await change(reviewer, "approve", current);
+  const approvals = (
+    current.history as unknown as {
+      action: string;
+      approvedSnapshot?: unknown;
+    }[]
+  ).filter((entry) => entry.action === "approve");
+  expect(approvals).toHaveLength(2);
+  expect(approvals[0].approvedSnapshot).toEqual(snapshot);
   const second = await approved();
   expect(await service.archives(p, { team })).toHaveLength(1);
   expect((await service.archives(p, { team }))[0].href).toBe(href);
