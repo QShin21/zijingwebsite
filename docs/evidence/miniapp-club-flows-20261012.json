@@ -1,0 +1,98 @@
+{
+  "date": "2026-10-12",
+  "branch": "codex/miniapp-club-flows-20261012",
+  "baselineCommit": "ed965ef457b5913d4590753c9d931e82811244b9",
+  "baselineDevelopmentVersion": "0.3.1",
+  "sourceVersion": "0.3.1",
+  "currentSourceUploaded": false,
+  "compatibilityCommit": "4cb3d64",
+  "frontendCommit": "9bfafb04f1f8df07d375a4e9242bfd9d05a07626",
+  "baselineCI": {
+    "conclusion": "success",
+    "runId": 38209674895,
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38209674895"
+  },
+  "environment": {
+    "platform": "linux",
+    "node": "24.19.0",
+    "pnpm": "11.25.0",
+    "configuredBaseLibrary": "3.16.0"
+  },
+  "localVerification": {
+    "syntheticTests": {
+      "passed": 180,
+      "files": 12,
+      "miniappTests": 111,
+      "questionnaireLogicTests": 69,
+      "actualPageHandlers": "Node VM with synthetic SDK/API fixtures",
+      "liveHttpDatabaseIntegration": false
+    },
+    "packageCheck": {
+      "passed": true,
+      "pages": 17,
+      "files": 105,
+      "bytes": 256117,
+      "domainChecking": true,
+      "generatedQuestionnaireParity": true
+    },
+    "typecheck": "passed",
+    "lint": "passed",
+    "diffCheck": "passed"
+  },
+  "implementedFlows": [
+    "authorized-admin-card-and-manual-wechat-join",
+    "own-community-application-create-edit-withdraw-card-consent",
+    "authorized-community-review",
+    "server-approved-club-event-notice-showcase-projection",
+    "same-batch-staff-application-from-home-and-all-communities",
+    "own-staff-submit-status-edit-withdraw-resubmit",
+    "authorized-staff-review",
+    "authorized-manual-community-join-confirmation",
+    "activity-view-only-mode",
+    "full-16-question-types-complex-branches-and-5-to-6-member-groups",
+    "authentication-capability-version-compatibility"
+  ],
+  "permissions": {
+    "freshServerIdentity": true,
+    "businessServicesReused": true,
+    "frontendRoleGuessesForActions": false,
+    "privateStaffAnswersGrantedByCommunityEntry": false
+  },
+  "notImplementedThisSlice": [
+    "new-team-core-description-honor-contracts-pending-parent",
+    "native-content-authoring-and-promotion-management",
+    "native-staff-batch-authoring-and-export",
+    "wechat-login-account-binding",
+    "subscription-notifications"
+  ],
+  "notVerified": [
+    "wechat-official-compile",
+    "wechat-official-simulator",
+    "physical-device",
+    "platform-domain-lists",
+    "platform-privacy-declaration-and-native-consent",
+    "real-wechat-qr-recognition-friend-and-group-state",
+    "wechat-review",
+    "live-http-database-integration"
+  ],
+  "officialDocumentation": {
+    "checkedAt": "2026-10-12",
+    "liveWechatSiteResult": "non-retryable via web; CONNECT 403 via container",
+    "supplementalOfficialRepository": "https://github.com/wechat-miniprogram/api-typings",
+    "supplementalSnapshot": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+    "platformRulesRealtimeVerification": "blocked; see documented manual steps"
+  },
+  "operationsPerformed": {
+    "platformPermissionsRequested": false,
+    "platformKeysCreatedOrRead": false,
+    "officialVersionUploaded": false,
+    "reviewSubmitted": false,
+    "subscriptionMessagesSent": false,
+    "productionReadsOrWrites": false,
+    "deployment": false,
+    "pullRequest": false,
+    "merge": false,
+    "otherBranchesModified": false
+  },
+  "documentation": "docs/MINIAPP_CLUB_FLOWS.md"
+}
