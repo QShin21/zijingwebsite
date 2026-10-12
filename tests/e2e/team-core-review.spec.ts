@@ -178,6 +178,9 @@ test("既有teams REST归档后低权限恢复拒绝，过期revision和并发�
       user: leader,
       overrideAccess: false,
     });
+    const batches = (await p.find({ collection: "team-recruitments", user: leader, overrideAccess: false,
+      where: { team: { equals: mainTeam } }, depth: 0 })).docs;
+    expect(batches).toHaveLength(1); expect(batches[0].status).toBe("open");
     const response = await high.request.patch(`/api/teams/${mainTeam}`, {
       headers: origin,
       data: { archived: true },
@@ -186,6 +189,7 @@ test("既有teams REST归档后低权限恢复拒绝，过期revision和并发�
     const archived = (await response.json()).doc;
     expect(archived.teamStatus).toBe("archived");
     expect(archived.archived).toBe(true);
+    expect((await p.findByID({ collection: "team-recruitments", id: batches[0].id, user: leader, overrideAccess: false })).status).toBe("closed");
     const attempts = await Promise.all(
       ["active", "resting"].map((status) =>
         page.request.post("/api/team-core", {
@@ -231,12 +235,39 @@ test("既有teams REST归档后低权限恢复拒绝，过期revision和并发�
     });
     expect(restore.status(), await restore.text()).toBe(200);
     expect((await restore.json()).result.archived).toBe(false);
+    expect((await p.findByID({ collection: "team-recruitments", id: batches[0].id, user: leader, overrideAccess: false })).status).toBe("closed");
     expect(
       await getActiveTeamMembership(p, {
         teamID: mainTeam,
         userID: applicant.id,
       }),
     ).not.toBeNull();
+    const reopen = async () => {
+      const current = await p.findByID({ collection: "team-recruitments", id: batches[0].id, user: leader, overrideAccess: false });
+      const result = await high.request.post("/api/team-core", { headers: origin, data: { operation: "save-recruitment", teamID: mainTeam,
+        id: current.id, revision: current.updatedAt, title: current.title, status: "open", form } });
+      expect(result.status(), await result.text()).toBe(200); return (await result.json()).result;
+    };
+    const opened = await reopen();
+    const [archiving, publishing] = await Promise.all([
+      high.request.patch(`/api/teams/${mainTeam}`, { headers: origin, data: { archived: true } }),
+      high.request.post("/api/team-core", { headers: origin, data: { operation: "save-recruitment", teamID: mainTeam,
+        id: opened.id, revision: opened.updatedAt, title: opened.title, status: "open", form } }),
+    ]);
+    expect(archiving.status(), await archiving.text()).toBe(200); expect([200, 409]).toContain(publishing.status());
+    expect((await p.findByID({ collection: "team-recruitments", id: opened.id, user: leader, overrideAccess: false })).status).toBe("closed");
+    expect((await high.request.patch(`/api/teams/${mainTeam}`, { headers: origin, data: { archived: false } })).status()).toBe(200);
+    const again = await reopen();
+    const [teamArchive, batchArchive] = await Promise.all([
+      high.request.patch(`/api/teams/${mainTeam}`, { headers: origin, data: { archived: true } }),
+      high.request.post("/api/team-core", { headers: origin, data: { operation: "close-recruitment", id: again.id,
+        revision: again.updatedAt, status: "archived" } }),
+    ]);
+    expect(teamArchive.status(), await teamArchive.text()).toBe(200); expect([200, 409]).toContain(batchArchive.status());
+    const closed = await p.findByID({ collection: "team-recruitments", id: again.id, user: leader, overrideAccess: false });
+    expect(closed.status).toBe(batchArchive.status() === 200 ? "archived" : "closed");
+    expect((await high.request.patch(`/api/teams/${mainTeam}`, { headers: origin, data: { archived: false } })).status()).toBe(200);
+    expect((await p.findByID({ collection: "team-recruitments", id: again.id, user: leader, overrideAccess: false })).status).toBe(closed.status);
   } finally {
     await context.close();
   }

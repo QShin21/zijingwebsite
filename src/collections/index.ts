@@ -32,7 +32,7 @@ import { APIError } from "payload";
 import { SocialCollections } from "./social";
 import { ContentPromotions } from "./promotions";
 import { StaffBatches, StaffApplications } from "./staff-recruitment";
-import { TeamCoreCollections, teamLifecycleFields, guardTeamLifecycle } from "./team-core";
+import { TeamCoreCollections, teamLifecycleFields, guardTeamLifecycle, closeInactiveTeamRecruitments } from "./team-core";
 import { TeamMemberProfiles } from "./team-profiles";
 import { nicknameKey, validNickname } from "../lib/nickname";
 
@@ -377,7 +377,7 @@ function content(
         },
       ],
       beforeChange: [guard(scoped, self), ...(slug === 'teams' ? [guardTeamLifecycle] : []), ...(slug === 'events' ? [validateSignupForm] : [])],
-      afterChange: [audit],
+      afterChange: [...(slug === "teams" ? [closeInactiveTeamRecruitments] : []), audit],
     },
     fields: [
       ...common,

@@ -153,9 +153,19 @@ afterAll(async () => {
   await db?.end();
   await p.destroy();
 });
+it("CMS归档草稿不关闭当前公开队伍或开放批次，也不发布草稿配置", async () => {
+  const team = await createTeam("合成归档草稿队"), { batch } = await join(team);
+  const original = (await db.query("SELECT title,archived,team_status,_status FROM teams WHERE id=$1", [team])).rows[0];
+  await p.update({ collection: "teams", id: team, user: leader, overrideAccess: false, draft: true,
+    data: { archived: true, title: "合成未发布归档草稿" } });
+  expect((await db.query("SELECT title,archived,team_status,_status FROM teams WHERE id=$1", [team])).rows[0]).toEqual(original);
+  expect((await p.findByID({ collection: "team-recruitments", id: batch.id, user: leader, overrideAccess: false })).status).toBe("open");
+  expect((await teamRecruitmentInfo(p, applicant, batch.id)).state).toBe("招新开放");
+});
+
 it("既有CMS归档同步生命周期；低权限两种恢复拒绝，旧revision/并发不得清除归档", async () => {
   const team = await createTeam("合成归档权限队"),
-    { application } = await join(team);
+    { application, batch } = await join(team);
   await decideTeamJoinApplication(
     p,
     manager,
@@ -180,6 +190,7 @@ it("既有CMS归档同步生命周期；低权限两种恢复拒绝，旧revisio
   });
   expect(doc.archived).toBe(true);
   expect(doc.teamStatus).toBe("archived");
+  expect((await p.findByID({ collection: "team-recruitments", id: batch.id, user: leader, overrideAccess: false })).status).toBe("closed");
   for (const status of ["active", "resting"])
     await expect(
       changeTeamLifecycle(p, manager, team, status, doc.updatedAt),
@@ -218,6 +229,8 @@ it("既有CMS归档同步生命周期；低权限两种恢复拒绝，旧revisio
     doc.updatedAt,
   );
   expect(restored.archived).toBe(false);
+  expect((await p.findByID({ collection: "team-recruitments", id: batch.id, user: leader, overrideAccess: false })).status).toBe("closed");
+  expect((await db.query("SELECT archived,team_status,_status FROM teams WHERE id=$1", [team])).rows[0]).toMatchObject({ archived: false, team_status: "resting", _status: "published" });
   expect(
     await getActiveTeamMembership(p, { teamID: team, userID: applicant.id }),
   ).not.toBeNull();

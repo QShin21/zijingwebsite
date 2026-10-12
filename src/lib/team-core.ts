@@ -8,6 +8,7 @@ import type {
 } from "../payload-types";
 import { canParticipate, canPublish } from "./rules";
 import { workflowTransaction, uniqueFieldError } from "./workflow-transactions";
+import { lockTeamLifecycle } from "./team-locks";
 import { formVersion } from "./activity-signups";
 import {
   normalizeSignup,
@@ -414,6 +415,7 @@ export async function changeTeamLifecycle(
 ) {
   return tx(p, actor, async (req) => {
     await requireTeamManager(p, req.user as User, id, req);
+    await lockTeamLifecycle(req, id, true);
     const team = await p.findByID({
       collection: "teams",
       id,
@@ -479,6 +481,7 @@ export async function saveTeamRecruitment(
   return tx(p, actor, async (req) => {
     const id = teamID(input.teamID);
     await requireTeamManager(p, req.user as User, id, req);
+    await lockTeamLifecycle(req, id);
     if (!(await isEstablishedTeam(p, id, req)))
       throw new APIError("队伍尚未批准成立或已归档，不能配置招新", 409);
     const team = await p.findByID({

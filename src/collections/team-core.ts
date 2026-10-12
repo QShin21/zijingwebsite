@@ -3,6 +3,7 @@ import {
   type Access,
   type CollectionConfig,
   type CollectionBeforeChangeHook,
+  type CollectionAfterChangeHook,
   type Field,
   type RelationshipField,
   type Where,
@@ -15,6 +16,8 @@ import {
   relationID,
 } from "../lib/rules";
 import { currentTeamActor } from "../lib/team-memberships";
+import { sql } from "@payloadcms/db-postgres";
+import { teamTransactionDatabase } from "../lib/team-locks";
 
 async function actorScope(req: Parameters<Access>[0]["req"]) {
   const actor = await currentTeamActor(
@@ -371,4 +374,17 @@ export const guardTeamLifecycle: CollectionBeforeChangeHook = async ({
     }
   }
   return data;
+};
+
+export const closeInactiveTeamRecruitments: CollectionAfterChangeHook = async ({ doc, req }) => {
+  if (!doc.establishmentApplication || !(doc.archived === true || ["resting", "archived"].includes(doc.teamStatus))) return doc;
+  const db = await teamTransactionDatabase(req);
+  // Saving a CMS draft/version must not close the still-active persisted team.
+  const current = (await db.execute(sql`SELECT archived,team_status FROM teams WHERE id=${doc.id}`)).rows[0];
+  if (!current || !(current.archived === true || ["resting", "archived"].includes(String(current.team_status)))) return doc;
+  const batchReq = { ...req, context: { ...req.context, teamCoreWrite: true } };
+  const batches = (await db.execute(sql`SELECT id FROM team_recruitments WHERE team_id=${doc.id} AND status='open' ORDER BY id FOR UPDATE`)).rows;
+  for (const batch of batches) await req.payload.update({ collection: "team-recruitments", id: Number(batch.id), req: batchReq,
+    overrideAccess: false, data: { status: "closed" } });
+  return doc;
 };
