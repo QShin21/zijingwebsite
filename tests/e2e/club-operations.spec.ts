@@ -90,11 +90,29 @@ test("预览居中、进群空态、联系兜底及四个响应式断点", async
     await page.getByRole("button", { name: "预览填写效果", exact: true }).click();
     const dialog = page.locator("dialog.questionnaire-dialog"); await expect(dialog).toBeVisible();
     const box = await dialog.boundingBox(); expect(box).not.toBeNull(); expect(Math.abs(box!.x + box!.width / 2 - width / 2)).toBeLessThan(3);
-    expect(box!.y).toBeGreaterThan(0); await dialog.getByRole("button", { name: "关闭预览", exact: true }).click();
+    expect(Math.abs(box!.y + box!.height / 2 - 450)).toBeLessThan(3);
+    await dialog.getByRole("button", { name: "关闭预览", exact: true }).click();
+    await expect(page.getByRole("button", { name: "预览填写效果", exact: true })).toBeFocused();
+    await page.getByRole("button", { name: "3 · 预览试填", exact: true }).click(); await expect(dialog).toBeVisible();
+    await page.keyboard.press("Escape"); await expect(dialog).not.toBeVisible();
+    await expect(page.getByRole("button", { name: "3 · 预览试填", exact: true })).toBeFocused();
     await page.goto(`/community/${slug}/join`); expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await page.goto("/contact"); expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await expect(page.getByRole("link", { name: "申请组织已有或新游戏社群", exact: true })).toBeVisible();
     expect(await page.locator('main a[href="/contact"]').count()).toBe(0);
   }
   expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
+  await page.getByRole("link", { name: "查看游戏社群与管理员名片", exact: true }).click(); await expect(page).toHaveURL(/\/community$/);
+  await page.goto("/contact"); await page.getByRole("link", { name: "申请组织已有或新游戏社群", exact: true }).click(); await expect(page).toHaveURL(/\/community\/apply$/);
+});
+
+test("模板预览返回可继续键盘操作，关闭及Escape恢复制作入口焦点", async ({ page }) => {
+  await login(page, leader); await page.goto(`/activities/community-posts/${post}/manage`);
+  const trigger = page.getByRole("button", { name: /从模板开始/ });
+  await trigger.click(); const dialog = page.locator("dialog.questionnaire-starter-dialog"); await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: /^预览「/ }).first().click();
+  await dialog.getByRole("button", { name: "返回模板列表", exact: true }).click();
+  await expect(dialog.getByRole("button", { name: "模板库", exact: true })).toBeFocused();
+  await dialog.getByRole("button", { name: "关闭制作窗口", exact: true }).click(); await expect(trigger).toBeFocused();
+  await trigger.press("Enter"); await expect(dialog).toBeVisible(); await page.keyboard.press("Escape"); await expect(trigger).toBeFocused();
 });

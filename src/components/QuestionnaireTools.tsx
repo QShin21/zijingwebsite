@@ -31,6 +31,7 @@ export function QuestionnaireTools({
 }) {
   const dialog = useRef<HTMLDialogElement>(null),
     request = useRef<AbortController | null>(null),
+    sourceTabs = useRef<HTMLDivElement>(null),
     titleId = useId();
   const [tab, setTab] = useState<"templates" | "import" | "ai">("templates");
   const [candidate, setCandidate] = useState<Candidate | null>(null),
@@ -220,7 +221,7 @@ export function QuestionnaireTools({
             关闭
           </button>
         </div>
-        <div className="designer-tabs" role="group" aria-label="内容来源">
+        <div ref={sourceTabs} className="designer-tabs" role="group" aria-label="内容来源">
           {(
             [
               ["templates", "模板库"],
@@ -402,6 +403,7 @@ export function QuestionnaireTools({
                   onClick={() => {
                     setCandidate(null);
                     setTryFill(false);
+                    sourceTabs.current?.querySelector<HTMLButtonElement>('button[aria-pressed="true"]')?.focus();
                   }}
                 >
                   返回
