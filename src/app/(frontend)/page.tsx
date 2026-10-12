@@ -6,6 +6,7 @@ import type { CollectionSlug, Where } from "payload";
 import { routeFor } from "@/lib/rules";
 import { publicHref, sectionMeta } from "@/lib/presentation";
 import { PromotedContent } from "@/components/PromotedContent";
+import { StaffRecruitmentNotice } from "@/components/StaffRecruitmentNotice";
 
 type HomeModule = { kind: string; enabled?: boolean | null; title?: string | null };
 const defaults: HomeModule[] = ["events", "teams", "honors", "join", "news", "albums", "about"].map((kind) => ({ kind, enabled: true }));
@@ -31,6 +32,7 @@ export default async function Home() {
     <PromotedContent kind="event" />
     <PromotedContent kind="notice" />
     <PromotedContent kind="showcase" />
+    <StaffRecruitmentNotice home />
     {await Promise.all(modules.map(async (m, index) => {
       const number = String(index + 1).padStart(2, "0");
       if (m.kind === "join") return <section key={m.kind} className="home-section join-section"><div className="section-title"><div><p className="eyebrow">{number} / FIND YOUR PLACE</p><h2>{m.title || "总有你的位置。"}</h2></div><p className="section-note">一起玩，认真赢，<br />也一起把社团变得更好。</p></div><JoinCards /></section>;

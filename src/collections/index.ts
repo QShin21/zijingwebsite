@@ -31,6 +31,7 @@ import sharp from "sharp";
 import { APIError } from "payload";
 import { SocialCollections } from "./social";
 import { ContentPromotions } from "./promotions";
+import { StaffBatches, StaffApplications } from "./staff-recruitment";
 import { nicknameKey, validNickname } from "../lib/nickname";
 
 const text = (name: string, label: string, required = false): TextField => ({
@@ -608,6 +609,7 @@ export const Collections: CollectionConfig[] = [
   Media,
   ...SocialCollections,
   ContentPromotions,
+  StaffBatches, StaffApplications,
   EventSignups,
   content("games", "游戏项目", [
     { name: "sort", label: "排序", type: "number" },

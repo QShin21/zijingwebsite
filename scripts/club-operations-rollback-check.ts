@@ -4,7 +4,7 @@ import pg from "pg";
 const db = new pg.Client({ connectionString: process.env.DATABASE_URL });
 await db.connect();
 try {
-  const result = await db.query<{ backbone: number; new_states: number; joins: number; promotions: number; reduced_grants: number; revoked_grants: number; legacy_owner_private_access: number; legacy_historical_private_access: number; revoked_cards: number; member_offices: number }>(`
+  const result = await db.query<{ backbone: number; new_states: number; joins: number; promotions: number; staff_batches: number; staff_applications: number; reduced_grants: number; revoked_grants: number; legacy_owner_private_access: number; legacy_historical_private_access: number; revoked_cards: number; member_offices: number }>(`
     WITH current_events AS (
       SELECT e.id,
         CASE WHEN v.id IS NOT NULL THEN v.version_game_id ELSE e.game_id END game_id,
@@ -19,6 +19,8 @@ try {
       (SELECT count(*)::int FROM community_applications WHERE status IN('returned','withdrawn')) new_states,
       (SELECT count(*)::int FROM community_joins) joins,
       (SELECT count(*)::int FROM content_promotions) promotions,
+      (SELECT count(*)::int FROM staff_batches) staff_batches,
+      (SELECT count(*)::int FROM staff_applications) staff_applications,
       (SELECT count(*)::int FROM users_community_offices WHERE status='revoked') revoked_grants,
       (SELECT count(*)::int FROM current_events e JOIN users_roles r ON r.parent_id=e.organizer_id
        JOIN users u ON u.id=r.parent_id WHERE r.value='communityAdmin' AND coalesce(u.account_status::text,'active')<>'suspended'

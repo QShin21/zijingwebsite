@@ -25,7 +25,7 @@
     "shared reader re-added revoked B office; changed fixture to legitimately reactivate its unique office",
     "showcase browser navigated before local review response; now waits for saved review receipt"
   ],
-  "fullSuiteAndExactCI": "Verify latest review-fix SHA; do not treat intermediate 53f5a2c or notice results as final.",
+  "fullSuiteAndExactCI": "PASS for exact final review-fix SHA",
   "productionMigration": false,
   "productionAccess": false,
   "newMiniappUI": false,
@@ -95,7 +95,21 @@
     },
     "typecheck": "PASS",
     "lint": "PASS",
-    "latestFullSuiteAndBuild": "pending"
+    "latestFullSuiteAndBuild": {
+      "sourceSHA": "beac037eafe88b9b82e171e15cfddcca351b838b",
+      "unitFiles": 30,
+      "unitTests": 253,
+      "typecheck": "PASS",
+      "lint": "PASS",
+      "miniapp": "PASS",
+      "E2E": {
+        "tests": 61,
+        "passed": 61,
+        "failed": 0,
+        "reportedDuration": "11.6m"
+      },
+      "build": "PASS"
+    }
   },
   "reviewBlockersClosed": [
     "stable single-record showcase detail with original game/visibility checks, 6-item pagination preserved",
@@ -107,5 +121,21 @@
     "reportedDuration": "11.2m",
     "reason": "activity final proactive action navigation raced prior success text; wait actual item status and distinct action receipt"
   },
-  "firstProactiveRaceChecked": true
+  "firstProactiveRaceChecked": true,
+  "finalSourceSHA": "beac037eafe88b9b82e171e15cfddcca351b838b",
+  "finalCI": {
+    "id": 38202304227,
+    "jobID": 114658137738,
+    "headSHA": "beac037eafe88b9b82e171e15cfddcca351b838b",
+    "status": "completed",
+    "conclusion": "success",
+    "updatedUTC": "2026-10-12T04:28:08Z",
+    "unitFiles": 30,
+    "unitTests": 253,
+    "e2eTests": 61,
+    "e2eReportedDuration": "18.8m",
+    "build": "success",
+    "artifactUpload": "success",
+    "failedSteps": []
+  }
 }

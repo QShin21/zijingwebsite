@@ -1,0 +1,78 @@
+{
+  "branch": "codex/club-operations-recovery",
+  "baseSHA": "beac037eafe88b9b82e171e15cfddcca351b838b",
+  "atUTC": "2026-10-12T05:29:30.482218+00:00",
+  "phase": "first single-batch web acceptance checkpoint; full latest-head regression and CI pending",
+  "scope": "execution/publicity staff recruitment web only; regular joining remains separate; no teams or new miniapp UI",
+  "migration": {
+    "result": "PASS",
+    "environment": "isolated synthetic loopback development",
+    "beforeTables": 61,
+    "afterTables": 63,
+    "unchangedOriginalColumnTables": 60,
+    "expectedChangedTables": [
+      "payload_migrations"
+    ],
+    "productionAccess": false,
+    "staffApplicationsInitiallyEmpty": true
+  },
+  "model": {
+    "batchCollections": 1,
+    "applicationCollections": 1,
+    "currentBatchUnique": true,
+    "applicationUniqueBy": "batch + account",
+    "withdrawResubmitPreservesID": true,
+    "eventAndSignupCopies": 0
+  },
+  "deadlinePolicy": "Applicants may edit/withdraw/resubmit only while open. Deadline and close make receipts read-only. Accepted/rejected require explicit return and an open batch to edit.",
+  "permissions": "Self and current president/vicePresident only; local offices/backbone do not grant other-candidate access. Internal notes are management-only. Acceptance does not grant roles; appointment remains president-only.",
+  "projection": "Homepage club notice and every current/future community updates page use the same current batch reference.",
+  "questionnaire": "Existing configurable builder, paged form, normalization, validation, version and CSV engine; no contact or answer duplication into ordinary activity signup records.",
+  "checks": {
+    "targetedUnitDatabase": {
+      "tests": 10,
+      "result": "PASS"
+    },
+    "targetedWeb": {
+      "tests": 1,
+      "result": "PASS",
+      "reportedDuration": "1.3m"
+    },
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "miniappStatic": "PASS",
+    "build": "PASS",
+    "fullUnitDatabase": "pending",
+    "fullE2E": "pending",
+    "exactFinalCI": "pending"
+  },
+  "browserCoverage": [
+    "draft/publish/start/deadline/close",
+    "application/withdraw/resubmit same ID",
+    "manual acceptance and own feedback",
+    "private notes omitted from self REST",
+    "filtered CSV and local-admin denial",
+    "old-session role revocation and fake request context rejected",
+    "existing and newly created game same batch link",
+    "360/390/768/1440 and narrow application/management pages"
+  ],
+  "priorResolvedTestIssues": [
+    "nested summary locator matched questionnaire settings",
+    "existing questionnaire button is 下一步",
+    "select accessible name includes option text; use combobox role/name"
+  ],
+  "productionAccess": false,
+  "productionMigration": false,
+  "realMessagesSent": false,
+  "newMiniappUI": false,
+  "dependencyVersionsChanged": false,
+  "protectedBranchesUpdated": false,
+  "PR": false,
+  "merge": false,
+  "deploy": false,
+  "remaining": [
+    "full local unit/database and browser regression",
+    "final source build/static checks",
+    "exact final remote SHA and CI terminal result"
+  ]
+}

@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { PageHeading } from "@/components/PageHeading";
 import { cms } from "@/lib/content";
-import { canPublish, canReviewPromotion, canSubmitClubContent, communityIDs, hasCommunityOffice } from "@/lib/rules";
+import { canPublish, canManageStaffRecruitment, canReviewPromotion, canSubmitClubContent, communityIDs, hasCommunityOffice } from "@/lib/rules";
 import { joinLabels } from "@/lib/community-status";
 import { logoutAction } from "./actions";
 export default async function Account() {
@@ -47,6 +47,8 @@ export default async function Account() {
           <div><dt>社群管理任职</dt><dd>{hasCommunityOffice(user) ? "已获独立社群任职，能力按社群授权" : "暂无在任社群"}</dd></div>
         </dl>
         <div className="account-actions">
+          {canManageStaffRecruitment(user) && <Link className="account-action" href="/staff/manage"><Icon name="layers" /><strong>骨干招新管理</strong><small>管理执行/宣传批次与候选资料，任命权限另行处理。</small></Link>}
+          <Link className="account-action" href="/join/staff"><Icon name="layers" /><strong>骨干申请与本人回执</strong><small>查看批次及自己的申请，普通入社使用游戏社群入口。</small></Link>
           {(canReviewPromotion(user) || communityIDs(user, "publishContent").length > 0) && <Link className="account-action" href={canReviewPromotion(user) ? "/community/promotions?view=review" : "/community/promotions"}>
             <Icon name="layers" /><strong>{canReviewPromotion(user) ? "审核社群升推" : "我的社群升推"}</strong><small>申请、审核及管理社团首页展示。</small>
           </Link>}

@@ -28,6 +28,8 @@ export interface Config {
     'community-showcase': CommunityShowcase;
     'community-posts': CommunityPost;
     'content-promotions': ContentPromotion;
+    'staff-batches': StaffBatch;
+    'staff-applications': StaffApplication;
     'event-signups': EventSignup;
     games: Game;
     teams: Team;
@@ -56,6 +58,8 @@ export interface Config {
     'community-showcase': CommunityShowcaseSelect<false> | CommunityShowcaseSelect<true>;
     'community-posts': CommunityPostsSelect<false> | CommunityPostsSelect<true>;
     'content-promotions': ContentPromotionsSelect<false> | ContentPromotionsSelect<true>;
+    'staff-batches': StaffBatchesSelect<false> | StaffBatchesSelect<true>;
+    'staff-applications': StaffApplicationsSelect<false> | StaffApplicationsSelect<true>;
     'event-signups': EventSignupsSelect<false> | EventSignupsSelect<true>;
     games: GamesSelect<false> | GamesSelect<true>;
     teams: TeamsSelect<false> | TeamsSelect<true>;
@@ -417,6 +421,80 @@ export interface ContentPromotion {
   approvedBy?: (number | null) | User;
   approvedAt?: string | null;
   reviewNote?: string | null;
+  history?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * 通过网页骨干招新工作台管理；当前批次动态出现在首页和全部社群，普通入社不要求填写。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staff-batches".
+ */
+export interface StaffBatch {
+  id: number;
+  title: string;
+  description?: string | null;
+  state: 'draft' | 'open' | 'closed';
+  startAt?: string | null;
+  endAt?: string | null;
+  currentKey?: string | null;
+  signupForm:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * 候选资料仅本人及社长/副社长可见；录用状态不会授予平台角色。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staff-applications".
+ */
+export interface StaffApplication {
+  id: number;
+  batch: number | StaffBatch;
+  applicant: number | User;
+  requestKey: string;
+  memberName: string;
+  batchTitle: string;
+  department: 'execution' | 'publicity' | 'both';
+  status: 'submitted' | 'reviewing' | 'returned' | 'accepted' | 'rejected' | 'withdrawn';
+  formVersion: string;
+  questions:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  answers:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  feedback?: string | null;
+  reviewNotes?: string | null;
   history?:
     | {
         [k: string]: unknown;
@@ -962,6 +1040,14 @@ export interface PayloadLockedDocument {
         value: number | ContentPromotion;
       } | null)
     | ({
+        relationTo: 'staff-batches';
+        value: number | StaffBatch;
+      } | null)
+    | ({
+        relationTo: 'staff-applications';
+        value: number | StaffApplication;
+      } | null)
+    | ({
         relationTo: 'event-signups';
         value: number | EventSignup;
       } | null)
@@ -1244,6 +1330,42 @@ export interface ContentPromotionsSelect<T extends boolean = true> {
   approvedBy?: T;
   approvedAt?: T;
   reviewNote?: T;
+  history?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staff-batches_select".
+ */
+export interface StaffBatchesSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  state?: T;
+  startAt?: T;
+  endAt?: T;
+  currentKey?: T;
+  signupForm?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "staff-applications_select".
+ */
+export interface StaffApplicationsSelect<T extends boolean = true> {
+  batch?: T;
+  applicant?: T;
+  requestKey?: T;
+  memberName?: T;
+  batchTitle?: T;
+  department?: T;
+  status?: T;
+  formVersion?: T;
+  questions?: T;
+  answers?: T;
+  feedback?: T;
+  reviewNotes?: T;
   history?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -5,6 +5,7 @@ import { bySlug, cms } from "@/lib/content";
 import { managesGame, formatDate } from "@/lib/rules";
 import { CommunityPager, pageNumber } from "@/components/CommunityPager";
 import { CommunityActivityComposer } from "@/components/CommunityActivityComposer";
+import { StaffRecruitmentNotice } from "@/components/StaffRecruitmentNotice";
 
 export default async function Updates({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ page?: string; message?: string }> }) {
   const { slug } = await params; const query = await searchParams;
@@ -15,6 +16,7 @@ export default async function Updates({ params, searchParams }: { params: Promis
     where: { game: { equals: game.id } }, sort: "-createdAt", limit: 10, page,
     select: { title: true, body: true, category: true, createdAt: true, authorName: true } });
   return <section className="community-page"><h2>活动与通知</h2><p role="status">{query.message}</p>
+    <StaffRecruitmentNotice />
     <div className="community-list">{entries.docs.map(post => <article className="panel" key={post.id}>
       <small>{post.category === "event" ? "社群活动" : "社群通知"} · {formatDate(post.createdAt)}</small>
       <h3><Link href={`/community/${slug}/updates/${post.id}`}>{post.title}</Link></h3>

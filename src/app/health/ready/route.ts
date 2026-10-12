@@ -18,6 +18,10 @@ export async function GET() {
     if (!migration.rowCount) throw new Error("Required migration unavailable");
     const promotionMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261012_030000_content_promotions"]);
     if (!promotionMigration.rowCount) throw new Error("Required promotion migration unavailable");
+    await db.pool.query("SELECT current_key,signup_form FROM staff_batches LIMIT 0");
+    await db.pool.query("SELECT request_key,status FROM staff_applications LIMIT 0");
+    const staffMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261012_050000_staff_recruitment"]);
+    if (!staffMigration.rowCount) throw new Error("Required staff migration unavailable");
     return Response.json({ status: "ready", schema: "club-operations-1" });
   } catch {
     return Response.json({ status: "unavailable" }, { status: 503 });
