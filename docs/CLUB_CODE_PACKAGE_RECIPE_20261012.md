@@ -46,19 +46,20 @@
 
     node /tools/club-release-dependency-fingerprint.mjs --source "$CLUB_BUILD_SOURCE_SHA" --root /code --output /code/CLUB_DEPENDENCY_METADATA.json
 
-metadata 合同为 schemaVersion 1 / kind club-release-dependency-fingerprint，含 sourceSHA、实测 runtime、entries、packages、resolutions、aliases、files、probes、pendingRunner 及 fingerprintSHA256。physical file 路径均相对于实际 node_modules realpath，去掉宿主 /workspace、Docker /code 或现场 /srv 等前缀；每个文件记录 SHA-256、bytes、所属包名/版本。指纹还保留模块解析上下文、请求 specifier、实际物理目标和文件 alias，逐项核对这些解析关系，不能只看文件还存在。
+metadata 合同为 schemaVersion 1 / kind club-release-dependency-fingerprint，含 sourceSHA、rootPackageSHA256、rootDependencies、实测 runtime、entries、packages、resolutions、aliases、files、probes、pendingRunner 及 fingerprintSHA256。physical file 路径均相对于实际 node_modules realpath，去掉宿主 /workspace、Docker /code 或现场 /srv 等前缀；每个文件记录 SHA-256、bytes、所属包名/版本。指纹还保留模块解析上下文、请求 specifier、实际物理目标和文件 alias，逐项核对这些解析关系，不能只看文件还存在。
 
 实际必需入口与闭包：
 
+- 项目 package.json 的全部 dependencies 作为必须种子，逐项记录精确声明版本、实际物理 package manifest、包身份和可解析的根 API，并纳入递归运行/已安装 peer 闭包。pg/dotenv 根 API 必须存在；@payloadcms/next 没有根 API export，保留其 manifest，并记录源码使用的 auth、css、layouts、routes、rsc、views、withPayload 子入口。只解析路径、读取包文件，不 import 应用或配置。
 - 根 tsx 的 dist/cli.mjs，与 Payload 自己解析的 tsx/esm/api 分开记录；Payload bin.js/API 及其声明运行依赖均核对，不能只签 .bin wrapper。
 - Next dist/bin/next、Next API、SWC loader 与 Linux x64 GNU 的实际 .node；Native SWC 实测最小 TypeScript transform 和 parse，不采用会下载 fallback 的入口。
 - Sharp loader、实际被加载的 Sharp .node，以及实际加载的 libvips .so 和 libvips 包文件闭包；合成 1×1 PNG 编码再读 metadata。
 - 根 tsx 与 Payload tsx 分别解析的 esbuild API、Linux x64 实际 ELF 可执行与包闭包；执行版本检查及最小 transform。
 - 根 tsx CLI --version 与 Next CLI --version，检查输出非空且版本正确。probe 采用无配置/秘密的临时 cwd 与最小环境，不调用 Payload --help/bin/config 或数据库。
 
-完整声明运行依赖及已安装 peer 的所选平台闭包也逐文件记录；缺必需包、缺入口、外部解析、原生 probe 失败、运行 tuple 错误或不支持的 alias 均拒绝输出。打包器要求 metadata 的 sourceSHA/runtime 与 builder 完全一致，再用仓库当前实际 node_modules 逐路径核对解析、完整文件清单、所有 SHA/bytes 和包版本；新增本地 native 或解析换向同样不能默许。完整确定指纹及 metadata 摘要进入归档内 release-contract 和外部 manifest，不复制依赖。
+完整声明运行依赖及已安装 peer 的所选平台闭包也逐文件记录；缺必需包、缺入口、外部解析、原生 probe 失败、运行 tuple 错误或不支持的 alias 均拒绝输出。验证器要求 rootDependencies 与实际根声明、精确版本、物理包及根解析关系全部匹配，缺任一种子的旧 metadata 拒绝。打包器将 rootPackageSHA256 绑定到精确 Git 导出的 package.json，并要求 metadata 的 sourceSHA/runtime 与 builder 完全一致，再用仓库当前实际 node_modules 逐路径核对解析、完整文件清单、所有 SHA/bytes 和包版本；新增本地 native 或解析换向同样不能默许。完整确定指纹及 metadata 摘要进入归档内 release-contract 和外部 manifest，不复制依赖。
 
-根线程已报告回滚 466 的匹配 Docker 实测通过：136 包 / 23,486 文件，根 TSX/Next CLI、Sharp/libvips、SWC 原生 transform/parse、两套 esbuild 全部通过；该份 metadata 的自摘要为 056008e0dc9825870a486fc4d0c5f588610bc8be98231ba9730807d4a938bcf9。这是该构建/依赖集合的证据，不能复用于另一 sourceSHA 或代报最终包已验收。Payload 实际 bin/config/up、真正回滚门禁及网页仍在 pendingRunner 中，须从解包产物独立执行并验收。
+此前根线程报告回滚 466 的匹配 Docker CLI/native 实测通过：136 包 / 23,486 文件，根 TSX/Next CLI、Sharp/libvips、SWC 原生 transform/parse、两套 esbuild 全部通过；该份 metadata 的自摘要为 056008e0dc9825870a486fc4d0c5f588610bc8be98231ba9730807d4a938bcf9。该旧闭包遗漏部分项目根 dependencies，当前合同已补齐全部根种子并拒绝此旧 metadata；最终候选与兼容回滚均须重新生成完整指纹、重复打包并验收，不能据旧结果宣称最终包完成。Payload 实际 bin/config/up、真正回滚门禁及网页仍在 pendingRunner 中，须从解包产物独立执行并验收。
 
 ## 打包与重复哈希
 
@@ -81,7 +82,7 @@ metadata 合同为 schemaVersion 1 / kind club-release-dependency-fingerprint，
 
 ## 解包运行与迁移 runner
 
-根线程将实际 tar.gz 解压到新空代码目录，核对 manifest 全部文件与归档摘要，绑定已核对完整确定指纹的现有 /srv/zijingwebsite/app/node_modules。必须逐项比较根 TSX/Payload/Next/SWC/Sharp/esbuild/libvips 的实际物理目标、解析关系、包版本及所有文件 bytes/SHA；任何不符即停止。保留 app/.data/postgres、实际 PG 二进制目录、受限环境与绝对 DB/MEDIA 路径；不整体替换/删除 app 或依赖，不运行目标 npm/pnpm install/prune/build，不动 FreeKill。
+根线程将实际 tar.gz 解压到新空代码目录，核对 manifest 全部文件与归档摘要，绑定已核对完整确定指纹的现有 /srv/zijingwebsite/app/node_modules。必须逐项比较全部项目根 dependencies（含 db-postgres、email-nodemailer、@payloadcms/next、richtext、storage-s3、dotenv、pg）及 TSX/Payload/Next/SWC/Sharp/esbuild/libvips 的实际物理目标、解析关系、包版本及所有文件 bytes/SHA；任何不符即停止。保留 app/.data/postgres、实际 PG 二进制目录、受限环境与绝对 DB/MEDIA 路径；不整体替换/删除 app 或依赖，不运行目标 npm/pnpm install/prune/build，不动 FreeKill。
 
 现场只读指纹核对还必须核对**现场实际运行平台**。下面假设部署线程已核实并注入 CLUB_CODE_MANIFEST / CLUB_CODE_ROOT，受控 helper 放在 /tools；传给 verifyDependencyMetadata 的最后参数从现场 Node 实测，不能复制 metadata.runtime：
 

@@ -35,6 +35,17 @@ const requiredEntries = [
   "payloadEsbuildAPI",
   "payloadEsbuildBinary",
 ];
+const requiredRootSubpaths = {
+  "@payloadcms/next": [
+    "auth",
+    "css",
+    "layouts",
+    "routes",
+    "rsc",
+    "views",
+    "withPayload",
+  ],
+};
 
 function runtimeTuple() {
   return {
@@ -121,6 +132,100 @@ function packageForFile(root, file) {
     directory = path.dirname(directory);
   }
   throw new Error("Resolved entry has no package identity");
+}
+function rootDependencySeeds(root, project) {
+  const bytes = fsSync.readFileSync(path.join(project, "package.json"));
+  const declarations = JSON.parse(bytes).dependencies;
+  if (
+    !declarations ||
+    typeof declarations !== "object" ||
+    Array.isArray(declarations) ||
+    !Object.keys(declarations).length
+  )
+    throw new Error("Project root dependencies are required");
+  const require = createRequire(path.join(project, "package.json"));
+  const rootDependencies = {},
+    packages = [],
+    resolutions = [];
+  for (const name of sort(Object.keys(declarations))) {
+    const declaredVersion = declarations[name];
+    if (
+      isBuiltin(name) ||
+      typeof declaredVersion !== "string" ||
+      !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(
+        declaredVersion,
+      )
+    )
+      throw new Error(
+        "Root dependency must pin an exact package version: " + name,
+      );
+    const directory = resolvePackage(root, project, null, name);
+    const pkg = JSON.parse(
+      fsSync.readFileSync(path.join(directory, "package.json"), "utf8"),
+    );
+    if (pkg.name !== name || pkg.version !== declaredVersion)
+      throw new Error("Root dependency declaration/version mismatch: " + name);
+    const packagePath = relative(root, directory);
+    packages.push(directory);
+    resolutions.push({
+      context: null,
+      specifier: name,
+      kind: "package",
+      path: packagePath,
+      optional: false,
+    });
+    const entries = {};
+    for (const specifier of [
+      name,
+      ...(requiredRootSubpaths[name] || []).map(
+        (subpath) => name + "/" + subpath,
+      ),
+    ]) {
+      let actual;
+      try {
+        actual = physical(root, require.resolve(specifier));
+      } catch (error) {
+        // Packages such as @payloadcms/next expose subpaths without a root API.
+        if (
+          specifier === name &&
+          !["pg", "dotenv"].includes(name) &&
+          error.code === "ERR_PACKAGE_PATH_NOT_EXPORTED" &&
+          pkg.exports &&
+          typeof pkg.exports === "object" &&
+          !Object.hasOwn(pkg.exports, ".") &&
+          Object.keys(pkg.exports).some((key) => key.startsWith("./"))
+        )
+          continue;
+        throw error;
+      }
+      if (
+        !fsSync.statSync(actual).isFile() ||
+        packageForFile(root, actual).directory !== directory
+      )
+        throw new Error("Root dependency entry/package mismatch: " + specifier);
+      entries[specifier] = relative(root, actual);
+      resolutions.push({
+        context: null,
+        specifier,
+        kind: "module",
+        path: entries[specifier],
+        optional: false,
+      });
+    }
+    rootDependencies[name] = {
+      declaredVersion,
+      packageName: pkg.name,
+      packageVersion: pkg.version,
+      packagePath,
+      entries,
+    };
+  }
+  return {
+    rootPackageSHA256: digest(bytes),
+    rootDependencies,
+    packages,
+    resolutions,
+  };
 }
 async function hashFile(file) {
   const hash = createHash("sha256");
@@ -227,6 +332,40 @@ export async function verifyDependencyMetadata(
     !Object.keys(metadata.files).length
   )
     throw new Error("Dependency closure/resolution evidence is empty");
+  const seeds = rootDependencySeeds(root, project);
+  if (
+    metadata.rootPackageSHA256 !== seeds.rootPackageSHA256 ||
+    JSON.stringify(metadata.rootDependencies) !==
+      JSON.stringify(seeds.rootDependencies)
+  )
+    throw new Error(
+      "Complete project root dependency seeds/declarations mismatch",
+    );
+  for (const [name, seed] of Object.entries(seeds.rootDependencies)) {
+    const pkg = metadata.packages?.[seed.packagePath];
+    if (
+      pkg?.name !== name ||
+      pkg.version !== seed.declaredVersion ||
+      !metadata.files[seed.packagePath + "/package.json"] ||
+      Object.values(seed.entries).some((entry) => !metadata.files[entry])
+    )
+      throw new Error("Root dependency seed is missing from closure: " + name);
+  }
+  for (const required of seeds.resolutions) {
+    if (
+      !metadata.resolutions.some(
+        (record) =>
+          record.context === required.context &&
+          record.specifier === required.specifier &&
+          record.kind === required.kind &&
+          record.path === required.path &&
+          record.optional === false,
+      )
+    )
+      throw new Error(
+        "Missing root dependency resolution: " + required.specifier,
+      );
+  }
   for (const resolution of metadata.resolutions) {
     const context = contextPath(root, project, resolution.context);
     let actual;
@@ -379,6 +518,15 @@ async function createMetadata(project, sourceSHA) {
   }
   const manifestContext = (entry) =>
     entries[entry].packagePath + "/package.json";
+  const seeds = rootDependencySeeds(root, project);
+  for (const directory of seeds.packages) addPackage(directory);
+  for (const resolution of seeds.resolutions)
+    recordResolution(
+      resolution.context,
+      resolution.specifier,
+      resolution.kind,
+      path.join(root, ...resolution.path.split("/")),
+    );
   const tsxCLI = addEntry("rootTsxCLI", "tsx/cli");
   addEntry("payloadAPI", "payload");
   addEntry("payloadBin", "./bin.js", manifestContext("payloadAPI"));
@@ -652,6 +800,8 @@ async function createMetadata(project, sourceSHA) {
     schemaVersion: 1,
     kind: "club-release-dependency-fingerprint",
     sourceSHA,
+    rootPackageSHA256: seeds.rootPackageSHA256,
+    rootDependencies: seeds.rootDependencies,
     runtime,
     target,
     physicalPathsRelativeTo:

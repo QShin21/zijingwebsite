@@ -348,6 +348,10 @@ async function main() {
         );
       inputsSHA256[relative] = digest;
     }
+    if (dependencyMetadata.rootPackageSHA256 !== inputsSHA256["package.json"])
+      throw new Error(
+        "Root dependency declarations are not from the exact Git SHA",
+      );
     const index = await fs.readFile(
       at(stage, "src/migrations/index.ts"),
       "utf8",
