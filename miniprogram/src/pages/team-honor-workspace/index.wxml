@@ -5,8 +5,8 @@
   <template is="feedback" data="{{needsLogin}}" />
   <block wx:if="{{!needsLogin}}">
     <view class="chips"><button class="chip {{view === 'mine' ? 'active' : ''}}" bindtap="view" data-view="mine" disabled="{{busy || loading}}">我的记录</button><button wx:if="{{actions.review}}" class="chip {{view === 'review' ? 'active' : ''}}" bindtap="view" data-view="review" disabled="{{busy || loading}}">社群审核</button></view>
-    <button wx:if="{{view === 'mine' &amp;&amp; actions.create &amp;&amp; teams.length}}" class="primary" bindtap="create" disabled="{{busy || loading || !ready}}">新建荣誉投稿</button>
-    <text wx:if="{{view === 'mine' &amp;&amp; ready &amp;&amp; !teams.length}}" class="muted">当前暂无可投稿的有效队伍，本人历史记录仍保留。</text>
+    <button wx:if="{{view === 'mine' && actions.create && teams.length}}" class="primary" bindtap="create" disabled="{{busy || loading || !ready}}">新建荣誉投稿</button>
+    <text wx:if="{{view === 'mine' && ready && !teams.length}}" class="muted">当前暂无可投稿的有效队伍，本人历史记录仍保留。</text>
     <text wx:if="{{busy}}" class="muted">本次确认、读取或保存尚未结束，请稍候。</text><text wx:if="{{loading}}" class="muted">正在核对荣誉与操作权限…</text>
     <view wx:if="{{error}}" class="section"><text class="error">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{busy || loading}}">重新加载</button></view>
     <text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text><text wx:if="{{message}}" class="body" aria-role="status">{{message}}</text>
@@ -26,7 +26,7 @@
       <view wx:for="{{detailImages}}" wx:key="index"><image wx:if="{{item.path}}" class="photo" mode="widthFix" src="{{item.path}}" bindtap="previewEvidence" data-path="{{item.path}}" aria-label="{{item.caption || '荣誉证据图片'}}" /><text class="muted">{{item.caption}}</text></view>
       <text wx:if="{{imageError}}" class="muted">{{imageError}}</text><button wx:if="{{detail.hasVideo}}" class="secondary section" bindtap="viewVideo" disabled="{{busy || loading}}">读取本次视频证据</button><video wx:if="{{videoSource}}" id="honor-evidence" class="evidence-video" src="{{videoSource}}" controls autoplay="{{false}}" binderror="videoError" data-id="{{detail.id}}" data-revision="{{detail.revision}}" aria-label="本次荣誉视频证据" /><text wx:if="{{videoError}}" class="error">{{videoError}}</text><button wx:if="{{detail.hasVideo}}" class="plain" bindtap="websiteEvidence" disabled="{{busy}}">复制网站证据页地址</button><button class="plain" bindtap="closeDetail" disabled="{{busy}}">收起证据</button>
     </view>
-    <view wx:if="{{!docs.length &amp;&amp; ready &amp;&amp; !loading}}" class="empty"><text>{{view === 'review' ? '当前范围暂无可查看的荣誉记录' : '尚无本人荣誉投稿'}}</text><text class="muted">可刷新核对最新状态。</text></view>
+    <view wx:if="{{!docs.length && ready && !loading}}" class="empty"><text>{{view === 'review' ? '当前范围暂无可查看的荣誉记录' : '尚无本人荣誉投稿'}}</text><text class="muted">可刷新核对最新状态。</text></view>
     <button wx:if="{{hasMore}}" class="plain section" bindtap="onReachBottom" disabled="{{busy || loading || !ready}}">加载更多记录</button>
   </block>
 </view>

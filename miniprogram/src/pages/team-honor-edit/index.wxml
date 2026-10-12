@@ -8,7 +8,7 @@
     <view wx:if="{{record}}" class="panel section"><text class="section-title">{{record.statusText}}</text><text class="muted">投稿 {{record.id}} · 修订 {{record.revision}} · {{teamTitle}}</text><text wx:if="{{record.reviewNote}}" class="body">处理反馈：{{record.reviewNote}}</text><text wx:if="{{record.season}}" class="muted">原赛季 {{record.season}}；历史队伍与赛季归属保留。</text></view>
     <view class="panel section editor">
       <view wx:if="{{!record}}" class="field"><text class="field-label">所属有效代表队</text><picker range="{{teams}}" range-key="title" value="{{teamIndex}}" bindchange="team" disabled="{{busy || loading || !ready || uncertainCreate}}"><view>{{teamTitle || '暂无可投稿的有效队伍'}}</view></picker></view>
-      <text wx:if="{{!editable &amp;&amp; !loading}}" class="muted">当前资料只读。可重新读取回执，查看服务端当前允许的操作。</text>
+      <text wx:if="{{!editable && !loading}}" class="muted">当前资料只读。可重新读取回执，查看服务端当前允许的操作。</text>
       <view class="field"><text class="field-label">荣誉标题</text><input value="{{fields.title}}" maxlength="120" bindinput="input" data-field="title" disabled="{{busy || loading || !editable}}" /></view>
       <view class="field"><text class="field-label">赛事名称</text><input value="{{fields.competition}}" maxlength="200" bindinput="input" data-field="competition" disabled="{{busy || loading || !editable}}" /></view>
       <view class="field"><text class="field-label">奖项或名次</text><input value="{{fields.placing}}" maxlength="200" bindinput="input" data-field="placing" disabled="{{busy || loading || !editable}}" /></view>

@@ -5,7 +5,7 @@
   <text class="title">队员简介</text>
   <text class="subtitle">展示仍在队且由本人选择公开的昵称与介绍。</text>
   <template is="feedback" data="{{loading,error,needsLogin}}" />
-  <view wx:if="{{loaded &amp;&amp; !loading &amp;&amp; !needsLogin}}" class="section">
+  <view wx:if="{{loaded && !loading && !needsLogin}}" class="section">
     <view wx:if="{{!profiles.length}}" class="panel state"><text class="state-title">暂无选择展示的队员简介</text><text class="muted">本人保存并选择展示后，会出现在这里。</text></view>
     <view wx:for="{{profiles}}" wx:key="id" class="panel profile-card">
       <image wx:if="{{item.avatarPath}}" class="avatar" src="{{item.avatarPath}}" mode="aspectFill" aria-label="{{item.displayName}}的头像" />
@@ -14,8 +14,8 @@
       <text wx:if="{{item.biography}}" class="body biography" selectable>{{item.biography}}</text>
     </view>
     <text wx:if="{{imageError}}" class="muted section">{{imageError}}</text>
-    <text wx:if="{{!eligible &amp;&amp; !locked}}" class="muted section">入队审核通过且仍在队后，可以填写自己的队内简介。</text>
-    <button wx:if="{{eligible &amp;&amp; !editing &amp;&amp; !locked}}" class="primary section" bindtap="edit" disabled="{{busy || loading}}">编辑我的队内简介</button>
+    <text wx:if="{{!eligible && !locked}}" class="muted section">入队审核通过且仍在队后，可以填写自己的队内简介。</text>
+    <button wx:if="{{eligible && !editing && !locked}}" class="primary section" bindtap="edit" disabled="{{busy || loading}}">编辑我的队内简介</button>
     <button class="secondary section" bindtap="retry" disabled="{{busy || loading}}">刷新展示资料</button>
   </view>
   <view wx:if="{{editing}}" class="panel section editor">

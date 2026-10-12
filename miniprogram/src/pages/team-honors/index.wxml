@@ -6,7 +6,7 @@
   <text wx:if="{{team.gameTitle}}" class="subtitle">{{team.gameTitle}}</text>
   <button class="secondary section" bindtap="workspace" disabled="{{loading}}">我的荣誉投稿与工作台 →</button>
   <template is="feedback" data="{{loading,error,needsLogin:false}}" />
-  <view wx:if="{{loaded &amp;&amp; !records.length &amp;&amp; !loading &amp;&amp; !error}}" class="state panel">
+  <view wx:if="{{loaded && !records.length && !loading && !error}}" class="state panel">
     <text class="state-title">暂无已公开的荣誉档案</text>
     <text class="muted">荣誉记录发布后会出现在这里。</text>
     <button class="secondary" bindtap="retry">重新加载</button>
@@ -29,5 +29,5 @@
     <button wx:if="{{item.mediaError || item.videoError}}" class="plain" bindtap="retry" disabled="{{loading}}">重新加载档案</button>
     <button wx:if="{{item.sourceHref}}" class="plain" bindtap="source" data-key="{{item.key}}">查看历史荣誉原文 →</button>
   </view>
-  <button wx:if="{{loaded &amp;&amp; records.length}}" class="secondary section" bindtap="retry" disabled="{{loading}}">刷新档案</button>
+  <button wx:if="{{loaded && records.length}}" class="secondary section" bindtap="retry" disabled="{{loading}}">刷新档案</button>
 </view>

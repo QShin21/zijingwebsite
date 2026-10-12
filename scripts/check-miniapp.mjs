@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { buildQuestionnaireRuntime } from './build-mini-questionnaire.mjs';
+import { escapedWxmlBindings } from './wxml-bindings.mjs';
 buildQuestionnaireRuntime({ check: true });
 const root = path.resolve('miniprogram');
 const source = path.join(root, 'src');
@@ -34,6 +35,10 @@ function walk(directory) {
     }
     if (entry.name.endsWith('.wxml')) {
       const text = fs.readFileSync(filename, 'utf8');
+      for (const binding of escapedWxmlBindings(text)) {
+        const line = text.slice(0, binding.index).split('\n').length;
+        failures.push(`HTML-escaped entity ${binding.entity} in WXML binding in ${filename}:${line}`);
+      }
       for (const binding of text.matchAll(/wx:(?:if|elif|for)="([^"]*)"/g)) {
         if (!binding[1].startsWith('{{') || !binding[1].endsWith('}}')) failures.push(`Missing reactive template binding in ${filename}`);
       }
