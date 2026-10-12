@@ -441,6 +441,55 @@ test("招新关闭、跨站拒绝和表单工作台四个视口", async ({ page,
   await expect(
     page.getByText("已关闭 · 招新已关闭", { exact: true }),
   ).toBeVisible();
+  const teamRecord = await p.findByID({
+    collection: "teams",
+    id: team,
+    user: null,
+    overrideAccess: false,
+  });
+  const archived = await page.request.post("/api/team-core", {
+    headers: origin,
+    data: {
+      operation: "lifecycle",
+      id: team,
+      revision: teamRecord.updatedAt,
+      status: "archived",
+    },
+  });
+  expect(archived.status(), await archived.text()).toBe(200);
+  const archivedTeam = (await archived.json()).result;
+  await page.goto(`/teams/${teamRecord.slug}`);
+  await expect(
+    page.getByText("历史归档", { exact: true }).first(),
+  ).toBeVisible();
+  const unauthorizedRestore = await page.request.post("/api/team-core", {
+    headers: origin,
+    data: {
+      operation: "lifecycle",
+      id: team,
+      revision: archivedTeam.updatedAt,
+      status: "active",
+    },
+  });
+  expect(unauthorizedRestore.status()).toBe(403);
+  const highContext = await browser.newContext();
+  try {
+    const high = await highContext.newPage();
+    await login(high, leader);
+    const restored = await high.request.post("/api/team-core", {
+      headers: origin,
+      data: {
+        operation: "lifecycle",
+        id: team,
+        revision: archivedTeam.updatedAt,
+        status: "active",
+      },
+    });
+    expect(restored.status(), await restored.text()).toBe(200);
+    expect((await restored.json()).result.archived).toBe(false);
+  } finally {
+    await highContext.close();
+  }
   const context = await browser.newContext();
   try {
     const applicant = await context.newPage();
@@ -558,6 +607,18 @@ test("真实API表单版本冲突保留草稿，新批次录取后本人网页�
     );
     const current = await currentResponse.json();
     expect(current.application.answers).toEqual({ gameID: "合成保留原稿" });
+    const incomplete = await page.request.post("/api/team-core", {
+      headers: origin,
+      data: {
+        operation: "save-join",
+        id: recruitment.id,
+        action: "submit",
+        version: current.version,
+        revision: draft.updatedAt,
+        answers: {},
+      },
+    });
+    expect(incomplete.status()).toBe(400);
     const submitted = await page.request.post("/api/team-core", {
       headers: origin,
       data: {

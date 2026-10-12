@@ -790,6 +790,16 @@ describe.sequential("代表队核心合成数据库", () => {
     });
     await changeTeamLifecycle(p, manager, team, "archived", record.updatedAt);
     expect(
+      (
+        await p.findByID({
+          collection: "teams",
+          id: team,
+          user: null,
+          overrideAccess: false,
+        })
+      ).archived,
+    ).toBe(true);
+    expect(
       await getActiveTeamMembership(p, { teamID: team, userID: member.id }),
     ).toBeNull();
     expect(

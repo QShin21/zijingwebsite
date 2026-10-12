@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import { defaultTeamForm, normalizeTeamForm } from "../src/lib/team-core";
+import { positiveID } from "../src/lib/team-memberships";
 
 it("默认必填核心题可达，核心题不能隐藏或被提前结束跳过", () => {
   expect(normalizeTeamForm(defaultTeamForm).questions).toHaveLength(5);
@@ -82,4 +83,35 @@ it("核心资料之后的扩展题保留合法条件分支", () => {
     ],
   });
   expect(form.questions[5].jumps?.[0].target).toBe("$end");
+});
+
+it("原问卷结构校验失败保留400语义", () => {
+  try {
+    normalizeTeamForm({
+      ...defaultTeamForm,
+      questions: [{ id: "broken", label: "合成无效题", type: "unsupported" }],
+    });
+    throw new Error("unexpected success");
+  } catch (error) {
+    expect((error as { status?: number }).status).toBe(400);
+  }
+});
+
+it("ID只接受PostgreSQL正整数或其HTTP字符串，布尔/数组不能误指向记录1", () => {
+  for (const value of [
+    true,
+    false,
+    [1],
+    null,
+    0,
+    -1,
+    "1.2",
+    "1e2",
+    2147483648,
+    "2147483648",
+  ])
+    expect(positiveID(value)).toBeNull();
+  expect(positiveID(1)).toBe(1);
+  expect(positiveID("1")).toBe(1);
+  expect(positiveID({ id: 1 })).toBe(1);
 });
