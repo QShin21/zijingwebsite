@@ -13,30 +13,61 @@ Page({
   data: { loading: true, error: '', needsLogin: false, busy: false, message: '', info: null, form: {}, answers: {}, questions: [], receipt: null, responseEditing: false, review: false, reviewRows: [], answerErrors: {}, step: 0, answerPages: 1, completed: 0, answerTotal: 0, progress: 0, branchNotice: '', advancedEditing: false, edit: false, tab: 'edit', entries: [], page: 1, pages: 0, total: 0, typeLabels: ['单行文本','多行文本','单选','多选'] },
   ...actions,
   onLoad(options) {
+    if(this._unsubscribe)this._unsubscribe();
+    this._ticket=(this._ticket||0)+1;this._context=(this._context||0)+1;this._loaded=false;this._hidden=false;this._disposed=false;this._resumeRead=false;this._recoveryDraft=null;
     this._options=options; this._seed=String(Math.random()); this._staff=options.kind==='staff';
     this._endpoint=this._staff?'/api/staff/batches/'+encodeURIComponent(options.id)+'/application':'/api/activities/'+encodeURIComponent(options.kind)+'/'+encodeURIComponent(options.id)+'/signup';
     this._readEndpoint=this._staff?'/api/miniapp/staff/'+encodeURIComponent(options.id):this._endpoint;
-    this.setData({staff:this._staff,edit:!this._staff&&['manage','view'].includes(options.mode)});
+    this.setData({staff:this._staff,edit:!this._staff&&['manage','view'].includes(options.mode),loading:false,error:'',info:null,form:{},receipt:null,answers:{},questions:[],reviewRows:[],entries:[],responseEditing:false,review:false});
     if(session.subscribe)this._unsubscribe=session.subscribe(user=>{
       if(String(user&&user.id)===String(this._userId))return;
-      this._ticket=(this._ticket||0)+1;this._loaded=false;
+      this._ticket=(this._ticket||0)+1;this._context=(this._context||0)+1;this._loaded=false;this._resumeRead=false;this._recoveryDraft=null;
       this.setData({loading:false,info:null,receipt:null,answers:{},questions:[],reviewRows:[],entries:[],responseEditing:false,review:false,needsLogin:!user});
     });
   },
-  onShow() { this._hidden=false;const user=session.user(); if(!this.data.busy&&(!this._loaded || String(user && user.id)!==String(this._userId)))return this.load(); },
-  onHide() { this._hidden=true;this._ticket=(this._ticket||0)+1;if(this.data.busy)this._loaded=false; },
-  onUnload() { this.onHide();if(this._unsubscribe)this._unsubscribe(); },
-  retry() { this.load(); },
+  onShow() {
+    if(this._disposed)return;this._hidden=false;const user=session.user();
+    const needsRead=!this._loaded||!this.data.info||String(user&&user.id)!==String(this._userId);
+    if(this.data.busy){if(needsRead)this._resumeRead=true;return;}
+    if(needsRead)return this.load();
+  },
+  onHide() { this._hidden=true;this._resumeRead=false;this._ticket=(this._ticket||0)+1;if(this.data.loading||this.data.busy)this._loaded=false;this.setData({loading:false}); },
+  onUnload() { this.onHide();this._disposed=true;this._recoveryDraft=null;if(this._unsubscribe)this._unsubscribe(); },
+  retry() { return this.load(); },
+  validRead(ticket,userId,endpoint) { return !this._hidden&&!this._disposed&&ticket===this._ticket&&endpoint===this._readEndpoint&&String(session.user()&&session.user().id)===String(userId); },
+  async completeOperation(draft) {
+    if(this._disposed)return;this.setData({busy:false});
+    if(!this._loaded)this._recoveryDraft=draft&&draft.context===this._context&&draft.endpoint===this._readEndpoint&&String(draft.userId)===String(session.user()&&session.user().id)?draft:null;
+    if(this._resumeRead&&!this._hidden){
+      this._resumeRead=false;
+      await this.load();
+    }
+  },
   async load() {
-    if(this.data.busy)return;
+    if(this.data.busy||this._hidden||this._disposed)return;
+    // A previous success does not make an in-flight reload complete.
+    this._loaded=false;this._resumeRead=false;
     const ticket=this._ticket=(this._ticket||0)+1;
     if(!protect(this)){this._loaded=false;this.setData({loading:false,info:null,receipt:null,answers:{},questions:[],entries:[]});return;}
-    this._userId=session.user().id;this.setData({loading:true,error:'',message:'',info:null,receipt:null});
-    try { const info=await http.request(this._readEndpoint+(this.data.edit?'?mode='+ (this._options.mode==='view'?'view':'manage'):''),{raw:true,required:true,questionnaire:true});
-      if(ticket!==this._ticket||String(session.user()&&session.user().id)!==String(this._userId))return;this._loaded=true;
+    const userId=this._userId=session.user().id,endpoint=this._readEndpoint;
+    this.setData({loading:true,error:'',message:'',info:null,receipt:null});
+    try { const info=await http.request(endpoint+(this.data.edit?'?mode='+ (this._options.mode==='view'?'view':'manage'):''),{raw:true,required:true,questionnaire:true});
+      if(!this.validRead(ticket,userId,endpoint))return;
       this.setData({loading:false,info:{...info,title:brand.display(info.title)},receipt:this._staff?staff.receipt(info.application):receipt(info.signup),answers:{},responseEditing:false,review:false,step:0,answerErrors:{}});this.setForm(info.form);this.renderQuestions();wx.setNavigationBarTitle({title:this._staff?'骨干申请':this.data.edit?'报名问卷管理':'活动报名'});
+      const draft=this._recoveryDraft,saved=this.data.receipt;
+      const unchanged=draft&&draft.context===this._context&&String(draft.userId)===String(userId)&&draft.endpoint===endpoint&&
+        (saved?String(saved.id)===String(draft.receiptId)&&saved.updatedAt===draft.revision:!draft.receiptId);
+      const allowed=draft&&(this._staff?info.actions&&info.actions[draft.responseEditing?'edit':'submit']:info.state==='报名开放');
+      if(unchanged&&allowed){
+        const answers=questionnaire.initialAnswers(info.form,draft.answers),review=draft.review&&draft.version===info.version;
+        this.setData({answers,responseEditing:draft.responseEditing,review,step:draft.step,
+          reviewRows:review?receipt({questions:questionnaire.visibleQuestions(info.form,answers),answers}).rows:[],message:'提交状态已刷新，尚未保存的内容已保留，请核对后重试。'});
+        this.renderQuestions();
+      }
+      this._recoveryDraft=null;
+      this._loaded=true;
       if(this.data.edit&&!info.canManage&&info.canViewSignups){this.setData({tab:'entries'});await this.loadEntries(1);}
-    }catch(cause){if(ticket===this._ticket)error(this,cause);}
+    }catch(cause){if(this.validRead(ticket,userId,endpoint)){this._loaded=false;error(this,cause);}}
   },
   setForm(form) { const start=localParts(form.start),end=localParts(form.end);this.setData({form,advancedEditing:form.questions.some(q=>!types.includes(q.type)||q.showWhen||q.display||q.jumps?.length),editQuestions:form.questions.map(q=>({...q,typeIndex:types.indexOf(q.type),typeLabel:questionnaire.questionTypes[q.type],optionsText:q.options.join('\n')})),startDate:start.date,startTime:start.time,endDate:end.date,endTime:end.time}); },
   renderQuestions() { this.setData(questionnaire.presentation(this.data.form,this.data.answers,this.data.step,this._seed,this.data.answerErrors)); },
@@ -58,19 +89,22 @@ Page({
   answerPrevious() { if(this.data.busy)return;this.setData(this.data.review?{review:false}:{step:Math.max(0,this.data.step-1)});this.renderQuestions();wx.pageScrollTo({scrollTop:0,duration:200}); },
   editAnswers() { if(this.data.busy||!this.data.receipt||!(this._staff?this.data.info.actions&&this.data.info.actions.edit:this.data.info.state==='报名开放'))return;this.setData({responseEditing:true,answers:questionnaire.initialAnswers(this.data.form,this.data.receipt.answers),answerErrors:{},step:0,review:false,message:''});this.renderQuestions(); },
   async refreshStaff(message) {
+    const ticket=this._ticket,userId=this._userId,endpoint=this._readEndpoint;
     this.setData({info:{...this.data.info,actions:{}}});
     try {
-      const info=await http.request(this._readEndpoint,{raw:true,required:true,questionnaire:true});
-      if(this._hidden||String(session.user()&&session.user().id)!==String(this._userId))return;
+      const info=await http.request(endpoint,{raw:true,required:true,questionnaire:true});
+      if(!this.validRead(ticket,userId,endpoint))return;
       this.setData({info:{...info,title:brand.display(info.title)},receipt:staff.receipt(info.application),message});
     } catch(cause) {
-      if(!this._hidden&&session.user()&&String(session.user().id)===String(this._userId))this.setData({message:message+'；回执状态刷新失败：'+cause.message+'。请重新加载确认允许的操作。'});
+      if(this.validRead(ticket,userId,endpoint))this.setData({message:message+'；回执状态刷新失败：'+cause.message+'。请重新加载确认允许的操作。'});
     }
   },
   async submit() {
-    if(this.data.busy||!this.data.review||!this.checkAnswers(true)||!session.user()||String(session.user().id)!==String(this._userId))return;
+    if(this.data.busy||this.data.loading||!this.data.info||this._hidden||this._disposed||!this.data.review||!this.checkAnswers(true)||!session.user()||String(session.user().id)!==String(this._userId))return;
     if(this._staff&&!(this.data.info.actions&&this.data.info.actions[this.data.responseEditing?'edit':'submit']))return;
     const userId=this._userId,ticket=this._ticket;
+    const draft={userId,context:this._context,endpoint:this._readEndpoint,version:this.data.info.version,receiptId:this.data.receipt&&this.data.receipt.id,
+      revision:this.data.receipt&&this.data.receipt.updatedAt,answers:this.data.answers,responseEditing:this.data.responseEditing,review:this.data.review,step:this.data.step};
     this.setData({busy:true,message:''});
     try{const updating=this.data.responseEditing,reapplying=this._staff&&this.data.receipt&&this.data.receipt.status==='withdrawn',result=await http.request(this._endpoint,{raw:true,method:updating&&!reapplying?'PATCH':'POST',required:true,questionnaire:true,data:{version:this.data.info.version,...(this.data.receipt&&(updating||this._staff)?{revision:this.data.receipt.updatedAt}:{}),answers:questionnaire.validateAnswers(this.data.form,this.data.answers)}});
       if(ticket!==this._ticket||String(session.user()&&session.user().id)!==String(userId))return;
@@ -78,7 +112,7 @@ Page({
       this.setData({receipt:this._staff?staff.receipt(result.application):receipt(result.signup),responseEditing:false,review:false,answers:{},message});
       if(this._staff)await this.refreshStaff(message);
     }
-    catch(cause){if(ticket===this._ticket&&String(session.user()&&session.user().id)===String(userId))this.setData({message:cause.message});}finally{this.setData({busy:false});}
+    catch(cause){if(ticket===this._ticket&&String(session.user()&&session.user().id)===String(userId))this.setData({message:cause.message});}finally{await this.completeOperation(draft);}
   },
   async withdraw() {
     if(this.data.busy||!this.data.info||!this.data.info.actions||!this.data.info.actions.withdraw)return;
@@ -91,7 +125,7 @@ Page({
       if(ticket!==this._ticket||String(session.user()&&session.user().id)!==String(userId))return;
       this.setData({receipt:staff.receipt(result.application),responseEditing:false,review:false,answers:{},message:'申请已撤回'});
       await this.refreshStaff('申请已撤回');
-    }catch(cause){if(ticket===this._ticket)this.setData({message:cause.message});}finally{this.setData({busy:false});}
+    }catch(cause){if(ticket===this._ticket)this.setData({message:cause.message});}finally{await this.completeOperation();}
   },
   staffReview() { if(this.data.info&&this.data.info.actions&&this.data.info.actions.review)navigation.go('staff-review',{id:this._options.id}); },
   websiteEditor() { wx.setClipboardData({data:config.origin+'/activities/'+encodeURIComponent(this._options.kind)+'/'+encodeURIComponent(this._options.id)+'/manage'}); },
@@ -109,9 +143,9 @@ Page({
   add() { if(this.data.advancedEditing)return;this.setForm({...this.data.form,questions:[...this.data.form.questions,{id:'q'+Date.now().toString(36)+Math.random().toString(36).slice(2,8),label:'',type:'text',required:true,options:[]}]}); },
   move(event) { const i=Number(event.currentTarget.dataset.index),j=i+Number(event.currentTarget.dataset.direction),questions=[...this.data.form.questions];if(j<0||j>=questions.length)return;[questions[i],questions[j]]=[questions[j],questions[i]];this.setForm({...this.data.form,questions}); },
   remove(event) { this.setForm({...this.data.form,questions:this.data.form.questions.filter((_,i)=>i!==Number(event.currentTarget.dataset.index))}); },
-  async save() { if(this.data.busy||this.data.advancedEditing||!this.data.info||!this.data.info.canManage)return;const ticket=this._ticket;this.setData({busy:true,message:''});try{const result=await http.request(this._endpoint,{raw:true,required:true,questionnaire:true,method:'PUT',data:{version:this.data.info.version,form:this.data.form}});if(ticket!==this._ticket)return;this.setData({info:{...this.data.info,version:result.version},message:result.message});this.setForm(result.form);}catch(cause){if(ticket===this._ticket)this.setData({message:cause.message});}finally{this.setData({busy:false});} },
+  async save() { if(this.data.busy||this.data.advancedEditing||!this.data.info||!this.data.info.canManage)return;const ticket=this._ticket;this.setData({busy:true,message:''});try{const result=await http.request(this._endpoint,{raw:true,required:true,questionnaire:true,method:'PUT',data:{version:this.data.info.version,form:this.data.form}});if(ticket!==this._ticket)return;this.setData({info:{...this.data.info,version:result.version},message:result.message});this.setForm(result.form);}catch(cause){if(ticket===this._ticket)this.setData({message:cause.message});}finally{await this.completeOperation();} },
   tab(event) { if(this.data.busy||!this.data.info)return;const tab=event.currentTarget.dataset.tab;if(tab==='edit'&&!this.data.info.canManage||tab==='entries'&&!this.data.info.canViewSignups||!['edit','entries'].includes(tab))return;this.setData({tab,message:''});if(tab==='entries')this.loadEntries(1); },
-  async loadEntries(page) { if(this.data.busy||!this.data.info||!this.data.info.canViewSignups)return;const ticket=this._ticket;this.setData({busy:true,message:''});try{const result=await http.request(this._endpoint+'?mode=entries&page='+page,{raw:true,required:true,questionnaire:true});if(ticket!==this._ticket)return;this.setData({entries:result.docs.map(receipt),page:result.page,pages:result.totalPages,total:result.totalDocs});}catch(cause){if(ticket===this._ticket)this.setData({message:cause.message});}finally{this.setData({busy:false});} },
+  async loadEntries(page) { if(this.data.busy||!this.data.info||!this.data.info.canViewSignups)return;const ticket=this._ticket;this.setData({busy:true,message:''});try{const result=await http.request(this._endpoint+'?mode=entries&page='+page,{raw:true,required:true,questionnaire:true});if(ticket!==this._ticket)return;this.setData({entries:result.docs.map(receipt),page:result.page,pages:result.totalPages,total:result.totalDocs});}catch(cause){if(ticket===this._ticket)this.setData({message:cause.message});}finally{await this.completeOperation();} },
   previous() { if(this.data.page>1)this.loadEntries(this.data.page-1); },
   next() { if(this.data.page<this.data.pages)this.loadEntries(this.data.page+1); },
 });
