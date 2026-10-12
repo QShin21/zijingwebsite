@@ -5,6 +5,7 @@ import { canParticipate, canReviewShowcase, relationID } from "./rules";
 import { teamHonorService } from "./team-honor-service";
 import { honorError, honorWorkspace, saveHonorForm } from "./team-honor-web";
 import { honorID, type HonorAction, type HonorInput } from "./team-honor-model";
+import { miniappTeamHonorReads } from "./miniapp-team-honor";
 
 const noStore = {
   "Cache-Control": "private, no-store",
@@ -109,14 +110,15 @@ export async function teamHonorHTTP(
       id = idValue === undefined ? undefined : honorID(idValue);
     if (!mutate) {
       if (id) {
+        const read = await miniappTeamHonorReads(p, actor);
         const record = await p.findByID({
           collection: "team-honor-records",
           id,
-          user: actor,
+          user: read.actor,
           overrideAccess: false,
           depth: 0,
         });
-        return reply({ record: honorPrivateDTO(record, actor) });
+        return reply({ record: { ...honorPrivateDTO(record, read.actor), actions: await read.recordActions(record) } });
       }
       const url = new URL(request.url),
         view = url.searchParams.get("view") === "review" ? "review" : "mine";
@@ -132,20 +134,21 @@ export async function teamHonorHTTP(
           ? { game: honorID(url.searchParams.get("game")) }
           : {}),
       };
-      const records = await honorWorkspace(p, actor, view, page, scope),
-        memberships = await teamHonorService.availableTeams(p, actor);
+      const read = await miniappTeamHonorReads(p, actor, scope),
+        records = await honorWorkspace(p, read.actor, view, page, scope);
       return reply({
-        docs: records.docs.map((record) => honorPrivateDTO(record, actor)),
+        docs: await Promise.all(records.docs.map(async (record) => ({ ...honorPrivateDTO(record, read.actor), actions: await read.recordActions(record) }))),
         totalDocs: records.totalDocs,
         page: records.page,
         totalPages: records.totalPages,
-        teams: memberships.map((row) => ({
+        teams: read.teams.map((row) => ({
           id: row.team,
           title: row.teamInfo.title,
           game: row.teamInfo.game,
           gameTitle: row.teamInfo.gameTitle,
           gameSlug: row.teamInfo.gameSlug,
         })),
+        actions: read.actions,
       });
     }
     const type = request.headers.get("content-type") || "";
