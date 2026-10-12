@@ -1,3 +1,4 @@
+import * as teamCore from './20261012_160000_team_core';
 import * as activitySignups from './20261011_160000_activity_signups';
 import * as clubOperations from './20261011_180000_club_operations';
 import * as contentPromotions from './20261012_030000_content_promotions';
@@ -61,4 +62,5 @@ export const migrations = [
   { up: clubOperations.up, down: clubOperations.down, name: '20261011_180000_club_operations' },
   { up: contentPromotions.up, down: contentPromotions.down, name: '20261012_030000_content_promotions' },
   { up: staffRecruitment.up, down: staffRecruitment.down, name: '20261012_050000_staff_recruitment' },
+  { up: teamCore.up, down: teamCore.down, name: '20261012_160000_team_core' },
 ];
