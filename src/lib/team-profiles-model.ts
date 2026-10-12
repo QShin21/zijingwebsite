@@ -43,13 +43,16 @@ function plainText(
 ) {
   if (typeof value !== "string") throw new APIError(`${label}格式无效`, 400);
   const result = value.trim();
+  const control = Array.from(result).some((character) => {
+    const code = character.codePointAt(0)!;
+    return code === 127 || (code < 32 && ![9, 10, 13].includes(code));
+  });
   // Plain text only: no HTML, control characters or invisible direction overrides.
   if (
     result.length > max ||
     (required && !result) ||
-    /[<>\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\u202A-\u202E\u2066-\u2069]/u.test(
-      result,
-    ) ||
+    control ||
+    /[<>\u202A-\u202E\u2066-\u2069]/u.test(result) ||
     (!multiline && /[\r\n\t]/u.test(result))
   )
     throw new APIError(
