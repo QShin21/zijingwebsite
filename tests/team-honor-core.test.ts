@@ -279,13 +279,55 @@ it("真实队伍归档/账号停用阻断权限，队伍档案同步撤下", asy
     [],
   );
   await expect(submit()).rejects.toThrow("有效成员");
+  await expect(
+    p.update({
+      collection: "teams",
+      id: chain.team.id,
+      overrideAccess: true,
+      user: reviewer,
+      context: { teamCoreWrite: true },
+      data: { teamStatus: "active", archived: false },
+    }),
+  ).rejects.toThrow("高权限");
+  const connection = new pg.Client({
+    connectionString: process.env.DATABASE_URL,
+  });
+  await connection.connect();
+  try {
+    // Legacy dual-marker inconsistencies still cannot restore current submission/archive authority.
+    for (const [status, archived] of [
+      ["active", true],
+      ["archived", false],
+    ] as const) {
+      await connection.query(
+        "UPDATE teams SET team_status=$1,archived=$2 WHERE id=$3",
+        [status, archived, chain.team.id],
+      );
+      expect(
+        await teamHonorService.archives(p, { team: chain.team.id }),
+      ).toEqual([]);
+      await expect(submit()).rejects.toThrow("有效成员");
+      await expect(
+        p.update({
+          collection: "teams",
+          id: chain.team.id,
+          overrideAccess: true,
+          user: reviewer,
+          context: { teamCoreWrite: true },
+          data: { teamStatus: "active", archived: false },
+        }),
+      ).rejects.toThrow("高权限");
+    }
+  } finally {
+    await connection.end();
+  }
   await p.update({
     collection: "teams",
     id: chain.team.id,
     overrideAccess: true,
     user: leader,
     context: { system: true, teamCoreWrite: true },
-    data: { teamStatus: "active" },
+    data: { teamStatus: "active", archived: false },
   });
 });
 it("真实成员行锁使退出和荣誉写入串行化，不使用缓存有效关系越过已完成退出", async () => {
