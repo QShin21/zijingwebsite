@@ -1,14 +1,14 @@
 {
-  "schemaVersion": 2,
-  "at": "2026-10-12T11:07:51.164633+00:00",
+  "schemaVersion": 3,
+  "at": "2026-10-12T11:31:10.234053+00:00",
   "branch": "codex/club-integration-20261012",
   "base": "ed965ef457b5913d4590753c9d931e82811244b9",
-  "runtimeCodeSHA": "463f0419fc941af83e27812073f964d33660b954",
-  "runtimeObjectsSHA256": "c45d91033f5f6297410585f006c2ea6d16a89a2189cdb992bdeb9748a2304e77",
+  "runtimeCodeSHA": "e5de8df47c6feea3a5ad6efde44937038c59f2d0",
+  "runtimeObjectsSHA256": "e3231c122c77a6ad9546a95af99a67752747bb9adf8c4cd101b6163608c67fcb",
   "approvedFrozenInputs": {
     "staff": "1c19cddfe39abb4946f3603ff7053b089cda9637",
     "profiles": "3ba056c3dde350b51f28ea72792fe17d54e96b84",
-    "native": "72f580f7806d09b8e249f45c63ae215f190f5fcf",
+    "native": "58eb54277c01685e6fc19cd0e17218da965e3192",
     "core": "bf6665c57d83ffa269845c76ff6903d23e0510de",
     "honors": "196ebf841c77f7a725ed6b41100cd66b341faea5"
   },
@@ -211,32 +211,25 @@
   },
   "local": {
     "fullUnitDatabase": {
-      "result": "success",
-      "files": 55,
-      "tests": 638,
-      "durationSeconds": 132.2,
-      "codeSHA": "463f0419fc941af83e27812073f964d33660b954",
-      "log": "/tmp/zijing-union-all-unit-final.log"
+      "status": "running",
+      "sourceCodeSHA": "e5de8df47c6feea3a5ad6efde44937038c59f2d0",
+      "log": "/tmp/zijing-native-complete-final-unit.log"
     },
     "typecheck": "success",
     "lint": "success",
     "diffCheck": "success",
     "build": {
-      "result": "success",
-      "codeSHA": "a4a0c57de778f8966031e1c0143ad48e91aab066",
-      "method": "exact git archive, isolated build directory and installed Next CLI",
-      "log": "/tmp/zijing-honor-build-exact.log",
-      "laterRuntimeChanges": [
-        "d46aab1 submitted-team snapshot on uncertain action",
-        "280545a five core/profile rollback counts"
-      ]
+      "status": "pending-final-native-build"
     },
     "nativeStatic": {
       "result": "success",
-      "pages": 17,
-      "files": 105,
-      "bytes": 259641,
-      "domainChecking": true
+      "pages": 25,
+      "files": 142,
+      "bytes": 457838,
+      "domainChecking": true,
+      "nativeDependencies": 0,
+      "codeSHA": "e5de8df47c6feea3a5ad6efde44937038c59f2d0",
+      "log": "/tmp/zijing-native-complete-final-static.log"
     },
     "targetedRealHTTPBrowser": {
       "crossModule": 2,
@@ -253,15 +246,24 @@
         "submittedTeamRetainedAfterChangingTeam": true,
         "savedResultVisible": true,
         "automaticReplay": false
+      },
+      "completeNativeHTTPBridge": {
+        "result": "success",
+        "tests": 3,
+        "durationMinutes": 2.6,
+        "codeSHA": "8d65bf739a8ef88fe72b0ff6f8e2404c8c28f77c",
+        "log": "/tmp/zijing-native-union-cross-e2e.log",
+        "jwtTransport": true,
+        "ownApprovedRecruitmentAndPrivateMemberDTO": true,
+        "unauthorizedWorkbench403": true,
+        "honorActionsAndScopedTeams": true,
+        "revokedAuthorActionsClosed": true,
+        "archivedOriginalReceiptVisible": true,
+        "archivedReceiptOthers404Guests401": true
       }
     },
     "fullBrowser": {
-      "status": "success",
-      "tests": 95,
-      "durationMinutes": 27.4,
-      "sourceAtStart": "a4a0c57de778f8966031e1c0143ad48e91aab066",
-      "note": "Started before the additional multi-team recovery edge; that edge is being re-run separately. Exact final CI is tracked separately.",
-      "log": "/tmp/zijing-honor-all-e2e.log"
+      "status": "pending-final-complete-native-integration"
     },
     "rollbackGateTests": {
       "status": "success",
@@ -276,8 +278,27 @@
       "durationSeconds": 121.23,
       "log": "/tmp/zijing-honor-all-unit-clean.log"
     },
-    "typecheckLog": "/tmp/zijing-union-typecheck-verified.log",
-    "lintLog": "/tmp/zijing-union-lint-verified.log"
+    "typecheckLog": "/tmp/zijing-native-complete-final-typecheck.log",
+    "lintLog": "/tmp/zijing-native-complete-final-lint.log",
+    "intermediateMergedFullUnitDatabase": {
+      "result": "success",
+      "files": 67,
+      "tests": 1144,
+      "durationSeconds": 151.29,
+      "codeSHA": "f5502b62048f127afe53bbbf72f87d41846ceb46",
+      "log": "/tmp/zijing-native-union-all-unit.log",
+      "scope": "before independent staff form/version refresh fix"
+    },
+    "previousBuild": {
+      "result": "success",
+      "codeSHA": "a4a0c57de778f8966031e1c0143ad48e91aab066",
+      "method": "exact git archive, isolated build directory and installed Next CLI",
+      "log": "/tmp/zijing-honor-build-exact.log",
+      "laterRuntimeChanges": [
+        "d46aab1 submitted-team snapshot on uncertain action",
+        "280545a five core/profile rollback counts"
+      ]
+    }
   },
   "schema": {
     "collections": 33,
@@ -297,7 +318,10 @@
     ],
     "registeredOnce": true,
     "honorOwnershipForeignKeys": "four RESTRICT, reviewer SET NULL",
-    "catalogArrayTypes": "attname cast text[]; all snapshot FK columns are arrays"
+    "catalogArrayTypes": "attname cast text[]; all snapshot FK columns are arrays",
+    "afterNativeTypesRegeneratedUnchanged": true,
+    "afterNativeCatalogMatchesSnapshot": true,
+    "afterNativeReadOnlyLog": "/tmp/zijing-native-union-schema.log"
   },
   "migrationDrills": {
     "core": "club-integration-core-honors-migration-20261012.json",
@@ -329,6 +353,20 @@
         "failedCase": "tests/team-profiles-db.test.ts: same initial content parallel save",
         "browserAndBuild": "not-run",
         "error": "explicit public serializable/deadlock conflict 409 after the documented single automatic retry"
+      },
+      {
+        "headSHA": "a4a0c57de778f8966031e1c0143ad48e91aab066",
+        "runID": 38236959029,
+        "jobID": 114769877218,
+        "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38236959029",
+        "conclusion": "success",
+        "unitPassed": 633,
+        "unitFiles": 55,
+        "browserPassed": 95,
+        "browserDurationMinutes": 37.5,
+        "build": "success",
+        "logCountsVerified": true,
+        "scope": "earlier web source; predates submitted-team snapshot, extra rollback counts and complete native integration"
       }
     ]
   },
@@ -365,7 +403,7 @@
     }
   ],
   "remainingUnverified": [
-    "unapproved subsequent native team/profile/honor adapter still under development",
+    "parent separate narrow native profile PUT-success/GET-failure consistency patch awaiting freeze",
     "official WeChat compilation/simulator/device/platform settings",
     "actual S3 mirror synchronization/offsite backup/production recovery",
     "final cloud-built thin release artifact, migration runner and compatible rollback package"
@@ -376,13 +414,15 @@
     "registrationTypesAndSchema": "no additional material omission reported for a4a0c57",
     "navigationFinding": "Uncertain result lookup followed the currently selected team; fixed by retaining the submitted team in d46aab1",
     "submittedTeamSnapshotReview": "read-only follow-up found no material omission",
-    "rollbackGateFollowup": "read-only follow-up found no fail-open behavior; production schema and rollback artifact remain unverified"
+    "rollbackGateFollowup": "read-only follow-up found no fail-open behavior; production schema and rollback artifact remain unverified",
+    "nativeBridge": "no material ACL expansion found; keep fresh actor/DTO actions and integration media/archive/staff contracts",
+    "staffRefreshFinding": "Fixed staff version B/rendered form A mismatch in e5de8df; fresh form plus forced new review and null-form receipt regression pass"
   },
   "releasePreflight": {
     "document": "../CLUB_RELEASE_PREFLIGHT_20261012.md",
     "planningOnly": true,
     "artifactCreated": false,
-    "parentReportedFreeDiskGiB": 1.06,
+    "parentReportedFreeDiskGiB": 2.113,
     "mustVerify": [
       "final approved SHA after native freeze",
       "platform architecture/libc and native modules",
@@ -390,6 +430,205 @@
       "separate web/runtime and CLI migration closure",
       "actual production catalog and pending migrations",
       "v3 media backup and compatible rollback artifact"
-    ]
+    ],
+    "currentSiteAppCannotBeReplaced": true,
+    "postgresData": "app/.data/postgres",
+    "postgresRuntimeBinaries": "app/node_modules",
+    "reuseExistingVerifiedDependencies": true,
+    "targetPlatform": {
+      "arch": "x64",
+      "libc": "glibc2.36",
+      "node": "24.12"
+    },
+    "parentReportedDiskUsePercent": 98,
+    "secondPersistentDisk": false,
+    "codePackageLimitsMiB": {
+      "compressed": 50,
+      "expanded": 100
+    },
+    "PG_BIN": "/srv/zijingwebsite/tools/pg17/usr/lib/postgresql/17/bin",
+    "pgClientVersion": "17.11",
+    "defaultPgClientVersion": "15.15",
+    "actualAppliedMigrationNamesNeedComparison": true,
+    "reportedAppliedMigrationCount": 11,
+    "candidateMigrationCount": 17,
+    "cacheCleanupApproved": true,
+    "priorReportedFreeDiskGiB": 1.06,
+    "cacheCleanupPerformedByParentDeploymentThread": true,
+    "parentReportedFreedDiskGiB": 1.055,
+    "parentReportedServicesAndPIDUnchanged": true,
+    "integrationProductionAccess": false,
+    "actualPeakBudgetStillRequired": true
+  },
+  "historicalWebBeforeCompleteNativeStage": {
+    "runtimeCodeSHA": "463f0419fc941af83e27812073f964d33660b954",
+    "runtimeObjectsSHA256": "c45d91033f5f6297410585f006c2ea6d16a89a2189cdb992bdeb9748a2304e77",
+    "approvedFrozenInputs": {
+      "staff": "1c19cddfe39abb4946f3603ff7053b089cda9637",
+      "profiles": "3ba056c3dde350b51f28ea72792fe17d54e96b84",
+      "native": "72f580f7806d09b8e249f45c63ae215f190f5fcf",
+      "core": "bf6665c57d83ffa269845c76ff6903d23e0510de",
+      "honors": "196ebf841c77f7a725ed6b41100cd66b341faea5"
+    },
+    "local": {
+      "fullUnitDatabase": {
+        "result": "success",
+        "files": 55,
+        "tests": 638,
+        "durationSeconds": 132.2,
+        "codeSHA": "463f0419fc941af83e27812073f964d33660b954",
+        "log": "/tmp/zijing-union-all-unit-final.log"
+      },
+      "typecheck": "success",
+      "lint": "success",
+      "diffCheck": "success",
+      "build": {
+        "result": "success",
+        "codeSHA": "a4a0c57de778f8966031e1c0143ad48e91aab066",
+        "method": "exact git archive, isolated build directory and installed Next CLI",
+        "log": "/tmp/zijing-honor-build-exact.log",
+        "laterRuntimeChanges": [
+          "d46aab1 submitted-team snapshot on uncertain action",
+          "280545a five core/profile rollback counts"
+        ]
+      },
+      "nativeStatic": {
+        "result": "success",
+        "pages": 17,
+        "files": 105,
+        "bytes": 259641,
+        "domainChecking": true
+      },
+      "targetedRealHTTPBrowser": {
+        "crossModule": 2,
+        "publicMediaGuard": 1,
+        "storageMatrixChecks": 293,
+        "realMarkerReadFailureChecks": 3,
+        "multiTeamUncertainResult": {
+          "status": "success",
+          "tests": 1,
+          "durationSeconds": 44.3,
+          "codeSHA": "463f0419fc941af83e27812073f964d33660b954",
+          "log": "/tmp/zijing-honor-multiteam-recovery-e2e-verified.log",
+          "realDualMembership": true,
+          "submittedTeamRetainedAfterChangingTeam": true,
+          "savedResultVisible": true,
+          "automaticReplay": false
+        }
+      },
+      "fullBrowser": {
+        "status": "success",
+        "tests": 95,
+        "durationMinutes": 27.4,
+        "sourceAtStart": "a4a0c57de778f8966031e1c0143ad48e91aab066",
+        "note": "Started before the additional multi-team recovery edge; that edge is being re-run separately. Exact final CI is tracked separately.",
+        "log": "/tmp/zijing-honor-all-e2e.log"
+      },
+      "rollbackGateTests": {
+        "status": "success",
+        "tests": 30,
+        "log": "/tmp/zijing-union-rollback-unit.log",
+        "sourceCommit": "280545aeca519c0b07e7d07a5304d1ddacbd041a"
+      },
+      "previousFullUnitDatabase": {
+        "result": "success",
+        "files": 55,
+        "tests": 633,
+        "durationSeconds": 121.23,
+        "log": "/tmp/zijing-honor-all-unit-clean.log"
+      },
+      "typecheckLog": "/tmp/zijing-union-typecheck-verified.log",
+      "lintLog": "/tmp/zijing-union-lint-verified.log"
+    },
+    "schema": {
+      "collections": 33,
+      "expectedModuleCollections": 8,
+      "snapshotTables": 69,
+      "snapshot": "src/migrations/20261012_170000_team_member_profiles.json",
+      "readOnlySnapshot": true,
+      "reconciledConstraintTables": 11,
+      "diffDDLExecuted": false,
+      "coreMigrationTSBlob": "a47f81e6a8f62f596da3bb2808750216c114257d",
+      "migrationOrder": [
+        "20261012_030000_content_promotions",
+        "20261012_050000_staff_recruitment",
+        "20261012_080000_team_honor_records",
+        "20261012_160000_team_core",
+        "20261012_170000_team_member_profiles"
+      ],
+      "registeredOnce": true,
+      "honorOwnershipForeignKeys": "four RESTRICT, reviewer SET NULL",
+      "catalogArrayTypes": "attname cast text[]; all snapshot FK columns are arrays"
+    },
+    "exactIntegratedCI": {
+      "status": "pending-push-final-reviewed-integration",
+      "attempts": [
+        {
+          "headSHA": "672f4dd88cd8088e0f44dad55144453f02847434",
+          "runID": 38230468219,
+          "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38230468219",
+          "conclusion": "failure",
+          "unitPassed": 518,
+          "unitFailed": 1,
+          "failedCase": "tests/team-profiles-db.test.ts: same initial content parallel save",
+          "browserAndBuild": "not-run",
+          "error": "explicit public serializable/deadlock conflict 409 after the documented single automatic retry"
+        },
+        {
+          "headSHA": "a4a0c57de778f8966031e1c0143ad48e91aab066",
+          "runID": 38236959029,
+          "jobID": 114769877218,
+          "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38236959029",
+          "conclusion": "success",
+          "unitPassed": 633,
+          "unitFiles": 55,
+          "browserPassed": 95,
+          "browserDurationMinutes": 37.5,
+          "build": "success",
+          "logCountsVerified": true,
+          "scope": "earlier web source; predates submitted-team snapshot, extra rollback counts and complete native integration"
+        }
+      ]
+    }
+  },
+  "nativeFrozenSource": {
+    "codeSHA": "cd337eb2451991548424f4084a906a8202633636",
+    "documentationFreezeSHA": "58eb54277c01685e6fc19cd0e17218da965e3192",
+    "documentationOnlyFiles": 9,
+    "runID": 38236841206,
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38236841206",
+    "conclusion": "success",
+    "unitPassed": 1030,
+    "browserPassed": 83,
+    "officialWeChatEvidence": false,
+    "mergeSHA": "f5502b62048f127afe53bbbf72f87d41846ceb46"
+  },
+  "nativeMergeRetained": {
+    "protectedIntegrationFilesByteCompared": 18,
+    "newSharedBackendFiles": [
+      "src/lib/miniapp-team.ts",
+      "src/lib/miniapp-team-honor.ts"
+    ],
+    "modifiedSharedBackendFiles": [
+      "src/app/(frontend)/api/miniapp/[...path]/route.ts",
+      "src/lib/team-honor-http.ts"
+    ],
+    "collectionsTypesMigrationsChanged": false,
+    "coreGetterBlob": "46a892f0554f02172d23896195c8661d0afa5967",
+    "coreMigrationTSBlob": "a47f81e6a8f62f596da3bb2808750216c114257d",
+    "staffFormNullAndOriginalVersionRetained": true,
+    "archiveTransactionAndMediaMarkersRetained": true
+  },
+  "nativeStaffRefreshFix": {
+    "commit": "e5de8df47c6feea3a5ad6efde44937038c59f2d0",
+    "regressionsFailedBefore": 2,
+    "newRegressionsPassed": 2,
+    "staffCasesPassed": 31,
+    "sharedLifecycleCasesPassed": 144,
+    "totalTargetedPassed": 175,
+    "nullFormReceiptRetained": true,
+    "freshFormAndVersionSynchronized": true,
+    "oldReviewReset": true,
+    "noAutomaticWriteReplay": true
   }
 }
