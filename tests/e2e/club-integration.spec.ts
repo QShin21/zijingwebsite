@@ -271,7 +271,7 @@ test("荣誉本人分页保留队伍和社群；断网与丢响应保留附件�
     const secondApplication = await operation(page, { operation: "save-join", id: secondBatch.id, action: "submit", version: secondInfo.version, answers: { gameID: "合成第二队玩家", position: "合成位置", experience: "合成经历", availability: "合成时段", contact: "synthetic-recovery@example.invalid" } });
     await operation(reviewer, { operation: "decide-join", id: secondApplication.id, revision: secondApplication.updatedAt, decision: "approved", note: "" });
     await page.goto("/teams/honors?view=mine&game=" + game); const uncertainTitle = "合成已写入但丢响应-" + suffix;
-    await editor.getByLabel("所属有效代表队", { exact: true }).selectOption(String(teamID));
+    await editor.getByRole("combobox", { name: "所属有效代表队", exact: true }).selectOption(String(teamID));
     await editor.getByLabel("荣誉标题", { exact: true }).fill(uncertainTitle);
     await editor.getByLabel("添加证据图片（每份 2 MB，最多 6 份）", { exact: true }).setInputFiles({ name: "synthetic-uncertain.png", mimeType: "image/png", buffer: png });
     await editor.getByLabel(/新证据 1 说明/).fill("合成丢响应附件保留");
@@ -282,7 +282,7 @@ test("荣誉本人分页保留队伍和社群；断网与丢响应保留附件�
     await expect(editor.getByRole("alert")).toContainText("提交结果尚未确认"); await expect(editor.getByRole("button", { name: "保存草稿", exact: true })).toBeDisabled();
     await expect(editor.getByLabel("荣誉标题", { exact: true })).toHaveValue(uncertainTitle); await expect(editor.getByLabel(/新证据 1 说明/)).toHaveValue("合成丢响应附件保留");
     await page.unroute("**/teams/honors**", loseResponse);
-    await editor.getByLabel("所属有效代表队", { exact: true }).selectOption(String(secondTeam));
+    await editor.getByRole("combobox", { name: "所属有效代表队", exact: true }).selectOption(String(secondTeam));
     expect(new URL((await editor.getByRole("link", { name: "查看本人荣誉记录", exact: true }).getAttribute("href"))!, "http://localhost:3000").searchParams.get("team")).toBe(String(teamID));
     const checkPagePromise = page.context().waitForEvent("page"); await editor.getByRole("link", { name: "查看本人荣誉记录", exact: true }).click();
     const checkPage = await checkPagePromise; await expect(checkPage.getByRole("link", { name: uncertainTitle, exact: true })).toBeVisible();
