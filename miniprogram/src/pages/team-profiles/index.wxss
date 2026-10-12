@@ -1,0 +1,10 @@
+.profile-card { margin-bottom: 20rpx; }
+.profile-card .muted, .editor > .muted, .preview > .muted { display: block; margin-top: 14rpx; }
+.avatar { width: 120rpx; height: 120rpx; border-radius: 24rpx; display: block; margin-bottom: 20rpx; }
+.preview-avatar { margin-top: 24rpx; }
+.biography { white-space: pre-wrap; overflow-wrap: anywhere; }
+.field { display: block; margin: 28rpx 0; }
+.field > text { display: block; margin-bottom: 12rpx; }
+.field input, .field textarea { width: 100%; min-height: 70rpx; background: #f3f5f8; border-radius: 12rpx; padding: 16rpx; box-sizing: border-box; }
+.field textarea { min-height: 160rpx; }
+.consent { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; margin-top: 28rpx; }
