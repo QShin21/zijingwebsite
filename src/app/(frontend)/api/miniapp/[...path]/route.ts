@@ -4,6 +4,7 @@ import { beginRegistrationAction, registerAction } from '@/app/(frontend)/accoun
 import { schoolEmail, validPassword, issueCode, consumeCode } from '@/lib/verification';
 import { miniappClubGET, miniappClubPOST, miniappClubReadPath, miniappClubWritePath } from '@/lib/miniapp-club';
 import { applicationError } from '@/lib/application-error';
+import { miniappTeamGET, miniappTeamReadPath } from '@/lib/miniapp-team';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -41,6 +42,7 @@ async function clubReply(operation: () => Promise<unknown>) {
 export async function GET(request: Request, context: Context) {
   const path = (await context.params).path.join('/');
   if (path === 'status') return reply({ version: 2, authentication: ['email', 'nickname'], registration: true, questionnaireVersion: 3, responseEditing: true, operationsVersion: 1, platformRoles: ['member', 'backbone', 'vicePresident', 'president'], communityOffices: true, manualWechatJoin: true });
+  if (miniappTeamReadPath(path)) return clubReply(async () => miniappTeamGET(await cms(), request, path));
   if (miniappClubReadPath(path)) return clubReply(async () => miniappClubGET(await cms(), request, path));
   return reply({ error: '接口不存在' }, 404);
 }
