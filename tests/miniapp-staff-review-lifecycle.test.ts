@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -14,7 +14,9 @@ type Page = { data: { docs: Doc[]; busy: boolean; loading: boolean; error: strin
   load(page?: number): Promise<void>; retry(): Promise<void>; decide(event: Event): Promise<void>; field(event: Event): void };
 type Modal = { success(value: { confirm: boolean }): void; fail(): void };
 const path = "miniprogram/src/pages/staff-review/index.js";
-const frozen = execFileSync("git", ["show", "72f580f7806d09b8e249f45c63ae215f190f5fcf:" + path], { encoding: "utf8" });
+// Exact source fixtures retain the negative regression proof in shallow CI checkouts.
+const frozen = readFileSync(new URL("./fixtures/miniapp-staff-review-72f580f.js.txt", import.meta.url), "utf8");
+const frozenWXML = readFileSync(new URL("./fixtures/miniapp-staff-review-72f580f.wxml.txt", import.meta.url), "utf8");
 const require = createRequire(import.meta.url);
 const staff = require("../miniprogram/src/lib/staff.js"), cms = require("../miniprogram/src/lib/cms.js");
 const oldRevision = "2026-10-12T01:00:00Z", newRevision = "2026-10-12T02:00:00Z";
@@ -199,6 +201,8 @@ describe("骨干审核生命周期修复", () => {
 
   it("保留冻结版本WXML，所有生命周期保护在Page中执行", () => {
     const wxml = "miniprogram/src/pages/staff-review/index.wxml";
-    expect(readFileSync(wxml, "utf8")).toBe(execFileSync("git", ["show", "72f580f7806d09b8e249f45c63ae215f190f5fcf:" + wxml], { encoding: "utf8" }));
+    expect(createHash("sha256").update(frozen).digest("hex")).toBe("6765c720c65245f90e356ef1bf2886b05ce39ce0a7049b7701f41b7dde4aeebe");
+    expect(createHash("sha256").update(frozenWXML).digest("hex")).toBe("92dc5e04a8d18118ada86823df5db28644fb439755f04c4da32b2823e0527c6f");
+    expect(readFileSync(wxml, "utf8")).toBe(frozenWXML);
   });
 });
