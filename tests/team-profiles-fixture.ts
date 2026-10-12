@@ -1,20 +1,12 @@
 import { randomBytes } from "node:crypto";
 import type { Payload } from "payload";
 import type { User } from "../src/payload-types";
-import {
-  submitTeamEstablishment,
-  decideTeamEstablishment,
-  saveTeamRecruitment,
-  closeTeamRecruitment,
-  teamRecruitmentInfo,
-  saveTeamJoinApplication,
-  decideTeamJoinApplication,
-  revokeTeamMembership,
-  defaultTeamForm,
-} from "../src/lib/team-core";
-import { getTeamMembership, positiveID } from "../src/lib/team-memberships";
+import { emptySignup } from "../src/lib/signup-schema";
 
-/** Actual formation, approval and admission services; synthetic records only. */
+/** Real core schema + read API fixture, not an approval-workflow acceptance test.
+ * The internal core write context is used only to prepare synthetic, valid
+ * establishment/team/game/account/membership relationships. Authority is never mocked.
+ */
 export async function profileFixture(p: Payload) {
   if (
     process.env.APP_ENV !== "development" ||
@@ -48,9 +40,9 @@ export async function profileFixture(p: Payload) {
     users.push(value);
     return value;
   };
-  const admin = await user("ProfileAdmin", ["president"]);
-  const member = await user("ProfileMember", ["member"]);
-  const viewer = await user("ProfileViewer", ["member"]);
+  const admin = await user("ProfileAdmin", ["president"]),
+    member = await user("ProfileMember", ["member"]),
+    viewer = await user("ProfileViewer", ["member"]);
   const game = await p.create({
     collection: "games",
     overrideAccess: true,
@@ -62,122 +54,116 @@ export async function profileFixture(p: Payload) {
       demo: true,
     },
   });
+  const core = {
+    user: admin,
+    overrideAccess: false,
+    context: { teamCoreWrite: true },
+  } as const;
   async function team(label: string) {
-    const application = await submitTeamEstablishment(p, admin, {
-      gameID: game.id,
-      title: "合成简介队" + label + suffix,
-      reason: "合成测试建队与公开简介资料，禁止导入生产。",
+    const application = await p.create({
+      ...core,
+      collection: "team-establishment-applications",
+      data: {
+        title: "合成简介队" + label,
+        game: game.id,
+        applicant: admin.id,
+        reason:
+          "合成读取接口与简介测试，禁止生产导入，不代表建队审批流程验收。",
+        requestKey: `profiles-establish:${suffix}:${label}`,
+        status: "pending",
+      },
     });
     applicationIDs.push(application.id);
-    const approved = await decideTeamEstablishment(
-      p,
-      admin,
-      application.id,
-      "approved",
-      "合成批准",
-      application.updatedAt,
-    );
-    const teamID = positiveID(approved.team)!;
-    teamIDs.push(teamID);
-    return p.update({
+    const value = await p.create({
+      ...core,
       collection: "teams",
-      id: teamID,
-      overrideAccess: true,
-      user: admin,
-      context: { system: true },
-      data: { demo: true },
+      data: {
+        title: "合成简介队" + label,
+        slug: "profile-team-" + label + "-" + suffix,
+        game: game.id,
+        _status: "published",
+        demo: true,
+        teamStatus: "active",
+        establishmentApplication: application.id,
+      },
     });
+    teamIDs.push(value.id);
+    await p.update({
+      ...core,
+      collection: "team-establishment-applications",
+      id: application.id,
+      data: { status: "approved", team: value.id },
+    });
+    return value;
   }
   const first = await team("a"),
     second = await team("b");
   async function enroll(teamID: number, memberID = member.id) {
-    const applicant = users.find((value) => value.id === memberID)!;
-    const batches = await p.find({
+    const recruitment = await p.create({
+      ...core,
       collection: "team-recruitments",
-      user: admin,
-      overrideAccess: false,
-      depth: 0,
-      pagination: false,
-      where: {
-        and: [{ team: { equals: teamID } }, { status: { equals: "open" } }],
-      },
-    });
-    for (const batch of batches.docs)
-      await closeTeamRecruitment(p, admin, batch.id, "closed", batch.updatedAt);
-    const recruitment = await saveTeamRecruitment(p, admin, {
-      teamID,
-      title: "合成入队批次",
-      status: "open",
-      form: {
-        ...defaultTeamForm,
-        enabled: true,
-        closed: false,
-        end: new Date(Date.now() + 3600_000).toISOString(),
+      data: {
+        title: "合成入队批次",
+        team: teamID,
+        game: game.id,
+        status: "open",
+        signupForm: {
+          ...emptySignup,
+          enabled: true,
+          end: new Date(Date.now() + 3600_000).toISOString(),
+        },
+        createdBy: admin.id,
       },
     });
     recruitmentIDs.push(recruitment.id);
-    const info = await teamRecruitmentInfo(p, applicant, recruitment.id);
-    const application = await saveTeamJoinApplication(
-      p,
-      applicant,
-      recruitment.id,
-      {
-        action: "submit",
-        version: info.version,
-        answers: {
-          gameID: "SyntheticPlayer",
-          position: "中路",
-          experience: "合成测试游戏经历",
-          availability: "合成测试训练安排",
-          contact: "PRIVATE_PROFILE_TEST_ANSWER@example.invalid",
-        },
+    const application = await p.create({
+      ...core,
+      collection: "team-join-applications",
+      data: {
+        title: "合成已审核关系",
+        team: teamID,
+        game: game.id,
+        recruitment: recruitment.id,
+        applicant: memberID,
+        requestKey: `profiles-join:${suffix}:${teamID}:${memberID}`,
+        status: "approved",
+        formVersion: "synthetic-v1",
+        formSnapshot: { questions: [] },
+        answers: { privateSyntheticAnswer: "PRIVATE_PROFILE_TEST_ANSWER" },
       },
-    );
-    joinIDs.push(application.id);
-    await decideTeamJoinApplication(
-      p,
-      admin,
-      application.id,
-      "approved",
-      "合成录取",
-      application.updatedAt,
-    );
-    const relation = await getTeamMembership(p, { teamID, userID: memberID });
-    if (!relation || relation.status !== "active")
-      throw new Error(
-        "Real core admission did not produce an active membership",
-      );
-    if (!membershipIDs.includes(relation.id)) membershipIDs.push(relation.id);
-    return p.findByID({
-      collection: "team-memberships",
-      id: relation.id,
-      overrideAccess: true,
-      depth: 0,
     });
+    joinIDs.push(application.id);
+    const membership = await p.create({
+      ...core,
+      collection: "team-memberships",
+      data: {
+        title: "合成有效成员",
+        member: memberID,
+        team: teamID,
+        game: game.id,
+        membershipKey: `${teamID}:${memberID}`,
+        status: "active",
+        joinedAt: new Date().toISOString(),
+        sourceApplication: application.id,
+        grantedBy: admin.id,
+      },
+    });
+    membershipIDs.push(membership.id);
+    return membership;
   }
   const membership = await enroll(first.id);
-  async function changeMembership(data: {
+  const changeMembership = (data: {
     status?: "active" | "revoked";
     joinedAt?: string;
     revokedAt?: string | null;
     leftAt?: string | null;
-  }) {
-    if (data.status === "active") return enroll(first.id);
-    const current = await p.findByID({
+  }) =>
+    p.update({
+      ...core,
       collection: "team-memberships",
       id: membership.id,
-      overrideAccess: true,
-      depth: 0,
+      data,
     });
-    return revokeTeamMembership(
-      p,
-      data.leftAt ? member : admin,
-      current.id,
-      current.updatedAt,
-      "合成离队 / 移除",
-      Boolean(data.leftAt),
-    );
-  }
   async function cleanup() {
     for (const id of membershipIDs)
       await p.delete({
