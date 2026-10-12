@@ -14,6 +14,6 @@ export default async function Staff() {
       <h2>骨干招新批次</h2>{!batches.docs.length && <p>暂无已发布的骨干批次。普通入社可继续查看游戏社群。</p>}
       <div className="community-list">{batches.docs.map(batch => <article className="panel" key={batch.id}><h3><Link href={"/join/staff/batches/" + batch.id}>{batch.title}</Link></h3>
         <p>{batch.description}</p><p>{staffWindow(batch)} · 截止：{formatDate(batch.endAt)}</p><Link href={"/join/staff/batches/" + batch.id}>查看批次与本人申请 ↗</Link></article>)}</div>
-      {legacy.docs.length > 0 && <><h2>既有外部批次与历史资料</h2><Cards docs={legacy.docs} collection="recruitment" /></>}
+      {legacy.docs.length > 0 && <><h2>招新批次与历史记录</h2><p>既有外部批次与历史资料，保留原报名详情入口。</p><Cards docs={legacy.docs} collection="recruitment" /></>}
     </section></>;
 }

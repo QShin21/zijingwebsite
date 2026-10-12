@@ -1,8 +1,8 @@
 {
   "branch": "codex/club-operations-recovery",
   "baseSHA": "beac037eafe88b9b82e171e15cfddcca351b838b",
-  "atUTC": "2026-10-12T05:29:30.482218+00:00",
-  "phase": "first single-batch web acceptance checkpoint; full latest-head regression and CI pending",
+  "atUTC": "2026-10-12T05:48:36.328723+00:00",
+  "phase": "final local compatibility fix verified; exact pushed-source CI terminal result recorded in delivery",
   "scope": "execution/publicity staff recruitment web only; regular joining remains separate; no teams or new miniapp UI",
   "migration": {
     "result": "PASS",
@@ -42,9 +42,29 @@
     "lint": "PASS",
     "miniappStatic": "PASS",
     "build": "PASS",
-    "fullUnitDatabase": "pending",
-    "fullE2E": "pending",
-    "exactFinalCI": "pending"
+    "fullUnitDatabase": {
+      "tests": 263,
+      "files": 31,
+      "result": "PASS",
+      "reportedDuration": "67.78s"
+    },
+    "fullE2E": {
+      "initialPassed": 61,
+      "initialFailed": 1,
+      "reportedDuration": "13.4m",
+      "failure": "legacy staff history section title renamed; original heading restored, assertions unchanged",
+      "newStaffWebInFullSuite": {
+        "result": "PASS",
+        "reportedDuration": "57.6s"
+      },
+      "affectedLegacyRetest": {
+        "tests": 1,
+        "result": "PASS",
+        "reportedDuration": "36.1s"
+      },
+      "latestCompleteSuite": "final exact-SHA CI pending"
+    },
+    "exactFinalCI": "Verify final pushed source SHA; checkpoint 38208213739 is not final."
   },
   "browserCoverage": [
     "draft/publish/start/deadline/close",
@@ -71,8 +91,7 @@
   "merge": false,
   "deploy": false,
   "remaining": [
-    "full local unit/database and browser regression",
-    "final source build/static checks",
     "exact final remote SHA and CI terminal result"
-  ]
+  ],
+  "checkpointCommit": "2623800ad3b77ba1dcce0eb2b67b3dbcfde1a8be"
 }
