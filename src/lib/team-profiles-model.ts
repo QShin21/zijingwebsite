@@ -19,7 +19,11 @@ export type PublicTeamProfile = Omit<TeamProfileDraft, "visible"> & {
 export type OwnTeamProfile = TeamProfileDraft & { revision: number };
 export type TeamProfilesView = {
   profiles: PublicTeamProfile[];
-  own: { eligible: boolean; profile: OwnTeamProfile | null };
+  own: {
+    eligible: boolean;
+    membershipVersion: string | null;
+    profile: OwnTeamProfile | null;
+  };
 };
 export const emptyTeamProfile = (): TeamProfileDraft => ({
   displayName: "",
@@ -114,6 +118,7 @@ export function sameTeamProfile(a: TeamProfileDraft, b: TeamProfileDraft) {
 export function profileError(error: unknown): {
   status: number;
   error: string;
+  code?: "PROFILE_PERIOD_CHANGED";
 } {
   if (
     error &&
@@ -127,7 +132,17 @@ export function profileError(error: unknown): {
     "message" in error &&
     typeof error.message === "string"
   )
-    return { status: error.status, error: error.message };
+    return {
+      status: error.status,
+      error: error.message,
+      ...("data" in error &&
+      error.data &&
+      typeof error.data === "object" &&
+      "code" in error.data &&
+      error.data.code === "PROFILE_PERIOD_CHANGED"
+        ? { code: "PROFILE_PERIOD_CHANGED" as const }
+        : {}),
+    };
   return {
     status: 503,
     error: "队员简介暂时无法加载或保存，请稍后重试；已填写的内容会保留。",

@@ -18,6 +18,8 @@ import {
 } from "./team-profiles-model";
 import {
   profileMembershipAuthority,
+  teamProfileMembershipVersion,
+  assertProfileMembershipVersion,
   type ProfileMembership,
   type ProfileMembershipAuthority,
 } from "./team-profiles-authority";
@@ -151,6 +153,7 @@ export async function readTeamProfiles(
     ),
     own: {
       eligible: Boolean(own),
+      membershipVersion: own ? teamProfileMembershipVersion(p, own) : null,
       // A new membership period requires a fresh opt-in, retaining the draft.
       profile: profile
         ? {
@@ -170,6 +173,7 @@ export async function saveTeamProfile(
   teamID: number,
   revision: unknown,
   value: unknown,
+  membershipVersion: unknown,
   authority: ProfileMembershipAuthority = profileMembershipAuthority,
 ): Promise<OwnTeamProfile> {
   if (!canParticipate(actor)) throw new APIError("请登录后编辑队内简介", 401);
@@ -188,6 +192,9 @@ export async function saveTeamProfile(
     });
     if (!membership)
       throw new APIError("当前入队资格已失效，无法继续编辑简介", 403);
+    // Before reads, image work, idempotency and all writes: old periods cannot
+    // renew consent, including after re-admission reuses the membership ID.
+    assertProfileMembershipVersion(p, membership, membershipVersion);
     const existing = await findOwn(p, membership, req);
     if (draft.avatar !== (existing?.avatar ?? null))
       draft.avatar = await normalizeTeamProfileAvatar(draft.avatar);
@@ -208,6 +215,7 @@ export async function saveTeamProfile(
         ...req.context,
         teamProfileTeam: teamID,
         teamProfileMembership: membership.id,
+        teamProfileMembershipVersion: membershipVersion,
       },
     };
     const data = {

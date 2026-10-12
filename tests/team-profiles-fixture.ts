@@ -2,6 +2,21 @@ import { randomBytes } from "node:crypto";
 import type { Payload } from "payload";
 import type { User } from "../src/payload-types";
 import { emptySignup } from "../src/lib/signup-schema";
+import { readTeamProfiles, saveTeamProfile } from "../src/lib/team-profiles";
+
+/** Normal save after an explicit current-period read; stale tests call service directly. */
+export async function saveLoadedProfile(
+  p: Payload,
+  actor: User | null,
+  teamID: number,
+  revision: unknown,
+  profile: unknown,
+) {
+  const version = actor
+    ? (await readTeamProfiles(p, actor, teamID)).own.membershipVersion
+    : null;
+  return saveTeamProfile(p, actor, teamID, revision, profile, version);
+}
 
 /** Real core schema + read API fixture, not an approval-workflow acceptance test.
  * The internal core write context is used only to prepare synthetic, valid

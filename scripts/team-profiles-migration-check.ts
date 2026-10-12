@@ -6,8 +6,10 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { getPayload } from "payload";
 import type { MigrateUpArgs, MigrateDownArgs } from "@payloadcms/db-postgres";
 import { migrations } from "../src/migrations";
-import { profileFixture } from "../tests/team-profiles-fixture";
-import { saveTeamProfile } from "../src/lib/team-profiles";
+import {
+  profileFixture,
+  saveLoadedProfile as saveTeamProfile,
+} from "../tests/team-profiles-fixture";
 import { emptyTeamProfile } from "../src/lib/team-profiles-model";
 
 if (process.env.APP_ENV !== "development" || process.env.DB_PUSH !== "false")

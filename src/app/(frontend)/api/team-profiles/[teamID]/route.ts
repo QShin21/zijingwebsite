@@ -64,7 +64,9 @@ async function run(request: Request, context: Context, write: boolean) {
       !data ||
       typeof data !== "object" ||
       Array.isArray(data) ||
-      Object.keys(data).some((key) => !["profile", "revision"].includes(key))
+      Object.keys(data).some(
+        (key) => !["profile", "revision", "membershipVersion"].includes(key),
+      )
     )
       return reply({ error: "简介请求仅接受资料和版本" }, 400);
     return reply({
@@ -74,11 +76,15 @@ async function run(request: Request, context: Context, write: boolean) {
         teamID,
         data.revision,
         data.profile,
+        data.membershipVersion,
       ),
     });
   } catch (cause) {
     const result = profileError(cause);
-    return reply({ error: result.error }, result.status);
+    return reply(
+      { error: result.error, ...(result.code ? { code: result.code } : {}) },
+      result.status,
+    );
   }
 }
 export const GET = (request: Request, context: Context) =>

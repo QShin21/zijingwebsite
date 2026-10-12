@@ -3,6 +3,7 @@ import { canParticipate, relationID } from "../lib/rules";
 import { parseTeamProfile } from "../lib/team-profiles-model";
 import {
   profileMembershipAuthority,
+  assertProfileMembershipVersion,
   type ProfileMembership,
 } from "../lib/team-profiles-authority";
 
@@ -66,6 +67,11 @@ export const TeamMemberProfiles: CollectionConfig = {
             Number(relationID(originalDoc.membership)) !== active.id)
         )
           throw new APIError("当前入队资格已失效，无法继续编辑简介", 403);
+        assertProfileMembershipVersion(
+          req.payload,
+          active,
+          req.context.teamProfileMembershipVersion,
+        );
         const merged = { ...originalDoc, ...data };
         const profile = parseTeamProfile({
           displayName: merged.displayName,
