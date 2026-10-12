@@ -28,6 +28,10 @@ export interface Config {
     'community-showcase': CommunityShowcase;
     'community-posts': CommunityPost;
     'content-promotions': ContentPromotion;
+    'team-establishment-applications': TeamEstablishmentApplication;
+    'team-recruitments': TeamRecruitment;
+    'team-join-applications': TeamJoinApplication;
+    'team-memberships': TeamMembership;
     'team-member-profiles': TeamMemberProfile;
     'event-signups': EventSignup;
     games: Game;
@@ -57,6 +61,10 @@ export interface Config {
     'community-showcase': CommunityShowcaseSelect<false> | CommunityShowcaseSelect<true>;
     'community-posts': CommunityPostsSelect<false> | CommunityPostsSelect<true>;
     'content-promotions': ContentPromotionsSelect<false> | ContentPromotionsSelect<true>;
+    'team-establishment-applications': TeamEstablishmentApplicationsSelect<false> | TeamEstablishmentApplicationsSelect<true>;
+    'team-recruitments': TeamRecruitmentsSelect<false> | TeamRecruitmentsSelect<true>;
+    'team-join-applications': TeamJoinApplicationsSelect<false> | TeamJoinApplicationsSelect<true>;
+    'team-memberships': TeamMembershipsSelect<false> | TeamMembershipsSelect<true>;
     'team-member-profiles': TeamMemberProfilesSelect<false> | TeamMemberProfilesSelect<true>;
     'event-signups': EventSignupsSelect<false> | EventSignupsSelect<true>;
     games: GamesSelect<false> | GamesSelect<true>;
@@ -294,9 +302,32 @@ export interface Team {
   submittedBy?: (number | null) | User;
   reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
   game?: (number | null) | Game;
+  teamStatus?: ('unestablished' | 'active' | 'resting' | 'archived') | null;
+  establishmentApplication?: (number | null) | TeamEstablishmentApplication;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * 仅通过代表队网页工作台操作；成员录取不会授予平台或社群权限。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-establishment-applications".
+ */
+export interface TeamEstablishmentApplication {
+  id: number;
+  title: string;
+  game: number | Game;
+  applicant: number | User;
+  reason: string;
+  requestKey: string;
+  status: 'pending' | 'returned' | 'rejected' | 'withdrawn' | 'approved';
+  reviewNote?: string | null;
+  reviewedBy?: (number | null) | User;
+  reviewedAt?: string | null;
+  team?: (number | null) | Team;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * 扫码或网站操作均不证明已进微信群；在社群进群管理页人工处理。
@@ -432,38 +463,47 @@ export interface ContentPromotion {
   createdAt: string;
 }
 /**
+ * 仅通过代表队网页工作台操作；成员录取不会授予平台或社群权限。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "team-member-profiles".
+ * via the `definition` "team-recruitments".
  */
-export interface TeamMemberProfile {
+export interface TeamRecruitment {
   id: number;
-  membership: number;
-  membershipJoinedAt: string;
-  displayName: string;
-  position?: string | null;
-  biography?: string | null;
-  avatar?: string | null;
-  visible: boolean;
-  revision: number;
+  title: string;
+  team: number | Team;
+  game: number | Game;
+  status: 'draft' | 'open' | 'closed' | 'archived';
+  signupForm:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  createdBy: number | User;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * 仅通过代表队网页工作台操作；成员录取不会授予平台或社群权限。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "event-signups".
+ * via the `definition` "team-join-applications".
  */
-export interface EventSignup {
+export interface TeamJoinApplication {
   id: number;
-  activityType: string;
-  activityID: number;
-  dedupeKey: string;
-  member: number | User;
-  organizer?: (number | null) | User;
-  game?: (number | null) | Game;
-  memberName: string;
-  eventTitle: string;
+  title: string;
+  team: number | Team;
+  game: number | Game;
+  recruitment: number | TeamRecruitment;
+  applicant: number | User;
+  requestKey: string;
+  status: 'draft' | 'pending' | 'returned' | 'rejected' | 'withdrawn' | 'approved';
   formVersion: string;
-  questions:
+  formSnapshot:
     | {
         [k: string]: unknown;
       }
@@ -481,6 +521,34 @@ export interface EventSignup {
     | number
     | boolean
     | null;
+  reviewNote?: string | null;
+  reviewedBy?: (number | null) | User;
+  reviewedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * 仅通过代表队网页工作台操作；成员录取不会授予平台或社群权限。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-memberships".
+ */
+export interface TeamMembership {
+  id: number;
+  title: string;
+  team: number | Team;
+  game: number | Game;
+  member: number | User;
+  membershipKey: string;
+  status: 'active' | 'revoked';
+  joinedAt: string;
+  revokedAt?: string | null;
+  season?: (number | null) | Season;
+  leftAt?: string | null;
+  sourceApplication: number | TeamJoinApplication;
+  grantedBy: number | User;
+  revokedBy?: (number | null) | User;
+  revocationReason?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -533,6 +601,59 @@ export interface Season {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-member-profiles".
+ */
+export interface TeamMemberProfile {
+  id: number;
+  membership: number;
+  membershipJoinedAt: string;
+  displayName: string;
+  position?: string | null;
+  biography?: string | null;
+  avatar?: string | null;
+  visible: boolean;
+  revision: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-signups".
+ */
+export interface EventSignup {
+  id: number;
+  activityType: string;
+  activityID: number;
+  dedupeKey: string;
+  member: number | User;
+  organizer?: (number | null) | User;
+  game?: (number | null) | Game;
+  memberName: string;
+  eventTitle: string;
+  formVersion: string;
+  questions:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  answers:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -981,6 +1102,22 @@ export interface PayloadLockedDocument {
         value: number | ContentPromotion;
       } | null)
     | ({
+        relationTo: 'team-establishment-applications';
+        value: number | TeamEstablishmentApplication;
+      } | null)
+    | ({
+        relationTo: 'team-recruitments';
+        value: number | TeamRecruitment;
+      } | null)
+    | ({
+        relationTo: 'team-join-applications';
+        value: number | TeamJoinApplication;
+      } | null)
+    | ({
+        relationTo: 'team-memberships';
+        value: number | TeamMembership;
+      } | null)
+    | ({
         relationTo: 'team-member-profiles';
         value: number | TeamMemberProfile;
       } | null)
@@ -1273,6 +1410,81 @@ export interface ContentPromotionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-establishment-applications_select".
+ */
+export interface TeamEstablishmentApplicationsSelect<T extends boolean = true> {
+  title?: T;
+  game?: T;
+  applicant?: T;
+  reason?: T;
+  requestKey?: T;
+  status?: T;
+  reviewNote?: T;
+  reviewedBy?: T;
+  reviewedAt?: T;
+  team?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-recruitments_select".
+ */
+export interface TeamRecruitmentsSelect<T extends boolean = true> {
+  title?: T;
+  team?: T;
+  game?: T;
+  status?: T;
+  signupForm?: T;
+  createdBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-join-applications_select".
+ */
+export interface TeamJoinApplicationsSelect<T extends boolean = true> {
+  title?: T;
+  team?: T;
+  game?: T;
+  recruitment?: T;
+  applicant?: T;
+  requestKey?: T;
+  status?: T;
+  formVersion?: T;
+  formSnapshot?: T;
+  answers?: T;
+  reviewNote?: T;
+  reviewedBy?: T;
+  reviewedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-memberships_select".
+ */
+export interface TeamMembershipsSelect<T extends boolean = true> {
+  title?: T;
+  team?: T;
+  game?: T;
+  member?: T;
+  membershipKey?: T;
+  status?: T;
+  joinedAt?: T;
+  revokedAt?: T;
+  season?: T;
+  leftAt?: T;
+  sourceApplication?: T;
+  grantedBy?: T;
+  revokedBy?: T;
+  revocationReason?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "team-member-profiles_select".
  */
 export interface TeamMemberProfilesSelect<T extends boolean = true> {
@@ -1346,6 +1558,8 @@ export interface TeamsSelect<T extends boolean = true> {
   submittedBy?: T;
   reviewState?: T;
   game?: T;
+  teamStatus?: T;
+  establishmentApplication?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

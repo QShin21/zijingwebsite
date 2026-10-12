@@ -31,6 +31,7 @@ import sharp from "sharp";
 import { APIError } from "payload";
 import { SocialCollections } from "./social";
 import { ContentPromotions } from "./promotions";
+import { TeamCoreCollections, teamLifecycleFields, guardTeamLifecycle } from "./team-core";
 import { TeamMemberProfiles } from "./team-profiles";
 import { nicknameKey, validNickname } from "../lib/nickname";
 
@@ -374,7 +375,7 @@ function content(
           return args;
         },
       ],
-      beforeChange: [guard(scoped, self), ...(slug === 'events' ? [validateSignupForm] : [])],
+      beforeChange: [guard(scoped, self), ...(slug === 'teams' ? [guardTeamLifecycle] : []), ...(slug === 'events' ? [validateSignupForm] : [])],
       afterChange: [audit],
     },
     fields: [
@@ -609,12 +610,13 @@ export const Collections: CollectionConfig[] = [
   Media,
   ...SocialCollections,
   ContentPromotions,
+  ...TeamCoreCollections,
   TeamMemberProfiles,
   EventSignups,
   content("games", "游戏项目", [
     { name: "sort", label: "排序", type: "number" },
   ]),
-  content("teams", "代表队", [rel("game", "游戏项目", "games")], true, true),
+  content("teams", "代表队", [rel("game", "游戏项目", "games"), ...teamLifecycleFields], true, true),
   content(
     "seasons",
     "赛季阵容",
