@@ -20,9 +20,9 @@
   },
   "localVerification": {
     "syntheticTests": {
-      "passed": 180,
+      "passed": 181,
       "files": 12,
-      "miniappTests": 111,
+      "miniappTests": 112,
       "questionnaireLogicTests": 69,
       "actualPageHandlers": "Node VM with synthetic SDK/API fixtures",
       "liveHttpDatabaseIntegration": false
@@ -31,7 +31,7 @@
       "passed": true,
       "pages": 17,
       "files": 105,
-      "bytes": 256117,
+      "bytes": 256699,
       "domainChecking": true,
       "generatedQuestionnaireParity": true
     },
@@ -94,5 +94,7 @@
     "merge": false,
     "otherBranchesModified": false
   },
-  "documentation": "docs/MINIAPP_CLUB_FLOWS.md"
+  "documentation": "docs/MINIAPP_CLUB_FLOWS.md",
+  "followupFrontendCommit": "c77dc9f01a289f06b40dc772fcdaec3f0f016049",
+  "teamContractBoundary": "collection/read available; final public HTTP/profile/honor contracts pending; internal overrideAccess member getter not exposed"
 }
