@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-12T07:46:43.323Z",
+  "profileCodeSHA": "223d9ebaf8d2ae976b03f4960ec4a3be337bfe01",
+  "environment": "new empty synthetic loopback database, DB_PUSH=false",
+  "database": "team_profiles_migration_b1052b948673",
+  "baselineTables": 61,
+  "beforeProfileTables": 65,
+  "finalTables": 66,
+  "coreOriginalColumnTablesPreserved": 60,
+  "profileOriginalColumnTablesPreserved": 64,
+  "onlyExpectedChangedTable": "payload_migrations",
+  "legacyTeamRemainsUnestablished": true,
+  "noInventedMemberships": true,
+  "coreRecordPreserved": true,
+  "uniqueMembershipProfileIndex": true,
+  "migratedRealAuthorityWriteAndRetry": true,
+  "sourceDatabaseMigrated": false,
+  "productionAccess": false
+}
