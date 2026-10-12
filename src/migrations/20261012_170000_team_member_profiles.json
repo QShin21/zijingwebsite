@@ -2347,6 +2347,10 @@
       "indexes": {
         "staff_batches_current_key_idx": {
           "name": "staff_batches_current_key_idx",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "current_key",
@@ -2354,14 +2358,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "staff_batches_updated_at_idx": {
           "name": "staff_batches_updated_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "updated_at",
@@ -2369,14 +2373,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "staff_batches_created_at_idx": {
           "name": "staff_batches_created_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "created_at",
@@ -2384,11 +2388,7 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         }
       },
       "foreignKeys": {},
@@ -2504,38 +2504,12 @@
         }
       },
       "indexes": {
-        "staff_applications_batch_idx": {
-          "name": "staff_applications_batch_idx",
-          "columns": [
-            {
-              "expression": "batch_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "staff_applications_applicant_idx": {
-          "name": "staff_applications_applicant_idx",
-          "columns": [
-            {
-              "expression": "applicant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "staff_applications_request_key_idx": {
           "name": "staff_applications_request_key_idx",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "request_key",
@@ -2543,14 +2517,44 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": true,
-          "concurrently": false,
+          ]
+        },
+        "staff_applications_batch_idx": {
+          "name": "staff_applications_batch_idx",
+          "isUnique": false,
           "method": "btree",
-          "with": {}
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "batch_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "staff_applications_applicant_idx": {
+          "name": "staff_applications_applicant_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "applicant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
         },
         "staff_applications_updated_at_idx": {
           "name": "staff_applications_updated_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "updated_at",
@@ -2558,14 +2562,14 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         },
         "staff_applications_created_at_idx": {
           "name": "staff_applications_created_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
           "columns": [
             {
               "expression": "created_at",
@@ -2573,11 +2577,7 @@
               "asc": true,
               "nulls": "last"
             }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+          ]
         }
       },
       "foreignKeys": {
@@ -2591,7 +2591,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
+          "onDelete": "no action",
           "onUpdate": "no action"
         },
         "staff_applications_applicant_id_users_id_fk": {
@@ -2604,7 +2604,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -2828,8 +2828,12 @@
           "name": "team_establishment_applications_game_id_fkey",
           "tableFrom": "team_establishment_applications",
           "tableTo": "games",
-          "columnsFrom": "{game_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "game_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2837,8 +2841,12 @@
           "name": "team_establishment_applications_applicant_id_fkey",
           "tableFrom": "team_establishment_applications",
           "tableTo": "users",
-          "columnsFrom": "{applicant_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "applicant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2846,8 +2854,12 @@
           "name": "team_establishment_applications_reviewed_by_id_fkey",
           "tableFrom": "team_establishment_applications",
           "tableTo": "users",
-          "columnsFrom": "{reviewed_by_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "reviewed_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -2855,8 +2867,12 @@
           "name": "team_establishment_applications_team_id_fkey",
           "tableFrom": "team_establishment_applications",
           "tableTo": "teams",
-          "columnsFrom": "{team_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -3043,8 +3059,12 @@
           "name": "team_recruitments_team_id_fkey",
           "tableFrom": "team_recruitments",
           "tableTo": "teams",
-          "columnsFrom": "{team_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3052,8 +3072,12 @@
           "name": "team_recruitments_game_id_fkey",
           "tableFrom": "team_recruitments",
           "tableTo": "games",
-          "columnsFrom": "{game_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "game_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3061,8 +3085,12 @@
           "name": "team_recruitments_created_by_id_fkey",
           "tableFrom": "team_recruitments",
           "tableTo": "users",
-          "columnsFrom": "{created_by_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "created_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3341,8 +3369,12 @@
           "name": "team_join_applications_team_id_fkey",
           "tableFrom": "team_join_applications",
           "tableTo": "teams",
-          "columnsFrom": "{team_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3350,8 +3382,12 @@
           "name": "team_join_applications_game_id_fkey",
           "tableFrom": "team_join_applications",
           "tableTo": "games",
-          "columnsFrom": "{game_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "game_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3359,8 +3395,12 @@
           "name": "team_join_applications_recruitment_id_fkey",
           "tableFrom": "team_join_applications",
           "tableTo": "team_recruitments",
-          "columnsFrom": "{recruitment_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "recruitment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3368,8 +3408,12 @@
           "name": "team_join_applications_applicant_id_fkey",
           "tableFrom": "team_join_applications",
           "tableTo": "users",
-          "columnsFrom": "{applicant_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "applicant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3377,8 +3421,12 @@
           "name": "team_join_applications_reviewed_by_id_fkey",
           "tableFrom": "team_join_applications",
           "tableTo": "users",
-          "columnsFrom": "{reviewed_by_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "reviewed_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -3677,8 +3725,12 @@
           "name": "team_memberships_team_id_fkey",
           "tableFrom": "team_memberships",
           "tableTo": "teams",
-          "columnsFrom": "{team_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3686,8 +3738,12 @@
           "name": "team_memberships_game_id_fkey",
           "tableFrom": "team_memberships",
           "tableTo": "games",
-          "columnsFrom": "{game_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "game_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3695,8 +3751,12 @@
           "name": "team_memberships_member_id_fkey",
           "tableFrom": "team_memberships",
           "tableTo": "users",
-          "columnsFrom": "{member_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "member_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3704,8 +3764,12 @@
           "name": "team_memberships_season_id_fkey",
           "tableFrom": "team_memberships",
           "tableTo": "seasons",
-          "columnsFrom": "{season_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "season_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -3713,8 +3777,12 @@
           "name": "team_memberships_source_application_id_fkey",
           "tableFrom": "team_memberships",
           "tableTo": "team_join_applications",
-          "columnsFrom": "{source_application_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "source_application_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3722,8 +3790,12 @@
           "name": "team_memberships_granted_by_id_fkey",
           "tableFrom": "team_memberships",
           "tableTo": "users",
-          "columnsFrom": "{granted_by_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "granted_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3731,8 +3803,12 @@
           "name": "team_memberships_revoked_by_id_fkey",
           "tableFrom": "team_memberships",
           "tableTo": "users",
-          "columnsFrom": "{revoked_by_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "revoked_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -3870,9 +3946,372 @@
           "name": "team_member_profiles_membership_id_fkey",
           "tableFrom": "team_member_profiles",
           "tableTo": "team_memberships",
-          "columnsFrom": "{membership_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "membership_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.team_honor_records": {
+      "name": "team_honor_records",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "game_id": {
+          "name": "game_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "season_id": {
+          "name": "season_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "author_id": {
+          "name": "author_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "author_name": {
+          "name": "author_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "membership_ref": {
+          "name": "membership_ref",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "competition": {
+          "name": "competition",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "placing": {
+          "name": "placing",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "name": "date",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "images": {
+          "name": "images",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "video_u_r_l": {
+          "name": "video_u_r_l",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "state": {
+          "name": "state",
+          "type": "enum_team_honor_records_state",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "revision": {
+          "name": "revision",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "submitted_version": {
+          "name": "submitted_version",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "submitted_at": {
+          "name": "submitted_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approved_version": {
+          "name": "approved_version",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approved_snapshot": {
+          "name": "approved_snapshot",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approved_at": {
+          "name": "approved_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reviewed_by_id": {
+          "name": "reviewed_by_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "review_note": {
+          "name": "review_note",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "history": {
+          "name": "history",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "team_honor_records_team_idx": {
+          "name": "team_honor_records_team_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "team_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_honor_records_game_idx": {
+          "name": "team_honor_records_game_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "game_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_honor_records_author_idx": {
+          "name": "team_honor_records_author_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "author_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_honor_records_season_idx": {
+          "name": "team_honor_records_season_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "season_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_honor_records_state_idx": {
+          "name": "team_honor_records_state_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "state",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_honor_records_reviewed_by_idx": {
+          "name": "team_honor_records_reviewed_by_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "reviewed_by_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_honor_records_updated_at_idx": {
+          "name": "team_honor_records_updated_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        },
+        "team_honor_records_created_at_idx": {
+          "name": "team_honor_records_created_at_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
+        }
+      },
+      "foreignKeys": {
+        "team_honor_records_team_id_teams_id_fk": {
+          "name": "team_honor_records_team_id_teams_id_fk",
+          "tableFrom": "team_honor_records",
+          "tableTo": "teams",
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "team_honor_records_game_id_games_id_fk": {
+          "name": "team_honor_records_game_id_games_id_fk",
+          "tableFrom": "team_honor_records",
+          "tableTo": "games",
+          "columnsFrom": [
+            "game_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "team_honor_records_season_id_seasons_id_fk": {
+          "name": "team_honor_records_season_id_seasons_id_fk",
+          "tableFrom": "team_honor_records",
+          "tableTo": "seasons",
+          "columnsFrom": [
+            "season_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "team_honor_records_author_id_users_id_fk": {
+          "name": "team_honor_records_author_id_users_id_fk",
+          "tableFrom": "team_honor_records",
+          "tableTo": "users",
+          "columnsFrom": [
+            "author_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "team_honor_records_reviewed_by_id_users_id_fk": {
+          "name": "team_honor_records_reviewed_by_id_users_id_fk",
+          "tableFrom": "team_honor_records",
+          "tableTo": "users",
+          "columnsFrom": [
+            "reviewed_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -4962,8 +5401,12 @@
           "name": "teams_cover_id_media_id_fk",
           "tableFrom": "teams",
           "tableTo": "media",
-          "columnsFrom": "{cover_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "cover_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -4971,8 +5414,12 @@
           "name": "teams_game_id_games_id_fk",
           "tableFrom": "teams",
           "tableTo": "games",
-          "columnsFrom": "{game_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "game_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -4980,8 +5427,12 @@
           "name": "teams_submitted_by_id_users_id_fk",
           "tableFrom": "teams",
           "tableTo": "users",
-          "columnsFrom": "{submitted_by_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "submitted_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -4989,8 +5440,12 @@
           "name": "teams_establishment_application_id_fkey",
           "tableFrom": "teams",
           "tableTo": "team_establishment_applications",
-          "columnsFrom": "{establishment_application_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "establishment_application_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -5341,8 +5796,12 @@
           "name": "_teams_v_parent_id_teams_id_fk",
           "tableFrom": "_teams_v",
           "tableTo": "teams",
-          "columnsFrom": "{parent_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -5350,8 +5809,12 @@
           "name": "_teams_v_version_cover_id_media_id_fk",
           "tableFrom": "_teams_v",
           "tableTo": "media",
-          "columnsFrom": "{version_cover_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "version_cover_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -5359,8 +5822,12 @@
           "name": "_teams_v_version_game_id_games_id_fk",
           "tableFrom": "_teams_v",
           "tableTo": "games",
-          "columnsFrom": "{version_game_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "version_game_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -5368,8 +5835,12 @@
           "name": "_teams_v_version_submitted_by_id_users_id_fk",
           "tableFrom": "_teams_v",
           "tableTo": "users",
-          "columnsFrom": "{version_submitted_by_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "version_submitted_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -5377,8 +5848,12 @@
           "name": "_teams_v_version_establishment_application_id_fkey",
           "tableFrom": "_teams_v",
           "tableTo": "team_establishment_applications",
-          "columnsFrom": "{version_establishment_application_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "version_establishment_application_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -12644,6 +13119,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "team_honor_records_id": {
+          "name": "team_honor_records_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "event_signups_id": {
           "name": "event_signups_id",
           "type": "integer",
@@ -13176,6 +13657,21 @@
               "nulls": "last"
             }
           ]
+        },
+        "payload_locked_documents_rels_team_honor_records_id_idx": {
+          "name": "payload_locked_documents_rels_team_honor_records_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false,
+          "with": {},
+          "columns": [
+            {
+              "expression": "team_honor_records_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ]
         }
       },
       "foreignKeys": {
@@ -13183,8 +13679,12 @@
           "name": "payload_locked_documents_rels_parent_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "payload_locked_documents",
-          "columnsFrom": "{parent_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13192,8 +13692,12 @@
           "name": "payload_locked_documents_rels_users_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "users",
-          "columnsFrom": "{users_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "users_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13201,8 +13705,12 @@
           "name": "payload_locked_documents_rels_media_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "media",
-          "columnsFrom": "{media_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "media_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13210,8 +13718,12 @@
           "name": "payload_locked_documents_rels_games_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "games",
-          "columnsFrom": "{games_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "games_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13219,8 +13731,12 @@
           "name": "payload_locked_documents_rels_teams_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "teams",
-          "columnsFrom": "{teams_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "teams_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13228,8 +13744,12 @@
           "name": "payload_locked_documents_rels_seasons_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "seasons",
-          "columnsFrom": "{seasons_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "seasons_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13237,8 +13757,12 @@
           "name": "payload_locked_documents_rels_honors_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "honors",
-          "columnsFrom": "{honors_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "honors_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13246,8 +13770,12 @@
           "name": "payload_locked_documents_rels_events_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "events",
-          "columnsFrom": "{events_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "events_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13255,8 +13783,12 @@
           "name": "payload_locked_documents_rels_recruitment_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "recruitment",
-          "columnsFrom": "{recruitment_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "recruitment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13264,8 +13796,12 @@
           "name": "payload_locked_documents_rels_news_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "news",
-          "columnsFrom": "{news_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "news_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13273,8 +13809,12 @@
           "name": "payload_locked_documents_rels_albums_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "albums",
-          "columnsFrom": "{albums_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "albums_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13282,8 +13822,12 @@
           "name": "payload_locked_documents_rels_pages_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "pages",
-          "columnsFrom": "{pages_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "pages_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13291,8 +13835,12 @@
           "name": "payload_locked_documents_rels_redirects_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "redirects",
-          "columnsFrom": "{redirects_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "redirects_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13300,8 +13848,12 @@
           "name": "payload_locked_documents_rels_audit_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "audit",
-          "columnsFrom": "{audit_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "audit_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13309,8 +13861,12 @@
           "name": "payload_locked_documents_rels_community_applications_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "community_applications",
-          "columnsFrom": "{community_applications_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "community_applications_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13318,8 +13874,12 @@
           "name": "payload_locked_documents_rels_community_bans_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "community_bans",
-          "columnsFrom": "{community_bans_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "community_bans_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13327,8 +13887,12 @@
           "name": "payload_locked_documents_rels_forum_posts_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "forum_posts",
-          "columnsFrom": "{forum_posts_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "forum_posts_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13336,8 +13900,12 @@
           "name": "payload_locked_documents_rels_community_messages_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "community_messages",
-          "columnsFrom": "{community_messages_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "community_messages_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13345,8 +13913,12 @@
           "name": "payload_locked_documents_rels_community_posts_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "community_posts",
-          "columnsFrom": "{community_posts_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "community_posts_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13354,8 +13926,12 @@
           "name": "payload_locked_documents_rels_comments_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "comments",
-          "columnsFrom": "{comments_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "comments_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13363,8 +13939,12 @@
           "name": "payload_locked_documents_rels_announcements_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "announcements",
-          "columnsFrom": "{announcements_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "announcements_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13372,8 +13952,12 @@
           "name": "payload_locked_documents_rels_community_reactions_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "community_reactions",
-          "columnsFrom": "{community_reactions_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "community_reactions_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13381,8 +13965,12 @@
           "name": "payload_locked_documents_rels_community_showcase_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "community_showcase",
-          "columnsFrom": "{community_showcase_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "community_showcase_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13390,8 +13978,12 @@
           "name": "payload_locked_documents_rels_event_signups_id_fkey",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "event_signups",
-          "columnsFrom": "{event_signups_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "event_signups_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13399,8 +13991,12 @@
           "name": "payload_locked_documents_rels_community_joins_id_fkey",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "community_joins",
-          "columnsFrom": "{community_joins_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "community_joins_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13408,8 +14004,12 @@
           "name": "payload_locked_documents_rels_content_promotions_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "content_promotions",
-          "columnsFrom": "{content_promotions_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "content_promotions_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13417,8 +14017,12 @@
           "name": "payload_locked_documents_rels_staff_batches_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "staff_batches",
-          "columnsFrom": "{staff_batches_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "staff_batches_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13426,8 +14030,12 @@
           "name": "payload_locked_documents_rels_staff_applications_fk",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "staff_applications",
-          "columnsFrom": "{staff_applications_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "staff_applications_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13435,8 +14043,12 @@
           "name": "payload_locked_documents_rels_team_establishment_applicati_fkey",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "team_establishment_applications",
-          "columnsFrom": "{team_establishment_applications_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "team_establishment_applications_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13444,8 +14056,12 @@
           "name": "payload_locked_documents_rels_team_recruitments_id_fkey",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "team_recruitments",
-          "columnsFrom": "{team_recruitments_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "team_recruitments_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13453,8 +14069,12 @@
           "name": "payload_locked_documents_rels_team_join_applications_id_fkey",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "team_join_applications",
-          "columnsFrom": "{team_join_applications_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "team_join_applications_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13462,8 +14082,12 @@
           "name": "payload_locked_documents_rels_team_memberships_id_fkey",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "team_memberships",
-          "columnsFrom": "{team_memberships_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "team_memberships_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -13471,8 +14095,25 @@
           "name": "payload_locked_documents_rels_team_member_profiles_id_fkey",
           "tableFrom": "payload_locked_documents_rels",
           "tableTo": "team_member_profiles",
-          "columnsFrom": "{team_member_profiles_id}",
-          "columnsTo": "{id}",
+          "columnsFrom": [
+            "team_member_profiles_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_team_honor_records_fk": {
+          "name": "payload_locked_documents_rels_team_honor_records_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "team_honor_records",
+          "columnsFrom": [
+            "team_honor_records_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -15373,6 +16014,19 @@
         "revoked"
       ]
     },
+    "public.enum_team_honor_records_state": {
+      "name": "enum_team_honor_records_state",
+      "schema": "public",
+      "values": [
+        "draft",
+        "pending",
+        "withdrawn",
+        "returned",
+        "rejected",
+        "approved",
+        "hidden"
+      ]
+    },
     "public.enum_games_review_state": {
       "name": "enum_games_review_state",
       "schema": "public",
@@ -15952,5 +16606,5 @@
     "columns": {}
   },
   "id": "aded4c5c-922c-4451-a0b7-217fa23a951b",
-  "prevId": "c1afbdf7-3ab6-480d-9cec-53196085400a"
+  "prevId": "9af5092f-c7de-497a-a19d-2b84be741b29"
 }

@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import pg from "pg";
+import { assertHonorForeignKeys, type CatalogForeignKey } from "./team-schema-constraints";
 const url = new URL(process.env.DATABASE_URL!);
 if (
   process.env.APP_ENV !== "development" ||
@@ -52,6 +53,9 @@ try {
     "_teams_v",
     "payload_locked_documents_rels",
     ...(snapshot.tables["public.team_member_profiles"] ? ["team_member_profiles"] : []),
+    ...(snapshot.tables["public.staff_batches"] ? ["staff_batches"] : []),
+    ...(snapshot.tables["public.staff_applications"] ? ["staff_applications"] : []),
+    ...(snapshot.tables["public.team_honor_records"] ? ["team_honor_records"] : []),
   ];
   for (const table of owned) {
     const definition = snapshot.tables[`public.${table}`];
@@ -60,15 +64,16 @@ try {
         "Run reviewed migrations before generating the team snapshot",
       );
     const foreignKeys = (
-      await client.query(
+      await client.query<CatalogForeignKey>(
         `SELECT c.conname name, src.relname table_from, dest.relname table_to, c.confdeltype delete_action, c.confupdtype update_action,
-      ARRAY(SELECT a.attname FROM unnest(c.conkey) WITH ORDINALITY k(n,ord) JOIN pg_attribute a ON a.attrelid=c.conrelid AND a.attnum=k.n ORDER BY ord) columns_from,
-      ARRAY(SELECT a.attname FROM unnest(c.confkey) WITH ORDINALITY k(n,ord) JOIN pg_attribute a ON a.attrelid=c.confrelid AND a.attnum=k.n ORDER BY ord) columns_to
+      ARRAY(SELECT a.attname::text FROM unnest(c.conkey) WITH ORDINALITY k(n,ord) JOIN pg_attribute a ON a.attrelid=c.conrelid AND a.attnum=k.n ORDER BY ord) columns_from,
+      ARRAY(SELECT a.attname::text FROM unnest(c.confkey) WITH ORDINALITY k(n,ord) JOIN pg_attribute a ON a.attrelid=c.confrelid AND a.attnum=k.n ORDER BY ord) columns_to
       FROM pg_constraint c JOIN pg_class src ON src.oid=c.conrelid JOIN pg_class dest ON dest.oid=c.confrelid JOIN pg_namespace ns ON ns.oid=src.relnamespace
       WHERE c.contype='f' AND ns.nspname='public' AND src.relname=$1`,
         [table],
       )
     ).rows;
+    if (table === "team_honor_records") assertHonorForeignKeys(foreignKeys);
     const actions: Record<string, string> = {
       a: "no action",
       r: "restrict",
