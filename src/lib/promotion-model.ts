@@ -7,7 +7,7 @@ export type PromotionAction = "submit" | "withdraw" | "approve" | "return" | "re
 export type PromotionSnapshot = { title: string; body: string; authorName: string; kind: PromotionKind; game: number };
 export type PromotionHistory = { action: string; actor: string; actorName: string; at: string; from: string; to: string; reason: string; version: string };
 // Enable one validated content slice at a time. The additive schema supports all three.
-export const supportedPromotionKinds: PromotionKind[] = ["event", "notice"];
+export const supportedPromotionKinds: PromotionKind[] = ["event", "notice", "showcase"];
 export const promotionKindLabels = { event: "活动", notice: "公告", showcase: "风采" };
 export const promotionStatusLabels: Record<string, string> = { pending: "待审核", returned: "已退回", rejected: "已拒绝", withdrawn: "已撤回", approved: "已升推", demoted: "已降级", needsReview: "改稿待复审" };
 export function promotionSource(value: unknown): PromotionSource {

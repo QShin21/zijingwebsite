@@ -19,7 +19,7 @@ export async function readPromotionSource(p: Payload, collection: PromotionSourc
   if (!game || game._status !== "published") throw new APIError("原社群尚未开放", 409);
   const value = { ...doc, game: gameID } as unknown as Record<string, unknown>;
   const snapshot: PromotionSnapshot = { title: doc.title, body: doc.body ?? "", authorName: doc.authorName ?? "", kind, game: gameID };
-  return { doc, game, kind, version: promotionVersion(value), snapshot,
+  return { collection, doc, game, kind, version: promotionVersion(value), snapshot,
     href: "/community/" + game.slug + (collection === "community-posts" ? "/updates/" + doc.id : "/showcase#showcase-" + doc.id) };
 }
 async function lockPromotion(req: PayloadRequest, key: string) {

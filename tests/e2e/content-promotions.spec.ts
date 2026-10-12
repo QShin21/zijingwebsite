@@ -1,12 +1,13 @@
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
+import sharp from "sharp";
 import { test, expect, type Page } from "@playwright/test";
 import { getPayload, type Payload } from "payload";
 import config from "../../src/payload.config";
 import type { User } from "../../src/payload-types";
 let p: Payload, leader: User, admin: User, execution: User, publicity: User, member: User, game: number, post: number;
 const suffix = randomBytes(6).toString("hex"), password = randomBytes(24).toString("hex"), slug = "promotion-web-" + suffix;
-const origin = { Origin: "http://localhost:3000" }, postIDs: number[] = [], receiptIDs: number[] = [];
+const origin = { Origin: "http://localhost:3000" }, postIDs: number[] = [], showcaseIDs: number[] = [], receiptIDs: number[] = [];
 test.beforeAll(async () => {
   if (process.env.APP_ENV !== "development" || !["127.0.0.1", "localhost"].includes(new URL(process.env.DATABASE_URL!).hostname)) throw new Error("Synthetic loopback only");
   p = await getPayload({ config, key: "promotions-web-e2e" });
@@ -23,12 +24,13 @@ test.beforeAll(async () => {
 test.afterAll(async () => {
   if (!p) return;
   if (receiptIDs.length) await p.delete({ collection: "event-signups", overrideAccess: true, where: { id: { in: receiptIDs } } });
-  const rows = await p.find({ collection: "content-promotions", overrideAccess: true, pagination: false, where: { sourceKey: { in: postIDs.map(id => "community-posts:" + id) } } });
+  const rows = await p.find({ collection: "content-promotions", overrideAccess: true, pagination: false, where: { sourceKey: { in: [...postIDs.map(id => "community-posts:" + id), ...showcaseIDs.map(id => "community-showcase:" + id)] } } });
   if (rows.docs.length) {
     await p.delete({ collection: "audit", overrideAccess: true, where: { object: { in: rows.docs.map(row => "content-promotions:" + row.id) } } });
     await p.delete({ collection: "content-promotions", overrideAccess: true, where: { id: { in: rows.docs.map(row => row.id) } } });
   }
   for (const id of postIDs) await p.delete({ collection: "community-posts", id, overrideAccess: true });
+  for (const id of showcaseIDs) await p.delete({ collection: "community-showcase", id, overrideAccess: true, context: { webShowcaseWrite: true } });
   for (const user of [leader, admin, execution, publicity, member]) if (user) await p.delete({ collection: "users", id: user.id, overrideAccess: true, context: { system: true } });
   if (game) await p.delete({ collection: "games", id: game, overrideAccess: true });
   await p.destroy();
@@ -101,5 +103,34 @@ test("公告网页申请由宣传部骨干审核，社团首页链接原公告�
     await expect(projected.getByRole("link", { name: "合成网页升推公告", exact: true })).toHaveAttribute("href", sourcePath);
     await projected.getByRole("link", { name: "合成网页升推公告", exact: true }).click(); await expect(page).toHaveURL(new RegExp("/updates/" + notice.id + "$"));
     await expect(page.getByRole("button", { name: "核对并提交" })).toHaveCount(0);
+  } finally { await staffContext.close(); }
+});
+test("风采本地批准后网页申请升推，隐藏关闭首页且重新公开仍需复审", async ({ page, browser }) => {
+  test.setTimeout(120000);
+  const source = await p.create({ collection: "community-showcase", user: member, overrideAccess: false, context: { webShowcaseWrite: true },
+    data: { game, author: member.id, title: "合成网页升推风采", body: "合成风采说明", images: [{ source: "data:image/png;base64," + (await sharp({ create: { width: 32, height: 32, channels: 3, background: "purple" } }).png().toBuffer()).toString("base64"), caption: "合成照片" }] } }); showcaseIDs.push(source.id);
+  const staffContext = await browser.newContext(), path = "/community/" + slug + "/showcase";
+  try {
+    await login(page, admin); await page.goto(path + "?view=review");
+    let card = page.locator("#showcase-" + source.id); await expect(card.getByRole("link", { name: "申请社团级展示" })).toHaveCount(0);
+    await card.getByRole("button", { name: "批准发布", exact: true }).click();
+    await expect(page.getByRole("status").filter({ hasText: "审核已保存" })).toBeVisible(); await page.goto(path);
+    card = page.locator("#showcase-" + source.id); await card.getByRole("link", { name: "申请社团级展示", exact: true }).click();
+    const item = page.locator('[data-promotion-source="community-showcase:' + source.id + '"]');
+    await item.getByLabel("升推理由", { exact: true }).fill("合成风采适合社团成员了解");
+    await item.getByRole("button", { name: "申请升推", exact: true }).click(); await expect(page.getByRole("status")).toContainText("升推结果已保存");
+    const pending = (await p.find({ collection: "content-promotions", user: admin, overrideAccess: false, where: { sourceKey: { equals: "community-showcase:" + source.id } } })).docs[0];
+    const staff = await staffContext.newPage(); await login(staff, execution); await staff.goto("/community/promotions?view=review");
+    await staff.locator('[data-promotion-record="' + pending.id + '"]').getByRole("button", { name: "通过升推", exact: true }).click(); await expect(staff.getByRole("status")).toContainText("升推结果已保存");
+    await page.goto("/"); const projected = page.locator('[data-section="promoted-showcase"] [data-promotion-source="community-showcase:' + source.id + '"]');
+    await expect(projected.getByRole("link", { name: "合成网页升推风采", exact: true })).toHaveAttribute("href", path + "#showcase-" + source.id);
+    await page.goto(path); await page.locator("#showcase-" + source.id).getByRole("button", { name: "隐藏风采", exact: true }).click();
+    await expect(page.getByRole("status").filter({ hasText: "审核已保存" })).toBeVisible();
+    await page.goto("/"); await expect(projected).toHaveCount(0);
+    await page.goto(path + "?view=review"); await page.locator("#showcase-" + source.id).getByRole("button", { name: "批准发布", exact: true }).click();
+    await expect(page.getByRole("status").filter({ hasText: "审核已保存" })).toBeVisible();
+    await page.goto("/"); await expect(projected).toHaveCount(0);
+    const retained = await p.findByID({ collection: "content-promotions", id: pending.id, user: admin, overrideAccess: false });
+    expect(retained.status).toBe("needsReview"); expect(retained.approvedVersion).toBeTruthy();
   } finally { await staffContext.close(); }
 });

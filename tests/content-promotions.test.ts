@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
+import sharp from "sharp";
 import { beforeAll, beforeEach, afterEach, afterAll, expect, it } from "vitest";
 import { getPayload, type Payload } from "payload";
 import config from "../src/payload.config";
@@ -11,7 +12,7 @@ import { canAppoint, canPublish } from "../src/lib/rules";
 
 let p: Payload, leader: User, vice: User, admin: User, execution: User, publicity: User, member: User, outsider: User;
 let game: number, otherGame: number, post: number;
-const suffix = randomBytes(6).toString("hex"), actors: User[] = [], posts: number[] = [], receipts: number[] = [];
+const suffix = randomBytes(6).toString("hex"), actors: User[] = [], posts: number[] = [], showcases: number[] = [], receipts: number[] = [];
 const form = { enabled: true, questions: [{ id: "name", label: "合成称呼", type: "text", required: true }] };
 async function event() {
   const row = await p.create({ collection: "community-posts", overrideAccess: false, user: admin, context: { manageSignupForm: true },
@@ -48,13 +49,14 @@ beforeEach(async () => {
 });
 afterEach(async () => {
   if (receipts.length) await p.delete({ collection: "event-signups", overrideAccess: true, where: { id: { in: receipts } } });
-  const own = await p.find({ collection: "content-promotions", overrideAccess: true, pagination: false, where: { sourceKey: { in: posts.map(id => "community-posts:" + id) } } });
+  const own = await p.find({ collection: "content-promotions", overrideAccess: true, pagination: false, where: { sourceKey: { in: [...posts.map(id => "community-posts:" + id), ...showcases.map(id => "community-showcase:" + id)] } } });
   if (own.docs.length) {
     await p.delete({ collection: "audit", overrideAccess: true, where: { object: { in: own.docs.map(doc => "content-promotions:" + doc.id) } } });
     await p.delete({ collection: "content-promotions", overrideAccess: true, where: { id: { in: own.docs.map(doc => doc.id) } } });
   }
   for (const id of posts) await p.delete({ collection: "community-posts", id, overrideAccess: true }).catch(() => null);
-  posts.length = 0; receipts.length = 0;
+  for (const id of showcases) await p.delete({ collection: "community-showcase", id, overrideAccess: true, context: { webShowcaseWrite: true } }).catch(() => null);
+  posts.length = 0; showcases.length = 0; receipts.length = 0;
 });
 afterAll(async () => {
   if (!p) return;
@@ -179,4 +181,34 @@ it("活动改为公告必须复审，保留原来源键、原答卷及唯一升�
   current = await change(admin, "submit", await row()); current = await change(vice, "approve", current);
   expect(current.id).toBe(id); expect(current.kind).toBe("notice"); expect(current.sourceKey).toBe("community-posts:" + post);
   expect((await p.findByID({ collection: "event-signups", id: receipt.id, user: member, overrideAccess: false })).answers).toEqual({ name: "合成历史答卷" });
+});
+it("风采先本地审核再申请，骨干升推不授本地发布或私人报名能力", async () => {
+  const source = await p.create({ collection: "community-showcase", user: member, overrideAccess: false, context: { webShowcaseWrite: true },
+    data: { game, author: member.id, title: "合成风采记录", body: "合成内容", images: [] } }); showcases.push(source.id);
+  expect(source.status).toBe("pending");
+  await expect(changePromotion(p, admin, "community-showcase", source.id, "submit", { sourceVersion: "fake", reason: "合成风采需要升推" })).rejects.toThrow();
+  await expect(p.update({ collection: "community-showcase", id: source.id, user: execution, overrideAccess: false, context: { webShowcaseWrite: true }, data: { status: "visible" } })).rejects.toThrow();
+  await p.update({ collection: "community-showcase", id: source.id, user: admin, overrideAccess: false, context: { webShowcaseWrite: true }, data: { status: "visible" } });
+  const visible = await readPromotionSource(p, "community-showcase", source.id);
+  let current = await changePromotion(p, admin, "community-showcase", source.id, "submit", { sourceVersion: visible.version, reason: "合成风采适合社团展示" });
+  current = await changePromotion(p, execution, "community-showcase", source.id, "approve", { revision: current.updatedAt, sourceVersion: current.requestedVersion });
+  expect(current.kind).toBe("showcase"); expect(current.sourceID).toBe(source.id); expect(Number(current.game)).toBe(game);
+  expect((await promotedContent(p, "showcase")).find(item => item.sourceKey === "community-showcase:" + source.id)?.href).toContain("/showcase#showcase-" + source.id);
+  expect(canPublish(execution)).toBe(false);
+});
+it("风采媒体改稿撤下并保留旧批准版本，重新申请后才展示新版本", async () => {
+  const image = async (background: string) => "data:image/png;base64," + (await sharp({ create: { width: 32, height: 32, channels: 3, background } }).png().toBuffer()).toString("base64");
+  const source = await p.create({ collection: "community-showcase", user: admin, overrideAccess: false, context: { webShowcaseWrite: true },
+    data: { game, author: admin.id, title: "合成风采媒体", body: "合成媒体", images: [{ source: await image("white"), caption: "合成原图" }] } }); showcases.push(source.id);
+  const first = await readPromotionSource(p, "community-showcase", source.id);
+  let current = await changePromotion(p, publicity, "community-showcase", source.id, "promote", { sourceVersion: first.version, reason: "合成媒体主动升推" });
+  const approved = current.approvedVersion, snapshot = current.approvedSnapshot;
+  await p.update({ collection: "community-showcase", id: source.id, user: admin, overrideAccess: false, context: { webShowcaseWrite: true }, data: { images: [{ source: await image("purple"), caption: "合成新图" }] } });
+  current = (await p.find({ collection: "content-promotions", overrideAccess: true, where: { sourceKey: { equals: "community-showcase:" + source.id } } })).docs[0];
+  expect(current.status).toBe("needsReview"); expect(current.approvedVersion).toBe(approved); expect(current.approvedSnapshot).toEqual(snapshot);
+  expect((await promotedContent(p, "showcase")).some(item => item.sourceKey === "community-showcase:" + source.id)).toBe(false);
+  const next = await readPromotionSource(p, "community-showcase", source.id);
+  current = await changePromotion(p, admin, "community-showcase", source.id, "submit", { revision: current.updatedAt, sourceVersion: next.version, reason: "合成媒体改稿重新申请" });
+  current = await changePromotion(p, vice, "community-showcase", source.id, "approve", { revision: current.updatedAt, sourceVersion: current.requestedVersion });
+  expect(current.approvedVersion).not.toBe(approved);
 });

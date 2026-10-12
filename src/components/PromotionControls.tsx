@@ -3,8 +3,8 @@ import { promotionAction } from "@/app/(frontend)/community/promotions/actions";
 import type { ContentPromotion } from "@/payload-types";
 import type { PromotionSource } from "@/lib/promotion-model";
 
-export function PromotionControls({ collection, id, version, current, manager, reviewer, actor }: {
-  collection: PromotionSource; id: number; version: string; current?: ContentPromotion; manager: boolean; reviewer: boolean; actor: number;
+export function PromotionControls({ collection, id, version, current, manager, reviewer, actor, canApprove = true }: {
+  collection: PromotionSource; id: number; version: string; current?: ContentPromotion; manager: boolean; reviewer: boolean; actor: number; canApprove?: boolean;
 }) {
   const fields = <>
     <input type="hidden" name="sourceCollection" value={collection} /><input type="hidden" name="sourceID" value={id} />
@@ -15,7 +15,7 @@ export function PromotionControls({ collection, id, version, current, manager, r
       <form action={promotionAction}>{fields}<SubmitButton name="action" value="withdraw" className="button light">撤回申请</SubmitButton></form>}
     {reviewer && <form action={promotionAction} className="member-form">{fields}
       <label>审核意见（退回或拒绝必填）<textarea name="reason" rows={3} maxLength={1000} /></label>
-      <div className="reaction-bar"><SubmitButton name="action" value="approve">通过升推</SubmitButton>
+      <div className="reaction-bar"><SubmitButton name="action" value="approve" disabled={!canApprove}>通过升推</SubmitButton>
         <SubmitButton name="action" value="return" className="button light">退回修改</SubmitButton>
         <SubmitButton name="action" value="reject" className="button light">拒绝升推</SubmitButton></div>
     </form>}
