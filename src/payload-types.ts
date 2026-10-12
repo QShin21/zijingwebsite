@@ -28,6 +28,7 @@ export interface Config {
     'community-showcase': CommunityShowcase;
     'community-posts': CommunityPost;
     'content-promotions': ContentPromotion;
+    'team-member-profiles': TeamMemberProfile;
     'event-signups': EventSignup;
     games: Game;
     teams: Team;
@@ -56,6 +57,7 @@ export interface Config {
     'community-showcase': CommunityShowcaseSelect<false> | CommunityShowcaseSelect<true>;
     'community-posts': CommunityPostsSelect<false> | CommunityPostsSelect<true>;
     'content-promotions': ContentPromotionsSelect<false> | ContentPromotionsSelect<true>;
+    'team-member-profiles': TeamMemberProfilesSelect<false> | TeamMemberProfilesSelect<true>;
     'event-signups': EventSignupsSelect<false> | EventSignupsSelect<true>;
     games: GamesSelect<false> | GamesSelect<true>;
     teams: TeamsSelect<false> | TeamsSelect<true>;
@@ -426,6 +428,23 @@ export interface ContentPromotion {
     | number
     | boolean
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-member-profiles".
+ */
+export interface TeamMemberProfile {
+  id: number;
+  membership: number;
+  membershipJoinedAt: string;
+  displayName: string;
+  position?: string | null;
+  biography?: string | null;
+  avatar?: string | null;
+  visible: boolean;
+  revision: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -962,6 +981,10 @@ export interface PayloadLockedDocument {
         value: number | ContentPromotion;
       } | null)
     | ({
+        relationTo: 'team-member-profiles';
+        value: number | TeamMemberProfile;
+      } | null)
+    | ({
         relationTo: 'event-signups';
         value: number | EventSignup;
       } | null)
@@ -1245,6 +1268,22 @@ export interface ContentPromotionsSelect<T extends boolean = true> {
   approvedAt?: T;
   reviewNote?: T;
   history?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-member-profiles_select".
+ */
+export interface TeamMemberProfilesSelect<T extends boolean = true> {
+  membership?: T;
+  membershipJoinedAt?: T;
+  displayName?: T;
+  position?: T;
+  biography?: T;
+  avatar?: T;
+  visible?: T;
+  revision?: T;
   updatedAt?: T;
   createdAt?: T;
 }

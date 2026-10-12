@@ -1,4 +1,5 @@
 import { ActivitySignup } from './ActivitySignup';
+import { TeamProfilesPanel } from './team-profiles/TeamProfilesPanel';
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { RichText } from "@payloadcms/richtext-lexical/react";
@@ -339,6 +340,7 @@ export async function Detail({
       <div className="detail-layout">
         <div className="detail-main">
           <Prose doc={doc} />
+          {collection === "teams" && <TeamProfilesPanel teamID={doc.id} />}
           {Boolean(doc.members?.length) && (
             <section>
               <h2>公开阵容</h2>
