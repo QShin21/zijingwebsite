@@ -1,4 +1,5 @@
 import { ActivitySignup } from './ActivitySignup';
+import { TeamProfilesPanel } from './team-profiles/TeamProfilesPanel';
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { RichText } from "@payloadcms/richtext-lexical/react";
@@ -340,6 +341,7 @@ export async function Detail({
         <div className="detail-main">
           <Prose doc={doc} />
           {collection === "teams" && <section className="panel"><h2>加入与管理代表队</h2><Link className="button" href="/teams/recruitment">查看代表队招新与我的记录</Link> <Link href={`/teams/manage/${doc.id}`}>本队工作台</Link><p>入队资格以已批准的成员关系为准，公开阵容和简介不授管理权限。</p></section>}
+          {collection === "teams" && <TeamProfilesPanel teamID={doc.id} />}
           {Boolean(doc.members?.length) && (
             <section>
               <h2>公开阵容</h2>

@@ -33,6 +33,7 @@ import { SocialCollections } from "./social";
 import { ContentPromotions } from "./promotions";
 import { StaffBatches, StaffApplications } from "./staff-recruitment";
 import { TeamCoreCollections, teamLifecycleFields, guardTeamLifecycle } from "./team-core";
+import { TeamMemberProfiles } from "./team-profiles";
 import { nicknameKey, validNickname } from "../lib/nickname";
 
 const text = (name: string, label: string, required = false): TextField => ({
@@ -612,6 +613,7 @@ export const Collections: CollectionConfig[] = [
   ContentPromotions,
   StaffBatches, StaffApplications,
   ...TeamCoreCollections,
+  TeamMemberProfiles,
   EventSignups,
   content("games", "游戏项目", [
     { name: "sort", label: "排序", type: "number" },

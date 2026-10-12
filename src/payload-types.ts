@@ -34,6 +34,7 @@ export interface Config {
     'team-recruitments': TeamRecruitment;
     'team-join-applications': TeamJoinApplication;
     'team-memberships': TeamMembership;
+    'team-member-profiles': TeamMemberProfile;
     'event-signups': EventSignup;
     games: Game;
     teams: Team;
@@ -68,6 +69,7 @@ export interface Config {
     'team-recruitments': TeamRecruitmentsSelect<false> | TeamRecruitmentsSelect<true>;
     'team-join-applications': TeamJoinApplicationsSelect<false> | TeamJoinApplicationsSelect<true>;
     'team-memberships': TeamMembershipsSelect<false> | TeamMembershipsSelect<true>;
+    'team-member-profiles': TeamMemberProfilesSelect<false> | TeamMemberProfilesSelect<true>;
     'event-signups': EventSignupsSelect<false> | EventSignupsSelect<true>;
     games: GamesSelect<false> | GamesSelect<true>;
     teams: TeamsSelect<false> | TeamsSelect<true>;
@@ -680,6 +682,23 @@ export interface Season {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-member-profiles".
+ */
+export interface TeamMemberProfile {
+  id: number;
+  membership: number;
+  membershipJoinedAt: string;
+  displayName: string;
+  position?: string | null;
+  biography?: string | null;
+  avatar?: string | null;
+  visible: boolean;
+  revision: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "event-signups".
  */
 export interface EventSignup {
@@ -1185,6 +1204,10 @@ export interface PayloadLockedDocument {
         value: number | TeamMembership;
       } | null)
     | ({
+        relationTo: 'team-member-profiles';
+        value: number | TeamMemberProfile;
+      } | null)
+    | ({
         relationTo: 'event-signups';
         value: number | EventSignup;
       } | null)
@@ -1579,6 +1602,22 @@ export interface TeamMembershipsSelect<T extends boolean = true> {
   grantedBy?: T;
   revokedBy?: T;
   revocationReason?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-member-profiles_select".
+ */
+export interface TeamMemberProfilesSelect<T extends boolean = true> {
+  membership?: T;
+  membershipJoinedAt?: T;
+  displayName?: T;
+  position?: T;
+  biography?: T;
+  avatar?: T;
+  visible?: T;
+  revision?: T;
   updatedAt?: T;
   createdAt?: T;
 }
