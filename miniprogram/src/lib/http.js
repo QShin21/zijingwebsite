@@ -26,15 +26,17 @@ function request(path, options = {}) {
     wx.request({
       url: url(path), method: options.method || 'GET', data: options.data,
       timeout: options.timeout || 20000,
-      header: { 'content-type': 'application/json', ...(credential ? { Authorization: `JWT ${credential}` } : {}), ...(options.questionnaire ? { 'x-questionnaire-version': '3' } : {}) },
+      header: { 'content-type': 'application/json', ...(credential ? { Authorization: `JWT ${credential}` } : {}), ...(options.questionnaire ? { 'x-questionnaire-version': '3' } : {}),
+        ...(options.siteWrite === true && options.required && credential && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method) ? { Origin: config.origin } : {}) },
       success(response) {
         if (response.statusCode >= 200 && response.statusCode < 300) {
           if (typeof response.data === 'string' && response.data.trim().startsWith('<')) {
             reject(Object.assign(new Error('此功能需要更新网站服务接口'), { status: 404 }));
           } else resolve(options.raw ? response.data : brand.display(response.data));
         } else {
-          if (response.statusCode === 401 && credential) session.clear();
-          reject(Object.assign(new Error(message(response.data, response.statusCode)), { status: response.statusCode }));
+          if (response.statusCode === 401 && credential && session.token() === credential) session.clear();
+          reject(Object.assign(new Error(message(response.data, response.statusCode)), { status: response.statusCode,
+            ...(response.statusCode === 409 && response.data && response.data.code === 'PROFILE_PERIOD_CHANGED' ? { code: 'PROFILE_PERIOD_CHANGED' } : {}) }));
         }
       },
       fail() { reject(new Error('连接失败，请检查网络后重试')); },
