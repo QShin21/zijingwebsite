@@ -1,21 +1,16 @@
 {
-  "schemaVersion": 1,
-  "at": "2026-10-12T09:31:35.695651+00:00",
+  "schemaVersion": 2,
+  "at": "2026-10-12T10:29:31.246908+00:00",
   "branch": "codex/club-integration-20261012",
   "base": "ed965ef457b5913d4590753c9d931e82811244b9",
-  "runtimeCodeSHA": "8d69b2aef73606f436e11eb4c1ecdb9c1f521591",
-  "runtimeObjectsSHA256": "ad056de63f9411accfed2121095f2858b246e7953e7447c6f82c43d3b4c32bcc",
+  "runtimeCodeSHA": "dcb030bcbd48120c788f8ad5aa498b351554cf9b",
+  "runtimeObjectsSHA256": "73f039d3787b029bc7cd038bf9bb0fbf69e91320ae399275f84274f58311ddd5",
   "approvedFrozenInputs": {
     "staff": "1c19cddfe39abb4946f3603ff7053b089cda9637",
     "profiles": "3ba056c3dde350b51f28ea72792fe17d54e96b84",
     "native": "72f580f7806d09b8e249f45c63ae215f190f5fcf",
-    "core": "bf6665c57d83ffa269845c76ff6903d23e0510de"
-  },
-  "ownSlices": {
-    "nativeAndProfileContracts": "fca91bf039bf22eace30676b35844c8000021e47",
-    "archiveTransactions": "857da943c16654e01bf8d8f5f00589b4f823247f",
-    "crossModuleAndKeyboardQA": "fe9ff763b285220a512c54ee3140652922be71c2",
-    "schemaAndDrills": "8d69b2aef73606f436e11eb4c1ecdb9c1f521591"
+    "core": "bf6665c57d83ffa269845c76ff6903d23e0510de",
+    "honors": "196ebf841c77f7a725ed6b41100cd66b341faea5"
   },
   "environment": {
     "syntheticOnly": true,
@@ -27,22 +22,209 @@
     "node": "24.19.0",
     "pnpm": "11.25.0"
   },
+  "historicalPreHonorStage": {
+    "schemaVersion": 1,
+    "at": "2026-10-12T09:31:35.695651+00:00",
+    "branch": "codex/club-integration-20261012",
+    "base": "ed965ef457b5913d4590753c9d931e82811244b9",
+    "runtimeCodeSHA": "8d69b2aef73606f436e11eb4c1ecdb9c1f521591",
+    "runtimeObjectsSHA256": "ad056de63f9411accfed2121095f2858b246e7953e7447c6f82c43d3b4c32bcc",
+    "approvedFrozenInputs": {
+      "staff": "1c19cddfe39abb4946f3603ff7053b089cda9637",
+      "profiles": "3ba056c3dde350b51f28ea72792fe17d54e96b84",
+      "native": "72f580f7806d09b8e249f45c63ae215f190f5fcf",
+      "core": "bf6665c57d83ffa269845c76ff6903d23e0510de"
+    },
+    "ownSlices": {
+      "nativeAndProfileContracts": "fca91bf039bf22eace30676b35844c8000021e47",
+      "archiveTransactions": "857da943c16654e01bf8d8f5f00589b4f823247f",
+      "crossModuleAndKeyboardQA": "fe9ff763b285220a512c54ee3140652922be71c2",
+      "schemaAndDrills": "8d69b2aef73606f436e11eb4c1ecdb9c1f521591"
+    },
+    "environment": {
+      "syntheticOnly": true,
+      "loopbackPostgres": true,
+      "DB_PUSH": false,
+      "productionAccess": false,
+      "realNotifications": false,
+      "credentialsRead": false,
+      "node": "24.19.0",
+      "pnpm": "11.25.0"
+    },
+    "local": {
+      "fullUnitDatabase": {
+        "result": "success",
+        "files": 44,
+        "tests": 519,
+        "durationSeconds": 134.33,
+        "log": "/tmp/zijing-integration-all-unit.log"
+      },
+      "typecheck": "success",
+      "lint": "success",
+      "diffCheck": "success",
+      "build": {
+        "result": "success",
+        "sourceSHA": "8d69b2aef73606f436e11eb4c1ecdb9c1f521591",
+        "method": "git archive source plus installed Next CLI, isolated build directory",
+        "log": "/tmp/zijing-integration-build.log"
+      },
+      "nativeStatic": {
+        "result": "success",
+        "pages": 17,
+        "files": 105,
+        "bytes": 259641,
+        "domainChecking": true
+      },
+      "browserUniquePassedCases": 16,
+      "browserRuns": [
+        {
+          "name": "staff/core/club boundaries",
+          "passed": 13,
+          "firstFixtureFailure": "missing same-origin GET header in new cross-module fixture",
+          "log": "/tmp/zijing-integration-targeted-e2e.log"
+        },
+        {
+          "name": "profile return/cancel/edit focus",
+          "passed": 1,
+          "originalDefectReproduced": true
+        },
+        {
+          "name": "five preview entry points",
+          "passed": 1,
+          "viewports": [
+            {
+              "width": 390,
+              "height": 480
+            },
+            {
+              "width": 1440,
+              "height": 900
+            }
+          ],
+          "additionalWidths": [
+            360,
+            500,
+            768
+          ],
+          "log": "/tmp/zijing-integration-cross-module.log"
+        },
+        {
+          "name": "actual core admission and profile consent period",
+          "passed": 1,
+          "fixtureCorrection": "scope staff navigation link to participants navigation",
+          "log": "/tmp/zijing-integration-cross-final.log"
+        },
+        {
+          "name": "CMS archive/publish and batch archive concurrency",
+          "passed": 1,
+          "includedInUniqueCount": false,
+          "log": "/tmp/zijing-integration-archive-race-final.log"
+        }
+      ]
+    },
+    "schema": {
+      "collections": 32,
+      "expectedModuleCollections": 7,
+      "snapshotTables": 68,
+      "snapshot": "src/migrations/20261012_170000_team_member_profiles.json",
+      "readOnlySnapshot": true,
+      "reconciledConstraintTables": 8,
+      "diffDDLExecuted": false,
+      "coreMigrationTSBlob": "a47f81e6a8f62f596da3bb2808750216c114257d",
+      "migrationOrder": [
+        "20261012_030000_content_promotions",
+        "20261012_050000_staff_recruitment",
+        "20261012_160000_team_core",
+        "20261012_170000_team_member_profiles"
+      ],
+      "registeredOnce": true
+    },
+    "migrationDrills": {
+      "core": {
+        "result": "success",
+        "legacyTablesPreserved": 62,
+        "legacyRowsPreserved": 9,
+        "repeatNoop": true,
+        "downBlocked": true,
+        "log": "/tmp/zijing-integration-core-migration.log"
+      },
+      "profiles": {
+        "result": "success",
+        "evidence": "club-integration-profiles-migration-20261012.json",
+        "baselineTables": 63,
+        "beforeProfileTables": 67,
+        "finalTables": 68,
+        "coreOriginalColumnTablesPreserved": 62,
+        "profileOriginalColumnTablesPreserved": 66
+      }
+    },
+    "exactIntegratedCI": {
+      "status": "pending-after-test-contract-correction",
+      "attempts": [
+        {
+          "headSHA": "672f4dd88cd8088e0f44dad55144453f02847434",
+          "runID": 38230468219,
+          "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38230468219",
+          "conclusion": "failure",
+          "unitPassed": 518,
+          "unitFailed": 1,
+          "failedCase": "tests/team-profiles-db.test.ts: same initial content parallel save",
+          "browserAndBuild": "not-run",
+          "error": "explicit public serializable/deadlock conflict 409 after the documented single automatic retry"
+        }
+      ]
+    },
+    "remainingUnverified": [
+      "honors module awaiting approved frozen commit",
+      "native subsequent team/profile/honor adapter under development",
+      "official WeChat compilation, simulator, real device and platform settings"
+    ],
+    "forbiddenActionsPerformed": [],
+    "concurrencyTestCorrection": {
+      "applicationChanged": false,
+      "automaticRetriesExpanded": false,
+      "waitsForAllOriginalTransactions": true,
+      "sameOriginalMembershipVersionReplayed": true,
+      "acceptedErrors": {
+        "status": 409,
+        "isPublic": true,
+        "message": "记录已更新，请刷新后重试"
+      },
+      "mustHaveOriginalSuccess": true,
+      "checksUniqueRowBeforeReplay": true,
+      "replayMustKeepExactStoredRow": true,
+      "defaultHiddenAndRevisionOne": true,
+      "oldPeriodRevocationAndDifferentContentTestsUnchanged": true,
+      "originalCaseAdditionalLocalPasses": 5,
+      "correctedTargetedTestsPassed": 21,
+      "correctedTypeAndLint": "success"
+    },
+    "finalReadOnlySchemaCheck": {
+      "tables": 68,
+      "schemaMatchesCommittedSnapshot": true,
+      "coreMigrationOccurrences": 1,
+      "profileMigrationOccurrences": 1,
+      "remainingIntegrationActors": 0,
+      "remainingIntegrationGames": 0,
+      "remainingIntegrationBatches": 0
+    }
+  },
   "local": {
     "fullUnitDatabase": {
       "result": "success",
-      "files": 44,
-      "tests": 519,
-      "durationSeconds": 134.33,
-      "log": "/tmp/zijing-integration-all-unit.log"
+      "files": 55,
+      "tests": 633,
+      "durationSeconds": 121.23,
+      "log": "/tmp/zijing-honor-all-unit-clean.log"
     },
     "typecheck": "success",
     "lint": "success",
     "diffCheck": "success",
     "build": {
       "result": "success",
-      "sourceSHA": "8d69b2aef73606f436e11eb4c1ecdb9c1f521591",
-      "method": "git archive source plus installed Next CLI, isolated build directory",
-      "log": "/tmp/zijing-integration-build.log"
+      "codeSHA": "bce2b951f0bfac71eb5b72e6ffd5ff90ac0c39fb",
+      "laterChanges": "test pool/fixture isolation and equivalent filename-condition rewrite",
+      "log": "/tmp/zijing-honor-build.log"
     },
     "nativeStatic": {
       "result": "success",
@@ -51,91 +233,55 @@
       "bytes": 259641,
       "domainChecking": true
     },
-    "browserUniquePassedCases": 16,
-    "browserRuns": [
-      {
-        "name": "staff/core/club boundaries",
-        "passed": 13,
-        "firstFixtureFailure": "missing same-origin GET header in new cross-module fixture",
-        "log": "/tmp/zijing-integration-targeted-e2e.log"
-      },
-      {
-        "name": "profile return/cancel/edit focus",
-        "passed": 1,
-        "originalDefectReproduced": true
-      },
-      {
-        "name": "five preview entry points",
-        "passed": 1,
-        "viewports": [
-          {
-            "width": 390,
-            "height": 480
-          },
-          {
-            "width": 1440,
-            "height": 900
-          }
-        ],
-        "additionalWidths": [
-          360,
-          500,
-          768
-        ],
-        "log": "/tmp/zijing-integration-cross-module.log"
-      },
-      {
-        "name": "actual core admission and profile consent period",
-        "passed": 1,
-        "fixtureCorrection": "scope staff navigation link to participants navigation",
-        "log": "/tmp/zijing-integration-cross-final.log"
-      },
-      {
-        "name": "CMS archive/publish and batch archive concurrency",
-        "passed": 1,
-        "includedInUniqueCount": false,
-        "log": "/tmp/zijing-integration-archive-race-final.log"
-      }
-    ]
+    "targetedRealHTTPBrowser": {
+      "crossModule": 2,
+      "publicMediaGuard": 1,
+      "storageMatrixChecks": 293,
+      "realMarkerReadFailureChecks": 3
+    },
+    "fullBrowser": {
+      "status": "running",
+      "log": "/tmp/zijing-honor-all-e2e.log"
+    }
   },
   "schema": {
-    "collections": 32,
-    "expectedModuleCollections": 7,
-    "snapshotTables": 68,
+    "collections": 33,
+    "expectedModuleCollections": 8,
+    "snapshotTables": 69,
     "snapshot": "src/migrations/20261012_170000_team_member_profiles.json",
     "readOnlySnapshot": true,
-    "reconciledConstraintTables": 8,
+    "reconciledConstraintTables": 11,
     "diffDDLExecuted": false,
     "coreMigrationTSBlob": "a47f81e6a8f62f596da3bb2808750216c114257d",
     "migrationOrder": [
       "20261012_030000_content_promotions",
       "20261012_050000_staff_recruitment",
+      "20261012_080000_team_honor_records",
       "20261012_160000_team_core",
       "20261012_170000_team_member_profiles"
     ],
-    "registeredOnce": true
+    "registeredOnce": true,
+    "honorOwnershipForeignKeys": "four RESTRICT, reviewer SET NULL",
+    "catalogArrayTypes": "attname cast text[]; all snapshot FK columns are arrays"
   },
   "migrationDrills": {
-    "core": {
-      "result": "success",
-      "legacyTablesPreserved": 62,
-      "legacyRowsPreserved": 9,
-      "repeatNoop": true,
-      "downBlocked": true,
-      "log": "/tmp/zijing-integration-core-migration.log"
-    },
-    "profiles": {
-      "result": "success",
-      "evidence": "club-integration-profiles-migration-20261012.json",
-      "baselineTables": 63,
-      "beforeProfileTables": 67,
-      "finalTables": 68,
-      "coreOriginalColumnTablesPreserved": 62,
-      "profileOriginalColumnTablesPreserved": 66
-    }
+    "core": "club-integration-core-honors-migration-20261012.json",
+    "profiles": "club-integration-profiles-honors-migration-20261012.json"
   },
+  "storageBackupRestore": "club-integration-honor-storage-20261012.json",
+  "crossModuleBoundaries": [
+    "staff admission does not grant roles or team membership",
+    "actual establishment/recruit/application/admission grants profile and honor eligibility",
+    "profile opt-in has narrow public DTO and membership-period HMAC",
+    "owner/cross-game/backbone/president honor matrix",
+    "honor edit removes current projection and stale approval returns409; fresh review updates stable archive",
+    "revocation removes profile and blocks honor create/edit/pending approval; approved history retained",
+    "same-ID rejoin keeps old profile consent invalid",
+    "CMS archive closes open recruitment in same transaction; no automatic reopen",
+    "scope pagination and two interrupted-action cases preserve state and require manual result check"
+  ],
   "exactIntegratedCI": {
-    "status": "pending-after-test-contract-correction",
+    "status": "pending-push-final-reviewed-integration",
     "attempts": [
       {
         "headSHA": "672f4dd88cd8088e0f44dad55144453f02847434",
@@ -150,38 +296,28 @@
       }
     ]
   },
-  "remainingUnverified": [
-    "honors module awaiting approved frozen commit",
-    "native subsequent team/profile/honor adapter under development",
-    "official WeChat compilation, simulator, real device and platform settings"
-  ],
-  "forbiddenActionsPerformed": [],
-  "concurrencyTestCorrection": {
-    "applicationChanged": false,
-    "automaticRetriesExpanded": false,
-    "waitsForAllOriginalTransactions": true,
-    "sameOriginalMembershipVersionReplayed": true,
-    "acceptedErrors": {
-      "status": 409,
-      "isPublic": true,
-      "message": "记录已更新，请刷新后重试"
+  "localFailedAttempts": [
+    {
+      "result": "failure",
+      "unitAssertionsPassed": 633,
+      "unhandledErrors": 1,
+      "reason": "isolated honor migration database FORCE drop hit a retained bootstrap client",
+      "fixedIn": "d8a5be524124bbae96a673a62a7e474410966594",
+      "log": "/tmp/zijing-honor-all-unit.log"
     },
-    "mustHaveOriginalSuccess": true,
-    "checksUniqueRowBeforeReplay": true,
-    "replayMustKeepExactStoredRow": true,
-    "defaultHiddenAndRevisionOne": true,
-    "oldPeriodRevocationAndDifferentContentTestsUnchanged": true,
-    "originalCaseAdditionalLocalPasses": 5,
-    "correctedTargetedTestsPassed": 21,
-    "correctedTypeAndLint": "success"
-  },
-  "finalReadOnlySchemaCheck": {
-    "tables": 68,
-    "schemaMatchesCommittedSnapshot": true,
-    "coreMigrationOccurrences": 1,
-    "profileMigrationOccurrences": 1,
-    "remainingIntegrationActors": 0,
-    "remainingIntegrationGames": 0,
-    "remainingIntegrationBatches": 0
-  }
+    {
+      "result": "failure",
+      "passed": 632,
+      "failed": 1,
+      "reason": "legacy private-signup rollback fixture shared permanent honor markers from another test",
+      "fixedIn": "2487e7a",
+      "log": "/tmp/zijing-honor-all-unit-final.log"
+    }
+  ],
+  "remainingUnverified": [
+    "unapproved subsequent native team/profile/honor adapter still under development",
+    "official WeChat compilation/simulator/device/platform settings",
+    "actual S3 mirror synchronization/offsite backup/production recovery"
+  ],
+  "forbiddenActionsPerformed": []
 }

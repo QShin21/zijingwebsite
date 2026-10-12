@@ -1,0 +1,164 @@
+{
+  "date": "2026-10-12",
+  "builtApplicationSHA": "bce2b951f0bfac71eb5b72e6ffd5ff90ac0c39fb",
+  "syntheticOnly": true,
+  "productionAccess": false,
+  "realNotifications": false,
+  "databaseServer": "isolated embedded PostgreSQL 17.10",
+  "backupClient": "PostgreSQL 17.11 official Debian package extracted under /tmp",
+  "manifestVersion": 3,
+  "publicMirrorSource": "local simulated S3 mirror; no object-storage network connection",
+  "offsiteConfigured": false,
+  "localRestore": {
+    "verifiedAt": "2026-10-12T10:15:25.690Z",
+    "database": "zijing_restore_1791800123035",
+    "tables": 69,
+    "records": 1823,
+    "mediaFiles": 4,
+    "mediaDirectory": "/workspace/zijingwebsite/.data/zijing_restore_1791800123035/media",
+    "localVideoFiles": 2,
+    "localHonorVideoFiles": 1,
+    "honorVideoReservations": 1,
+    "honorStorageVerified": true,
+    "result": "PASS",
+    "sourceUntouched": true
+  },
+  "separatedMirrorRestore": {
+    "verifiedAt": "2026-10-12T10:16:25.334Z",
+    "database": "zijing_restore_1791800180460",
+    "tables": 69,
+    "records": 1823,
+    "mediaFiles": 1,
+    "mediaDirectory": "/workspace/zijingwebsite/.data/zijing_restore_1791800180460/media",
+    "localVideoFiles": 2,
+    "localHonorVideoFiles": 1,
+    "honorVideoReservations": 1,
+    "honorStorageVerified": true,
+    "result": "PASS",
+    "sourceUntouched": true
+  },
+  "httpPhases": [
+    {
+      "syntheticOnly": true,
+      "phase": "source",
+      "checks": 95,
+      "privateRawAndEncodedBlockedForAllSixIdentities": true,
+      "privateRevisionScoped": true,
+      "markerOnlyOldCopyBlocked": true,
+      "approvedPublicRange": true,
+      "approvedBytesSHA256": "0300f73826c6c43b31e1ac758a1d8472bb8a95e11670315a53ea2a0d08f91f9d",
+      "revokedOldToken": false,
+      "changedBytesFailClosed": false
+    },
+    {
+      "syntheticOnly": true,
+      "phase": "local-restored",
+      "checks": 99,
+      "privateRawAndEncodedBlockedForAllSixIdentities": true,
+      "privateRevisionScoped": true,
+      "markerOnlyOldCopyBlocked": true,
+      "approvedPublicRange": true,
+      "approvedBytesSHA256": "0300f73826c6c43b31e1ac758a1d8472bb8a95e11670315a53ea2a0d08f91f9d",
+      "revokedOldToken": true,
+      "changedBytesFailClosed": true
+    },
+    {
+      "syntheticOnly": true,
+      "phase": "separated-restored",
+      "checks": 99,
+      "privateRawAndEncodedBlockedForAllSixIdentities": true,
+      "privateRevisionScoped": true,
+      "markerOnlyOldCopyBlocked": true,
+      "approvedPublicRange": true,
+      "approvedBytesSHA256": "0300f73826c6c43b31e1ac758a1d8472bb8a95e11670315a53ea2a0d08f91f9d",
+      "revokedOldToken": true,
+      "changedBytesFailClosed": true
+    }
+  ],
+  "realMarkerReadFailure": {
+    "syntheticOnly": true,
+    "realFilesystemPermissionFailure": true,
+    "checks": [
+      {
+        "method": "GET",
+        "range": false,
+        "status": 503,
+        "bytes": 0
+      },
+      {
+        "method": "HEAD",
+        "range": false,
+        "status": 503,
+        "bytes": 0
+      },
+      {
+        "method": "GET",
+        "range": true,
+        "status": 503,
+        "bytes": 0
+      }
+    ]
+  },
+  "rollbackGates": [
+    {
+      "phase": "original",
+      "exitCode": 1,
+      "compatibleWithBaseline": false,
+      "counts": {
+        "backbone": 1,
+        "new_states": 0,
+        "joins": 0,
+        "promotions": 0,
+        "staff_batches": 0,
+        "staff_applications": 0,
+        "reduced_grants": 0,
+        "revoked_grants": 0,
+        "legacy_owner_private_access": 0,
+        "legacy_historical_private_access": 0,
+        "revoked_cards": 0,
+        "member_offices": 2,
+        "honor_records": 2,
+        "honor_private_files": 1,
+        "honor_video_reservations": 1
+      },
+      "checksComplete": true,
+      "requiresHonorVideoIsolation": true,
+      "preservesExpandedSchema": true,
+      "recommendation": "Use a reviewed rollback build retaining club operations, consent, private signup and honor video isolation capabilities; preserve data, private videos and permanent reservations; do not revert to 1.0 or execute down"
+    },
+    {
+      "phase": "marker-only",
+      "exitCode": 1,
+      "compatibleWithBaseline": false,
+      "counts": {
+        "backbone": 0,
+        "new_states": 0,
+        "joins": 0,
+        "promotions": 0,
+        "staff_batches": 0,
+        "staff_applications": 0,
+        "reduced_grants": 0,
+        "revoked_grants": 0,
+        "legacy_owner_private_access": 0,
+        "legacy_historical_private_access": 0,
+        "revoked_cards": 0,
+        "member_offices": 0,
+        "honor_records": 0,
+        "honor_private_files": 0,
+        "honor_video_reservations": 1
+      },
+      "checksComplete": true,
+      "requiresHonorVideoIsolation": true,
+      "preservesExpandedSchema": true,
+      "recommendation": "Use a reviewed rollback build retaining club operations, consent, private signup and honor video isolation capabilities; preserve data, private videos and permanent reservations; do not revert to 1.0 or execute down"
+    }
+  ],
+  "notes": [
+    "Database and every media component checked with SHA-256 before/after backup and after restore.",
+    "Private video and permanent marker map to their original paths under restored MEDIA_DIR.",
+    "Source and both restored approved-video hashes match.",
+    "Only restored synthetic reviewer grants and copied bytes changed for negative HTTP cases.",
+    "Original backup source is not production; no real credentials were read.",
+    "No incompatible old application was started after rollback gate rejection."
+  ]
+}

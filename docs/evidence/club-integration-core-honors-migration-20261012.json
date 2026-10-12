@@ -1,0 +1,15 @@
+{
+  "database": "isolated-disposable",
+  "cleanSequentialMigrations": true,
+  "legacyTablesPreserved": 63,
+  "legacyRowsPreserved": 9,
+  "legacyHash": "4667d829e2d0865b4dabdececce6475177680e161d97e116ac0a6f73291b0818",
+  "noImplicitMembership": true,
+  "legacyTeamUnestablished": true,
+  "migrationRepeatNoop": true,
+  "destructiveDownBlocked": true,
+  "date": "2026-10-12",
+  "sourceSHA": "d8a5be524124bbae96a673a62a7e474410966594",
+  "honorMigrationIncludedBeforeCore": true,
+  "productionAccess": false
+}
