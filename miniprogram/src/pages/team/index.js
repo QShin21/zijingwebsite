@@ -106,7 +106,7 @@ Page({
   teamPage(event) {
     if (this.data.loading || this.data.busy) return;
     const { id, page } = event.currentTarget.dataset;
-    if (!['team-profiles', 'team-honors'].includes(page)) return;
+    if (!['team-profiles', 'team-honors', 'team-honor-workspace'].includes(page)) return;
     const doc = this.data.docs.find(value => String(value.id) === String(id));
     const teamID = doc && (this.data.view === 'managedTeams' ? doc.id : doc.teamID);
     if (/^[1-9]\d*$/.test(String(teamID))) navigation.go(page, { team: teamID });

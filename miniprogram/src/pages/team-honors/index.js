@@ -36,6 +36,9 @@ Page({
   onHide() { this._visible = false; this.invalidate(); },
   onUnload() { this.onHide(); if (this._unsubscribe) this._unsubscribe(); },
   back: navigation.back,
+  workspace() {
+    if (this._visible && this._team && navigation.requireUser()) navigation.go('team-honor-workspace', { team: this._team });
+  },
   retry() { return this.load(); },
   onPullDownRefresh() { return this.load().finally(() => wx.stopPullDownRefresh()); },
   async load() {

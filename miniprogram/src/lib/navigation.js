@@ -24,6 +24,19 @@ function website(path) {
   if (path === '/join/members') return go('communities');
   if (path === '/join/staff') return go('staff');
   if (path === '/join/teams' || path === '/teams/recruitment' || path === '/teams/manage') return go('team');
+  const honorWorkspace = /^\/teams\/honors(?:\?([^#]*))?$/.exec(path);
+  if (honorWorkspace) {
+    const values = {};
+    for (const pair of (honorWorkspace[1] || '').split('&')) {
+      const [key, value] = pair.split('=');
+      if (key === 'view' && value === 'review') values.view = 'review';
+      if ((key === 'team' || key === 'game') && /^[1-9]\d*$/.test(value || '')) values[key] = value;
+    }
+    return go('team-honor-workspace', values);
+  }
+  if (path === '/teams/honors/new') return go('team-honor-edit');
+  const honorRecord = /^\/teams\/honors\/([1-9]\d*)$/.exec(path);
+  if (honorRecord) return go('team-honor-edit', { id: honorRecord[1] });
   const teamRecruitment = /^\/teams\/recruitment\/([1-9]\d*)$/.exec(path);
   if (teamRecruitment) return go('signup', { kind: 'team', id: teamRecruitment[1] });
   const teamApply = /^\/teams\/apply(?:\?edit=([1-9]\d*))?$/.exec(path);

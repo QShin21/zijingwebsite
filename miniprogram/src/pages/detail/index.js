@@ -66,7 +66,7 @@ Page({
   signup() { if(navigation.requireUser())navigation.go('signup',{kind:this.data.collection,id:this.data.doc.id}); },
   teamPage(event) {
     const page = event.currentTarget.dataset.page, id = this.data.doc.id;
-    if (this.data.collection === 'teams' && ['team-profiles', 'team-honors'].includes(page) && /^[1-9]\d*$/.test(String(id)))
+    if (this.data.collection === 'teams' && ['team-profiles', 'team-honors', 'team-honor-workspace'].includes(page) && /^[1-9]\d*$/.test(String(id)))
       navigation.go(page, { team: id });
   },
   register() {

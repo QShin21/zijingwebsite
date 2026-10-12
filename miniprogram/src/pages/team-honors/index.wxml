@@ -4,6 +4,7 @@
   <text class="eyebrow">TEAM HONORS</text>
   <text class="title">{{team.title || '队伍荣誉档案'}}</text>
   <text wx:if="{{team.gameTitle}}" class="subtitle">{{team.gameTitle}}</text>
+  <button class="secondary section" bindtap="workspace" disabled="{{loading}}">我的荣誉投稿与工作台 →</button>
   <template is="feedback" data="{{loading,error,needsLogin:false}}" />
   <view wx:if="{{loaded &amp;&amp; !records.length &amp;&amp; !loading &amp;&amp; !error}}" class="state panel">
     <text class="state-title">暂无已公开的荣誉档案</text>

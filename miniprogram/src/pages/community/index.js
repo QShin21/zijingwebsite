@@ -144,6 +144,10 @@ Page({
     } catch (cause) { if (this.valid(scope) && ticket === this._areaTicket) this.setData({ loadingMore: false, contentError: cause.message }); }
   },
   retryContent() { return this.loadArea(); },
+  honorWorkspace() {
+    if (this._visible && !this._disposed && !this._pendingWrite && !this.data.loading && this.data.game.id)
+      navigation.go('team-honor-workspace', { game: this.data.game.id });
+  },
   area(event) {
     const area = event.currentTarget.dataset.area;
     if (area === this.data.area || area !== 'contacts' && !areas[area]) return;
