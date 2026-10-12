@@ -1,7 +1,8 @@
 import { APIError } from 'payload';
 import path from 'node:path';
-import { randomUUID } from 'node:crypto';
-import { mkdir, writeFile, unlink } from 'node:fs/promises';
+import { createHash, randomUUID } from 'node:crypto';
+import { constants } from 'node:fs';
+import { mkdir, writeFile, unlink, open } from 'node:fs/promises';
 export const VIDEO_MAX_BYTES = 10 * 1024 * 1024;
 export const SUBMISSION_MAX_BYTES = 12 * 1024 * 1024;
 export const videoFilename = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.mp4$/;
@@ -28,6 +29,31 @@ export async function saveVideo(file: File) {
   return '/api/showcase-videos/' + name;
 }
 export async function discardVideo(url: string) { await unlink(videoPath(url.split('/').pop() || '')).catch(() => {}); }
+export function controlledVideoName(url: string) {
+  const prefix = '/api/showcase-videos/';
+  const name = url.startsWith(prefix) ? url.slice(prefix.length) : '';
+  return videoFilename.test(name) ? name : null;
+}
+export async function controlledVideoVersion(url: string) {
+  const name = controlledVideoName(url);
+  if (!name) throw new APIError('外链视频可在社群展示；升推需上传本站受控 MP4 视频。', 409);
+  const file = await open(videoPath(name), constants.O_RDONLY | constants.O_NOFOLLOW).catch(() => null);
+  if (!file) throw new APIError('本站视频已不可用，请重新上传后申请复审。', 409);
+  try {
+    const before = await file.stat({ bigint: true });
+    if (!before.isFile() || before.size < 24n || before.size > BigInt(VIDEO_MAX_BYTES)) throw new APIError('本站视频不可用，请重新上传。', 409);
+    const hash = createHash('sha256'); let bytes = 0;
+    for await (const chunk of file.createReadStream({ autoClose: false })) {
+      bytes += chunk.length;
+      if (bytes > VIDEO_MAX_BYTES) throw new APIError('本站视频已变化，请重新上传。', 409);
+      hash.update(chunk);
+    }
+    const after = await file.stat({ bigint: true });
+    if (after.nlink === 0n || before.size !== after.size || before.mtimeNs !== after.mtimeNs || before.ctimeNs !== after.ctimeNs || BigInt(bytes) !== before.size)
+      throw new APIError('视频已变化，请重新上传后申请复审。', 409);
+    return hash.digest('hex');
+  } finally { await file.close(); }
+}
 export function videoRange(header: string | null, size: number) {
   if (!header) return { start: 0, end: size - 1, partial: false };
   const match = /^bytes=(\d*)-(\d*)$/.exec(header);

@@ -32,6 +32,7 @@ export function ShowcaseForm({ game, manager }: { game: number; manager: boolean
       <label>视频链接或 B 站嵌入代码（选填）<textarea name="videoURL" maxLength={2000} rows={3} placeholder="粘贴 B 站分享中的嵌入代码、完整视频链接，或 HTTPS MP4 直链" /></label>
       <label>上传 MP4 视频（选填，10 MB 以内）<input name="video" type="file" accept="video/mp4,.mp4" /></label>
       <small>B 站链接或嵌入代码支持网页内预览。上传的 MP4 可在网页和小程序内播放，请使用 H.264 视频／AAC 音频编码。视频文件与链接二选一，图片和视频合计不超过 12 MB。</small>
+      <p>外链视频可在社群展示。申请社团首页升推时，视频须使用本站受控上传；外链内容可能被外部替换，无法作为本站批准的视频版本。</p>
       <p role="status">{feedback}</p><button className="button" disabled={pending || !ready}>{pending ? "正在提交…" : manager ? "发布风采" : "提交审核"}</button>
     </form>
   </details>;

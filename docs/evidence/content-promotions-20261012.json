@@ -18,14 +18,14 @@
   },
   "sourceGameActivityAndSignupIDsPreserved": true,
   "approvedSnapshotPreservedAfterEdit": true,
-  "policy": "Source save withdraws promoted projection and requires new request/review; homepage verifies current public source hash against approval.",
+  "policy": "Source saves require review; approved source/media fingerprints are checked for projection. URL-only hashes do not guarantee external video bytes.",
   "authorityPositiveProof": "After A/NULL to B, legitimately grant B view: historical list/single/view recover, export remains denied.",
   "priorResolvedTestIssues": [
     "first browser attempt interrupted after wrong submit button locator; corrected existing two-step submission",
     "shared reader re-added revoked B office; changed fixture to legitimately reactivate its unique office",
     "showcase browser navigated before local review response; now waits for saved review receipt"
   ],
-  "fullSuiteAndExactCI": "Pending final three-content source; intermediate slice results are not final-source CI evidence.",
+  "fullSuiteAndExactCI": "Verify latest review-fix SHA; do not treat intermediate 53f5a2c or notice results as final.",
   "productionMigration": false,
   "productionAccess": false,
   "newMiniappUI": false,
@@ -67,7 +67,7 @@
     "finalThreeKindBuild": "pending"
   },
   "noticeCommit": "0f7eebf20502dc05ee99cd5abdc0f3fa0ddcc713",
-  "checks": {
+  "previousThreeKindChecks": {
     "latestSlice": "showcase",
     "promotionUnitDatabase": {
       "tests": 14,
@@ -81,5 +81,31 @@
     "typecheck": "PASS",
     "lint": "PASS",
     "finalThreeKindBuild": "pending"
-  }
+  },
+  "checks": {
+    "reviewFixTargetedUnitDatabase": {
+      "tests": 26,
+      "result": "PASS",
+      "promotionTests": 19
+    },
+    "reviewFixWebHTTP": {
+      "tests": 6,
+      "result": "PASS",
+      "reportedDuration": "2.6m"
+    },
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "latestFullSuiteAndBuild": "pending"
+  },
+  "reviewBlockersClosed": [
+    "stable single-record showcase detail with original game/visibility checks, 6-item pagination preserved",
+    "club-level video promotion requires local controlled immutable upload plus actual byte SHA256; external community videos remain supported"
+  ],
+  "initialFullE2E": {
+    "passed": 59,
+    "failed": 1,
+    "reportedDuration": "11.2m",
+    "reason": "activity final proactive action navigation raced prior success text; wait actual item status and distinct action receipt"
+  },
+  "firstProactiveRaceChecked": true
 }

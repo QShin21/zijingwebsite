@@ -4,7 +4,7 @@ import { APIError } from "payload";
 export type PromotionKind = "event" | "notice" | "showcase";
 export type PromotionSource = "community-posts" | "community-showcase";
 export type PromotionAction = "submit" | "withdraw" | "approve" | "return" | "reject" | "promote" | "demote";
-export type PromotionSnapshot = { title: string; body: string; authorName: string; kind: PromotionKind; game: number };
+export type PromotionSnapshot = { title: string; body: string; authorName: string; kind: PromotionKind; game: number; videoURL?: string | null; videoVersion?: string | null };
 export type PromotionHistory = { action: string; actor: string; actorName: string; at: string; from: string; to: string; reason: string; version: string };
 // Enable one validated content slice at a time. The additive schema supports all three.
 export const supportedPromotionKinds: PromotionKind[] = ["event", "notice", "showcase"];
@@ -20,6 +20,6 @@ export function promotionKey(collection: PromotionSource, id: number) {
 }
 export function promotionVersion(value: Record<string, unknown>) {
   // Bind public content and the original questionnaire; no answers or private identity fields.
-  const keys = ["title", "body", "game", "status", "category", "authorName", "signupForm", "images", "videoURL"];
+  const keys = ["title", "body", "game", "status", "category", "authorName", "signupForm", "images", "videoURL", "videoVersion"];
   return createHash("sha256").update(JSON.stringify(Object.fromEntries(keys.map(key => [key, value[key] ?? null])))).digest("hex");
 }

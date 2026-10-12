@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
 import sharp from "sharp";
+import { writeFile } from "node:fs/promises";
 import { beforeAll, beforeEach, afterEach, afterAll, expect, it } from "vitest";
 import { getPayload, type Payload } from "payload";
 import config from "../src/payload.config";
@@ -9,11 +10,18 @@ import { changePromotion, promotedContent, readPromotionSource } from "../src/li
 import type { PromotionAction } from "../src/lib/promotion-model";
 import { activity, submitSignup, saveSignupForm } from "../src/lib/activity-signups";
 import { canAppoint, canPublish } from "../src/lib/rules";
+import { saveVideo, discardVideo, videoPath, controlledVideoVersion } from "../src/lib/showcase-videos";
 
 let p: Payload, leader: User, vice: User, admin: User, execution: User, publicity: User, member: User, outsider: User;
 let game: number, otherGame: number, post: number;
 const suffix = randomBytes(6).toString("hex"), actors: User[] = [], posts: number[] = [], showcases: number[] = [], receipts: number[] = [];
 const form = { enabled: true, questions: [{ id: "name", label: "合成称呼", type: "text", required: true }] };
+const videos: string[] = [];
+function syntheticVideo(marker = "a") {
+  // Container-header bytes test immutable storage/hash behavior; real playback remains in the MP4 E2E.
+  const bytes = Buffer.alloc(64); bytes.writeUInt32BE(24, 0); bytes.write("ftyp", 4); bytes.write("isom", 8); bytes.write("mp41", 16); bytes.write("moov", 24); bytes.write("mdat", 32); bytes.write(marker, 40);
+  return bytes;
+}
 async function event() {
   const row = await p.create({ collection: "community-posts", overrideAccess: false, user: admin, context: { manageSignupForm: true },
     data: { game, author: admin.id, title: "合成升推活动", body: "只有合成内容的社群活动", category: "event", signupForm: form } });
@@ -56,6 +64,8 @@ afterEach(async () => {
   }
   for (const id of posts) await p.delete({ collection: "community-posts", id, overrideAccess: true }).catch(() => null);
   for (const id of showcases) await p.delete({ collection: "community-showcase", id, overrideAccess: true, context: { webShowcaseWrite: true } }).catch(() => null);
+  for (const video of videos) await discardVideo(video);
+  videos.length = 0;
   posts.length = 0; showcases.length = 0; receipts.length = 0;
 });
 afterAll(async () => {
@@ -193,7 +203,7 @@ it("风采先本地审核再申请，骨干升推不授本地发布或私人报�
   let current = await changePromotion(p, admin, "community-showcase", source.id, "submit", { sourceVersion: visible.version, reason: "合成风采适合社团展示" });
   current = await changePromotion(p, execution, "community-showcase", source.id, "approve", { revision: current.updatedAt, sourceVersion: current.requestedVersion });
   expect(current.kind).toBe("showcase"); expect(current.sourceID).toBe(source.id); expect(Number(current.game)).toBe(game);
-  expect((await promotedContent(p, "showcase")).find(item => item.sourceKey === "community-showcase:" + source.id)?.href).toContain("/showcase#showcase-" + source.id);
+  expect((await promotedContent(p, "showcase")).find(item => item.sourceKey === "community-showcase:" + source.id)?.href).toContain("/showcase/" + source.id);
   expect(canPublish(execution)).toBe(false);
 });
 it("风采媒体改稿撤下并保留旧批准版本，重新申请后才展示新版本", async () => {
@@ -211,4 +221,41 @@ it("风采媒体改稿撤下并保留旧批准版本，重新申请后才展示�
   current = await changePromotion(p, admin, "community-showcase", source.id, "submit", { revision: current.updatedAt, sourceVersion: next.version, reason: "合成媒体改稿重新申请" });
   current = await changePromotion(p, vice, "community-showcase", source.id, "approve", { revision: current.updatedAt, sourceVersion: current.requestedVersion });
   expect(current.approvedVersion).not.toBe(approved);
+});
+it("社群外链视频仍可发布，但外链 MP4/B站均不能成为受审核视频升推", async () => {
+  for (const url of ["https://example.invalid/mutable.mp4", "https://www.bilibili.com/video/BV1B7411m7LV/"]) {
+    const source = await p.create({ collection: "community-showcase", user: admin, overrideAccess: false, context: { webShowcaseWrite: true },
+      data: { game, author: admin.id, title: "合成外链视频", body: "社群功能保留", videoURL: url } }); showcases.push(source.id);
+    expect(source.status).toBe("visible");
+    await expect(readPromotionSource(p, "community-showcase", source.id)).rejects.toThrow("本站受控");
+    await expect(changePromotion(p, execution, "community-showcase", source.id, "promote", { sourceVersion: "fake", reason: "不可用外链的合成升推" })).rejects.toThrow("本站受控");
+  }
+});
+it("受控视频绑定实际字节，原地变化或删除不会继续展示旧批准版本，换新文件需复审", async () => {
+  const url = await saveVideo(new File([syntheticVideo()], "synthetic.mp4", { type: "video/mp4" })); videos.push(url);
+  const source = await p.create({ collection: "community-showcase", user: admin, overrideAccess: false, context: { webShowcaseWrite: true },
+    data: { game, author: admin.id, title: "合成受控视频", videoURL: url } }); showcases.push(source.id);
+  const first = await readPromotionSource(p, "community-showcase", source.id);
+  let current = await changePromotion(p, execution, "community-showcase", source.id, "promote", { sourceVersion: first.version, reason: "合成受控视频审核" });
+  expect((current.approvedSnapshot as { videoVersion: string }).videoVersion).toBe(await controlledVideoVersion(url));
+  await writeFile(videoPath(url.split("/").pop()!), syntheticVideo("b"));
+  expect((await promotedContent(p, "showcase")).some(item => item.sourceKey === "community-showcase:" + source.id)).toBe(false);
+  expect((await readPromotionSource(p, "community-showcase", source.id)).version).not.toBe(current.approvedVersion);
+  await discardVideo(url);
+  await expect(readPromotionSource(p, "community-showcase", source.id)).rejects.toThrow("不可用");
+  expect((await promotedContent(p, "showcase")).some(item => item.sourceKey === "community-showcase:" + source.id)).toBe(false);
+  const nextURL = await saveVideo(new File([syntheticVideo("c")], "synthetic-new.mp4", { type: "video/mp4" })); videos.push(nextURL);
+  await p.update({ collection: "community-showcase", id: source.id, user: admin, overrideAccess: false, context: { webShowcaseWrite: true }, data: { videoURL: nextURL } });
+  current = (await p.find({ collection: "content-promotions", overrideAccess: true, where: { sourceKey: { equals: "community-showcase:" + source.id } } })).docs[0];
+  expect(current.status).toBe("needsReview"); expect((current.approvedSnapshot as { videoURL: string }).videoURL).toBe(url);
+  const next = await readPromotionSource(p, "community-showcase", source.id);
+  current = await changePromotion(p, publicity, "community-showcase", source.id, "promote", { revision: current.updatedAt, sourceVersion: next.version, reason: "合成新视频重新审核" });
+  expect(current.approvedVersion).toBe(next.version);
+});
+it.each([1, 2, 3])("首次主动升推与改稿竞争 %i：不匹配新稿不能作为批准版本展示", async () => {
+  await Promise.allSettled([change(execution, "promote", undefined, "合成首次主动升推"), p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, data: { title: "合成首次竞态新稿" } })]);
+  const latest = await readPromotionSource(p, "community-posts", post), current = await row();
+  const displayed = (await promotedContent(p, "event")).find(item => item.sourceKey === "community-posts:" + post);
+  if (displayed) { expect(current.approvedVersion).toBe(latest.version); expect(displayed.snapshot.title).toBe(latest.snapshot.title); }
+  if (latest.snapshot.title === "合成首次竞态新稿" && current?.approvedVersion !== latest.version) expect(displayed).toBeUndefined();
 });

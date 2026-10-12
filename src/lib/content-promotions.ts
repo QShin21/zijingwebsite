@@ -3,6 +3,7 @@ import { APIError, type CollectionAfterChangeHook, type CollectionAfterDeleteHoo
 import type { ContentPromotion, User } from "../payload-types";
 import { canReviewPromotion, managesGame, relationID } from "./rules";
 import { workflowTransaction } from "./workflow-transactions";
+import { controlledVideoVersion } from "./showcase-videos";
 import { promotionKey, promotionSource, promotionVersion, supportedPromotionKinds, type PromotionAction, type PromotionHistory, type PromotionKind, type PromotionSnapshot, type PromotionSource } from "./promotion-model";
 
 export async function readPromotionSource(p: Payload, collection: PromotionSource, id: number, req?: PayloadRequest) {
@@ -17,10 +18,12 @@ export async function readPromotionSource(p: Payload, collection: PromotionSourc
   const game = await p.findByID({ collection: "games", id: gameID, overrideAccess: false, user: null,
     ...(req ? { req: { ...req, user: null } } : {}), draft: false, depth: 0, select: { title: true, slug: true, _status: true } }).catch(() => null);
   if (!game || game._status !== "published") throw new APIError("原社群尚未开放", 409);
-  const value = { ...doc, game: gameID } as unknown as Record<string, unknown>;
-  const snapshot: PromotionSnapshot = { title: doc.title, body: doc.body ?? "", authorName: doc.authorName ?? "", kind, game: gameID };
+  const videoURL = "videoURL" in doc ? doc.videoURL || null : null;
+  const videoVersion = videoURL ? await controlledVideoVersion(videoURL) : null;
+  const value = { ...doc, game: gameID, videoVersion } as unknown as Record<string, unknown>;
+  const snapshot: PromotionSnapshot = { title: doc.title, body: doc.body ?? "", authorName: doc.authorName ?? "", kind, game: gameID, videoURL, videoVersion };
   return { collection, doc, game, kind, version: promotionVersion(value), snapshot,
-    href: "/community/" + game.slug + (collection === "community-posts" ? "/updates/" + doc.id : "/showcase#showcase-" + doc.id) };
+    href: "/community/" + game.slug + (collection === "community-posts" ? "/updates/" + doc.id : "/showcase/" + doc.id) };
 }
 async function lockPromotion(req: PayloadRequest, key: string) {
   const db = req.payload.db as unknown as PostgresAdapter;
@@ -28,6 +31,14 @@ async function lockPromotion(req: PayloadRequest, key: string) {
   const session = transactionID != null ? db.sessions[String(transactionID)] : null;
   if (!session) throw new APIError("无法安全保存升推，请刷新重试", 503);
   await session.db.execute(sql`SELECT id FROM content_promotions WHERE source_key=${key} FOR UPDATE`);
+}
+async function lockSource(req: PayloadRequest, collection: PromotionSource, id: number) {
+  const db = req.payload.db as unknown as PostgresAdapter, transactionID = await req.transactionID;
+  const session = transactionID != null ? db.sessions[String(transactionID)] : null;
+  if (!session) throw new APIError("无法安全保存升推，请刷新重试", 503);
+  // Same order as source writes: source row, then its promotion row.
+  await session.db.execute(collection === "community-posts" ? sql`SELECT id FROM community_posts WHERE id=${id} FOR SHARE`
+    : sql`SELECT id FROM community_showcase WHERE id=${id} FOR SHARE`);
 }
 function historyOf(doc?: ContentPromotion) {
   return Array.isArray(doc?.history) ? doc.history as unknown as PromotionHistory[] : [];
@@ -43,6 +54,7 @@ export async function changePromotion(p: Payload, actor: User | null, collection
   return workflowTransaction(p, actor, { promotionWrite: true, promotionAction: action }, async req => {
     const user = req.user as User;
     if (!["submit", "withdraw"].includes(action) && !canReviewPromotion(user)) throw new APIError("无权审核或升推", 403);
+    await lockSource(req, collection, id);
     await lockPromotion(req, key);
     const current = (await p.find({ collection: "content-promotions", req, overrideAccess: false, depth: 0, limit: 1, where: { sourceKey: { equals: key } } })).docs[0];
     const source = ["submit", "approve", "promote"].includes(action) ? await readPromotionSource(p, collection, id, req)

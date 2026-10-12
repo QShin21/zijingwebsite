@@ -6,6 +6,8 @@ import { canPublish, canSubmitClubContent, canReviewShowcase, managesGame } from
 import { discardVideo, saveVideo, VIDEO_MAX_BYTES, SUBMISSION_MAX_BYTES } from '@/lib/showcase-videos';
 import { decideCommunityApplication, editCommunityApplication, updateCommunityCard, changeCommunityJoin } from "@/lib/community-operations";
 import { applicationError } from "@/lib/application-error";
+import { workflowTransaction } from "@/lib/workflow-transactions";
+import { APIError } from "payload";
 
 const value = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 const numeric = (form: FormData, key: string) => {
@@ -124,6 +126,24 @@ export async function reviewShowcaseAction(form: FormData) {
     data: { status: status as "visible" | "rejected" | "hidden", reviewNote: value(form, "reviewNote") } }); }
   catch { problem(path, "审核未成功，请刷新后重试"); }
   redirect(`${path}?view=review&message=${encodeURIComponent("审核已保存")}`);
+}
+export async function replaceShowcaseVideoAction(form: FormData) {
+  const { p, user } = await current(), id = numeric(form, "id");
+  let uploaded = "", game = 0, message = "本站视频已更新，社团级展示需重新申请复审。";
+  try {
+    await workflowTransaction(p, user, { webShowcaseWrite: true }, async req => {
+      const post = await p.findByID({ collection: "community-showcase", id, req, overrideAccess: false, depth: 0 });
+      game = Number(post.game);
+      if (!canReviewShowcase(req.user, post.game)) throw new APIError("无权修改此社群风采视频", 403);
+      if (value(form, "revision") !== post.updatedAt) throw new APIError("风采已更新，请刷新后再上传", 409);
+      const file = form.get("video");
+      if (!(file instanceof File) || !file.size) throw new APIError("请选择 10 MB 以内的 MP4 视频", 400);
+      uploaded = await saveVideo(file);
+      await p.update({ collection: "community-showcase", id, req, overrideAccess: false, data: { videoURL: uploaded } });
+    });
+  } catch (error) { if (uploaded) await discardVideo(uploaded); message = applicationError(error); }
+  const path = (await gamePath(game)) + "/showcase/" + id;
+  redirect(path + "?message=" + encodeURIComponent(message));
 }
 
 export async function withdrawApplicationAction(form: FormData) {
