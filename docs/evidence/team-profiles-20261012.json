@@ -1,0 +1,79 @@
+{
+  "at": "2026-10-12T07:24:30.538Z",
+  "baseline": "beac037eafe88b9b82e171e15cfddcca351b838b",
+  "branch": "codex/team-profiles-20261012",
+  "applicationSHA": "adfd2c955216f0f2bde1ef1a8bc7cacf9609746a",
+  "applicationContentSHA256": "eabe8adb629c57ab4be7cd87aff28a55b694d47ad86a8abd9659f62741c8b649",
+  "coreDependencies": {
+    "docs": "5866adcd8a638273f23f2f66e3992e48f2a46873",
+    "schemaAndReadAPI": "e74e6a4fa7281bcd2edcf667343b9e653380f40d",
+    "typeFix": "567e359907418a2ebdb14833cfc5838901a09892",
+    "migrationOnly": "aec6f2675fbbe6074ad3867cff21e6fc69c6adaa:src/migrations/20261012_160000_team_core.ts"
+  },
+  "tests": {
+    "typecheck": "passed",
+    "fullRepositoryLint": "passed",
+    "fullUnit": {
+      "passed": 304,
+      "failed": 0,
+      "sourceSHA": "890a2d7e94356704432937637986e6f1d825da3d"
+    },
+    "profileTests": {
+      "passed": 51,
+      "failed": 0
+    },
+    "profileE2E": {
+      "passed": 6,
+      "failed": 0,
+      "sourceSHA": "adfd2c955216f0f2bde1ef1a8bc7cacf9609746a",
+      "runner": "standard playwright.config.ts / Next dev Turbopack / actual core schema + read API"
+    },
+    "viewports": [320, 390, 768, 1440],
+    "horizontalOverflow": false,
+    "axeViolations": 0,
+    "productionBuild": {
+      "passed": true,
+      "sourceSHA": "adfd2c955216f0f2bde1ef1a8bc7cacf9609746a"
+    }
+  },
+  "validationScope": "Actual core schema and live getter authorization plus profile UI; synthetic valid authority chain created with internal core context; no mock qualification. Full core operational formation/admission UI is outside this validation scope.",
+  "checks": [
+    "default hidden",
+    "real membership and full authority prerequisites",
+    "raw collection and forged context rejected",
+    "self-only edit without admin privilege expansion",
+    "plain text and decoded avatar",
+    "minimal public DTO",
+    "idempotent duplicate create/save",
+    "revision and concurrent conflicts",
+    "load/save failure recovery",
+    "preview/cancel/return",
+    "team switch isolation",
+    "revoke/suspend/archive old-page rejection",
+    "new joinedAt period requires renewed opt-in"
+  ],
+  "historicalIntermediateFailures": {
+    "resolved": [
+      "unreadable relationship query moved into access filter",
+      "create hook empty originalDoc handled",
+      "browser model no longer imports Payload",
+      "cross-origin denied at Payload auth with 401 or route with 403; saved profile unchanged"
+    ],
+    "nonFinalEnvironment": "Detached node_modules symlink blocked Turbopack; final tests use actual feature branch and standard Turbopack server",
+    "nonFinalConcurrentUnit": "One promotion transaction conflict while running browser and unit together; final serial full suite passed"
+  },
+  "delivery": {
+    "productionAccess": false,
+    "productionMigration": false,
+    "deployment": false,
+    "pullRequest": false,
+    "merge": false,
+    "realMemberContact": false
+  },
+  "pending": [
+    "core operational approval/recruitment end-to-end acceptance by core task",
+    "honor and unified entry integration",
+    "unified full-module schema snapshot",
+    "exact remote CI status tracked separately"
+  ]
+}
