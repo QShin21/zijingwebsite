@@ -1,9 +1,4 @@
-import {
-  APIError,
-  type CollectionConfig,
-  type CollectionSlug,
-  type Where,
-} from "payload";
+import { APIError, type CollectionConfig, type Where } from "payload";
 import { canParticipate, relationID } from "../lib/rules";
 import { parseTeamProfile } from "../lib/team-profiles-model";
 import {
@@ -67,7 +62,7 @@ export const TeamMemberProfiles: CollectionConfig = {
           active.id !== req.context.teamProfileMembership ||
           Number(relationID(data.membership ?? originalDoc?.membership)) !==
             active.id ||
-          (originalDoc &&
+          (originalDoc?.id &&
             Number(relationID(originalDoc.membership)) !== active.id)
         )
           throw new APIError("当前入队资格已失效，无法继续编辑简介", 403);
@@ -93,10 +88,11 @@ export const TeamMemberProfiles: CollectionConfig = {
       name: "membership",
       label: "权威入队关系",
       type: "relationship",
-      relationTo: "team-memberships" as CollectionSlug,
+      relationTo: "team-memberships",
       required: true,
       unique: true,
       maxDepth: 0,
+      typescriptSchema: [() => ({ type: "number" })],
       access: privateField,
     },
     {

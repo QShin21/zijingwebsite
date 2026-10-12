@@ -10,7 +10,7 @@ export async function up({ db }: MigrateUpArgs) {
   await db.execute(sql`
     CREATE TABLE team_member_profiles (
       id serial PRIMARY KEY,
-      membership_id integer NOT NULL UNIQUE REFERENCES team_memberships(id),
+      membership_id integer NOT NULL REFERENCES team_memberships(id),
       membership_joined_at timestamptz(3) NOT NULL,
       display_name varchar NOT NULL,
       position varchar,
@@ -21,6 +21,7 @@ export async function up({ db }: MigrateUpArgs) {
       updated_at timestamptz(3) NOT NULL DEFAULT now(),
       created_at timestamptz(3) NOT NULL DEFAULT now()
     );
+    CREATE UNIQUE INDEX team_member_profiles_membership_idx ON team_member_profiles(membership_id);
     CREATE INDEX team_member_profiles_updated_at_idx ON team_member_profiles(updated_at);
     CREATE INDEX team_member_profiles_created_at_idx ON team_member_profiles(created_at);
     ALTER TABLE payload_locked_documents_rels ADD COLUMN team_member_profiles_id integer REFERENCES team_member_profiles(id) ON DELETE CASCADE;
