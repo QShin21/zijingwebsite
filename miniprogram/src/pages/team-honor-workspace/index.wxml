@@ -1,0 +1,32 @@
+<import src="../../templates/common.wxml" />
+<view class="page">
+  <button class="plain" bindtap="back">返回</button><text class="eyebrow">TEAM HONOR WORKSPACE</text><text class="title">{{view === 'review' ? '荣誉审核工作台' : '我的荣誉投稿'}}</text>
+  <text class="subtitle">投稿材料供本人及当前有权限的审核者查看。批准后证据会展示在队伍荣誉档案，请提交获准公开的成果材料。</text>
+  <template is="feedback" data="{{needsLogin}}" />
+  <block wx:if="{{!needsLogin}}">
+    <view class="chips"><button class="chip {{view === 'mine' ? 'active' : ''}}" bindtap="view" data-view="mine" disabled="{{busy || loading}}">我的记录</button><button wx:if="{{actions.review}}" class="chip {{view === 'review' ? 'active' : ''}}" bindtap="view" data-view="review" disabled="{{busy || loading}}">社群审核</button></view>
+    <button wx:if="{{view === 'mine' &amp;&amp; actions.create &amp;&amp; teams.length}}" class="primary" bindtap="create" disabled="{{busy || loading || !ready}}">新建荣誉投稿</button>
+    <text wx:if="{{view === 'mine' &amp;&amp; ready &amp;&amp; !teams.length}}" class="muted">当前暂无可投稿的有效队伍，本人历史记录仍保留。</text>
+    <text wx:if="{{busy}}" class="muted">本次确认、读取或保存尚未结束，请稍候。</text><text wx:if="{{loading}}" class="muted">正在核对荣誉与操作权限…</text>
+    <view wx:if="{{error}}" class="section"><text class="error">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{busy || loading}}">重新加载</button></view>
+    <text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text><text wx:if="{{message}}" class="body" aria-role="status">{{message}}</text>
+    <view class="section-head section"><text class="muted">共 {{totalDocs}} 条 · 第 {{page}} 页</text><button class="plain" bindtap="retry" disabled="{{busy || loading}}">刷新回执</button></view>
+    <view wx:for="{{docs}}" wx:for-item="entry" wx:key="id" class="panel section honor-record">
+      <view class="row"><text class="section-title">{{entry.title}}</text><text class="badge">{{entry.statusText}}</text></view>
+      <text class="muted">投稿 {{entry.id}} · 修订 {{entry.revision}} · 队伍 {{entry.team}}</text><text class="muted">投稿人：{{entry.authorName}}</text>
+      <text class="body">{{entry.competition || '赛事待补充'}} · {{entry.placing || '奖项待补充'}} · {{entry.date || '日期待补充'}}</text>
+      <text wx:if="{{entry.reviewNote}}" class="body">处理反馈：{{entry.reviewNote}}</text><text class="muted">证据图片 {{entry.imageCount}} 份{{entry.hasVideo ? ' · 含视频证据' : ''}}</text>
+      <button class="plain" bindtap="inspect" data-id="{{entry.id}}" disabled="{{busy || loading}}">查看文字与本次证据</button>
+      <view class="actions"><button wx:if="{{entry.actions.edit}}" class="secondary" bindtap="edit" data-id="{{entry.id}}" disabled="{{busy || loading || !ready}}">修改 / 重新提交</button><button wx:if="{{entry.actions.withdraw}}" class="plain" bindtap="perform" data-action="withdraw" data-id="{{entry.id}}" disabled="{{busy || loading || !ready}}">撤回投稿</button></view>
+      <view wx:if="{{entry.decisions.length || entry.actions.hide}}" class="field"><text class="field-label">处理说明（退回、拒绝或隐藏必填）</text><textarea value="{{entry.noteDraft}}" maxlength="1000" bindinput="note" data-id="{{entry.id}}" disabled="{{busy || loading || !ready}}" /></view>
+      <view class="actions"><button wx:for="{{entry.decisions}}" wx:key="action" class="secondary" bindtap="perform" data-action="{{item.action}}" data-id="{{entry.id}}" disabled="{{busy || loading || !ready}}">{{item.label}}</button><button wx:if="{{entry.actions.hide}}" class="danger" bindtap="perform" data-action="hide" data-id="{{entry.id}}" disabled="{{busy || loading || !ready}}">隐藏荣誉</button></view>
+      <text wx:if="{{!ready}}" class="muted">当前回执只读，请重新加载核对操作。</text>
+    </view>
+    <view wx:if="{{detail}}" class="panel section"><text class="section-title">{{detail.title}} · 本次证据</text><text class="body" selectable>{{detail.description}}</text><text wx:if="{{detail.reviewNote}}" class="body">处理反馈：{{detail.reviewNote}}</text>
+      <view wx:for="{{detailImages}}" wx:key="index"><image wx:if="{{item.path}}" class="photo" mode="widthFix" src="{{item.path}}" bindtap="previewEvidence" data-path="{{item.path}}" aria-label="{{item.caption || '荣誉证据图片'}}" /><text class="muted">{{item.caption}}</text></view>
+      <text wx:if="{{imageError}}" class="muted">{{imageError}}</text><button wx:if="{{detail.hasVideo}}" class="secondary section" bindtap="viewVideo" disabled="{{busy || loading}}">读取本次视频证据</button><video wx:if="{{videoSource}}" id="honor-evidence" class="evidence-video" src="{{videoSource}}" controls autoplay="{{false}}" binderror="videoError" data-id="{{detail.id}}" data-revision="{{detail.revision}}" aria-label="本次荣誉视频证据" /><text wx:if="{{videoError}}" class="error">{{videoError}}</text><button wx:if="{{detail.hasVideo}}" class="plain" bindtap="websiteEvidence" disabled="{{busy}}">复制网站证据页地址</button><button class="plain" bindtap="closeDetail" disabled="{{busy}}">收起证据</button>
+    </view>
+    <view wx:if="{{!docs.length &amp;&amp; ready &amp;&amp; !loading}}" class="empty"><text>{{view === 'review' ? '当前范围暂无可查看的荣誉记录' : '尚无本人荣誉投稿'}}</text><text class="muted">可刷新核对最新状态。</text></view>
+    <button wx:if="{{hasMore}}" class="plain section" bindtap="onReachBottom" disabled="{{busy || loading || !ready}}">加载更多记录</button>
+  </block>
+</view>

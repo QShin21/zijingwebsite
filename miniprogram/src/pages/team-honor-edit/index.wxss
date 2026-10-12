@@ -1,0 +1,5 @@
+.editor > .muted, .editor .muted, .panel > .muted { display: block; margin-top: 16rpx; }
+.evidence { border-top: 1rpx solid #eae3f0; margin-top: 28rpx; padding-top: 18rpx; }
+.field .row picker { flex: 1; }
+.photo { min-height: 140rpx; }
+.evidence-video { width: 100%; margin-top: 24rpx; }
