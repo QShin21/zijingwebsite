@@ -190,7 +190,7 @@ export function TeamProfilesPanel({
         {editable && !editing && (
           <button
             type="button"
-            className="button secondary"
+            className="button light"
             onClick={() => setEditing(true)}
           >
             编辑我的队内简介
@@ -228,7 +228,7 @@ export function TeamProfilesPanel({
       {!loading && error && (
         <button
           type="button"
-          className="button secondary"
+          className="button light"
           disabled={busy}
           onClick={() => setReloadKey((key) => key + 1)}
         >
@@ -241,7 +241,7 @@ export function TeamProfilesPanel({
           <p className={styles.note}>
             请使用公开昵称。无需填写真实姓名、学号、联系方式或报名作答。
           </p>
-          <form onSubmit={review}>
+          <form className="member-form" onSubmit={review}>
             <fieldset disabled={busy || locked} className={styles.fields}>
               <label>
                 公开昵称
@@ -288,7 +288,7 @@ export function TeamProfilesPanel({
               {draft.avatar && (
                 <button
                   type="button"
-                  className="button secondary"
+                  className="button light"
                   onClick={() => {
                     change("avatar", null);
                     if (fileInput.current) fileInput.current.value = "";
@@ -312,11 +312,7 @@ export function TeamProfilesPanel({
                 <button className="button" type="submit">
                   预览简介
                 </button>
-                <button
-                  className="button secondary"
-                  type="button"
-                  onClick={cancel}
-                >
+                <button className="button light" type="button" onClick={cancel}>
                   取消修改
                 </button>
               </div>
@@ -342,7 +338,7 @@ export function TeamProfilesPanel({
                 </button>
                 <button
                   type="button"
-                  className="button secondary"
+                  className="button light"
                   disabled={busy}
                   onClick={() => setPreview(false)}
                 >
