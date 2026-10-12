@@ -1,7 +1,6 @@
 import {
   APIError,
   createLocalReq,
-  type CollectionSlug,
   type Payload,
   type PayloadRequest,
 } from "payload";
@@ -23,7 +22,7 @@ import {
   type ProfileMembershipAuthority,
 } from "./team-profiles-authority";
 
-export const profileCollection = "team-member-profiles" as CollectionSlug;
+export const profileCollection = "team-member-profiles" as const;
 export type TeamProfileRecord = TeamProfileDraft & {
   id: number;
   membership: number;
@@ -97,8 +96,9 @@ async function findOwn(
     overrideAccess: false,
     depth: 0,
     limit: 1,
-    where: { membership: { equals: membership.id } },
-    select: profileSelect as never,
+    // The collection access rule supplies the exact membership filter. Keeping
+    // this relation unreadable also prevents caller-driven relation queries.
+    select: profileSelect,
   });
   return (result.docs[0] as unknown as TeamProfileRecord) ?? null;
 }
@@ -141,7 +141,7 @@ export async function readTeamProfiles(
         pagination: false,
         limit: 0,
         sort: "displayName",
-        select: profileSelect as never,
+        select: profileSelect,
       })
     : { docs: [] };
   const profile = own ? await findOwn(p, own, req) : null;
@@ -179,62 +179,76 @@ export async function saveTeamProfile(
   )
     throw new APIError("简介版本无效，请重新加载", 400);
   const draft = parseTeamProfile(value);
-  return workflowTransaction(
-    p,
-    actor,
-    { teamProfileWrite: true },
-    async (req) => {
-      await profileTeam(p, teamID, req);
-      const membership = await authority.active(p, {
-        teamID,
-        userID: req.user!.id as number,
-        req,
-      });
-      if (!membership)
-        throw new APIError("当前入队资格已失效，无法继续编辑简介", 403);
-      const existing = await findOwn(p, membership, req);
-      if (draft.avatar !== (existing?.avatar ?? null))
-        draft.avatar = await normalizeTeamProfileAvatar(draft.avatar);
-      const same =
-        existing &&
-        existing.membershipJoinedAt === membership.joinedAt &&
-        sameTeamProfile(draft, profileDraft(existing));
-      // Idempotent retries still check current eligibility before returning.
-      if (same) return ownDTO(existing);
-      if (revision !== (existing?.revision ?? null))
-        throw new APIError(
-          "简介已在其他页面更新，请重新加载后核对；当前输入可继续预览",
-          409,
-        );
-      const writeReq = {
-        ...req,
-        context: {
-          ...req.context,
-          teamProfileTeam: teamID,
-          teamProfileMembership: membership.id,
-        },
-      };
-      const data = {
-        ...draft,
-        membership: membership.id,
-        membershipJoinedAt: membership.joinedAt,
-        revision: (existing?.revision ?? 0) + 1,
-      };
-      const saved = existing
-        ? await p.update({
-            collection: profileCollection,
-            id: existing.id,
-            req: writeReq,
-            overrideAccess: false,
-            data: data as never,
-          })
-        : await p.create({
-            collection: profileCollection,
-            req: writeReq,
-            overrideAccess: false,
-            data: data as never,
-          });
-      return ownDTO(saved as unknown as TeamProfileRecord);
-    },
-  );
+  const write = async (req: PayloadRequest) => {
+    await profileTeam(p, teamID, req);
+    const membership = await authority.active(p, {
+      teamID,
+      userID: req.user!.id as number,
+      req,
+    });
+    if (!membership)
+      throw new APIError("当前入队资格已失效，无法继续编辑简介", 403);
+    const existing = await findOwn(p, membership, req);
+    if (draft.avatar !== (existing?.avatar ?? null))
+      draft.avatar = await normalizeTeamProfileAvatar(draft.avatar);
+    const same =
+      existing &&
+      existing.membershipJoinedAt === membership.joinedAt &&
+      sameTeamProfile(draft, profileDraft(existing));
+    // Idempotent retries still check current eligibility before returning.
+    if (same) return ownDTO(existing);
+    if (revision !== (existing?.revision ?? null))
+      throw new APIError(
+        "简介已在其他页面更新，请重新加载后核对；当前输入可继续预览",
+        409,
+      );
+    const writeReq = {
+      ...req,
+      context: {
+        ...req.context,
+        teamProfileTeam: teamID,
+        teamProfileMembership: membership.id,
+      },
+    };
+    const data = {
+      ...draft,
+      membership: membership.id,
+      membershipJoinedAt: membership.joinedAt,
+      revision: (existing?.revision ?? 0) + 1,
+    };
+    const saved = existing
+      ? await p.update({
+          collection: profileCollection,
+          id: existing.id,
+          req: writeReq,
+          overrideAccess: false,
+          data,
+        })
+      : await p.create({
+          collection: profileCollection,
+          req: writeReq,
+          overrideAccess: false,
+          data,
+        });
+    return ownDTO(saved as unknown as TeamProfileRecord);
+  };
+  try {
+    return await workflowTransaction(
+      p,
+      actor,
+      { teamProfileWrite: true },
+      write,
+    );
+  } catch (error) {
+    if (
+      !error ||
+      typeof error !== "object" ||
+      !("status" in error) ||
+      error.status !== 409
+    )
+      throw error;
+    // A single fresh transaction converges identical racing saves. Different
+    // stale edits still fail the revision check, and eligibility is re-read.
+    return workflowTransaction(p, actor, { teamProfileWrite: true }, write);
+  }
 }

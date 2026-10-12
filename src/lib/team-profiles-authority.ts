@@ -1,4 +1,8 @@
-import { APIError, type Payload, type PayloadRequest } from "payload";
+import type { Payload, PayloadRequest } from "payload";
+import {
+  getActiveTeamMembership,
+  listActiveTeamMemberships,
+} from "./team-memberships";
 
 export type ProfileMembership = {
   id: number;
@@ -17,12 +21,9 @@ export type ProfileMembershipAuthority = {
   ): Promise<ProfileMembership[]>;
 };
 
-// The core task owns the only membership implementation. Fail closed until its
-// formal helper is available; test doubles are passed explicitly in unit tests.
-const unavailable = async (): Promise<never> => {
-  throw new APIError("代表队成员服务尚待集成，请稍后重试", 503);
-};
+// Formal core contract: the core task owns all eligibility and roster facts.
+// This adapter only narrows the return type; it never invents membership rules.
 export const profileMembershipAuthority: ProfileMembershipAuthority = {
-  active: unavailable,
-  list: unavailable,
+  active: getActiveTeamMembership,
+  list: listActiveTeamMemberships,
 };

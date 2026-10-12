@@ -1,0 +1,311 @@
+import "dotenv/config";
+import { getPayload, type Payload } from "payload";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import config from "../src/payload.config";
+import { saveTeamProfile, readTeamProfiles } from "../src/lib/team-profiles";
+import { emptyTeamProfile } from "../src/lib/team-profiles-model";
+import { getActiveTeamMembership } from "../src/lib/team-memberships";
+import { changeTeamLifecycle } from "../src/lib/team-core";
+import { profileFixture } from "./team-profiles-fixture";
+
+let p: Payload, f: Awaited<ReturnType<typeof profileFixture>>;
+const draft = () => ({
+  ...emptyTeamProfile(),
+  displayName: "合成队员公开昵称",
+  position: "中路",
+  biography: "这是一条合成公开介绍。",
+});
+beforeAll(async () => {
+  p = await getPayload({ config });
+  f = await profileFixture(p);
+});
+afterAll(async () => {
+  if (f) await f.cleanup();
+  if (p) await p.destroy();
+});
+describe.sequential("真实核心成员服务 + 简介数据库（仅合成账号）", () => {
+  it("调用正式实时资格服务，未入队和普通社群关系不能写", async () => {
+    expect(
+      (
+        await getActiveTeamMembership(p, {
+          teamID: f.first.id,
+          userID: f.member.id,
+        })
+      )?.id,
+    ).toBe(f.membership.id);
+    expect(
+      await getActiveTeamMembership(p, {
+        teamID: f.first.id,
+        userID: f.viewer.id,
+      }),
+    ).toBeNull();
+    await expect(
+      saveTeamProfile(p, null, f.first.id, null, draft()),
+    ).rejects.toThrow();
+    const offices = [
+      {
+        game: f.game.id,
+        status: "active" as const,
+        handleJoins: true,
+        publishContent: true,
+      },
+    ];
+    await p.update({
+      collection: "users",
+      id: f.viewer.id,
+      overrideAccess: true,
+      context: { system: true },
+      data: { communityOffices: offices, teams: [f.first.id] },
+    });
+    await expect(
+      saveTeamProfile(p, f.viewer, f.first.id, null, draft()),
+    ).rejects.toThrow("入队资格");
+    await expect(
+      saveTeamProfile(p, f.admin, f.first.id, null, draft()),
+    ).rejects.toThrow("入队资格");
+  });
+  it("首次默认隐藏，同一关系一个简介且名单不泄露隐藏资料", async () => {
+    const [saved, duplicate] = await Promise.all([
+      saveTeamProfile(p, f.member, f.first.id, null, draft()),
+      saveTeamProfile(p, f.member, f.first.id, null, draft()),
+    ]);
+    expect(duplicate).toEqual(saved);
+    expect(saved.visible).toBe(false);
+    expect(saved.revision).toBe(1);
+    const view = await readTeamProfiles(p, f.viewer, f.first.id);
+    expect(view.profiles).toEqual([]);
+    expect(view.own).toEqual({ eligible: false, profile: null });
+    expect(
+      (await readTeamProfiles(p, f.member, f.first.id)).own.profile
+        ?.displayName,
+    ).toBe(draft().displayName);
+  });
+  it("本人授权后只展示公开 DTO，敏感/资格字段拒绝写入", async () => {
+    await expect(
+      saveTeamProfile(p, f.member, f.first.id, 1, {
+        ...draft(),
+        answers: { private: true },
+      }),
+    ).rejects.toThrow();
+    const saved = await saveTeamProfile(p, f.member, f.first.id, 1, {
+      ...draft(),
+      visible: true,
+    });
+    expect(saved.revision).toBe(2);
+    const view = await readTeamProfiles(p, f.viewer, f.first.id);
+    expect(view.profiles).toHaveLength(1);
+    expect(Object.keys(view.profiles[0]).sort()).toEqual([
+      "avatar",
+      "biography",
+      "displayName",
+      "id",
+      "position",
+    ]);
+    expect(JSON.stringify(view)).not.toMatch(
+      /PRIVATE_PROFILE_TEST_ANSWER|membership|realName|email|student|contact|reviewNote/,
+    );
+  });
+  it("原始集合 REST/Local 读写关闭，不能用管理员身份代改简介", async () => {
+    const record = (
+      await p.find({
+        collection: "team-member-profiles",
+        overrideAccess: true,
+        depth: 0,
+        where: { membership: { equals: f.membership.id } },
+      })
+    ).docs[0];
+    for (const user of [null, f.viewer, f.admin]) {
+      await expect(
+        p.find({
+          collection: "team-member-profiles",
+          overrideAccess: false,
+          user,
+        }),
+      ).rejects.toThrow();
+      await expect(
+        p.update({
+          collection: "team-member-profiles",
+          id: record.id,
+          overrideAccess: false,
+          user,
+          data: { displayName: "越权昵称" },
+        }),
+      ).rejects.toThrow();
+    }
+    await expect(
+      p.create({
+        collection: "team-member-profiles",
+        overrideAccess: false,
+        user: f.member,
+        data: {
+          ...draft(),
+          membership: f.membership.id,
+          membershipJoinedAt: f.membership.joinedAt,
+          revision: 1,
+        },
+      }),
+    ).rejects.toThrow();
+  });
+  it("重复保存幂等；不同旧版本修改拒绝且保留既有资料", async () => {
+    const retry = await saveTeamProfile(p, f.member, f.first.id, 1, {
+      ...draft(),
+      visible: true,
+    });
+    expect(retry.revision).toBe(2);
+    await expect(
+      saveTeamProfile(p, f.member, f.first.id, 1, {
+        ...draft(),
+        displayName: "旧页面误覆盖",
+      }),
+    ).rejects.toThrow("其他页面");
+    expect(
+      (
+        await p.find({
+          collection: "team-member-profiles",
+          overrideAccess: true,
+          where: { membership: { equals: f.membership.id } },
+        })
+      ).totalDocs,
+    ).toBe(1);
+  });
+  it("并发修改最多一个成功，旧版本不覆盖并可刷新重试", async () => {
+    const results = await Promise.allSettled(
+      ["并发昵称A", "并发昵称B"].map((displayName) =>
+        saveTeamProfile(p, f.member, f.first.id, 2, {
+          ...draft(),
+          displayName,
+          visible: true,
+        }),
+      ),
+    );
+    expect(
+      results.filter((result) => result.status === "fulfilled"),
+    ).toHaveLength(1);
+    expect(
+      results.filter((result) => result.status === "rejected"),
+    ).toHaveLength(1);
+    expect(
+      (await readTeamProfiles(p, f.member, f.first.id)).own.profile?.revision,
+    ).toBe(3);
+  });
+  it("改队伍由服务器检查新队资格，不把旧简介错存新队", async () => {
+    await expect(
+      saveTeamProfile(p, f.member, f.second.id, null, draft()),
+    ).rejects.toThrow("入队资格");
+    await f.enroll(f.second.id);
+    await saveTeamProfile(p, f.member, f.second.id, null, {
+      ...draft(),
+      displayName: "第二队合成昵称",
+      visible: true,
+    });
+    expect(
+      (await readTeamProfiles(p, f.viewer, f.second.id)).profiles[0]
+        .displayName,
+    ).toBe("第二队合成昵称");
+    expect(
+      (await readTeamProfiles(p, f.viewer, f.first.id)).profiles[0].displayName,
+    ).not.toBe("第二队合成昵称");
+  });
+  it("离队/移除立即过滤，旧页面包括重复请求拒绝保存且数据保留", async () => {
+    await f.changeMembership({
+      status: "revoked",
+      revokedAt: new Date().toISOString(),
+      leftAt: new Date().toISOString(),
+    });
+    expect((await readTeamProfiles(p, f.viewer, f.first.id)).profiles).toEqual(
+      [],
+    );
+    expect((await readTeamProfiles(p, f.member, f.first.id)).own).toEqual({
+      eligible: false,
+      profile: null,
+    });
+    await expect(
+      saveTeamProfile(p, f.member, f.first.id, 3, draft()),
+    ).rejects.toThrow("入队资格");
+    expect(
+      (
+        await p.find({
+          collection: "team-member-profiles",
+          overrideAccess: true,
+          where: { membership: { equals: f.membership.id } },
+        })
+      ).totalDocs,
+    ).toBe(1);
+  });
+  it("重新入队保留唯一简介草稿，新的加入周期需本人重新选择展示", async () => {
+    await f.changeMembership({
+      status: "active",
+      joinedAt: new Date().toISOString(),
+      revokedAt: null,
+      leftAt: null,
+    });
+    const view = await readTeamProfiles(p, f.member, f.first.id);
+    expect(view.profiles).toEqual([]);
+    expect(view.own.profile?.visible).toBe(false);
+    expect(view.own.profile?.revision).toBe(3);
+    await saveTeamProfile(p, f.member, f.first.id, 3, {
+      ...draft(),
+      visible: true,
+    });
+    expect(
+      (await readTeamProfiles(p, f.viewer, f.first.id)).profiles,
+    ).toHaveLength(1);
+  });
+  it("本人可再次隐藏，不删除成员关系或公开档案", async () => {
+    await saveTeamProfile(p, f.member, f.first.id, 4, draft());
+    expect((await readTeamProfiles(p, f.viewer, f.first.id)).profiles).toEqual(
+      [],
+    );
+    expect(
+      await getActiveTeamMembership(p, {
+        teamID: f.first.id,
+        userID: f.member.id,
+      }),
+    ).not.toBeNull();
+  });
+  it("账号停用、队伍归档通过核心实时服务撤销展示/写权限", async () => {
+    await saveTeamProfile(p, f.member, f.first.id, 5, {
+      ...draft(),
+      visible: true,
+    });
+    await p.update({
+      collection: "users",
+      id: f.member.id,
+      overrideAccess: true,
+      context: { system: true },
+      data: { accountStatus: "suspended" },
+    });
+    expect((await readTeamProfiles(p, f.viewer, f.first.id)).profiles).toEqual(
+      [],
+    );
+    await expect(
+      saveTeamProfile(p, f.member, f.first.id, 6, draft()),
+    ).rejects.toThrow("停用");
+    await p.update({
+      collection: "users",
+      id: f.member.id,
+      overrideAccess: true,
+      context: { system: true },
+      data: { accountStatus: "active" },
+    });
+    const current = await p.findByID({
+      collection: "teams",
+      id: f.first.id,
+      overrideAccess: true,
+      depth: 0,
+    });
+    await changeTeamLifecycle(
+      p,
+      f.admin,
+      current.id,
+      "archived",
+      current.updatedAt,
+    );
+    expect((await readTeamProfiles(p, f.viewer, f.first.id)).profiles).toEqual(
+      [],
+    );
+    await expect(
+      saveTeamProfile(p, f.member, f.first.id, 6, draft()),
+    ).rejects.toThrow("入队资格");
+  });
+});
