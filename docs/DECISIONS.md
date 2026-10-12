@@ -291,3 +291,9 @@ HTTP 写入要求显式有效 JWT 或同源 cookie，严拒客户端身份/权�
 preflight必须先完成环境检查，禁止非法APP_ENV或非字面false的DB_PUSH触发Payload配置、数据库连接或推送；合法环境继续原有聚合检查。BACKUP_DEST采用新唯一空绝对目录，避开现有14天清理逻辑作用于旧备份。最终依赖合同须绑定实际根TSX/Payload/Next入口、Sharp/SWC原生文件、运行依赖字节及匹配平台探针；现场任何指纹不符均停止，不安装或修剪目标依赖。获批WXML仅纳入68f81b2精确来源，官方GUI/真机证据单独保留未验证状态。
 
 配置、备份和回滚会直接加载pg/dotenv与Payload插件；完整依赖合同必须以package.json全部14项精确根声明为种子，校验其实际物理包/入口、声明摘要与精确Git package.json、递归解析与字节。单独CLI/native闭包不能代表这些实际加载项，旧缺根种子的metadata拒绝。最终来源6f862c7及兼容466都使用436包/53153文件新合同；实际解包验收和精确CI另作回执，保持生产平台/绑定/异机/峰值未验证边界。
+
+## 2026-10-12 · 原生HTTP方法兼容与首次隐私授权
+
+父任务新增明确授权的最小网站兼容：仅在现有活动报名和骨干申请路由提供POST action=edit，与原PATCH使用同一业务函数；原PATCH和普通POST继续保留，GET保持只读，不新增状态机/团队API/collection/迁移。官方wx.request方法声明无PATCH，原生使用明确POST并在SDK前拒绝不支持方法，无自动fallback/重发。
+
+已发布网站隐私正文非空是产品门槛，平台合同独立打开，正式agreePrivacyAuthorization按钮事件才同意；取消/页面/账号变化不能恢复旧操作。已取消但未完成的SDK调用保留归属直至实际callback，迟到onNeed只能否决旧调用，不绑定新弹窗。privacy页正文不做品牌替换。getPrivacySetting false不证明后台采集声明齐全，平台/系统媒体权限与名片/简介公开opt-in分别验收。运营者、联系方式、保留删除和实际服务方交负责人核定，草案不代发布；现代微信工具/真机及审核证据与历史编译、合成SDK和HTTP证据分开。

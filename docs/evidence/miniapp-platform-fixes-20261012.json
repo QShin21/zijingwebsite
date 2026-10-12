@@ -1,0 +1,543 @@
+{
+  "recordedAt": "2026-10-12T18:34:36.715228+00:00",
+  "baseCommit": "6f862c7bb876db658ab7c961bf55979cfa276482",
+  "sourceCommit": "e3a935c33d4a79695fa656cb51a0977a72117465",
+  "branch": "codex/miniapp-platform-fixes-20261012",
+  "clientVersion": "0.3.1",
+  "releaseReady": false,
+  "codeChecksPassed": true,
+  "codeCommitsInOrder": [
+    {
+      "commit": "46a750699e6189bae2770d210abb93d01bba152c",
+      "scope": "two website POST action=edit aliases and real HTTP regression"
+    },
+    {
+      "commit": "e3a935c33d4a79695fa656cb51a0977a72117465",
+      "scope": "native POST edit transport and explicit published-body privacy consent"
+    }
+  ],
+  "websitePatchRequired": true,
+  "websitePatchDeployedByThisTask": false,
+  "stateMachineDuplicated": false,
+  "collectionsOrMigrationsChanged": false,
+  "nativeSource": {
+    "pages": 25,
+    "files": 146,
+    "bytes": 474072,
+    "nativeDependencies": 0,
+    "urlCheck": true,
+    "sourceHashes": {
+      "miniprogram/src/app.js": "d8729d66183f568329ad6046ec711bb61757813f52ccedace8d35f8e2d345b58",
+      "miniprogram/src/app.json": "a0b43f21af708e68cc2673a67fd9df1b1a9a515c456ac4d3500285aa3923a6c4",
+      "miniprogram/src/app.wxss": "165f3a286f16486d3a6ceea4d0ab96bf30e7af660d597cac8b18778e4a7e6c2e",
+      "miniprogram/src/assets/calendar-active.png": "8734d6ccbc2413e22647298c4a65f8a562592985703c0aff90139787cdafa2d6",
+      "miniprogram/src/assets/calendar.png": "f2b88e0220a692bed108c36828664e5924a1dd836e4974e90048af341bf473ea",
+      "miniprogram/src/assets/community-active.png": "08cdbfd5db528c9daa5c3ec446b4f9e18427afd5bb7dcc3b18ea3af9efb2baa9",
+      "miniprogram/src/assets/community.png": "9724a73919272651487f72095ebd207d0795fae7f64dbdf5e47fe61766b01a30",
+      "miniprogram/src/assets/explore-active.png": "81ffe550012ce839c82fbcce612baac7fd5d40356d0ffddd5e4c7c372e6c268f",
+      "miniprogram/src/assets/explore.png": "dc4e95e298be93dbca05ebcc8f78b13273ace5f7ffb931cf06b12e5ba1e271db",
+      "miniprogram/src/assets/home-active.png": "2f7b5f5551d84ee0bf048871250a47efaf0b259b4743c74048b7e614c6905d12",
+      "miniprogram/src/assets/home.png": "28c9e5956a1a782b475eef2c549401049d62268bede2b123643c50ccb8e1e8d0",
+      "miniprogram/src/assets/user-active.png": "4a4d20d3d82e0998898dea76217d60401b9a54f76079e04be5a7cf4edee6e78a",
+      "miniprogram/src/assets/user.png": "31e02bebe4848da405dce67f5a48287ef0263d1fab7e2721f6f5d3f34aa2f652",
+      "miniprogram/src/components/privacy-consent/index.js": "569b512b91ebc240dc50290325b023a6484ed9bd5dffed25cadcfd2cbcff74c7",
+      "miniprogram/src/components/privacy-consent/index.json": "e7b657f5a4b032a68e9e084639b3a5564ce552896d269c3f8c4463bf7a7fa3b5",
+      "miniprogram/src/components/privacy-consent/index.wxml": "7e62de1e7379b6579434ff125b0fb9326bfe67e200be8cdb3e7f0666689e4f24",
+      "miniprogram/src/components/privacy-consent/index.wxss": "8d2a4f90937bb44a78c4eb949c08cad3dd6fa73330384790bc24821f8ce79685",
+      "miniprogram/src/config.js": "69970d6e1e205ca7bc225edc0fd215b70ea99b7408fc36612b070a4c0ddcd021",
+      "miniprogram/src/lib/brand.js": "695c2b3583150395b668b3ead96f87bc054cc5eb173950d2ca85aa2cfbf73887",
+      "miniprogram/src/lib/club.js": "5a344822d2b27e5b5f34183c73f509db290f36566b5d1c210ba288d207da42b7",
+      "miniprogram/src/lib/cms.js": "e01e0a7e409a381182c49edd8eb28b45e1e875764b4fc721bfe1fd9d23ba9654",
+      "miniprogram/src/lib/files.js": "1cd8b892613589b0e2da1681cc56df8088584c394c2babef3d50ec172a848b5a",
+      "miniprogram/src/lib/format.js": "a5a6f6608e83ff09eaf32f8d733a8bd6c21e66e0a2e3b427e14dc20687d9839d",
+      "miniprogram/src/lib/generated/questionnaire-flow.js": "401c0a12480dafda92b65f44548ab9c09824a047d81774bca94e457484333067",
+      "miniprogram/src/lib/generated/questionnaire-model.js": "4247e00d87d3d345b5e01f3604e3e19e5c4169da9e1e5579a9f9159380c2caa5",
+      "miniprogram/src/lib/generated/signup-schema.js": "8b5341a7d251d0801ee52770ad3698188b4ddde259ff82fcefc0919fb3ac7bd1",
+      "miniprogram/src/lib/home.js": "c4efde1b0c34c849fbfeb16d995f503ce7a32a615f9ef1a92f91962187d2546a",
+      "miniprogram/src/lib/honor-media.js": "f4ecd8e9945547146f3c93ec74eb4c6099513026b3f0bcee820c410f2d0c7519",
+      "miniprogram/src/lib/http.js": "90cf9f0f9d20b51a3f2ce3259c40c383b1e5855626296d3adb49dcd4c5b2f226",
+      "miniprogram/src/lib/navigation.js": "5c2a643d0ce2ea7471a796855271c621b4e7f5e76b4e024cb33011eedbea000c",
+      "miniprogram/src/lib/page.js": "bb68ffcc8f49ab1d762472bdd54564363dfb8a0db78741adfc6e139f78de7a18",
+      "miniprogram/src/lib/privacy.js": "c166579696da8074be37e094f2db0157b7d9e5e756716652b546e47531821d9a",
+      "miniprogram/src/lib/questionnaire-runtime.js": "45c9f153b1315e15c550d3829d53d1980e683b4291646f4abc33069a7acb2574",
+      "miniprogram/src/lib/questionnaire.js": "8a30c13b9e5b645f8fb4541b1a5fb0c20a5878987d22a1ec516e93c19cd398ab",
+      "miniprogram/src/lib/richtext.js": "74de5f6201e6b912c2e96d96fc694951500fc5f1f4b1bbee0ae0f0b2baf88c0f",
+      "miniprogram/src/lib/session.js": "d2c2e765ee7b9903a180330aa808ab660380874df331dc78e5d647bb6a5e11c8",
+      "miniprogram/src/lib/staff.js": "71428396bdf3d27d0c8896cc313d60e511272bab62b0abf1b926c8a63d231ede",
+      "miniprogram/src/lib/team-honor-workflow.js": "019a99d2b8da8f88f168a9b83706b12a9bc3b2f20877ef59c2040dd317f8fe4e",
+      "miniprogram/src/lib/team-honor.js": "b245e4cf6f0b8553865e9afa68b6e423daea3da54c2e251306f44d5da781af7b",
+      "miniprogram/src/lib/team-profile.js": "9fdccba5137b940306dce284dfe0fe91b4b398236013f247b63bec73aec3e01e",
+      "miniprogram/src/lib/team.js": "7be75905c693c22e70172a2c58b9a203a46219bdf89a0501d3f36d2fd254dd18",
+      "miniprogram/src/lib/video.js": "b8425a41e41cf706f11671d25fd67f48a39cfc1d5df9d494663880b6279c66c2",
+      "miniprogram/src/pages/account/index.js": "f2744c829196d208dd3036bb6f249ddf418601d053d6a4c382aae2ca4aef93f8",
+      "miniprogram/src/pages/account/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/account/index.wxml": "368fa7d146a092eab749c7f53184b7f90f3837beb5cfe8621248af1b54f886c8",
+      "miniprogram/src/pages/account/index.wxss": "63e57275704a071a2b5e9a230d7c72109a19fb7fe20d4d32a902d8c37b02a789",
+      "miniprogram/src/pages/activity-manage/index.js": "77b2c44a0686f35cb47a4a4461aadbee617c47fe8b71a54273f4d472bd6602a4",
+      "miniprogram/src/pages/activity-manage/index.json": "805959d5d922c03ec728014ed626f6214b30b654242aca80bbdb308c633d4e09",
+      "miniprogram/src/pages/activity-manage/index.wxml": "5e5924ff499deb7a73bceb5b27df09195eeffe04bba074515c5d11a1dc2ea289",
+      "miniprogram/src/pages/activity-manage/index.wxss": "2efff9e83554bea5753eae3fbf9fa52fa986a1b7f5004895f48727051f44cadd",
+      "miniprogram/src/pages/applications/index.js": "3094d6b4d1c42d34f395b5b57b1f591735156f9c09a0e3beca715a762fc0f8c2",
+      "miniprogram/src/pages/applications/index.json": "aa0278d43c05c449e906a7a2ed57c38c6f9dcd1ff92812be22b3d3dc8a8fd5dd",
+      "miniprogram/src/pages/applications/index.wxml": "c7fa5aa02918a5fd341eed6a2733749170196cc7ccb19f41b53e1d6eff5af2ea",
+      "miniprogram/src/pages/applications/index.wxss": "dc2d91cefceb2f8a9ed872f06ed104641eed138b2fed2a32f79198dce6ed3e08",
+      "miniprogram/src/pages/auth/index.js": "f46a8aced9e3b634dd9a64e42aad4420937c05a409b7980334550f499c07655c",
+      "miniprogram/src/pages/auth/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/auth/index.wxml": "b241eb7b54355bbf399c16d5f484a526891cc127ec0094bd182b4a139ae88901",
+      "miniprogram/src/pages/auth/index.wxss": "840de9fd19d436a8e90094ddff767a316579809312cd01d0dbf7900a340c6bbb",
+      "miniprogram/src/pages/communities/index.js": "8a6576bc90e47f52b4dca2b114546f13943924f9f591f0d9462db3268b9c4685",
+      "miniprogram/src/pages/communities/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/communities/index.wxml": "51f15a1d1b1fdf8907d5e6b0909292d52874e1a945452d3062ac18b45922e0e6",
+      "miniprogram/src/pages/communities/index.wxss": "d2e3b03a05951f5ca31a1f817669e0e58a46714a797e3c0619e685cab5b0aea8",
+      "miniprogram/src/pages/community/index.js": "f18c2fedbad8b6cd482b2b07d4c3003619e507f1e59fe103e99959555030413f",
+      "miniprogram/src/pages/community/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/community/index.wxml": "230f02929cd4ead56ba8b14a1e4ab81091ea72ae4ad87d7fa5e20975bc98ec12",
+      "miniprogram/src/pages/community/index.wxss": "a4446b411f2a7d2776e8dec5e576f12fc7d402a7a5a9ddce1aa6e93b1b442a7c",
+      "miniprogram/src/pages/community-joins/index.js": "1bea9825286fba02ba757b8f551666c390e57fd56b873d2eff404a5d055863ab",
+      "miniprogram/src/pages/community-joins/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/community-joins/index.wxml": "0a82da06d0f34e4ebce00eed93db3e63c1474e1c93c1b6fdc5616eac7f1ee09f",
+      "miniprogram/src/pages/community-joins/index.wxss": "a8dafc65b1305e5e3eed63265cef59fe6f6a08929bc95432c5902734ced8ad41",
+      "miniprogram/src/pages/detail/index.js": "962657c8efad3e7920f8108db09931a7de23326c6b8a893b160878c8c73730c3",
+      "miniprogram/src/pages/detail/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/detail/index.wxml": "c0d226e53d32cfac5a1477d34f8dc800e41af6ceace7678ca2c7bb2ea877a486",
+      "miniprogram/src/pages/detail/index.wxss": "17ed1626bb6222578c1c6110ae358c302c1a15e1b0fb7d25091d69661910f22f",
+      "miniprogram/src/pages/events/index.js": "5c4f7eff5695092c5e847f42f5d0702adac157ada53afa749e31ce134d8b9a2a",
+      "miniprogram/src/pages/events/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/events/index.wxml": "28c33a432ff45b511c7bce76dc53192d65d11fb24a6dffcac566ed97fb5adcbb",
+      "miniprogram/src/pages/events/index.wxss": "f45cc5429a5e6f4b501162bce6025da9c88abf7533d5681e4eb9a534b8f56d47",
+      "miniprogram/src/pages/explore/index.js": "aeb4b081a0965fa84070fb32b1095a34132a849999fbf869b0c36eb454de823b",
+      "miniprogram/src/pages/explore/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/explore/index.wxml": "a9b8f4d4cea015c2f2ea0eda022f2917a9cac906fe740c445ba1702201d7ecae",
+      "miniprogram/src/pages/explore/index.wxss": "6d3f7175185adc9c1adb393e22634b0cac840669f5f41297fa29616168e8467c",
+      "miniprogram/src/pages/fixed/index.js": "fdd08411541c8a3ca92f7fcc0ef3e9f6ad5a981ce2214f72d627e8e2a165ee24",
+      "miniprogram/src/pages/fixed/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/fixed/index.wxml": "5c05e9831de424d2b06da21494b80e42f722cd3c476eba1d5d254eec5750d8b1",
+      "miniprogram/src/pages/fixed/index.wxss": "90b745da23860e8e25822728bc82699e7623d5a92d57cb8aeea7083a19ff39ec",
+      "miniprogram/src/pages/home/index.js": "b421bf47cbe5a647a4620669a42309a115f18b88a64580b8ab00af29e7d8d6c4",
+      "miniprogram/src/pages/home/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/home/index.wxml": "f5d160e67fed0487179d9188978ca62f940780aa4e3613e09a769e50b215edb1",
+      "miniprogram/src/pages/home/index.wxss": "a02747c3c8585f6c6401ee8a558d631f5363787d812a7bd2ff482a2d63a17fed",
+      "miniprogram/src/pages/list/index.js": "26f49eee80b77c69b2d448088b1521c10a94fa87c09bd485eda39309ea2e2527",
+      "miniprogram/src/pages/list/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/list/index.wxml": "8ea9e5d512f80cba78c3c5785a2fecbdf645c0f7f4b4451fcc345840505d87c6",
+      "miniprogram/src/pages/list/index.wxss": "a300a61a6a026427807d7f88ee30ccf420a2dac722587a46fffed32b18fcab07",
+      "miniprogram/src/pages/review/index.js": "f16f9c05c197ea3e21edcfcecff4b1e8fd0eb84b8a6f6f4b44452ab7d6ce1b76",
+      "miniprogram/src/pages/review/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/review/index.wxml": "9e520946f79424e7fac6e4b96d91b05b2e8c86674ef009de81d5a3afd180ecb8",
+      "miniprogram/src/pages/review/index.wxss": "6302e0ecf72e35550f82e423a10c125e8949a87e5cd27dfa67a3d6b919c5d134",
+      "miniprogram/src/pages/signup/index.js": "11b9b00c21eeee87d9cab3f321e4623e49d3d166464f67038a8828924a0ac706",
+      "miniprogram/src/pages/signup/index.json": "6b5a02d76151f49fbcea08b70f26f744c76861cbf8eaf8188775444cdde2cf10",
+      "miniprogram/src/pages/signup/index.wxml": "ad11d387533b953f5f92a0a5ec4777df954ca1720708169b905e4554fe4aed9f",
+      "miniprogram/src/pages/signup/index.wxss": "bfcfbb4bf30f7b2ff6e5fc0449b2340bd71c66186c2bf7b6e10877edc7b9d796",
+      "miniprogram/src/pages/staff/index.js": "8791d509ccb089fe88822af94cf652c758cde45e6214babb5db8dda0854dc0c2",
+      "miniprogram/src/pages/staff/index.json": "4b5840296e29f4808c23ef8de23b0714aecd0c45506bc46e9bda967915f7bff5",
+      "miniprogram/src/pages/staff/index.wxml": "d426790282f5ae30f66b713c6de2c5b4e32c6033ef5098faaae11836865a65c5",
+      "miniprogram/src/pages/staff/index.wxss": "a231780825cae1e5059dc3699ee514b4a809afa8fa95239fea67c02d460b070f",
+      "miniprogram/src/pages/staff-review/index.js": "aa2e42c867accc5f5ccd0bb6b86dc08cee5e70f6fee8fc1b67fdd79587890a3c",
+      "miniprogram/src/pages/staff-review/index.json": "20a64c13813eaebf070b93ed45b4816e1885806965ec2e1e0e8d53ebd336881f",
+      "miniprogram/src/pages/staff-review/index.wxml": "92dc5e04a8d18118ada86823df5db28644fb439755f04c4da32b2823e0527c6f",
+      "miniprogram/src/pages/staff-review/index.wxss": "a163f97da842e6fe7b817d1fc9e4448464d45783f91821db2c255d501a9479d2",
+      "miniprogram/src/pages/team/index.js": "44406f6ac12251feea056cc9ec25e61649f4144598214e94a6ddd0ce0620bc72",
+      "miniprogram/src/pages/team/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/team/index.wxml": "690721e1b190a5a9f1b5d17b909068436ad8d3af0c9f43516633c48cba357eae",
+      "miniprogram/src/pages/team/index.wxss": "efbd3a3c0f526faa7bc6465e57aee9ad3c6fcdd814e29f27230c27bd091e084f",
+      "miniprogram/src/pages/team-apply/index.js": "779de9ed6b9580d951c5467fc43c6323b008e72c4a8c39518e600221241cc02f",
+      "miniprogram/src/pages/team-apply/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/team-apply/index.wxml": "96fdb6ae39d009e4e9928557b9f32af5b29562223679cdfaf457ad20e4c64ab7",
+      "miniprogram/src/pages/team-apply/index.wxss": "0652fb860b848cfaec7f7684146582f6bd0991978becb05f1f6eff7d5f5973f1",
+      "miniprogram/src/pages/team-honor-edit/index.js": "c8619785862c974ae6432ced6631e9d46ac2d1a360b37bfc082e0c54a4ca46f5",
+      "miniprogram/src/pages/team-honor-edit/index.json": "aa0278d43c05c449e906a7a2ed57c38c6f9dcd1ff92812be22b3d3dc8a8fd5dd",
+      "miniprogram/src/pages/team-honor-edit/index.wxml": "bd0d452366c0e4858667973cd4c984e5b88aeddab1cd98da49d6a9c05d8f8af1",
+      "miniprogram/src/pages/team-honor-edit/index.wxss": "f7ec5f320106bc7f4b3226ac1e69cf66565dbc56109e1f9683179d86a3262c5a",
+      "miniprogram/src/pages/team-honor-workspace/index.js": "07babeb5bde484c11898a5737965a2e8928914c7ab6891c2c7748b160a868b5d",
+      "miniprogram/src/pages/team-honor-workspace/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/team-honor-workspace/index.wxml": "31ad2ceb92325d234b8d8da276c755ede55904a422b9246e661516d10a79d4b1",
+      "miniprogram/src/pages/team-honor-workspace/index.wxss": "5efbd32d442e94ed86c2899d4692347bd183aa7d8ec90be49165af788cfc45bb",
+      "miniprogram/src/pages/team-honors/index.js": "7399747709a0180eb67437c36b7887505be72028cd94d398f46565270a639ff9",
+      "miniprogram/src/pages/team-honors/index.json": "2650ec8e8485a8795a993dfcf91a17c52996a316e497f77a66052c231e6e3824",
+      "miniprogram/src/pages/team-honors/index.wxml": "d7db5887758e5171697071277a4312d8b7f05b33167758c57463fad9562bdea2",
+      "miniprogram/src/pages/team-honors/index.wxss": "922a7915addb83881690a9b57dbdf64d15b9c883dce85af69557da554fcfbd44",
+      "miniprogram/src/pages/team-members/index.js": "11228fce10d604b62d8788bef5be1dc095366e10ddc2d68ba5a18b5b4183baf4",
+      "miniprogram/src/pages/team-members/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/team-members/index.wxml": "b544c579d6ebb14822ca81e9c20b4d973b3e6815560f7dc420bc4db3c9053c53",
+      "miniprogram/src/pages/team-members/index.wxss": "0652fb860b848cfaec7f7684146582f6bd0991978becb05f1f6eff7d5f5973f1",
+      "miniprogram/src/pages/team-profiles/index.js": "d4101f111129c97b95f032a663ec0cbeef1a482cd93ddef988491648869c1d31",
+      "miniprogram/src/pages/team-profiles/index.json": "34b6bebf03d1d563d2d540cf2353f222d2ddb0a567ede7ab3882cf7b6197423b",
+      "miniprogram/src/pages/team-profiles/index.wxml": "78c530d823029930bf7a79e16f2d2b464b69d4f9f7614446dc183523a58bd45d",
+      "miniprogram/src/pages/team-profiles/index.wxss": "28924d3feea222d7564b33abd3a069b27a2ae96cdcb3d65f6310731f318c9e52",
+      "miniprogram/src/pages/team-review/index.js": "c505d49d677c9db46ee19c48cf1d6164899d3da5b4dc164643ba0877418bbb44",
+      "miniprogram/src/pages/team-review/index.json": "64d42420122c5a69693a093c601a30647bad72c773a51cb773dcffb2be7df78f",
+      "miniprogram/src/pages/team-review/index.wxml": "e92478dad44df2fc030a728b581b2dfa1d1de6b50868f58e68dc853cf89c67ee",
+      "miniprogram/src/pages/team-review/index.wxss": "42a70e28e558545c5260ffbbd53b47ece093b1f652a1fd458547f342ba500820",
+      "miniprogram/src/sitemap.json": "402beec1eaad42303f9f871c3019ca3e7dfc3788bb00bd3121b6ce963cd63834",
+      "miniprogram/src/templates/club.wxml": "e8f1950e81d73c6792c6ee3710232a4d4eb2d405c33d9e06d66b962ac7ca7562",
+      "miniprogram/src/templates/common.wxml": "4c3347e75d6b62aaa07a1e9f1a99b92a74d5acfc3f50ae64cbc3c78f387344ca",
+      "miniprogram/src/templates/questionnaire.wxml": "185033b8bde8a7c85b4093ec8b5ea54723047286f21e1974f4b8abc91283804a"
+    }
+  },
+  "checks": {
+    "nativeSyntheticVM": {
+      "success": true,
+      "passed": 799,
+      "failed": 0,
+      "files": 22,
+      "includesNewPrivacyComponentAndRealMediaConsumerCases": 41,
+      "includesNewPOSTPageAndMethodCases": 28,
+      "scope": "real native JS modules/Pages/Component with synthetic SDK; no WeChat runtime or real network",
+      "sourceReportSHA256": "4c3057cd6c411c4fcd1bd8148acaab216dba16229a84c56cb8ad919768d091eb"
+    },
+    "realHTTPJWTSQL": {
+      "httpTransport": "Actual Node HTTP listener on 127.0.0.1 with an OS-assigned port; fetch crosses the socket and dispatches to the real exported route handlers.",
+      "onlyMock": "CMS locator",
+      "realLayers": [
+        "JWT login/authentication",
+        "Payload",
+        "current-user/record ACL",
+        "existing business services",
+        "PostgreSQL writes"
+      ],
+      "passedTests": 19,
+      "failedTests": 0,
+      "success": true,
+      "targetLintExit": 0,
+      "typecheckExit": 0,
+      "diffCheckExit": 0,
+      "unverified": [
+        "Next full framework/proxy",
+        "WeChat SDK/device",
+        "production/deployment"
+      ],
+      "warning": "Non-failing pg future deprecation warning during concurrent submit checks; no unhandled error."
+    },
+    "independentPrivacyReview": {
+      "reviewedAt": "2026-10-12T18:30:32.617Z",
+      "sourceHashes": {
+        "config.js": "69970d6e1e205ca7bc225edc0fd215b70ea99b7408fc36612b070a4c0ddcd021",
+        "lib/privacy.js": "c166579696da8074be37e094f2db0157b7d9e5e756716652b546e47531821d9a",
+        "lib/cms.js": "e01e0a7e409a381182c49edd8eb28b45e1e875764b4fc721bfe1fd9d23ba9654",
+        "lib/http.js": "90cf9f0f9d20b51a3f2ce3259c40c383b1e5855626296d3adb49dcd4c5b2f226",
+        "lib/session.js": "d2c2e765ee7b9903a180330aa808ab660380874df331dc78e5d647bb6a5e11c8",
+        "lib/brand.js": "695c2b3583150395b668b3ead96f87bc054cc5eb173950d2ca85aa2cfbf73887",
+        "lib/format.js": "a5a6f6608e83ff09eaf32f8d733a8bd6c21e66e0a2e3b427e14dc20687d9839d",
+        "lib/richtext.js": "74de5f6201e6b912c2e96d96fc694951500fc5f1f4b1bbee0ae0f0b2baf88c0f",
+        "lib/files.js": "1cd8b892613589b0e2da1681cc56df8088584c394c2babef3d50ec172a848b5a",
+        "components/privacy-consent/index.js": "569b512b91ebc240dc50290325b023a6484ed9bd5dffed25cadcfd2cbcff74c7",
+        "components/privacy-consent/index.wxml": "7e62de1e7379b6579434ff125b0fb9326bfe67e200be8cdb3e7f0666689e4f24"
+      },
+      "results": [
+        {
+          "case": "zero_width_only_section_does_not_count_as_body",
+          "passed": true,
+          "docReady": false,
+          "sdkRequests": 0,
+          "decisions": [],
+          "chooser": 0,
+          "caller": {
+            "state": "rejected",
+            "error": "隐私授权未完成，图片未读取；可查看隐私说明后重新选择"
+          }
+        },
+        {
+          "case": "platform_contract_navigation_success_then_hide",
+          "passed": true,
+          "shownAfterReturn": true,
+          "readyAfterReturn": true,
+          "decisions": [
+            "agree"
+          ],
+          "chooser": 1,
+          "caller": {
+            "state": "resolved",
+            "error": ""
+          },
+          "scope": "Synthetic lifecycle ordering only; not WeChat simulator/device proof"
+        },
+        {
+          "case": "platform_contract_navigation_hide_then_success",
+          "passed": true,
+          "shownAfterReturn": true,
+          "readyAfterReturn": true,
+          "decisions": [
+            "agree"
+          ],
+          "chooser": 1,
+          "caller": {
+            "state": "resolved",
+            "error": ""
+          },
+          "scope": "Synthetic lifecycle ordering only; not WeChat simulator/device proof"
+        },
+        {
+          "case": "cancelled_sdk_need_event_keeps_owner_until_old_settled",
+          "passed": true,
+          "blockedBeforeOldSettled": true,
+          "blockedError": "微信隐私授权正在结束，请稍后重新选择",
+          "oldCaller": {
+            "state": "rejected",
+            "error": "隐私授权未完成，图片未读取；可查看隐私说明后重新选择"
+          },
+          "freshUnaffected": true,
+          "freshCaller": {
+            "state": "resolved",
+            "error": ""
+          },
+          "decisions": [
+            {
+              "event": "disagree",
+              "requestIndex": 0
+            },
+            {
+              "event": "agree",
+              "buttonId": "zijing-privacy-agree",
+              "requestIndex": 1
+            }
+          ],
+          "chooser": 1
+        },
+        {
+          "case": "cancel_during_body_then_late_HTTP_and_settings",
+          "passed": true,
+          "caller": {
+            "state": "rejected",
+            "error": "隐私授权未完成，图片未读取；可查看隐私说明后重新选择"
+          },
+          "sdkRequests": 0,
+          "chooser": 0
+        },
+        {
+          "case": "network_failure_retry_only_authorizes_after_new_policy",
+          "passed": true,
+          "blockedBeforeRetry": true,
+          "sdkRequests": 1,
+          "chooser": 1
+        },
+        {
+          "case": "cancel_plain_hide_late_success_has_no_chooser",
+          "passed": true,
+          "caller": {
+            "state": "rejected",
+            "error": "页面或账号已更新，请重新操作"
+          },
+          "decisions": [
+            {
+              "event": "disagree",
+              "requestIndex": 0
+            }
+          ],
+          "chooser": 0
+        },
+        {
+          "case": "cancel_repeated_hide_during_owned_contract_late_success_has_no_chooser",
+          "passed": true,
+          "caller": {
+            "state": "rejected",
+            "error": "页面或账号已更新，请重新操作"
+          },
+          "decisions": [
+            {
+              "event": "disagree",
+              "requestIndex": 0
+            }
+          ],
+          "chooser": 0
+        },
+        {
+          "case": "cancel_actor_change_late_success_has_no_chooser",
+          "passed": true,
+          "caller": {
+            "state": "rejected",
+            "error": "页面或账号已更新，请重新操作"
+          },
+          "decisions": [
+            {
+              "event": "disagree",
+              "requestIndex": 0
+            }
+          ],
+          "chooser": 0
+        },
+        {
+          "case": "cancel_detach_late_success_has_no_chooser",
+          "passed": true,
+          "caller": {
+            "state": "rejected",
+            "error": "页面或账号已更新，请重新操作"
+          },
+          "decisions": [
+            {
+              "event": "disagree",
+              "requestIndex": 0
+            }
+          ],
+          "chooser": 0
+        },
+        {
+          "case": "cancel_route_change_late_success_has_no_chooser",
+          "passed": true,
+          "caller": {
+            "state": "rejected",
+            "error": "页面或账号已更新，请重新操作"
+          },
+          "decisions": [
+            {
+              "event": "disagree",
+              "requestIndex": 0
+            }
+          ],
+          "chooser": 0
+        },
+        {
+          "case": "needAuthorization_false_cannot_skip_empty_website_body",
+          "passed": true,
+          "blockedBeforeDeny": true,
+          "sdkRequests": 0,
+          "chooser": 0
+        },
+        {
+          "case": "known_platform_consent_still_loads_nonempty_website_policy",
+          "passed": true,
+          "reads": 1,
+          "settings": 1,
+          "chooser": 1,
+          "scope": "A false setting is not proof that backend collection types are correct; this only checks the explicit policy gate."
+        },
+        {
+          "case": "double_platform_agreement_only_settles_once",
+          "passed": true,
+          "decisions": [
+            {
+              "event": "agree",
+              "buttonId": "zijing-privacy-agree",
+              "requestIndex": 0
+            }
+          ],
+          "chooser": 1
+        }
+      ],
+      "projectFilesEdited": false,
+      "platformOperations": false,
+      "network": false
+    },
+    "legacyOriginalOfficialCompilation": {
+      "success": true,
+      "tool": "miniprogram-compiler@0.2.3 original published Linux wcc/wcsc",
+      "WXML": 29,
+      "WXSS": 27,
+      "WXS": 0,
+      "sourceFileCount": 146,
+      "sourceSnapshotMatchesCodeCommit": true,
+      "networkSyscalls": 0,
+      "generatedOutputExecuted": false,
+      "scope": "local WXML/WXSS compilation using original published legacy Linux wcc/wcsc; not complete DevTools/base library3.16/simulator/device/audit",
+      "originalCompilerSHA256": {
+        "wcc": "a9ae4babf6c8c07541ebc86b4a9c091f3ad69f7343b0c1e31c3ed7775b4eafd4",
+        "wcsc": "ad2b53804ccf0d2266ad26afd349613985d021662cb9c7c758bef2d3f88f34fb"
+      }
+    },
+    "fullRepositoryESLint": {
+      "exitCode": 0
+    },
+    "typecheck": {
+      "command": "tsc --noEmit --incremental false",
+      "exitCode": 0
+    },
+    "diffCheck": {
+      "exitCode": 0
+    },
+    "miniappCheck": {
+      "exitCode": 0,
+      "pages": 25,
+      "files": 146,
+      "bytes": 474072,
+      "domainChecking": true,
+      "nativeDependencies": 0
+    }
+  },
+  "syntheticDatabase": {
+    "version": "17.10",
+    "registeredMigrationsApplied": 17,
+    "rowCleanupCounts": {
+      "users": 0,
+      "events": 0,
+      "posts": 0,
+      "batches": 0,
+      "applications": 0,
+      "signups": 0,
+      "games": 0,
+      "audit": 0,
+      "migrations": 17
+    },
+    "ownedClusterStoppedAndRemoved": true,
+    "productionDatabaseAccess": false
+  },
+  "officialAPISource": {
+    "orgRepo": "https://github.com/wechat-miniprogram/api-typings",
+    "commit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+    "commitDate": "2026-09-01T12:25:38Z",
+    "version": "5.2.3",
+    "npmVersionQuery": "https://registry.npmjs.org/miniprogram-api-typings/latest",
+    "packageURL": "https://registry.npmjs.org/miniprogram-api-typings/-/miniprogram-api-typings-5.2.3.tgz",
+    "publishedIntegrity": "sha512-KVcNSfR2VmRtz35rxkjLxE92HlsBnbT6NsKyTcDX3ebbTKAsAiTOFO1mRM82Xbe848dnEYqNGzaD48LMEvGytw==",
+    "actualIntegrity": "sha512-KVcNSfR2VmRtz35rxkjLxE92HlsBnbT6NsKyTcDX3ebbTKAsAiTOFO1mRM82Xbe848dnEYqNGzaD48LMEvGytw==",
+    "integrityMatches": true,
+    "officialAPIPath": "/tmp/zijing-release-platform-officialAPI-20261012.d.ts",
+    "officialAPI_SHA256": "25e9e6fdab1b4282ee5231d8f8de7a31a177d2edc690ec834e0da479cc166245",
+    "publishedAPISameBytesAsOfficialCommit": true,
+    "license": "MIT",
+    "readonlyDownloadAndStaticReadOnly": true
+  },
+  "officialHTMLAccessLimits": [
+    {
+      "url": "https://developers.weixin.qq.com/miniprogram/dev/framework/user-privacy/PrivacyAuthorize.html",
+      "bodyAvailable": false,
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    {
+      "url": "https://developers.weixin.qq.com/miniprogram/dev/api/open-api/privacy/wx.onNeedPrivacyAuthorization.html",
+      "bodyAvailable": false,
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    {
+      "url": "https://developers.weixin.qq.com/miniprogram/dev/api/open-api/privacy/wx.requirePrivacyAuthorize.html",
+      "bodyAvailable": false,
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    {
+      "url": "https://developers.weixin.qq.com/miniprogram/dev/framework/ability/network.html",
+      "bodyAvailable": false,
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    {
+      "url": "https://developers.weixin.qq.com/miniprogram/dev/framework/open-ability/login.html",
+      "bodyAvailable": false,
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    {
+      "url": "https://developers.weixin.qq.com/miniprogram/dev/component/web-view.html",
+      "bodyAvailable": false,
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    }
+  ],
+  "privacyDesignChoices": [
+    "Require actual nonempty published website body before any SDK/chooser continuation; no bundled draft accepted as live notice",
+    "First-time SDK agreement only via official button event after opening the separate platform contract",
+    "Retain cancelled SDK call ownership until its real success/fail callback; late onNeed is denied and cannot attach to a new attempt",
+    "Never rewrite published operator/contact text through client branding"
+  ],
+  "remainingExternalChecks": [
+    "Responsible operator confirms three fact groups and publishes a complete website privacy page",
+    "Authorized owner integrates website compatibility commit before testing native edits against that service",
+    "Current existing request/uploadFile/downloadFile legal domains, privacy declarations and public image/redirect paths",
+    "Official DevTools 3.16/base-library and iOS/Android device first consent, rejection, contract navigation, media permissions and weak network",
+    "Fresh full CI/build and actual deployment are not claimed by local targeted checks"
+  ],
+  "operations": {
+    "productionReadsThisFixTask": false,
+    "productionWrites": false,
+    "deployment": false,
+    "newPlatformPermissions": false,
+    "keysCreatedOrRead": false,
+    "wechatLoginOrPreviewOrUploadOrAudit": false,
+    "realSubscriptionMessages": false
+  }
+}

@@ -1,0 +1,697 @@
+{
+  "reviewedAt": "2026-10-12T18:33:07.627023+00:00",
+  "branch": "codex/miniapp-platform-fixes-20261012",
+  "existingServiceFactCommit": "6f862c7bb876db658ab7c961bf55979cfa276482",
+  "officialAPIProvenance": {
+    "commit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+    "version": "5.2.3",
+    "readFile": "/tmp/zijing-release-platform-officialAPI-20261012.d.ts",
+    "officialGitAndNpmAPIBytesEqual": true,
+    "publicArchiveIntegrityVerified": true
+  },
+  "officialAPIConstraints": [
+    {
+      "id": "METHODS",
+      "fact": "RequestOption.method声明OPTIONS、GET、HEAD、POST、PUT、DELETE、TRACE、CONNECT；没有PATCH。header可传字典，但禁止设置Referer；类型存在不等于各端实际Origin传输已验证。",
+      "refs": [
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 10851,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L10851",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 10863,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L10863",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        }
+      ],
+      "unknown": "当前开发文档正文不可达，未实施官方SDK验证；不据此断言所有客户端实际行为。"
+    },
+    {
+      "id": "PRIVACY_MINIMUM",
+      "fact": "getPrivacySetting、onNeedPrivacyAuthorization、requirePrivacyAuthorize、openPrivacyContract均标基础库2.32.3、插件不支持。",
+      "refs": [
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 25510,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L25510",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 28784,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L28784",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 30742,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L30742",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 29580,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L29580",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        }
+      ]
+    },
+    {
+      "id": "GET_SETTING",
+      "fact": "getPrivacySetting是可选辅助查询，返回needAuthorization与privacyContractName。后台未声明收集类型也可返回false；之前同意过可返回false；新增声明可能需要再次同意。false不能证明声明完整或全部业务同意已取得。",
+      "refs": [
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 6203,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L6203",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 6211,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L6211",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 25510,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L25510",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        }
+      ]
+    },
+    {
+      "id": "NEED_RESOLVE",
+      "fact": "onNeed事件触发时原隐私调用pending；需要开发者显示说明，用户同意/拒绝后resolve。agree带buttonId；disagree使原调用失败。",
+      "refs": [
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 28784,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L28784",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 28796,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L28796",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 28802,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L28802",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 28806,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L28806",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        }
+      ]
+    },
+    {
+      "id": "OFFICIAL_BUTTON",
+      "fact": "官方说明要求在button open-type=agreePrivacyAuthorization的bindagreeprivacyauthorization触发后，才调用resolve({event:agree,buttonId})；基础库检查对应按钮被轻触。单纯bindtap、普通checkbox或读完网站正文不等同平台同意事件。",
+      "refs": [
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 28802,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L28802",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 28820,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L28820",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 28853,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L28853",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        }
+      ]
+    },
+    {
+      "id": "SINGLE_REGISTRATION",
+      "fact": "onNeed是覆盖式监听，最后注册生效。若先轻触官方同意按钮可不注册监听；一旦注册监听，必须处理resolve。",
+      "refs": [
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 28841,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L28841",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 28844,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L28844",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 28845,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L28845",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        }
+      ]
+    },
+    {
+      "id": "REQUIRE_HELPER",
+      "fact": "requirePrivacyAuthorize是可选辅助接口；既往同意者立即success；未同意且注册监听者触发事件，并由用户明确同意/拒绝的resolve决定success/fail。",
+      "refs": [
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 30742,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L30742",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 30754,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L30754",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 30762,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L30762",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        }
+      ],
+      "unknown": "此说明未承诺无监听时所有SDK默认行为；未承诺原生事件与success/hide/show的唯一顺序或每次事件有可关联requestID。"
+    },
+    {
+      "id": "CONTRACT_READING",
+      "fact": "openPrivacyContract跳转平台隐私协议页；阅读接口可选，推荐使用。它不是同意接口，其success不能替代官方同意按钮事件。网站发布正文与平台合同应明确分别展示。",
+      "refs": [
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 29580,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L29580",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        },
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 29591,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L29591",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        }
+      ]
+    },
+    {
+      "id": "USER_GATE",
+      "fact": "正文必须已加载、已发布且非空才能启用同意/调用媒体，是父任务明确产品要求；不能写成官方API自动验证运营者、用途或保留期。一次显式打开平台合同拥有的导航token、pending SDK归属锁、取消后拒绝旧请求，是本项目的实现选择。",
+      "refs": [
+        {
+          "file": "types/wx/lib.wx.api.d.ts",
+          "line": 28802,
+          "url": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L28802",
+          "pinnedCommit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+          "packageVersion": "5.2.3"
+        }
+      ],
+      "origin": "explicit parent/user requirement and local design"
+    }
+  ],
+  "officialBodyAccess": {
+    "attemptedAgain": [
+      "https://developers.weixin.qq.com/miniprogram/dev/component/button.html",
+      "https://developers.weixin.qq.com/miniprogram/dev/api/open-api/privacy/wx.getPrivacySetting.html",
+      "https://developers.weixin.qq.com/miniprogram/dev/api/open-api/privacy/wx.onNeedPrivacyAuthorization.html",
+      "https://developers.weixin.qq.com/miniprogram/dev/framework/user-privacy/PrivacyAuthorize.html"
+    ],
+    "result": "web open non-retryable; official API definitions provide inspectable first-party supplementation. No statement about live platform console or audit outcome."
+  },
+  "verifiedDataFactsForDraft": [
+    {
+      "id": "ACCOUNT",
+      "data": "本人输入的昵称/邮箱、密码与邮箱验证码；登录返回JWT、到期时间及最小账号投影。",
+      "purpose": "网站账号登录、注册、密码重设；后续请求标识当前账号并执行服务端权限。",
+      "audience": "账号认证服务与本人；未通过wx.login获取OpenID，未调用微信用户信息/手机号获取。",
+      "storageFact": "小程序本地会话存JWT/exp、姓名邮箱及角色/社群投影，不存表单答案或照片草稿；read校验过期并清理失效会话，logout清理会话及自有媒体。不承诺到期瞬间有后台定时清除。",
+      "refs": [
+        {
+          "path": "miniprogram/src/pages/auth/index.js",
+          "line": 28,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/miniprogram/src/pages/auth/index.js#L28",
+          "SHA256": "f46a8aced9e3b634dd9a64e42aad4420937c05a409b7980334550f499c07655c"
+        },
+        {
+          "path": "miniprogram/src/lib/session.js",
+          "line": 4,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/miniprogram/src/lib/session.js#L4",
+          "SHA256": "d2c2e765ee7b9903a180330aa808ab660380874df331dc78e5d647bb6a5e11c8"
+        },
+        {
+          "path": "miniprogram/src/lib/session.js",
+          "line": 16,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/miniprogram/src/lib/session.js#L16",
+          "SHA256": "d2c2e765ee7b9903a180330aa808ab660380874df331dc78e5d647bb6a5e11c8"
+        },
+        {
+          "path": "miniprogram/src/lib/session.js",
+          "line": 23,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/miniprogram/src/lib/session.js#L23",
+          "SHA256": "d2c2e765ee7b9903a180330aa808ab660380874df331dc78e5d647bb6a5e11c8"
+        },
+        {
+          "path": "src/lib/miniapp-auth.ts",
+          "line": 16,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/lib/miniapp-auth.ts#L16",
+          "SHA256": "d171515b6d05432855eaf58b612f32acd6a6011e2ee221c2bda5ea06f3757a81"
+        }
+      ]
+    },
+    {
+      "id": "ADMIN_APPLICATION",
+      "data": "账号关联、游戏/拟新建社群、姓名、手机号、申请/运营说明、微信名片图片、独立名片展示选择、状态/审核意见与时间。",
+      "purpose": "社群管理员申请审核及经本人选择的在任管理员联系展示。",
+      "audience": "本人和有当前审核权限的负责人；获批在任且主动授权展示的名片才进入登录成员可见入口。",
+      "limits": "姓名/电话字段是否必填以具体页面/服务规则为准；来源集合字段并非全部required。名片optional display勾选不是平台隐私同意。",
+      "refs": [
+        {
+          "path": "src/collections/community-operations.ts",
+          "line": 130,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/community-operations.ts#L130",
+          "SHA256": "3d5fe2901563a0158ee546f57730e4724b77e7364ecc527d3425b2ee106be926"
+        },
+        {
+          "path": "src/collections/community-operations.ts",
+          "line": 137,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/community-operations.ts#L137",
+          "SHA256": "3d5fe2901563a0158ee546f57730e4724b77e7364ecc527d3425b2ee106be926"
+        },
+        {
+          "path": "miniprogram/src/pages/applications/index.wxml",
+          "line": 28,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/miniprogram/src/pages/applications/index.wxml#L28",
+          "SHA256": "4eb9aefb2e1acfe415dbfd893b889edd674aa8358647678378aa2f689f3f9030"
+        },
+        {
+          "path": "src/lib/miniapp-club.ts",
+          "line": 37,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/lib/miniapp-club.ts#L37",
+          "SHA256": "8c08b1c69c6e3f850187bb589eb1f553519b3cd6f61441791b1535444b8b60f1"
+        }
+      ]
+    },
+    {
+      "id": "JOIN_INTENT",
+      "data": "本人账号、游戏社群、所选管理员关联、成员展示名、人工进群状态/处理说明/确认人及时间。",
+      "purpose": "记录联系和人工拉群进度。",
+      "audience": "本人及服务端授权处理该社群进群的人员。",
+      "limits": "扫码/预览不代表进群；撤回记录不等于退出微信群或删除历史。",
+      "refs": [
+        {
+          "path": "src/collections/community-operations.ts",
+          "line": 147,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/community-operations.ts#L147",
+          "SHA256": "3d5fe2901563a0158ee546f57730e4724b77e7364ecc527d3425b2ee106be926"
+        },
+        {
+          "path": "src/collections/community-operations.ts",
+          "line": 167,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/community-operations.ts#L167",
+          "SHA256": "3d5fe2901563a0158ee546f57730e4724b77e7364ecc527d3425b2ee106be926"
+        },
+        {
+          "path": "src/lib/community-operations.ts",
+          "line": 65,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/lib/community-operations.ts#L65",
+          "SHA256": "38a5d5e2ee261d7759bfd73986519dde0248376e98af45680a98d6dfa0c5ce81"
+        },
+        {
+          "path": "miniprogram/src/pages/community/index.js",
+          "line": 158,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/miniprogram/src/pages/community/index.js#L158",
+          "SHA256": "f18c2fedbad8b6cd482b2b07d4c3003619e507f1e59fe103e99959555030413f"
+        }
+      ]
+    },
+    {
+      "id": "ACTIVITY_FORMS",
+      "data": "账号、活动关联、提交/修改时间、表单版本、可见题目和答案；当前表单可配置16类题/复杂分支及5–6组员资料。",
+      "purpose": "本次活动组织和报名处理。",
+      "audience": "本人及有活动当前查看/管理权限的人员；以服务端实时授权为准。",
+      "limits": "具体字段由已发布问卷配置决定；本轮未读取生产问卷或真实答卷，不能宣称每个活动都采集姓名、手机或每种题型。",
+      "refs": [
+        {
+          "path": "src/collections/signups.ts",
+          "line": 57,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/signups.ts#L57",
+          "SHA256": "bbfc98c2269bb8e4d6f8a7fc967a4b944ba09253c2e235a0bbffe355c4d68919"
+        },
+        {
+          "path": "src/collections/signups.ts",
+          "line": 67,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/signups.ts#L67",
+          "SHA256": "bbfc98c2269bb8e4d6f8a7fc967a4b944ba09253c2e235a0bbffe355c4d68919"
+        },
+        {
+          "path": "src/lib/activity-signups.ts",
+          "line": 209,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/lib/activity-signups.ts#L209",
+          "SHA256": "93f70eda935ced8bfe91c77b0fedb2a3b3d378baeb02532b37ba1370b81f1393"
+        },
+        {
+          "path": "src/lib/activity-signups.ts",
+          "line": 268,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/lib/activity-signups.ts#L268",
+          "SHA256": "93f70eda935ced8bfe91c77b0fedb2a3b3d378baeb02532b37ba1370b81f1393"
+        }
+      ]
+    },
+    {
+      "id": "STAFF",
+      "data": "必保意向部门、姓名、学校院系年级、动机、经验、可投入时间、一种联系方式；作品HTTPS链接可选。保存账号/批次标题、题目答案/版本、状态、反馈和处理历史。",
+      "purpose": "本批次执行部/宣传部选拔与联系。",
+      "audience": "本人及当前骨干招新审核权限人员；普通社区管理员不因入口可见而获得答案权限。",
+      "refs": [
+        {
+          "path": "src/lib/staff-recruitment-model.ts",
+          "line": 6,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/lib/staff-recruitment-model.ts#L6",
+          "SHA256": "527b3779a06cd725457cbe5248fc358475a1e2c2ef825d0140f105d66eb59f9d"
+        },
+        {
+          "path": "src/lib/staff-recruitment-model.ts",
+          "line": 12,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/lib/staff-recruitment-model.ts#L12",
+          "SHA256": "527b3779a06cd725457cbe5248fc358475a1e2c2ef825d0140f105d66eb59f9d"
+        },
+        {
+          "path": "src/lib/staff-recruitment-model.ts",
+          "line": 14,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/lib/staff-recruitment-model.ts#L14",
+          "SHA256": "527b3779a06cd725457cbe5248fc358475a1e2c2ef825d0140f105d66eb59f9d"
+        },
+        {
+          "path": "src/collections/staff-recruitment.ts",
+          "line": 35,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/staff-recruitment.ts#L35",
+          "SHA256": "96849808a9d16c45be414ee14d74927bbb83df66ac4968ce7c2aef8ea921da1f"
+        },
+        {
+          "path": "src/collections/staff-recruitment.ts",
+          "line": 64,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/staff-recruitment.ts#L64",
+          "SHA256": "96849808a9d16c45be414ee14d74927bbb83df66ac4968ce7c2aef8ea921da1f"
+        }
+      ]
+    },
+    {
+      "id": "TEAM_APPLICATION",
+      "data": "入队必保游戏ID/昵称、位置、经历、训练/投入时间及微信/邮箱/电话任选一种联系方式；另存账号、批次/队伍、表单版本/快照、答案、审核与成员关系。建队申请另有组织与训练方案。",
+      "purpose": "对应队伍人工选拔、建立/维护入队与训练组织关系。",
+      "audience": "本人和具有当前相应服务端申请查看/审批权限的人员。",
+      "limits": "动态问卷增加项需运营者按实际启用配置核定；不把当前可以配置的全部字段写成必采数据。",
+      "refs": [
+        {
+          "path": "src/lib/team-core.ts",
+          "line": 54,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/lib/team-core.ts#L54",
+          "SHA256": "95a62b9689b7c75c83faa1b0c5f40aed3f19129b14ceae71ea6a2de29bc0d233"
+        },
+        {
+          "path": "src/lib/team-core.ts",
+          "line": 101,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/lib/team-core.ts#L101",
+          "SHA256": "95a62b9689b7c75c83faa1b0c5f40aed3f19129b14ceae71ea6a2de29bc0d233"
+        },
+        {
+          "path": "src/collections/team-core.ts",
+          "line": 263,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/team-core.ts#L263",
+          "SHA256": "0cea8edb56c240327b6027fabd4574418c8b99bf2933161bb11f33aea8c41394"
+        }
+      ]
+    },
+    {
+      "id": "PROFILE",
+      "data": "本人自填展示名、位置、简介、所选头像、展示选择、对应成员周期和修订。",
+      "purpose": "本人在当前代表队页面自愿展示介绍。",
+      "audience": "有效在队周期且本人选择展示的最小简介会进入可访问对应队伍页的名单；原始权威关系/周期token不作为展示字段。",
+      "limits": "不能写成只给队员看或匿名；成员周期变化后需重新明确选择公开。隐藏是可见性变更，不等同清除数据库原稿。",
+      "refs": [
+        {
+          "path": "src/collections/team-profiles.ts",
+          "line": 12,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/team-profiles.ts#L12",
+          "SHA256": "d4030dbaed7225d240205fc289ac5b604e31de3e69b23b1c5eeb32b06b0de808"
+        },
+        {
+          "path": "src/collections/team-profiles.ts",
+          "line": 16,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/team-profiles.ts#L16",
+          "SHA256": "d4030dbaed7225d240205fc289ac5b604e31de3e69b23b1c5eeb32b06b0de808"
+        },
+        {
+          "path": "src/lib/team-profiles.ts",
+          "line": 137,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/lib/team-profiles.ts#L137",
+          "SHA256": "82ef6e0c1a8ee6b12013b7558afaf9069951578ad019af8da30ccd27ac99e459"
+        },
+        {
+          "path": "src/lib/team-profiles.ts",
+          "line": 157,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/lib/team-profiles.ts#L157",
+          "SHA256": "82ef6e0c1a8ee6b12013b7558afaf9069951578ad019af8da30ccd27ac99e459"
+        },
+        {
+          "path": "miniprogram/src/pages/team-profiles/index.wxml",
+          "line": 30,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/miniprogram/src/pages/team-profiles/index.wxml#L30",
+          "SHA256": "d3ac2cf4d174e07c94f89b987bdf64cbdba1a1b43b481dbff70fb653625eea0f"
+        }
+      ]
+    },
+    {
+      "id": "HONOR",
+      "data": "本人/队伍/赛季、标题、赛事、名次、日期、说明、证据图片与MP4、修订、审核说明和历史快照。",
+      "purpose": "荣誉投稿、修改、撤回、审核和获批版本展示。",
+      "audience": "原稿为本人和授权审核工作台读取；批准快照用于允许的展示渠道，原私有视频地址不进入普通媒体展示。",
+      "limits": "图片2MiB/张最多6，MP4单份10MiB是项目限制。撤回展示、权限失效和临时文件清理不保证已合法下载的字节被远程追回。",
+      "refs": [
+        {
+          "path": "src/collections/team-honor-records.ts",
+          "line": 74,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/team-honor-records.ts#L74",
+          "SHA256": "9f0699ce167979187d987cf7fc4382c9a5aeb80a843421ff2a9410dc4e6cc413"
+        },
+        {
+          "path": "src/collections/team-honor-records.ts",
+          "line": 156,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/team-honor-records.ts#L156",
+          "SHA256": "9f0699ce167979187d987cf7fc4382c9a5aeb80a843421ff2a9410dc4e6cc413"
+        },
+        {
+          "path": "src/collections/team-honor-records.ts",
+          "line": 174,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/team-honor-records.ts#L174",
+          "SHA256": "9f0699ce167979187d987cf7fc4382c9a5aeb80a843421ff2a9410dc4e6cc413"
+        },
+        {
+          "path": "miniprogram/src/lib/honor-media.js",
+          "line": 63,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/miniprogram/src/lib/honor-media.js#L63",
+          "SHA256": "f4ecd8e9945547146f3c93ec74eb4c6099513026b3f0bcee820c410f2d0c7519"
+        },
+        {
+          "path": "miniprogram/src/lib/honor-media.js",
+          "line": 152,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/miniprogram/src/lib/honor-media.js#L152",
+          "SHA256": "f4ecd8e9945547146f3c93ec74eb4c6099513026b3f0bcee820c410f2d0c7519"
+        }
+      ]
+    },
+    {
+      "id": "LOCAL_MEDIA",
+      "data": "用户主动选择的名片/头像/荣誉图片或视频、本地临时显示/待上传文件。",
+      "purpose": "预览、用户明确保存/上传；实际隐私授权、摄像头/相册系统权限分别验收。",
+      "storageFact": "源码在离开/账号变化及失效回调清理自有路径；收到服务器成功后只读取对账，不自动重传。客户端存储清理不替代服务器保存策略。",
+      "refs": [
+        {
+          "path": "miniprogram/src/lib/files.js",
+          "line": 17,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/miniprogram/src/lib/files.js#L17",
+          "SHA256": "1cd8b892613589b0e2da1681cc56df8088584c394c2babef3d50ec172a848b5a"
+        },
+        {
+          "path": "miniprogram/src/lib/files.js",
+          "line": 30,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/miniprogram/src/lib/files.js#L30",
+          "SHA256": "1cd8b892613589b0e2da1681cc56df8088584c394c2babef3d50ec172a848b5a"
+        },
+        {
+          "path": "miniprogram/src/lib/files.js",
+          "line": 42,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/miniprogram/src/lib/files.js#L42",
+          "SHA256": "1cd8b892613589b0e2da1681cc56df8088584c394c2babef3d50ec172a848b5a"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honor-edit/index.js",
+          "line": 154,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/miniprogram/src/pages/team-honor-edit/index.js#L154",
+          "SHA256": "c8619785862c974ae6432ced6631e9d46ac2d1a360b37bfc082e0c54a4ca46f5"
+        }
+      ]
+    },
+    {
+      "id": "RETENTION_BOUNDARY",
+      "data": "申请、人工进群、成员、简介和荣誉含状态、时间、历史快照等。",
+      "purpose": "业务状态与历史回执处理。",
+      "storageFact": "所读多个集合拒绝用户直接delete；staff/team撤回只是更新状态并保留记录。源码事实不支持“全部资料立即删除”“只保留30天”“绝不备份/记录日志”等承诺。",
+      "refs": [
+        {
+          "path": "src/collections/staff-recruitment.ts",
+          "line": 54,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/staff-recruitment.ts#L54",
+          "SHA256": "96849808a9d16c45be414ee14d74927bbb83df66ac4968ce7c2aef8ea921da1f"
+        },
+        {
+          "path": "src/collections/team-core.ts",
+          "line": 127,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/team-core.ts#L127",
+          "SHA256": "0cea8edb56c240327b6027fabd4574418c8b99bf2933161bb11f33aea8c41394"
+        },
+        {
+          "path": "src/collections/signups.ts",
+          "line": 97,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/signups.ts#L97",
+          "SHA256": "bbfc98c2269bb8e4d6f8a7fc967a4b944ba09253c2e235a0bbffe355c4d68919"
+        },
+        {
+          "path": "src/collections/community-operations.ts",
+          "line": 159,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/collections/community-operations.ts#L159",
+          "SHA256": "3d5fe2901563a0158ee546f57730e4724b77e7364ecc527d3425b2ee106be926"
+        },
+        {
+          "path": "src/lib/staff-recruitment.ts",
+          "line": 95,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/lib/staff-recruitment.ts#L95",
+          "SHA256": "0685249634c0d8e2a1b76aefc8452f027b21c991bf33ca06b7dd3c78256ac320"
+        },
+        {
+          "path": "src/lib/team-core.ts",
+          "line": 817,
+          "url": "https://github.com/QShin21/zijingwebsite/blob/6f862c7bb876db658ab7c961bf55979cfa276482/src/lib/team-core.ts#L817",
+          "SHA256": "95a62b9689b7c75c83faa1b0c5f40aed3f19129b14ceae71ea6a2de29bc0d233"
+        }
+      ]
+    }
+  ],
+  "operatorConfirmationGroups": [
+    {
+      "group": "运营主体与联系渠道",
+      "requiredConfirmation": "实际运营/隐私责任主体，以及有效联系、更正/删除请求渠道。Site.name是可配置品牌/社团名，不能代替已核定运营者；未访问生产联系人。"
+    },
+    {
+      "group": "保留、备份与删除安排",
+      "requiredConfirmation": "按账号、申请/成员历史、私有原稿/获批展示、媒体、本地会话及服务器日志/备份分类核定期限或判定规则、可执行删除/去标识流程与请求处理方式；不要把撤回/隐藏等同删除。"
+    },
+    {
+      "group": "实际启用采集项与处理服务方",
+      "requiredConfirmation": "实际发布的动态问卷字段、必要性/用途/可见人员，以及MP后台隐私勾选、实际邮件/存储/托管等处理服务方。源码支持的能力不代表全部已启用；未读取生产设置或真实报名。"
+    }
+  ],
+  "implementationReview": {
+    "afterEvidence": "/tmp/zijing-miniapp-privacy-independent-review-after-20261012.json",
+    "independentSyntheticCases": 14,
+    "passed": 14,
+    "failures": [],
+    "sourceHashes": {
+      "config.js": "69970d6e1e205ca7bc225edc0fd215b70ea99b7408fc36612b070a4c0ddcd021",
+      "lib/privacy.js": "c166579696da8074be37e094f2db0157b7d9e5e756716652b546e47531821d9a",
+      "lib/cms.js": "e01e0a7e409a381182c49edd8eb28b45e1e875764b4fc721bfe1fd9d23ba9654",
+      "lib/http.js": "90cf9f0f9d20b51a3f2ce3259c40c383b1e5855626296d3adb49dcd4c5b2f226",
+      "lib/session.js": "d2c2e765ee7b9903a180330aa808ab660380874df331dc78e5d647bb6a5e11c8",
+      "lib/brand.js": "695c2b3583150395b668b3ead96f87bc054cc5eb173950d2ca85aa2cfbf73887",
+      "lib/format.js": "a5a6f6608e83ff09eaf32f8d733a8bd6c21e66e0a2e3b427e14dc20687d9839d",
+      "lib/richtext.js": "74de5f6201e6b912c2e96d96fc694951500fc5f1f4b1bbee0ae0f0b2baf88c0f",
+      "lib/files.js": "1cd8b892613589b0e2da1681cc56df8088584c394c2babef3d50ec172a848b5a",
+      "components/privacy-consent/index.js": "569b512b91ebc240dc50290325b023a6484ed9bd5dffed25cadcfd2cbcff74c7",
+      "components/privacy-consent/index.wxml": "7e62de1e7379b6579434ff125b0fb9326bfe67e200be8cdb3e7f0666689e4f24"
+    },
+    "beforeEvidence": [
+      "/tmp/zijing-miniapp-privacy-independent-review-before-20261012.json",
+      "/tmp/zijing-miniapp-privacy-independent-review-stale-before-20261012.json"
+    ],
+    "closedFindings": [
+      "platform contract success/hide ordering",
+      "cancelled SDK onNeed event ownership"
+    ],
+    "executed": "Real Component/privacy/cms/http/session/richtext modules under NodeVM, synthetic wx callbacks and chooser continuation; not complete Page/GUI/device proof",
+    "currentReviewedModuleHashes": {
+      "config.js": "69970d6e1e205ca7bc225edc0fd215b70ea99b7408fc36612b070a4c0ddcd021",
+      "lib/privacy.js": "c166579696da8074be37e094f2db0157b7d9e5e756716652b546e47531821d9a",
+      "lib/cms.js": "e01e0a7e409a381182c49edd8eb28b45e1e875764b4fc721bfe1fd9d23ba9654",
+      "lib/http.js": "90cf9f0f9d20b51a3f2ce3259c40c383b1e5855626296d3adb49dcd4c5b2f226",
+      "lib/session.js": "d2c2e765ee7b9903a180330aa808ab660380874df331dc78e5d647bb6a5e11c8",
+      "lib/brand.js": "695c2b3583150395b668b3ead96f87bc054cc5eb173950d2ca85aa2cfbf73887",
+      "lib/format.js": "a5a6f6608e83ff09eaf32f8d733a8bd6c21e66e0a2e3b427e14dc20687d9839d",
+      "lib/richtext.js": "74de5f6201e6b912c2e96d96fc694951500fc5f1f4b1bbee0ae0f0b2baf88c0f",
+      "lib/files.js": "1cd8b892613589b0e2da1681cc56df8088584c394c2babef3d50ec172a848b5a",
+      "components/privacy-consent/index.js": "569b512b91ebc240dc50290325b023a6484ed9bd5dffed25cadcfd2cbcff74c7",
+      "components/privacy-consent/index.wxml": "7e62de1e7379b6579434ff125b0fb9326bfe67e200be8cdb3e7f0666689e4f24"
+    },
+    "moduleFilesChangedSinceIndependent14": [],
+    "currentSnapshotNote": "The current reviewed modules still equal the independently exercised14-case snapshot. Additional root41/799 results are parent-reported and were not rerun here.",
+    "privacyCMSPreservesPublishedText": "Current cms.list sets raw:true only for pages/keyprivacy, so HTTP client branding display does not rewrite published operator/contact sentences. Other CMS paths retain existing display behavior. This is a product data-integrity choice, not proof that an operator statement is factually complete.",
+    "currentNoOtherCodeFixFinding": "Within the independent privacy/helper/component review scope, the two reproduced ordering/ownership issues are closed; no additional code fix is currently requested. Platform/operator checks remain open."
+  },
+  "remainingUnverified": [
+    "actual platform privacy collection declarations and contract content/version",
+    "operator facts and retention/deletion/processors listed above",
+    "official GUI and physical client privacy button/native navigation/OS permission behavior",
+    "native legal-domain/TLS/JWT/Origin/media integration"
+  ],
+  "reviewOperations": {
+    "projectFilesEdited": false,
+    "committedOrPushed": false,
+    "CLIOrCompilerRun": false,
+    "databaseOrProductionReadWrite": false,
+    "credentialsReadOrPrinted": false,
+    "platformPermissionsLoginUploadReviewOrRealMessages": false,
+    "syntheticNodeVMExecuted": true
+  },
+  "legacyCompilationBoundary": {
+    "source": "parent-reported new local original-archive legacy compilation",
+    "sourceFiles": 146,
+    "WXML": 29,
+    "WXSS": 27,
+    "result": "both compiler exits0; trace reports0network",
+    "independentlyRerunHere": false,
+    "boundary": "This does not establish modern GUI/base library3.16, native permission UI, simulator/device, platform configuration or audit acceptance."
+  }
+}

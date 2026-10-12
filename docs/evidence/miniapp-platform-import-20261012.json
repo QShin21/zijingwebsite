@@ -1,0 +1,22 @@
+{
+  "sourceCommit": "e3a935c33d4a79695fa656cb51a0977a72117465",
+  "file": "zijing-miniapp-import-e3a935c-20261012.zip",
+  "bytes": 209754,
+  "SHA256": "2fd3a91f2ca0eec46f62faeff67eed4df9e16506f3451a5a05c5656b1102620a",
+  "zipEntries": 152,
+  "sourceEntries": 147,
+  "nativeSourceFiles": 146,
+  "nativeSourceBytes": 474072,
+  "exactGitSourceVerified": true,
+  "zipCRCAndBytesVerified": true,
+  "releaseReady": false,
+  "codeGapsFromPriorPackageFixed": true,
+  "requiresWebsiteCommit": "46a750699e6189bae2770d210abb93d01bba152c",
+  "platformCommandsExecuted": [],
+  "libraryDelivery": {
+    "operationSucceeded": true,
+    "previousVersionRetained": true,
+    "localXattrsApplied": true,
+    "current_version_number": 1
+  }
+}
