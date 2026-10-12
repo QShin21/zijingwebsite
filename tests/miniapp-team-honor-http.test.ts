@@ -88,8 +88,14 @@ async function videoRecord() {
 
 beforeAll(async () => {
   const db = new URL(process.env.DATABASE_URL!);
-  if (process.env.APP_ENV !== "development" || process.env.DB_PUSH !== "false" || db.hostname !== "127.0.0.1" || db.port !== "55578" || db.pathname !== "/miniapp_team_qa")
-    throw new Error("Only the delegated disposable loopback miniapp_team_qa database is allowed");
+  // Allow only the two delegated disposable QA databases or this repository's isolated CI service.
+  // CI flags alone never authorize an arbitrary loopback database.
+  const delegatedQA = db.hostname === "127.0.0.1" && db.port === "55578" &&
+    ["/miniapp_team_qa", "/miniapp_team_qa_synthetic"].includes(db.pathname);
+  const repositoryCI = process.env.GITHUB_ACTIONS === "true" && process.env.GITHUB_REPOSITORY === "QShin21/zijingwebsite" &&
+    db.hostname === "127.0.0.1" && db.port === "5432" && db.pathname === "/zijing" && db.username === "zijing";
+  if (process.env.APP_ENV !== "development" || process.env.DB_PUSH !== "false" || !(delegatedQA || repositoryCI))
+    throw new Error("Only the delegated disposable QA database or this repository's isolated CI database is allowed");
   p = await getPayload({ config, key: "miniapp-honor-http-" + suffix }); locator.cms.mockResolvedValue(p);
   async function actor(label: string, roles: User["roles"]) {
     const user = await p.create({ collection: "users", overrideAccess: true, context: { system: true },
