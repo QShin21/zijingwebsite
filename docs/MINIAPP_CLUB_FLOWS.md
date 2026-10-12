@@ -2,7 +2,7 @@
 
 本轮从 CI 成功的 `ed965ef457b5913d4590753c9d931e82811244b9` 出发，只在 `codex/miniapp-club-flows-20261012` 工作。基线是原生小程序 **0.3.1**；当前分支的适配源码尚未经过微信开发者工具编译或上传。保留 `config.version:0.3.1`、AppID、基础库配置 `3.16.0` 和 `urlCheck:true`。之前 0.3.1 开发上传记录见 [MINIAPP.md](MINIAPP.md)，不代表本轮源码已经上传。
 
-独立兼容补丁为 `4cb3d64`；前端及合成测试提交为 `9bfafb04f1f8df07d375a4e9242bfd9d05a07626`，活动工作台退出保护补丁为 `c77dc9f01a289f06b40dc772fcdaec3f0f016049`。除 `src/lib/miniapp-club.ts` 和既有小程序 JSON 网关外，修改范围为小程序、相关测试及本文档。未改集合、迁移、业务服务、其他分支或生产环境。
+独立兼容补丁为 `4cb3d64`；前端及合成测试提交为 `9bfafb04f1f8df07d375a4e9242bfd9d05a07626`，活动工作台退出保护补丁为 `c77dc9f01a289f06b40dc772fcdaec3f0f016049`，报名页生命周期修复为 `b2adf41c350c4ac27388fdf427450a8d8b5d7938`。除 `src/lib/miniapp-club.ts` 和既有小程序 JSON 网关外，修改范围为小程序、相关测试及本文档。未改集合、迁移、业务服务、其他分支或生产环境。
 
 ## 本轮验收切片
 
@@ -17,6 +17,7 @@
 | 骨干招新                                              | 当前与历史批次、本人历史状态、完整表单、同记录修改、撤回和重提；截止、关闭、最终结果由服务端提示允许的动作 | 合成页面与契约通过；跨端真实 HTTP / 数据库集成待测试环境验证         |
 | 适当权限工作台                                        | 建群审核、骨干审核、人工进群管理按服务器能力和每条记录动作；仅名单权限进入既有 `mode=view`                 | 403、权限撤回、修订冲突、重复点击和迟到响应合成用例通过              |
 | 既有活动报名                                          | 保留报名状态、本人回执、修改作答、完整 16 类表单、复杂分支及五至六人成员组                                 | 既有表单与原生回归通过；真机未验证                                   |
+| 活动 / 社区活动 / 骨干申请前后台恢复                  | 首次加载与重载被隐藏打断后恢复读取；隔离旧账号、旧页面响应；提交中返回仅 GET 确认，允许时保留未保存草稿    | 72 项实际 Page handler 合成生命周期用例通过；官方模拟器与真机未验证  |
 | 登录 / 注册 / 重设密码                                | 沿用网站账号与邮箱验证；修正只认能力版本 1 的旧逻辑，读取服务器明确声明的能力                              | 版本 1/2/3、缺失能力、弱网重试合成用例通过；真实邮件和账号操作未执行 |
 | 队伍核心 / 简介 / 荣誉三条新分支                      | 保留基线已有展示入口，等待父任务提供最终合同后适配                                                         | 本轮未新增团队 API、名单或推测未来接口                               |
 | 订阅通知、原生内容创作与升推管理、骨干批次制作 / 导出 | 本轮未接入；既有网页工作台继续承担配置、制作与管理                                                         | 无订阅消息发送、平台权限申请、正式版本上传或审核提交                 |
@@ -44,6 +45,21 @@
 
 表单继续使用原生生成模块与 `templates/questionnaire.wxml`，声明 `X-Questionnaire-Version:3`。生成模块没有被修改；填答包含 text、textarea、single、multiple、select、number、date、time、rating、nps、ranking、matrix、matrixMultiple、blanks、group 和 description 共 16 类。原有简易制作器及高级表单跳转网页制作保持原边界，不会把高级表单转换为四题型。
 
+## 报名页生命周期修复
+
+独立复核在冻结的 `afc1ea3` 中复现 P2：已有回执成功加载后点击重试，新的 GET 未完成就隐藏并返回页面。旧实现没有使加载完成标记失效，因此没有第三次 GET；被废弃的旧响应也无法结束加载，三个入口均停在 `loading=true / info=null`。
+
+`b2adf41` 在每次读取开始时使完成标记失效，隐藏时停止可见加载状态，重新显示时读取当前账号及当前页面的数据。读取结果必须同时匹配请求编号、账号和页面路径；退出、换账号、换页面或卸载会隔离迟到响应，失败可显式重试。正常离开已加载的问卷仍保留草稿，不额外读取。
+
+提交锁持续到原写请求结束。请求在后台先结束或回到前台后才结束，均不会自动重发 POST/PATCH；后台不触发恢复 GET。返回前台后只读确认服务端状态：新回执直接显示，原记录编号与修订未变且服务端仍允许提交或修改时，才恢复同一账号、页面及会话上下文的未保存草稿。确认 GET 失败仍可重试。补充的后台先结束失败场景在最后修正前为 6 项失败，修正后全部通过。
+
+以下冻结复现命令在三个入口上预期失败，分别断言实际 2 次 GET，而正常恢复应有 3 次；修复后的完整文件共 72 项通过。全部使用合成会话、延迟 Promise 和真实原生 Page handler，没有调用微信模拟器或线上接口。
+
+```sh
+MINIAPP_LIFECYCLE_REF=afc1ea3 pnpm exec vitest run tests/miniapp-signup-lifecycle.test.ts -t '已有回执 retry'
+pnpm exec vitest run tests/miniapp-signup-lifecycle.test.ts
+```
+
 ## 微信官方核验与设计选择
 
 2026-10-12 已查询微信官方中英文文档。文档站直读返回 `non-retryable error`，容器 HTTPS 通道返回 CONNECT 403；没有用第三方总结替代当前平台条款。可读取的补充官方资料是微信 [`api-typings` 文档生成说明](https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/README.md)，以及当日查询的官方仓库快照 `6092df9`（2026-09-01 更新）。这只能证明该快照中的 API 契约，不能证明平台后台配置或审核结果。
@@ -65,17 +81,17 @@
 
 ## 已执行证据
 
-环境为 Linux、Node `24.19.0`、pnpm `11.25.0`；使用仓库锁文件安装，未创建或读取平台密钥。基线 CI 成功记录为 [V1 checks 38209674895](https://github.com/QShin21/zijingwebsite/actions/runs/38209674895)。
+环境为 Linux、Node `24.19.0`、pnpm `11.25.0`；使用仓库锁文件安装，未创建或读取平台密钥。基线 CI 成功记录为 [V1 checks 38209674895](https://github.com/QShin21/zijingwebsite/actions/runs/38209674895)。上一版 `afc1ea3b0f56d92c820307d94dc944f722da4c96` 的 [CI 38215530655](https://github.com/QShin21/zijingwebsite/actions/runs/38215530655) 已于 2026-10-12 07:22:47 UTC 完成并成功；这项记录不包含后续生命周期修复。
 
-- **181 项 / 12 文件合成测试通过**：8 份小程序测试 112 项，加 4 份问卷逻辑测试 69 项。API 使用 mock，页面 handler 在 Node VM 中实际执行；没有请求生产数据或保存真实申请。
-- `pnpm miniapp:check` 通过：**17 页面、105 文件、256699 字节**，合法域名检查开启；生成问卷与服务器源文件保持一致。
+- **253 项 / 13 文件合成测试通过**：9 份小程序测试 184 项，加 4 份问卷逻辑测试 69 项。API 使用 mock，页面 handler 在 Node VM 中实际执行；没有请求生产数据或保存真实申请。
+- `pnpm miniapp:check` 通过：**17 页面、105 文件、259536 字节**，合法域名检查开启；生成问卷与服务器源文件保持一致。
 - `pnpm typecheck`、`pnpm lint`、`git diff --check` 通过。
 - 该环境没有 `wechat-devtools`、`wcc`、`wcsc` 命令，未配置工具路径或服务端口；本轮未执行官方编译、官方模拟器、开发版上传、真机或微信审核。
 
 可复现命令：
 
 ```sh
-pnpm exec vitest run tests/miniapp.test.ts tests/miniapp-startup.test.ts tests/miniapp-questionnaire.test.ts tests/miniapp-api.test.ts tests/miniapp-club-api.test.ts tests/miniapp-staff-flows.test.ts tests/miniapp-community-flows.test.ts tests/miniapp-content-flows.test.ts tests/questionnaire-schema.test.ts tests/questionnaire-flow.test.ts tests/questionnaire-group.test.ts tests/questionnaire-platform.test.ts
+pnpm exec vitest run tests/miniapp.test.ts tests/miniapp-startup.test.ts tests/miniapp-questionnaire.test.ts tests/miniapp-api.test.ts tests/miniapp-club-api.test.ts tests/miniapp-staff-flows.test.ts tests/miniapp-community-flows.test.ts tests/miniapp-content-flows.test.ts tests/miniapp-signup-lifecycle.test.ts tests/questionnaire-schema.test.ts tests/questionnaire-flow.test.ts tests/questionnaire-group.test.ts tests/questionnaire-platform.test.ts
 pnpm miniapp:check
 pnpm typecheck
 pnpm lint
@@ -89,6 +105,7 @@ git diff --check
 3. 在公众平台只读核对 request、downloadFile、现有 uploadFile 和业务域名列表。确认 `home.thuzijing.top` 及实际媒体域名、TLS、重定向和外链规则，记录当前声明，不申请新权限或创建密钥。
 4. 用合成资料核对隐私声明覆盖姓名、学校、联系资料、申请答案和二维码；测试首次选图、同意、拒绝、取消与重试。名片展示授权和平台隐私同意分别验证。
 5. 真机用合成图片检查名片预览、长按识码、返回、连续点击和慢网。预览不应产生进群写请求；主动报告与管理员人工确认分开验证。不添加真实管理员，不写生产群记录。
-6. 记录真实编译与真机结果后再交给父任务决定后续发布范围；队伍三条分支收到最终合同后另做适配。本轮不提交审核、不上传正式版本、不发送订阅消息。
+6. 在隔离测试服务给 GET/POST/PATCH 注入延迟，分别验证活动、社区活动和骨干申请的首次加载、已有回执重载、隐藏再显示、退出换账号及迟到成功/失败。提交只发一次写请求；返回后的恢复只能读取，原记录未变时保留草稿。分别覆盖写请求在后台先完成、返回后才完成和确认 GET 失败后显式重试。
+7. 记录真实编译与真机结果后再交给父任务决定后续发布范围；队伍三条分支收到最终合同后另做适配。本轮不提交审核、不上传正式版本、不发送订阅消息。
 
 逐项执行记录见 [miniapp-club-flows-20261012.json](evidence/miniapp-club-flows-20261012.json)。
