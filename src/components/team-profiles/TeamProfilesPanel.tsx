@@ -27,6 +27,9 @@ export function TeamProfilesPanel({
     [preview, setPreview] = useState(false);
   const [draft, setDraft] = useState<TeamProfileDraft>(emptyTeamProfile);
   const [original, setOriginal] = useState<OwnTeamProfile | null>(null);
+  const [membershipVersion, setMembershipVersion] = useState<string | null>(
+    null,
+  );
   const [error, setError] = useState(""),
     [message, setMessage] = useState("");
   const [locked, setLocked] = useState(false),
@@ -44,6 +47,7 @@ export function TeamProfilesPanel({
     setMessage("");
     setDraft(emptyTeamProfile());
     setOriginal(null);
+    setMembershipVersion(null);
     setPreview(false);
     setLocked(false);
     setEditing(startEditing);
@@ -55,6 +59,7 @@ export function TeamProfilesPanel({
         if (turn !== generation.current) return;
         setView(data);
         setOriginal(data.own.profile);
+        setMembershipVersion(data.own.membershipVersion);
         setDraft(data.own.profile ?? emptyTeamProfile());
       })
       .catch((cause) => {
@@ -106,6 +111,7 @@ export function TeamProfilesPanel({
   async function save() {
     if (saving.current || locked || !view?.own.eligible) return;
     const turn = generation.current;
+    const submittedMembershipVersion = membershipVersion;
     saving.current = true;
     setBusy(true);
     setError("");
@@ -116,6 +122,7 @@ export function TeamProfilesPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           revision: original?.revision ?? null,
+          membershipVersion: submittedMembershipVersion,
           profile: {
             displayName: draft.displayName,
             position: draft.position,
@@ -128,7 +135,10 @@ export function TeamProfilesPanel({
       const result = await response.json();
       if (turn !== generation.current) return;
       if (!response.ok) {
-        if ([401, 403, 404].includes(response.status)) {
+        if (
+          [401, 403, 404].includes(response.status) ||
+          result.code === "PROFILE_PERIOD_CHANGED"
+        ) {
           setLocked(true);
           setView(null);
         }
@@ -143,8 +153,19 @@ export function TeamProfilesPanel({
       const responseView = await fetch(endpoint, { cache: "no-store" });
       const updated = await responseView.json();
       if (turn !== generation.current) return;
-      if (responseView.ok) setView(updated);
-      else {
+      if (responseView.ok) {
+        setView(updated);
+        // A background roster refresh must never rebind an old checked draft to
+        // a new period. Only explicit reload initializes the editor credential.
+        if (
+          !updated.own.eligible ||
+          updated.own.membershipVersion !== submittedMembershipVersion
+        ) {
+          setLocked(true);
+          setMessage("");
+          setError("入队周期已更新，请重新加载后确认当前周期的展示选择");
+        }
+      } else {
         setView(null);
         setError(updated.error || "已保存，名单刷新失败，请重新加载");
       }

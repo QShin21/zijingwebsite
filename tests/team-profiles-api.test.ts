@@ -55,7 +55,10 @@ describe("简介 HTTP 边界（服务响应合成替身，非成员集成验收�
   });
   it("只返回受控 DTO，未知错误不泄露私人答案或 SQL", async () => {
     mocks.auth.mockResolvedValue({ user: { id: 3 } });
-    const view = { profiles: [], own: { eligible: false, profile: null } };
+    const view = {
+      profiles: [],
+      own: { eligible: false, membershipVersion: null, profile: null },
+    };
     mocks.read.mockResolvedValue(view);
     expect(
       await (
@@ -111,5 +114,22 @@ describe("简介 HTTP 边界（服务响应合成替身，非成员集成验收�
     expect((await PUT(request(), context)).status).toBe(403);
     mocks.save.mockRejectedValue(new APIError("版本已更新", 409));
     expect((await PUT(request(), context)).status).toBe(409);
+  });
+  it("周期凭据仅在请求顶层传给服务，周期冲突返回可识别409", async () => {
+    mocks.auth.mockResolvedValue({ user: { id: 3 } });
+    mocks.save.mockRejectedValue(
+      new APIError("入队周期已更新", 409, { code: "PROFILE_PERIOD_CHANGED" }),
+    );
+    const version = "v1." + "a".repeat(43);
+    const response = await PUT(
+      request({ revision: 1, profile: {}, membershipVersion: version }),
+      context,
+    );
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({
+      error: "入队周期已更新",
+      code: "PROFILE_PERIOD_CHANGED",
+    });
+    expect(mocks.save.mock.calls[0].slice(2)).toEqual([12, 1, {}, version]);
   });
 });

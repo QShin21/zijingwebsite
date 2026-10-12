@@ -2,10 +2,16 @@ import "dotenv/config";
 import { getPayload, type Payload } from "payload";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import config from "../src/payload.config";
-import { saveTeamProfile, readTeamProfiles } from "../src/lib/team-profiles";
+import {
+  saveTeamProfile as submitProfile,
+  readTeamProfiles,
+} from "../src/lib/team-profiles";
 import { emptyTeamProfile } from "../src/lib/team-profiles-model";
 import { getActiveTeamMembership } from "../src/lib/team-memberships";
-import { profileFixture } from "./team-profiles-fixture";
+import {
+  profileFixture,
+  saveLoadedProfile as saveTeamProfile,
+} from "./team-profiles-fixture";
 
 let p: Payload, f: Awaited<ReturnType<typeof profileFixture>>;
 const draft = () => ({
@@ -21,6 +27,172 @@ beforeAll(async () => {
 afterAll(async () => {
   if (f) await f.cleanup();
   if (p) await p.destroy();
+});
+describe("入队周期并发凭据（真实核心关系，无资格 mock）", () => {
+  it.each([true, false])(
+    "旧周期公开/隐藏资料请求拒绝，刷新新周期明确选择后才可展示：%s",
+    async (visible) => {
+      const g = await profileFixture(p);
+      const value = { ...draft(), visible };
+      const stored = async () =>
+        (
+          await p.find({
+            collection: "team-member-profiles",
+            overrideAccess: true,
+            depth: 0,
+            where: { membership: { equals: g.membership.id } },
+          })
+        ).docs[0];
+      try {
+        const oldVersion = (await readTeamProfiles(p, g.member, g.first.id)).own
+          .membershipVersion;
+        await submitProfile(p, g.member, g.first.id, null, value, oldVersion);
+        const before = await stored();
+        await g.changeMembership({
+          status: "revoked",
+          revokedAt: new Date().toISOString(),
+        });
+        await expect(
+          submitProfile(p, g.member, g.first.id, 1, value, oldVersion),
+        ).rejects.toMatchObject({ status: 403 });
+        await g.changeMembership({
+          status: "active",
+          joinedAt: new Date(Date.now() + 1000).toISOString(),
+          revokedAt: null,
+          leftAt: null,
+        });
+        const current = await readTeamProfiles(p, g.member, g.first.id);
+        expect(current.own.membershipVersion).not.toBe(oldVersion);
+        expect(current.own.profile?.visible).toBe(false);
+        expect(current.profiles).toEqual([]);
+        for (const version of [
+          oldVersion,
+          undefined,
+          g.membership.joinedAt,
+          "v1." + "a".repeat(43),
+        ]) {
+          await expect(
+            submitProfile(
+              p,
+              g.member,
+              g.first.id,
+              1,
+              { ...value, visible: true },
+              version,
+            ),
+          ).rejects.toMatchObject({
+            status: 409,
+            data: { code: "PROFILE_PERIOD_CHANGED" },
+          });
+          expect(await stored()).toEqual(before);
+        }
+        const newVersion = current.own.membershipVersion;
+        await submitProfile(
+          p,
+          g.member,
+          g.first.id,
+          1,
+          { ...value, visible: false },
+          newVersion,
+        );
+        expect(
+          (await readTeamProfiles(p, g.viewer, g.first.id)).profiles,
+        ).toEqual([]);
+        await submitProfile(
+          p,
+          g.member,
+          g.first.id,
+          2,
+          { ...value, visible: true },
+          newVersion,
+        );
+        expect(
+          (await readTeamProfiles(p, g.viewer, g.first.id)).profiles,
+        ).toHaveLength(1);
+        // Even an identical idempotent request cannot cross the period boundary.
+        await expect(
+          submitProfile(
+            p,
+            g.member,
+            g.first.id,
+            3,
+            { ...value, visible: true },
+            oldVersion,
+          ),
+        ).rejects.toMatchObject({ status: 409 });
+        expect((await stored()).revision).toBe(3);
+        await g.changeMembership({
+          status: "revoked",
+          revokedAt: new Date().toISOString(),
+        });
+        await g.changeMembership({
+          status: "active",
+          joinedAt: new Date(Date.now() + 2000).toISOString(),
+          revokedAt: null,
+          leftAt: null,
+        });
+        await expect(
+          submitProfile(
+            p,
+            g.member,
+            g.first.id,
+            3,
+            { ...value, visible: true },
+            newVersion,
+          ),
+        ).rejects.toMatchObject({ status: 409 });
+        expect((await stored()).revision).toBe(3);
+        expect(
+          (await readTeamProfiles(p, g.viewer, g.first.id)).profiles,
+        ).toEqual([]);
+      } finally {
+        await g.cleanup();
+      }
+    },
+  );
+  it("旧周期空编辑器不能新建；凭据不可跨队使用", async () => {
+    const g = await profileFixture(p);
+    try {
+      const old = (await readTeamProfiles(p, g.member, g.first.id)).own
+        .membershipVersion;
+      await g.changeMembership({ status: "revoked" });
+      await g.changeMembership({
+        status: "active",
+        joinedAt: new Date(Date.now() + 1000).toISOString(),
+      });
+      await expect(
+        submitProfile(
+          p,
+          g.member,
+          g.first.id,
+          null,
+          { ...draft(), visible: true },
+          old,
+        ),
+      ).rejects.toMatchObject({ status: 409 });
+      expect(
+        (
+          await p.find({
+            collection: "team-member-profiles",
+            overrideAccess: true,
+            where: { membership: { equals: g.membership.id } },
+          })
+        ).totalDocs,
+      ).toBe(0);
+      const current = (await readTeamProfiles(p, g.member, g.first.id)).own
+        .membershipVersion;
+      await g.enroll(g.second.id);
+      await expect(
+        submitProfile(p, g.member, g.second.id, null, draft(), current),
+      ).rejects.toMatchObject({ status: 409 });
+      await submitProfile(p, g.member, g.first.id, null, draft(), current);
+      expect(
+        (await readTeamProfiles(p, g.viewer, g.first.id)).profiles,
+      ).toEqual([]);
+    } finally {
+      await g.cleanup();
+    }
+  });
 });
 describe.sequential("真实核心成员服务 + 简介数据库（仅合成账号）", () => {
   it("调用正式实时资格服务，未入队和普通社群关系不能写", async () => {
@@ -73,7 +245,11 @@ describe.sequential("真实核心成员服务 + 简介数据库（仅合成账�
     expect(saved.revision).toBe(1);
     const view = await readTeamProfiles(p, f.viewer, f.first.id);
     expect(view.profiles).toEqual([]);
-    expect(view.own).toEqual({ eligible: false, profile: null });
+    expect(view.own).toEqual({
+      eligible: false,
+      membershipVersion: null,
+      profile: null,
+    });
     expect(
       (await readTeamProfiles(p, f.member, f.first.id)).own.profile
         ?.displayName,
@@ -101,7 +277,7 @@ describe.sequential("真实核心成员服务 + 简介数据库（仅合成账�
       "position",
     ]);
     expect(JSON.stringify(view)).not.toMatch(
-      /PRIVATE_PROFILE_TEST_ANSWER|membership|realName|email|student|contact|reviewNote/,
+      /PRIVATE_PROFILE_TEST_ANSWER|"membership"|realName|email|student|contact|reviewNote/,
     );
   });
   it("原始集合 REST/Local 读写关闭，不能用管理员身份代改简介", async () => {
@@ -301,6 +477,7 @@ describe.sequential("真实核心成员服务 + 简介数据库（仅合成账�
     );
     expect((await readTeamProfiles(p, f.member, f.first.id)).own).toEqual({
       eligible: false,
+      membershipVersion: null,
       profile: null,
     });
     await expect(

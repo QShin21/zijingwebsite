@@ -4,8 +4,10 @@ import { getPayload, type Payload } from "payload";
 import sharp from "sharp";
 import AxeBuilder from "@axe-core/playwright";
 import config from "../../src/payload.config";
-import { profileFixture } from "../team-profiles-fixture";
-import { saveTeamProfile } from "../../src/lib/team-profiles";
+import {
+  profileFixture,
+  saveLoadedProfile as saveTeamProfile,
+} from "../team-profiles-fixture";
 import { emptyTeamProfile } from "../../src/lib/team-profiles-model";
 
 let p: Payload, f: Awaited<ReturnType<typeof profileFixture>>;
@@ -178,7 +180,7 @@ test("本人上传头像、预览、单次保存、修改/取消与隐藏；桌�
   expect(response.headers()["cache-control"]).toContain("no-store");
   expect(view.profiles[0].avatar).toMatch(/^data:image\/webp;base64,/);
   expect(JSON.stringify(view)).not.toMatch(
-    /PRIVATE_PROFILE_TEST_ANSWER|membership|realName|student|reviewNote/,
+    /PRIVATE_PROFILE_TEST_ANSWER|"membership"|realName|student|reviewNote/,
   );
   await panel(page)
     .getByLabel("公开昵称", { exact: true })
