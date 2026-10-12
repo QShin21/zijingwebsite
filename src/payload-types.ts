@@ -124,6 +124,9 @@ export interface User {
   roles: ('president' | 'vicePresident' | 'backbone' | 'communityAdmin' | 'member')[];
   accountStatus?: ('active' | 'suspended') | null;
   department?: ('execution' | 'publicity') | null;
+  /**
+   * 移除任职会保留已撤任记录；仅在任授权生效。更换社群请新增任职。
+   */
   communityOffices?:
     | {
         game?: (number | null) | Game;

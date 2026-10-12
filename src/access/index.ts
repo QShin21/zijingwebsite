@@ -1,5 +1,5 @@
 import type { Access, FieldAccess, Where } from "payload";
-import { canPublish, canSubmitClubContent, hasRole, type Identity } from "../lib/rules";
+import { canPublish, canSubmitClubContent, communityIDs, hasRole, type Identity } from "../lib/rules";
 export const admin: Access = ({ req }) =>
   hasRole(req.user as Identity, "president");
 export const adminField: FieldAccess = ({ req }) =>
@@ -34,3 +34,14 @@ export const editContent =
       return { submittedBy: { equals: user.id } } as Where;
     return false;
   };
+export const readEventContent: Access = ({ req }) => {
+  const user = req.user as Identity;
+  if (canPublish(user)) return true;
+  if (canSubmitClubContent(user))
+    return { or: [publicWhere(), { submittedBy: { equals: user.id } }] } as Where;
+  const games = communityIDs(user, "viewSignups");
+  if (games.length) return { or: [publicWhere(), { and: [
+    { submittedBy: { equals: user.id } }, { or: [{ game: { in: games } }, { game: { exists: false } }] },
+  ] }] } as Where;
+  return publicWhere();
+};

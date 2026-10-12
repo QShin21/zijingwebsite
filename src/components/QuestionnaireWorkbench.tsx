@@ -6,7 +6,7 @@ export function QuestionnaireWorkbench() {
     [page, setPage] = useState(1),
     [retry, setRetry] = useState(0);
   const [docs, setDocs] = useState<
-      { id: number; title: string; _status?: string }[]
+      { id: number; title: string; _status?: string; canManage: boolean; canViewSignups: boolean }[]
     >([]),
     [next, setNext] = useState(false),
     [loading, setLoading] = useState(true),
@@ -37,7 +37,7 @@ export function QuestionnaireWorkbench() {
     <section className="panel member-form">
       <h1>问卷工作台</h1>
       <p>
-        管理你有权限的活动问卷、预览填写效果，并查看回收统计。新活动可从内容管理后台或游戏社群的活动发布入口创建。
+        按授权编辑活动问卷或查看报名与统计。新活动可从内容管理后台或游戏社群的活动发布入口创建。
       </p>
       <label>
         活动来源
@@ -63,9 +63,12 @@ export function QuestionnaireWorkbench() {
                 {doc._status === "draft" ? "草稿 · 发布后可填写" : "活动问卷"}
               </p>
               <div className="signup-tools">
-                <Link href={`/activities/${kind}/${doc.id}/manage`}>
+                {doc.canManage && <Link href={`/activities/${kind}/${doc.id}/manage`}>
                   编辑与统计
-                </Link>
+                </Link>}
+                {doc.canViewSignups && <Link href={`/activities/${kind}/${doc.id}/signups`}>
+                  查看报名与统计
+                </Link>}
                 <Link href={`/activities/${kind}/${doc.id}/fill`}>
                   填写入口
                 </Link>

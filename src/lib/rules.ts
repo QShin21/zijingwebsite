@@ -47,14 +47,16 @@ export const canSubmitClubContent = (user: Identity | null | undefined) =>
   canPublish(user) || hasRole(user, "backbone", "communityAdmin") || communityIDs(user, "publishContent").length > 0;
 // Legacy communityAdmin retains its existing club draft permission during the additive transition.
 // It grants no community scope or private signup access. All new approvals preserve platform roles.
+const signupScope = (user: Identity | null | undefined, game: unknown, capability: "viewSignups" | "exportSignups") =>
+  relationID(game) == null ? communityIDs(user, capability).length > 0 : communityIDs(user, capability).includes(String(relationID(game)));
 export const canReadActivitySignups = (user: Identity | null | undefined, kind: string, game: unknown, organizer: unknown) =>
   canPublish(user) || (kind === "community-posts"
     ? communityIDs(user, "viewSignups").includes(String(relationID(game)))
-    : canParticipate(user) && String(relationID(organizer)) === String(user?.id) && communityIDs(user, "viewSignups").length > 0);
+    : canParticipate(user) && String(relationID(organizer)) === String(user?.id) && signupScope(user, game, "viewSignups"));
 export const canExportActivitySignups = (user: Identity | null | undefined, kind: string, game: unknown, organizer: unknown) =>
   canReadActivitySignups(user, kind, game, organizer) && (canPublish(user) || (kind === "community-posts"
     ? communityIDs(user, "exportSignups").includes(String(relationID(game)))
-    : communityIDs(user, "exportSignups").length > 0));
+    : signupScope(user, game, "exportSignups")));
 export const teamIDs = (user: Identity | null | undefined) =>
   (user?.teams ?? []).map((t) => String(typeof t === "object" ? t.id : t));
 export function safeURL(value: unknown): boolean {

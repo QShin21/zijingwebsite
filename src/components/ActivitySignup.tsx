@@ -96,7 +96,7 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
         {error && <button onClick={() => setRetry(retry + 1)}>重试</button>}
       </section>
     );
-  if (!info.form.enabled && !info.canManage && !info.signup) return null;
+  if (!info.form.enabled && !info.canManage && !info.canViewSignups && !info.signup) return null;
   return (
     <section className="panel activity-signup">
       <h2>{info.form.title || "活动报名"}</h2>
@@ -106,6 +106,9 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
             管理报名问卷 ↗
           </Link>
         </p>
+      )}
+      {!info.canManage && info.canViewSignups && (
+        <p><Link href={`/activities/${kind}/${id}/signups`}>查看报名与统计 ↗</Link></p>
       )}
       {info.signup && !editing ? (
         <>
@@ -182,7 +185,7 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
     </section>
   );
 }
-export function SignupManager({ kind, id }: { kind: string; id: number }) {
+export function SignupManager({ kind, id, readOnly = false }: { kind: string; id: number; readOnly?: boolean }) {
   const endpoint = `/api/activities/${kind}/${id}/signup`,
     [info, setInfo] = useState<Info | null>(null),
     [message, setMessage] = useState(""),
@@ -192,10 +195,10 @@ export function SignupManager({ kind, id }: { kind: string; id: number }) {
     [pages, setPages] = useState(0),
     [total, setTotal] = useState<number | null>(null);
   useEffect(() => {
-    signupRequest(endpoint + "?mode=manage")
+    signupRequest(endpoint + (readOnly ? "?mode=view" : "?mode=manage"))
       .then(setInfo)
       .catch((e) => setMessage(e.message));
-  }, [endpoint]);
+  }, [endpoint, readOnly]);
   async function loadEntries(n: number) {
     setBusy(true);
     try {
@@ -237,7 +240,7 @@ export function SignupManager({ kind, id }: { kind: string; id: number }) {
       )}
       {info && (
         <>
-          <form
+          {!readOnly && info.canManage && <form
             className="member-form panel"
             onSubmit={async (e) => {
               e.preventDefault();
@@ -265,7 +268,8 @@ export function SignupManager({ kind, id }: { kind: string; id: number }) {
             <button disabled={busy} className="button">
               {busy ? "正在保存…" : "保存报名问卷"}
             </button>
-          </form>
+          </form>}
+          {readOnly && <p className="panel">此入口仅查看报名与统计；导出按单独授权开放。</p>}
           {info.canViewSignups && <QuestionnaireResults
             endpoint={endpoint}
             questions={info.form.questions}

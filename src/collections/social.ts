@@ -17,12 +17,12 @@ const moderatorWhere: Access = ({ req }) => {
 };
 const visibleToPublic: Access = ({ req }) => {
   if (canPublish(req.user as Identity)) return true;
-  if (communityIDs(req.user as Identity, "publishContent").length) {
-    const ids = communityIDs(req.user as Identity, "publishContent");
-    return { or: [{ status: { equals: "visible" } },
-      { game: { in: ids } }] } as Where;
-  }
-  return { status: { equals: "visible" } };
+  const scope: Where[] = [{ status: { equals: "visible" } }];
+  const editors = communityIDs(req.user as Identity, "publishContent");
+  const readers = communityIDs(req.user as Identity, "viewSignups");
+  if (editors.length) scope.push({ game: { in: editors } });
+  if (readers.length) scope.push({ and: [{ game: { in: readers } }, { category: { equals: "event" } }] });
+  return { or: scope };
 };
 const idOf = (value: unknown) =>
   typeof value === "object" && value !== null && "id" in value

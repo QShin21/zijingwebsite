@@ -1,0 +1,78 @@
+{
+  "branch": "codex/club-operations-recovery",
+  "base": "1d57dfb5abbe0ed9c88b097d2478f1495a87b99f",
+  "atUTC": "2026-10-12T00:08:51.857757+00:00",
+  "scope": [
+    "revocation evidence and dangerous legacy rollback gate",
+    "independent read-only signup access and per-action/community authorization",
+    "snapshot rejects unsafe config and enforces read-only database connections"
+  ],
+  "checks": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "unitDatabase": {
+      "files": 28,
+      "tests": 230,
+      "result": "PASS"
+    },
+    "newReadonlyE2E": {
+      "tests": 1,
+      "result": "PASS",
+      "durationSeconds": 44.5
+    },
+    "existingClubE2E": {
+      "tests": 2,
+      "result": "PASS",
+      "note": "repeated in final full suite"
+    },
+    "fullE2E": {
+      "tests": 55,
+      "passed": 55,
+      "failed": 0,
+      "result": "PASS",
+      "reportedDuration": "9.2m"
+    },
+    "build": "PASS",
+    "relatedE2E": {
+      "tests": 3,
+      "result": "PASS",
+      "note": "all included in final 55-test suite"
+    },
+    "miniappStatic": "not run separately in recovery; exact commit CI includes the unchanged miniapp gate"
+  },
+  "snapshotProof": {
+    "DB_PUSH_trueRejected": true,
+    "PAYLOAD_DROP_DATABASE_trueRejected": true,
+    "actualTransactionReadOnlyVerified": true,
+    "normalGenerationDDLEvents": 0,
+    "publicCatalogUnchanged": true,
+    "repositorySnapshotUnchanged": true,
+    "probeOutputInTemporaryDirectory": true
+  },
+  "permissionProof": [
+    "last assignment removal retained revoked row",
+    "legacy projection did not reactivate revoked grant",
+    "stale identity rejected on private actions",
+    "legacy owner risk blocked by rollback CLI",
+    "cross-community and linked site-event scope rejected",
+    "reader cannot save/edit/publish",
+    "duplicate concurrent submissions returned one receipt",
+    "export requires separate authorization",
+    "old HTTP session loses private access after revocation"
+  ],
+  "priorResolvedFailures": [
+    "synthetic game creation missing controlled context",
+    "snapshot CLI waited on retained Payload reconnect client",
+    "missing same-origin headers caused test fixture 401 and missing form version",
+    "test reloaded before workbench navigation completed"
+  ],
+  "newMigration": false,
+  "dependencyVersionsChanged": false,
+  "productionAccess": false,
+  "productionMigration": false,
+  "phase2Implemented": false,
+  "merge": false,
+  "PR": false,
+  "deploy": false,
+  "finalCommitCI": "Verify separately after recovery branch push; baseline CI is not used as recovery validation."
+}

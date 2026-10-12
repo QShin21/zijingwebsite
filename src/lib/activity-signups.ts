@@ -33,6 +33,12 @@ export async function activity(
   req?: PayloadRequest,
   permission: "edit" | "view" | "export" = "edit",
 ) {
+  if (edit && user) {
+    // Private-data actions must honor revocation even when an internal caller has an old identity.
+    const fresh = await p.findByID({ collection: "users", id: user.id, overrideAccess: true, req, depth: 0,
+      select: { roles: true, accountStatus: true, communityOffices: true } }).catch(() => null);
+    user = fresh ? { ...user, ...fresh, accountStatus: fresh.accountStatus, communityOffices: fresh.communityOffices } : null;
+  }
   if (kind === "community-posts" && !canParticipate(user))
     throw new APIError("请先登录", 401);
   const doc = await p

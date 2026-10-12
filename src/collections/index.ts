@@ -15,6 +15,7 @@ import {
   publisher,
   publisherField,
   readContent,
+  readEventContent,
   staff,
 } from "../access";
 import {
@@ -339,7 +340,7 @@ function content(
     },
     versions: { drafts: true, maxPerDoc: 30 },
     access: {
-      read: readContent(scoped, slug === "honors", self),
+      read: slug === "events" ? readEventContent : readContent(scoped, slug === "honors", self),
       create: ({ req }) =>
         canSubmitClubContent(req.user as Identity),
       update: editContent(scoped, self),
@@ -473,6 +474,19 @@ export const Users: CollectionConfig = {
         }
         if (data.communityOffices !== undefined) {
           if (!Array.isArray(data.communityOffices)) throw new APIError("社群任职格式无效", 400);
+          for (const office of data.communityOffices) {
+            const previous = originalDoc?.communityOffices?.find((item: { id?: string }) => item.id && item.id === office.id);
+            if (previous?.game != null && String(relationID(previous.game)) !== String(relationID(office.game)))
+              throw new APIError("任职所属社群不可更换；请撤任后新增授权", 400);
+          }
+          // Removing an assignment must retain its revocation evidence for rollback checks.
+          for (const previous of originalDoc?.communityOffices ?? []) {
+            const retained = data.communityOffices.some((office: { id?: string; game?: unknown }) =>
+              previous.game != null
+                ? String(relationID(office.game)) === String(relationID(previous.game))
+                : previous.id && office.id === previous.id);
+            if (!retained) data.communityOffices.push({ ...previous, status: "revoked" });
+          }
           const seen = new Set<string>();
           for (const office of data.communityOffices) {
             const game = String(relationID(office.game));
@@ -524,6 +538,7 @@ export const Users: CollectionConfig = {
       { label: "执行部", value: "execution" }, { label: "宣传部", value: "publicity" },
     ], access: { create: adminField, update: adminField } },
     { name: "communityOffices", label: "社群任职与能力", type: "array",
+      admin: { description: "移除任职会保留已撤任记录；仅在任授权生效。更换社群请新增任职。" },
       access: { create: adminField, update: adminField }, fields: [
         { name: "game", label: "游戏社群（在任必选）", type: "relationship", relationTo: "games", maxDepth: 0 },
         { name: "status", label: "任职状态", type: "select", required: true, defaultValue: "active", options: [

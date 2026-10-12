@@ -49,8 +49,8 @@ async function run(
         kind,
         id,
         user,
-        ["manage", "entries", "stats", "export"].includes(mode || ""),
-        undefined, mode === "export" ? "export" : ["entries", "stats"].includes(mode || "") ? "view" : "edit",
+        ["manage", "view", "entries", "stats", "export"].includes(mode || ""),
+        undefined, mode === "export" ? "export" : ["view", "entries", "stats"].includes(mode || "") ? "view" : "edit",
       );
       if (
         request.headers.get("authorization")?.startsWith("JWT ") &&
