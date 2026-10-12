@@ -72,7 +72,10 @@ function text(value: unknown, label: string, limit: number) {
   if (
     typeof value !== "string" ||
     value.trim().length > limit ||
-    /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value)
+    [...value].some((character) => {
+      const code = character.charCodeAt(0);
+      return code < 32 && ![9, 10, 13].includes(code);
+    })
   )
     throw new APIError(label + "格式无效或超过" + limit + "字", 400);
   return value.trim();

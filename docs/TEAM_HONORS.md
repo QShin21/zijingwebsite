@@ -15,6 +15,20 @@
 
 正式签名到达前用荣誉专属隔离适配器默认拒绝成员写入，并以显式注入的合成权威做测试。接口替换后还需核心联合验证，隔离测试通过不能宣称完整成员权限通过。
 
+已只读核对核心合同 `567e359907418a2ebdb14833cfc5838901a09892` 的 `getActiveTeamMembership(payload, {teamID,userID,req})`。`src/lib/team-honor-core-adapter.ts` 接收该真实函数，每个引用均重新核验，并在同一事务以共享行锁锁住队伍、作者和 membership，退出/撤销/停用的行更新必须等待或使荣誉事务冲突。列出本人队伍只从核心集合读取本人 `member` 的不透明引用，再由核心函数决定资格，没有状态回退或第二名单。
+
+最终集成需在 `src/lib/team-honor-service.ts` 做下述局部替换，核心集合及类型必须先注册：
+
+```ts
+import { getActiveTeamMembership } from "./team-memberships";
+import { createCoreTeamHonorAuthority } from "./team-honor-core-adapter";
+export const teamHonorService = createTeamHonorService(
+  createCoreTeamHonorAuthority({ getActiveTeamMembership }),
+);
+```
+
+当前分支仍使用明确关闭写入的 `pendingHonorAuthority`；切勿把模块合成测试描述为真实成员权限联调通过。核心 `teamStatus=archived` 或旧 `archived=true` 撤下档案；核心的 resting 是否允许荣誉补录，完全沿用其当前有效成员判定。旧 unestablished 队伍的既有公开荣誉仍以历史来源展示，不赋予新投稿资格。
+
 ## 状态和公开规则
 
 草稿 → 待审核；待审可撤回；退回/拒绝附具体说明，作者修改后可重提。所有作者创建（包括同时任管理员的队员）均不自动批准。保存修改会撤下当前批准投影，回到草稿，重新提交和由他人批准后展示。隐藏记录保留作者、批准版本和历史，重新提交须重新审核。
@@ -37,4 +51,4 @@
 
 ## 验证状态
 
-正在实现；成员权威尚未联调。后续按提交切片补充实际执行的检查结果、SHA 和仍需集成的事项。
+隔离模型与数据库检查已通过 16 项（12 项数据库流程、4 项模型）。覆盖队员与非队员、旧 users.teams 无资格、跨队/跨社群、管理员队员自审阻断、骨干材料隔离、角色撤任/账号停用、离队后历史保留、撤回/审核与改稿/审核并发、重复批准、图片/MP4 字节替换及删除、隐藏/空档案、旧荣誉兼容及不复制风采。证据端点覆盖私有材料权限、公开批准版本、Range、HEAD 与 no-store。当前成员权威尚未联合验证，网页与迁移演练正在补充。
