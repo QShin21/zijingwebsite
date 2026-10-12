@@ -81,6 +81,12 @@
         "batches": 0,
         "users": 0
       }
+    },
+    "managementHydrationRetest": {
+      "tests": 2,
+      "result": "PASS",
+      "reportedDuration": "1.3m",
+      "reason": "wait for React-bound review form controls instead of global networkidle; same application source"
     }
   },
   "regressionCoverage": [
@@ -98,7 +104,8 @@
     "use stable textbox name prefixes for populated textareas",
     "allow development SSR no-cache header while requiring private/no-store on receipt API",
     "wait for completed management interactions and actual row status rather than an old success message",
-    "honor the existing questionnaire page boundary after a branch question"
+    "honor the existing questionnaire page boundary after a branch question",
+    "replace global networkidle with hydration of the rendered review controls; both affected status cases retested"
   ],
   "newMigration": false,
   "productionAccess": false,
@@ -113,5 +120,20 @@
   "remaining": [
     "await reviewed exact final team/profile/honor/miniapp commits before later integration; common dependencies and migration de-duplication inputs recorded in docs/TASKS.md"
   ],
-  "atUTC": "2026-10-12T07:22:00Z"
+  "atUTC": "2026-10-12T07:22:00Z",
+  "remoteAttempts": [
+    {
+      "sha": "1fb3d67c2fe2016e617f7e7c697481605ae684a9",
+      "runID": 38218181398,
+      "conclusion": "failure",
+      "unitDatabase": "PASS",
+      "e2e": {
+        "passed": 65,
+        "failed": 2,
+        "reportedDuration": "31.9m",
+        "failure": "Both final-state scenarios timed out waiting for global page networkidle before interaction. No application assertion failed in those scenarios."
+      },
+      "build": "not run after E2E failure"
+    }
+  ]
 }

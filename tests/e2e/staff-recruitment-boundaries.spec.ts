@@ -48,6 +48,15 @@ async function login(page: Page, user: User) {
   await page.goto("/login"); await page.getByLabel("昵称或邮箱").fill(user.name); await page.getByLabel("密码", { exact: true }).fill(password);
   await page.getByRole("button", { name: "登录", exact: true }).click(); await expect(page).toHaveURL(/\/account$/);
 }
+async function managementFormReady(page: Page, application: number) {
+  // Editing prefilled textareas must wait until their form has hydrated.
+  await page.waitForFunction(id => {
+    const form = document.querySelector('[data-staff-application="' + id + '"] form');
+    if (!form) return false;
+    const controls = Array.from(form.querySelectorAll("textarea, button"));
+    return controls.length > 0 && controls.every(control => Object.keys(control).some(key => key.startsWith("__reactProps$")));
+  }, application);
+}
 async function apply(page: Page, batch: StaffBatch) {
   const info = await (await page.request.get(endpoint(batch), { headers: origin })).json();
   const response = await page.request.post(endpoint(batch), { headers: origin, data: { version: info.version, answers } });
@@ -136,7 +145,7 @@ for (const finalStatus of ["accepted", "rejected"] as const) test(finalStatus + 
     expect(unchanged.updatedAt).toBe(final.updatedAt); expect(unchanged.history).toEqual(final.history); expect(unchanged.feedback).toBe(final.feedback);
     await page.goto(path(batch)); await expect(page.getByRole("button", { name: "修改申请", exact: true })).toHaveCount(0); await expect(page.getByRole("button", { name: "撤回申请", exact: true })).toHaveCount(0);
     await manager.goto("/staff/manage?batch=" + batch.id);
-    await manager.waitForLoadState("networkidle");
+    await managementFormReady(manager, final.id);
     const row = manager.locator('[data-staff-application="' + final.id + '"]');
     await expect(row.getByRole("button", { name: "进入选拔", exact: true })).toBeDisabled();
     await expect(row.getByRole("button", { name: finalStatus === "accepted" ? "未录用" : "录用", exact: true })).toBeDisabled();
@@ -145,7 +154,7 @@ for (const finalStatus of ["accepted", "rejected"] as const) test(finalStatus + 
     await expect(row.getByRole("textbox", { name: /^本人可见反馈/ })).toHaveValue("");
     await row.getByRole("button", { name: "退回补充", exact: true }).click();
     await expect(manager.getByRole("status").filter({ hasText: "退回或未录用须说明原因" })).toBeVisible();
-    await manager.waitForLoadState("networkidle");
+    await managementFormReady(manager, final.id);
     await expect(row.getByRole("button", { name: "进入选拔", exact: true })).toBeDisabled();
     await row.getByRole("textbox", { name: /^本人可见反馈/ }).fill("请补充合成姓名，并重新提交资料");
     await row.getByRole("button", { name: "退回补充", exact: true }).click();
@@ -164,7 +173,7 @@ for (const finalStatus of ["accepted", "rejected"] as const) test(finalStatus + 
     expect(current.application.reviewNotes).toBeUndefined();
     expect(current.application.history).toEqual(expect.arrayContaining([expect.objectContaining({ from: finalStatus, to: "returned", feedback: "请补充合成姓名，并重新提交资料" })]));
     expect((await p.findByID({ collection: "users", id: member.id, overrideAccess: true })).roles).toEqual(["member"]);
-    await manager.reload(); await manager.waitForLoadState("networkidle"); await expect(row.getByRole("button", { name: "进入选拔", exact: true })).toBeEnabled();
+    await manager.reload(); await managementFormReady(manager, final.id); await expect(row.getByRole("button", { name: "进入选拔", exact: true })).toBeEnabled();
     await row.getByRole("button", { name: "进入选拔", exact: true }).click(); await expect(manager.getByRole("status").filter({ hasText: "申请处理结果已保存" })).toBeVisible();
     await expect(row.getByRole("heading", { name: /选拔处理中/ })).toBeVisible();
     const reviewing = await (await page.request.get(endpoint(batch), { headers: origin })).json(); expect(reviewing.application.status).toBe("reviewing");
