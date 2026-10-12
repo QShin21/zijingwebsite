@@ -18,32 +18,46 @@ Page({
     qr: '', savedQr: false, contactConsent: false, busy: false, imageBusy: false, formError: '', operationError: '', done: '' },
   ...actions,
   onLoad(options = {}) {
-    this._visible = true; this._identity = identity(); this._initialGame = options.game || '';
+    if (this._unsubscribe) this._unsubscribe();
+    this._disposed = false; this._visible = false; this._resumeRead = false; this._context = (this._context || 0) + 1; this.invalidate();
+    this._identity = identity(); this.resetPrivate(); this._initialGame = options.game || '';
     this.setData({ apply: options.apply === '1' });
     this._unsubscribe = session.subscribe(() => {
-      if (this._identity !== identity()) { this._identity = identity(); this.invalidate(); this.resetPrivate(); }
+      if (this._identity !== identity()) { this._identity = identity(); this._context = (this._context || 0) + 1; this._resumeRead = false; this.invalidate(); this.resetPrivate(); }
     });
   },
   onShow() {
     this._visible = true;
-    if (this._identity !== identity()) { this._identity = identity(); this.invalidate(); this.resetPrivate(); }
+    if (this._disposed) return;
+    if (this._identity !== identity()) { this._identity = identity(); this._context = (this._context || 0) + 1; this.invalidate(); this.resetPrivate(); }
     return this.load();
   },
   invalidate() { this._scope = (this._scope || 0) + 1; this._operation = (this._operation || 0) + 1; this._imageTicket = (this._imageTicket || 0) + 1; },
-  valid(scope) { return this._visible !== false && scope === (this._scope || 0) && this._identity === identity() && Boolean(identity()); },
+  valid(scope) { return !this._disposed && this._visible !== false && scope === (this._scope || 0) && this._identity === identity() && Boolean(identity()); },
+  beginWrite() { this._pendingWrite = true; return this._writeID = (this._writeID || 0) + 1; },
+  writeValid(context, actor, writeID) { return !this._disposed && context === this._context && actor === identity() && writeID === this._writeID; },
+  async finishWrite(writeID) {
+    if (writeID !== this._writeID) return;
+    this._pendingWrite = false;
+    if (this._disposed) return;
+    this.setData({ busy: false });
+    if (this._visible && this._resumeRead) { this._resumeRead = false; await this.load(); }
+  },
   resetPrivate() {
     this._qr = '';
     this.setData({ user: session.user(), needsLogin: !session.user(), loading: false, error: '', docs: [], page: 1, hasMore: false,
       games: [{ id: '', title: '申请新游戏社群' }], gamesLoading: false, gamesError: '', gameIndex: 0,
       apply: false, mode: 'submit', editId: '', revision: '', proposedGame: '', realName: '', phone: '', reason: '',
-      qr: '', savedQr: false, contactConsent: false, busy: false, imageBusy: false, formError: '', operationError: '', done: '' });
+      qr: '', savedQr: false, contactConsent: false, busy: Boolean(this._pendingWrite), imageBusy: false, formError: '', operationError: '', done: '' });
   },
-  onHide() { this._visible = false; this.invalidate(); this.setData({ loading: false, gamesLoading: false, busy: false, imageBusy: false }); },
-  onUnload() { this.onHide(); this._qr = ''; if (this._unsubscribe) this._unsubscribe(); },
+  onHide() { this._visible = false; this._resumeRead = false; this.invalidate(); this.setData({ loading: false, gamesLoading: false, busy: Boolean(this._pendingWrite), imageBusy: false }); },
+  onUnload() { this.onHide(); this._disposed = true; this._qr = ''; if (this._unsubscribe) this._unsubscribe(); },
   retry() { return this.load(); },
   onPullDownRefresh() { return this.load().finally(() => wx.stopPullDownRefresh()); },
   onReachBottom() { if (this.data.hasMore && !this.data.loading) return this.load(true); },
   async load(more = false) {
+    if (this._disposed || this._visible === false) return;
+    if (this._pendingWrite) { this._resumeRead = true; return; }
     if (more && (this.data.loading || !this.data.hasMore)) return;
     if (!protect(this)) { this.invalidate(); this.resetPrivate(); return; }
     const scope = this._scope || 0, ticket = this._loadTicket = (this._loadTicket || 0) + 1;
@@ -60,6 +74,8 @@ Page({
     if (!more && this.valid(scope)) await this.loadGames();
   },
   async loadGames() {
+    if (this._disposed || this._visible === false) return;
+    if (this._pendingWrite) { this._resumeRead = true; return; }
     if (this.data.gamesLoading || !identity()) return;
     const scope = this._scope || 0, ticket = this._gamesTicket = (this._gamesTicket || 0) + 1;
     this.setData({ gamesLoading: true, gamesError: '' });
@@ -106,7 +122,7 @@ Page({
     catch (cause) { if (this.valid(scope)) this.setData({ formError: cause.message }); }
   },
   async chooseQr() {
-    if (this.data.busy || this.data.imageBusy || !identity()) return;
+    if (this._disposed || this._visible === false || this._pendingWrite || this.data.busy || this.data.imageBusy || !identity()) return;
     const scope = this._scope || 0, ticket = this._imageTicket = (this._imageTicket || 0) + 1;
     this.setData({ imageBusy: true, formError: '' });
     try {
@@ -136,7 +152,7 @@ Page({
     if (action === 'edit') await this.loadSavedQr(doc.id, true);
   },
   async loadSavedQr(id, forEdit = false) {
-    if (this.data.imageBusy || !identity()) return;
+    if (this._disposed || this._visible === false || this._pendingWrite || this.data.imageBusy || !identity()) return;
     const scope = this._scope || 0, ticket = this._imageTicket = (this._imageTicket || 0) + 1;
     this.setData({ imageBusy: true });
     try {
@@ -157,13 +173,13 @@ Page({
   },
   inspectSaved() { if (this.data.editId) return this.loadSavedQr(this.data.editId, this.data.mode === 'edit'); },
   async submit() {
-    if (!identity() || this.data.busy || this.data.imageBusy) return;
+    if (!identity() || this._disposed || this._visible === false || this._pendingWrite || this.data.loading || this.data.busy || this.data.imageBusy) return;
     const mode = this.data.mode;
     if (mode !== 'submit') {
       const current = this.data.docs.find(doc => String(doc.id) === String(this.data.editId));
       if (!current || !current.actions[mode]) { this.setData({ formError: '申请已更新，请刷新回执后核对' }); return; }
     }
-    const scope = this._scope || 0, operation = this._operation = (this._operation || 0) + 1;
+    const context = this._context, actor = identity(), writeID = this.beginWrite();
     this.setData({ busy: true, formError: '', operationError: '', done: '' });
     try {
       const data = { action: mode, contactConsent: this.data.contactConsent === true,
@@ -177,33 +193,34 @@ Page({
           phone: this.data.phone.trim(), reason: this.data.reason.trim() });
       }
       const result = await http.request('/api/miniapp/community/applications', { method: 'POST', required: true, data });
-      if (!this.valid(scope) || operation !== this._operation) return;
+      if (!this.writeValid(context, actor, writeID)) return;
       if (!result || !result.application) throw new Error('保存结果暂不可用，请刷新回执核对');
-      const saved = decorate(result.application);
+      const saved = decorate({ ...result.application, actions: {} });
       this.setData({ docs: [saved, ...this.data.docs.filter(doc => String(doc.id) !== String(saved.id))] });
       this._qr = '';
       this.setData({ apply: false, mode: 'submit', editId: '', revision: '', proposedGame: '', realName: '', phone: '', reason: '', qr: '',
         savedQr: false, contactConsent: false, done: mode === 'card' ? '名片与展示设置已保存' : '申请已提交，请在回执中查看状态和处理意见' });
       await this.load();
-    } catch (cause) { if (this.valid(scope) && operation === this._operation) this.setData({ formError: cause.message }); }
-    finally { if (this.valid(scope) && operation === this._operation) this.setData({ busy: false }); }
+    } catch (cause) { if (this.writeValid(context, actor, writeID)) this.setData({ formError: cause.message }); }
+    finally { await this.finishWrite(writeID); }
   },
   async withdraw(event) {
-    if (!identity() || this.data.busy || this.data.imageBusy) return;
+    if (!identity() || this._disposed || this._visible === false || this._pendingWrite || this.data.loading || this.data.busy || this.data.imageBusy) return;
     const doc = this.data.docs.find(value => String(value.id) === String(event.currentTarget.dataset.id));
     if (!doc || !doc.actions.withdraw) return;
     const scope = this._scope || 0, operation = this._operation = (this._operation || 0) + 1;
+    const context = this._context, actor = identity(), writeID = this.beginWrite();
     this.setData({ busy: true, operationError: '', done: '' });
     try {
       if (!await confirm('撤回网站申请', '确认撤回这份申请？后续可从同一回执修改并重新提交。')) return;
       if (!this.valid(scope) || operation !== this._operation) return;
       const result = await http.request('/api/miniapp/community/applications', { method: 'POST', required: true,
         data: { action: 'withdraw', id: doc.id, revision: doc.updatedAt } });
-      if (!this.valid(scope) || operation !== this._operation) return;
+      if (!this.writeValid(context, actor, writeID)) return;
       if (!result || !result.application) throw new Error('撤回结果暂不可用，请刷新回执核对');
-      this.setData({ docs: this.data.docs.map(value => String(value.id) === String(doc.id) ? decorate(result.application) : value), done: '网站申请已撤回' });
+      this.setData({ docs: this.data.docs.map(value => String(value.id) === String(doc.id) ? decorate({ ...result.application, actions: {} }) : value), done: '网站申请已撤回' });
       await this.load();
-    } catch (cause) { if (this.valid(scope) && operation === this._operation) this.setData({ operationError: cause.message }); }
-    finally { if (this.valid(scope) && operation === this._operation) this.setData({ busy: false }); }
+    } catch (cause) { if (this.writeValid(context, actor, writeID)) this.setData({ operationError: cause.message }); }
+    finally { await this.finishWrite(writeID); }
   },
 });
