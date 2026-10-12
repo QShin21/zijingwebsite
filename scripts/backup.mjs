@@ -1,10 +1,136 @@
-import "dotenv/config";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import pg from "pg";
 import os from 'node:os';
+const hash = (data) => createHash("sha256").update(data).digest("hex");
+const missing = error => { if (error.code === "ENOENT") return null; throw error; };
+export async function files(dir, root = dir) {
+  const info = await fs.lstat(dir).catch(missing);
+  if (!info) return {};
+  if (!info.isDirectory()) throw new Error("备份媒体路径必须为实际目录，不能使用符号链接");
+  const output = {};
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  for (const e of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+    const f = path.join(dir, e.name);
+    if (e.isDirectory()) Object.assign(output, await files(f, root));
+    else if (e.isFile()) output[path.relative(root, f).replaceAll("\\", "/")] = hash(await fs.readFile(f));
+    else throw new Error("备份媒体中存在符号链接或非普通文件，无法确认完整性");
+  }
+  return output;
+}
+const reservations = localVideos => Object.fromEntries(Object.entries(localVideos)
+  .filter(([name]) => name.startsWith(".team-honor-reserved/"))
+  .map(([name, value]) => [name.slice(".team-honor-reserved/".length), value]));
+const sameFiles = (actual, expected) => Object.keys(actual).length === Object.keys(expected).length &&
+  Object.entries(actual).every(([name, value]) => expected[name] === value);
+export async function mediaSnapshot(mediaSource, mediaDirectory) {
+  const media = await files(mediaSource);
+  const localVideos = await files(path.join(mediaDirectory, ".showcase-videos"));
+  const localHonorVideos = await files(path.join(mediaDirectory, ".team-honor-videos"));
+  return { media, localVideos, localHonorVideos, honorVideoReservations: reservations(localVideos) };
+}
+async function copyDirectory(sourceDirectory, destination) {
+  const info = await fs.lstat(sourceDirectory).catch(missing);
+  if (!info) { await fs.mkdir(destination, { recursive: true, mode: 0o700 }); return; }
+  if (!info.isDirectory()) throw new Error("备份媒体路径必须为实际目录");
+  await fs.cp(sourceDirectory, destination, { recursive: true, errorOnExist: true, force: false });
+}
+export async function copyBackupMedia(directory, mediaSource, mediaDirectory, snapshot) {
+  await copyDirectory(mediaSource, path.join(directory, "media"));
+  await copyDirectory(path.join(mediaDirectory, ".showcase-videos"), path.join(directory, "local-videos"));
+  await copyDirectory(path.join(mediaDirectory, ".team-honor-videos"), path.join(directory, "local-honor-videos"));
+  await verifyBackupMedia(directory, { version: 3, ...snapshot });
+}
+function checkedMap(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value) ||
+    Object.entries(value).some(([name, digest]) => !name || name.startsWith("/") ||
+      name.split("/").some(part => !part || part === "." || part === "..") ||
+      typeof digest !== "string" || !/^[a-f0-9]{64}$/.test(digest)))
+    throw new Error("媒体备份 manifest 缺失或哈希格式无效");
+  return value;
+}
+export function assertMediaManifest(manifest) {
+  const version = manifest.version ?? 1;
+  if (![1, 2, 3].includes(version)) throw new Error("不支持的媒体备份 manifest 版本");
+  checkedMap(manifest.media);
+  if (version >= 2) checkedMap(manifest.localVideos);
+  for (const [field, folder] of [["localVideos", ".showcase-videos"], ["localHonorVideos", ".team-honor-videos"]]) {
+    if ((field === "localVideos" && version >= 2) || version === 3) {
+      checkedMap(manifest[field]);
+      for (const [name, digest] of Object.entries(manifest[field])) {
+        const mirrored = manifest.media[folder + "/" + name];
+        if (mirrored && mirrored !== digest) throw new Error("媒体镜像与本地视频 manifest 内容冲突");
+      }
+    }
+  }
+  if (version === 3) {
+    checkedMap(manifest.localHonorVideos);
+    checkedMap(manifest.honorVideoReservations);
+    if (!sameFiles(reservations(manifest.localVideos), manifest.honorVideoReservations))
+      throw new Error("永久荣誉隔离标记与本地视频 manifest 不一致");
+  } else {
+    const honorTable = manifest.tables?.team_honor_records;
+    if (honorTable && (!Number.isSafeInteger(honorTable.count) || honorTable.count < 0))
+      throw new Error("旧备份荣誉记录计数无效");
+    const honorMedia = Object.keys(manifest.media).some(name => name.startsWith(".team-honor-videos/") ||
+      name.startsWith(".showcase-videos/.team-honor-reserved/"));
+    if (honorTable?.count || honorMedia || Object.keys(reservations(manifest.localVideos || {})).length)
+      throw new Error("旧 manifest 未确认荣誉私有视频与永久隔离标记完整性，请使用 v3 备份");
+  }
+  return version;
+}
+async function requiredFiles(directory) {
+  const info = await fs.lstat(directory);
+  if (!info.isDirectory()) throw new Error("备份媒体目录无效");
+  return files(directory);
+}
+export async function verifyBackupMedia(directory, manifest) {
+  const version = assertMediaManifest(manifest);
+  if (!sameFiles(await requiredFiles(path.join(directory, "media")), manifest.media))
+    throw new Error("媒体备份哈希校验失败");
+  if (version >= 2 && !sameFiles(await requiredFiles(path.join(directory, "local-videos")), manifest.localVideos))
+    throw new Error("本地视频与永久隔离标记备份哈希校验失败");
+  if (version === 3) {
+    if (!sameFiles(await requiredFiles(path.join(directory, "local-honor-videos")), manifest.localHonorVideos))
+      throw new Error("私有荣誉视频备份哈希校验失败");
+  } else if (Object.keys(await files(path.join(directory, "local-honor-videos"))).length ||
+    Object.keys(await files(path.join(directory, "local-videos", ".team-honor-reserved"))).length)
+    throw new Error("旧 manifest 未包含私有荣誉视频或永久隔离标记，不能确认完整性");
+  return version;
+}
+export async function restoreBackupMedia(directory, mediaDirectory, manifest) {
+  const version = await verifyBackupMedia(directory, manifest);
+  await fs.cp(path.join(directory, "media"), mediaDirectory, { recursive: true, errorOnExist: true, force: false });
+  const expected = { ...manifest.media };
+  async function restoreComponent(folder, target, recorded) {
+    const destination = path.join(mediaDirectory, target), existing = await files(destination);
+    if (Object.entries(existing).some(([name, digest]) => recorded[name] !== digest))
+      throw new Error("媒体镜像与本地私有视频备份冲突，停止恢复");
+    for (const [name, digest] of Object.entries(recorded)) {
+      const key = target + "/" + name;
+      if (expected[key] && expected[key] !== digest) throw new Error("媒体备份 manifest 内容冲突");
+      expected[key] = digest;
+    }
+    await fs.cp(path.join(directory, folder), destination, { recursive: true, force: false });
+    if (!sameFiles(await files(destination), recorded)) throw new Error("恢复后本地视频哈希不一致");
+  }
+  if (version >= 2) await restoreComponent("local-videos", ".showcase-videos", manifest.localVideos);
+  if (version === 3) {
+    await restoreComponent("local-honor-videos", ".team-honor-videos", manifest.localHonorVideos);
+    if (!sameFiles(await files(path.join(mediaDirectory, ".showcase-videos", ".team-honor-reserved")), manifest.honorVideoReservations))
+      throw new Error("恢复后永久荣誉隔离标记哈希不一致");
+  }
+  if (!sameFiles(await files(mediaDirectory), expected)) throw new Error("恢复后媒体哈希不一致");
+  return { mediaDirectory: path.resolve(mediaDirectory), localVideoFiles: Object.keys(manifest.localVideos || {}).length,
+    localHonorVideoFiles: Object.keys(manifest.localHonorVideos || {}).length,
+    honorVideoReservations: Object.keys(manifest.honorVideoReservations || {}).length, honorStorageVerified: version === 3 };
+}
+
+async function main() {
+await import("dotenv/config");
 const base = path.resolve(process.env.BACKUP_DEST || "backups");
 const command = process.argv[2] || "create";
 const source = new URL(process.env.DATABASE_URL);
@@ -29,21 +155,6 @@ function run(name, args, url) {
     windowsHide: true,
     stdio: ["ignore", "pipe", "pipe"],
   });
-}
-const hash = (data) => createHash("sha256").update(data).digest("hex");
-async function files(dir, root = dir) {
-  const output = {};
-  for (const e of await fs
-    .readdir(dir, { withFileTypes: true })
-    .catch(error => { if (error.code === "ENOENT") return []; throw error; })) {
-    const f = path.join(dir, e.name);
-    if (e.isDirectory()) Object.assign(output, await files(f, root));
-    else if (e.isFile())
-      output[path.relative(root, f).replaceAll("\\", "/")] = hash(
-        await fs.readFile(f),
-      );
-  }
-  return output;
 }
 async function census(url) {
   const client = new pg.Client({ connectionString: url.toString() });
@@ -89,9 +200,8 @@ if (command === "create") {
   );
   await fs.mkdir(media, { recursive: true });
   const before = await census(source);
-  const mediaBefore = await files(media);
-  const localVideoDir = path.resolve(process.env.MEDIA_DIR || "media", ".showcase-videos");
-  const localVideosBefore = await files(localVideoDir);
+  const mediaDirectory = path.resolve(process.env.MEDIA_DIR || "media");
+  const mediaBefore = await mediaSnapshot(media, mediaDirectory);
   run(
     "pg_dump",
     [
@@ -103,23 +213,18 @@ if (command === "create") {
     ],
     source,
   );
-  await fs.cp(media, path.join(directory, "media"), { recursive: true });
-  const videoBackup = path.join(directory, "local-videos");
-  if (await fs.stat(localVideoDir).catch(error => { if (error.code === "ENOENT") return null; throw error; })) await fs.cp(localVideoDir, videoBackup, { recursive: true });
-  else await fs.mkdir(videoBackup);
+  await copyBackupMedia(directory, media, mediaDirectory, mediaBefore);
   const after = await census(source);
   if (
     JSON.stringify(before) !== JSON.stringify(after) ||
-    JSON.stringify(mediaBefore) !== JSON.stringify(await files(media)) ||
-    JSON.stringify(localVideosBefore) !== JSON.stringify(await files(localVideoDir))
+    JSON.stringify(mediaBefore) !== JSON.stringify(await mediaSnapshot(media, mediaDirectory))
   )
     throw new Error("备份期间发生写入；暂停内容维护后重试，不使用此不完整备份");
   const manifest = {
-    version: 2,
+    version: 3,
     createdAt: new Date().toISOString(),
     tables: before,
-    media: mediaBefore,
-    localVideos: localVideosBefore,
+    ...mediaBefore,
     databaseSHA256: hash(
       await fs.readFile(path.join(directory, "database.dump")),
     ),
@@ -174,6 +279,7 @@ if (command === "create") {
     manifest.databaseSHA256
   )
     throw new Error("数据库备份校验失败");
+  await verifyBackupMedia(directory, manifest);
   const target = new URL(process.env.RESTORE_DATABASE_URL || source.toString());
   target.pathname = "/zijing_restore_" + Date.now();
   if (!["127.0.0.1", "localhost", "db"].includes(target.hostname))
@@ -201,28 +307,14 @@ if (command === "create") {
   if (JSON.stringify(actual) !== JSON.stringify(manifest.tables))
     throw new Error("恢复后记录计数或内容哈希不一致");
   const restoredMedia = path.resolve(".data", name, "media");
-  await fs.cp(path.join(directory, "media"), restoredMedia, {
-    recursive: true,
-    errorOnExist: true,
-    force: false,
-  });
-  if (
-    JSON.stringify(await files(restoredMedia)) !==
-    JSON.stringify(manifest.media)
-  )
-    throw new Error("恢复后媒体校验失败");
-  const restoredVideos = path.resolve(".data", name, "local-videos");
-  if (manifest.version >= 2) {
-    await fs.cp(path.join(directory, "local-videos"), restoredVideos, { recursive: true, errorOnExist: true, force: false });
-    if (JSON.stringify(await files(restoredVideos)) !== JSON.stringify(manifest.localVideos)) throw new Error("恢复后本地视频校验失败");
-  }
+  const restored = await restoreBackupMedia(directory, restoredMedia, manifest);
   const report = {
     verifiedAt: new Date().toISOString(),
     database: name,
     tables: Object.keys(actual).length,
     records: Object.values(actual).reduce((n, v) => n + v.count, 0),
     mediaFiles: Object.keys(manifest.media).length,
-    localVideoFiles: Object.keys(manifest.localVideos || {}).length,
+    ...restored,
     result: "PASS",
     sourceUntouched: true,
   };
@@ -233,3 +325,5 @@ if (command === "create") {
   );
   console.log(JSON.stringify(report));
 } else throw new Error("Use create or verify <backup directory>");
+}
+if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) await main();
