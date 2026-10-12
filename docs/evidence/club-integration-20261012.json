@@ -135,13 +135,53 @@
     }
   },
   "exactIntegratedCI": {
-    "status": "pending",
-    "resultMustBeResolvedAfterPush": true
+    "status": "pending-after-test-contract-correction",
+    "attempts": [
+      {
+        "headSHA": "672f4dd88cd8088e0f44dad55144453f02847434",
+        "runID": 38230468219,
+        "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38230468219",
+        "conclusion": "failure",
+        "unitPassed": 518,
+        "unitFailed": 1,
+        "failedCase": "tests/team-profiles-db.test.ts: same initial content parallel save",
+        "browserAndBuild": "not-run",
+        "error": "explicit public serializable/deadlock conflict 409 after the documented single automatic retry"
+      }
+    ]
   },
   "remainingUnverified": [
     "honors module awaiting approved frozen commit",
     "native subsequent team/profile/honor adapter under development",
     "official WeChat compilation, simulator, real device and platform settings"
   ],
-  "forbiddenActionsPerformed": []
+  "forbiddenActionsPerformed": [],
+  "concurrencyTestCorrection": {
+    "applicationChanged": false,
+    "automaticRetriesExpanded": false,
+    "waitsForAllOriginalTransactions": true,
+    "sameOriginalMembershipVersionReplayed": true,
+    "acceptedErrors": {
+      "status": 409,
+      "isPublic": true,
+      "message": "记录已更新，请刷新后重试"
+    },
+    "mustHaveOriginalSuccess": true,
+    "checksUniqueRowBeforeReplay": true,
+    "replayMustKeepExactStoredRow": true,
+    "defaultHiddenAndRevisionOne": true,
+    "oldPeriodRevocationAndDifferentContentTestsUnchanged": true,
+    "originalCaseAdditionalLocalPasses": 5,
+    "correctedTargetedTestsPassed": 21,
+    "correctedTypeAndLint": "success"
+  },
+  "finalReadOnlySchemaCheck": {
+    "tables": 68,
+    "schemaMatchesCommittedSnapshot": true,
+    "coreMigrationOccurrences": 1,
+    "profileMigrationOccurrences": 1,
+    "remainingIntegrationActors": 0,
+    "remainingIntegrationGames": 0,
+    "remainingIntegrationBatches": 0
+  }
 }

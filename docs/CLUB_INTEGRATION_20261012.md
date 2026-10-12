@@ -24,3 +24,5 @@
 源码 `8d69b2a` 的隔离优化生产构建已通过（从 git archive 建立单独目录，使用已安装的 Next CLI）；这是编译验收。完整集成 SHA 的远端 CI 终态在证据和交付回复核实，未结束不计成功。荣誉未获准，未合入；原生后续队伍/简介/荣誉适配、微信官方编译、模拟器、真机和平台配置仍未验收。本次不作正式发布声明。
 
 证据：[集成记录](evidence/club-integration-20261012.json)、[组合迁移](evidence/club-integration-profiles-migration-20261012.json)。实际脚本为 `team-core-migration-check.ts`、`team-profiles-migration-check.ts`、`team-core-schema.ts`；网页回归为 `club-integration.spec.ts` 及现有 staff/core/profile/club 用例。
+
+远端首轮 `672f4dd` 的 [38230468219](https://github.com/QShin21/zijingwebsite/actions/runs/38230468219) 单元阶段为518通过/1失败，网页及构建未运行。失败为简介同内容首次并发保存超过既定单次自动重试后返回明确事务409，原Promise.all又会提前退出而留另一事务在途；本地原用例额外五次均通过。修正测试等待全部事务，只允许精确公开事务冲突409，固定原周期凭据/空revision直接重放，在重放前后核对唯一原行、隐藏、revision=1与完整内容不变；其他409/403/5xx仍失败，旧周期/撤权/不同内容并发断言保持。无需扩大重试或改变业务权限。修改后21项定向及类型/Lint通过，完整最终CI另核。

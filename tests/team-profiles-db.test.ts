@@ -236,11 +236,27 @@ describe.sequential("真实核心成员服务 + 简介数据库（仅合成账�
     ).rejects.toThrow("入队资格");
   });
   it("首次默认隐藏，同一关系一个简介且名单不泄露隐藏资料", async () => {
-    const [saved, duplicate] = await Promise.all([
-      saveTeamProfile(p, f.member, f.first.id, null, draft()),
-      saveTeamProfile(p, f.member, f.first.id, null, draft()),
+    const version = (await readTeamProfiles(p, f.member, f.first.id)).own.membershipVersion;
+    const request = () => submitProfile(p, f.member, f.first.id, null, draft(), version);
+    const results = await Promise.allSettled([
+      request(), request(),
     ]);
-    expect(duplicate).toEqual(saved);
+    const successful = results.find(result => result.status === "fulfilled");
+    expect(successful).toBeDefined();
+    if (!successful || successful.status !== "fulfilled") throw new Error("No initial save committed");
+    const saved = successful.value;
+    for (const result of results) {
+      if (result.status === "fulfilled") expect(result.value).toEqual(saved);
+      else expect(result.reason).toMatchObject({ status: 409, isPublic: true, message: "记录已更新，请刷新后重试" });
+    }
+    const persisted = async () => (await p.find({ collection: "team-member-profiles", overrideAccess: true, depth: 0,
+      pagination: false, where: { membership: { equals: f.membership.id } } })).docs;
+    const before = await persisted();
+    expect(before).toHaveLength(1); expect(before[0]).toMatchObject({ revision: 1, visible: false });
+    // Explicitly replay the same request after both transactions settle. Do not
+    // refresh its admission token/revision or silently retry other 409 errors.
+    expect(await request()).toEqual(saved); expect(await request()).toEqual(saved);
+    expect(await persisted()).toEqual(before);
     expect(saved.visible).toBe(false);
     expect(saved.revision).toBe(1);
     const view = await readTeamProfiles(p, f.viewer, f.first.id);
