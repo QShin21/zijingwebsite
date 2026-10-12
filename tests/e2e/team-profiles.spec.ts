@@ -113,13 +113,11 @@ test("本人上传头像、预览、单次保存、修改/取消与隐藏；桌�
   })
     .png()
     .toBuffer();
-  await panel(page)
-    .getByLabel("头像（可选）", { exact: true })
-    .setInputFiles({
-      name: "synthetic-avatar.png",
-      mimeType: "image/png",
-      buffer: picture,
-    });
+  await panel(page).getByLabel("头像（可选）", { exact: true }).setInputFiles({
+    name: "synthetic-avatar.png",
+    mimeType: "image/png",
+    buffer: picture,
+  });
   await expect(
     panel(page).getByRole("button", { name: "移除头像", exact: true }),
   ).toBeVisible();
@@ -142,6 +140,10 @@ test("本人上传头像、预览、单次保存、修改/取消与隐藏；桌�
     (await new AxeBuilder({ page }).include("#team-members").analyze())
       .violations,
   ).toEqual([]);
+  await page.screenshot({
+    path: ".data/team-profiles-preview-1440.png",
+    fullPage: true,
+  });
   let writes = 0;
   await page.route(`**/api/team-profiles/${f.first.id}`, async (route) => {
     if (route.request().method() === "PUT") {
@@ -370,13 +372,15 @@ test("两个页面旧版本冲突保留输入；真实接口拒绝 XSS、敏感�
         })
       ).status(),
     ).toBe(400);
+  const crossSite = await page.request.put(endpoint, {
+    headers: { Origin: "https://untrusted.example" },
+    data: { revision: 2, profile },
+  });
+  // Payload can reject the origin before authenticating the cookie (401); our
+  // route rejects authenticated cross-site requests with 403. Both deny writes.
+  expect([401, 403]).toContain(crossSite.status());
   expect(
-    (
-      await page.request.put(endpoint, {
-        headers: { Origin: "https://untrusted.example" },
-        data: { revision: 2, profile },
-      })
-    ).status(),
-  ).toBe(403);
+    (await (await page.request.get(endpoint)).json()).own.profile.displayName,
+  ).toBe("已保存的新昵称");
   await second.close();
 });
