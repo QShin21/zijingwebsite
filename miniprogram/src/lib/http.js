@@ -43,15 +43,55 @@ function request(path, options = {}) {
     });
   });
 }
-function download(path) {
-  const credential = session.token();
-  if (!credential) return Promise.reject(new Error('请先登录'));
-  return new Promise((resolve, reject) => wx.downloadFile({
-    url: url(path), header: { Authorization: `JWT ${credential}` },
-    success(result) {
-      if (result.statusCode === 200) resolve(result.tempFilePath);
-      else reject(new Error('图片暂不可用'));
-    }, fail() { reject(new Error('图片加载失败')); },
-  }));
+function taskCallbacks(task, options) {
+  try { if (typeof options.onTask === 'function') options.onTask(task); } catch { /* Observers must not lose an in-flight write acknowledgement. */ }
+  if (task && typeof task.onProgressUpdate === 'function' && typeof options.onProgress === 'function') task.onProgressUpdate(value => {
+    try { options.onProgress(value); } catch { /* UI observers do not change the transport outcome. */ }
+  });
 }
-module.exports = { request, download, url, message };
+function upload(path, filePath, options = {}) {
+  const credential = session.token();
+  if (!credential) return Promise.reject(Object.assign(new Error('请先登录'), { status: 401 }));
+  return new Promise((resolve, reject) => {
+    // The SDK supplies the multipart boundary; a JSON Content-Type would corrupt this body.
+    const task = wx.uploadFile({
+      url: url(path), filePath, name: options.name || 'file', formData: options.formData || {},
+      timeout: options.timeout || 60000, header: { Authorization: `JWT ${credential}` },
+      success(response) {
+        let data;
+        try { data = JSON.parse(response.data); } catch {
+          if (response.statusCode === 401 && session.token() === credential) session.clear();
+          reject(Object.assign(new Error(response.statusCode >= 400 ? message(null, response.statusCode) : '上传结果暂不可用，请重新加载核对'), { status: response.statusCode }));
+          return;
+        }
+        if (response.statusCode >= 200 && response.statusCode < 300) resolve(options.raw ? data : brand.display(data));
+        else {
+          if (response.statusCode === 401 && session.token() === credential) session.clear();
+          reject(Object.assign(new Error(message(data, response.statusCode)), { status: response.statusCode }));
+        }
+      },
+      fail() { reject(new Error('上传未完成，请检查网络并重新加载核对')); },
+    });
+    taskCallbacks(task, options);
+  });
+}
+function download(path, options = {}) {
+  const credential = session.token();
+  if (!credential) return Promise.reject(Object.assign(new Error('请先登录'), { status: 401 }));
+  return new Promise((resolve, reject) => {
+    const task = wx.downloadFile({
+      url: url(path), header: { Authorization: `JWT ${credential}` },
+      ...(options.filePath ? { filePath: options.filePath } : {}),
+      ...(options.timeout ? { timeout: options.timeout } : {}),
+      success(result) {
+        if (result.statusCode === 200) resolve(options.filePath ? result.filePath : result.tempFilePath);
+        else {
+          if (result.statusCode === 401 && session.token() === credential) session.clear();
+          reject(Object.assign(new Error('图片暂不可用'), { status: result.statusCode }));
+        }
+      }, fail() { reject(new Error('图片加载失败')); },
+    });
+    taskCallbacks(task, options);
+  });
+}
+module.exports = { request, upload, download, url, message };
