@@ -19,29 +19,43 @@ Page({
     clubLoading: false, clubError: '', staffBatches: [], promotions: [] },
   ...actions,
   onLoad(options = {}) {
-    this._options = options; this._visible = true; this._identity = identity();
-    if (options.area === 'showcase' || options.area === 'updates') this.setData({ area: options.area });
+    if (this._unsubscribe) this._unsubscribe();
+    this._disposed = false; this._visible = false; this._resumeRead = false; this._context = (this._context || 0) + 1; this.invalidate();
+    this._identity = identity(); this.resetPrivate(); this._options = options;
+    this.setData({ area: options.area === 'showcase' || options.area === 'updates' ? options.area : 'contacts' });
     this._unsubscribe = session.subscribe(() => {
-      if (this._identity !== identity()) { this._identity = identity(); this.invalidate(); this.resetPrivate(); }
+      if (this._identity !== identity()) { this._identity = identity(); this._context = (this._context || 0) + 1; this._resumeRead = false; this.invalidate(); this.resetPrivate(); }
     });
   },
   invalidate() { this._scope = (this._scope || 0) + 1; this._joinOperation = (this._joinOperation || 0) + 1; },
-  valid(scope) { return this._visible !== false && scope === (this._scope || 0) && this._identity === identity() && Boolean(identity()); },
+  valid(scope) { return !this._disposed && this._visible !== false && scope === (this._scope || 0) && this._identity === identity() && Boolean(identity()); },
+  beginWrite() { this._pendingWrite = true; return this._writeID = (this._writeID || 0) + 1; },
+  writeValid(context, actor, writeID) { return !this._disposed && context === this._context && actor === identity() && writeID === this._writeID; },
+  async finishWrite(writeID) {
+    if (writeID !== this._writeID) return;
+    this._pendingWrite = false;
+    if (this._disposed) return;
+    this.setData({ joinBusy: false });
+    if (this._visible && this._resumeRead) { this._resumeRead = false; await this.load(); }
+  },
   resetPrivate() { this.setData({ needsLogin: !session.user(), loading: false, error: '', game: {}, docs: [], nodes: [], page: 1,
     hasMore: false, loadingMore: false, contentError: '', contacts: [], contactsLoading: false, contactsError: '',
-    join: null, joinActions: {}, joinLoading: false, joinError: '', joinBusy: false, joinDone: '', canHandle: false,
+    join: null, joinActions: {}, joinLoading: false, joinError: '', joinBusy: Boolean(this._pendingWrite), joinDone: '', canHandle: false,
     clubLoading: false, clubError: '', staffBatches: [], promotions: [] }); },
   onShow() {
     this._visible = true;
-    if (this._identity !== identity()) { this._identity = identity(); this.invalidate(); this.resetPrivate(); }
+    if (this._disposed) return;
+    if (this._identity !== identity()) { this._identity = identity(); this._context = (this._context || 0) + 1; this.invalidate(); this.resetPrivate(); }
     return this.load();
   },
-  onHide() { this._visible = false; this.invalidate(); this.setData({ loading: false, loadingMore: false, contactsLoading: false, joinLoading: false, joinBusy: false, clubLoading: false }); },
-  onUnload() { this.onHide(); if (this._unsubscribe) this._unsubscribe(); },
+  onHide() { this._visible = false; this._resumeRead = false; this.invalidate(); this.setData({ loading: false, loadingMore: false, contactsLoading: false, joinLoading: false, joinBusy: Boolean(this._pendingWrite), clubLoading: false }); },
+  onUnload() { this.onHide(); this._disposed = true; if (this._unsubscribe) this._unsubscribe(); },
   retry() { return this.load(); },
   onPullDownRefresh() { return this.load().finally(() => wx.stopPullDownRefresh()); },
   onReachBottom() { if (this.data.hasMore && !this.data.loadingMore) return this.loadArea(true); },
   async load() {
+    if (this._disposed || this._visible === false) return;
+    if (this._pendingWrite) { this._resumeRead = true; return; }
     if (!protect(this)) { this.invalidate(); this.resetPrivate(); return; }
     const scope = this._scope || 0, ticket = this._loadTicket = (this._loadTicket || 0) + 1;
     this.setData({ loading: true, error: '' });
@@ -55,6 +69,8 @@ Page({
     } catch (cause) { if (this.valid(scope) && ticket === this._loadTicket) this.setData({ loading: false, error: cause.message }); }
   },
   async retryContacts() {
+    if (this._disposed || this._visible === false) return;
+    if (this._pendingWrite) { this._resumeRead = true; return; }
     if (!identity() || !this.data.game.id || this.data.contactsLoading) return;
     const scope = this._scope || 0, game = this.data.game, ticket = this._contactsTicket = (this._contactsTicket || 0) + 1;
     this.setData({ contactsLoading: true, contactsError: '' });
@@ -72,6 +88,8 @@ Page({
     } catch (cause) { if (this.valid(scope) && ticket === this._contactsTicket) this.setData({ contactsLoading: false, contactsError: cause.message }); }
   },
   async retryJoin() {
+    if (this._disposed || this._visible === false) return;
+    if (this._pendingWrite) { this._resumeRead = true; return; }
     if (!identity() || !this.data.game.id || this.data.joinLoading) return;
     const scope = this._scope || 0, ticket = this._joinTicket = (this._joinTicket || 0) + 1;
     this.setData({ joinLoading: true, joinError: '' });
@@ -83,6 +101,8 @@ Page({
     } catch (cause) { if (this.valid(scope) && ticket === this._joinTicket) this.setData({ joinLoading: false, joinError: cause.message, ...(cause.status === 403 ? { joinActions: {}, canHandle: false, join: null } : {}) }); }
   },
   async retryClub() {
+    if (this._disposed || this._visible === false) return;
+    if (this._pendingWrite) { this._resumeRead = true; return; }
     if (!identity() || this.data.clubLoading) return;
     const scope = this._scope || 0, ticket = this._clubTicket = (this._clubTicket || 0) + 1;
     this.setData({ clubLoading: true, clubError: '' });
@@ -96,6 +116,8 @@ Page({
     } catch (cause) { if (this.valid(scope) && ticket === this._clubTicket) this.setData({ clubLoading: false, clubError: cause.message }); }
   },
   async loadArea(more = false) {
+    if (this._disposed || this._visible === false) return;
+    if (this._pendingWrite) { this._resumeRead = true; return; }
     if (!identity() || !this.data.game.id || more && (this.data.loadingMore || !this.data.hasMore)) return;
     if (this.data.area === 'contacts') { this._areaTicket = (this._areaTicket || 0) + 1; this.setData({ loadingMore: false, hasMore: false, contentError: '' }); return; }
     const scope = this._scope || 0, ticket = this._areaTicket = (this._areaTicket || 0) + 1;
@@ -122,6 +144,10 @@ Page({
     } catch (cause) { if (this.valid(scope) && ticket === this._areaTicket) this.setData({ loadingMore: false, contentError: cause.message }); }
   },
   retryContent() { return this.loadArea(); },
+  honorWorkspace() {
+    if (this._visible && !this._disposed && !this._pendingWrite && !this.data.loading && this.data.game.id)
+      navigation.go('team-honor-workspace', { game: this.data.game.id });
+  },
   area(event) {
     const area = event.currentTarget.dataset.area;
     if (area === this.data.area || area !== 'contacts' && !areas[area]) return;
@@ -130,11 +156,12 @@ Page({
     return this.loadArea();
   },
   async joinAction(event) {
-    if (!identity() || this.data.joinBusy || this.data.joinLoading) return;
+    if (!identity() || this._disposed || this._visible === false || this._pendingWrite || this.data.loading || this.data.joinBusy || this.data.joinLoading) return;
     const { action, contact } = event.currentTarget.dataset;
     if (!['request', 'reportFriend', 'withdraw'].includes(action) || !this.data.joinActions[action]) return;
     if (action === 'request' && !this.data.contacts.some(doc => String(doc.id) === String(contact) && doc.image)) return;
     const scope = this._scope || 0, operation = this._joinOperation = (this._joinOperation || 0) + 1;
+    const context = this._context, actor = identity(), writeID = this.beginWrite();
     const messages = { request: '记录站内加入意向后，请主动到微信添加管理员好友并等待人工拉群。',
       reportFriend: '仅在你已经到微信发送好友申请后报告。管理员还需核实好友并人工拉群。',
       withdraw: '确认撤回网站意向？微信好友或群成员情况需要到微信联系管理员处理。' };
@@ -146,12 +173,12 @@ Page({
       if (!answer || !this.valid(scope) || operation !== this._joinOperation) return;
       const result = await http.request(`/api/miniapp/community/${encodeURIComponent(this.data.game.id)}/join`, { required: true, method: 'POST', data: {
         action, ...(record ? { id: record.id, revision: record.updatedAt } : {}), ...(action === 'request' ? { contact } : {}) } });
-      if (!this.valid(scope) || operation !== this._joinOperation) return;
+      if (!this.writeValid(context, actor, writeID)) return;
       if (!result || !result.record) throw new Error('保存结果暂不可用，请刷新进度核对');
-      this.setData({ join: receipt(result.record), joinActions: {}, joinDone: action === 'request' ? '加入意向已保存，请主动到微信联系管理员' : action === 'reportFriend' ? '好友申请报告已保存' : '网站意向已撤回' });
+      this.setData({ join: receipt({ ...result.record, actions: {} }), joinActions: {}, canHandle: false, joinDone: action === 'request' ? '加入意向已保存，请主动到微信联系管理员' : action === 'reportFriend' ? '好友申请报告已保存' : '网站意向已撤回' });
       await this.retryJoin();
-    } catch (cause) { if (this.valid(scope) && operation === this._joinOperation) this.setData({ joinError: cause.message }); }
-    finally { if (this.valid(scope) && operation === this._joinOperation) this.setData({ joinBusy: false }); }
+    } catch (cause) { if (this.writeValid(context, actor, writeID)) this.setData({ joinError: cause.message }); }
+    finally { await this.finishWrite(writeID); }
   },
   manageJoins() { if (this.data.canHandle && this.data.game.id) navigation.go('community-joins', { id: this.data.game.id, title: this.data.game.title }); },
   apply() { if (navigation.requireUser()) navigation.go('applications', { apply: 1, game: this.data.game.id }); },

@@ -1,0 +1,24 @@
+{
+  "at": "2026-10-12T10:14:07.824Z",
+  "profileCodeSHA": "862edcf00a3218f831b29ad09229715f561785f0",
+  "environment": "new empty synthetic loopback database, DB_PUSH=false",
+  "database": "team_profiles_migration_85019f5031b3",
+  "baselineTables": 64,
+  "beforeProfileTables": 68,
+  "finalTables": 69,
+  "coreOriginalColumnTablesPreserved": 63,
+  "profileOriginalColumnTablesPreserved": 67,
+  "onlyExpectedChangedTable": "payload_migrations",
+  "legacyTeamRemainsUnestablished": true,
+  "noInventedMemberships": true,
+  "coreRecordPreserved": true,
+  "uniqueMembershipProfileIndex": true,
+  "migratedRealAuthorityWriteAndRetry": true,
+  "sourceDatabaseMigrated": false,
+  "productionAccess": false,
+  "source": {
+    "script": "scripts/team-profiles-migration-check.ts",
+    "scope": "combined staff/honor/core/profile migrations in a newly owned empty synthetic database; original source evidence preserved",
+    "report": "/tmp/zijing-miniapp-profile-migration-union-20261012.log"
+  }
+}

@@ -16,7 +16,15 @@
     "pages/activity-manage/index",
     "pages/staff/index",
     "pages/staff-review/index",
-    "pages/community-joins/index"
+    "pages/community-joins/index",
+    "pages/team/index",
+    "pages/team-apply/index",
+    "pages/team-review/index",
+    "pages/team-members/index",
+    "pages/team-honors/index",
+    "pages/team-profiles/index",
+    "pages/team-honor-workspace/index",
+    "pages/team-honor-edit/index"
   ],
   "window": {
     "navigationBarTitleText": "竞在紫荆",
@@ -68,6 +76,7 @@
   "sitemapLocation": "sitemap.json",
   "networkTimeout": {
     "request": 70000,
-    "downloadFile": 20000
+    "downloadFile": 20000,
+    "uploadFile": 70000
   }
 }

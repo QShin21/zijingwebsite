@@ -1,0 +1,4 @@
+.honor-record > .muted { display: block; margin-top: 14rpx; }
+.chips button { padding: 16rpx 24rpx; }
+.photo { min-height: 140rpx; }
+.evidence-video { width: 100%; margin-top: 24rpx; }

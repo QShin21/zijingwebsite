@@ -23,6 +23,30 @@ function website(path) {
   if (!path || typeof path !== 'string') return;
   if (path === '/join/members') return go('communities');
   if (path === '/join/staff') return go('staff');
+  if (path === '/join/teams' || path === '/teams/recruitment' || path === '/teams/manage') return go('team');
+  const honorWorkspace = /^\/teams\/honors(?:\?([^#]*))?$/.exec(path);
+  if (honorWorkspace) {
+    const values = {};
+    for (const pair of (honorWorkspace[1] || '').split('&')) {
+      const [key, value] = pair.split('=');
+      if (key === 'view' && value === 'review') values.view = 'review';
+      if ((key === 'team' || key === 'game') && /^[1-9]\d*$/.test(value || '')) values[key] = value;
+    }
+    return go('team-honor-workspace', values);
+  }
+  if (path === '/teams/honors/new') return go('team-honor-edit');
+  const honorRecord = /^\/teams\/honors\/([1-9]\d*)$/.exec(path);
+  if (honorRecord) return go('team-honor-edit', { id: honorRecord[1] });
+  const teamRecruitment = /^\/teams\/recruitment\/([1-9]\d*)$/.exec(path);
+  if (teamRecruitment) return go('signup', { kind: 'team', id: teamRecruitment[1] });
+  const teamApply = /^\/teams\/apply(?:\?edit=([1-9]\d*))?$/.exec(path);
+  if (teamApply) return go('team-apply', teamApply[1] ? { edit: teamApply[1] } : {});
+  const teamWorkbench = /^\/teams\/manage\/([1-9]\d*)$/.exec(path);
+  if (teamWorkbench) return go('team-review', { team: teamWorkbench[1] });
+  const teamProfiles = /^\/teams\/([1-9]\d*)\/profiles$/.exec(path);
+  if (teamProfiles) return go('team-profiles', { team: teamProfiles[1] });
+  const teamHonors = /^\/teams\/([1-9]\d*)\/honors$/.exec(path);
+  if (teamHonors) return go('team-honors', { team: teamHonors[1] });
   const staff = /^\/join\/staff\/batches\/([1-9]\d*)$/.exec(path);
   if (staff) return go('signup', { kind: 'staff', id: staff[1] });
   if (path === '/community/apply') return go('applications', { apply: 1 });

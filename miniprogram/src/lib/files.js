@@ -34,7 +34,7 @@ function clearPrivate() {
   privateFiles = [];
   // Remove files left by a previous interrupted session, limited to our own prefix.
   fs.readdir({ dirPath: wx.env.USER_DATA_PATH, success(result) {
-    (result.files || []).filter(name => /^zijing-private-[\w.-]+\.(png|jpeg|webp|gif)$/.test(name))
+    (result.files || []).filter(name => /^zijing-private-[\w.-]+\.(png|jpeg|webp|gif|mp4)$/.test(name))
       .filter(name => !privateFiles.includes(`${wx.env.USER_DATA_PATH}/${name}`))
       .forEach(name => fs.unlink({ filePath: `${wx.env.USER_DATA_PATH}/${name}`, fail() {} }));
   }, fail() {} });

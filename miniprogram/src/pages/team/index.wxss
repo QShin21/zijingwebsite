@@ -1,0 +1,2 @@
+.panel > .muted { display: block; margin-top: 14rpx; }
+.section-head { margin-top: 28rpx; }

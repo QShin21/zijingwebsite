@@ -1,0 +1,176 @@
+const http = require('../../lib/http');
+const session = require('../../lib/session');
+const navigation = require('../../lib/navigation');
+const config = require('../../config');
+const team = require('../../lib/team');
+const format = require('../../lib/format');
+const { actions, protect } = require('../../lib/page');
+const identity = () => String((session.user() || {}).id || '');
+const decisionLabels = { approved: '批准', returned: '退回补充', rejected: '拒绝' };
+const lifecycle = { active: '活跃', resting: '休整', archived: '已归档', unestablished: '尚未批准成立' };
+const statuses = ['pending', 'returned', 'approved', 'rejected', 'withdrawn'];
+const unique = docs => docs.filter((doc, index) => docs.findIndex(value => String(value.id) === String(doc.id)) === index);
+Page({
+  data: { needsLogin: false, loading: false, error: '', operationError: '', done: '', allowed: false, busy: false,
+    mode: 'establishment', teamID: '', teamDoc: null, teamActions: {}, lifecycleChoices: [], docs: [], page: 1, hasMore: false,
+    status: 'pending', statusIndex: 0, statusLabels: ['待人工审核', '退回补充', '已批准', '未通过', '已撤回'],
+    recruitments: [], batchesPage: 1, batchesMore: false },
+  ...actions,
+  onLoad(options = {}) {
+    if (this._unsubscribe) this._unsubscribe();
+    this._disposed = false; this._visible = false; this._resumeRead = false; this._context = (this._context || 0) + 1; this.invalidate();
+    this._identity = identity(); this.resetPrivate(); this._teamID = options.team || options.id || '';
+    this.setData({ mode: this._teamID ? 'join' : 'establishment', teamID: this._teamID,
+      status: statuses.includes(options.status) ? options.status : 'pending', statusIndex: statuses.includes(options.status) ? statuses.indexOf(options.status) : 0 });
+    this._unsubscribe = session.subscribe(() => {
+      if (this._identity !== identity()) { this._identity = identity(); this._context = (this._context || 0) + 1; this._resumeRead = false; this.invalidate(); this.resetPrivate(); }
+    });
+  },
+  invalidate() { this._scope = (this._scope || 0) + 1; this._operation = (this._operation || 0) + 1; },
+  valid(scope) { return !this._disposed && this._visible !== false && scope === (this._scope || 0) && this._identity === identity() && Boolean(identity()); },
+  beginWrite() { this._pendingWrite = true; return this._writeID = (this._writeID || 0) + 1; },
+  writeValid(context, actor, writeID) { return !this._disposed && context === this._context && actor === identity() && writeID === this._writeID; },
+  async finishWrite(writeID) {
+    if (writeID !== this._writeID) return;
+    this._pendingWrite = false;
+    if (this._disposed) return;
+    this.setData({ busy: false });
+    if (this._visible && this._resumeRead) { this._resumeRead = false; await this.load(); }
+  },
+  resetPrivate() { this.setData({ needsLogin: !session.user(), loading: false, error: '', operationError: '', done: '', allowed: false, busy: Boolean(this._pendingWrite),
+    teamDoc: null, teamActions: {}, lifecycleChoices: [], docs: [], page: 1, hasMore: false, recruitments: [], batchesPage: 1, batchesMore: false }); },
+  onShow() {
+    this._visible = true;
+    if (this._disposed) return;
+    if (this._identity !== identity()) { this._identity = identity(); this._context = (this._context || 0) + 1; this.invalidate(); this.resetPrivate(); }
+    return this.load();
+  },
+  onHide() { this._visible = false; this._resumeRead = false; this.invalidate(); this.setData({ loading: false, busy: Boolean(this._pendingWrite) }); },
+  onUnload() { this.onHide(); this._disposed = true; if (this._unsubscribe) this._unsubscribe(); },
+  retry() { return this.load(); },
+  onPullDownRefresh() { return this.load().finally(() => wx.stopPullDownRefresh()); },
+  onReachBottom() { if (this.data.hasMore && !this.data.loading && !this.data.busy) return this.load('applications'); },
+  moreBatches() { if (this.data.batchesMore && !this.data.loading && !this.data.busy) return this.load('batches'); },
+  decorate(doc) {
+    const previous = this.data.docs.find(value => String(value.id) === String(doc.id) && value.updatedAt === doc.updatedAt);
+    let value = doc;
+    if (this.data.mode === 'join') {
+      try { value = team.receipt(doc) || doc; }
+      catch { value = { ...doc, rows: [], receiptError: '已提交答卷暂时无法展示，请刷新重试' }; }
+    }
+    return { ...value, actions: doc.actions || {}, statusText: value.statusText || team.labels[doc.status] || '状态待核对', dateText: format.date(doc.updatedAt),
+      noteDraft: previous ? previous.noteDraft || '' : '',
+      decisions: ((doc.actions || {}).reviewDecisions || []).filter(decision => decisionLabels[decision]).map(decision => ({ value: decision, label: decisionLabels[decision] })) };
+  },
+  async load(more = '') {
+    if (this._disposed || this._visible === false) return;
+    if (this._pendingWrite) { this._resumeRead = true; return; }
+    if (more && (this.data.loading || (more === 'batches' ? !this.data.batchesMore : !this.data.hasMore))) return;
+    if (!protect(this)) { this.invalidate(); this.resetPrivate(); return; }
+    const scope = this._scope || 0, ticket = this._loadTicket = (this._loadTicket || 0) + 1;
+    const page = more ? this.data.page + (more === 'applications' ? 1 : 0) : 1;
+    const batchesPage = more ? this.data.batchesPage + (more === 'batches' ? 1 : 0) : 1;
+    this.setData({ loading: true, error: '' });
+    try {
+      const url = this.data.mode === 'establishment' ? `/api/miniapp/team/establishments?mode=review&page=${page}`
+        : `/api/miniapp/team/${encodeURIComponent(this._teamID)}/workbench?page=${page}&membersPage=1&batchesPage=${batchesPage}&status=${this.data.status}`;
+      const result = await http.request(url, { required: true });
+      if (!this.valid(scope) || ticket !== this._loadTicket) return;
+      const queue = this.data.mode === 'establishment' ? result : result.applications;
+      if (!queue || !Array.isArray(queue.docs)) throw new Error('审核记录暂不可用，请重试');
+      if (this.data.mode === 'establishment' && !(result.actions || {}).reviewEstablishments) { this.resetPrivate(); return; }
+      if (this.data.mode === 'join' && (!result.team || String(result.team.id) !== String(this._teamID) || !result.recruitments || !Array.isArray(result.recruitments.docs))) throw new Error('队伍工作台暂不可用，请重试');
+      const values = { allowed: true, loading: false };
+      if (!more || more === 'applications') Object.assign(values, { docs: unique((more ? this.data.docs : []).concat(queue.docs.map(doc => this.decorate(doc)))),
+        page: queue.page || page, hasMore: Boolean(queue.hasNextPage) });
+      if (this.data.mode === 'join') {
+        Object.assign(values, { teamDoc: { ...result.team, statusText: lifecycle[result.team.teamStatus] || '状态待核对' }, teamActions: result.actions || {},
+          lifecycleChoices: ((result.actions || {}).lifecycleStatuses || []).filter(state => lifecycle[state]).map(state => ({ value: state, label: lifecycle[state] })) });
+        if (!more || more === 'batches') Object.assign(values, { recruitments: unique((more ? this.data.recruitments : []).concat(result.recruitments.docs.map(doc => ({ ...doc, actions: doc.actions || {},
+          startText: format.date(doc.startAt), endText: format.date(doc.endAt) })))), batchesPage: result.recruitments.page || batchesPage, batchesMore: Boolean(result.recruitments.hasNextPage) });
+      }
+      this.setData(values);
+    } catch (cause) {
+      if (this.valid(scope) && ticket === this._loadTicket) {
+        if ([401, 403].includes(cause.status)) this.resetPrivate();
+        this.setData({ loading: false, error: cause.message, ...(cause.status === 401 ? { needsLogin: true } : {}) });
+      }
+    }
+  },
+  status(event) {
+    const index = Number(event.detail.value);
+    if (this.data.busy || !statuses[index] || statuses[index] === this.data.status) return;
+    this.setData({ status: statuses[index], statusIndex: index, docs: [], page: 1, hasMore: false }); return this.load();
+  },
+  note(event) {
+    if (this.data.busy) return;
+    const index = this.data.docs.findIndex(doc => String(doc.id) === String(event.currentTarget.dataset.id));
+    if (index >= 0) this.setData({ [`docs[${index}].noteDraft`]: event.detail.value });
+  },
+  async decide(event) {
+    if (!identity() || this._disposed || this._visible === false || this._pendingWrite || !this.data.allowed || this.data.loading || this.data.busy) return;
+    const { id, decision } = event.currentTarget.dataset;
+    const doc = this.data.docs.find(value => String(value.id) === String(id));
+    if (!doc || !doc.decisions.some(value => value.value === decision)) return;
+    if (doc.receiptError && decision === 'approved') { this.setData({ operationError: '请先刷新并完整核对已提交答卷，再批准' }); return; }
+    const scope = this._scope || 0, operation = this._operation = (this._operation || 0) + 1;
+    const context = this._context, actor = identity(), writeID = this.beginWrite();
+    this.setData({ busy: true, operationError: '', done: '' });
+    try {
+      if (decision !== 'approved' && !(doc.noteDraft || '').trim()) throw new Error('退回或拒绝需要填写具体原因');
+      const answer = await new Promise((resolve, reject) => wx.showModal({ title: this.data.mode === 'join' ? '审核入队申请' : '审核建队申请',
+        content: `确认${decisionLabels[decision]}这份申请？处理意见会出现在本人的回执中。`, success: value => resolve(value.confirm), fail: () => reject(new Error('确认未完成，请重试')) }));
+      if (!answer || !this.valid(scope) || operation !== this._operation) return;
+      const response = await team.post({ operation: this.data.mode === 'join' ? 'decide-join' : 'decide-establishment', id: doc.id,
+        revision: doc.updatedAt, decision, note: doc.noteDraft || '' });
+      if (!this.writeValid(context, actor, writeID)) return;
+      if (!response || !response.result) throw new Error('处理结果暂不可用，请刷新后核对');
+      const saved = { ...doc, actions: {}, decisions: [], noteDraft: '' };
+      for (const key of ['status', 'updatedAt', 'reviewNote']) if (response.result[key] !== undefined) saved[key] = response.result[key];
+      saved.statusText = team.labels[saved.status] || '状态待核对'; saved.dateText = format.date(saved.updatedAt);
+      this.setData({ docs: this.data.docs.map(value => String(value.id) === String(id) ? saved : value), done: '审核决定已保存' });
+      await this.load();
+    } catch (cause) { if (this.writeValid(context, actor, writeID)) this.setData({ operationError: cause.message }); }
+    finally { await this.finishWrite(writeID); }
+  },
+  websiteWorkbench(event) {
+    if (!this.data.allowed || !this.data.teamDoc || this.data.loading || this.data.busy) return;
+    const id = event.currentTarget.dataset.id, create = event.currentTarget.dataset.create;
+    if (create && !this.data.teamActions.createRecruitment) return;
+    if (id && !this.data.recruitments.some(doc => String(doc.id) === String(id) && doc.actions.edit)) return;
+    navigation.copy(config.origin + `/teams/manage/${this.data.teamDoc.id}` + (create ? '?create=1' : id ? '?edit=' + encodeURIComponent(id) : ''), '工作台地址已复制，可在浏览器登录后打开');
+  },
+  members() { if (this.data.allowed && this.data.teamDoc && !this.data.loading && !this.data.busy) navigation.go('team-members', { team: this.data.teamDoc.id }); },
+  openRecruitment(event) {
+    const doc = this.data.recruitments.find(value => String(value.id) === String(event.currentTarget.dataset.id));
+    if (doc && doc.actions.view && !this.data.loading && !this.data.busy) navigation.go('signup', { kind: 'team', id: doc.id });
+  },
+  async operate(event) {
+    if (!identity() || this._disposed || this._visible === false || this._pendingWrite || !this.data.allowed || !this.data.teamDoc || this.data.loading || this.data.busy) return;
+    const { operation: operationName, id, status } = event.currentTarget.dataset;
+    let target;
+    if (operationName === 'lifecycle' && this.data.lifecycleChoices.some(value => value.value === status)) target = this.data.teamDoc;
+    if (operationName === 'close-recruitment' && ['closed', 'archived'].includes(status)) target = this.data.recruitments.find(doc => String(doc.id) === String(id) && doc.actions[status === 'closed' ? 'close' : 'archive']);
+    if (!target) return;
+    const scope = this._scope || 0, operation = this._operation = (this._operation || 0) + 1;
+    const context = this._context, actor = identity(), writeID = this.beginWrite();
+    this.setData({ busy: true, operationError: '', done: '' });
+    try {
+      const answer = await new Promise((resolve, reject) => wx.showModal({ title: operationName === 'lifecycle' ? '修改队伍运营状态' : '关闭或归档招新',
+        content: operationName === 'lifecycle' ? `确认设为${lifecycle[status]}？休整或归档会关闭当前开放的招新批次。` : status === 'closed' ? '确认关闭本轮招新？已提交申请保留，后续操作以最新回执权限为准。' : '确认归档本批次？归档后不能重开，原申请记录保留。',
+        success: value => resolve(value.confirm), fail: () => reject(new Error('确认未完成，请重试')) }));
+      if (!answer || !this.valid(scope) || operation !== this._operation) return;
+      const response = await team.post({ operation: operationName, id: target.id, revision: target.updatedAt, status });
+      if (!this.writeValid(context, actor, writeID)) return;
+      if (!response || !response.result) throw new Error('处理结果暂不可用，请刷新后核对');
+      const saved = { ...target, actions: {} };
+      for (const key of ['status', 'teamStatus', 'updatedAt']) if (response.result[key] !== undefined) saved[key] = response.result[key];
+      this.setData({ done: '队伍或批次状态已保存', teamActions: {}, lifecycleChoices: [],
+        docs: this.data.docs.map(doc => ({ ...doc, actions: {}, decisions: [] })),
+        ...(operationName === 'lifecycle' ? { teamDoc: { ...saved, statusText: lifecycle[saved.teamStatus] || '状态待核对' } } : {}),
+        recruitments: this.data.recruitments.map(doc => String(doc.id) === String(target.id) && operationName === 'close-recruitment' ? { ...saved, state: '已保存，请刷新核对招新窗口' } : { ...doc, actions: {} }) });
+      await this.load();
+    } catch (cause) { if (this.writeValid(context, actor, writeID)) this.setData({ operationError: cause.message }); }
+    finally { await this.finishWrite(writeID); }
+  },
+});
