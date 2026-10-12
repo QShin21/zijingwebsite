@@ -548,6 +548,16 @@ test("真实 HTTP JWT 上传及审核；旧共享视频跨集合借用在改稿/
     await mutate(reviewerToken, "hide", { note: "合成视频最终隐藏" });
     expect((await request.get(publicHref)).status()).toBe(404);
     await blockedCopies();
+    // Only the permanent marker remains after synthetic history/reference removal.
+    // Readable old showcase copies must still be unable to disclose these bytes.
+    const cleared = new pg.Client({ connectionString: process.env.DATABASE_URL });
+    await cleared.connect();
+    try {
+      await cleared.query("UPDATE team_honor_records SET video_u_r_l=NULL,approved_snapshot=NULL,history='[]'::jsonb WHERE id=$1", [current.id]);
+    } finally { await cleared.end(); }
+    await blockedCopies();
+    expect((await request.head(rawURL)).status()).toBe(404);
+    expect((await page.request.get(rawURL, { headers: { "Sec-Fetch-Site": "same-origin", Range: "bytes=0-7" } })).status()).toBe(404);
     // Ordinary independently uploaded published showcase video remains usable.
     const normalURL = await saveVideo(
       new File([bytes], "synthetic-normal.mp4", { type: "video/mp4" }),

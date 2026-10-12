@@ -1,6 +1,6 @@
 import path from "node:path";
 import { constants } from "node:fs";
-import { mkdir, open, stat, unlink, writeFile } from "node:fs/promises";
+import { mkdir, open, lstat, unlink, writeFile } from "node:fs/promises";
 import { createHash, randomUUID } from "node:crypto";
 import { APIError, type Payload, type PayloadRequest } from "payload";
 import { sql, type PostgresAdapter } from "@payloadcms/db-postgres";
@@ -72,9 +72,12 @@ export async function isReservedHonorVideo(
 ) {
   if (!videoFilename.test(name)) return true;
   if (
-    await stat(reservationPath(name))
+    await lstat(reservationPath(name))
       .then(() => true)
-      .catch(() => false)
+      .catch((error: NodeJS.ErrnoException) => {
+        if (error.code === "ENOENT") return false;
+        throw new APIError("暂时无法核验视频归属", 503);
+      })
   )
     return true;
   const url = "/api/showcase-videos/" + name;

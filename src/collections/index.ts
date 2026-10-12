@@ -36,6 +36,7 @@ import { TeamCoreCollections, teamLifecycleFields, guardTeamLifecycle, closeInac
 import { TeamMemberProfiles } from "./team-profiles";
 import { TeamHonorRecords } from "./team-honor-records";
 import { protectLegacyTeamHonors } from "./team-honor-legacy";
+import { publicMediaRead } from "../lib/public-media-access";
 import { nicknameKey, validNickname } from "../lib/nickname";
 
 const text = (name: string, label: string, required = false): TextField => ({
@@ -575,7 +576,7 @@ export const Users: CollectionConfig = {
 export const Media: CollectionConfig = {
   slug: "media",
   labels: { singular: "公开媒体", plural: "公开媒体" },
-  access: { read: () => true, create: staff, update: publisher, delete: admin },
+  access: { read: publicMediaRead, create: staff, update: publisher, delete: admin },
   upload: {
     staticDir: process.env.MEDIA_DIR || "media",
     mimeTypes: ["image/jpeg", "image/png", "image/webp"],
