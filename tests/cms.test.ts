@@ -349,10 +349,11 @@ describe.sequential("真实 PostgreSQL / Payload 权限链路", () => {
     expect((await p.find({ collection: "seasons", overrideAccess: false,
       user: null, where: { id: { equals: season.id } } })).docs).toHaveLength(0);
   });
-  it("荣誉发布仍需核验，内部字段不出现在关系展开中", async () => {
+  it("历史荣誉仍需核验且不泄漏内部字段，新增和重新发布使用成员审核流程", async () => {
     const h = await p.create({
       collection: "honors",
-      overrideAccess: false,
+      overrideAccess: true,
+      context: { system: true },
       user: publisher,
       data: {
         title: "测试荣誉",
@@ -375,10 +376,13 @@ describe.sequential("真实 PostgreSQL / Payload 权限链路", () => {
         })
       ).docs.some((d) => d.id === h.id),
     ).toBe(false);
+    await expect(p.update({ collection: "honors", id: h.id, overrideAccess: false, user: publisher,
+      data: { verified: true, sourceURL: "https://example.com/public-proof" } })).rejects.toThrow();
     await p.update({
       collection: "honors",
       id: h.id,
-      overrideAccess: false,
+      overrideAccess: true,
+      context: { system: true },
       user: publisher,
       data: { verified: true, sourceURL: "https://example.com/public-proof" },
     });
@@ -405,7 +409,7 @@ describe.sequential("真实 PostgreSQL / Payload 权限链路", () => {
   it('新赛季和阵容变更不覆盖旧赛季及荣誉归属',async()=>{
     const old=await p.create({collection:'seasons',overrideAccess:false,user:publisher,data:{title:'历史赛季',slug:`test-history-${suffix}`,season:'历史',team,demo:true,_status:'published',members:[{displayName:'测试旧昵称',position:'旧位置',consent:true}]}});
     const current=await p.create({collection:'seasons',overrideAccess:false,user:publisher,data:{title:'当前赛季',slug:`test-current-${suffix}`,season:'当前',team,demo:true,_status:'published',members:[{displayName:'测试新昵称',position:'新位置',consent:true}]}});
-    const honor=await p.create({collection:'honors',overrideAccess:false,user:publisher,data:{title:'历史关联测试',slug:`test-historical-honor-${suffix}`,team,season:old.id,competition:'测试赛事',placing:'测试',verified:true,sourceURL:'https://example.com/public-source',demo:true,_status:'published'}});
+    const honor=await p.create({collection:'honors',overrideAccess:true,context:{system:true},user:publisher,data:{title:'历史关联测试',slug:`test-historical-honor-${suffix}`,team,season:old.id,competition:'测试赛事',placing:'测试',verified:true,sourceURL:'https://example.com/public-source',demo:true,_status:'published'}});
     await p.update({collection:'seasons',id:current.id,overrideAccess:false,user:publisher,data:{members:[{displayName:'替补测试昵称',position:'新位置',consent:true}]}});
     expect((await p.findByID({collection:'seasons',id:old.id,overrideAccess:false,user:null})).members?.[0].displayName).toBe('测试旧昵称');
     expect((await p.findByID({collection:'honors',id:honor.id,overrideAccess:false,user:null,depth:0})).season).toBe(old.id);

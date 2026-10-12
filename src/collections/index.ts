@@ -34,6 +34,8 @@ import { ContentPromotions } from "./promotions";
 import { StaffBatches, StaffApplications } from "./staff-recruitment";
 import { TeamCoreCollections, teamLifecycleFields, guardTeamLifecycle, closeInactiveTeamRecruitments } from "./team-core";
 import { TeamMemberProfiles } from "./team-profiles";
+import { TeamHonorRecords } from "./team-honor-records";
+import { protectLegacyTeamHonors } from "./team-honor-legacy";
 import { nicknameKey, validNickname } from "../lib/nickname";
 
 const text = (name: string, label: string, required = false): TextField => ({
@@ -614,6 +616,7 @@ export const Collections: CollectionConfig[] = [
   StaffBatches, StaffApplications,
   ...TeamCoreCollections,
   TeamMemberProfiles,
+  TeamHonorRecords,
   EventSignups,
   content("games", "游戏项目", [
     { name: "sort", label: "排序", type: "number" },
@@ -645,7 +648,7 @@ export const Collections: CollectionConfig[] = [
     ],
     true,
   ),
-  content(
+  protectLegacyTeamHonors(content(
     "honors",
     "荣誉",
     [
@@ -666,7 +669,7 @@ export const Collections: CollectionConfig[] = [
       },
     ],
     true,
-  ),
+  )),
   content("events", "活动", [
     ...signupFields,
     {

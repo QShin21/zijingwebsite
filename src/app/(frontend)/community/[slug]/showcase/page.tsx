@@ -7,6 +7,7 @@ import { canParticipate, canReviewPromotion, canReviewShowcase, managesGame } fr
 import { CommunityPager, pageNumber } from "@/components/CommunityPager";
 import { ShowcaseForm } from "@/components/ShowcaseForm";
 import { ShowcaseCard } from "@/components/ShowcaseCard";
+import { TeamHonorPins } from "@/components/TeamHonorArchives";
 export default async function Showcase({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ page?: string; view?: string; message?: string }> }) {
   const { slug } = await params; const query = await searchParams; const game = await bySlug("games", slug); if (!game) notFound();
   const p = await cms(); const { user } = await p.auth({ headers: await headers() }); const manager = canReviewShowcase(user, game.id);
@@ -22,6 +23,7 @@ export default async function Showcase({ params, searchParams }: { params: Promi
   return <section className="community-page"><h2>社群风采</h2><p>把共同经历的精彩留在这里。</p><nav className="community-tabs" aria-label="风采筛选">
     <Link href={base} aria-current={view === "public" ? "page" : undefined}>公开风采</Link>{canParticipate(user) && <Link href={`${base}?view=mine`} aria-current={view === "mine" ? "page" : undefined}>我的投稿</Link>}{manager && <Link href={`${base}?view=review`} aria-current={view === "review" ? "page" : undefined}>审核投稿</Link>}
   </nav><p role="status">{query.message}</p>
+    {view === "public" && page === 1 && <TeamHonorPins payload={p} game={game.id} />}
     <div className="showcase-feed">{posts.docs.map(post => <ShowcaseCard key={post.id} post={post} manager={manager} privateView={view !== "public"}
       promotionHref={post.status === "visible" && (managesGame(user, game.id) || canReviewPromotion(user)) ? "/community/promotions?source=community-showcase&id=" + post.id : undefined} />)}</div>
     {!posts.docs.length && <p>{view === "public" ? "暂无已发布的风采，欢迎分享活动记录。" : "此处暂无投稿。"}</p>}
