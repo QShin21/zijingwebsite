@@ -275,6 +275,68 @@ describe('原生骨干申请：服务端动作和本人回执', () => {
     expect(page.data.busy).toBe(false);
   });
 
+  it('撤回刷新取得新版题干和新增必填题，重提须按新版重新核对后 POST 同一申请', async () => {
+    const original = saved('submitted');
+    const nextForm = normalizeSignup({ enabled: true, questions: [
+      { ...form.questions[0], label: '合成新版申请说明' },
+      { id: 'availability', label: '合成新版必填时段', type: 'text', required: true, options: [] },
+    ] });
+    const { page, request, wx } = await signupHarness(info({ application: original, actions: { edit: true, withdraw: true } }));
+    page.editAnswers(); page.answerNext();
+    expect(page.data.review).toBe(true);
+    const withdrawn = { ...original, status: 'withdrawn', updatedAt: '2026-10-12T04:00:00Z' };
+    const nextInfo = info({ form: nextForm, version: 'synthetic-v2', application: withdrawn, actions: { edit: true, submit: true } });
+    wx.showModal.mockImplementationOnce(options => options.success({ confirm: true }));
+    request.mockResolvedValueOnce({ application: withdrawn }).mockResolvedValueOnce(nextInfo);
+    await page.withdraw();
+    expect(page.data.info?.version).toBe('synthetic-v2');
+    expect(page.data.form).toEqual(nextForm);
+    expect(page.data.questions).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'motivation', label: '合成新版申请说明' }),
+      expect.objectContaining({ id: 'availability', label: '合成新版必填时段' }),
+    ]));
+    expect(page.data.receipt?.answers).toEqual(original.answers);
+    expect(page.data.review).toBe(false); expect(page.data.reviewRows).toEqual([]);
+    page.editAnswers(); page.answerNext();
+    expect(page.data.answers.motivation).toBe(original.answers.motivation);
+    expect(page.data.review).toBe(false); expect(page.data.answerErrors.availability).toBeTruthy();
+    await page.submit(); expect(writes(request)).toHaveLength(1);
+    page.answer(event('availability', '合成新版可参与时段'));
+    await page.submit(); expect(writes(request)).toHaveLength(1);
+    page.answerNext();
+    expect(page.data.review).toBe(true);
+    expect(page.data.reviewRows).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'motivation', label: '合成新版申请说明' }),
+      expect.objectContaining({ id: 'availability', label: '合成新版必填时段', answer: '合成新版可参与时段' }),
+    ]));
+    const updated = { ...withdrawn, status: 'submitted', updatedAt: '2026-10-12T05:00:00Z',
+      formVersion: 'synthetic-v2', questions: nextForm.questions, answers: page.data.answers };
+    request.mockResolvedValueOnce({ application: updated }).mockResolvedValueOnce({ ...nextInfo, application: updated, actions: { withdraw: true } });
+    await page.submit();
+    expect(writes(request)).toHaveLength(2);
+    expect(writes(request)[1]).toEqual([
+      '/api/staff/batches/71/application',
+      expect.objectContaining({ method: 'POST', data: { version: 'synthetic-v2', revision: withdrawn.updatedAt, answers: updated.answers } }),
+    ]);
+    expect(page.data.receipt?.id).toBe(original.id);
+  });
+
+  it('撤回后的刷新返回空表单时禁用问卷，仍保留原题目回执且不能重提', async () => {
+    const original = saved('submitted');
+    const { page, request, wx } = await signupHarness(info({ application: original, actions: { withdraw: true } }));
+    const withdrawn = { ...original, status: 'withdrawn', updatedAt: '2026-10-12T04:00:00Z' };
+    wx.showModal.mockImplementationOnce(options => options.success({ confirm: true }));
+    request.mockResolvedValueOnce({ application: withdrawn }).mockResolvedValueOnce(info({
+      form: null, state: '批次已撤下，仅可查看回执', application: withdrawn, actions: {},
+    }));
+    await page.withdraw();
+    expect(page.data.form.enabled).toBe(false); expect(page.data.form.questions).toEqual([]);
+    expect(page.data.receipt).toMatchObject({ id: original.id, answers: original.answers });
+    expect(page.data.error).toBe(''); expect(page.data.message).toBe('申请已撤回');
+    page.editAnswers(); page.setData({ review: true }); await page.submit();
+    expect(page.data.responseEditing).toBe(false); expect(writes(request)).toHaveLength(1);
+  });
+
   it('取消撤回无写入；撤回后的能力刷新失败则关闭动作并允许重新读取', async () => {
     const original = saved('submitted');
     const { page, request, wx } = await signupHarness(info({ application: original, actions: { withdraw: true } }));

@@ -70,13 +70,13 @@ Page({
         (saved?String(saved.id)===String(draft.receiptId)&&saved.updatedAt===draft.revision:!draft.receiptId);
       const allowed=draft&&(this._team?info.actions&&(info.actions.draft||info.actions.submit):this._staff?info.actions&&info.actions[draft.responseEditing?'edit':'submit']:info.state==='报名开放');
       if(unchanged&&allowed){
-        const answers=questionnaire.initialAnswers(info.form,draft.answers),review=draft.review&&draft.version===info.version;
+        const answers=questionnaire.initialAnswers(this.data.form,draft.answers),review=draft.review&&draft.version===info.version;
         this.setData({answers,responseEditing:draft.responseEditing,review,step:draft.step,
-          reviewRows:review?receipt({questions:questionnaire.visibleQuestions(info.form,answers),answers}).rows:[],message:'提交状态已刷新，尚未保存的内容已保留，请核对后重试。'});
+          reviewRows:review?receipt({questions:questionnaire.visibleQuestions(this.data.form,answers),answers}).rows:[],message:'提交状态已刷新，尚未保存的内容已保留，请核对后重试。'});
         this.renderQuestions();
       }else if(unchanged&&this._team){
-        const answers=questionnaire.initialAnswers(info.form,draft.answers);
-        const rows=receipt({questions:questionnaire.visibleQuestions(info.form,answers),answers}).rows;
+        const answers=questionnaire.initialAnswers(this.data.form,draft.answers);
+        const rows=receipt({questions:questionnaire.visibleQuestions(this.data.form,answers),answers}).rows;
         this.setData({recoveryRows:rows,message:rows.length?'当前状态只读，尚未保存的内容仅在本页保留；恢复操作需以服务端允许的动作核对。':''});
       }
       this._recoveryDraft=this._team&&unchanged&&!allowed&&this.data.recoveryRows.length?draft:null;
@@ -117,7 +117,11 @@ Page({
       if(!this.validRead(ticket,userId,endpoint))return;
       if(this._team)this._teamConfirmation=null;
       this.setData({info:{...info,title:brand.display(info.title)},receipt:this._team?team.receipt(info.application):staff.receipt(info.application),message});
-      if(this._team){this.setForm(info.form);if(this.data.responseEditing)this.setData({answers:questionnaire.initialAnswers(info.form,this.data.answers),review:false});this.renderQuestions();}
+      if(this._staff||this._team){
+        this.setForm(info.form);
+        this.setData({review:false,reviewRows:[],answerErrors:{},...(this.data.responseEditing?{answers:questionnaire.initialAnswers(this.data.form,this.data.answers)}:{})});
+        this.renderQuestions();
+      }
     } catch(cause) {
       if(this.validRead(ticket,userId,endpoint))this.setData({message:message+'；回执状态刷新失败：'+cause.message+'。请重新加载确认允许的操作。'});
     }
