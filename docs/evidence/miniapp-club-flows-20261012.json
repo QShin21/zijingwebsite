@@ -1,0 +1,149 @@
+{
+  "date": "2026-10-12",
+  "branch": "codex/miniapp-club-flows-20261012",
+  "baselineCommit": "ed965ef457b5913d4590753c9d931e82811244b9",
+  "baselineDevelopmentVersion": "0.3.1",
+  "sourceVersion": "0.3.1",
+  "currentSourceUploaded": false,
+  "compatibilityCommit": "4cb3d64",
+  "frontendCommit": "9bfafb04f1f8df07d375a4e9242bfd9d05a07626",
+  "baselineCI": {
+    "conclusion": "success",
+    "runId": 38209674895,
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38209674895"
+  },
+  "priorReviewedCI": {
+    "headSha": "afc1ea3b0f56d92c820307d94dc944f722da4c96",
+    "status": "completed",
+    "conclusion": "success",
+    "runId": 38215530655,
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38215530655",
+    "completedAt": "2026-10-12T07:22:47Z"
+  },
+  "environment": {
+    "platform": "linux",
+    "node": "24.19.0",
+    "pnpm": "11.25.0",
+    "configuredBaseLibrary": "3.16.0"
+  },
+  "localVerification": {
+    "syntheticTests": {
+      "passed": 253,
+      "files": 13,
+      "miniappTests": 184,
+      "questionnaireLogicTests": 69,
+      "actualPageHandlers": "Node VM with synthetic SDK/API fixtures",
+      "liveHttpDatabaseIntegration": false
+    },
+    "packageCheck": {
+      "passed": true,
+      "pages": 17,
+      "files": 105,
+      "bytes": 259536,
+      "domainChecking": true,
+      "generatedQuestionnaireParity": true
+    },
+    "typecheck": "passed",
+    "lint": "passed",
+    "diffCheck": "passed"
+  },
+  "implementedFlows": [
+    "authorized-admin-card-and-manual-wechat-join",
+    "own-community-application-create-edit-withdraw-card-consent",
+    "authorized-community-review",
+    "server-approved-club-event-notice-showcase-projection",
+    "same-batch-staff-application-from-home-and-all-communities",
+    "own-staff-submit-status-edit-withdraw-resubmit",
+    "authorized-staff-review",
+    "authorized-manual-community-join-confirmation",
+    "activity-view-only-mode",
+    "full-16-question-types-complex-branches-and-5-to-6-member-groups",
+    "authentication-capability-version-compatibility",
+    "activity-and-staff-foreground-read-recovery-without-duplicate-writes"
+  ],
+  "permissions": {
+    "freshServerIdentity": true,
+    "businessServicesReused": true,
+    "frontendRoleGuessesForActions": false,
+    "privateStaffAnswersGrantedByCommunityEntry": false
+  },
+  "notImplementedThisSlice": [
+    "new-team-core-description-honor-contracts-pending-parent",
+    "native-content-authoring-and-promotion-management",
+    "native-staff-batch-authoring-and-export",
+    "wechat-login-account-binding",
+    "subscription-notifications"
+  ],
+  "notVerified": [
+    "wechat-official-compile",
+    "wechat-official-simulator",
+    "physical-device",
+    "platform-domain-lists",
+    "platform-privacy-declaration-and-native-consent",
+    "real-wechat-qr-recognition-friend-and-group-state",
+    "wechat-review",
+    "live-http-database-integration"
+  ],
+  "officialDocumentation": {
+    "checkedAt": "2026-10-12",
+    "liveWechatSiteResult": "non-retryable via web; CONNECT 403 via container",
+    "supplementalOfficialRepository": "https://github.com/wechat-miniprogram/api-typings",
+    "supplementalSnapshot": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+    "platformRulesRealtimeVerification": "blocked; see documented manual steps"
+  },
+  "operationsPerformed": {
+    "platformPermissionsRequested": false,
+    "platformKeysCreatedOrRead": false,
+    "officialVersionUploaded": false,
+    "reviewSubmitted": false,
+    "subscriptionMessagesSent": false,
+    "productionReadsOrWrites": false,
+    "deployment": false,
+    "pullRequest": false,
+    "merge": false,
+    "otherBranchesModified": false
+  },
+  "documentation": "docs/MINIAPP_CLUB_FLOWS.md",
+  "followupFrontendCommit": "c77dc9f01a289f06b40dc772fcdaec3f0f016049",
+  "signupLifecycleFix": {
+    "baselineCommit": "afc1ea3b0f56d92c820307d94dc944f722da4c96",
+    "fixCommit": "b2adf41c350c4ac27388fdf427450a8d8b5d7938",
+    "testFile": "tests/miniapp-signup-lifecycle.test.ts",
+    "passed": 72,
+    "modes": ["events", "community-posts", "staff"],
+    "frozenReproduction": {
+      "command": "MINIAPP_LIFECYCLE_REF=afc1ea3 pnpm exec vitest run tests/miniapp-signup-lifecycle.test.ts -t '已有回执 retry'",
+      "expectedFailures": 3,
+      "actualGETs": 2,
+      "requiredGETs": 3,
+      "visibleState": {
+        "loading": true,
+        "info": null,
+        "receipt": null,
+        "error": ""
+      }
+    },
+    "backgroundCompletionRegression": {
+      "scenario": "POST/PATCH completed while hidden before next onShow; unchanged server record must retain scoped unsaved draft",
+      "beforeLastCorrection": { "passed": 6, "failed": 6, "skipped": 60 },
+      "afterCorrection": { "passed": 12, "failed": 0 }
+    },
+    "lateResponseGuards": [
+      "request-ticket",
+      "current-actor",
+      "current-endpoint",
+      "visible-and-mounted-page"
+    ],
+    "draftRestorationGuards": [
+      "session-route-context",
+      "current-actor",
+      "current-endpoint",
+      "unchanged-server-record-and-revision",
+      "server-allowed-action"
+    ],
+    "backgroundRecoveryGETs": 0,
+    "automaticWriteRetries": 0,
+    "verificationKind": "synthetic Node VM executing actual Page handlers; not official WeChat simulator or physical device"
+  },
+  "teamContractBoundary": "collection/read available; final public HTTP/profile/honor contracts pending; internal overrideAccess member getter not exposed"
+}

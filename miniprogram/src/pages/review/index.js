@@ -1,55 +1,100 @@
-const cms = require('../../lib/cms');
 const http = require('../../lib/http');
 const session = require('../../lib/session');
 const files = require('../../lib/files');
 const format = require('../../lib/format');
 const { actions, protect } = require('../../lib/page');
+const identity = () => String((session.user() || {}).id || '');
+const decisions = { approved: '批准', returned: '退回补充', rejected: '拒绝' };
 Page({
-  data: { needsLogin: false, allowed: false, loading: false, error: '',
-    docs: [], page: 1, hasMore: false, busy: false },
+  data: { needsLogin: false, allowed: false, loading: false, error: '', operationError: '', done: '',
+    docs: [], page: 1, hasMore: false, busy: false, imageBusy: false },
   ...actions,
-  onShow() { this.load(); },
-  retry() { this.load(); },
-  onPullDownRefresh() { this.load().finally(() => wx.stopPullDownRefresh()); },
-  onReachBottom() { if (this.data.hasMore && !this.data.loading) this.load(true); },
+  onLoad() {
+    this._visible = true; this._identity = identity();
+    this._unsubscribe = session.subscribe(() => {
+      if (this._identity !== identity()) { this._identity = identity(); this.invalidate(); this.resetPrivate(); }
+    });
+  },
+  invalidate() { this._scope = (this._scope || 0) + 1; this._operation = (this._operation || 0) + 1; this._imageTicket = (this._imageTicket || 0) + 1; },
+  valid(scope) { return this._visible !== false && scope === (this._scope || 0) && this._identity === identity() && Boolean(identity()); },
+  resetPrivate() { this.setData({ needsLogin: !session.user(), allowed: false, loading: false, error: '', operationError: '', done: '', docs: [], page: 1, hasMore: false, busy: false, imageBusy: false }); },
+  onShow() {
+    this._visible = true;
+    if (this._identity !== identity()) { this._identity = identity(); this.invalidate(); this.resetPrivate(); }
+    return this.load();
+  },
+  onHide() { this._visible = false; this.invalidate(); this.setData({ loading: false, busy: false, imageBusy: false }); },
+  onUnload() { this.onHide(); if (this._unsubscribe) this._unsubscribe(); },
+  retry() { return this.load(); },
+  onPullDownRefresh() { return this.load().finally(() => wx.stopPullDownRefresh()); },
+  onReachBottom() { if (this.data.hasMore && !this.data.loading) return this.load(true); },
   async load(more = false) {
-    if (!protect(this)) return;
-    const allowed = session.reviewer();
-    this.setData({ allowed }); if (!allowed) return;
+    if (more && (this.data.loading || !this.data.hasMore)) return;
+    if (!protect(this)) { this.invalidate(); this.resetPrivate(); return; }
+    const scope = this._scope || 0, ticket = this._loadTicket = (this._loadTicket || 0) + 1;
+    const page = more ? this.data.page + 1 : 1;
     this.setData({ loading: true, error: '' });
     try {
-      const query = { depth: 0, limit: 12, page: more ? this.data.page + 1 : 1,
-        sort: 'createdAt', 'where[status][equals]': 'pending',
-        ...cms.selection(['proposedGame', 'realName', 'phone', 'reason', 'status', 'createdAt', 'applicant']) };
-      const collection = 'community-applications';
-      const result = await http.request(`/api/${collection}?${cms.query(query)}`, { required: true });
-      const docs = [];
-      for (const doc of result.docs) {
-        const images = [];
-        for (const image of (doc.images || [])) images.push(await files.localImage(image.source));
-        let applicant = null;
-        if (doc.applicant) applicant = await http.request(`/api/users/${doc.applicant}?depth=0&${cms.query(cms.selection(['name', 'email']))}`, { required: true }).catch(() => null);
-        docs.push({ ...doc, dateText: format.date(doc.createdAt), localImages: images, applicantName: applicant && applicant.name, applicantEmail: applicant && applicant.email });
-      }
-      this.setData({ loading: false, docs: (more ? this.data.docs : []).concat(docs), page: result.page, hasMore: result.hasNextPage });
-    } catch (cause) { this.setData({ loading: false, error: cause.message }); }
+      const workbench = await http.request('/api/miniapp/workbench', { required: true });
+      if (!this.valid(scope) || ticket !== this._loadTicket) return;
+      if (!workbench || workbench.reviewCommunity !== true) { this.setData({ allowed: false, loading: false, docs: [], page: 1, hasMore: false }); return; }
+      this.setData({ allowed: true });
+      const result = await http.request(`/api/miniapp/community/applications?mode=review&page=${page}`, { required: true });
+      if (!this.valid(scope) || ticket !== this._loadTicket) return;
+      if (!result || !Array.isArray(result.docs)) throw new Error('审核列表暂不可用，请重试');
+      const mapped = result.docs.map(doc => {
+        const previous = this.data.docs.find(value => String(value.id) === String(doc.id) && value.updatedAt === doc.updatedAt);
+        return { ...doc, actions: doc.actions || {}, dateText: format.date(doc.createdAt), reviewDraft: previous ? previous.reviewDraft || '' : '' };
+      });
+      const docs = (more ? this.data.docs : []).concat(mapped);
+      this.setData({ docs: docs.filter((doc, index) => docs.findIndex(value => String(value.id) === String(doc.id)) === index),
+        loading: false, page: result.page || page, hasMore: Boolean(result.hasNextPage) });
+    } catch (cause) {
+      if (!this.valid(scope) || ticket !== this._loadTicket) return;
+      this.setData({ loading: false, error: cause.message,
+        ...(cause.status === 403 ? { allowed: false, docs: [], hasMore: false } : {}) });
+    }
+  },
+  note(event) {
+    if (this.data.busy) return;
+    const index = this.data.docs.findIndex(doc => String(doc.id) === String(event.currentTarget.dataset.id));
+    if (index >= 0) this.setData({ [`docs[${index}].reviewDraft`]: event.detail.value });
   },
   async inspect(event) {
-    try { const doc = await http.request(`/api/community-applications/${event.currentTarget.dataset.id}?depth=0&select[wechatQr]=true`, { required: true });
-      const image = await files.localImage(doc.wechatQr); if (image) wx.previewImage({ urls: [image] }); }
-    catch (cause) { this.setData({ error: cause.message }); }
+    if (this.data.busy || this.data.imageBusy) return;
+    const id = event.currentTarget.dataset.id;
+    if (!this.data.allowed || !this.data.docs.some(doc => String(doc.id) === String(id) && doc.actions.review)) return;
+    const scope = this._scope || 0, ticket = this._imageTicket = (this._imageTicket || 0) + 1;
+    this.setData({ imageBusy: true, operationError: '' });
+    try {
+      const doc = await http.request(`/api/community-applications/${encodeURIComponent(id)}?depth=0&select[wechatQr]=true`, { required: true });
+      if (!this.valid(scope) || ticket !== this._imageTicket) return;
+      const image = await files.localImage(doc.wechatQr);
+      if (!this.valid(scope) || ticket !== this._imageTicket) return;
+      if (!image) throw new Error('名片暂时无法显示，请重试');
+      wx.previewImage({ current: image, urls: [image] });
+    } catch (cause) { if (this.valid(scope) && ticket === this._imageTicket) this.setData({ operationError: cause.message }); }
+    finally { if (this.valid(scope) && ticket === this._imageTicket) this.setData({ imageBusy: false }); }
   },
   async decide(event) {
-    if (this.data.busy) return;
+    if (!identity() || this.data.busy || this.data.imageBusy) return;
     const { id, decision } = event.currentTarget.dataset;
-    const answer = await new Promise(resolve => wx.showModal({ title: '审核内容', content: decision === 'approved' ? '确认通过这条申请？' : '确认退回这条申请？', success: resolve }));
-    if (!answer.confirm) return;
-    this.setData({ busy: true, error: '' });
+    const doc = this.data.docs.find(value => String(value.id) === String(id));
+    if (!this.data.allowed || !doc || !doc.actions.review || !decisions[decision]) return;
+    const scope = this._scope || 0, operation = this._operation = (this._operation || 0) + 1;
+    this.setData({ busy: true, operationError: '', done: '' });
     try {
-      await http.request(`/api/community-applications/${id}`, {
-        required: true, method: 'PATCH', data: { status: decision } });
-      await this.load(); wx.showToast({ title: '审核已完成', icon: 'none' });
-    } catch (cause) { this.setData({ error: cause.message }); }
-    finally { this.setData({ busy: false }); }
+      const answer = await new Promise((resolve, reject) => wx.showModal({ title: '审核社群申请',
+        content: `确认${decisions[decision]}这份申请？${decision === 'approved' ? '批准后开放社群任职，微信群仍需人工建立与拉群。' : ''}`,
+        success: value => resolve(value.confirm), fail: () => reject(new Error('确认未完成，请重试')) }));
+      if (!answer || !this.valid(scope) || operation !== this._operation) return;
+      const result = await http.request('/api/miniapp/community/applications', { required: true, method: 'POST',
+        data: { action: 'review', id: doc.id, revision: doc.updatedAt, decision, reviewNote: doc.reviewDraft || '' } });
+      if (!this.valid(scope) || operation !== this._operation) return;
+      if (!result || !result.application) throw new Error('处理结果暂不可用，请刷新后核对');
+      this.setData({ docs: this.data.docs.filter(value => String(value.id) !== String(doc.id)), done: `已${decisions[decision]}该申请` });
+      await this.load();
+    } catch (cause) { if (this.valid(scope) && operation === this._operation) this.setData({ operationError: cause.message }); }
+    finally { if (this.valid(scope) && operation === this._operation) this.setData({ busy: false }); }
   },
 });

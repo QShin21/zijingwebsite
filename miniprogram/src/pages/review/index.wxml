@@ -1,2 +1,24 @@
 <import src="../../templates/common.wxml" />
-<view class="page"><text class="eyebrow">COMMUNITY MANAGEMENT</text><text class="title">管理员申请审核</text><template is="feedback" data="{{needsLogin}}" /><view wx:if="{{!needsLogin && !allowed}}" class="empty"><text>当前账号没有此管理权限</text></view><block wx:if="{{allowed}}"><text wx:if="{{error}}" class="error">{{error}}</text><view wx:for="{{docs}}" wx:key="id" class="section panel"><text class="section-title">{{item.proposedGame || item.title}}</text><text class="muted">{{item.authorName || item.applicantName}} · {{item.dateText}}</text><block><text class="body" selectable>{{item.realName}} · {{item.phone}}</text><text class="muted" selectable>{{item.applicantEmail}}</text><text class="body">{{item.reason}}</text><button class="secondary section" bindtap="inspect" data-id="{{item.id}}">查看微信名片二维码</button></block><view class="actions"><button class="primary" bindtap="decide" data-id="{{item.id}}" data-decision="approved" disabled="{{busy}}">通过</button><button class="danger" bindtap="decide" data-id="{{item.id}}" data-decision="rejected" disabled="{{busy}}">退回</button></view></view><view wx:if="{{!docs.length && !loading}}" class="empty"><text>没有待审核内容</text></view><button wx:if="{{hasMore}}" class="plain" bindtap="onReachBottom">加载更多</button></block></view>
+<view class="page">
+  <button class="plain" bindtap="back">返回</button>
+  <text class="eyebrow">COMMUNITY MANAGEMENT</text><text class="title">管理员申请审核</text>
+  <text class="subtitle">根据你当前的管理权限显示待审申请。处理意见将出现在申请人的回执中。</text>
+  <template is="feedback" data="{{needsLogin}}" />
+  <text wx:if="{{loading}}" class="muted">正在核对权限与待审申请…</text>
+  <view wx:if="{{!needsLogin && !allowed && !loading && !error}}" class="empty"><text>当前账号没有此管理权限</text><button class="secondary" bindtap="retry">重新核对权限</button></view>
+  <view wx:if="{{error}}" class="section"><text class="error">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{loading || busy}}">重新加载</button></view>
+  <text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text><text wx:if="{{done}}" class="body" aria-role="status">{{done}}</text>
+  <block wx:if="{{allowed && !needsLogin}}">
+    <button class="plain" bindtap="retry" disabled="{{loading || busy}}">刷新审核列表</button>
+    <view wx:for="{{docs}}" wx:key="id" class="section panel"><text class="section-title">{{item.proposedGame || '游戏社群申请'}}</text><text class="muted">回执 {{item.id}} · {{item.dateText}}</text>
+      <text class="body" selectable>{{item.realName}} · {{item.phone}}</text><text class="body">{{item.reason}}</text>
+      <text class="muted">名片展示：{{item.contactConsent ? '申请人已授权在任期间展示' : '未授权展示，批准后不提供成员可见名片'}}</text>
+      <button wx:if="{{item.actions.review}}" class="secondary section" bindtap="inspect" data-id="{{item.id}}" disabled="{{busy || imageBusy}}">查看微信名片二维码</button>
+      <view wx:if="{{item.actions.review}}" class="field"><text class="field-label">处理意见</text><textarea value="{{item.reviewDraft}}" bindinput="note" data-id="{{item.id}}" maxlength="1000" placeholder="退回或拒绝时必填具体原因" disabled="{{busy}}" /></view>
+      <view class="actions" wx:if="{{item.actions.review}}"><button class="primary" bindtap="decide" data-id="{{item.id}}" data-decision="approved" disabled="{{busy || imageBusy}}">批准</button><button class="secondary" bindtap="decide" data-id="{{item.id}}" data-decision="returned" disabled="{{busy || imageBusy}}">退回补充</button><button class="danger" bindtap="decide" data-id="{{item.id}}" data-decision="rejected" disabled="{{busy || imageBusy}}">拒绝</button></view>
+      <text wx:if="{{!item.actions.review}}" class="muted">该申请暂无可执行操作，请刷新列表核对。</text>
+    </view>
+    <view wx:if="{{!docs.length && !loading && !error}}" class="empty"><text>没有待审核申请</text></view>
+    <button wx:if="{{hasMore}}" class="plain" bindtap="onReachBottom" disabled="{{loading || busy}}" loading="{{loading}}">加载更多</button>
+  </block>
+</view>

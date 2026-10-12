@@ -1,17 +1,20 @@
 const cms = require('../../lib/cms');
+const club = require('../../lib/club');
 const { actions, error } = require('../../lib/page');
 Page({
-  data: { loading: true, error: '', mode: 'events', types: ['全部', '比赛', '观赛', '交流', '训练', '其他'], type: '全部', search: '', docs: [], page: 1, hasMore: false, loadingMore: false },
+  data: { loading: true, error: '', mode: 'events', types: ['全部', '比赛', '观赛', '交流', '训练', '其他'], type: '全部', search: '', docs: [], page: 1, hasMore: false, loadingMore: false, promoted: [], clubError: '' },
   ...actions,
-  onShow() { this.load(); },
+  onShow() { return this.load(); },
+  onHide() { this._ticket = (this._ticket || 0) + 1; this._promotionTicket = (this._promotionTicket || 0) + 1; },
   onPullDownRefresh() { this.load().finally(() => wx.stopPullDownRefresh()); },
-  onReachBottom() { if (this.data.hasMore && !this.data.loadingMore) this.load(true); },
+  onReachBottom() { if (this.data.hasMore && !this.data.loading && !this.data.loadingMore) return this.load(true); },
   retry() { this.load(); },
   changeMode(event) { this.setData({ mode: event.currentTarget.dataset.mode }); this.load(); },
   changeType(event) { this.setData({ type: event.currentTarget.dataset.type }); this.load(); },
   input(event) { this.setData({ search: event.detail.value }); },
   search() { this.load(); },
   async load(more = false) {
+    if (more && (this.data.loading || this.data.loadingMore)) return;
     const ticket = this._ticket = (this._ticket || 0) + 1;
     this.setData(more ? { loadingMore: true } : { loading: true, error: '', docs: [] });
     try {
@@ -20,7 +23,17 @@ Page({
       const docs = await cms.decorate(result.docs);
       if (ticket !== this._ticket) return;
       this.setData({ loading: false, loadingMore: false, docs: more ? this.data.docs.concat(docs) : docs, page: result.page, hasMore: result.hasNextPage });
+      if (!more) await this.loadPromoted();
     } catch (cause) { if (ticket === this._ticket) { error(this, cause); this.setData({ loadingMore: false }); } }
+  },
+  retryClub() { return this.loadPromoted(); },
+  async loadPromoted() {
+    const ticket = this._promotionTicket = (this._promotionTicket || 0) + 1, mode = this.data.mode;
+    this.setData({ promoted: [], clubError: '' });
+    try {
+      const value = await club.load();
+      if (ticket === this._promotionTicket && mode === this.data.mode) this.setData({ promoted: value.promotions[mode === 'events' ? 'event' : 'notice'] || [] });
+    } catch (cause) { if (ticket === this._promotionTicket && mode === this.data.mode) this.setData({ clubError: cause.message }); }
   },
   onShareAppMessage() { return { title: '竞在紫荆 · 活动与通知', path: '/pages/events/index' }; },
 });

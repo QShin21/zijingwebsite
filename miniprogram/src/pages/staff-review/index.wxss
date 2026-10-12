@@ -1,0 +1,2 @@
+@import "../signup/index.wxss";
+.filters picker { flex: 1; padding: 20rpx 0; }
