@@ -1,0 +1,117 @@
+{
+  "branch": "codex/club-integration-20261012",
+  "baseSHA": "ed965ef457b5913d4590753c9d931e82811244b9",
+  "baseCI": "https://github.com/QShin21/zijingwebsite/actions/runs/38209674895",
+  "runtimeSourceSHA": "46a6ea30b32437cb36a3f45dc153a65f4d37cf6f",
+  "scope": [
+    "own withdrawn staff batch receipts and navigation",
+    "explicit return with feedback before reopening final staff decisions",
+    "save/publish validation of mandatory staff questionnaire routes"
+  ],
+  "environment": {
+    "database": "fresh isolated loopback development PostgreSQL 17.10",
+    "data": "synthetic users, applicants and explicitly marked demo content only",
+    "node": "24.19.0",
+    "pnpm": "11.25.0",
+    "DB_PUSH": false,
+    "externalStorage": false,
+    "mail": "existing E2E loopback SMTP receiver only; no real notifications"
+  },
+  "strategy": {
+    "withdrawnBatch": "Retain open-to-draft management. SSR and receipt list use owner-filtered minimal stored-title projections. API returns only own receipt snapshots, null editable form and original form version; no current draft configuration or private notes.",
+    "review": "Submitted/reviewing/returned retain the four review targets. Accepted/rejected allow only the same result or returned. Returned/rejected require trimmed applicant-visible feedback. UI and API share the transition rule; existing serializable transactions, locks, revision comparison and audits remain.",
+    "questionnaire": "Core fields stay directly visible. Every forward jump is rejected if its skipped interval includes any of the seven core fields. Extension-only branches and ending after the core fields remain supported."
+  },
+  "checks": {
+    "targetedUnitDatabase": {
+      "tests": 28,
+      "files": 2,
+      "result": "PASS"
+    },
+    "targetedHttpE2E": {
+      "uniqueScenarios": 6,
+      "result": "PASS",
+      "execution": "scoped retests after fixture corrections; includes the original complete recruitment flow and new concurrent review case"
+    },
+    "fullUnitDatabase": {
+      "tests": 281,
+      "files": 32,
+      "result": "PASS",
+      "durationSeconds": 75.13
+    },
+    "fullE2E": {
+      "tests": 67,
+      "passed": 67,
+      "failed": 0,
+      "result": "PASS",
+      "reportedDuration": "18.0m"
+    },
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "miniappStatic": {
+      "result": "PASS",
+      "pages": 14,
+      "files": 89,
+      "domainChecking": true
+    },
+    "build": {
+      "result": "PASS",
+      "sourceSHA": "46a6ea30b32437cb36a3f45dc153a65f4d37cf6f",
+      "execution": "git archive of committed runtime source in this cloud environment; installed Next build --webpack CLI; no dependency changes"
+    },
+    "independentReadOnlyReview": "PASS; no blocking source defect found; execution evidence comes from this integration task",
+    "compiledHttp": {
+      "result": "PASS",
+      "sourceSHA": "46a6ea30b32437cb36a3f45dc153a65f4d37cf6f",
+      "environment": "loopback compiled build; development synthetic DB",
+      "checks": 8,
+      "ownSSR": 200,
+      "ownList": 200,
+      "ownAPI": 200,
+      "otherSSR": 404,
+      "otherAPI": 404,
+      "guestSSR": 307,
+      "guestAPI": 404,
+      "ownPatch": 404,
+      "documentCache": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "listCache": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "receiptAPICache": "private, no-store",
+      "notesAndDraftOmitted": true,
+      "fixtureCleanupVerified": {
+        "batches": 0,
+        "users": 0
+      }
+    }
+  },
+  "regressionCoverage": [
+    "withdrawn owner original URL and receipt-list navigation; applicant-visible feedback retained",
+    "draft title/description/new questions and private review notes omitted",
+    "anonymous API denial and existing page login gate; other account page/API/receipt denial",
+    "withdrawn submit/edit/withdraw and fake direct-collection write context denied; record unchanged",
+    "accepted and rejected to reviewing/opposite final denied; blank return feedback denied",
+    "explicit returned feedback shown and open-batch supplement preserves applicant ID and member role",
+    "concurrent result updates and concurrent final returns each commit one result; stale revision denied; exactly one history/audit entry",
+    "unconditional end, forward skip and both department conditional skips rejected during draft save and publish",
+    "legal extension branch real UI/HTTP submissions and withdrawn snapshots with filtered branch targets remain readable"
+  ],
+  "fixtureCorrections": [
+    "use stable textbox name prefixes for populated textareas",
+    "allow development SSR no-cache header while requiring private/no-store on receipt API",
+    "wait for completed management interactions and actual row status rather than an old success message",
+    "honor the existing questionnaire page boundary after a branch question"
+  ],
+  "newMigration": false,
+  "productionAccess": false,
+  "productionMigration": false,
+  "realNotificationsSent": false,
+  "rolesAutomaticallyGranted": false,
+  "otherModulesMerged": false,
+  "protectedBranchesUpdatedByThisTask": false,
+  "PR": false,
+  "deploy": false,
+  "exactFinalCI": "Match the pushed integration HEAD to its Actions terminal conclusion; the final delivery records that exact SHA and run URL. A previous checkpoint success does not satisfy this gate.",
+  "remaining": [
+    "await reviewed exact final team/profile/honor/miniapp commits before later integration; common dependencies and migration de-duplication inputs recorded in docs/TASKS.md"
+  ],
+  "atUTC": "2026-10-12T07:22:00Z"
+}
