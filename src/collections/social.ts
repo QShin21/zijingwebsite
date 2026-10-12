@@ -1,6 +1,8 @@
 import { signupFields, validateSignupForm } from './signups';
 import { communityVideo } from "../lib/community-video";
 import { normalizeShowcaseImage } from "../lib/showcase-images";
+import { controlledVideoName } from "../lib/showcase-videos";
+import { isReservedHonorVideo } from "../lib/team-honor-videos";
 import { APIError, type CollectionConfig, type CollectionBeforeChangeHook, type Access, type Where } from "payload";
 import { canParticipate, canPublish, communityIDs, canReviewShowcase, canSubmitClubContent, managesGame, type Identity } from "../lib/rules";
 import { CommunityApplications, CommunityJoins } from "./community-operations";
@@ -55,6 +57,9 @@ const participationGuard = (kind: "local" | "showcase"): CollectionBeforeChangeH
         const video = communityVideo(data.videoURL);
         if (!video) throw new APIError("请填写有效的 HTTPS 视频链接或 B 站嵌入代码", 400);
         data.videoURL = video.url;
+        const name = controlledVideoName(video.url);
+        if (name && await isReservedHonorVideo(req.payload, name, req))
+          throw new APIError("荣誉私有证据不能复用为普通风采视频，请自行上传", 403);
       }
       if (data.images !== undefined) {
         if (!Array.isArray(data.images) || data.images.length > 6) throw new APIError("最多上传 6 张照片", 400);

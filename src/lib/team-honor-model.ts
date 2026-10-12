@@ -179,7 +179,11 @@ export function honorVersion(
 ) {
   // Canonical field order, decoded image bytes, and controlled video bytes form the reviewed version.
   const value = {
-    ...attribution,
+    team: attribution.team,
+    game: attribution.game,
+    author: attribution.author,
+    authorName: attribution.authorName,
+    season: attribution.season ?? null,
     title: content.title,
     competition: content.competition,
     placing: content.placing,

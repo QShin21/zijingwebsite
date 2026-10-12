@@ -3,13 +3,8 @@ import { open } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { APIError, type Payload } from "payload";
 import type { User } from "../payload-types";
-import {
-  controlledVideoName,
-  VIDEO_MAX_BYTES,
-  videoPath,
-  validateVideo,
-  videoRange,
-} from "./showcase-videos";
+import { VIDEO_MAX_BYTES, validateVideo, videoRange } from "./showcase-videos";
+import { honorVideoPath } from "./team-honor-videos";
 import { currentHonorVersion, teamHonorService } from "./team-honor-service";
 import { honorID } from "./team-honor-model";
 
@@ -31,7 +26,8 @@ export async function honorVideoResponse(
       expectedHash: string | null = null;
     if (query.get("version")) {
       // Public evidence uses only the approved, currently eligible archive projection.
-      const record = await teamHonorService.publicRecord(p, id);
+      const evidence = await teamHonorService.publicEvidence(p, id);
+      const record = evidence?.record;
       if (
         record?.videoHref ===
         "/api/team-honor-evidence/" +
@@ -39,7 +35,7 @@ export async function honorVideoResponse(
           "/video?version=" +
           query.get("version")
       ) {
-        url = record.videoURL;
+        url = evidence!.storageURL;
         expectedHash = record.videoVersion;
       }
     } else if (user) {
@@ -72,12 +68,11 @@ export async function honorVideoResponse(
         expectedHash = observed.videoVersion;
       }
     }
-    const filename = url ? controlledVideoName(url) : null;
-    if (!filename || !expectedHash)
+    if (!url || !expectedHash)
       return new Response(null, { status: 404, headers });
     // Open once, without following symlinks; serve the very bytes validated below.
     const file = await open(
-      videoPath(filename),
+      honorVideoPath(url),
       constants.O_RDONLY | constants.O_NOFOLLOW,
     ).catch(() => null);
     if (!file) return new Response(null, { status: 404, headers });

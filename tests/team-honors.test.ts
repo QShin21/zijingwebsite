@@ -15,7 +15,15 @@ import {
   type HonorMembershipAuthority,
 } from "../src/lib/team-honor-authority";
 import type { HonorAction, HonorInput } from "../src/lib/team-honor-model";
-import { discardVideo, saveVideo, videoPath } from "../src/lib/showcase-videos";
+import { discardVideo, saveVideo } from "../src/lib/showcase-videos";
+import {
+  saveHonorVideo,
+  discardHonorVideo,
+  honorVideoPath,
+  isReservedHonorVideo,
+} from "../src/lib/team-honor-videos";
+import { honorVersion } from "../src/lib/team-honor-model";
+import { controlledVideoVersion } from "../src/lib/showcase-videos";
 import { honorVideoResponse } from "../src/lib/team-honor-evidence";
 import { honorWorkspace } from "../src/lib/team-honor-web";
 
@@ -255,7 +263,10 @@ afterEach(async () => {
   }
   for (const id of legacyIDs)
     await p.delete({ collection: "honors", id, overrideAccess: true });
-  for (const url of videos) await discardVideo(url);
+  for (const url of videos) {
+    await discardHonorVideo(url);
+    await discardVideo(url).catch(() => {});
+  }
   records.length = 0;
   legacyIDs.length = 0;
   videos.length = 0;
@@ -534,7 +545,7 @@ it("本站 MP4 字节替换/删除撤下批准投影，待审证据变化不能�
       videoURL: "https://example.invalid/mutable.mp4",
     }),
   ).rejects.toThrow("外链");
-  const url = await saveVideo(
+  const url = await saveHonorVideo(
     new File([video()], "synthetic.mp4", { type: "video/mp4" }),
   );
   videos.push(url);
@@ -547,15 +558,15 @@ it("本站 MP4 字节替换/删除撤下批准投影，待审证据变化不能�
   expect(
     (await service.archives(p, { team }))[0].records[0].videoVersion,
   ).toMatch(/^[0-9a-f]{64}$/);
-  await writeFile(videoPath(url.split("/").pop()!), video("b"));
+  await writeFile(honorVideoPath(url), video("b"));
   expect(await service.archives(p, { team })).toEqual([]);
   current = await change(player, "save", current, {
     input: { description: "合成视频改稿" },
   });
   current = await change(player, "submit", current);
-  await writeFile(videoPath(url.split("/").pop()!), video("c"));
+  await writeFile(honorVideoPath(url), video("c"));
   await expect(change(reviewer, "approve", current)).rejects.toThrow("字节");
-  await discardVideo(url);
+  await discardHonorVideo(url);
   expect(await service.archives(p, { team })).toEqual([]);
 });
 it("证据图片变更撤下；匿名投影不含退回说明、成员关系、旧批准快照或历史审计", async () => {
@@ -563,6 +574,7 @@ it("证据图片变更撤下；匿名投影不含退回说明、成员关系、�
   const dto = (await service.archives(p, { team }))[0].records[0];
   expect(Object.keys(dto)).not.toContain("author");
   for (const field of [
+    "videoURL",
     "history",
     "reviewNote",
     "membershipRef",
@@ -584,6 +596,93 @@ it("证据图片变更撤下；匿名投影不含退回说明、成员关系、�
     await db.end();
   }
   expect(await service.archives(p, { team })).toEqual([]);
+});
+it("独立荣誉视频不能跨集合引用；旧泄漏标识在隐藏、改稿和历史引用消失后永久隔离", async () => {
+  const privateURL = await saveHonorVideo(
+    new File([video()], "private.mp4", { type: "video/mp4" }),
+  );
+  videos.push(privateURL);
+  const rawURL = await saveVideo(
+    new File([video()], "old-shared.mp4", { type: "video/mp4" }),
+  );
+  videos.push(rawURL);
+  // New shared identifiers cannot be introduced as honor proof.
+  await expect(
+    pending(player, { ...input(), videoURL: rawURL }),
+  ).rejects.toThrow("本站上传");
+  let current = await pending(player, {
+    ...input(),
+    images: [],
+    videoURL: privateURL,
+  });
+  // Reproduce a pre-isolation stored record strictly on synthetic data; preserve the exact submitted version.
+  const content = {
+    title: current.title,
+    competition: current.competition!,
+    placing: current.placing!,
+    date: current.date!,
+    description: current.description!,
+    images: [],
+    videoURL: rawURL,
+  };
+  const version = honorVersion(
+    content,
+    { author: player.id, authorName: player.name, team, game, season: null },
+    await controlledVideoVersion(rawURL),
+  );
+  const db = new pg.Client({ connectionString: process.env.DATABASE_URL });
+  await db.connect();
+  try {
+    await db.query(
+      "UPDATE team_honor_records SET video_u_r_l=$1,submitted_version=$2 WHERE id=$3",
+      [rawURL, version, current.id],
+    );
+  } finally {
+    await db.end();
+  }
+  current = await row(current.id);
+  const name = rawURL.split("/").pop()!;
+  expect(await isReservedHonorVideo(p, name)).toBe(true);
+  for (const actor of [player, nonplayer]) {
+    for (const url of [privateURL, rawURL])
+      await expect(
+        p.create({
+          collection: "community-showcase",
+          user: actor,
+          overrideAccess: false,
+          context: { webShowcaseWrite: true },
+          data: {
+            title: "合成跨集合复用",
+            game,
+            author: actor.id,
+            videoURL: url,
+          },
+        }),
+      ).rejects.toThrow();
+  }
+  current = await change(reviewer, "approve", current);
+  const dto = (await service.archives(p, { team }))[0].records[0];
+  expect(dto).not.toHaveProperty("videoURL");
+  expect(JSON.stringify(dto)).not.toContain(rawURL);
+  const request = new Request("http://localhost:3000" + dto.videoHref);
+  expect((await honorVideoResponse(p, null, current.id, request)).status).toBe(
+    200,
+  );
+  current = await change(reviewer, "hide", current, { note: "合成跨集合隐藏" });
+  expect((await honorVideoResponse(p, null, current.id, request)).status).toBe(
+    404,
+  );
+  current = await change(player, "save", current, {
+    input: { videoURL: null, images: [{ source: picture, caption: "新证明" }] },
+  });
+  expect(await isReservedHonorVideo(p, name)).toBe(true);
+  // Even deletion of synthetic records does not erase the permanent legacy reservation.
+  await p.delete({
+    collection: "team-honor-records",
+    id: current.id,
+    overrideAccess: true,
+  });
+  expect(await isReservedHonorVideo(p, name)).toBe(true);
 });
 it("历史荣誉兼容纳入同一档案并保留作者/赛季，未核验及草稿不入档且无风采复制", async () => {
   const before = (
@@ -718,7 +817,7 @@ it("旧 CMS 发布入口不能绕过成员审核，历史内容只读且只有�
   expect(retained.date).toBe(data.date);
 });
 it("证据端点按作者/当前审核范围或有效批准版本授权，Range/HEAD 不泄漏待审或隐藏视频", async () => {
-  const url = await saveVideo(
+  const url = await saveHonorVideo(
     new File([video()], "synthetic-evidence.mp4", { type: "video/mp4" }),
   );
   videos.push(url);

@@ -64,6 +64,13 @@ describe("荣誉状态与证据边界", () => {
       season: null,
     };
     const version = honorVersion(content, attribution, "a");
+    expect(
+      honorVersion(
+        content,
+        { author: 3, authorName: "合成队员", season: null, game: 2, team: 1 },
+        "a",
+      ),
+    ).toBe(version);
     for (const change of [
       { description: "改稿" },
       { date: "2026-10-02" },

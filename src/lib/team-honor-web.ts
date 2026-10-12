@@ -8,12 +8,8 @@ import {
   canPublish,
 } from "./rules";
 import { teamHonorService } from "./team-honor-service";
-import {
-  saveVideo,
-  discardVideo,
-  SUBMISSION_MAX_BYTES,
-  VIDEO_MAX_BYTES,
-} from "./showcase-videos";
+import { SUBMISSION_MAX_BYTES, VIDEO_MAX_BYTES } from "./showcase-videos";
+import { saveHonorVideo, discardHonorVideo } from "./team-honor-videos";
 import {
   honorID,
   type HonorInput,
@@ -176,7 +172,7 @@ export async function saveHonorForm(
   );
   let uploaded: string | undefined;
   try {
-    if (video) uploaded = await saveVideo(video);
+    if (video) uploaded = await saveHonorVideo(video);
     const input: HonorInput = {
       title: value("title"),
       competition: value("competition"),
@@ -209,7 +205,7 @@ export async function saveHonorForm(
           where: { videoURL: { equals: uploaded } },
         })
         .catch(() => null);
-      if (saved?.totalDocs === 0) await discardVideo(uploaded);
+      if (saved?.totalDocs === 0) await discardHonorVideo(uploaded);
     }
     throw error;
   }
