@@ -2,25 +2,8 @@
   "branch": "codex/club-operations-recovery",
   "base": "e67d55e93a2f6dd0338b301fa7ffcfe3eb4753a7",
   "atUTC": "2026-10-12T02:50:55.990152+00:00",
-  "slice": "activity",
+  "slice": "activity + notice",
   "scope": "original content reference, approved version, web request/review/home projection; no recruitment or teams",
-  "checks": {
-    "unitDatabase": {
-      "tests": 14,
-      "result": "PASS",
-      "promotionTests": 10,
-      "authorityRegressions": 4
-    },
-    "affectedWebHTTP": {
-      "tests": 3,
-      "result": "PASS",
-      "reportedDuration": "1.3m"
-    },
-    "typecheck": "PASS",
-    "lint": "PASS",
-    "miniappStatic": "PASS",
-    "build": "PASS"
-  },
   "migration": {
     "result": "PASS",
     "environment": "isolated synthetic loopback development",
@@ -48,5 +31,38 @@
   "protectedBranchesUpdated": false,
   "PR": false,
   "merge": false,
-  "deploy": false
+  "deploy": false,
+  "activityChecks": {
+    "unitDatabase": {
+      "tests": 14,
+      "result": "PASS",
+      "promotionTests": 10,
+      "authorityRegressions": 4
+    },
+    "affectedWebHTTP": {
+      "tests": 3,
+      "result": "PASS",
+      "reportedDuration": "1.3m"
+    },
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "miniappStatic": "PASS",
+    "build": "PASS"
+  },
+  "activityCommit": "7d377bb8682e32df9cda7d98852ae20d8c74e27d",
+  "checks": {
+    "latestSlice": "notice",
+    "promotionUnitDatabase": {
+      "tests": 12,
+      "result": "PASS"
+    },
+    "noticeWebE2E": {
+      "tests": 1,
+      "result": "PASS",
+      "reportedDuration": "34.5s"
+    },
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "finalThreeKindBuild": "pending"
+  }
 }

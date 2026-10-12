@@ -40,7 +40,12 @@ beforeAll(async () => {
   admin = await p.update({ collection: "users", id: admin.id, user: leader, overrideAccess: false, data: { communityOffices: [{ game, status: "active", publishContent: true, reviewShowcase: true, viewSignups: false, exportSignups: false }] } });
   outsider = await p.update({ collection: "users", id: outsider.id, user: leader, overrideAccess: false, data: { communityOffices: [{ game: otherGame, status: "active", publishContent: true, viewSignups: false, exportSignups: false }] } });
 });
-beforeEach(async () => { post = await event(); });
+beforeEach(async () => {
+  const fresh = await p.findByID({ collection: "users", id: admin.id, overrideAccess: true, depth: 0 });
+  admin = await p.update({ collection: "users", id: admin.id, user: leader, overrideAccess: false, data: { communityOffices: fresh.communityOffices!.map(office => ({ ...office, status: "active" as const })) } });
+  execution = await p.update({ collection: "users", id: execution.id, user: leader, overrideAccess: false, data: { roles: ["backbone"] } });
+  post = await event();
+});
 afterEach(async () => {
   if (receipts.length) await p.delete({ collection: "event-signups", overrideAccess: true, where: { id: { in: receipts } } });
   const own = await p.find({ collection: "content-promotions", overrideAccess: true, pagination: false, where: { sourceKey: { in: posts.map(id => "community-posts:" + id) } } });
@@ -150,4 +155,28 @@ it("旧身份不能在撤任/撤销骨干后继续申请或审核", async () => 
   await expect(change(staleAdmin, "withdraw", pending, "")).rejects.toThrow();
   await p.update({ collection: "users", id: execution.id, user: leader, overrideAccess: false, data: { roles: ["member"] } });
   await expect(change(staleReviewer, "approve", pending)).rejects.toThrow();
+});
+it("公告使用原内容引用与审核流程，升推不生成活动或报名表", async () => {
+  const notice = await p.create({ collection: "community-posts", user: admin, overrideAccess: false,
+    data: { game, author: admin.id, title: "合成升推公告", body: "合成公告，不发送通知", category: "notice" } }); posts.push(notice.id);
+  let current = await change(admin, "submit", undefined, "合成公告适合社团成员查看", notice.id);
+  current = await change(publicity, "approve", current, "", notice.id);
+  expect(current.kind).toBe("notice"); expect(current.sourceID).toBe(notice.id);
+  expect((await promotedContent(p, "notice")).some(item => item.sourceKey === "community-posts:" + notice.id)).toBe(true);
+  expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + notice.id)).toBe(false);
+  await expect(activity(p, "community-posts", notice.id, member)).rejects.toThrow();
+  const snapshot = current.approvedSnapshot;
+  await p.update({ collection: "community-posts", id: notice.id, user: admin, overrideAccess: false, data: { body: "合成公告改稿" } });
+  current = await row(notice.id); expect(current.status).toBe("needsReview"); expect(current.approvedSnapshot).toEqual(snapshot);
+});
+it("活动改为公告必须复审，保留原来源键、原答卷及唯一升推记录", async () => {
+  const value = await activity(p, "community-posts", post, member), receipt = await submitSignup(p, "community-posts", post, member, value.version, { name: "合成历史答卷" }); receipts.push(receipt.id);
+  let current = await change(execution, "promote", undefined, "合成活动主动升推");
+  const id = current.id;
+  await p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, context: { manageSignupForm: true },
+    data: { category: "notice", signupForm: { enabled: false, questions: [] } } });
+  expect((await row()).status).toBe("needsReview");
+  current = await change(admin, "submit", await row()); current = await change(vice, "approve", current);
+  expect(current.id).toBe(id); expect(current.kind).toBe("notice"); expect(current.sourceKey).toBe("community-posts:" + post);
+  expect((await p.findByID({ collection: "event-signups", id: receipt.id, user: member, overrideAccess: false })).answers).toEqual({ name: "合成历史答卷" });
 });

@@ -84,3 +84,22 @@ test("活动网页申请/撤回/退回/重提/审核/改稿复审及主动升降
     expect((await p.findByID({ collection: "event-signups", id: receipt.id, user: member, overrideAccess: false })).id).toBe(receipt.id);
   } finally { await staffContext.close(); await memberContext.close(); }
 });
+test("公告网页申请由宣传部骨干审核，社团首页链接原公告且不出现报名", async ({ page, browser }) => {
+  const notice = await p.create({ collection: "community-posts", user: admin, overrideAccess: false, data: { game, author: admin.id, title: "合成网页升推公告", body: "合成公告说明", category: "notice" } }); postIDs.push(notice.id);
+  const staffContext = await browser.newContext();
+  try {
+    await login(page, admin); const sourcePath = "/community/" + slug + "/updates/" + notice.id;
+    await page.goto(sourcePath); await expect(page.getByRole("button", { name: "核对并提交" })).toHaveCount(0);
+    await page.getByRole("link", { name: "申请社团级展示", exact: true }).click();
+    const source = page.locator('[data-promotion-source="community-posts:' + notice.id + '"]');
+    await source.getByLabel("升推理由", { exact: true }).fill("合成公告对社团成员有帮助");
+    await source.getByRole("button", { name: "申请升推", exact: true }).click(); await expect(page.getByRole("status")).toContainText("升推结果已保存");
+    const pending = (await p.find({ collection: "content-promotions", user: admin, overrideAccess: false, where: { sourceKey: { equals: "community-posts:" + notice.id } } })).docs[0];
+    const staff = await staffContext.newPage(); await login(staff, publicity); await staff.goto("/community/promotions?view=review");
+    await staff.locator('[data-promotion-record="' + pending.id + '"]').getByRole("button", { name: "通过升推", exact: true }).click(); await expect(staff.getByRole("status")).toContainText("升推结果已保存");
+    await page.goto("/"); const projected = page.locator('[data-section="promoted-notice"] [data-promotion-source="community-posts:' + notice.id + '"]');
+    await expect(projected.getByRole("link", { name: "合成网页升推公告", exact: true })).toHaveAttribute("href", sourcePath);
+    await projected.getByRole("link", { name: "合成网页升推公告", exact: true }).click(); await expect(page).toHaveURL(new RegExp("/updates/" + notice.id + "$"));
+    await expect(page.getByRole("button", { name: "核对并提交" })).toHaveCount(0);
+  } finally { await staffContext.close(); }
+});

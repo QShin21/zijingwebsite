@@ -14,6 +14,6 @@ export default async function Update({ params, searchParams }: { params: Promise
   return <article className="community-article panel"><Link href={`/community/${slug}/updates`}>← 活动与通知</Link><h2>{post.title}</h2><p>{post.authorName} · {formatDate(post.createdAt)}</p>
     <p className="preserve thread-body">{post.body}</p><p role="status">{(await searchParams).message}</p>
   {post.category === "event" && <ActivitySignup kind="community-posts" id={post.id} />}
-  {post.category === "event" && (managesGame(user, game.id) || canReviewPromotion(user)) && <Link className="button light" href={"/community/promotions?source=community-posts&id=" + post.id}>申请社团级展示</Link>}
+  {(managesGame(user, game.id) || canReviewPromotion(user)) && <Link className="button light" href={"/community/promotions?source=community-posts&id=" + post.id}>申请社团级展示</Link>}
   </article>;
 }
