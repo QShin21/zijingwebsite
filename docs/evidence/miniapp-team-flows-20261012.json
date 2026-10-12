@@ -1,14 +1,19 @@
 {
   "date": "2026-10-12",
   "branch": "codex/miniapp-club-flows-20261012",
-  "phase": "baseline-frozen-before-team-integration",
+  "phase": "core-native-slice-frozen-before-honor-write-integration",
   "preTeamBaseline": {
     "headSha": "72f580f7806d09b8e249f45c63ae215f190f5fcf",
     "lifecycleFixCommit": "b2adf41c350c4ac27388fdf427450a8d8b5d7938",
     "independentReview": "parent confirmed lifecycle P2 closed",
     "syntheticTestsPassed": 253,
     "lifecycleTestsPassed": 72,
-    "package": { "pages": 17, "files": 105, "bytes": 259536, "domainChecking": true },
+    "package": {
+      "pages": 17,
+      "files": 105,
+      "bytes": 259536,
+      "domainChecking": true
+    },
     "ci": {
       "runId": 38218742756,
       "headSha": "72f580f7806d09b8e249f45c63ae215f190f5fcf",
@@ -20,19 +25,251 @@
     "evidence": "docs/evidence/miniapp-club-flows-20261012.json"
   },
   "coreDependency": {
-    "requiredCommit": "5f28f95377e9ea4fbf6e4afc54b6cb88e969d33a",
-    "ci": {
-      "runId": 38218255813,
-      "headSha": "5f28f95377e9ea4fbf6e4afc54b6cb88e969d33a",
+    "requiredCommit": "bf6665c57d83ffa269845c76ff6903d23e0510de",
+    "initialContract": {
+      "requiredCommit": "5f28f95377e9ea4fbf6e4afc54b6cb88e969d33a",
+      "ci": {
+        "runId": 38218255813,
+        "headSha": "5f28f95377e9ea4fbf6e4afc54b6cb88e969d33a",
+        "status": "completed",
+        "conclusion": "success",
+        "completedAt": "2026-10-12T07:57:16Z",
+        "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38218255813"
+      },
+      "historicalReceiptCorrection": "pending final parent contract; no client ACL bypass"
+    },
+    "historicalReceiptCorrection": "integrated: original snapshot only; all native application actions false; core original withdrawal policy preserved",
+    "finalCI": {
+      "runId": 38224075245,
+      "headSha": "bf6665c57d83ffa269845c76ff6903d23e0510de",
       "status": "completed",
       "conclusion": "success",
-      "completedAt": "2026-10-12T07:57:16Z",
-      "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38218255813"
+      "completedAt": "2026-10-12T08:51:51Z",
+      "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38224075245"
     },
-    "historicalReceiptCorrection": "pending final parent contract; no client ACL bypass"
+    "commitMap": [
+      {
+        "source": "5866adcd8a638273f23f2f66e3992e48f2a46873",
+        "local": "27fe744cdc93e0045f21349f5a3cc7c285406d57"
+      },
+      {
+        "source": "e74e6a4fa7281bcd2edcf667343b9e653380f40d",
+        "local": "b708341ca8e3a7c7ee6d6236ca9cba7e4e8878f6"
+      },
+      {
+        "source": "567e359907418a2ebdb14833cfc5838901a09892",
+        "local": "9580f8deb5d39fef3f651b2d2521b928f5308a53"
+      },
+      {
+        "source": "aec6f2675fbbe6074ad3867cff21e6fc69c6adaa",
+        "local": "fe5f70f566777024b55c524beadc8fc7cc08a6f5"
+      },
+      {
+        "source": "88c0653dbc32dd36b706fd3a8f6e97925711eca6",
+        "local": "de1ec818ba29e5b06e4f69c9f2e7e9a5eebe1a0e"
+      },
+      {
+        "source": "5f28f95377e9ea4fbf6e4afc54b6cb88e969d33a",
+        "local": "b062b4abbbac0da2343d7998f32b20e7ab3925d4"
+      },
+      {
+        "source": "cb1f0de04df959cb95099898c309bb02926abdbe",
+        "local": "164e4456b24860a7c67fb3b468114082b935d198"
+      },
+      {
+        "source": "bf6665c57d83ffa269845c76ff6903d23e0510de",
+        "local": "9dc3bb66de79c9d0e8a2b71f1565a4fd8db9d13b"
+      }
+    ]
   },
   "currentSourceUploaded": false,
   "officialSimulatorVerified": false,
   "physicalDeviceVerified": false,
-  "platformConfigurationVerified": false
+  "platformConfigurationVerified": false,
+  "preHonorWriteSlice": {
+    "sourceHead": "e71e1b0d232b39a39ea7ffbe481ae3ab56b23faa",
+    "unitAndDatabase": {
+      "files": 48,
+      "passed": 758,
+      "failed": 0,
+      "skipped": 0,
+      "success": true,
+      "report": "/tmp/zijing-miniapp-team-unit-20261012.json"
+    },
+    "miniappSuites": {
+      "files": 18,
+      "passed": 502
+    },
+    "targetCounts": {
+      "originalSignupLifecycle": 72,
+      "teamSignup": 72,
+      "teamWorkspaces": 73,
+      "profilesSDK": 70,
+      "honorReadOnlySDK": 12,
+      "teamReadAPI": 21,
+      "teamRealSQLHTTP": 6,
+      "staffReviewLifecycle": 21,
+      "communityWriteLifecycle": 34,
+      "HTTPTransport": 9
+    },
+    "browser": {
+      "passed": 9,
+      "files": [
+        "tests/e2e/team-core-review.spec.ts",
+        "tests/e2e/team-core.spec.ts",
+        "tests/e2e/staff-recruitment.spec.ts"
+      ],
+      "scope": "Real Next HTTP and Chromium; only isolated synthetic SQL fixtures; not WeChat",
+      "duration": "2.5m",
+      "lastRun": "test-results/.last-run.json"
+    },
+    "package": {
+      "pages": 23,
+      "files": 132,
+      "bytes": 384150,
+      "domainChecking": true,
+      "nativeDependencies": 0
+    },
+    "checks": {
+      "typecheck": "passed",
+      "lint": "passed",
+      "build": "passed exit0; generic compilation warning without diagnostic text",
+      "diffCheck": "passed"
+    },
+    "sourceCommits": {
+      "httpCredentialAndOrigin": "673488b0fd2403784d4d2017bb31b1a06549a20b",
+      "communityLocks": "6d0055b63c0885415fa7c48c7100e1bec7d4a750",
+      "teamGETCompatibility": "62c5a3fd84c4cd423ba0df830d5658475c1e7ffc",
+      "staffReviewLocks": "029a2a19f0e89d01237011bf6c7348e47f76cb2e",
+      "profileConsumer": "85340fcdeb3ec6bbf697a7d9e38dfb5d28b097f0",
+      "honorReadOnlyConsumer": "bdcaa95f247c12ceaa8b2122cfa8a4a1234f3824",
+      "teamNative": "e71e1b0d232b39a39ea7ffbe481ae3ab56b23faa"
+    }
+  },
+  "honorWriteIntegration": {
+    "requiredCommit": "196ebf841c77f7a725ed6b41100cd66b341faea5",
+    "state": "authorized contract read; implementation and unified verification pending",
+    "profileRequiredCommit": "3ba056c3dde350b51f28ea72792fe17d54e96b84",
+    "CIReportedByParent": {
+      "runId": 38227427404,
+      "unit": 282,
+      "browser": 65
+    }
+  },
+  "questionnaireUnchanged": {
+    "miniprogram/src/lib/questionnaire.js": {
+      "sha256": "8a30c13b9e5b645f8fb4541b1a5fb0c20a5878987d22a1ec516e93c19cd398ab",
+      "equalsFrozen031Slice": true
+    },
+    "miniprogram/src/templates/questionnaire.wxml": {
+      "sha256": "185033b8bde8a7c85b4093ec8b5ea54723047286f21e1974f4b8abc91283804a",
+      "equalsFrozen031Slice": true
+    }
+  },
+  "database": {
+    "host": "127.0.0.1",
+    "port": 55578,
+    "name": "miniapp_team_qa",
+    "syntheticOnly": true,
+    "automaticSchemaPush": false,
+    "migration": "baseline + staff 050000 + existing core 160000 applied once before final core corrections; no production",
+    "coreDrill": {
+      "legacyTablesPreserved": 62,
+      "rowsPreserved": 9,
+      "legacyHash": "90e1becafbe6552888fe3a107ade12f7a0e0f4be6a5cf218d30eb88fa202b633",
+      "noImplicitMembership": true,
+      "legacyTeamUnestablished": true,
+      "repeatNoop": true,
+      "downBlocked": true
+    }
+  },
+  "regressionProofs": {
+    "httpCredential": {
+      "before": {
+        "report": "/tmp/zijing-miniapp-http-before-20261012.json",
+        "total": 9,
+        "passed": 0,
+        "failed": 2,
+        "skipped": 7
+      },
+      "after": {
+        "report": "/tmp/zijing-miniapp-http-after-20261012.json",
+        "total": 9,
+        "passed": 9,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    "communityLocks": {
+      "before": {
+        "report": "/tmp/zijing-community-writes-before-20261012.json",
+        "total": 34,
+        "passed": 1,
+        "failed": 33,
+        "skipped": 0
+      },
+      "after": {
+        "report": "/tmp/zijing-community-writes-after-20261012.json",
+        "total": 64,
+        "passed": 64,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    "teamLocks": {
+      "before": {
+        "report": "/tmp/zijing-miniapp-team-before-20261012.json",
+        "total": 56,
+        "passed": 0,
+        "failed": 14,
+        "skipped": 42
+      },
+      "after": {
+        "report": "/tmp/zijing-miniapp-team-after-20261012.json",
+        "total": 70,
+        "passed": 70,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    "reviewActions": {
+      "before": {
+        "report": "/tmp/zijing-team-review-actions-before-20261012.json",
+        "total": 73,
+        "passed": 70,
+        "failed": 3,
+        "skipped": 0
+      },
+      "after": {
+        "report": "/tmp/zijing-team-review-actions-after-20261012.json",
+        "total": 73,
+        "passed": 73,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    "profileLateACK": {
+      "before": {
+        "report": "/tmp/zijing-miniapp-profile-ack-before-20261012.json",
+        "total": 70,
+        "passed": 0,
+        "failed": 5,
+        "skipped": 65
+      },
+      "after": {
+        "report": "/tmp/zijing-miniapp-profile-ack-after-20261012.json",
+        "total": 70,
+        "passed": 5,
+        "failed": 0,
+        "skipped": 65
+      }
+    }
+  },
+  "officialDocs": {
+    "date": "2026-10-12",
+    "platformPagesReadable": false,
+    "failure": "non-retryable error / HTTPS CONNECT403; search no reliable official body",
+    "officialAPIRepositoryHEAD": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+    "scope": "API declarations only; platform requirements and audit acceptance unverified"
+  }
 }

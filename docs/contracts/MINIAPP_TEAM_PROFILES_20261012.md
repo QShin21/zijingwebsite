@@ -60,6 +60,8 @@ GET 原文字保持原样。公开行与本人资料采用字段白名单；原�
 
 独立复核发现“旧页 PUT 已确认 rev4，hide/show 后 GET 失败，用户再点保存仍发送 rev3”的边界。追加五条回归，修前 0 通过/5 失败，修后五条通过；覆盖先 show/先完成、GET 失败后同周期/新周期重读及迟到失败草稿。临时合成报告为 `/tmp/zijing-miniapp-profile-ack-before-20261012.json`、`/tmp/zijing-miniapp-profile-ack-after-20261012.json`。这是用户再次点击导致的旧 PUT，未称为客户端自动重试。
 
+本切片实际执行：`pnpm exec vitest run tests/miniapp-team-profiles.test.ts --reporter=dot` 70 通过；两个新测试文件目标 ESLint、`pnpm exec tsc --noEmit --pretty false` 通过；`pnpm miniapp:check` 静态检查通过（当时 23 页、132 文件、384150 B、域名校验开启、原生依赖 0）。检查结果不包含微信编译器、模拟器、真机或审核。
+
 总集成后按以下步骤验证，仅用隔离合成账号和资料：
 
 1. 引入精确简介后端及其已审迁移依赖后，在隔离服务确认 GET/PUT 合同与网页原周期回归；原生分支不自行增加服务器接口。
