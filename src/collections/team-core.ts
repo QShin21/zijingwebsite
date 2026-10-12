@@ -1,4 +1,4 @@
-import { APIError, type Access, type CollectionConfig, type CollectionBeforeChangeHook, type Field, type Where } from "payload";
+import { APIError, type Access, type CollectionConfig, type CollectionBeforeChangeHook, type Field, type RelationshipField, type Where } from "payload";
 import type { User } from "../payload-types";
 import { canParticipate, canPublish, communityIDs, relationID } from "../lib/rules";
 import { currentTeamActor } from "../lib/team-memberships";
@@ -26,7 +26,7 @@ const guard: CollectionBeforeChangeHook = ({ req, data }) => {
   if (req.context.teamCoreWrite !== true) throw new APIError("请使用代表队工作台操作", 403);
   return data;
 };
-const rel = (name: string, relationTo: "users" | "games" | "teams" | "team-establishment-applications" | "team-recruitments" | "team-join-applications", required = true): Field =>
+const rel = (name: string, relationTo: "users" | "games" | "teams" | "team-establishment-applications" | "team-recruitments" | "team-join-applications", required = true): RelationshipField =>
   ({ name, type: "relationship", relationTo, required, maxDepth: 0, index: true });
 const note: Field = { name: "reviewNote", label: "审核意见", type: "textarea", maxLength: 1000 };
 const reviewed: Field[] = [note, rel("reviewedBy", "users", false), { name: "reviewedAt", type: "date" }];
