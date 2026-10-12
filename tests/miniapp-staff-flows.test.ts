@@ -14,7 +14,7 @@ type Application = {
   questions: SignupForm['questions']; answers: Answers; feedback?: string;
 };
 type StaffInfo = Record<string, unknown> & {
-  title: string; form: SignupForm; version: string; state: string;
+  title: string; form: SignupForm | null; version: string; state: string;
   application: Application | null;
   actions: Partial<Record<'submit' | 'edit' | 'withdraw' | 'review', boolean>>;
 };
@@ -157,6 +157,17 @@ function visibleGuard(path: string, marker: string, data: Record<string, unknown
 }
 
 describe('原生骨干申请：服务端动作和本人回执', () => {
+  it('撤下批次的空表单仍显示本人原题目回执，不能恢复填答或发送写请求', async () => {
+    const original = saved('submitted');
+    const { page, request } = await signupHarness(info({ form: null, state: '批次已撤下，仅可查看回执', application: original, actions: {} }));
+    expect(page.data.info?.state).toBe('批次已撤下，仅可查看回执');
+    expect(page.data.receipt).toMatchObject({ id: original.id, answers: original.answers });
+    expect(page.data.form.enabled).toBe(false); expect(page.data.form.questions).toEqual([]);
+    expect(page.data.error).toBe(''); expect(page.data.loading).toBe(false);
+    page.editAnswers(); page.setData({ review: true }); await page.submit(); await page.withdraw();
+    expect(page.data.responseEditing).toBe(false); expect(writes(request)).toHaveLength(0);
+    expect(visibleGuard('miniprogram/src/pages/signup/index.wxml', 'form.enabled && (staff ?', page.data)).toBe(false);
+  });
   it.each([
     { state: '已截止', status: 'submitted' },
     { state: '申请开放', status: 'accepted' },

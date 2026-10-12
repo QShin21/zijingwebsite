@@ -40,6 +40,17 @@ describe('小程序账号与网络边界', () => {
     expect(saved).toBeNull();
     expect(request.mock.calls[0][0].url).toBe('https://home.thuzijing.top/api/games');
   });
+  it('旧账号的迟到401仅拒绝旧请求，换账号后的当前会话继续保留', async () => {
+    login();
+    const pending = http.request('/api/miniapp/staff/71', { required: true });
+    const failed = expect(pending).rejects.toMatchObject({ status: 401 });
+    session.save({ token: 'next-fixture-token', exp: 9999999999,
+      user: { id: 6, name: '合成新账号', accountStatus: 'active', roles: ['member'] } });
+    request.mock.calls[0][0].success({ statusCode: 401, data: {} });
+    await failed;
+    expect(session.token()).toBe('next-fixture-token'); expect(session.user().id).toBe(6);
+    expect(request.mock.calls[0][0].header.Authorization).toBe('JWT fixture-token');
+  });
   it('内部异常与 HTML 错误页不会被当作成功业务数据', async () => {
     expect(http.message({ error: 'SQL error with secret' }, 500)).not.toContain('secret');
     request.mockImplementation(options => options.success({ statusCode: 200, data: '<!DOCTYPE html><html />' }));

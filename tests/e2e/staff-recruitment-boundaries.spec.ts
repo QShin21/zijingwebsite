@@ -94,6 +94,14 @@ test("发布后保存新草稿，本人旧链接及列表回执可读，游客�
     expect(infoResponse.headers()["cache-control"]).toBe("private, no-store");
     const info = await infoResponse.json(); expect(info).toMatchObject({ title: batch.title, state: "批次已撤下，仅可查看回执", form: null, version: saved.formVersion, application: { id: saved.id, feedback: "合成本人可见反馈" } });
     expect(info.application.reviewNotes).toBeUndefined(); expect(info.draftKey).toBeUndefined(); expect(JSON.stringify(info)).not.toContain(draftTitle);
+    const nativeResponse = await page.request.get("/api/miniapp/staff/" + batch.id, { headers: origin });
+    expect(nativeResponse.status()).toBe(200); expect(nativeResponse.headers()["cache-control"]).toBe("private, no-store");
+    const native = await nativeResponse.json();
+    expect(native).toMatchObject({ title: info.title, form: null, version: saved.formVersion, state: info.state,
+      application: { id: saved.id, answers: saved.answers, updatedAt: saved.updatedAt }, actions: { submit: false, edit: false, withdraw: false } });
+    for (const privateValue of [draftTitle, draftDescription, "private_draft", "仅管理层历史备注-" + suffix, "reviewNotes", "history", "requestKey"]) expect(JSON.stringify(native)).not.toContain(privateValue);
+    const ownList = await (await page.request.get("/api/staff-applications?depth=0&where[applicant][equals]=" + member.id + "&select[batch]=true&select[batchTitle]=true&select[status]=true&select[updatedAt]=true", { headers: origin })).json();
+    expect(ownList.docs).toEqual(expect.arrayContaining([expect.objectContaining({ id: saved.id, batch: batch.id, batchTitle: batch.title })]));
     await page.goto(path(batch)); await page.reload();
     await expect(page.getByRole("heading", { name: batch.title, exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "选拔处理中 · 申请编号 " + saved.id })).toBeVisible();
@@ -114,13 +122,39 @@ test("发布后保存新草稿，本人旧链接及列表回执可读，游客�
     expect(unchanged.updatedAt).toBe(saved.updatedAt); expect(unchanged.answers).toEqual(saved.answers); expect(unchanged.history).toEqual(saved.history);
     expect((await outsider.request.get(path(batch), { headers: origin })).status()).toBe(404);
     expect((await outsider.request.get(endpoint(batch), { headers: origin })).status()).toBe(404);
+    expect((await outsider.request.get("/api/miniapp/staff/" + batch.id, { headers: origin })).status()).toBe(404);
     expect((await outsider.request.get("/api/staff-batches/" + batch.id, { headers: origin })).status()).toBe(404);
     expect((await outsider.request.post(endpoint(batch), { headers: origin, data: { version: saved.formVersion, answers } })).status()).toBe(404);
     await outsider.goto("/join/staff"); await expect(outsider.locator('[data-staff-receipt="' + saved.id + '"]')).toHaveCount(0); await expect(outsider.getByText(draftTitle, { exact: true })).toHaveCount(0);
     expect((await request.get(endpoint(batch))).status()).toBe(404);
+    expect((await request.get("/api/miniapp/staff/" + batch.id)).status()).toBe(401);
     const guestPage = await request.get(path(batch), { maxRedirects: 0 }); expect(guestPage.status()).toBe(307); expect(guestPage.headers().location).toContain("/login");
     expect(await guestPage.text()).not.toContain(batch.title);
   } finally { await managerContext.close(); await otherContext.close(); }
+});
+
+test("原生同形审核请求缺省保留内部备注，显式清空仍生效，普通申请人读取与审核均隔离", async ({ page, browser }) => {
+  const batch = await createBatch(), managerContext = await browser.newContext();
+  try {
+    await login(page, member); const own = await apply(page, batch);
+    const manager = await managerContext.newPage(); await login(manager, president);
+    const initial = await manager.request.post(endpoint(batch), { headers: origin, data: { action: "review", id: own.id, revision: own.updatedAt,
+      status: "reviewing", feedback: "合成选拔反馈", reviewNotes: "合成已有网页私有备注" } });
+    expect(initial.status()).toBe(200); const noted = (await initial.json()).application;
+    const returned = await manager.request.post(endpoint(batch), { headers: origin, data: { action: "review", id: own.id, revision: noted.updatedAt,
+      status: "returned", feedback: "合成原生审核退回反馈" } });
+    expect(returned.status()).toBe(200); const result = (await returned.json()).application;
+    expect(result.id).toBe(own.id); expect(result.reviewNotes).toBe("合成已有网页私有备注");
+    expect((await p.findByID({ collection: "staff-applications", id: own.id, user: president, overrideAccess: false })).reviewNotes).toBe("合成已有网页私有备注");
+    const native = await (await page.request.get("/api/miniapp/staff/" + batch.id, { headers: origin })).json();
+    expect(native.application).toMatchObject({ id: own.id, status: "returned", feedback: "合成原生审核退回反馈", updatedAt: result.updatedAt });
+    expect(JSON.stringify(native)).not.toContain("合成已有网页私有备注"); expect(native.application.reviewNotes).toBeUndefined();
+    expect((await page.request.get("/api/miniapp/staff/" + batch.id + "?mode=review", { headers: origin })).status()).toBe(403);
+    expect((await page.request.post(endpoint(batch), { headers: origin, data: { action: "review", id: own.id, revision: result.updatedAt, status: "accepted", context: { system: true } } })).status()).toBe(403);
+    const cleared = await manager.request.post(endpoint(batch), { headers: origin, data: { action: "review", id: own.id, revision: result.updatedAt,
+      status: "returned", feedback: "合成明确保留退回", reviewNotes: "" } });
+    expect(cleared.status()).toBe(200); expect((await cleared.json()).application.reviewNotes).toBe("");
+  } finally { await managerContext.close(); }
 });
 
 for (const finalStatus of ["accepted", "rejected"] as const) test(finalStatus + " 最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充", async ({ page, browser }) => {
@@ -131,6 +165,8 @@ for (const finalStatus of ["accepted", "rejected"] as const) test(finalStatus + 
     const manager = await managerContext.newPage(); await login(manager, vice);
     const response = await manager.request.post(endpoint(batch), { headers: origin, data: { action: "review", id: receipt.id, revision: receipt.updatedAt, status: finalStatus, feedback: "合成最终结果反馈", reviewNotes: "合成最终结果私有备注" } });
     expect(response.status()).toBe(200); const final = (await response.json()).application;
+    const nativeQueue = await (await manager.request.get("/api/miniapp/staff/" + batch.id + "?mode=review", { headers: origin })).json();
+    expect(nativeQueue.docs.find((row: { id: number }) => row.id === final.id).actions.reviewStatuses).toEqual(["returned", finalStatus]);
     for (const feedback of ["", "尝试改变可见反馈"]) {
       const invalid = await manager.request.post(endpoint(batch), { headers: origin, data: { action: "review", id: final.id, revision: final.updatedAt, status: "reviewing", feedback } });
       expect(invalid.status()).toBe(409); expect((await invalid.json()).error).toContain("先明确退回补充");
@@ -265,6 +301,10 @@ test("保存与发布拒绝跳过核心资料的分支，合法扩展分支可�
     for (const [applicantPage, receipt] of [[applicant, own], [outsider, otherReceipt]] as const) {
       const archived = await applicantPage.request.get(endpoint(batch), { headers: origin }); expect(archived.status()).toBe(200);
       expect(await archived.json()).toMatchObject({ form: null, state: "批次已撤下，仅可查看回执", application: { id: receipt.id, answers: receipt.answers } });
+      const nativeArchived = await applicantPage.request.get("/api/miniapp/staff/" + batch.id, { headers: origin });
+      expect(nativeArchived.status()).toBe(200);
+      expect(await nativeArchived.json()).toMatchObject({ form: null, version: receipt.formVersion,
+        state: "批次已撤下，仅可查看回执", application: { id: receipt.id, questions: receipt.questions, answers: receipt.answers } });
       expect((await applicantPage.goto(path(batch)))?.status()).toBe(200); await expect(applicantPage.getByRole("heading", { name: "已提交 · 申请编号 " + receipt.id })).toBeVisible();
       expect((await applicantPage.request.get("/api/staff-applications/" + (receipt.id === own.id ? otherReceipt.id : own.id), { headers: origin })).status()).toBe(404);
     }

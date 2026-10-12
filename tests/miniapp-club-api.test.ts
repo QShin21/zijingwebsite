@@ -188,6 +188,22 @@ describe("人工进群与管理队列", () => {
 });
 
 describe("单份骨干申请与现有问卷兼容", () => {
+  it("撤下批次仅返回原回执与原version，残缺跳转快照不重建为表单", async () => {
+    const archived = { ...staffApplication, formVersion: "saved-historical-version", questions: [
+      { ...defaultStaffForm.questions[7], jumps: [{ when: { mode: "all", rules: [{ questionId: "works", operator: "equals", value: "合成" }] }, target: "omitted_target" }] },
+    ] };
+    mocked.batch.mockRejectedValueOnce(new APIError("记录不存在", 404));
+    mocked.ownStaff.mockResolvedValueOnce(archived);
+    const response = await get("staff/6"), data = await response.json();
+    expect(response.status).toBe(200);
+    expect(data).toMatchObject({ title: archived.batchTitle, form: null, version: archived.formVersion,
+      state: "批次已撤下，仅可查看回执", application: { id: archived.id, questions: archived.questions },
+      actions: { submit: false, edit: false, withdraw: false, review: false } });
+    expect(data.draftKey).toBeUndefined(); expect(data.description).toBeUndefined();
+    expect(JSON.stringify(data)).not.toMatch(/reviewNotes|history|private-staff-key/);
+    mocked.batch.mockRejectedValueOnce(new APIError("记录不存在", 404)); mocked.ownStaff.mockResolvedValueOnce(null);
+    expect((await get("staff/6")).status).toBe(404);
+  });
   it("详情使用既有form/version/窗口，本人回执不暴露内部备注、history或requestKey", async () => {
     const data = await (await get("staff/6")).json();
     expect(mocked.ownStaff).toHaveBeenCalledWith(p, fresh, batch.id); expect(mocked.batch).toHaveBeenCalledWith(p, batch.id);
@@ -234,5 +250,11 @@ describe("单份骨干申请与现有问卷兼容", () => {
     mocked.reviewStaff.mockRejectedValueOnce(new APIError("无权读取或导出骨干候选资料", 403));
     expect((await get("staff/6", "?mode=review")).status).toBe(403);
     expect(mocked.ownStaff).not.toHaveBeenCalled();
+  });
+  it.each(["accepted", "rejected"])("%s终态仅提供原结果和明确退回，不能直接切换结果或进入选拔", async status => {
+    fresh = president;
+    mocked.reviewStaff.mockResolvedValueOnce({ batch, result: paged([{ ...staffApplication, status }]) });
+    const data = await (await get("staff/6", "?mode=review")).json();
+    expect(data.docs[0].actions.reviewStatuses).toEqual(["returned", status]);
   });
 });

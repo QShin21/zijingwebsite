@@ -35,6 +35,16 @@ export function TeamProfilesPanel({
   const [locked, setLocked] = useState(false),
     [reloadKey, setReloadKey] = useState(0);
   const fileInput = useRef<HTMLInputElement>(null);
+  const editButton = useRef<HTMLButtonElement>(null),
+    nicknameInput = useRef<HTMLInputElement>(null),
+    focusTarget = useRef<"entry" | "name" | null>(null);
+
+  useEffect(() => {
+    if (!focusTarget.current) return;
+    const control = focusTarget.current === "entry" ? editButton.current : nicknameInput.current;
+    control?.focus();
+    focusTarget.current = null;
+  }, [editing, preview]);
 
   useEffect(() => {
     const turn = ++generation.current,
@@ -184,6 +194,7 @@ export function TeamProfilesPanel({
     }
   }
   function cancel() {
+    focusTarget.current = "entry";
     setDraft(original ?? emptyTeamProfile());
     setPreview(false);
     setEditing(false);
@@ -210,9 +221,10 @@ export function TeamProfilesPanel({
         </div>
         {editable && !editing && (
           <button
+            ref={editButton}
             type="button"
             className="button light"
-            onClick={() => setEditing(true)}
+            onClick={() => { focusTarget.current = "name"; setEditing(true); }}
           >
             编辑我的队内简介
           </button>
@@ -267,6 +279,7 @@ export function TeamProfilesPanel({
               <label>
                 公开昵称
                 <input
+                  ref={nicknameInput}
                   value={draft.displayName}
                   onChange={(event) =>
                     change("displayName", event.target.value)
@@ -361,7 +374,7 @@ export function TeamProfilesPanel({
                   type="button"
                   className="button light"
                   disabled={busy}
-                  onClick={() => setPreview(false)}
+                  onClick={() => { focusTarget.current = "name"; setPreview(false); }}
                 >
                   返回修改
                 </button>

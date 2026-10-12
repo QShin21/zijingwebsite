@@ -2,7 +2,7 @@ import { APIError, type Payload } from "payload";
 import type { CommunityApplication, CommunityJoin, StaffApplication, StaffBatch, User } from "../payload-types";
 import { canHandleCommunityJoins, canManageStaffRecruitment, canParticipate, canReviewCommunityApplication, relationID } from "./rules";
 import { currentStaffBatches, ownStaffApplication, publicStaffBatch, readStaffApplications } from "./staff-recruitment";
-import { staffDeadlinePolicy, staffForm, staffPrivacy, staffWindow } from "./staff-recruitment-model";
+import { canReviewStaffTransition, staffDeadlinePolicy, staffForm, staffPrivacy, staffWindow } from "./staff-recruitment-model";
 import { formVersion } from "./activity-signups";
 import { promotedContent } from "./content-promotions";
 import { changeCommunityJoin, decideCommunityApplication, editCommunityApplication, updateCommunityCard } from "./community-operations";
@@ -90,15 +90,16 @@ export async function miniappClubGET(p: Payload, request: Request, path: string)
     if (query.get("mode") === "review") {
       const { result } = await readStaffApplications(p, user, batchID, query);
       return pageResult(result, result.docs.map(row => ({ ...staffReceipt(row), actions: {
-        reviewStatuses: row.status === "withdrawn" ? [] : ["reviewing", "returned", "accepted", "rejected"] } })));
+        reviewStatuses: ["reviewing", "returned", "accepted", "rejected"].filter(status => canReviewStaffTransition(row.status, status)) } })));
     }
     const application = await ownStaffApplication(p, user, batchID), batch = await publicStaffBatch(p, batchID).catch(() => null);
     if (!batch && !application) throw new APIError("批次尚未发布或已移除", 404);
-    const form = batch ? staffForm(batch.signupForm) : staffForm({ enabled: true, questions: application!.questions });
-    const version = formVersion(form), state = batch ? staffWindow(batch) : "批次已撤下，仅可查看回执";
+    // Submitted questions are a receipt snapshot, not a reusable questionnaire.
+    const form = batch ? staffForm(batch.signupForm) : null;
+    const version = form ? formVersion(form) : application!.formVersion, state = batch ? staffWindow(batch) : "批次已撤下，仅可查看回执";
     const open = state === "申请开放", final = Boolean(application && ["accepted", "rejected"].includes(application.status));
     return { title: batch?.title ?? application!.batchTitle, description: batch?.description, startAt: batch?.startAt, endAt: batch?.endAt,
-      form, version, state, loggedIn: true, draftKey: "staff:" + batchID + ":" + user.id + ":" + version,
+      form, version, state, loggedIn: true, draftKey: batch ? "staff:" + batchID + ":" + user.id + ":" + version : undefined,
       application: application ? staffReceipt(application) : null,
       actions: { submit: open && (!application || application.status === "withdrawn"), edit: open && Boolean(application) && !final,
         withdraw: open && Boolean(application && application.status !== "withdrawn") && !final, review: canManageStaffRecruitment(user) },

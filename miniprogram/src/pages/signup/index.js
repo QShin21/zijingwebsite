@@ -69,7 +69,7 @@ Page({
       if(this.data.edit&&!info.canManage&&info.canViewSignups){this.setData({tab:'entries'});await this.loadEntries(1);}
     }catch(cause){if(this.validRead(ticket,userId,endpoint)){this._loaded=false;error(this,cause);}}
   },
-  setForm(form) { const start=localParts(form.start),end=localParts(form.end);this.setData({form,advancedEditing:form.questions.some(q=>!types.includes(q.type)||q.showWhen||q.display||q.jumps?.length),editQuestions:form.questions.map(q=>({...q,typeIndex:types.indexOf(q.type),typeLabel:questionnaire.questionTypes[q.type],optionsText:q.options.join('\n')})),startDate:start.date,startTime:start.time,endDate:end.date,endTime:end.time}); },
+  setForm(form) { form=form||questionnaire.normalizeSignup({enabled:false,questions:[]});const start=localParts(form.start),end=localParts(form.end);this.setData({form,advancedEditing:form.questions.some(q=>!types.includes(q.type)||q.showWhen||q.display||q.jumps?.length),editQuestions:form.questions.map(q=>({...q,typeIndex:types.indexOf(q.type),typeLabel:questionnaire.questionTypes[q.type],optionsText:q.options.join('\n')})),startDate:start.date,startTime:start.time,endDate:end.date,endTime:end.time}); },
   renderQuestions() { this.setData(questionnaire.presentation(this.data.form,this.data.answers,this.data.step,this._seed,this.data.answerErrors)); },
   change(id,value) { if(this.data.busy)return;this.setData({answers:questionnaire.changeAnswer(this.data.form,this.data.answers,id,value),answerErrors:{},message:'',review:false});this.renderQuestions(); },
   answer(event) { this.change(event.currentTarget.dataset.id,event.detail.value); },

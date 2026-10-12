@@ -259,6 +259,19 @@ test("加载失败可重试，保存失败保留输入与预览并能实际重�
   ).toBeVisible();
 });
 
+test("简介预览返回和取消后焦点回到可继续操作的控件，不保存草稿", async ({ page }) => {
+  await login(page); await editor(page); await fill(page, "合成焦点未保存草稿");
+  await panel(page).getByRole("button", { name: "预览简介", exact: true }).click();
+  await panel(page).getByRole("button", { name: "返回修改", exact: true }).click();
+  await expect(panel(page).getByLabel("公开昵称", { exact: true })).toBeFocused();
+  await panel(page).getByRole("button", { name: "取消修改", exact: true }).click();
+  const entry = panel(page).getByRole("button", { name: "编辑我的队内简介", exact: true });
+  await expect(entry).toBeFocused(); await entry.press("Enter");
+  await expect(panel(page).getByLabel("公开昵称", { exact: true })).toBeFocused();
+  await expect(panel(page).getByLabel("公开昵称", { exact: true })).toHaveValue("");
+  expect((await (await page.request.get(`/api/team-profiles/${f.first.id}`)).json()).own.profile).toBeNull();
+});
+
 test("撤销资格后旧页面拒绝提交，旧会话读取名单也立即隐藏", async ({ page }) => {
   await saveTeamProfile(p, f.member, f.first.id, null, {
     ...emptyTeamProfile(),

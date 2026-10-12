@@ -33,7 +33,7 @@ function request(path, options = {}) {
             reject(Object.assign(new Error('此功能需要更新网站服务接口'), { status: 404 }));
           } else resolve(options.raw ? response.data : brand.display(response.data));
         } else {
-          if (response.statusCode === 401 && credential) session.clear();
+          if (response.statusCode === 401 && credential && session.token() === credential) session.clear();
           reject(Object.assign(new Error(message(response.data, response.statusCode)), { status: response.statusCode }));
         }
       },
