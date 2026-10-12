@@ -1,0 +1,349 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-12T13:13:13.577991+00:00",
+  "branch": "codex/club-integration-20261012",
+  "candidateCodeSHA": "6b6b5f6d6743d0c21ddbce2ed5b1263d0c6c33f9",
+  "rollbackCodeSHA": "466b8b96b5d870fe053af7c6757cb82a8268b8da",
+  "onlySyntheticData": true,
+  "productionAccess": false,
+  "packages": {
+    "final": {
+      "sourceSHA": "6b6b5f6d6743d0c21ddbce2ed5b1263d0c6c33f9",
+      "archiveSHA256": "0bb57c68842e8034aacadaf3e4e1d2b1c92708843a79177a05b745e89a335ebc",
+      "manifestSHA256": "8208a888421bd9a1a11caf9b848bad5f4ce62d25067f91cfe73352d936b1e619",
+      "compressedBytes": 6136037,
+      "expandedBytes": 32828315,
+      "fileCount": 833,
+      "reproducibleRepeatIdentical": true,
+      "unpackedAllFileHashesVerified": true,
+      "onlySyntheticData": true,
+      "productionAccess": false,
+      "targetPlatform": {
+        "node": "v24.12.0",
+        "platform": "linux",
+        "arch": "x64",
+        "glibc": "2.36"
+      },
+      "http": {
+        "mediaMatrixChecks": 95,
+        "privateHonorDTOIdentityChecks": 6,
+        "loginAdminReadinessStaticChecks": 14,
+        "actualMarkerEACCESChecks": 3,
+        "approvedVideoSHA256": "0300f73826c6c43b31e1ac758a1d8472bb8a95e11670315a53ea2a0d08f91f9d"
+      },
+      "runner": {
+        "fullMigrations": {
+          "count": 17,
+          "fromArtifact": "rollback",
+          "log": "/tmp/zijing-code-package-rollback-migrate.log"
+        },
+        "actualSchemaTables": 69,
+        "emptyRepeatNoOp": {
+          "fromArtifact": "final",
+          "log": "/tmp/zijing-code-package-final-migrate-repeat.log",
+          "migrationRunnerSourcesIdenticalBetweenArtifacts": true
+        },
+        "directTSXMarkerOnly": {
+          "exitCode": 1,
+          "checksComplete": true,
+          "compatibleWithBaseline": false,
+          "permanentMarkerFiles": 1
+        },
+        "directTSXEmpty": {
+          "exitCode": 0,
+          "checksComplete": true,
+          "compatibleWithBaseline": true
+        }
+      },
+      "productionDependencyFingerprintComparison": "pending separate deployment thread",
+      "sourceCI": {
+        "headSHA": "6b6b5f6d6743d0c21ddbce2ed5b1263d0c6c33f9",
+        "runID": 38248423773,
+        "jobID": 114808105556,
+        "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38248423773",
+        "status": "completed",
+        "conclusion": "success",
+        "unitTests": 1172,
+        "unitFiles": 68,
+        "browserTests": 95,
+        "browserDurationMinutes": 38.3,
+        "build": "success",
+        "actualLogCountsVerified": true
+      },
+      "native": "excluded; parent WXML correction awaits exact SHA; official GUI/device unverified",
+      "freshCatalogEvidence": "/tmp/zijing-code-package-fresh-catalog.json",
+      "targetPlatformBackupRestore": {
+        "node": "v24.12.0",
+        "glibc": "2.36",
+        "databaseServer": "17.10",
+        "pgDumpAndRestore": "17.11-1.pgdg12+2",
+        "libpq": "18.6-1.pgdg12+2 QA toolkit only; excluded from code package",
+        "manifestVersion": 3,
+        "tables": 69,
+        "records": 1840,
+        "localVideoFiles": 2,
+        "localHonorVideoFiles": 1,
+        "permanentMarkerFiles": 1,
+        "databaseAndMediaDigestsVerified": true,
+        "restoredCompiledHTTPChecks": 99,
+        "approvedBytesSHA256": "0300f73826c6c43b31e1ac758a1d8472bb8a95e11670315a53ea2a0d08f91f9d",
+        "revokedOldJWTBlocked": true,
+        "alteredBytesFailClosed": true,
+        "actualS3OrOffsite": "not performed",
+        "report": "/tmp/zijing-code-package-restore-synthetic/package-restore-report.json"
+      },
+      "failedValidationAttempts": [
+        {
+          "stage": "initial source matrix",
+          "reason": "morning synthetic JWTs expired at 12:13:57Z; actual HTTP logins refreshed for owned Storage* @example.invalid actors only",
+          "resolved": "95 plus six DTO checks passed for each artifact using refreshed tokens"
+        },
+        {
+          "stage": "first restored-runtime probe",
+          "reason": "request sent before Next listener ready",
+          "resolved": "waited for health/live 200 then passed all 99 real HTTP checks"
+        }
+      ],
+      "localExactSourceFullValidation": {
+        "unitTests": 1172,
+        "unitFiles": 68,
+        "unitDurationSeconds": 234.81,
+        "browserTests": 95,
+        "browserDurationMinutes": 31.0,
+        "typecheck": "passed",
+        "lint": "passed",
+        "static": {
+          "pages": 25,
+          "files": 142,
+          "bytes": 459637,
+          "domainChecking": true,
+          "nativeDependencies": 0
+        },
+        "sources": "ce104d3 unit and 6b6b5f6 browser; web/native source unchanged between these except packaging script and documentation",
+        "logs": [
+          "/tmp/zijing-final-frozen-all-unit.log",
+          "/tmp/zijing-final-frozen-all-e2e.log"
+        ]
+      }
+    },
+    "rollback": {
+      "sourceSHA": "466b8b96b5d870fe053af7c6757cb82a8268b8da",
+      "archiveSHA256": "6334f9e426e0ecf65065bdef4dafd597fa5174fcc8e6a1ca52f4b6e63711cde1",
+      "manifestSHA256": "fdade8e93df4e1e6142303949f3bd7a6db45cecc96b71207964a26a11ff36fec",
+      "compressedBytes": 6138996,
+      "expandedBytes": 32828519,
+      "fileCount": 833,
+      "reproducibleRepeatIdentical": true,
+      "unpackedAllFileHashesVerified": true,
+      "onlySyntheticData": true,
+      "productionAccess": false,
+      "targetPlatform": {
+        "node": "v24.12.0",
+        "platform": "linux",
+        "arch": "x64",
+        "glibc": "2.36"
+      },
+      "http": {
+        "mediaMatrixChecks": 95,
+        "privateHonorDTOIdentityChecks": 6,
+        "loginAdminReadinessStaticChecks": 14,
+        "actualMarkerEACCESChecks": 3,
+        "approvedVideoSHA256": "0300f73826c6c43b31e1ac758a1d8472bb8a95e11670315a53ea2a0d08f91f9d"
+      },
+      "runner": {
+        "fullMigrations": {
+          "count": 17,
+          "fromArtifact": "rollback",
+          "log": "/tmp/zijing-code-package-rollback-migrate.log"
+        },
+        "actualSchemaTables": 69,
+        "emptyRepeatNoOp": {
+          "fromArtifact": "final",
+          "log": "/tmp/zijing-code-package-final-migrate-repeat.log",
+          "migrationRunnerSourcesIdenticalBetweenArtifacts": true
+        },
+        "directTSXMarkerOnly": {
+          "exitCode": 1,
+          "checksComplete": true,
+          "compatibleWithBaseline": false,
+          "permanentMarkerFiles": 1
+        },
+        "directTSXEmpty": "shared unchanged runner source; empty case executed from final package"
+      },
+      "productionDependencyFingerprintComparison": "pending separate deployment thread",
+      "sourceCI": {
+        "runID": 38243234969,
+        "conclusion": "success",
+        "unitTests": 1146,
+        "webTests": 95
+      },
+      "native": "excluded; parent WXML correction awaits exact SHA; official GUI/device unverified",
+      "freshCatalogEvidence": "/tmp/zijing-code-package-fresh-catalog.json",
+      "restoredBusinessGate": {
+        "exitCode": 1,
+        "checksComplete": true,
+        "compatibleWithBaseline": false,
+        "requiresTeamCapabilities": true,
+        "requiresHonorVideoIsolation": true,
+        "counts": {
+          "backbone": 1,
+          "new_states": 0,
+          "joins": 0,
+          "promotions": 0,
+          "staff_batches": 0,
+          "staff_applications": 0,
+          "reduced_grants": 0,
+          "revoked_grants": 1,
+          "legacy_owner_private_access": 0,
+          "legacy_historical_private_access": 0,
+          "revoked_cards": 0,
+          "member_offices": 1,
+          "honor_records": 2,
+          "team_establishment_applications": 1,
+          "team_recruitments": 1,
+          "team_join_applications": 1,
+          "team_memberships": 1,
+          "team_member_profiles": 0,
+          "honor_private_files": 1,
+          "honor_video_reservations": 1
+        },
+        "purpose": "refuses 1.0 baseline while retained 466 capabilities remain usable; no code or data rollback performed"
+      }
+    }
+  },
+  "cloudDependencyFingerprint": {
+    "schemaVersion": 1,
+    "measuredPlatform": {
+      "node": "v24.12.0",
+      "platform": "linux",
+      "arch": "x64",
+      "glibc": "2.36"
+    },
+    "onlyCloudReusedDependencies": true,
+    "productionDependencyMatching": "pending deployment-thread comparison",
+    "dependencies": {
+      "next": {
+        "name": "next",
+        "version": "16.3.5",
+        "entry": ".pnpm/next@16.3.5_@babel+core@7.29.7_supports-color@7.2.0__@playwright+test@1.58.2_@types+nod_8e78d184c40346716ac8923abe8e8e93/node_modules/next/dist/server/next.js",
+        "entrySHA256": "7f5e6d550be3bfb73ca7f0668bf82dcf1130f63202c15e4d282ee5f130f75bc6",
+        "packageSHA256": "73192ad53e2c6f25f5f81177819607dff0b254548932a0a225aad09307fd6772"
+      },
+      "payload": {
+        "name": "payload",
+        "version": "3.90.1",
+        "entry": ".pnpm/payload@3.90.1_graphql@16.11.0_supports-color@7.2.0_typescript@5.9.3/node_modules/payload/dist/index.js",
+        "entrySHA256": "7e94b9e5ea492b7be10732f0899a68be900394db29cbded26d959411230d0f32",
+        "packageSHA256": "87f8bcdca2b505c17a6cd56527d22273a0cfb5eded37d1db37ae47c525648820"
+      },
+      "pg": {
+        "name": "pg",
+        "version": "8.16.3",
+        "entry": ".pnpm/pg@8.16.3/node_modules/pg/lib/index.js",
+        "entrySHA256": "a012ecbe7fdefed8d2b36c3658e33dc4c291d0bb60df18d382300061211052b7",
+        "packageSHA256": "f7b678a8055c234669e8dd272dd624771e29d9f0e3a3353f15c3005ab1a5fd29"
+      },
+      "sharp": {
+        "name": "sharp",
+        "version": "0.35.4",
+        "entry": ".pnpm/sharp@0.35.4_@types+node@24.10.1/node_modules/sharp/dist/index.cjs",
+        "entrySHA256": "d69f275bc49fcd2a6188b26b35c986d4db32a1b008653fef88adb4598688232a",
+        "packageSHA256": "27b5a6c6e1e1f27c527b09a963c932979403837d0f5f013ab5bdfb4a0ef2269a"
+      },
+      "rootTSX": {
+        "name": "tsx",
+        "version": "4.21.0",
+        "entry": ".pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/api/index.cjs",
+        "entrySHA256": "b97d8aa5122372689e759de9a7c30e6d1f29eb683a7a714beaab953cc8eceaa7",
+        "packageSHA256": "6e764b21991c21595441f82387c1451ccd10a3e7a3f0973cc5e3649a12dea7d2"
+      },
+      "payloadTSX": {
+        "name": "tsx",
+        "version": "4.22.4",
+        "entry": ".pnpm/tsx@4.22.4/node_modules/tsx/dist/esm/api/index.cjs",
+        "entrySHA256": "1e4e4b2dbb41d31b58b748d64c6b6f137f86b8113a010e99e13d92a7e260490d",
+        "packageSHA256": "b0d63b124b9b85b53d09cff256fa7832cb6a774f8b90ae1353e63df5275824b2"
+      },
+      "rootEsbuild": {
+        "name": "esbuild",
+        "version": "0.28.2",
+        "entry": ".pnpm/esbuild@0.28.2/node_modules/esbuild/lib/main.js",
+        "entrySHA256": "61ec0ba144ff93f4bf0e96ad6fab6f430ede0aa13e27ace8063ed63ba416b3cd",
+        "packageSHA256": "9d0bc453f4e791553c4cc2298ba023b409241fd9801e494741666eb0f6051490"
+      },
+      "payloadEsbuild": {
+        "name": "esbuild",
+        "version": "0.28.2",
+        "entry": ".pnpm/esbuild@0.28.2/node_modules/esbuild/lib/main.js",
+        "entrySHA256": "61ec0ba144ff93f4bf0e96ad6fab6f430ede0aa13e27ace8063ed63ba416b3cd",
+        "packageSHA256": "9d0bc453f4e791553c4cc2298ba023b409241fd9801e494741666eb0f6051490"
+      }
+    },
+    "nativeFiles": {
+      "esbuildLinuxX64": {
+        "entry": ".pnpm/@esbuild+linux-x64@0.28.2/node_modules/@esbuild/linux-x64/bin/esbuild",
+        "sha256": "e1698a3d5c6c0798fee4fd3b5cc816651f460c63d390a7a26ea4beb0b1884100",
+        "bytes": 11427952
+      },
+      "sharpLinuxX64": {
+        "entry": ".pnpm/@img+sharp-linux-x64@0.35.4/node_modules/@img/sharp-linux-x64/index.cjs",
+        "sha256": "6dba0c88db27b290bd8e2de94d043aa8242b1d63ae659eee9841d1334e6994f4",
+        "bytes": 135
+      },
+      "libvips-libvips-cpp.so.8.18.6": {
+        "entry": ".pnpm/@img+sharp-libvips-linux-x64@1.3.3/node_modules/@img/sharp-libvips-linux-x64/lib/libvips-cpp.so.8.18.6",
+        "sha256": "536cee19ab906cb5185ad519bf87647693f5d7b55e608c92eb28607f89ca5125",
+        "bytes": 18621496
+      }
+    },
+    "esbuildBinaryVersion": "0.28.2",
+    "sharpNativeOperation": {
+      "format": "png",
+      "width": 1,
+      "height": 1
+    }
+  },
+  "codeOnlyCapacity": {
+    "onlyOwnedCloudFilesystemMeasured": true,
+    "packages": [
+      {
+        "kind": "rollback",
+        "archiveBytes": 6138996,
+        "unpackedRegularFileBytes": 32828519,
+        "unpackedFilesystemAllocatedBytes": 34852864
+      },
+      {
+        "kind": "final",
+        "archiveBytes": 6136037,
+        "unpackedRegularFileBytes": 32828315,
+        "unpackedFilesystemAllocatedBytes": 34852864
+      }
+    ],
+    "codeOnlyTwoArchivesPlusTwoAllocatedDirectoriesBytes": 81980761,
+    "productionFullBackupMediaAndMigrationPeak": "unverified; deployment thread must measure actual absolute paths and backup retained copies",
+    "nativeArtifact": "awaiting WXML compile correction"
+  },
+  "nativeCompileBlocker": {
+    "reportedBy": "parent platform read-only audit",
+    "currentCandidateCompiles": false,
+    "affectedWXMLFiles": 4,
+    "encodedLogicalConjunctionExpressions": 16,
+    "isolatedDiagnosticAfterOnlyReplacement": {
+      "WXML": 28,
+      "WXSS": 26,
+      "pass": true,
+      "formalFrozenPatch": false
+    },
+    "approvedPatchSHA": null,
+    "officialGUI316": "unverified",
+    "realDevice": "unverified",
+    "nativePackageReleaseReady": false
+  },
+  "remainingUnverified": [
+    "approved WXML patch SHA, integration and relevant verification",
+    "real production dependency/native entry fingerprint comparison and absolute environment/media/static bindings",
+    "real production 11 migration names versus ordered candidate 17 and actual catalog",
+    "real production full v3 backup/peak space, S3/offsite and recovery",
+    "official WeChat GUI 3.16/device/privacy/domain configuration"
+  ]
+}

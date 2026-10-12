@@ -1,10 +1,10 @@
 {
   "schemaVersion": 3,
-  "at": "2026-10-12T12:19:07.212582+00:00",
+  "at": "2026-10-12T13:13:13.577991+00:00",
   "branch": "codex/club-integration-20261012",
   "base": "ed965ef457b5913d4590753c9d931e82811244b9",
-  "runtimeCodeSHA": "ce104d3668cd79b6a8d7830761d05e0727e757ec",
-  "runtimeObjectsSHA256": "e3231c122c77a6ad9546a95af99a67752747bb9adf8c4cd101b6163608c67fcb",
+  "runtimeCodeSHA": "6b6b5f6d6743d0c21ddbce2ed5b1263d0c6c33f9",
+  "runtimeObjectsSHA256": "d83096c86365fe3838bfddc628815669bcaa6a84ca63da47f5c2708380a337ac",
   "approvedFrozenInputs": {
     "staff": "1c19cddfe39abb4946f3603ff7053b089cda9637",
     "profiles": "3ba056c3dde350b51f28ea72792fe17d54e96b84",
@@ -353,6 +353,13 @@
       "domainChecking": true,
       "nativeDependencies": 0,
       "log": "/tmp/zijing-final-frozen-static.log"
+    },
+    "finalFullBrowser": {
+      "status": "passed",
+      "tests": 95,
+      "durationMinutes": 31,
+      "sourceSHA": "6b6b5f6d6743d0c21ddbce2ed5b1263d0c6c33f9",
+      "log": "/tmp/zijing-final-frozen-all-e2e.log"
     }
   },
   "schema": {
@@ -396,7 +403,7 @@
     "uncertain result lookup retains the actual submitted team after a member selects another active team"
   ],
   "exactIntegratedCI": {
-    "status": "pending-final-code-package-script-freeze-and-push",
+    "status": "completed",
     "attempts": [
       {
         "headSHA": "672f4dd88cd8088e0f44dad55144453f02847434",
@@ -437,9 +444,36 @@
         "build": "success",
         "logCountsVerified": true,
         "scope": "complete native candidate before approved final profile acknowledgement patch; compatible rollback source"
+      },
+      {
+        "status": "completed",
+        "headSHA": "6b6b5f6d6743d0c21ddbce2ed5b1263d0c6c33f9",
+        "runID": 38248423773,
+        "jobID": 114808105556,
+        "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38248423773",
+        "conclusion": "success",
+        "unitPassed": 1172,
+        "unitFiles": 68,
+        "browserPassed": 95,
+        "browserDurationMinutes": 38.3,
+        "build": "success",
+        "logCountsVerified": true,
+        "nativeReleaseReady": false
       }
     ],
-    "previousSuccessfulRollbackSHA": "466b8b96b5d870fe053af7c6757cb82a8268b8da"
+    "previousSuccessfulRollbackSHA": "466b8b96b5d870fe053af7c6757cb82a8268b8da",
+    "headSHA": "6b6b5f6d6743d0c21ddbce2ed5b1263d0c6c33f9",
+    "runID": 38248423773,
+    "jobID": 114808105556,
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38248423773",
+    "conclusion": "success",
+    "unitPassed": 1172,
+    "unitFiles": 68,
+    "browserPassed": 95,
+    "browserDurationMinutes": 38.3,
+    "build": "success",
+    "logCountsVerified": true,
+    "nativeReleaseReady": false
   },
   "localFailedAttempts": [
     {
@@ -474,10 +508,11 @@
     }
   ],
   "remainingUnverified": [
-    "parent separate narrow native profile PUT-success/GET-failure consistency patch awaiting freeze",
-    "official WeChat compilation/simulator/device/platform settings",
-    "actual S3 mirror synchronization/offsite backup/production recovery",
-    "final cloud-built thin release artifact, migration runner and compatible rollback package"
+    "approved WXML patch SHA, integration and relevant verification",
+    "real production dependency/native entry fingerprint comparison and absolute environment/media/static bindings",
+    "real production 11 migration names versus ordered candidate 17 and actual catalog",
+    "real production full v3 backup/peak space, S3/offsite and recovery",
+    "official WeChat GUI 3.16/device/privacy/domain configuration"
   ],
   "forbiddenActionsPerformed": [],
   "independentIntegrationReviews": {
@@ -762,5 +797,29 @@
       "same-ID new membership epoch reloads fresh HMAC and defaults hidden",
       "actor and route changes ignore late old GET"
     ]
+  },
+  "codePackages": {
+    "actualEvidence": "docs/evidence/club-code-packages-20261012.json",
+    "candidateSHA": "6b6b5f6d6743d0c21ddbce2ed5b1263d0c6c33f9",
+    "rollbackSHA": "466b8b96b5d870fe053af7c6757cb82a8268b8da",
+    "webRuntimeAndRunner": "passed in actual Node24.12.0/Linux x64/glibc2.36 containers, owned data only",
+    "codeOnlyHandoffDirectory": "/workspace/zijingwebsite/.data/club-release-20261012",
+    "productionVerified": false
+  },
+  "nativeCompileBlocker": {
+    "reportedBy": "parent platform read-only audit",
+    "currentCandidateCompiles": false,
+    "affectedWXMLFiles": 4,
+    "encodedLogicalConjunctionExpressions": 16,
+    "isolatedDiagnosticAfterOnlyReplacement": {
+      "WXML": 28,
+      "WXSS": 26,
+      "pass": true,
+      "formalFrozenPatch": false
+    },
+    "approvedPatchSHA": null,
+    "officialGUI316": "unverified",
+    "realDevice": "unverified",
+    "nativePackageReleaseReady": false
   }
 }
