@@ -46,7 +46,7 @@ export async function GET() {
     await db.pool.query("SELECT membership_id,membership_joined_at,visible,revision FROM team_member_profiles LIMIT 0");
     const teamMigrations = await db.pool.query("SELECT name FROM payload_migrations WHERE name=ANY($1::text[])", [["20261012_160000_team_core", "20261012_170000_team_member_profiles"]]);
     if (teamMigrations.rowCount !== 2) throw new Error("Required team migrations unavailable");
-    await db.pool.query("SELECT team_id,game_id,season_id,author_id,author_name,membership_ref,title,competition,placing,date,description,images,video_u_r_l,state,revision,submitted_version,submitted_at,approved_version,approved_snapshot,approved_at,reviewed_by_id,review_note,history FROM team_honor_records LIMIT 0");
+    await db.pool.query('SELECT team_id,game_id,season_id,author_id,author_name,membership_ref,title,competition,"placing",date,description,images,video_u_r_l,state,revision,submitted_version,submitted_at,approved_version,approved_snapshot,approved_at,reviewed_by_id,review_note,history FROM team_honor_records LIMIT 0');
     await db.pool.query("SELECT team_honor_records_id FROM payload_locked_documents_rels LIMIT 0");
     const honorMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261012_080000_team_honor_records"]);
     if (honorMigration.rowCount !== 1) throw new Error("Required honor migration unavailable");

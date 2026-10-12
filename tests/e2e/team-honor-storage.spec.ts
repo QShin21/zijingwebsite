@@ -18,6 +18,7 @@ test.beforeAll(async () => {
 test.afterAll(async () => { for (const file of files) await unlink(file).catch(() => {}); });
 
 test("真实 Media HTTP 保留公开图片，但解码目录/反斜杠/Range 无法旁路私有荣誉和旧视频标记", async ({ request }) => {
+  const ready = await request.get("/health/ready"); expect(ready.status()).toBe(200); expect(await ready.json()).toMatchObject({ status: "ready" });
   const publicImage = await request.get("/api/media/file/" + imageName); expect(publicImage.status()).toBe(200); expect(publicImage.headers()["content-type"]).toBe("image/png");
   for (const directory of [".team-honor-videos", ".showcase-videos", ".showcase-videos%2F.team-honor-reserved"]) {
     for (const separator of ["%2F", "%2f", "%5C", "%252F"]) {
