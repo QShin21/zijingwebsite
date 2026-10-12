@@ -263,7 +263,7 @@ test("荣誉本人分页保留队伍和社群；断网与丢响应保留附件�
     expect(saved.images).toHaveLength(1); expect(saved.images).toMatchObject([{ caption: "合成断网附件保留" }]);
     // A member can belong to two active teams. An uncertain result must keep
     // the submitted team's lookup even when the editor later selects the other.
-    const secondProposal = await operation(reviewer, { operation: "establish", gameID: game, title: "合成恢复队伍B-" + suffix, reason: "合成双队伍恢复范围" });
+    const secondProposal = await operation(reviewer, { operation: "establish", gameID: game, title: "合成恢复队伍B-" + suffix, reason: "合成双队伍恢复范围验收" });
     const secondDecision = await operation(leader, { operation: "decide-establishment", id: secondProposal.id, revision: secondProposal.updatedAt, decision: "approved", note: "" });
     const secondTeam = typeof secondDecision.team === "object" ? secondDecision.team.id : secondDecision.team;
     const secondBatch = await operation(reviewer, { operation: "save-recruitment", teamID: secondTeam, title: "合成第二队招新", status: "open", form: { ...defaultTeamForm, end: new Date(Date.now() + 86400000).toISOString() } });
