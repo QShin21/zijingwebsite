@@ -184,6 +184,7 @@ async function privateVideo(record, options = {}) {
   } catch (error) {
     unlink(filePath);
     if (error && error.status) throw Object.assign(new Error(http.message(null, error.status)), { status: error.status });
+    if (error && error.message === '图片加载失败') throw new Error('视频证据加载失败，请检查网络后重试', { cause: error });
     throw error;
   }
 }

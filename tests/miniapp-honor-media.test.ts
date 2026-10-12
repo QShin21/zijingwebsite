@@ -383,6 +383,15 @@ describe('荣誉私有视频：授权DTO href、JWT下载、本地源与scope清
     expect(h.downloads).toHaveLength(1); await flush(); expect(h.downloads).toHaveLength(1);
     h.state.visible = true; const retry = h.media.privateVideo(base, h.scope()); h.replyDownload(1); await retry; expect(h.downloads).toHaveLength(2);
   });
+  it('视频弱网用视频提示并清理部分输出，保留旧图片download默认提示；只允许明确重试', async () => {
+    const h = harness(), pending = error(h.media.privateVideo(base, h.scope())), path = h.downloads[0].filePath!;
+    h.local.set(path, { size: 24, bytes: mp4() }); h.downloads[0].fail();
+    expect(await pending).toMatchObject({ message: '视频证据加载失败，请检查网络后重试' }); expect(h.local.has(path)).toBe(false);
+    expect(h.downloads).toHaveLength(1);
+    const image = error(h.http.download('/api/miniapp/private-image/1')); h.downloads[1].fail();
+    expect(await image).toMatchObject({ message: '图片加载失败' });
+    const retry = h.media.privateVideo(base, h.scope()); h.replyDownload(2); await retry; expect(h.downloads).toHaveLength(3);
+  });
   it('hide后progress不把旧下载的进度写回页面', async () => {
     const h = harness(), scope = h.scope(), progress = vi.fn(); scope.onProgress = progress;
     const pending = error(h.media.privateVideo(base, scope)); h.state.visible = false;
