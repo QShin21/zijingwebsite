@@ -13,6 +13,11 @@ const sockets = new Set<net.Socket>();
 const smtp = net.createServer((socket) => {
   sockets.add(socket);
   socket.on("close", () => sockets.delete(socket));
+  // Transport verification may disconnect while the loopback receiver is replying.
+  socket.on("error", (error: NodeJS.ErrnoException) => {
+    if (error.code === "ECONNRESET" || error.code === "EPIPE") socket.destroy();
+    else throw error;
+  });
   socket.setEncoding("utf8");
   socket.write("220 localhost test SMTP\r\n");
   let buffer = "",

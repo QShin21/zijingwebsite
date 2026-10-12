@@ -20,8 +20,11 @@ export type TeamMembershipView = {
   leftAt: string | null;
 };
 export const positiveID = (value: unknown) => {
-  const id = Number(relationID(value));
-  return Number.isSafeInteger(id) && id > 0 ? id : null;
+  const raw = relationID(value);
+  if (typeof raw !== "number" && typeof raw !== "string") return null;
+  if (typeof raw === "string" && !/^\d+$/.test(raw)) return null;
+  const id = Number(raw);
+  return Number.isSafeInteger(id) && id > 0 && id <= 2147483647 ? id : null;
 };
 export async function currentTeamActor(
   p: Payload,

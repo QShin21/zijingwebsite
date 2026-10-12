@@ -28,7 +28,7 @@
 
 `team-memberships` 每队每账号只有一条关系，以 `member` 关联 `users`；数据库唯一索引和 serializable 事务共同保护。重复申请/批准与唯一字段冲突重新读取当前结果；已批准申请重复批准不会复活已撤销成员。重新入队需新的批次申请并复用原 membership ID。关系、旧申请、表单快照、审核日志留存；审计只有操作者、对象、动作和状态，没有原始答案或联系方式。
 
-`POST /api/team-core` 仅接受明确操作及选定输入，服务器自己构建上下文。原集合 REST 写入默认拒绝，不能通过请求体 context/system/overrideAccess 自批或造员；GET 招新仅给当前表单和本人回执，GET 申请列表需当前队伍管理范围。响应为 private/no-store，跨站写入拒绝。没有原始私人资料导出，也没有发送通知能力。
+`POST /api/team-core` 仅接受明确操作及选定输入，服务器自己构建上下文。原集合 REST 写入默认拒绝，不能通过请求体 context/system/overrideAccess 自批或造员；GET 招新仅给当前表单和本人回执，GET 申请列表需当前队伍管理范围。响应为 private/no-store，跨站写入拒绝。归档同步原 teams.archived 字段，公开档案显示历史状态，恢复仍需高权限。没有原始私人资料导出，也没有发送通知能力。
 
 ## 迁移与合成验证
 
@@ -36,10 +36,12 @@
 
 `pnpm exec tsx scripts/team-core-migration-check.ts` 只接受显式 development、loopback 和 DB_PUSH=false，创建唯一随机合成库，跑基线迁移、放入历史合成行、跑本模块后逐表逐列核对。再次运行验证迁移日志唯一；最后删除仅由脚本创建的合成库。`pnpm exec tsx scripts/team-core-schema.ts` 以只读连接核对实际外键和复合/条件唯一索引，不执行 DDL。down 明确阻止自动删历史，回滚采用经复核的兼容代码与数据库恢复方案。
 
-已实际完成干净顺序迁移、60 张原历史表和 9 条合成历史记录保留、迁移重复无操作、禁止自动 down、只读结构快照；12 项核心表单/数据库与 3 项真实网页/HTTP 切片测试通过，四个视口和无障碍通过。完整265项单元/数据库回归已通过；65项浏览器回归、精确 SHA/CI 与构建证据在最终交付更新，不能用 mock 或中间切片代替统一集成结果。
+已实际完成干净顺序迁移、60 张原历史表和 9 条合成历史记录保留、迁移重复无操作、禁止自动 down、只读结构快照；14 项核心表单/数据库与 4 项真实网页/HTTP 模块测试通过，四个视口和无障碍通过。完整267项单元/数据库回归已通过；完整65项浏览器首轮64通过/1个合成SMTP断连失败，修复夹具后注册3项及本模块4项复验通过；最终精确SHA的远端完整CI与构建以交付回复核验为准，不能用 mock 或中间切片代替统一集成结果。
 
 本分支没有生产迁移、真实报名读取、真人审核、通知、PR、合并或部署。简介/荣誉尚未合入，统一集成后的联测必须由集成者另跑。
 
 ## 集成时合并的共享文件
 
 `src/collections/index.ts`（四集合注册、teams 状态字段/钩子）、`src/payload-types.ts`（在统一配置上重新生成）、`src/migrations/index.ts`（追加迁移）、新增模块快照（统一后重新生成）、`src/components/Questionnaire.tsx`（可选 onSaveDraft，不改变既有默认提交）、`src/components/Content.tsx`、`src/app/(frontend)/[...path]/page.tsx`、`src/app/(frontend)/account/page.tsx`（入口）、`src/app/(frontend)/style.css`（核心窄屏样式）及三份状态文档均为小补丁。禁止整文件覆盖另一分支，勿把 UI 历史阵容复制成成员名单。
+
+验证证据见 [合成验收记录](evidence/team-core-20261012.json)。合成 SMTP 断连修复只涉及 tests/e2e/registration-flow.spec.ts 的预期 ECONNRESET/EPIPE；此测试补丁在集成时合并，注册断言和正式代码均保持。

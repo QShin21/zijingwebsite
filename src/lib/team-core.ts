@@ -93,7 +93,12 @@ export const defaultTeamForm: SignupForm = normalizeSignup({
   ],
 });
 export function normalizeTeamForm(raw: unknown) {
-  const form = normalizeSignup(raw);
+  let form: SignupForm;
+  try {
+    form = normalizeSignup(raw);
+  } catch (error) {
+    throw new APIError((error as Error).message, 400);
+  }
   const core = ["gameID", "position", "experience", "availability", "contact"];
   for (const id of core) {
     const question = form.questions.find((q) => q.id === id);
@@ -170,7 +175,13 @@ async function tx<T>(
     try {
       return await workflowTransaction(p, actor, { teamCoreWrite: true }, work);
     } catch (error) {
-      if (attempt < 2 && ["membershipKey", "requestKey"].some(field => uniqueFieldError(error, field))) continue;
+      if (
+        attempt < 2 &&
+        ["membershipKey", "requestKey"].some((field) =>
+          uniqueFieldError(error, field),
+        )
+      )
+        continue;
       if (
         attempt < 2 &&
         error instanceof APIError &&
@@ -443,7 +454,10 @@ export async function changeTeamLifecycle(
       id,
       req: { ...req, context: { ...req.context, system: true } },
       overrideAccess: true,
-      data: { teamStatus: status as "active" | "resting" | "archived" },
+      data: {
+        teamStatus: status as "active" | "resting" | "archived",
+        archived: status === "archived",
+      },
     });
   });
 }
@@ -659,10 +673,15 @@ export async function saveTeamJoinApplication(
       Array.isArray(input.answers)
     )
       throw new APIError("申请答案格式无效", 400);
-    const answers =
-      input.action === "submit"
-        ? validateAnswers(form, input.answers)
-        : sanitizeDraft(form, input.answers as Answers);
+    let answers: Answers;
+    try {
+      answers =
+        input.action === "submit"
+          ? validateAnswers(form, input.answers)
+          : sanitizeDraft(form, input.answers as Answers);
+    } catch (error) {
+      throw new APIError((error as Error).message, 400);
+    }
     if (JSON.stringify(answers).length > 100000)
       throw new APIError("申请内容过长", 400);
     if (own) {
@@ -811,7 +830,12 @@ export async function decideTeamJoinApplication(
       if (batch.status === "archived")
         throw new APIError("招新批次已归档，不能继续录取", 409);
       const snapshot = normalizeTeamForm(doc.formSnapshot);
-      validateAnswers(snapshot, doc.answers); // Review the submitted version, not a later questionnaire.
+      // Review the submitted version, not a later questionnaire.
+      try {
+        validateAnswers(snapshot, doc.answers);
+      } catch (error) {
+        throw new APIError((error as Error).message, 400);
+      }
       const applicant = await currentTeamActor(
         p,
         { id: teamID(doc.applicant) },
