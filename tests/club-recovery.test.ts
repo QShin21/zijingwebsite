@@ -37,7 +37,7 @@ beforeAll(async () => {
   post = (await createPost(game)).id; otherPost = (await createPost(otherGame)).id;
   event = (await p.create({ collection: "events", overrideAccess: false, user: legacy, context: { manageSignupForm: true }, data: { title: "合成旧组织者活动", slug: `recovery-owned-${suffix}`, signupForm: form } })).id;
   readerEvent = (await p.create({ collection: "events", overrideAccess: false, user: leader, context: { system: true }, data: { title: "合成只读旧活动", slug: `recovery-reader-owned-${suffix}`, submittedBy: reader.id, _status: "draft", signupForm: form } })).id;
-  outsideEvent = (await p.create({ collection: "events", overrideAccess: false, user: leader, context: { system: true }, data: { title: "合成外部旧活动", slug: `recovery-outside-owned-${suffix}`, submittedBy: reader.id, game: otherGame, _status: "draft", signupForm: form } })).id;
+  outsideEvent = (await p.create({ collection: "events", overrideAccess: false, user: leader, context: { system: true }, data: { title: "合成外部旧活动", slug: `recovery-outside-owned-${suffix}`, submittedBy: reader.id, game: otherGame, _status: "published", signupForm: form } })).id;
 });
 afterAll(async () => {
   if (!p) return;
@@ -61,6 +61,10 @@ describe.sequential("阶段1恢复权限与无DDL快照", () => {
     await expect(saveSignupForm(p, "events", readerEvent, reader, owned.version, owned.form)).rejects.toThrow();
     await expect(activity(p, "events", event, reader, true, undefined, "view")).rejects.toThrow();
     for (const permission of ["view", "export"] as const) await expect(activity(p, "events", outsideEvent, reader, true, undefined, permission)).rejects.toThrow();
+    const outside = await activity(p, "events", outsideEvent, participant);
+    const foreignReceipt = await submitSignup(p, "events", outsideEvent, participant, outside.version, { name: "合成跨社群报名者" });
+    await expect(p.findByID({ collection: "event-signups", id: foreignReceipt.id, user: reader, overrideAccess: false })).rejects.toThrow();
+    expect((await p.findByID({ collection: "event-signups", id: foreignReceipt.id, user: participant, overrideAccess: false })).id).toBe(foreignReceipt.id);
     await expect(activity(p, "community-posts", otherPost, reader, true, undefined, "view")).rejects.toThrow();
     await expect(activity(p, "community-posts", post, reader, true, undefined, "export")).rejects.toThrow();
     await expect(saveSignupForm(p, "community-posts", post, reader, value.version, { ...value.form, title: "禁止编辑" })).rejects.toThrow();

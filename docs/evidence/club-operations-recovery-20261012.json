@@ -1,7 +1,7 @@
 {
   "branch": "codex/club-operations-recovery",
   "base": "1d57dfb5abbe0ed9c88b097d2478f1495a87b99f",
-  "atUTC": "2026-10-12T00:08:51.857757+00:00",
+  "atUTC": "2026-10-12T00:31:30.303401+00:00",
   "scope": [
     "revocation evidence and dangerous legacy rollback gate",
     "independent read-only signup access and per-action/community authorization",
@@ -18,27 +18,36 @@
     "newReadonlyE2E": {
       "tests": 1,
       "result": "PASS",
-      "durationSeconds": 44.5
+      "note": "included in final 14-case run"
     },
     "existingClubE2E": {
       "tests": 2,
       "result": "PASS",
-      "note": "repeated in final full suite"
+      "note": "prior full suite; unchanged club operations flow"
     },
-    "fullE2E": {
+    "build": "PASS on final direct-collection scope",
+    "miniappStatic": "not run separately in recovery; exact commit CI includes the unchanged miniapp gate",
+    "previousLocalFullE2E": {
       "tests": 55,
       "passed": 55,
       "failed": 0,
       "result": "PASS",
-      "reportedDuration": "9.2m"
+      "reportedDuration": "9.2m",
+      "sourceCommit": "55effffc6aee569b5721b507972add2422db8aee"
     },
-    "build": "PASS",
-    "relatedE2E": {
-      "tests": 3,
+    "previousRecoveryCI": {
+      "id": 38186976626,
+      "sha": "55effffc6aee569b5721b507972add2422db8aee",
+      "conclusion": "success"
+    },
+    "finalLocalAffectedE2E": {
+      "tests": 14,
+      "passed": 14,
+      "failed": 0,
       "result": "PASS",
-      "note": "all included in final 55-test suite"
-    },
-    "miniappStatic": "not run separately in recovery; exact commit CI includes the unchanged miniapp gate"
+      "reportedDuration": "3.4m",
+      "note": "13 existing activity cases and 1 strengthened recovery case on final direct-collection scope"
+    }
   },
   "snapshotProof": {
     "DB_PUSH_trueRejected": true,
@@ -58,7 +67,8 @@
     "reader cannot save/edit/publish",
     "duplicate concurrent submissions returned one receipt",
     "export requires separate authorization",
-    "old HTTP session loses private access after revocation"
+    "old HTTP session loses private access after revocation",
+    "direct signup collection cannot read another community linked site activity even for its original organizer; own receipt remains readable"
   ],
   "priorResolvedFailures": [
     "synthetic game creation missing controlled context",
@@ -74,5 +84,5 @@
   "merge": false,
   "PR": false,
   "deploy": false,
-  "finalCommitCI": "Verify separately after recovery branch push; baseline CI is not used as recovery validation."
+  "finalCommitCI": "Verify exact follow-up commit after push; neither baseline nor first recovery CI is treated as final source verification."
 }

@@ -70,8 +70,9 @@ export const EventSignups: CollectionConfig = {
       if (canPublish(user)) return true;
       const scope: Where[] = [{ member: { equals: user.id } }];
       if (communityIDs(user, "viewSignups").length) {
-        scope.push({ and: [{ activityType: { equals: "events" } }, { organizer: { equals: user.id } }] });
         const games = communityIDs(user, "viewSignups");
+        scope.push({ and: [{ activityType: { equals: "events" } }, { organizer: { equals: user.id } },
+          { or: [{ game: { in: games } }, { game: { exists: false } }] }] });
         if (games.length)
           scope.push({
             and: [

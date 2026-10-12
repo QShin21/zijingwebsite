@@ -5,7 +5,7 @@ import { getPayload, type Payload } from "payload";
 import config from "../../src/payload.config";
 import type { User } from "../../src/payload-types";
 let p: Payload, leader: User, reader: User, member: User;
-let game: number, otherGame: number, post: number, otherPost: number;
+let game: number, otherGame: number, post: number, otherPost: number, outsideEvent: number;
 const suffix = randomBytes(6).toString("hex"), password = randomBytes(24).toString("hex");
 const origin = { Origin: "http://localhost:3000" };
 test.beforeAll(async () => {
@@ -18,11 +18,13 @@ test.beforeAll(async () => {
   reader = await p.update({ collection: "users", id: reader.id, user: leader, overrideAccess: false, data: { communityOffices: [{ game, status: "active", publishContent: false, reviewShowcase: false, handleJoins: false, viewSignups: true, exportSignups: false }] } });
   const createPost = (scope: number, title: string) => p.create({ collection: "community-posts", user: leader, overrideAccess: false, context: { manageSignupForm: true }, data: { game: scope, author: leader.id, title, body: "合成只读数据，禁止生产导入", category: "event", signupForm: { enabled: true, questions: [{ id: "name", label: "合成称呼", type: "text", required: true }] } } });
   post = (await createPost(game, "只读报名测试活动")).id; otherPost = (await createPost(otherGame, "跨社群拒绝测试活动")).id;
+  outsideEvent = (await p.create({ collection: "events", user: leader, overrideAccess: false, context: { system: true }, data: { title: "合成跨社群旧组织者活动", slug: `reader-outside-${suffix}`, submittedBy: reader.id, game: otherGame, _status: "published", signupForm: { enabled: true, questions: [{ id: "name", label: "合成称呼", type: "text", required: true }] } } })).id;
 });
 test.afterAll(async () => {
   if (!p) return;
   for (const scope of [game, otherGame].filter(Boolean)) await p.delete({ collection: "event-signups", overrideAccess: true, where: { game: { equals: scope } } });
   for (const id of [post, otherPost]) if (id) await p.delete({ collection: "community-posts", id, overrideAccess: true });
+  if (outsideEvent) await p.delete({ collection: "events", id: outsideEvent, overrideAccess: true });
   for (const user of [leader, reader, member]) if (user) await p.delete({ collection: "users", id: user.id, overrideAccess: true, context: { system: true } });
   for (const id of [game, otherGame]) if (id) await p.delete({ collection: "games", id, overrideAccess: true });
   await p.destroy();
@@ -39,6 +41,9 @@ test("只读成员可从详情与工作台查看报名，独立导出且不可�
     const receipts = await Promise.all([memberPage.request.post(endpoint, { headers: origin, data: { version: current.version, answers: { name: "合成参加者" } } }), memberPage.request.post(endpoint, { headers: origin, data: { version: current.version, answers: { name: "合成参加者" } } })]);
     for (const response of receipts) expect(response.status(), await response.text()).toBe(200);
     expect((await receipts[0].json()).signup.id).toBe((await receipts[1].json()).signup.id);
+    const outsideSite = `/api/activities/events/${outsideEvent}/signup`;
+    const outsideForm = await (await memberPage.request.get(outsideSite, { headers: origin })).json();
+    expect((await memberPage.request.post(outsideSite, { headers: origin, data: { version: outsideForm.version, answers: { name: "合成跨社群参加者" } } })).status()).toBe(200);
     await page.goto("/login"); await page.getByLabel("昵称或邮箱").fill(reader.name); await page.getByLabel("密码", { exact: true }).fill(password); await page.getByRole("button", { name: "登录", exact: true }).click(); await expect(page).toHaveURL(/\/account$/);
     await expect(page.getByRole("link", { name: /问卷工作台/ })).toBeVisible();
     await expect(page.getByRole("link", { name: /内容管理后台/ })).toHaveCount(0);
@@ -59,6 +64,9 @@ test("只读成员可从详情与工作台查看报名，独立导出且不可�
     expect((await page.request.patch(`/api/community-posts/${post}`, { headers: origin, data: { title: "拒绝编辑", status: "hidden" } })).status()).toBe(403);
     expect((await page.request.post("/api/community-posts", { headers: origin, data: { game, author: reader.id, title: "拒绝发布", body: "不应创建", category: "event" } })).status()).toBe(403);
     for (const mode of ["view", "entries", "stats", "export"]) expect((await page.request.get(outside + "?mode=" + mode, { headers: origin })).status()).toBe(403);
+    for (const mode of ["view", "entries", "stats", "export"]) expect((await page.request.get(outsideSite + "?mode=" + mode, { headers: origin })).status()).toBe(403);
+    const raw = await page.request.get(`/api/event-signups?where[activityType][equals]=events&where[activityID][equals]=${outsideEvent}`, { headers: origin });
+    expect(raw.status()).toBe(200); expect((await raw.json()).docs).toEqual([]);
     expect((await page.request.get(endpoint + "?mode=export", { headers: origin })).status()).toBe(403);
     await page.goto("/activities"); await page.getByLabel("活动来源").selectOption("community-posts");
     await expect(page.getByRole("heading", { name: "只读报名测试活动", exact: true })).toBeVisible();
