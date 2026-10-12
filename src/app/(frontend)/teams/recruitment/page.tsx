@@ -140,6 +140,12 @@ export default async function Recruitment({
                       : "已撤销"}
                 </p>
                 <p>入队不授予社群或平台管理权限，公开简介另行授权。</p>
+                {doc.status === "active" && positiveID(doc.team) && (
+                  <nav className="signup-tools" aria-label="本队成员操作">
+                    <Link href={`/teams/profiles/${positiveID(doc.team)}`}>填写或修改我的队内简介</Link>
+                    <Link href={`/teams/honors?view=mine&team=${positiveID(doc.team)}`}>本队荣誉与我的投稿</Link>
+                  </nav>
+                )}
                 {doc.status === "active" && (
                   <TeamCoreOperation
                     operation="leave"

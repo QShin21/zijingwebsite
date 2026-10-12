@@ -1,9 +1,11 @@
 import { ActivitySignup } from './ActivitySignup';
 import { TeamProfilesPanel } from './team-profiles/TeamProfilesPanel';
+import { headers } from "next/headers";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { list, media, names, type Content } from "@/lib/content";
+import { cms, list, media, names, type Content } from "@/lib/content";
+import { canManageTeam } from "@/lib/team-memberships";
 import {
   eventState,
   formatDate,
@@ -288,6 +290,12 @@ export async function Detail({
   photoPage?: number;
 }) {
   const state = registrationState(doc);
+  let managesTeam = false;
+  if (collection === "teams") {
+    const p = await cms(),
+      { user } = await p.auth({ headers: await headers() });
+    managesTeam = await canManageTeam(p, user, doc.id);
+  }
   const [linkedTeam, linkedEvent, linkedSeason, related, history] =
     await Promise.all([
       doc.team
@@ -341,7 +349,17 @@ export async function Detail({
         <div className="detail-main">
           <Prose doc={doc} />
           {collection === "teams" && <TeamProfilesPanel teamID={doc.id} />}
-          {collection === "teams" && <section className="panel"><h2>加入与管理代表队</h2><Link className="button" href="/teams/recruitment">查看代表队招新与我的记录</Link> <Link href={`/teams/manage/${doc.id}`}>本队工作台</Link><p>入队资格以已批准的成员关系为准，公开阵容和简介不授管理权限。</p></section>}
+          {collection === "teams" && (
+            <section className="panel">
+              <h2>加入与管理代表队</h2>
+              <div className="signup-tools">
+                <Link className="button" href="/teams/recruitment">查看代表队招新与我的记录</Link>
+                <Link href={`/teams/honors?team=${doc.id}`}>队伍荣誉档案与投稿</Link>
+                {managesTeam && <Link href={`/teams/manage/${doc.id}`}>本队工作台</Link>}
+              </div>
+              <p>入队资格以已批准的成员关系为准，公开阵容和简介不授管理权限。</p>
+            </section>
+          )}
           {Boolean(doc.members?.length) && (
             <section>
               <h2>公开阵容</h2>

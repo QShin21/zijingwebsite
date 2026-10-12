@@ -13,6 +13,7 @@ import { TeamHonorArchiveCards } from "./TeamHonorArchives";
 import { TeamHonorRecordCard } from "./TeamHonorRecord";
 import { TeamHonorEditor } from "./TeamHonorEditor";
 import { CommunityPager } from "./CommunityPager";
+import { teamHonorQuery } from "./TeamHonorNavigation";
 
 // Parent's unified Teams & Honors route can embed this component without rebuilding teams.
 export async function TeamHonorsPanel({
@@ -54,21 +55,30 @@ export async function TeamHonorsPanel({
       )
     : null;
   const writableMemberships = memberships.filter(
-    (item) => !team || item.team === team,
+    (item) =>
+      (!team || item.team === team) && (!game || item.teamInfo.game === game),
   );
+  const scopeQuery = teamHonorQuery({ team, game });
+  const href = (nextView: "public" | "mine" | "review") => {
+    const query = teamHonorQuery({ view: nextView, team, game });
+    return "/teams/honors" + (query ? "?" + query : "");
+  };
+  const returnQuery = teamHonorQuery({ view, page, team, game });
   return (
     <section aria-label="代表队荣誉">
       <nav className="community-tabs" aria-label="代表队与荣誉筛选">
-        <Link href="/teams">代表队与荣誉</Link>
+        <Link href={"/teams" + (game ? "?game=" + game : "")}>
+          代表队与荣誉
+        </Link>
         <Link
-          href="/teams/honors"
+          href={href("public")}
           aria-current={view === "public" ? "page" : undefined}
         >
           队伍荣誉档案
         </Link>
         {canParticipate(user) && (
           <Link
-            href="/teams/honors?view=mine"
+            href={href("mine")}
             aria-current={view === "mine" ? "page" : undefined}
           >
             我的荣誉记录
@@ -76,7 +86,7 @@ export async function TeamHonorsPanel({
         )}
         {reviewer && (
           <Link
-            href="/teams/honors?view=review"
+            href={href("review")}
             aria-current={view === "review" ? "page" : undefined}
           >
             审核本社群荣誉
@@ -93,6 +103,7 @@ export async function TeamHonorsPanel({
                 record={record}
                 reviewer={honorReviewerOf(user, record)}
                 owner={user?.id === Number(record.author)}
+                returnQuery={returnQuery}
                 editable={memberships.some(
                   (membership) =>
                     membership.id === record.membershipRef &&
@@ -106,7 +117,7 @@ export async function TeamHonorsPanel({
             page={page}
             pages={records.totalPages}
             base="/teams/honors"
-            query={"&view=" + view}
+            query={"&" + teamHonorQuery({ view, team, game })}
           />
         </>
       ) : (
@@ -120,7 +131,11 @@ export async function TeamHonorsPanel({
       {canParticipate(user) &&
         view !== "review" &&
         (writableMemberships.length ? (
-          <TeamHonorEditor memberships={writableMemberships} />
+          <TeamHonorEditor
+            key={scopeQuery}
+            memberships={writableMemberships}
+            returnQuery={teamHonorQuery({ view: "mine", page, team, game })}
+          />
         ) : (
           !membershipError && (
             <p>当前没有可投稿的有效代表队。已批准历史荣誉会继续保留。</p>

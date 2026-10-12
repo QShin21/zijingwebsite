@@ -5,6 +5,7 @@ import { canReviewShowcase } from "@/lib/rules";
 import { hideLegacyTeamHonorAction } from "@/app/(frontend)/teams/honors/actions";
 import { SubmitButton } from "./SubmitButton";
 import { teamHonorService, type HonorArchive } from "@/lib/team-honor-service";
+import { teamHonorQuery } from "./TeamHonorNavigation";
 
 export function TeamHonorArchiveCards({
   archives,
@@ -116,6 +117,14 @@ export function TeamHonorArchiveContents({
           )}
           {record.legacy && canReviewShowcase(user, archive.team.game) && (
             <form action={hideLegacyTeamHonorAction} className="member-form">
+              <input
+                type="hidden"
+                name="returnQuery"
+                value={teamHonorQuery({
+                  team: archive.team.id,
+                  game: archive.team.game,
+                })}
+              />
               <input type="hidden" name="id" value={record.key.split(":")[1]} />
               <input
                 type="hidden"

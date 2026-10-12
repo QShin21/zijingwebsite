@@ -52,7 +52,8 @@ export function SiteHeader({
     };
   }, []);
   const active = (path: string) =>
-    pathname === path || (path !== "/" && pathname?.startsWith(`${path}/`));
+    pathname === path || (path !== "/" && pathname?.startsWith(`${path}/`)) ||
+    (path === "/teams" && (pathname === "/honors" || pathname?.startsWith("/honors/")));
   return (
     <header className="site-header">
       <div className="header">

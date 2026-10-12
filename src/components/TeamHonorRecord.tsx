@@ -4,21 +4,27 @@ import type { HonorImage } from "@/lib/team-honor-model";
 import { honorLabels } from "@/lib/team-honor-model";
 import { changeTeamHonorAction } from "@/app/(frontend)/teams/honors/actions";
 import { SubmitButton } from "./SubmitButton";
+import { teamHonorQuery } from "./TeamHonorNavigation";
 
 export function TeamHonorRecordCard({
   record,
   reviewer = false,
   owner = false,
   editable = false,
+  returnQuery,
 }: {
   record: HonorRecord;
   reviewer?: boolean;
   owner?: boolean;
   editable?: boolean;
+  returnQuery?: string;
 }) {
   const images = Array.isArray(record.images)
     ? (record.images as unknown as HonorImage[])
     : [];
+  const navigation =
+    returnQuery ??
+    teamHonorQuery({ view: owner ? "mine" : reviewer ? "review" : "public" });
   return (
     <article className="panel showcase-card" data-honor-record={record.id}>
       <p>
@@ -26,7 +32,13 @@ export function TeamHonorRecordCard({
         {record.authorName}
       </p>
       <h3>
-        <Link href={"/teams/honors/" + record.id}>{record.title}</Link>
+        <Link
+          href={
+            "/teams/honors/" + record.id + (navigation ? "?" + navigation : "")
+          }
+        >
+          {record.title}
+        </Link>
       </h3>
       <p>
         赛事：{record.competition || "待补充"} · 奖项：
@@ -70,6 +82,7 @@ export function TeamHonorRecordCard({
       )}
       {(reviewer || (owner && editable)) && (
         <form action={changeTeamHonorAction} className="member-form">
+          <input type="hidden" name="returnQuery" value={navigation} />
           <input type="hidden" name="id" value={record.id} />
           <input type="hidden" name="revision" value={record.revision} />
           <input

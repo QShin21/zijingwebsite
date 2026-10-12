@@ -15,6 +15,7 @@ import { PageHeading } from "@/components/PageHeading";
 import { Icon } from "@/components/Identity";
 import { kindLabels, sectionMeta } from "@/lib/presentation";
 import { safeURL } from "@/lib/rules";
+import { teamHonorQuery, teamHonorScopeID } from "@/components/TeamHonorNavigation";
 
 type Props = {
   params: Promise<{ path: string[] }>;
@@ -77,7 +78,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     doc?.title ||
     (path[0] === "join"
       ? titles[path[1] || "join"]
-      : names[c] || titles[path[0]]) ||
+      : c === "teams" && path.length === 1
+        ? "代表队与荣誉"
+        : names[c] || titles[path[0]]) ||
     "页面未找到";
   return {
     title,
@@ -93,6 +96,21 @@ export default async function Page({ params, searchParams }: Props) {
     Math.max(1, Math.min(10000, Number(search.page) || 1)),
   );
   const c = collections[path[0]];
+  if (c === "honors" && path.length === 1) {
+    const team = search.team ? teamHonorScopeID(search.team) : undefined;
+    const game = search.game ? teamHonorScopeID(search.game) : undefined;
+    if (team === null || game === null) notFound();
+    const query = teamHonorQuery({
+      view:
+        search.view === "mine" || search.view === "review"
+          ? search.view
+          : "public",
+      page,
+      team,
+      game,
+    });
+    permanentRedirect("/teams/honors" + (query ? "?" + query : ""));
+  }
   if (c && path.length === 2)
     return (
       <Detail
@@ -157,10 +175,20 @@ export default async function Page({ params, searchParams }: Props) {
     return (
       <>
         <PageHeading
-          title={names[c]}
+          title={c === "teams" ? "代表队与荣誉" : names[c]}
           eyebrow={`ZIJING / ${sectionMeta[c]?.label || path[0].toUpperCase()}`}
-          description={sectionMeta[c]?.description}
+          description={
+            c === "teams"
+              ? "了解代表队、查看队员简介与已批准荣誉，找到适合自己的选拔入口。"
+              : sectionMeta[c]?.description
+          }
         />
+        {c === "teams" && (
+          <nav className="community-tabs" aria-label="代表队与荣誉">
+            <Link href="/teams" aria-current="page">代表队档案</Link>
+            <Link href={"/teams/honors" + (query.game ? "?game=" + query.game : "")}>队伍荣誉档案与投稿</Link>
+          </nav>
+        )}
         {c === "teams" && <nav className="signup-tools" aria-label="代表队入口"><Link className="button" href="/teams/recruitment">代表队招新与我的记录</Link><Link href="/teams/manage">代表队工作台</Link><Link href="/teams/apply">申请建立代表队</Link></nav>}
         {games && (
           <form className="filters" method="get" aria-label="筛选内容">

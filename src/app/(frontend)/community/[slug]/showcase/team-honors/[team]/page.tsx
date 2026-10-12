@@ -5,6 +5,7 @@ import { bySlug, cms } from "@/lib/content";
 import { teamHonorService } from "@/lib/team-honor-service";
 import { TeamHonorArchiveContents } from "@/components/TeamHonorArchives";
 import { PageHeading } from "@/components/PageHeading";
+import { teamHonorQuery } from "@/components/TeamHonorNavigation";
 export const dynamic = "force-dynamic";
 export default async function TeamHonorArchive({
   params,
@@ -31,7 +32,17 @@ export default async function TeamHonorArchive({
   if (!archive) notFound();
   return (
     <section className="community-page">
-      <Link href={"/community/" + slug + "/showcase"}>← 社群风采</Link>
+      <nav className="signup-tools" aria-label="档案返回">
+        <Link href={"/community/" + slug + "/showcase"}>← 社群风采</Link>
+        <Link
+          href={
+            "/teams/honors?" +
+            teamHonorQuery({ team: archive.team.id, game: game.id })
+          }
+        >
+          代表队与荣誉
+        </Link>
+      </nav>
       <PageHeading
         title={archive.team.title + " · 荣誉档案"}
         eyebrow={game.title}

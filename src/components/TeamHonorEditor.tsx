@@ -1,4 +1,5 @@
 "use client";
+import { unstable_rethrow } from "next/navigation";
 import {
   useActionState,
   useEffect,
@@ -17,18 +18,32 @@ import {
 export function TeamHonorEditor({
   record,
   memberships,
+  returnQuery = "",
 }: {
   record?: TeamHonorRecord;
   memberships: HonorMembership[];
+  returnQuery?: string;
 }) {
   const imageFiles = useRef<File[]>([]),
     videoFile = useRef<File | null>(null);
+  const [confirmedMissing, setConfirmedMissing] = useState(false);
   const [state, action, pending] = useActionState(
     async (previous: HonorFormState, form: FormData) => {
+      if (previous.unconfirmed && !confirmedMissing) return previous;
       form.delete("pictures");
       for (const file of imageFiles.current) form.append("pictures", file);
       if (videoFile.current) form.set("video", videoFile.current);
-      return saveTeamHonorAction(previous, form);
+      try {
+        return await saveTeamHonorAction(previous, form);
+      } catch (error) {
+        unstable_rethrow(error);
+        setConfirmedMissing(false);
+        return {
+          error:
+            "连接中断，提交结果尚未确认。输入与附件已保留，请先查看本人荣誉记录，核对后再重试。",
+          unconfirmed: true,
+        };
+      }
     },
     {} as HonorFormState,
   );
@@ -60,6 +75,11 @@ export function TeamHonorEditor({
     const { name, value } = event.currentTarget;
     setFields((previous) => ({ ...previous, [name]: value }));
   };
+  const ownRecords = new URLSearchParams(returnQuery);
+  ownRecords.set("view", "mine");
+  ownRecords.delete("page");
+  if (!record && fields.team) ownRecords.set("team", fields.team);
+  const retryLocked = Boolean(state.unconfirmed && !confirmedMissing);
   return (
     <form
       action={action}
@@ -72,6 +92,31 @@ export function TeamHonorEditor({
         保存修改会撤下当前展示。提交后由对应社群管理员审核；本人兼任管理员也须由他人审核。
       </p>
       {state.error && <p role="alert">{state.error}</p>}
+      {state.unconfirmed && (
+        <p>
+          <a
+            className="text-link"
+            href={"/teams/honors?" + ownRecords}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            查看本人荣誉记录
+          </a>
+        </p>
+      )}
+      {state.unconfirmed && (
+        <label className="checkbox-row">
+          <input
+            type="checkbox"
+            checked={confirmedMissing}
+            onChange={(event) =>
+              setConfirmedMissing(event.currentTarget.checked)
+            }
+          />
+          已核对本人记录，确认本次未保存
+        </label>
+      )}
+      <input type="hidden" name="returnQuery" value={returnQuery} />
       <fieldset
         disabled={!ready || pending}
         aria-label="荣誉投稿表单"
@@ -257,7 +302,7 @@ export function TeamHonorEditor({
             className="button light"
             name="action"
             value="save"
-            disabled={pending}
+            disabled={pending || retryLocked}
           >
             保存草稿
           </button>
@@ -265,7 +310,7 @@ export function TeamHonorEditor({
             className="button"
             name="action"
             value="submit"
-            disabled={pending}
+            disabled={pending || retryLocked}
           >
             {pending ? "正在保存…" : "提交审核"}
           </button>

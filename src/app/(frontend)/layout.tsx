@@ -27,8 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 const nav = [
   { path: "/events", label: "活动" },
-  { path: "/teams", label: "代表队" },
-  { path: "/honors", label: "荣誉档案" },
+  { path: "/teams", label: "代表队与荣誉" },
   { path: "/news", label: "社团动态" },
   { path: "/announcements", label: "通知" },
   { path: "/community", label: "游戏社群" },
@@ -41,6 +40,14 @@ export default async function Layout({
   const s = await site();
   const { user } = await (await cms()).auth({ headers: await headers() });
   const signedIn = canParticipate(user);
+  const navigation = (s.navigation?.length ? s.navigation : nav).reduce<
+    { path: string; label: string }[]
+  >((items, item) => {
+    const path = item.path === "/honors" ? "/teams" : item.path;
+    if (!items.some((entry) => entry.path === path))
+      items.push({ path, label: path === "/teams" ? "代表队与荣誉" : item.label });
+    return items;
+  }, []);
   return (
     <html lang="zh-CN" data-scroll-behavior="smooth">
       <body>
@@ -54,7 +61,7 @@ export default async function Layout({
         )}
         <SiteHeader
           name={s.name}
-          navigation={signedIn ? (s.navigation?.length ? s.navigation : nav) : nav.filter(item => ["/events", "/announcements"].includes(item.path))}
+          navigation={signedIn ? navigation : nav.filter(item => ["/events", "/announcements"].includes(item.path))}
           signedIn={signedIn}
         />
         <main id="main" tabIndex={-1}>
@@ -75,8 +82,7 @@ export default async function Layout({
             <nav aria-label="探索社团">
               <span className="eyebrow">EXPLORE</span>
               <Link href="/events">社团活动</Link>
-              {signedIn && <Link href="/teams">代表队</Link>}
-              {signedIn && <Link href="/honors">荣誉档案</Link>}
+              {signedIn && <Link href="/teams">代表队与荣誉</Link>}
               {signedIn && <Link href="/gallery">社团影像</Link>}
             </nav>
             {signedIn && <nav aria-label="参与社团">

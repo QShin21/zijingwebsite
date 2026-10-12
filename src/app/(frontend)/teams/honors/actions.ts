@@ -9,8 +9,16 @@ import { honorID, type HonorAction } from "@/lib/team-honor-model";
 import { workflowTransaction } from "@/lib/workflow-transactions";
 import { canReviewShowcase, relationID } from "@/lib/rules";
 import { APIError } from "payload";
+import { teamHonorReturnQuery } from "@/components/TeamHonorNavigation";
 
-export type HonorFormState = { error?: string };
+export type HonorFormState = { error?: string; unconfirmed?: boolean };
+function resultHref(path: string, form: FormData, message: string) {
+  const query = new URLSearchParams(
+    teamHonorReturnQuery(form.get("returnQuery")),
+  );
+  query.set("message", message);
+  return path + "?" + query;
+}
 function invalidateHonors() {
   revalidatePath("/teams");
   revalidatePath("/honors");
@@ -33,14 +41,13 @@ export async function saveTeamHonorAction(
   }
   invalidateHonors();
   redirect(
-    "/teams/honors/" +
-      id +
-      "?message=" +
-      encodeURIComponent(
-        state === "pending"
-          ? "荣誉已提交，等待对应社群管理员审核。"
-          : "草稿已保存；须提交并由他人审核后公开。",
-      ),
+    resultHref(
+      "/teams/honors/" + id,
+      form,
+      state === "pending"
+        ? "荣誉已提交，等待对应社群管理员审核。"
+        : "草稿已保存；须提交并由他人审核后公开。",
+    ),
   );
 }
 export async function changeTeamHonorAction(form: FormData) {
@@ -74,9 +81,7 @@ export async function changeTeamHonorAction(form: FormData) {
   invalidateHonors();
   // Redirect targets are computed on the server, never supplied by the client.
   redirect(
-    (id ? "/teams/honors/" + id : "/teams/honors") +
-      "?message=" +
-      encodeURIComponent(message),
+    resultHref(id ? "/teams/honors/" + id : "/teams/honors", form, message),
   );
 }
 export async function hideLegacyTeamHonorAction(form: FormData) {
@@ -146,5 +151,5 @@ export async function hideLegacyTeamHonorAction(form: FormData) {
     message = honorError(error);
   }
   invalidateHonors();
-  redirect("/teams/honors?message=" + encodeURIComponent(message));
+  redirect(resultHref("/teams/honors", form, message));
 }

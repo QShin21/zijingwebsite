@@ -7,13 +7,18 @@ import { honorError, honorReviewerOf } from "@/lib/team-honor-web";
 import { TeamHonorRecordCard } from "@/components/TeamHonorRecord";
 import { TeamHonorEditor } from "@/components/TeamHonorEditor";
 import { PageHeading } from "@/components/PageHeading";
+import { pageNumber } from "@/components/CommunityPager";
+import {
+  teamHonorQuery,
+  teamHonorScopeID,
+} from "@/components/TeamHonorNavigation";
 export const dynamic = "force-dynamic";
 export default async function HonorRecord({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ message?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { id } = await params;
   if (!/^\d+$/.test(id) || !Number.isSafeInteger(Number(id)) || Number(id) <= 0)
@@ -30,6 +35,18 @@ export default async function HonorRecord({
     })
     .catch(() => null);
   if (!record) notFound();
+  const query = await searchParams;
+  const scopeTeam = query.team ? teamHonorScopeID(query.team) : undefined;
+  const scopeGame = query.game ? teamHonorScopeID(query.game) : undefined;
+  if (scopeTeam === null || scopeGame === null) notFound();
+  const owner = user?.id === Number(record.author);
+  const reviewer = honorReviewerOf(user, record);
+  const returnQuery = teamHonorQuery({
+    view: !owner && reviewer ? "review" : "mine",
+    page: pageNumber(typeof query.page === "string" ? query.page : undefined),
+    team: scopeTeam,
+    game: scopeGame,
+  });
   let memberships: Awaited<ReturnType<typeof teamHonorService.availableTeams>> =
       [],
     error = "";
@@ -70,7 +87,9 @@ export default async function HonorRecord({
   ]);
   return (
     <section className="community-page">
-      <Link href="/teams/honors?view=mine">← 代表队与荣誉</Link>
+      <Link href={"/teams/honors?" + returnQuery}>
+        {!owner && reviewer ? "← 审核本社群荣誉" : "← 我的荣誉记录"}
+      </Link>
       <PageHeading
         title={record.title}
         eyebrow="TEAM HONOR"
@@ -80,18 +99,22 @@ export default async function HonorRecord({
           (game?.title || "已归档游戏社群")
         }
       />
-      <p role="status">{(await searchParams).message || error}</p>
+      <p role="status">
+        {typeof query.message === "string" ? query.message || error : error}
+      </p>
       <TeamHonorRecordCard
         record={record}
-        reviewer={honorReviewerOf(user, record)}
-        owner={user?.id === Number(record.author)}
+        reviewer={reviewer}
+        owner={owner}
         editable={editable}
+        returnQuery={returnQuery}
       />
       {editable && (
         <TeamHonorEditor
           key={record.id + ":" + record.revision}
           record={record}
           memberships={memberships}
+          returnQuery={returnQuery}
         />
       )}
     </section>
