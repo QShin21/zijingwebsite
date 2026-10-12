@@ -193,5 +193,18 @@
     "Only restored synthetic reviewer grants and copied bytes changed for negative HTTP cases.",
     "Original backup source is not production; no real credentials were read.",
     "No incompatible old application was started after rollback gate rejection."
-  ]
+  ],
+  "finalCompiledRecheck": {
+    "codeSHA": "466b8b96b5d870fe053af7c6757cb82a8268b8da",
+    "syntheticOnly": true,
+    "compiledNextHTTP": true,
+    "mediaChecks": 95,
+    "privateHonorDTOChecks": 6,
+    "approvedBytesSHA256": "0300f73826c6c43b31e1ac758a1d8472bb8a95e11670315a53ea2a0d08f91f9d",
+    "normalImagesAndReadiness200": true,
+    "privateRawEncodedAndMarkerOnlyCopiesBlocked": true,
+    "freshActorAndPrivateDTOKeepsForbiddenFieldsHidden": true,
+    "noWritesOrSourceChanges": true,
+    "productionAccess": false
+  }
 }

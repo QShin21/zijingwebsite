@@ -1,6 +1,6 @@
 # 社团集成发布前预检 · 2026-10-12
 
-本文件是当前现场的代码包、迁移 runner 和受控切换规划，尚未生成或验收正式发布包。初次源码读取起点为 `d46aab1`，本次更新读取仓库 `ed952f8333ee2557402d911761297f2d45e055a3`，并采用父部署线程新提供的生产只读事实。本线程仅更新本文件；没有访问生产或凭据、安装依赖、构建、打包、执行迁移、清理文件或启停进程。
+本文件是当前现场的代码包、迁移 runner 和受控切换规划，尚未生成或验收正式发布包。初次源码读取起点为 `d46aab1`，现场规划复核读取 `ed952f8333ee2557402d911761297f2d45e055a3`，并采用父部署线程提供的生产事实。初始复核仅更新本文；根集成线程随后在隔离合成环境追加 CLI 入口对照测试。没有在本集成线程访问生产或凭据、执行生产迁移、清理或启停生产进程。
 
 父线程已批准原生冻结 `58eb54277c01685e6fc19cd0e17218da965e3192`，根线程已合成 `f5502b62048f127afe53bbbf72f87d41846ceb46`；父线程报告注册、类型与迁移未产生新差异。简介 PUT 成功后 GET 失败的一致性窄补丁仍待冻结。代码包必须从包含最终获批冻结版本的**最终集成精确 SHA**重建并验收，不能改来源标记后复用早期构建。本文不构成正式发布声明。
 
@@ -85,10 +85,12 @@ node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3100
 NODE_ENV=production DB_PUSH=false PAYLOAD_DROP_DATABASE=false PAYLOAD_CONFIG_PATH=src/payload.config.ts node node_modules/payload/bin.js migrate:status
 NODE_ENV=production DB_PUSH=false PAYLOAD_DROP_DATABASE=false PAYLOAD_CONFIG_PATH=src/payload.config.ts node node_modules/payload/bin.js migrate
 PG_BIN=/srv/zijingwebsite/tools/pg17/usr/lib/postgresql/17/bin node scripts/backup.mjs create
-node node_modules/payload/bin.js run scripts/club-operations-rollback-check.ts
+node node_modules/tsx/dist/cli.mjs scripts/club-operations-rollback-check.ts
 ```
 
-迁移 status/up、全配置/17条迁移导入、重复 no-op、v3 合成备份/隔离恢复与回滚阻断均在最终 runner 和匹配依赖中独立验收。`migrate:status` 会初始化 Payload/数据库适配器，包括扩展初始化等行为，不是生产只读 catalog 探针；前置生产 schema 核对采用部署线程已有的只读通道。Payload `run` 加载回滚 TS 脚本的路径同样须实际验收；不得假定裁掉根 tsx bin 后原 pnpm 脚本仍可运行。
+迁移 status/up、全配置/17条迁移导入、重复 no-op、v3 合成备份/隔离恢复与回滚阻断仍须在最终 runner 和匹配依赖中独立验收。`migrate:status` 会初始化 Payload/数据库适配器，包括扩展初始化等行为，不是生产只读 catalog 探针；前置生产 schema 核对采用部署线程已有的只读通道。
+
+根线程实测发现不能以 `payload run` 运行此回滚门禁：安装的 Payload 保留 `process.argv[1]` 为其 CLI 路径，脚本的自执行保护因此不进入 main。在仅剩一个永久标记的合成库，`payload run` 输出为空且退出 0；直接根项目 `tsx@4.21.0` CLI 输出完整不兼容报告并退出 1。设计改用上方直接 TSX 入口，实际现场必须核对该入口指纹与 Node 24.12 运行结果；云端验证版本为 Node 24.19。任何空输出、缺少 `checksComplete:true` 的完整 JSON 报告或不符场景的退出码，均不得计为门禁成功。保留现有依赖，不删除或裁掉该 TSX 入口；以后替换 runner 也须重做真假通过对照。
 
 ## 实际 schema、v3 备份与容量峰值
 

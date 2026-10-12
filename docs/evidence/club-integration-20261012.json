@@ -1,16 +1,20 @@
 {
   "schemaVersion": 3,
-  "at": "2026-10-12T11:31:10.234053+00:00",
+  "at": "2026-10-12T12:19:07.212582+00:00",
   "branch": "codex/club-integration-20261012",
   "base": "ed965ef457b5913d4590753c9d931e82811244b9",
-  "runtimeCodeSHA": "e5de8df47c6feea3a5ad6efde44937038c59f2d0",
+  "runtimeCodeSHA": "ce104d3668cd79b6a8d7830761d05e0727e757ec",
   "runtimeObjectsSHA256": "e3231c122c77a6ad9546a95af99a67752747bb9adf8c4cd101b6163608c67fcb",
   "approvedFrozenInputs": {
     "staff": "1c19cddfe39abb4946f3603ff7053b089cda9637",
     "profiles": "3ba056c3dde350b51f28ea72792fe17d54e96b84",
     "native": "58eb54277c01685e6fc19cd0e17218da965e3192",
     "core": "bf6665c57d83ffa269845c76ff6903d23e0510de",
-    "honors": "196ebf841c77f7a725ed6b41100cd66b341faea5"
+    "honors": "196ebf841c77f7a725ed6b41100cd66b341faea5",
+    "nativeProfileAcknowledgement": {
+      "pageAndPureTests": "987309b739c7094cf7589749a0f70df7fab765cd",
+      "actualRouteSQLTests": "a02651670a47ad69f6e051b16bdc2ea608d7d7c9"
+    }
   },
   "environment": {
     "syntheticOnly": true,
@@ -211,15 +215,30 @@
   },
   "local": {
     "fullUnitDatabase": {
-      "status": "running",
+      "result": "success",
+      "files": 67,
+      "tests": 1146,
+      "durationSeconds": 165.15,
       "sourceCodeSHA": "e5de8df47c6feea3a5ad6efde44937038c59f2d0",
-      "log": "/tmp/zijing-native-complete-final-unit.log"
+      "log": "/tmp/zijing-native-complete-final-unit.log",
+      "unhandledErrors": 0,
+      "skipped": 0
     },
-    "typecheck": "success",
-    "lint": "success",
+    "typecheck": {
+      "status": "passed",
+      "log": "/tmp/zijing-final-frozen-typecheck.log"
+    },
+    "lint": {
+      "status": "passed",
+      "log": "/tmp/zijing-final-frozen-lint.log"
+    },
     "diffCheck": "success",
     "build": {
-      "status": "pending-final-native-build"
+      "status": "success",
+      "codeSHA": "466b8b96b5d870fe053af7c6757cb82a8268b8da",
+      "method": "exact git archive in isolated source directory, installed Next CLI",
+      "log": "/tmp/zijing-native-complete-final-build.log",
+      "result": "success"
     },
     "nativeStatic": {
       "result": "success",
@@ -263,7 +282,9 @@
       }
     },
     "fullBrowser": {
-      "status": "pending-final-complete-native-integration"
+      "status": "running",
+      "sourceAtStart": "466b8b96b5d870fe053af7c6757cb82a8268b8da",
+      "log": "/tmp/zijing-native-complete-final-e2e.log"
     },
     "rollbackGateTests": {
       "status": "success",
@@ -298,6 +319,40 @@
         "d46aab1 submitted-team snapshot on uncertain action",
         "280545a five core/profile rollback counts"
       ]
+    },
+    "compiledPrivateStorageHTTP": {
+      "codeSHA": "466b8b96b5d870fe053af7c6757cb82a8268b8da",
+      "result": "success",
+      "mediaChecks": 95,
+      "privateHonorDTOChecks": 6,
+      "compiledNextHTTP": true,
+      "sourceBackupClone": "zijing_honor_backup_synthetic",
+      "log": "/tmp/zijing-native-complete-source-storage-http.log",
+      "approvedBytesSHA256": "0300f73826c6c43b31e1ac758a1d8472bb8a95e11670315a53ea2a0d08f91f9d",
+      "platformPackageAcceptance": false
+    },
+    "compiledProbeLimits": {
+      "hubOnStorageOnlyFixture": "returned400 for incomplete mandatory core questionnaire in the intentionally minimal storage-authority batch",
+      "normalHubTransport": "actual JWT Next HTTP validated through real establishment/recruitment/admission in the three cross-module browser cases",
+      "oldStorageSourceMutated": false,
+      "minimalFixtureOrigin": "tests/team-honor-core-fixtures.ts:52 uses a single consent question only for storage/member-authority seeding; production core input guard correctly rejects it"
+    },
+    "unit": {
+      "status": "passed",
+      "tests": 1172,
+      "files": 68,
+      "durationSeconds": 234.81,
+      "log": "/tmp/zijing-final-frozen-all-unit.log",
+      "sourceSHA": "ce104d3668cd79b6a8d7830761d05e0727e757ec"
+    },
+    "miniappStatic": {
+      "status": "passed",
+      "pages": 25,
+      "files": 142,
+      "bytes": 459637,
+      "domainChecking": true,
+      "nativeDependencies": 0,
+      "log": "/tmp/zijing-final-frozen-static.log"
     }
   },
   "schema": {
@@ -341,7 +396,7 @@
     "uncertain result lookup retains the actual submitted team after a member selects another active team"
   ],
   "exactIntegratedCI": {
-    "status": "pending-push-final-reviewed-integration",
+    "status": "pending-final-code-package-script-freeze-and-push",
     "attempts": [
       {
         "headSHA": "672f4dd88cd8088e0f44dad55144453f02847434",
@@ -367,8 +422,24 @@
         "build": "success",
         "logCountsVerified": true,
         "scope": "earlier web source; predates submitted-team snapshot, extra rollback counts and complete native integration"
+      },
+      {
+        "headSHA": "466b8b96b5d870fe053af7c6757cb82a8268b8da",
+        "runID": 38243234969,
+        "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38243234969",
+        "status": "completed",
+        "jobID": 114790719903,
+        "conclusion": "success",
+        "unitPassed": 1146,
+        "unitFiles": 67,
+        "browserPassed": 95,
+        "browserDurationMinutes": 36.9,
+        "build": "success",
+        "logCountsVerified": true,
+        "scope": "complete native candidate before approved final profile acknowledgement patch; compatible rollback source"
       }
-    ]
+    ],
+    "previousSuccessfulRollbackSHA": "466b8b96b5d870fe053af7c6757cb82a8268b8da"
   },
   "localFailedAttempts": [
     {
@@ -458,7 +529,42 @@
     "parentReportedFreedDiskGiB": 1.055,
     "parentReportedServicesAndPIDUnchanged": true,
     "integrationProductionAccess": false,
-    "actualPeakBudgetStillRequired": true
+    "actualPeakBudgetStillRequired": true,
+    "rollbackRunnerProbe": {
+      "syntheticOnly": true,
+      "node": "24.19.0",
+      "payloadRun": {
+        "exitCode": 0,
+        "outputBytes": 0,
+        "gateExecuted": false,
+        "reason": "Payload keeps argv[1] pointing at its CLI; the imported script self-run guard does not enter main"
+      },
+      "directRootTsxCLI": {
+        "version": "4.21.0",
+        "exitCode": 1,
+        "gateExecuted": true,
+        "compatibleWithBaseline": false,
+        "checksComplete": true,
+        "permanentMarkers": 1
+      },
+      "designUsesDirectTsx": true,
+      "node24_12ActualRunnerStillPending": true
+    },
+    "targetMatchedRollbackBuild": {
+      "status": "passed",
+      "sourceSHA": "466b8b96b5d870fe053af7c6757cb82a8268b8da",
+      "node": "v24.12.0",
+      "glibc": "2.36",
+      "platform": "linux",
+      "arch": "x64",
+      "image": "node@sha256:7326fb2dbdce998edd72140946851be64ef4a643e8715e138ca467e8e9d92c99",
+      "sharpVersion": "0.35.4",
+      "nextBuild": "passed",
+      "publicOrigin": "https://home.thuzijing.top",
+      "onlySyntheticDatabase": true,
+      "log": "/tmp/zijing-release-rollback-build.log",
+      "packageAcceptance": "pending actual archive and unpacked runtime/runner validation"
+    }
   },
   "historicalWebBeforeCompleteNativeStage": {
     "runtimeCodeSHA": "463f0419fc941af83e27812073f964d33660b954",
@@ -630,5 +736,31 @@
     "freshFormAndVersionSynchronized": true,
     "oldReviewReset": true,
     "noAutomaticWriteReplay": true
+  },
+  "nativeProfileAcknowledgement": {
+    "sourceCI": {
+      "headSHA": "a02651670a47ad69f6e051b16bdc2ea608d7d7c9",
+      "runID": 38241191527,
+      "attempt": 2,
+      "conclusion": "success",
+      "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38241191527/attempts/2",
+      "previousAttempt": "attempt 1 fixture database disconnection retained in source history"
+    },
+    "localPageCommit": "7747977",
+    "localRouteTestCommit": "4d73b8f",
+    "ownedFixtureAuthorizationCommit": "ce104d3",
+    "scope": "three files: native profile page, 91 pure tests, five actual GET/PUT route+SQL tests; no backend authority, registration, schema or migration change",
+    "verification": {
+      "pureTests": 91,
+      "pureLog": "/tmp/zijing-final-narrow-profile-pure.log",
+      "actualRouteSQLTests": 5,
+      "routeLog": "/tmp/zijing-final-narrow-profile-http.log"
+    },
+    "boundaries": [
+      "acknowledged PUT followed by failed GET remains readonly and never sends a second PUT",
+      "revision 3 to PUT acknowledgement 4 to manual GET 4 to explicit PUT 5 verified in actual SQL",
+      "same-ID new membership epoch reloads fresh HMAC and defaults hidden",
+      "actor and route changes ignore late old GET"
+    ]
   }
 }
