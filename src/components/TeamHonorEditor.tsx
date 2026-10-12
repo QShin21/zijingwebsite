@@ -27,6 +27,7 @@ export function TeamHonorEditor({
   const imageFiles = useRef<File[]>([]),
     videoFile = useRef<File | null>(null);
   const [confirmedMissing, setConfirmedMissing] = useState(false);
+  const [unconfirmedTeam, setUnconfirmedTeam] = useState("");
   const [state, action, pending] = useActionState(
     async (previous: HonorFormState, form: FormData) => {
       if (previous.unconfirmed && !confirmedMissing) return previous;
@@ -38,6 +39,10 @@ export function TeamHonorEditor({
       } catch (error) {
         unstable_rethrow(error);
         setConfirmedMissing(false);
+        const submittedTeam = record
+          ? typeof record.team === "number" ? record.team : record.team.id
+          : form.get("team");
+        setUnconfirmedTeam(String(submittedTeam || ""));
         return {
           error:
             "连接中断，提交结果尚未确认。输入与附件已保留，请先查看本人荣誉记录，核对后再重试。",
@@ -78,7 +83,8 @@ export function TeamHonorEditor({
   const ownRecords = new URLSearchParams(returnQuery);
   ownRecords.set("view", "mine");
   ownRecords.delete("page");
-  if (!record && fields.team) ownRecords.set("team", fields.team);
+  if (state.unconfirmed && unconfirmedTeam) ownRecords.set("team", unconfirmedTeam);
+  else if (!record && fields.team) ownRecords.set("team", fields.team);
   const retryLocked = Boolean(state.unconfirmed && !confirmedMissing);
   return (
     <form

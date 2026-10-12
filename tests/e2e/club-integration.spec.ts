@@ -261,7 +261,17 @@ test("荣誉本人分页保留队伍和社群；断网与丢响应保留附件�
     const savedID = Number(new URL(page.url()).pathname.split("/").pop());
     const saved = await p.findByID({ collection: "team-honor-records", id: savedID, overrideAccess: true, depth: 0 });
     expect(saved.images).toHaveLength(1); expect(saved.images).toMatchObject([{ caption: "合成断网附件保留" }]);
-    await page.goto(url); const uncertainTitle = "合成已写入但丢响应-" + suffix;
+    // A member can belong to two active teams. An uncertain result must keep
+    // the submitted team's lookup even when the editor later selects the other.
+    const secondProposal = await operation(reviewer, { operation: "establish", gameID: game, title: "合成恢复队伍B-" + suffix, reason: "合成双队伍恢复范围" });
+    const secondDecision = await operation(leader, { operation: "decide-establishment", id: secondProposal.id, revision: secondProposal.updatedAt, decision: "approved", note: "" });
+    const secondTeam = typeof secondDecision.team === "object" ? secondDecision.team.id : secondDecision.team;
+    const secondBatch = await operation(reviewer, { operation: "save-recruitment", teamID: secondTeam, title: "合成第二队招新", status: "open", form: { ...defaultTeamForm, end: new Date(Date.now() + 86400000).toISOString() } });
+    const secondInfo = await (await page.request.get("/api/team-core?mode=recruitment&id=" + secondBatch.id, { headers: origin })).json();
+    const secondApplication = await operation(page, { operation: "save-join", id: secondBatch.id, action: "submit", version: secondInfo.version, answers: { gameID: "合成第二队玩家", position: "合成位置", experience: "合成经历", availability: "合成时段", contact: "synthetic-recovery@example.invalid" } });
+    await operation(reviewer, { operation: "decide-join", id: secondApplication.id, revision: secondApplication.updatedAt, decision: "approved", note: "" });
+    await page.goto("/teams/honors?view=mine&game=" + game); const uncertainTitle = "合成已写入但丢响应-" + suffix;
+    await editor.getByLabel("所属有效代表队", { exact: true }).selectOption(String(teamID));
     await editor.getByLabel("荣誉标题", { exact: true }).fill(uncertainTitle);
     await editor.getByLabel("添加证据图片（每份 2 MB，最多 6 份）", { exact: true }).setInputFiles({ name: "synthetic-uncertain.png", mimeType: "image/png", buffer: png });
     await editor.getByLabel(/新证据 1 说明/).fill("合成丢响应附件保留");
@@ -272,6 +282,8 @@ test("荣誉本人分页保留队伍和社群；断网与丢响应保留附件�
     await expect(editor.getByRole("alert")).toContainText("提交结果尚未确认"); await expect(editor.getByRole("button", { name: "保存草稿", exact: true })).toBeDisabled();
     await expect(editor.getByLabel("荣誉标题", { exact: true })).toHaveValue(uncertainTitle); await expect(editor.getByLabel(/新证据 1 说明/)).toHaveValue("合成丢响应附件保留");
     await page.unroute("**/teams/honors**", loseResponse);
+    await editor.getByLabel("所属有效代表队", { exact: true }).selectOption(String(secondTeam));
+    expect(new URL((await editor.getByRole("link", { name: "查看本人荣誉记录", exact: true }).getAttribute("href"))!, "http://localhost:3000").searchParams.get("team")).toBe(String(teamID));
     const checkPagePromise = page.context().waitForEvent("page"); await editor.getByRole("link", { name: "查看本人荣誉记录", exact: true }).click();
     const checkPage = await checkPagePromise; await expect(checkPage.getByRole("link", { name: uncertainTitle, exact: true })).toBeVisible();
     expect((await (await page.request.get("/api/team-honors?" + scope)).json()).totalDocs).toBe(11); await checkPage.close();
