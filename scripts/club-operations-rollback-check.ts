@@ -6,7 +6,8 @@ import { pathToFileURL } from "node:url";
 type RollbackReader = { query(sql: string): Promise<{ rows: Record<string, unknown>[] }> };
 const legacyCounts = ["backbone", "new_states", "joins", "promotions", "staff_batches", "staff_applications",
   "reduced_grants", "revoked_grants", "legacy_owner_private_access", "legacy_historical_private_access", "revoked_cards", "member_offices"];
-const recommendation = "Use a reviewed rollback build retaining club operations, consent, private signup and honor video isolation capabilities; preserve data, private videos and permanent reservations; do not revert to 1.0 or execute down";
+const teamTables = ["team_establishment_applications", "team_recruitments", "team_join_applications", "team_memberships", "team_member_profiles"];
+const recommendation = "Use a reviewed rollback build retaining club operations, team lifecycle, membership consent, private signup and honor video isolation capabilities; preserve data, private videos and permanent reservations; do not revert to 1.0 or execute down";
 function count(value: unknown) {
   if ((typeof value !== "number" && (typeof value !== "string" || !/^\d+$/.test(value))) ||
     !Number.isSafeInteger(Number(value)) || Number(value) < 0) throw new Error("Rollback count unavailable");
@@ -78,10 +79,18 @@ export async function assessClubRollback(db: RollbackReader, mediaDirectory: str
   counts.honor_records = table.rows[0].present
     ? count((await db.query("SELECT count(*)::bigint AS honor_records FROM team_honor_records")).rows[0]?.honor_records)
     : 0;
+  for (const name of teamTables) {
+    const available = await db.query(`SELECT to_regclass('public.${name}') IS NOT NULL AS present`);
+    if (typeof available.rows[0]?.present !== "boolean") throw new Error("Team table availability unknown");
+    counts[name] = available.rows[0].present
+      ? count((await db.query(`SELECT count(*)::bigint AS records FROM ${name}`)).rows[0]?.records)
+      : 0;
+  }
   Object.assign(counts, await honorStorageCounts(mediaDirectory));
   const requiresHonorVideoIsolation = counts.honor_records > 0 || counts.honor_private_files > 0 || counts.honor_video_reservations > 0;
   const compatible = Object.values(counts).every(value => value === 0);
   return { compatibleWithBaseline: compatible, counts, checksComplete: true, requiresHonorVideoIsolation,
+    requiresTeamCapabilities: teamTables.some(name => counts[name] > 0),
     preservesExpandedSchema: true, recommendation: compatible
       ? "Keep schema and backups; verify the actual previous build before switching"
       : recommendation };

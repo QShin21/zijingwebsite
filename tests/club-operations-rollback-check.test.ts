@@ -7,6 +7,7 @@ import { assessClubRollback, honorStorageCounts } from "../scripts/club-operatio
 const temporary: string[] = [];
 const legacy = { backbone: 0, new_states: 0, joins: 0, promotions: 0, staff_batches: 0, staff_applications: 0,
   reduced_grants: 0, revoked_grants: 0, legacy_owner_private_access: 0, legacy_historical_private_access: 0, revoked_cards: 0, member_offices: 0 };
+const teamTables = { team_establishment_applications: 0, team_recruitments: 0, team_join_applications: 0, team_memberships: 0, team_member_profiles: 0 };
 afterEach(async () => {
   vi.restoreAllMocks();
   for (const directory of temporary.splice(0)) await fs.rm(directory, { recursive: true, force: true });
@@ -16,11 +17,13 @@ async function media() {
   temporary.push(root);
   return root;
 }
-function database(rows: Record<string, unknown> = legacy, present: unknown = true, honors: unknown = "0") {
+function database(rows: Record<string, unknown> = legacy, present: unknown = true, honors: unknown = "0", teams: Record<string, unknown> = teamTables) {
   return { query: vi.fn(async (sql: string) => {
     if (sql.includes("WITH current_events")) return { rows: [{ ...rows }] };
     if (sql.includes("to_regclass")) return { rows: [{ present }] };
     if (sql.includes("FROM team_honor_records")) return { rows: [{ honor_records: honors }] };
+    const table = sql.match(/AS records FROM (\w+)$/)?.[1];
+    if (table) return { rows: [{ records: teams[table] }] };
     throw new Error("Unexpected synthetic read");
   }) };
 }
@@ -28,7 +31,7 @@ function database(rows: Record<string, unknown> = legacy, present: unknown = tru
 it("仅全部既有权限和新存储检查均为零时允许基线回滚", async () => {
   const db = database(), result = await assessClubRollback(db, await media());
   expect(result).toMatchObject({ compatibleWithBaseline: true, checksComplete: true, requiresHonorVideoIsolation: false });
-  expect(result.counts).toEqual({ ...legacy, honor_records: 0, honor_private_files: 0, honor_video_reservations: 0 });
+  expect(result.counts).toEqual({ ...legacy, ...teamTables, honor_records: 0, honor_private_files: 0, honor_video_reservations: 0 });
   for (const name of Object.keys(legacy)) expect(db.query.mock.calls[0][0]).toContain(name);
 });
 
@@ -54,10 +57,16 @@ it.each(["private", "reservation"])("只剩 %s 文件时仍阻断旧应用，无
   expect(result.counts[kind === "private" ? "honor_private_files" : "honor_video_reservations"]).toBe(1);
 });
 
-it("旧 schema 没有荣誉表且无私有文件时仍兼容，缺表不等于读错误", async () => {
+it("旧 schema 没有新增队伍或荣誉表且无私有文件时仍兼容，缺表不等于读错误", async () => {
   const db = database(legacy, false);
   expect((await assessClubRollback(db, await media())).compatibleWithBaseline).toBe(true);
-  expect(db.query).toHaveBeenCalledTimes(2);
+  expect(db.query).toHaveBeenCalledTimes(7);
+});
+
+it.each(Object.keys(teamTables))("仅有 %s 数据也要求保留新版队伍/简介能力的回滚构建", async table => {
+  const result = await assessClubRollback(database(legacy, true, "0", { ...teamTables, [table]: 1 }), await media());
+  expect(result).toMatchObject({ compatibleWithBaseline: false, requiresHonorVideoIsolation: false, requiresTeamCapabilities: true });
+  expect(result.counts[table]).toBe(1);
 });
 
 it.each([0, 1, 2])("第 %s 项数据库读取失败时不给回滚结论", async failing => {
