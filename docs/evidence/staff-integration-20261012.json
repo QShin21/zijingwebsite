@@ -116,7 +116,27 @@
   "protectedBranchesUpdatedByThisTask": false,
   "PR": false,
   "deploy": false,
-  "exactFinalCI": "Match the pushed integration HEAD to its Actions terminal conclusion; the final delivery records that exact SHA and run URL. A previous checkpoint success does not satisfy this gate.",
+  "exactFinalCI": {
+    "sha": "1c19cddfe39abb4946f3603ff7053b089cda9637",
+    "runID": 38222313105,
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38222313105",
+    "status": "completed",
+    "conclusion": "success",
+    "unitDatabase": {
+      "files": 32,
+      "tests": 281,
+      "result": "PASS"
+    },
+    "e2e": {
+      "tests": 67,
+      "result": "PASS",
+      "reportedDuration": "24.4m"
+    },
+    "build": "PASS",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "miniappStatic": "PASS"
+  },
   "remaining": [
     "await reviewed exact final team/profile/honor/miniapp commits before later integration; common dependencies and migration de-duplication inputs recorded in docs/TASKS.md"
   ],
@@ -135,5 +155,6 @@
       },
       "build": "not run after E2E failure"
     }
-  ]
+  ],
+  "independentReview": "Parent independently confirmed the three staff boundaries substantively closed on the exact final SHA."
 }
