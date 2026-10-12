@@ -8,7 +8,12 @@ import {
 import type { TeamHonorRecord, User } from "../payload-types";
 import { canParticipate, canReviewShowcase, relationID } from "./rules";
 import { workflowTransaction } from "./workflow-transactions";
-import { controlledVideoName, controlledVideoVersion } from "./showcase-videos";
+import { controlledVideoName } from "./showcase-videos";
+import {
+  honorVideoVersion,
+  privateHonorVideoName,
+  reserveLegacyHonorVideo,
+} from "./team-honor-videos";
 import { normalizeShowcaseImage } from "./showcase-images";
 import {
   type HonorMembershipAuthority,
@@ -83,7 +88,7 @@ export async function currentHonorVersion(doc: HonorVersionRecord) {
   )
     throw new APIError("证据图片已失效，请重新上传并审核", 409);
   const videoVersion = content.videoURL
-    ? await controlledVideoVersion(content.videoURL)
+    ? await honorVideoVersion(content.videoURL)
     : null;
   return {
     version: honorVersion(content, attributionOf(doc), videoVersion),
@@ -129,13 +134,17 @@ async function normalizeContent(
   if (content.videoURL) {
     if (
       typeof content.videoURL !== "string" ||
-      !controlledVideoName(content.videoURL)
+      (!privateHonorVideoName(content.videoURL) &&
+        !(
+          current?.videoURL === content.videoURL &&
+          controlledVideoName(content.videoURL)
+        ))
     )
       throw new APIError(
         "荣誉证据只接受本站上传的 MP4，外链不能作为审核证据",
         400,
       );
-    await controlledVideoVersion(content.videoURL);
+    await honorVideoVersion(content.videoURL);
   }
   return content;
 }
@@ -159,7 +168,7 @@ async function lockHonorActor(req: PayloadRequest) {
     sql`SELECT id FROM users WHERE id=${req.user!.id} FOR SHARE`,
   );
 }
-export type PublicHonor = HonorContent & {
+export type PublicHonor = Omit<HonorContent, "videoURL"> & {
   legacyRevision?: string;
   key: string;
   authorName: string;
@@ -184,8 +193,14 @@ export function createTeamHonorService(authority: HonorMembershipAuthority) {
     >,
     observed: Awaited<ReturnType<typeof currentHonorVersion>>,
   ): PublicHonor {
+    const content = observed.content;
     return {
-      ...observed.content,
+      title: content.title,
+      competition: content.competition,
+      placing: content.placing,
+      date: content.date,
+      description: content.description,
+      images: content.images,
       key: "team-honor-records:" + row.id,
       authorName: row.authorName,
       approvedAt: row.approvedAt || null,
@@ -200,10 +215,10 @@ export function createTeamHonorService(authority: HonorMembershipAuthority) {
       sourceHref: null,
     };
   }
-  async function publicRecord(
+  async function publicEvidence(
     p: Payload,
     id: number,
-  ): Promise<PublicHonor | null> {
+  ): Promise<{ record: PublicHonor; storageURL: string | null } | null> {
     const req = await createLocalReq({}, p);
     req.user = null;
     return withHonorProjection(req, async () => {
@@ -238,9 +253,18 @@ export function createTeamHonorService(authority: HonorMembershipAuthority) {
       if (!team?.active || team.game !== honorID(row.game)) return null;
       const observed = await currentHonorVersion(row).catch(() => null);
       return observed?.version === row.approvedVersion
-        ? projectRecord(row, observed)
+        ? {
+            record: projectRecord(row, observed),
+            storageURL: row.videoURL || null,
+          }
         : null;
     });
+  }
+  async function publicRecord(
+    p: Payload,
+    id: number,
+  ): Promise<PublicHonor | null> {
+    return (await publicEvidence(p, id))?.record || null;
   }
   async function availableTeams(p: Payload, actor: User | null) {
     if (!canParticipate(actor)) return [];
@@ -287,6 +311,8 @@ export function createTeamHonorService(authority: HonorMembershipAuthority) {
             depth: 0,
           })
         : undefined;
+      // Reserve pre-isolation identifiers before any edit can remove the last current reference.
+      if (current?.videoURL) await reserveLegacyHonorVideo(current.videoURL);
       if (current && Number(options.revision) !== current.revision)
         throw new APIError("荣誉记录已更新，请刷新后核对", 409);
       if (!current && options.revision)
@@ -392,7 +418,7 @@ export function createTeamHonorService(authority: HonorMembershipAuthority) {
       if (action === "submit") {
         completeHonor(content);
         const videoVersion = content.videoURL
-          ? await controlledVideoVersion(content.videoURL)
+          ? await honorVideoVersion(content.videoURL)
           : null;
         version = honorVersion(
           content,
@@ -616,7 +642,6 @@ export function createTeamHonorService(authority: HonorMembershipAuthority) {
           date: legacyHonorDate(row.date),
           description: row.summary || "",
           images: [],
-          videoURL: null,
           key: "honors:" + row.id,
           authorName: "历史荣誉档案",
           approvedAt: null,
@@ -644,7 +669,7 @@ export function createTeamHonorService(authority: HonorMembershipAuthority) {
         );
     });
   }
-  return { availableTeams, change, archives, publicRecord };
+  return { availableTeams, change, archives, publicRecord, publicEvidence };
 }
 export const teamHonorService = createTeamHonorService(
   createCoreTeamHonorAuthority({ getActiveTeamMembership }),

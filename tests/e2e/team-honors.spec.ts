@@ -1,12 +1,16 @@
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
 import sharp from "sharp";
+import pg from "pg";
 import { getPayload, type Payload } from "payload";
 import { test, expect, type Page } from "@playwright/test";
 import config from "../../src/payload.config";
 import { writeFile } from "node:fs/promises";
 import type { TeamHonorRecord, User } from "../../src/payload-types";
 import { teamHonorService as service } from "../../src/lib/team-honor-service";
+import { currentHonorVersion } from "../../src/lib/team-honor-service";
+import { saveVideo, discardVideo } from "../../src/lib/showcase-videos";
+import { discardHonorVideo } from "../../src/lib/team-honor-videos";
 import {
   seedHonorCoreChain,
   cleanHonorCoreChain,
@@ -25,6 +29,7 @@ const suffix = randomBytes(7).toString("hex"),
 const records: number[] = [],
   showcases: number[] = [],
   legacy: number[] = [];
+const videos: string[] = [];
 // The web app and fixture preparation use real core reads against a seeded synthetic authority chain.
 // The core's establishment/recruitment UI approval path is owned and verified by the core task.
 test.beforeAll(async () => {
@@ -198,6 +203,10 @@ test.afterAll(async () => {
     });
   for (const id of legacy)
     await p.delete({ collection: "honors", id, overrideAccess: true });
+  for (const url of videos) {
+    await discardHonorVideo(url);
+    await discardVideo(url).catch(() => {});
+  }
   if (chain) await cleanHonorCoreChain(p, chain);
   for (const user of [leader, reviewer, otherReviewer, player])
     if (user)
@@ -216,6 +225,7 @@ async function login(page: Page, user: User) {
     data: { email: user.email, password },
   });
   expect(response.ok()).toBe(true);
+  return response.json();
 }
 test("队伍荣誉只有一个置顶档案，普通风采仍为 6+1 分页，稳定详情不含待审材料", async ({
   page,
@@ -257,6 +267,359 @@ test("队伍荣誉只有一个置顶档案，普通风采仍为 6+1 分页，稳
   ])
     expect(body).not.toContain(field);
 });
+test("真实 HTTP JWT 上传及审核；旧共享视频跨集合借用在改稿/退回/隐藏/队伍归档后无法再请求字节", async ({
+  page,
+  request,
+  browser,
+}) => {
+  test.setTimeout(180000);
+  const context = await browser.newContext();
+  try {
+    const otherPage = await context.newPage();
+    const { token: playerToken } = await login(page, player);
+    const { token: reviewerToken } = await login(otherPage, reviewer);
+    // Authenticate the other-account copy once; do not introduce unrelated session writes during honor transactions.
+    await login(otherPage, otherReviewer);
+    // Generate a playable synthetic MP4 on an empty page, isolated from the site's CSP.
+    const fixturePage = await browser.newPage();
+    const clip = await fixturePage
+      .evaluate(async () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 320;
+        canvas.height = 180;
+        const ctx = canvas.getContext("2d")!;
+        let frame = 0;
+        const draw = () => {
+          ctx.fillStyle = "#6633aa";
+          ctx.fillRect(0, 0, 320, 180);
+          ctx.fillStyle = "white";
+          ctx.fillRect((frame++ * 7) % 280, 70, 40, 40);
+        };
+        draw();
+        const stream = canvas.captureStream(24),
+          chunks: Blob[] = [];
+        const recorder = new MediaRecorder(stream, {
+          mimeType: "video/mp4;codecs=avc1.42001E",
+        });
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          recorder.ondataavailable = (event) => chunks.push(event.data);
+          recorder.onerror = reject;
+          recorder.onstop = () =>
+            resolve(new Blob(chunks, { type: "video/mp4" }));
+          recorder.start();
+          const timer = setInterval(draw, 40);
+          setTimeout(() => {
+            clearInterval(timer);
+            recorder.stop();
+            stream.getTracks().forEach((track) => track.stop());
+          }, 1800);
+        });
+        return Array.from(new Uint8Array(await blob.arrayBuffer()));
+      })
+      .finally(() => fixturePage.close());
+    const bytes = Buffer.from(clip);
+    const uploaded = await request.post("/api/team-honors", {
+      headers: { Authorization: "JWT " + playerToken },
+      multipart: {
+        action: "submit",
+        team: String(team),
+        title: "合成视频 HTTP 荣誉",
+        competition: "合成视频赛事",
+        placing: "合成视频奖项",
+        date: "2026-10-01",
+        description: "合成视频说明",
+        video: {
+          name: "synthetic-native.mp4",
+          mimeType: "video/mp4",
+          buffer: bytes,
+        },
+      },
+    });
+    expect(uploaded.status()).toBe(201);
+    let current = (await uploaded.json()).record;
+    records.push(current.id);
+    let stored = await p.findByID({
+      collection: "team-honor-records",
+      id: current.id,
+      user: player,
+      overrideAccess: false,
+      depth: 0,
+    });
+    videos.push(stored.videoURL!);
+    expect(stored.videoURL).toMatch(/^\/api\/private-team-honor-videos\//);
+    expect(
+      (
+        await page.request.get(current.videoHref, {
+          headers: { "Sec-Fetch-Site": "same-origin" },
+        })
+      ).status(),
+    ).toBe(200);
+    expect((await request.get(current.videoHref)).status()).toBe(404);
+    expect((await request.get(stored.videoURL!)).status()).toBe(404);
+    const rawURL = await saveVideo(
+      new File([bytes], "synthetic-old-shared.mp4", { type: "video/mp4" }),
+    );
+    videos.push(rawURL);
+    // Recreate both author and other-account readable pending copies that existed before the isolation fix.
+    for (const actor of [player, otherReviewer]) {
+      const copy = await p.create({
+        collection: "community-showcase",
+        user: actor,
+        overrideAccess: false,
+        context: { webShowcaseWrite: true },
+        data: {
+          title: "合成旧跨集合借用",
+          game,
+          author: actor.id,
+          videoURL: rawURL,
+        },
+      });
+      expect(copy.status).toBe("pending");
+      showcases.push(copy.id);
+      expect(
+        (
+          await p.findByID({
+            collection: "community-showcase",
+            id: copy.id,
+            user: actor,
+            overrideAccess: false,
+            depth: 0,
+          })
+        ).id,
+      ).toBe(copy.id);
+    }
+    const connection = new pg.Client({
+      connectionString: process.env.DATABASE_URL,
+    });
+    await connection.connect();
+    try {
+      await connection.query(
+        "UPDATE team_honor_records SET video_u_r_l=$1 WHERE id=$2",
+        [rawURL, current.id],
+      );
+    } finally {
+      await connection.end();
+    }
+    stored = await p.findByID({
+      collection: "team-honor-records",
+      id: current.id,
+      user: player,
+      overrideAccess: false,
+      depth: 0,
+    });
+    const observed = await currentHonorVersion(stored);
+    const versionConnection = new pg.Client({
+      connectionString: process.env.DATABASE_URL,
+    });
+    await versionConnection.connect();
+    try {
+      await versionConnection.query(
+        "UPDATE team_honor_records SET submitted_version=$1 WHERE id=$2",
+        [observed.version, current.id],
+      );
+    } finally {
+      await versionConnection.end();
+    }
+    current = (
+      await (
+        await request.get("/api/team-honors/" + current.id, {
+          headers: { Authorization: "JWT " + playerToken },
+        })
+      ).json()
+    ).record;
+    const mutate = async (
+      token: string,
+      action: string,
+      extra: object = {},
+    ) => {
+      const response = await request.post("/api/team-honors/" + current.id, {
+        headers: { Authorization: "JWT " + token },
+        data: {
+          action,
+          revision: current.revision,
+          submittedVersion: current.submittedVersion,
+          ...extra,
+        },
+      });
+      expect(response.status(), await response.text()).toBe(200);
+      current = (await response.json()).record;
+    };
+    const blockedCopies = async () => {
+      expect(
+        (
+          await page.request.get(rawURL, {
+            headers: { "Sec-Fetch-Site": "same-origin" },
+          })
+        ).status(),
+      ).toBe(404);
+      expect((await request.get(rawURL)).status()).toBe(404);
+      expect(
+        (
+          await otherPage.request.get(rawURL, {
+            headers: { "Sec-Fetch-Site": "same-origin" },
+          })
+        ).status(),
+      ).toBe(404);
+    };
+    await blockedCopies();
+    await mutate(reviewerToken, "approve");
+    let publicHref =
+      "/api/team-honor-evidence/" +
+      current.id +
+      "/video?version=" +
+      observed.version;
+    expect((await request.get(publicHref)).status()).toBe(200);
+    expect(
+      (
+        await request.get(publicHref, { headers: { Range: "bytes=0-7" } })
+      ).status(),
+    ).toBe(206);
+    expect((await request.head(publicHref)).headers()["content-length"]).toBe(
+      String(bytes.length),
+    );
+    const archive = await (
+      await request.get("/api/team-honor-archives/" + team)
+    ).json();
+    const publicRecord = archive.records.find(
+      (row: { key: string }) => row.key === "team-honor-records:" + current.id,
+    );
+    expect(publicRecord).not.toHaveProperty("videoURL");
+    expect(JSON.stringify(publicRecord)).not.toContain(rawURL);
+    await page.goto("/community/" + slug + "/showcase/team-honors/" + team);
+    const playback = page.locator(
+      '[data-public-honor="team-honor-records:' + current.id + '"] video',
+    );
+    await expect
+      .poll(() => playback.evaluate((el: HTMLVideoElement) => el.readyState))
+      .toBeGreaterThanOrEqual(2);
+    await playback.evaluate(async (el: HTMLVideoElement) => {
+      el.muted = true;
+      await el.play();
+    });
+    await expect
+      .poll(() => playback.evaluate((el: HTMLVideoElement) => el.currentTime))
+      .toBeGreaterThan(0.1);
+    await playback.evaluate((el: HTMLVideoElement) => {
+      el.pause();
+      el.currentTime = 1;
+    });
+    await expect
+      .poll(() => playback.evaluate((el: HTMLVideoElement) => el.currentTime))
+      .toBeGreaterThanOrEqual(1);
+    await mutate(playerToken, "save", {
+      input: { description: "合成批准后改稿" },
+    });
+    expect((await request.get(publicHref)).status()).toBe(404);
+    await blockedCopies();
+    await mutate(playerToken, "submit", { input: {} });
+    await mutate(reviewerToken, "return", { note: "合成视频退回" });
+    expect((await request.get(publicHref)).status()).toBe(404);
+    await blockedCopies();
+    await mutate(playerToken, "submit", { input: {} });
+    const secondVersion = current.submittedVersion;
+    await mutate(reviewerToken, "approve");
+    publicHref =
+      "/api/team-honor-evidence/" +
+      current.id +
+      "/video?version=" +
+      secondVersion;
+    expect((await request.get(publicHref)).status()).toBe(200);
+    await p.update({
+      collection: "teams",
+      id: team,
+      overrideAccess: true,
+      user: leader,
+      context: { system: true, teamCoreWrite: true },
+      data: { teamStatus: "archived" },
+    });
+    expect((await request.get(publicHref)).status()).toBe(404);
+    expect(
+      (await request.get("/api/team-honor-archives/" + team)).status(),
+    ).toBe(404);
+    await blockedCopies();
+    await p.update({
+      collection: "teams",
+      id: team,
+      overrideAccess: true,
+      user: leader,
+      context: { system: true, teamCoreWrite: true },
+      data: { teamStatus: "active", archived: false },
+    });
+    await mutate(reviewerToken, "hide", { note: "合成视频最终隐藏" });
+    expect((await request.get(publicHref)).status()).toBe(404);
+    await blockedCopies();
+    // Ordinary independently uploaded published showcase video remains usable.
+    const normalURL = await saveVideo(
+      new File([bytes], "synthetic-normal.mp4", { type: "video/mp4" }),
+    );
+    videos.push(normalURL);
+    showcases.push(
+      (
+        await p.create({
+          collection: "community-showcase",
+          user: reviewer,
+          overrideAccess: false,
+          context: { webShowcaseWrite: true },
+          data: {
+            title: "合成正常视频风采",
+            game,
+            author: reviewer.id,
+            videoURL: normalURL,
+          },
+        })
+      ).id,
+    );
+    expect((await request.get(normalURL)).status()).toBe(200);
+    expect(
+      (
+        await request.get(normalURL, { headers: { Range: "bytes=0-7" } })
+      ).status(),
+    ).toBe(206);
+    await page.goto(
+      "/community/" + slug + "/showcase/" + showcases[showcases.length - 1],
+    );
+    const ordinaryPlayback = page.locator('video[aria-label="风采视频预览"]');
+    await expect
+      .poll(() =>
+        ordinaryPlayback.evaluate((el: HTMLVideoElement) => el.readyState),
+      )
+      .toBeGreaterThanOrEqual(2);
+    await ordinaryPlayback.evaluate(async (el: HTMLVideoElement) => {
+      el.muted = true;
+      await el.play();
+    });
+    await expect
+      .poll(() =>
+        ordinaryPlayback.evaluate((el: HTMLVideoElement) => el.currentTime),
+      )
+      .toBeGreaterThan(0.1);
+    await writeFile(
+      ".data/team-honor-http-video-evidence.json",
+      JSON.stringify({
+        syntheticOnly: true,
+        nativeJWT: true,
+        privateNamespace: true,
+        publicDTOHasNoStorageURL: true,
+        oldCrossCollectionCopiesBlocked: true,
+        hiddenEditedReturnedArchivedHTTPBlocked: true,
+        approvedVersionPlays: true,
+        approvedVersionSeeks: true,
+        ordinaryPublishedVideoWorks: true,
+      }),
+    );
+  } finally {
+    await p.update({
+      collection: "teams",
+      id: team,
+      overrideAccess: true,
+      user: leader,
+      context: { system: true, teamCoreWrite: true },
+      data: { teamStatus: "active", archived: false },
+    });
+    await context.close();
+  }
+});
+
 test("私有详情与原始 REST 守住社群边界，网页退回/拒绝需说明并可隐藏公开荣誉", async ({
   page,
   browser,
@@ -360,6 +723,9 @@ test("真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/�
     await editor
       .getByRole("textbox", { name: "获奖说明", exact: true })
       .fill("合成完整获奖说明，所有材料均为测试生成");
+    await expect(
+      editor.getByRole("textbox", { name: "获奖说明", exact: true }),
+    ).toHaveValue("合成完整获奖说明，所有材料均为测试生成");
     const png = await sharp({
       create: { width: 40, height: 40, channels: 3, background: "purple" },
     })
@@ -400,6 +766,11 @@ test("真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/�
       .locator("[data-honor-editor]")
       .getByRole("textbox", { name: "获奖说明", exact: true })
       .fill("已补充合成说明");
+    await expect(
+      page
+        .locator("[data-honor-editor]")
+        .getByRole("textbox", { name: "获奖说明", exact: true }),
+    ).toHaveValue("已补充合成说明");
     const resubmitRevision = Number(
       await page
         .locator("[data-honor-editor] input[name=revision]")
@@ -428,6 +799,11 @@ test("真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/�
       .locator("[data-honor-editor]")
       .getByRole("textbox", { name: "获奖说明", exact: true })
       .fill("批准后合成改稿，需要再次审核");
+    await expect(
+      page
+        .locator("[data-honor-editor]")
+        .getByRole("textbox", { name: "获奖说明", exact: true }),
+    ).toHaveValue("批准后合成改稿，需要再次审核");
     await page
       .locator("[data-honor-editor]")
       .getByRole("button", { name: "提交审核", exact: true })

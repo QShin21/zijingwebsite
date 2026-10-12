@@ -1,0 +1,110 @@
+{
+  "date": "2026-10-12",
+  "branch": "codex/team-honors-20261012",
+  "baseline": "beac037eafe88b9b82e171e15cfddcca351b838b",
+  "previousHonorSlices": [
+    "80c9f6961a7fb375bdc4215fe4fca8bdbd30d2e9",
+    "2a94cd352d1856dd86db4735b60185c0804134fd",
+    "397d6092e11c5b29a91916a5fead339c1a5602c4",
+    "d81770b0212ef9b285a6b1858e2300deb9037b78"
+  ],
+  "coreDependencySlice": "a37390db3c38eb360c7f5c706193a89e8a7e53cf",
+  "coreDependencySource": "bf6665c57d83ffa269845c76ff6903d23e0510de",
+  "coreDependencyFiles": [
+    "src/collections/team-core.ts",
+    "src/lib/team-memberships.ts"
+  ],
+  "membershipAuthority": "real team-memberships/getActiveTeamMembership; seeded synthetic approved establishment/recruitment/join chain",
+  "syntheticOnly": true,
+  "productionAccess": false,
+  "productionMigration": false,
+  "realNotifications": false,
+  "prMergeOrDeployment": false,
+  "verification": {
+    "fullTests": {
+      "command": "pnpm test",
+      "files": 35,
+      "tests": 282,
+      "passed": true
+    },
+    "honorModule": {
+      "files": 5,
+      "tests": 29,
+      "coveredByFinalFullTests": true
+    },
+    "affectedBrowserSuites": {
+      "command": "pnpm test:e2e tests/e2e/team-honors.spec.ts tests/e2e/community-spaces.spec.ts tests/e2e/content-promotions.spec.ts",
+      "tests": 10,
+      "passed": true,
+      "stage": "after HTTP/video/editor fixes, before final core file import"
+    },
+    "finalCoreHonorBrowser": {
+      "command": "pnpm test:e2e tests/e2e/team-honors.spec.ts",
+      "tests": 4,
+      "passed": true
+    },
+    "typecheck": true,
+    "lint": true,
+    "miniappStaticCheck": true,
+    "build": true
+  },
+  "videoHTTP": {
+    "syntheticOnly": true,
+    "nativeJWT": true,
+    "privateNamespace": true,
+    "publicDTOHasNoStorageURL": true,
+    "oldCrossCollectionCopiesBlocked": true,
+    "hiddenEditedReturnedArchivedHTTPBlocked": true,
+    "approvedVersionPlays": true,
+    "approvedVersionSeeks": true,
+    "ordinaryPublishedVideoWorks": true
+  },
+  "workflowBrowser": {
+    "membershipCore": "real",
+    "seededSyntheticChain": true,
+    "recruitmentUIVerified": false,
+    "draftSubmitWithdrawReturnApproveReapprove": true,
+    "historyAfterExit": true,
+    "mobileWidth": 390
+  },
+  "migration": {
+    "name": "20261012_080000_team_honor_records",
+    "additiveTable": "team_honor_records",
+    "oldHonorEntireRowAuthorSeasonPreserved": true,
+    "restrictForeignKeys": 4,
+    "lossyDownRefused": true,
+    "cleanBaselineHonorCoreOrderApplied": true,
+    "core160000Duplicated": false,
+    "productionRun": false
+  },
+  "rollback": {
+    "retainHonorTableAndHistory": true,
+    "retainPrivateVideoDirectoryAndLegacyReservations": true,
+    "retainGenericVideoIsolationGuard": true
+  },
+  "supersededCI": {
+    "commit": "d81770b0212ef9b285a6b1858e2300deb9037b78",
+    "run": 38222943389,
+    "artifact": 11736495578,
+    "unitTestsPassed": 275,
+    "e2ePassed": 63,
+    "e2eFailed": 1,
+    "buildSkipped": true,
+    "traceCause": "Textarea replacement concatenated previous description before submission; public projection contained the submitted concatenation.",
+    "fixed": "Hydration-ready controls; snapshot event values immediately; exact-value assertions before every description submission; original exact public assertion kept."
+  },
+  "deliveryCI": "Verify the exact delivery commit in GitHub Actions; prior commit checks are not final evidence.",
+  "remainingIntegration": [
+    "parent unifies top-level teams/honors navigation and old honors route",
+    "complete parent core business/UI and profile integration",
+    "final merged schema snapshot with core/profile/honor collections",
+    "whole establishment/recruitment UI path is owned by core task; not claimed by seeded honor tests"
+  ],
+  "localLogSha256": {
+    "team-honor-all-tests-delivery.log": "1700f0fdc7b2515710319bd1823affa68348f0d76a0ab64d9b953a9ea20e64f6",
+    "team-honor-affected-e2e-final2.log": "a67cbb5c203a00f9bec23b04f91785fbfadcadb1f11d2d77537e395738842b3d",
+    "team-honor-core-final-e2e.log": "ff7b9110256bb8050506c25b218a023e39116ea064f72a8ee58727160917518f",
+    "team-honor-integrated-migrate.log": "6959c2322a2057f627b221dee1f2f96ab8c83676bdd249732407ea720751a66d",
+    "team-honor-build-delivery.log": "a90411e2a67e5db659f7f61555ac944bf48333593e33a09bc5eb556ea4bad37f"
+  }
+}
