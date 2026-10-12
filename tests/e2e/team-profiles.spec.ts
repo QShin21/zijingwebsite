@@ -20,9 +20,7 @@ test.beforeEach(async () => {
 test.afterEach(async () => {
   if (f) await f.cleanup();
 });
-test.afterAll(async () => {
-  if (p) await p.destroy();
-});
+// Leave the shared Payload pool to worker teardown, after every spec has finished.
 const panel = (page: Page) => page.locator("#team-members");
 async function login(page: Page, user = f.member) {
   const response = await page.request.post("/api/users/login", {

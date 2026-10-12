@@ -14,9 +14,8 @@ test.beforeEach(async () => {
 test.afterEach(async () => {
   await f.cleanup();
 });
-test.afterAll(async () => {
-  await p.destroy();
-});
+// Playwright may reuse this worker for another spec. Payload caches its instance;
+// closing that shared pool here would leave the next spec with a destroyed cache.
 const panel = (page: Page) => page.locator("#team-members");
 async function open(page: Page) {
   expect(
