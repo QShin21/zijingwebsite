@@ -6,16 +6,17 @@ import { profileFixture, saveLoadedProfile } from "../team-profiles-fixture";
 import { emptyTeamProfile } from "../../src/lib/team-profiles-model";
 let p: Payload, f: Awaited<ReturnType<typeof profileFixture>>;
 test.beforeAll(async () => {
-  p = await getPayload({ config });
+  p = await getPayload({ config, key: "team-profiles-period-browser" });
 });
 test.beforeEach(async () => {
   f = await profileFixture(p);
 });
 test.afterEach(async () => {
-  await f.cleanup();
+  if (f) await f.cleanup();
 });
-// Playwright may reuse this worker for another spec. Payload caches its instance;
-// closing that shared pool here would leave the next spec with a destroyed cache.
+test.afterAll(async () => {
+  if (p) await p.destroy();
+});
 const panel = (page: Page) => page.locator("#team-members");
 async function open(page: Page) {
   expect(
