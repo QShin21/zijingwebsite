@@ -17,6 +17,7 @@ import {
 import type { HonorAction, HonorInput } from "../src/lib/team-honor-model";
 import { discardVideo, saveVideo, videoPath } from "../src/lib/showcase-videos";
 import { honorVideoResponse } from "../src/lib/team-honor-evidence";
+import { honorWorkspace } from "../src/lib/team-honor-web";
 
 let p: Payload,
   leader: User,
@@ -329,6 +330,17 @@ it("完整草稿/提交/撤回/退回修改/重提/拒绝流程沿用同一记�
   const archives = await service.archives(p, { game });
   expect(archives).toHaveLength(1);
   expect(archives[0].records).toHaveLength(1);
+  expect(
+    (await honorWorkspace(p, player, "mine")).docs.some(
+      (record) => record.id === id,
+    ),
+  ).toBe(true);
+  expect(
+    (await honorWorkspace(p, reviewer, "review")).docs.some(
+      (record) => record.id === id,
+    ),
+  ).toBe(true);
+  expect((await honorWorkspace(p, nonplayer, "mine")).docs).toEqual([]);
 });
 it("队员管理员与高权限队员必须待审且不能审核自己，骨干不能读取或改所有材料", async () => {
   for (const author of [reviewer, vice]) {
@@ -618,6 +630,92 @@ it("历史荣誉兼容纳入同一档案并保留作者/赛季，未核验及草
     (await p.count({ collection: "community-showcase", overrideAccess: true }))
       .totalDocs,
   ).toBe(before);
+});
+it("旧 CMS 发布入口不能绕过成员审核，历史内容只读且只有对应当前管理员能撤下", async () => {
+  const data = {
+    title: "合成只读旧荣誉",
+    slug: "honor-readonly-" + suffix,
+    team,
+    game,
+    submittedBy: player.id,
+    competition: "合成旧赛事",
+    placing: "合成旧奖项",
+    verified: true,
+    sourceURL: "https://example.invalid/legacy-proof",
+    date: "2020-09-30T16:00:00.000Z",
+    _status: "published" as const,
+  };
+  for (const actor of [leader, vice, reviewer, backbone])
+    await expect(
+      p.create({
+        collection: "honors",
+        user: actor,
+        overrideAccess: false,
+        data,
+      }),
+    ).rejects.toThrow();
+  const record = await p.create({
+    collection: "honors",
+    overrideAccess: true,
+    context: { system: true },
+    data,
+  });
+  legacyIDs.push(record.id);
+  expect((await service.archives(p, { team }))[0].records[0].date).toBe(
+    "2020-10-01T00:00:00.000Z",
+  );
+  await expect(
+    p.update({
+      collection: "honors",
+      id: record.id,
+      user: leader,
+      overrideAccess: false,
+      data: { _status: "published", verified: true },
+    }),
+  ).rejects.toThrow("不能重新");
+  await expect(
+    p.update({
+      collection: "honors",
+      id: record.id,
+      user: leader,
+      overrideAccess: false,
+      data: { title: "未经审核改稿", _status: "draft" },
+    }),
+  ).rejects.toThrow("只读");
+  await expect(
+    p.update({
+      collection: "honors",
+      id: record.id,
+      user: otherReviewer,
+      overrideAccess: false,
+      data: { _status: "draft" },
+    }),
+  ).rejects.toThrow();
+  await expect(
+    p.delete({
+      collection: "honors",
+      id: record.id,
+      user: leader,
+      overrideAccess: false,
+    }),
+  ).rejects.toThrow();
+  await p.update({
+    collection: "honors",
+    id: record.id,
+    user: reviewer,
+    overrideAccess: false,
+    data: { _status: "draft" },
+  });
+  expect(await service.archives(p, { team })).toEqual([]);
+  const retained = await p.findByID({
+    collection: "honors",
+    id: record.id,
+    overrideAccess: true,
+    depth: 0,
+  });
+  expect(retained.submittedBy).toBe(player.id);
+  expect(retained.title).toBe(data.title);
+  expect(retained.date).toBe(data.date);
 });
 it("证据端点按作者/当前审核范围或有效批准版本授权，Range/HEAD 不泄漏待审或隐藏视频", async () => {
   const url = await saveVideo(

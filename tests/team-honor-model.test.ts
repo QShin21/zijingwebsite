@@ -3,6 +3,7 @@ import {
   completeHonor,
   honorArchiveHref,
   honorID,
+  legacyHonorDate,
   honorText,
   honorVersion,
   nextHonorState,
@@ -23,6 +24,8 @@ describe("荣誉状态与证据边界", () => {
     expect(nextHonorState("new", "submit")).toBe("pending");
     expect(nextHonorState("approved", "save")).toBe("draft");
     expect(nextHonorState("draft", "submit")).toBe("pending");
+    expect(nextHonorState("approved", "submit")).toBe("pending");
+    expect(nextHonorState("pending", "submit")).toBe("pending");
     expect(nextHonorState("pending", "withdraw")).toBe("withdrawn");
     expect(nextHonorState("pending", "return")).toBe("returned");
     expect(nextHonorState("pending", "reject")).toBe("rejected");
@@ -48,6 +51,9 @@ describe("荣誉状态与证据边界", () => {
       "2024-02-29T00:00:00.000Z",
     );
     expect(() => honorText({ ...content, date: "2025-02-29" })).toThrow("日期");
+    expect(legacyHonorDate("2026-09-30T16:00:00.000Z")).toBe(
+      "2026-10-01T00:00:00.000Z",
+    );
   });
   it("字节、描述、日期与历史归属都进入审核版本", () => {
     const attribution = {

@@ -1,5 +1,9 @@
 import Link from "next/link";
 import type { Payload } from "payload";
+import type { User } from "@/payload-types";
+import { canReviewShowcase } from "@/lib/rules";
+import { hideLegacyTeamHonorAction } from "@/app/(frontend)/teams/honors/actions";
+import { SubmitButton } from "./SubmitButton";
 import { teamHonorService, type HonorArchive } from "@/lib/team-honor-service";
 
 export function TeamHonorArchiveCards({
@@ -57,8 +61,10 @@ export async function TeamHonorPins({
 }
 export function TeamHonorArchiveContents({
   archive,
+  user = null,
 }: {
   archive: HonorArchive;
+  user?: User | null;
 }) {
   return (
     <div className="showcase-feed">
@@ -107,6 +113,23 @@ export function TeamHonorArchiveContents({
             <Link className="button light" href={record.sourceHref}>
               查看原历史荣誉
             </Link>
+          )}
+          {record.legacy && canReviewShowcase(user, archive.team.game) && (
+            <form action={hideLegacyTeamHonorAction} className="member-form">
+              <input type="hidden" name="id" value={record.key.split(":")[1]} />
+              <input
+                type="hidden"
+                name="revision"
+                value={record.legacyRevision || ""}
+              />
+              <label>
+                隐藏历史荣誉说明
+                <textarea name="note" maxLength={500} required />
+              </label>
+              <SubmitButton name="action" value="hideLegacy">
+                隐藏历史荣誉
+              </SubmitButton>
+            </form>
           )}
         </article>
       ))}

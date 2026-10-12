@@ -697,6 +697,8 @@ export interface EventSignup {
   createdAt: string;
 }
 /**
+ * 历史荣誉保持原归属。新增、内容修改与复审请使用代表队荣誉工作台；这里只能撤下已有记录。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "honors".
  */

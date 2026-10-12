@@ -47,13 +47,14 @@ export function honorError(error: unknown) {
     error.message.includes("成员权威尚未接入")
   )
     return error.message;
-  return "暂时无法保存荣誉，请稍后重试；填写内容仍保留在此页面。";
+  return "暂时无法保存荣誉，请稍后重试。";
 }
 export async function honorWorkspace(
   p: Payload,
   user: User | null,
   view: "mine" | "review",
   page = 1,
+  scope: { team?: number; game?: number } = {},
 ) {
   if (!canParticipate(user)) throw new APIError("请先登录", 401);
   // The collection re-reads current scope before returning any private content.
@@ -65,19 +66,30 @@ export async function honorWorkspace(
     page,
     limit: 8,
     sort: "-updatedAt",
-    where:
-      view === "mine"
-        ? { author: { equals: user!.id } }
-        : {
-            and: [
-              { author: { not_equals: user!.id } },
-              {
-                state: {
-                  in: ["pending", "approved", "returned", "rejected", "hidden"],
+    where: {
+      and: [
+        view === "mine"
+          ? { author: { equals: user!.id } }
+          : {
+              and: [
+                { author: { not_equals: user!.id } },
+                {
+                  state: {
+                    in: [
+                      "pending",
+                      "approved",
+                      "returned",
+                      "rejected",
+                      "hidden",
+                    ],
+                  },
                 },
-              },
-            ],
-          },
+              ],
+            },
+        ...(scope.team ? [{ team: { equals: scope.team } }] : []),
+        ...(scope.game ? [{ game: { equals: scope.game } }] : []),
+      ],
+    },
   });
   return records;
 }
@@ -188,7 +200,17 @@ export async function saveHonorForm(
       input,
     });
   } catch (error) {
-    if (uploaded) await discardVideo(uploaded);
+    if (uploaded) {
+      // A commit failure can have an uncertain outcome. Delete only after proving the new file is unreferenced.
+      const saved = await p
+        .count({
+          collection: "team-honor-records",
+          overrideAccess: true,
+          where: { videoURL: { equals: uploaded } },
+        })
+        .catch(() => null);
+      if (saved?.totalDocs === 0) await discardVideo(uploaded);
+    }
     throw error;
   }
 }

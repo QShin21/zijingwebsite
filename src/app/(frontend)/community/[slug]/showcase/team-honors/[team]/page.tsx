@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { bySlug, cms } from "@/lib/content";
 import { teamHonorService } from "@/lib/team-honor-service";
@@ -19,8 +20,10 @@ export default async function TeamHonorArchive({
     Number(team) <= 0
   )
     notFound();
+  const p = await cms(),
+    { user } = await p.auth({ headers: await headers() });
   const archive = (
-    await teamHonorService.archives(await cms(), {
+    await teamHonorService.archives(p, {
       game: game.id,
       team: Number(team),
     })
@@ -34,7 +37,7 @@ export default async function TeamHonorArchive({
         eyebrow={game.title}
         description={archive.records.length + " 条已批准荣誉，按赛事日期汇总。"}
       />
-      <TeamHonorArchiveContents archive={archive} />
+      <TeamHonorArchiveContents archive={archive} user={user} />
     </section>
   );
 }

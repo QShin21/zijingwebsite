@@ -49,6 +49,12 @@ async function lockFacts(
   await session.db.execute(
     sql`SELECT id FROM team_memberships WHERE id=${membership} FOR SHARE`,
   );
+  await session.db.execute(
+    sql`SELECT id FROM games WHERE id=(SELECT game_id FROM teams WHERE id=${team}) FOR SHARE`,
+  );
+  await session.db.execute(
+    sql`SELECT id FROM team_establishment_applications WHERE id=(SELECT establishment_application_id FROM teams WHERE id=${team}) FOR SHARE`,
+  );
 }
 export function createCoreTeamHonorAuthority(
   core: HonorCoreContract,

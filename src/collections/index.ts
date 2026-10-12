@@ -32,6 +32,7 @@ import { APIError } from "payload";
 import { SocialCollections } from "./social";
 import { ContentPromotions } from "./promotions";
 import { TeamHonorRecords } from "./team-honor-records";
+import { protectLegacyTeamHonors } from "./team-honor-legacy";
 import { TeamCoreCollections, teamLifecycleFields, guardTeamLifecycle } from "./team-core";
 import { nicknameKey, validNickname } from "../lib/nickname";
 
@@ -643,7 +644,7 @@ export const Collections: CollectionConfig[] = [
     ],
     true,
   ),
-  content(
+  protectLegacyTeamHonors(content(
     "honors",
     "荣誉",
     [
@@ -664,7 +665,7 @@ export const Collections: CollectionConfig[] = [
       },
     ],
     true,
-  ),
+  )),
   content("events", "活动", [
     ...signupFields,
     {

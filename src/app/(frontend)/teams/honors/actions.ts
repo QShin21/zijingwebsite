@@ -6,6 +6,9 @@ import { cms } from "@/lib/content";
 import { teamHonorService } from "@/lib/team-honor-service";
 import { honorError, saveHonorForm } from "@/lib/team-honor-web";
 import { honorID, type HonorAction } from "@/lib/team-honor-model";
+import { workflowTransaction } from "@/lib/workflow-transactions";
+import { canReviewShowcase, relationID } from "@/lib/rules";
+import { APIError } from "payload";
 
 export type HonorFormState = { error?: string };
 function invalidateHonors() {
@@ -75,4 +78,73 @@ export async function changeTeamHonorAction(form: FormData) {
       "?message=" +
       encodeURIComponent(message),
   );
+}
+export async function hideLegacyTeamHonorAction(form: FormData) {
+  const p = await cms(),
+    { user } = await p.auth({ headers: await headers() });
+  let message: string;
+  try {
+    const id = honorID(form.get("id"));
+    await workflowTransaction(p, user, {}, async (req) => {
+      const record = await p.findByID({
+        collection: "honors",
+        id,
+        req: { ...req, user: null },
+        user: null,
+        overrideAccess: false,
+        draft: false,
+        depth: 0,
+        select: {
+          team: true,
+          game: true,
+          verified: true,
+          _status: true,
+          updatedAt: true,
+        },
+      });
+      const team = await p.findByID({
+        collection: "teams",
+        id: Number(relationID(record.team)),
+        req,
+        overrideAccess: true,
+        depth: 0,
+        select: { game: true },
+      });
+      const game = relationID(record.game) ?? relationID(team.game);
+      if (!canReviewShowcase(req.user, game))
+        throw new APIError("无权撤下此社群的历史荣誉", 403);
+      if (
+        String(form.get("revision") ?? "") !== record.updatedAt ||
+        record._status !== "published" ||
+        !record.verified
+      )
+        throw new APIError("历史荣誉已更新，请刷新后核对", 409);
+      const note = String(form.get("note") ?? "").trim();
+      if (!note || note.length > 500)
+        throw new APIError("请填写 1–500 字的隐藏说明", 400);
+      await p.update({
+        collection: "honors",
+        id,
+        req,
+        overrideAccess: false,
+        data: { _status: "draft", verified: false },
+      });
+      await p.create({
+        collection: "audit",
+        req,
+        overrideAccess: true,
+        data: {
+          actor: String(req.user!.id),
+          object: "honors:" + id,
+          action: "hideLegacy:" + note,
+          status: "hidden",
+        },
+      });
+    });
+    message = "历史荣誉已撤下，原作者、赛季和内容保留。";
+  } catch (error) {
+    message = honorError(error);
+  }
+  invalidateHonors();
+  redirect("/teams/honors?message=" + encodeURIComponent(message));
 }

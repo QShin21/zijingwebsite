@@ -1,12 +1,16 @@
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
 import sharp from "sharp";
-import { APIError, getPayload, type Payload } from "payload";
+import { getPayload, type Payload } from "payload";
 import { test, expect, type Page } from "@playwright/test";
 import config from "../../src/payload.config";
+import { writeFile } from "node:fs/promises";
 import type { TeamHonorRecord, User } from "../../src/payload-types";
-import { createTeamHonorService } from "../../src/lib/team-honor-service";
-import { readPublicHonorTeam } from "../../src/lib/team-honor-authority";
+import { teamHonorService as service } from "../../src/lib/team-honor-service";
+import {
+  seedHonorCoreChain,
+  cleanHonorCoreChain,
+} from "../team-honor-core-fixtures";
 
 let p: Payload, leader: User, reviewer: User, otherReviewer: User, player: User;
 let game: number,
@@ -14,24 +18,15 @@ let game: number,
   team: number,
   approved: TeamHonorRecord,
   pending: TeamHonorRecord;
+let chain: Awaited<ReturnType<typeof seedHonorCoreChain>>;
 const suffix = randomBytes(7).toString("hex"),
   password = randomBytes(24).toString("hex"),
   slug = "honor-web-" + suffix;
 const records: number[] = [],
   showcases: number[] = [],
   legacy: number[] = [];
-// Only fixture preparation injects synthetic membership facts. The running web app remains fail-closed
-// until the integration owner connects the real core. These tests do not claim full core membership E2E.
-const service = createTeamHonorService({
-  publicTeam: readPublicHonorTeam,
-  activeMemberships: async () => [],
-  activeMembership: async (req, member, teamID) => {
-    const teamInfo = await readPublicHonorTeam(req, teamID);
-    if (member !== player.id || teamID !== team || !teamInfo)
-      throw new APIError("Synthetic member only", 403);
-    return { id: 2001, member, team: teamID, season: null, teamInfo };
-  },
-});
+// The web app and fixture preparation use real core reads against a seeded synthetic authority chain.
+// The core's establishment/recruitment UI approval path is owned and verified by the core task.
 test.beforeAll(async () => {
   const url = new URL(process.env.DATABASE_URL!);
   if (
@@ -78,19 +73,6 @@ test.beforeAll(async () => {
       },
     })
   ).id;
-  team = (
-    await p.create({
-      collection: "teams",
-      overrideAccess: true,
-      context: { system: true },
-      data: {
-        title: "合成网页代表队",
-        slug: slug + "-team",
-        game,
-        _status: "published",
-      },
-    })
-  ).id;
   reviewer = await p.update({
     collection: "users",
     id: reviewer.id,
@@ -98,10 +80,24 @@ test.beforeAll(async () => {
     overrideAccess: false,
     data: {
       communityOffices: [
-        { game, status: "active", reviewShowcase: true, publishContent: true },
+        {
+          game,
+          status: "active",
+          reviewShowcase: true,
+          publishContent: true,
+          handleJoins: true,
+        },
       ],
     },
   });
+  chain = await seedHonorCoreChain(
+    p,
+    game,
+    reviewer,
+    [player, reviewer],
+    suffix,
+  );
+  team = chain.team.id;
   otherReviewer = await p.update({
     collection: "users",
     id: otherReviewer.id,
@@ -144,6 +140,27 @@ test.beforeAll(async () => {
     submittedVersion: approved.submittedVersion,
   });
   pending = await make("合成未审私有荣誉");
+  legacy.push(
+    (
+      await p.create({
+        collection: "honors",
+        overrideAccess: true,
+        context: { system: true },
+        data: {
+          title: "合成历史荣誉网页",
+          slug: "honor-web-legacy-" + suffix,
+          team,
+          game,
+          submittedBy: player.id,
+          competition: "合成旧比赛",
+          placing: "合成旧奖项",
+          verified: true,
+          sourceURL: "https://example.invalid/legacy-proof",
+          _status: "published",
+        },
+      })
+    ).id,
+  );
   for (let index = 0; index < 7; index++)
     showcases.push(
       (
@@ -181,6 +198,7 @@ test.afterAll(async () => {
     });
   for (const id of legacy)
     await p.delete({ collection: "honors", id, overrideAccess: true });
+  if (chain) await cleanHonorCoreChain(p, chain);
   for (const user of [leader, reviewer, otherReviewer, player])
     if (user)
       await p.delete({
@@ -189,8 +207,6 @@ test.afterAll(async () => {
         overrideAccess: true,
         context: { system: true },
       });
-  if (team)
-    await p.delete({ collection: "teams", id: team, overrideAccess: true });
   for (const id of [game, otherGame])
     if (id) await p.delete({ collection: "games", id, overrideAccess: true });
   await p.destroy();
@@ -290,6 +306,14 @@ test("私有详情与原始 REST 守住社群边界，网页退回/拒绝需说�
     await page.getByLabel("隐藏说明").fill("合成网页隐藏荣誉");
     await page.getByRole("button", { name: "隐藏荣誉", exact: true }).click();
     await expect(page.getByRole("status")).toContainText("荣誉已隐藏");
+    await page.goto("/community/" + slug + "/showcase/team-honors/" + team);
+    await page.getByLabel("隐藏历史荣誉说明").fill("合成历史荣誉隐藏说明");
+    await page
+      .getByRole("button", { name: "隐藏历史荣誉", exact: true })
+      .click();
+    await expect(page.getByRole("status").first()).toContainText(
+      "历史荣誉已撤下",
+    );
     expect(
       (await request.get("/api/team-honor-archives/" + team)).status(),
     ).toBe(404);
@@ -301,5 +325,162 @@ test("私有详情与原始 REST 守住社群边界，网页退回/拒绝需说�
     await expect(page.locator("[data-team-honor-archive]")).toHaveCount(0);
   } finally {
     await context.close();
+  }
+});
+
+test("真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/改稿复审/离队保留历史", async ({
+  page,
+  browser,
+}) => {
+  test.setTimeout(180000);
+  const reviewContext = await browser.newContext();
+  try {
+    const reviewPage = await reviewContext.newPage();
+    await login(page, player);
+    await login(reviewPage, reviewer);
+    await page.goto("/teams/honors?view=mine");
+    let editor = page.locator("[data-honor-editor]");
+    await editor
+      .getByLabel("荣誉标题", { exact: true })
+      .fill("合成完整网页荣誉流程");
+    await editor.getByRole("button", { name: "保存草稿", exact: true }).click();
+    await expect(page.getByRole("status")).toContainText("草稿已保存");
+    const id = Number(new URL(page.url()).pathname.split("/").pop());
+    records.push(id);
+    const detail = "/teams/honors/" + id;
+    editor = page.locator("[data-honor-editor]");
+    await editor.getByRole("button", { name: "提交审核", exact: true }).click();
+    await expect(editor.getByRole("alert")).toContainText("赛事");
+    await expect(editor.getByLabel("荣誉标题", { exact: true })).toHaveValue(
+      "合成完整网页荣誉流程",
+    );
+    await editor.getByLabel("赛事名称", { exact: true }).fill("合成完整赛事");
+    await editor.getByLabel("奖项或名次", { exact: true }).fill("合成完整奖项");
+    await editor.getByLabel("赛事日期", { exact: true }).fill("2026-10-01");
+    await editor
+      .getByRole("textbox", { name: "获奖说明", exact: true })
+      .fill("合成完整获奖说明，所有材料均为测试生成");
+    const png = await sharp({
+      create: { width: 40, height: 40, channels: 3, background: "purple" },
+    })
+      .png()
+      .toBuffer();
+    await editor
+      .getByLabel("添加证据图片（每份 2 MB，最多 6 份）", { exact: true })
+      .setInputFiles({
+        name: "synthetic-award.png",
+        mimeType: "image/png",
+        buffer: png,
+      });
+    await editor.getByLabel(/新证据 1 说明/).fill("合成网页证据");
+    await editor.getByRole("button", { name: "提交审核", exact: true }).click();
+    await expect(page.getByRole("status")).toContainText("荣誉已提交");
+    await page
+      .getByRole("button", { name: "撤回待审记录", exact: true })
+      .click();
+    await expect(page.getByRole("status")).toContainText("已撤回");
+    await page
+      .locator("[data-honor-editor]")
+      .getByRole("button", { name: "提交审核", exact: true })
+      .click();
+    await expect(page.getByRole("status")).toContainText("荣誉已提交");
+    await reviewPage.goto(detail);
+    await reviewPage
+      .getByLabel("审核说明（退回或拒绝必填）")
+      .fill("请补充合成获奖说明");
+    await reviewPage
+      .getByRole("button", { name: "退回修改", exact: true })
+      .click();
+    await expect(reviewPage.getByRole("status")).toContainText("已退回");
+    await page.reload();
+    await expect(page.locator("[data-honor-record]")).toContainText(
+      "请补充合成获奖说明",
+    );
+    await page
+      .locator("[data-honor-editor]")
+      .getByRole("textbox", { name: "获奖说明", exact: true })
+      .fill("已补充合成说明");
+    const resubmitRevision = Number(
+      await page
+        .locator("[data-honor-editor] input[name=revision]")
+        .inputValue(),
+    );
+    await page
+      .locator("[data-honor-editor]")
+      .getByRole("button", { name: "提交审核", exact: true })
+      .click();
+    await expect(
+      page.locator("[data-honor-editor] input[name=revision]"),
+    ).toHaveValue(String(resubmitRevision + 1));
+    await expect(page.getByRole("status")).toContainText("荣誉已提交");
+    await reviewPage.reload();
+    await reviewPage
+      .getByRole("button", { name: "批准荣誉", exact: true })
+      .click();
+    await expect(reviewPage.getByRole("status")).toContainText("已批准");
+    const archiveURL = "/community/" + slug + "/showcase/team-honors/" + team;
+    await page.goto(archiveURL);
+    await expect(
+      page.getByRole("heading", { name: "合成完整网页荣誉流程", exact: true }),
+    ).toBeVisible();
+    await page.goto(detail);
+    await page
+      .locator("[data-honor-editor]")
+      .getByRole("textbox", { name: "获奖说明", exact: true })
+      .fill("批准后合成改稿，需要再次审核");
+    await page
+      .locator("[data-honor-editor]")
+      .getByRole("button", { name: "提交审核", exact: true })
+      .click();
+    await expect(page.getByRole("status")).toContainText("荣誉已提交");
+    const beforeReview = await page.request.get(
+      "/api/team-honor-archives/" + team,
+    );
+    expect(await beforeReview.text()).not.toContain("批准后合成改稿");
+    await reviewPage.goto(detail);
+    await reviewPage
+      .getByRole("button", { name: "批准荣誉", exact: true })
+      .click();
+    await expect(reviewPage.getByRole("status")).toContainText("已批准");
+    await p.update({
+      collection: "team-memberships",
+      id: chain.memberships.get(player.id)!,
+      overrideAccess: true,
+      user: leader,
+      context: { system: true, teamCoreWrite: true },
+      data: {
+        status: "revoked",
+        leftAt: new Date().toISOString(),
+        revokedAt: new Date().toISOString(),
+      },
+    });
+    await page.goto(detail);
+    await expect(page.locator("[data-honor-editor]")).toHaveCount(0);
+    await page.goto(archiveURL);
+    await expect(
+      page.getByRole("heading", { name: "合成完整网页荣誉流程", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("批准后合成改稿，需要再次审核", { exact: true }),
+    ).toBeVisible();
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+    await writeFile(
+      ".data/team-honor-web-evidence.json",
+      JSON.stringify({
+        membershipCore: "real",
+        seededSyntheticChain: true,
+        recruitmentUIVerified: false,
+        draftSubmitWithdrawReturnApproveReapprove: true,
+        historyAfterExit: true,
+        mobileWidth: 390,
+      }),
+    );
+  } finally {
+    await reviewContext.close();
   }
 });

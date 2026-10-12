@@ -44,8 +44,10 @@ const privateRead: FieldAccess = ({ req, doc }) =>
   canParticipate(req.user as Identity) &&
   (Number(relationID(doc?.author)) === req.user!.id ||
     canReviewShowcase(req.user as Identity, doc?.game));
-const versionRead: FieldAccess = (args) =>
-  honorProjectionGranted(args.req) || privateRead(args);
+// The collection already limits authenticated reads to author/current reviewer scope.
+// Payload evaluates query-field permissions without a doc when filtering "my records" by author.
+const versionRead: FieldAccess = ({ req }) =>
+  honorProjectionGranted(req) || canParticipate(req.user as Identity);
 const privateAccess = { read: privateRead };
 const readRecords: Access = async ({ req }) => {
   if (honorProjectionGranted(req))
