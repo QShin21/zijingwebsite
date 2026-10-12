@@ -1,0 +1,32 @@
+<import src="../../templates/common.wxml" />
+<view class="page">
+  <button class="plain back" bindtap="back">← 返回</button>
+  <text class="eyebrow">TEAM HONORS</text>
+  <text class="title">{{team.title || '队伍荣誉档案'}}</text>
+  <text wx:if="{{team.gameTitle}}" class="subtitle">{{team.gameTitle}}</text>
+  <template is="feedback" data="{{loading,error,needsLogin:false}}" />
+  <view wx:if="{{loaded &amp;&amp; !records.length &amp;&amp; !loading &amp;&amp; !error}}" class="state panel">
+    <text class="state-title">暂无已公开的荣誉档案</text>
+    <text class="muted">荣誉记录发布后会出现在这里。</text>
+    <button class="secondary" bindtap="retry">重新加载</button>
+  </view>
+  <view wx:for="{{records}}" wx:key="key" class="section panel honor">
+    <view class="meta"><text>{{item.competition}}</text><text wx:if="{{item.legacy}}" class="badge">历史荣誉档案</text></view>
+    <text class="section-title honor-title">{{item.title}}</text>
+    <text wx:if="{{item.placing}}" class="body">{{item.placing}}</text>
+    <text wx:if="{{item.dateText}}" class="muted">赛事日期：{{item.dateText}}</text>
+    <text wx:if="{{item.description}}" class="body" selectable>{{item.description}}</text>
+    <text wx:if="{{item.authorName}}" class="muted author">{{item.authorName}}</text>
+    <text wx:if="{{item.mediaLoading}}" class="muted">正在加载证据图片…</text>
+    <view wx:for="{{item.localImages}}" wx:for-item="picture" wx:key="url" class="evidence">
+      <image class="photo" src="{{picture.url}}" mode="widthFix" aria-label="{{picture.caption}}" bindtap="preview" data-url="{{picture.url}}" />
+      <text class="muted">{{picture.caption}}</text>
+    </view>
+    <text wx:if="{{item.mediaError}}" class="error">{{item.mediaError}}</text>
+    <video wx:if="{{item.videoSource}}" id="honor-video-{{index}}" class="honor-video" src="{{item.videoSource}}" controls="{{true}}" autoplay="{{false}}" object-fit="contain" binderror="videoError" data-key="{{item.key}}" data-source="{{item.videoSource}}" />
+    <text wx:if="{{item.videoError}}" class="error">{{item.videoError}}</text>
+    <button wx:if="{{item.mediaError || item.videoError}}" class="plain" bindtap="retry" disabled="{{loading}}">重新加载档案</button>
+    <button wx:if="{{item.sourceHref}}" class="plain" bindtap="source" data-key="{{item.key}}">查看历史荣誉原文 →</button>
+  </view>
+  <button wx:if="{{loaded &amp;&amp; records.length}}" class="secondary section" bindtap="retry" disabled="{{loading}}">刷新档案</button>
+</view>
