@@ -135,14 +135,17 @@ test("本人上传头像、预览、单次保存、修改/取消与隐藏；桌�
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBeLessThanOrEqual(width);
+    if (width === 390)
+      await panel(page).screenshot({
+        path: ".data/team-profiles-preview-390.png",
+      });
   }
   expect(
     (await new AxeBuilder({ page }).include("#team-members").analyze())
       .violations,
   ).toEqual([]);
-  await page.screenshot({
+  await panel(page).screenshot({
     path: ".data/team-profiles-preview-1440.png",
-    fullPage: true,
   });
   let writes = 0;
   await page.route(`**/api/team-profiles/${f.first.id}`, async (route) => {
