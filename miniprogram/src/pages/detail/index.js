@@ -64,6 +64,11 @@ Page({
     } catch (cause) { if (ticket === this._ticket) error(this, cause); }
   },
   signup() { if(navigation.requireUser())navigation.go('signup',{kind:this.data.collection,id:this.data.doc.id}); },
+  teamPage(event) {
+    const page = event.currentTarget.dataset.page, id = this.data.doc.id;
+    if (this.data.collection === 'teams' && ['team-profiles', 'team-honors'].includes(page) && /^[1-9]\d*$/.test(String(id)))
+      navigation.go(page, { team: id });
+  },
   register() {
     if (this.data.registration !== '报名开放') return;
     navigation.copy(this.data.doc.registrationURL || this.data.doc.channelText || '', '报名渠道已复制');
