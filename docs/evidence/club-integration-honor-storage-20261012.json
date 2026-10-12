@@ -151,6 +151,39 @@
       "requiresHonorVideoIsolation": true,
       "preservesExpandedSchema": true,
       "recommendation": "Use a reviewed rollback build retaining club operations, consent, private signup and honor video isolation capabilities; preserve data, private videos and permanent reservations; do not revert to 1.0 or execute down"
+    },
+    {
+      "phase": "final-marker-only-with-core-profile-counts",
+      "sourceCommit": "280545aeca519c0b07e7d07a5304d1ddacbd041a",
+      "exitCode": 1,
+      "compatibleWithBaseline": false,
+      "counts": {
+        "backbone": 0,
+        "new_states": 0,
+        "joins": 0,
+        "promotions": 0,
+        "staff_batches": 0,
+        "staff_applications": 0,
+        "reduced_grants": 0,
+        "revoked_grants": 0,
+        "legacy_owner_private_access": 0,
+        "legacy_historical_private_access": 0,
+        "revoked_cards": 0,
+        "member_offices": 0,
+        "honor_records": 0,
+        "team_establishment_applications": 0,
+        "team_recruitments": 0,
+        "team_join_applications": 0,
+        "team_memberships": 0,
+        "team_member_profiles": 0,
+        "honor_private_files": 0,
+        "honor_video_reservations": 1
+      },
+      "checksComplete": true,
+      "requiresHonorVideoIsolation": true,
+      "requiresTeamCapabilities": false,
+      "preservesExpandedSchema": true,
+      "recommendation": "Use a reviewed rollback build retaining club operations, team lifecycle, membership consent, private signup and honor video isolation capabilities; preserve data, private videos and permanent reservations; do not revert to 1.0 or execute down"
     }
   ],
   "notes": [
