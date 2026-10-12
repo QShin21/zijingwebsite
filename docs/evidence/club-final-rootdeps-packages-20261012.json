@@ -1,0 +1,466 @@
+{
+  "recordType": "club-integration-final-source-and-packages",
+  "status": "CLOUD_ACCEPTED",
+  "sourceSHA": "6f862c7bb876db658ab7c961bf55979cfa276482",
+  "branch": "codex/club-integration-20261012",
+  "ci": {
+    "codeSourceSHA": "6f862c7bb876db658ab7c961bf55979cfa276482",
+    "id": 38263947645,
+    "job": 114861245721,
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38263947645",
+    "completed": true,
+    "status": "completed",
+    "conclusion": "success",
+    "unitTests": 1222,
+    "unitFiles": 70,
+    "webE2E": 95,
+    "webE2EMinutes": 30.8,
+    "typecheck": true,
+    "lint": true,
+    "miniappStatic": true,
+    "build": true,
+    "logCountsVerified": true,
+    "verifiedExcerpts": [
+      "2026-10-12T14:38:33.1496445Z  Test Files  70 passed (70)",
+      "2026-10-12T14:38:33.1497591Z       Tests  1222 passed (1222)",
+      "2026-10-12T15:10:13.8965993Z   95 passed (30.8m)",
+      "2026-10-12T15:11:07.4904036Z ⚠ Compiled with warnings in 50s",
+      "2026-10-12T15:11:30.6318568Z ✓ Generating static pages using 1 worker (4/4) in 985ms",
+      "2026-10-12T15:11:46.5481196Z Route (app)"
+    ]
+  },
+  "approvalLineage": {
+    "staff": "1c19cddfe39abb4946f3603ff7053b089cda9637",
+    "profiles": "3ba056c3dde350b51f28ea72792fe17d54e96b84",
+    "core": "bf6665c57d83ffa269845c76ff6903d23e0510de",
+    "honors": "196ebf841c77f7a725ed6b41100cd66b341faea5",
+    "native": "58eb54277c01685e6fc19cd0e17218da965e3192",
+    "profileNarrow": [
+      "987309b739c7094cf7589749a0f70df7fab765cd",
+      "a02651670a47ad69f6e051b16bdc2ea608d7d7c9"
+    ],
+    "wxml": "68f81b2cc7bcd95b27f53663cae830d6966c40b2"
+  },
+  "preflight": {
+    "APP_ENV": "production",
+    "DB_PUSH": "literal false required",
+    "allEnvironmentChecksBeforePayloadAndConfig": true,
+    "invalidActualCLICombinations": 3,
+    "beforeFixDatabaseTCPConnectionsEach": 1,
+    "afterFixDatabaseTCPConnectionsEach": 0,
+    "afterFixExitCodeEach": 1,
+    "noPGProtocolOrDDLInTCPTrap": true,
+    "targetedTests": 17,
+    "existingCountOnlyChecks": 12
+  },
+  "sourceValidation": {
+    "localUnit": {
+      "codeSHA": "3ed56a3c3fc07722308ce0a805f8b37e6ca80c57",
+      "tests": 1222,
+      "files": 70,
+      "seconds": 212.33,
+      "sameApplicationTestsConfigPreflightBytesAtFinalSource": true
+    },
+    "wxmlRegressionTests": 33,
+    "typecheck": true,
+    "lint": true,
+    "miniappStatic": {
+      "pages": 25,
+      "files": 142,
+      "bytes": 459509
+    },
+    "sourceGitDiffForApplicationConfigLockTestsAndMigrationAfter3edEmpty": true
+  },
+  "intermediateCI": {
+    "sourceSHA": "3ed56a3c3fc07722308ce0a805f8b37e6ca80c57",
+    "id": 38260392365,
+    "success": true,
+    "unit": 1222,
+    "files": 70,
+    "webE2E": 95,
+    "webE2EMinutes": 32.1,
+    "build": true,
+    "dependencyCoverageIncompleteInIntermediatePackages": true
+  },
+  "targetPlatform": {
+    "node": "v24.12.0",
+    "platform": "linux",
+    "arch": "x64",
+    "glibc": "2.36"
+  },
+  "dependencyFingerprint": {
+    "rootDeclarations": 14,
+    "packages": 436,
+    "files": 53153,
+    "rootPackageSHA256": "b2d1f1f69a1026121db2a7a84ac5209aa5bdb91641de4a419f19f17d4572e7f7",
+    "finalSHA256": "b760e38c5e4926a1e1ab176cc01f4e2bebf10cc0dc5ab9a794e46493785bbc32",
+    "rollbackSHA256": "9bf21a989c44632aef7c89cbbc30b0a2dfa779395293eb75a6cc2f66b43bf3c4",
+    "allRootAndRuntimeResolutionFileHashesMatch": true,
+    "negativeCases": 10,
+    "criticalEntries": {
+      "libvipsBinary": {
+        "path": ".pnpm/@img+sharp-libvips-linux-x64@1.3.3/node_modules/@img/sharp-libvips-linux-x64/lib/libvips-cpp.so.8.18.6",
+        "packagePath": ".pnpm/@img+sharp-libvips-linux-x64@1.3.3/node_modules/@img/sharp-libvips-linux-x64",
+        "packageName": "@img/sharp-libvips-linux-x64",
+        "packageVersion": "1.3.3",
+        "sha256": "536cee19ab906cb5185ad519bf87647693f5d7b55e608c92eb28607f89ca5125",
+        "bytes": 18621496
+      },
+      "nextAPI": {
+        "path": ".pnpm/next@16.3.5_@babel+core@7.29.7_supports-color@7.2.0__@playwright+test@1.58.2_@types+nod_8e78d184c40346716ac8923abe8e8e93/node_modules/next/dist/server/next.js",
+        "packagePath": ".pnpm/next@16.3.5_@babel+core@7.29.7_supports-color@7.2.0__@playwright+test@1.58.2_@types+nod_8e78d184c40346716ac8923abe8e8e93/node_modules/next",
+        "packageName": "next",
+        "packageVersion": "16.3.5",
+        "sha256": "7f5e6d550be3bfb73ca7f0668bf82dcf1130f63202c15e4d282ee5f130f75bc6",
+        "bytes": 19637
+      },
+      "nextCLI": {
+        "path": ".pnpm/next@16.3.5_@babel+core@7.29.7_supports-color@7.2.0__@playwright+test@1.58.2_@types+nod_8e78d184c40346716ac8923abe8e8e93/node_modules/next/dist/bin/next",
+        "packagePath": ".pnpm/next@16.3.5_@babel+core@7.29.7_supports-color@7.2.0__@playwright+test@1.58.2_@types+nod_8e78d184c40346716ac8923abe8e8e93/node_modules/next",
+        "packageName": "next",
+        "packageVersion": "16.3.5",
+        "sha256": "9017e0a9d562da4ce9fb2021db2e1cc6d2c2bd7bce278480da342f42b765d982",
+        "bytes": 23507
+      },
+      "nextSWCLoader": {
+        "path": ".pnpm/next@16.3.5_@babel+core@7.29.7_supports-color@7.2.0__@playwright+test@1.58.2_@types+nod_8e78d184c40346716ac8923abe8e8e93/node_modules/next/dist/build/swc/index.js",
+        "packagePath": ".pnpm/next@16.3.5_@babel+core@7.29.7_supports-color@7.2.0__@playwright+test@1.58.2_@types+nod_8e78d184c40346716ac8923abe8e8e93/node_modules/next",
+        "packageName": "next",
+        "packageVersion": "16.3.5",
+        "sha256": "e80c2d8841180a8797b25181ed89072f3264e7ef1169db1a46446586e27be822",
+        "bytes": 62048
+      },
+      "payloadAPI": {
+        "path": ".pnpm/payload@3.90.1_graphql@16.11.0_supports-color@7.2.0_typescript@5.9.3/node_modules/payload/dist/index.js",
+        "packagePath": ".pnpm/payload@3.90.1_graphql@16.11.0_supports-color@7.2.0_typescript@5.9.3/node_modules/payload",
+        "packageName": "payload",
+        "packageVersion": "3.90.1",
+        "sha256": "7e94b9e5ea492b7be10732f0899a68be900394db29cbded26d959411230d0f32",
+        "bytes": 39682
+      },
+      "payloadBin": {
+        "path": ".pnpm/payload@3.90.1_graphql@16.11.0_supports-color@7.2.0_typescript@5.9.3/node_modules/payload/bin.js",
+        "packagePath": ".pnpm/payload@3.90.1_graphql@16.11.0_supports-color@7.2.0_typescript@5.9.3/node_modules/payload",
+        "packageName": "payload",
+        "packageVersion": "3.90.1",
+        "sha256": "9943738582bd92601575f35ae450f1984cd9109badf9c7d182cba8deb33d23f3",
+        "bytes": 2203
+      },
+      "payloadEsbuildAPI": {
+        "path": ".pnpm/esbuild@0.28.2/node_modules/esbuild/lib/main.js",
+        "packagePath": ".pnpm/esbuild@0.28.2/node_modules/esbuild",
+        "packageName": "esbuild",
+        "packageVersion": "0.28.2",
+        "sha256": "61ec0ba144ff93f4bf0e96ad6fab6f430ede0aa13e27ace8063ed63ba416b3cd",
+        "bytes": 97463
+      },
+      "payloadEsbuildBinary": {
+        "path": ".pnpm/@esbuild+linux-x64@0.28.2/node_modules/@esbuild/linux-x64/bin/esbuild",
+        "packagePath": ".pnpm/@esbuild+linux-x64@0.28.2/node_modules/@esbuild/linux-x64",
+        "packageName": "@esbuild/linux-x64",
+        "packageVersion": "0.28.2",
+        "sha256": "e1698a3d5c6c0798fee4fd3b5cc816651f460c63d390a7a26ea4beb0b1884100",
+        "bytes": 11427952
+      },
+      "payloadTsxAPI": {
+        "path": ".pnpm/tsx@4.22.4/node_modules/tsx/dist/esm/api/index.cjs",
+        "packagePath": ".pnpm/tsx@4.22.4/node_modules/tsx",
+        "packageName": "tsx",
+        "packageVersion": "4.22.4",
+        "sha256": "1e4e4b2dbb41d31b58b748d64c6b6f137f86b8113a010e99e13d92a7e260490d",
+        "bytes": 1303
+      },
+      "rootEsbuildAPI": {
+        "path": ".pnpm/esbuild@0.28.2/node_modules/esbuild/lib/main.js",
+        "packagePath": ".pnpm/esbuild@0.28.2/node_modules/esbuild",
+        "packageName": "esbuild",
+        "packageVersion": "0.28.2",
+        "sha256": "61ec0ba144ff93f4bf0e96ad6fab6f430ede0aa13e27ace8063ed63ba416b3cd",
+        "bytes": 97463
+      },
+      "rootEsbuildBinary": {
+        "path": ".pnpm/@esbuild+linux-x64@0.28.2/node_modules/@esbuild/linux-x64/bin/esbuild",
+        "packagePath": ".pnpm/@esbuild+linux-x64@0.28.2/node_modules/@esbuild/linux-x64",
+        "packageName": "@esbuild/linux-x64",
+        "packageVersion": "0.28.2",
+        "sha256": "e1698a3d5c6c0798fee4fd3b5cc816651f460c63d390a7a26ea4beb0b1884100",
+        "bytes": 11427952
+      },
+      "rootTsxCLI": {
+        "path": ".pnpm/tsx@4.21.0/node_modules/tsx/dist/cli.mjs",
+        "packagePath": ".pnpm/tsx@4.21.0/node_modules/tsx",
+        "packageName": "tsx",
+        "packageVersion": "4.21.0",
+        "sha256": "8729ecfb90d9d568939e4190e6f1d3317c946583b7d37a776e0c23a21c021cf8",
+        "bytes": 120402
+      },
+      "sharpAPI": {
+        "path": ".pnpm/sharp@0.35.4_@types+node@24.10.1/node_modules/sharp/dist/index.cjs",
+        "packagePath": ".pnpm/sharp@0.35.4_@types+node@24.10.1/node_modules/sharp",
+        "packageName": "sharp",
+        "packageVersion": "0.35.4",
+        "sha256": "d69f275bc49fcd2a6188b26b35c986d4db32a1b008653fef88adb4598688232a",
+        "bytes": 620
+      },
+      "sharpNative": {
+        "path": ".pnpm/@img+sharp-linux-x64@0.35.4/node_modules/@img/sharp-linux-x64/lib/sharp-linux-x64-0.35.4.node",
+        "packagePath": ".pnpm/@img+sharp-linux-x64@0.35.4/node_modules/@img/sharp-linux-x64",
+        "packageName": "@img/sharp-linux-x64",
+        "packageVersion": "0.35.4",
+        "sha256": "649fd3c3f98401061963aa496976c21b120a67c382657d9a26a60df251a317e2",
+        "bytes": 415112
+      },
+      "sharpNativeLoader": {
+        "path": ".pnpm/@img+sharp-linux-x64@0.35.4/node_modules/@img/sharp-linux-x64/index.cjs",
+        "packagePath": ".pnpm/@img+sharp-linux-x64@0.35.4/node_modules/@img/sharp-linux-x64",
+        "packageName": "@img/sharp-linux-x64",
+        "packageVersion": "0.35.4",
+        "sha256": "6dba0c88db27b290bd8e2de94d043aa8242b1d63ae659eee9841d1334e6994f4",
+        "bytes": 135
+      },
+      "swcNative": {
+        "path": ".pnpm/@next+swc-linux-x64-gnu@16.3.5/node_modules/@next/swc-linux-x64-gnu/next-swc.linux-x64-gnu.node",
+        "packagePath": ".pnpm/@next+swc-linux-x64-gnu@16.3.5/node_modules/@next/swc-linux-x64-gnu",
+        "packageName": "@next/swc-linux-x64-gnu",
+        "packageVersion": "16.3.5",
+        "sha256": "8310cb95f2810b26c68431666e35ca2c27169109f844192b1a243f086a11ab64",
+        "bytes": 96731560
+      }
+    },
+    "rootDependencies": {
+      "@payloadcms/db-postgres": {
+        "declaredVersion": "3.90.1",
+        "packageName": "@payloadcms/db-postgres",
+        "packageVersion": "3.90.1",
+        "packagePath": ".pnpm/@payloadcms+db-postgres@3.90.1_payload@3.90.1_graphql@16.11.0_supports-color@7.2.0_type_5ab33261754f82f7bf253e4c692c84cc/node_modules/@payloadcms/db-postgres",
+        "entries": {
+          "@payloadcms/db-postgres": ".pnpm/@payloadcms+db-postgres@3.90.1_payload@3.90.1_graphql@16.11.0_supports-color@7.2.0_type_5ab33261754f82f7bf253e4c692c84cc/node_modules/@payloadcms/db-postgres/dist/index.js"
+        }
+      },
+      "@payloadcms/email-nodemailer": {
+        "declaredVersion": "3.90.1",
+        "packageName": "@payloadcms/email-nodemailer",
+        "packageVersion": "3.90.1",
+        "packagePath": ".pnpm/@payloadcms+email-nodemailer@3.90.1_payload@3.90.1_graphql@16.11.0_supports-color@7.2.0_typescript@5.9.3_/node_modules/@payloadcms/email-nodemailer",
+        "entries": {
+          "@payloadcms/email-nodemailer": ".pnpm/@payloadcms+email-nodemailer@3.90.1_payload@3.90.1_graphql@16.11.0_supports-color@7.2.0_typescript@5.9.3_/node_modules/@payloadcms/email-nodemailer/dist/index.js"
+        }
+      },
+      "@payloadcms/next": {
+        "declaredVersion": "3.90.1",
+        "packageName": "@payloadcms/next",
+        "packageVersion": "3.90.1",
+        "packagePath": ".pnpm/@payloadcms+next@3.90.1_@types+react@19.2.7_graphql@16.11.0_monaco-editor@0.56.0_next@1_abdd72d4339ff49fe8e0c0b57b8e7a48/node_modules/@payloadcms/next",
+        "entries": {
+          "@payloadcms/next/auth": ".pnpm/@payloadcms+next@3.90.1_@types+react@19.2.7_graphql@16.11.0_monaco-editor@0.56.0_next@1_abdd72d4339ff49fe8e0c0b57b8e7a48/node_modules/@payloadcms/next/dist/exports/auth.js",
+          "@payloadcms/next/css": ".pnpm/@payloadcms+next@3.90.1_@types+react@19.2.7_graphql@16.11.0_monaco-editor@0.56.0_next@1_abdd72d4339ff49fe8e0c0b57b8e7a48/node_modules/@payloadcms/next/dist/prod/styles.css",
+          "@payloadcms/next/layouts": ".pnpm/@payloadcms+next@3.90.1_@types+react@19.2.7_graphql@16.11.0_monaco-editor@0.56.0_next@1_abdd72d4339ff49fe8e0c0b57b8e7a48/node_modules/@payloadcms/next/dist/exports/layouts.js",
+          "@payloadcms/next/routes": ".pnpm/@payloadcms+next@3.90.1_@types+react@19.2.7_graphql@16.11.0_monaco-editor@0.56.0_next@1_abdd72d4339ff49fe8e0c0b57b8e7a48/node_modules/@payloadcms/next/dist/exports/routes.js",
+          "@payloadcms/next/rsc": ".pnpm/@payloadcms+next@3.90.1_@types+react@19.2.7_graphql@16.11.0_monaco-editor@0.56.0_next@1_abdd72d4339ff49fe8e0c0b57b8e7a48/node_modules/@payloadcms/next/dist/exports/rsc.js",
+          "@payloadcms/next/views": ".pnpm/@payloadcms+next@3.90.1_@types+react@19.2.7_graphql@16.11.0_monaco-editor@0.56.0_next@1_abdd72d4339ff49fe8e0c0b57b8e7a48/node_modules/@payloadcms/next/dist/exports/views.js",
+          "@payloadcms/next/withPayload": ".pnpm/@payloadcms+next@3.90.1_@types+react@19.2.7_graphql@16.11.0_monaco-editor@0.56.0_next@1_abdd72d4339ff49fe8e0c0b57b8e7a48/node_modules/@payloadcms/next/dist/cjs/withPayload.cjs"
+        }
+      },
+      "@payloadcms/richtext-lexical": {
+        "declaredVersion": "3.90.1",
+        "packageName": "@payloadcms/richtext-lexical",
+        "packageVersion": "3.90.1",
+        "packagePath": ".pnpm/@payloadcms+richtext-lexical@3.90.1_@faceless-ui+modal@3.0.0_react-dom@19.2.4_react@19._1fcd74f76c9c1bb45c8cee714d190acb/node_modules/@payloadcms/richtext-lexical",
+        "entries": {
+          "@payloadcms/richtext-lexical": ".pnpm/@payloadcms+richtext-lexical@3.90.1_@faceless-ui+modal@3.0.0_react-dom@19.2.4_react@19._1fcd74f76c9c1bb45c8cee714d190acb/node_modules/@payloadcms/richtext-lexical/dist/index.js"
+        }
+      },
+      "@payloadcms/storage-s3": {
+        "declaredVersion": "3.90.1",
+        "packageName": "@payloadcms/storage-s3",
+        "packageVersion": "3.90.1",
+        "packagePath": ".pnpm/@payloadcms+storage-s3@3.90.1_@types+react@19.2.7_monaco-editor@0.56.0_next@16.3.5_@bab_ac2d691caf5a728551bca4dcee7de85b/node_modules/@payloadcms/storage-s3",
+        "entries": {
+          "@payloadcms/storage-s3": ".pnpm/@payloadcms+storage-s3@3.90.1_@types+react@19.2.7_monaco-editor@0.56.0_next@16.3.5_@bab_ac2d691caf5a728551bca4dcee7de85b/node_modules/@payloadcms/storage-s3/dist/index.js"
+        }
+      },
+      "@payloadcms/translations": {
+        "declaredVersion": "3.90.1",
+        "packageName": "@payloadcms/translations",
+        "packageVersion": "3.90.1",
+        "packagePath": ".pnpm/@payloadcms+translations@3.90.1/node_modules/@payloadcms/translations",
+        "entries": {
+          "@payloadcms/translations": ".pnpm/@payloadcms+translations@3.90.1/node_modules/@payloadcms/translations/dist/exports/index.js"
+        }
+      },
+      "dotenv": {
+        "declaredVersion": "17.2.3",
+        "packageName": "dotenv",
+        "packageVersion": "17.2.3",
+        "packagePath": ".pnpm/dotenv@17.2.3/node_modules/dotenv",
+        "entries": {
+          "dotenv": ".pnpm/dotenv@17.2.3/node_modules/dotenv/lib/main.js"
+        }
+      },
+      "graphql": {
+        "declaredVersion": "16.11.0",
+        "packageName": "graphql",
+        "packageVersion": "16.11.0",
+        "packagePath": ".pnpm/graphql@16.11.0/node_modules/graphql",
+        "entries": {
+          "graphql": ".pnpm/graphql@16.11.0/node_modules/graphql/index.js"
+        }
+      },
+      "next": {
+        "declaredVersion": "16.3.5",
+        "packageName": "next",
+        "packageVersion": "16.3.5",
+        "packagePath": ".pnpm/next@16.3.5_@babel+core@7.29.7_supports-color@7.2.0__@playwright+test@1.58.2_@types+nod_8e78d184c40346716ac8923abe8e8e93/node_modules/next",
+        "entries": {
+          "next": ".pnpm/next@16.3.5_@babel+core@7.29.7_supports-color@7.2.0__@playwright+test@1.58.2_@types+nod_8e78d184c40346716ac8923abe8e8e93/node_modules/next/dist/server/next.js"
+        }
+      },
+      "payload": {
+        "declaredVersion": "3.90.1",
+        "packageName": "payload",
+        "packageVersion": "3.90.1",
+        "packagePath": ".pnpm/payload@3.90.1_graphql@16.11.0_supports-color@7.2.0_typescript@5.9.3/node_modules/payload",
+        "entries": {
+          "payload": ".pnpm/payload@3.90.1_graphql@16.11.0_supports-color@7.2.0_typescript@5.9.3/node_modules/payload/dist/index.js"
+        }
+      },
+      "pg": {
+        "declaredVersion": "8.16.3",
+        "packageName": "pg",
+        "packageVersion": "8.16.3",
+        "packagePath": ".pnpm/pg@8.16.3/node_modules/pg",
+        "entries": {
+          "pg": ".pnpm/pg@8.16.3/node_modules/pg/lib/index.js"
+        }
+      },
+      "react": {
+        "declaredVersion": "19.2.4",
+        "packageName": "react",
+        "packageVersion": "19.2.4",
+        "packagePath": ".pnpm/react@19.2.4/node_modules/react",
+        "entries": {
+          "react": ".pnpm/react@19.2.4/node_modules/react/index.js"
+        }
+      },
+      "react-dom": {
+        "declaredVersion": "19.2.4",
+        "packageName": "react-dom",
+        "packageVersion": "19.2.4",
+        "packagePath": ".pnpm/react-dom@19.2.4_react@19.2.4/node_modules/react-dom",
+        "entries": {
+          "react-dom": ".pnpm/react-dom@19.2.4_react@19.2.4/node_modules/react-dom/index.js"
+        }
+      },
+      "sharp": {
+        "declaredVersion": "0.35.4",
+        "packageName": "sharp",
+        "packageVersion": "0.35.4",
+        "packagePath": ".pnpm/sharp@0.35.4_@types+node@24.10.1/node_modules/sharp",
+        "entries": {
+          "sharp": ".pnpm/sharp@0.35.4_@types+node@24.10.1/node_modules/sharp/dist/index.cjs"
+        }
+      }
+    }
+  },
+  "archives": {
+    "final": {
+      "sourceSHA": "6f862c7bb876db658ab7c961bf55979cfa276482",
+      "sha256": "809aaa5ab5cd672382e8ebbc96f6f31c3bc6b694b3344450a2f336f5b9ea4ee0",
+      "manifestSHA256": "430db36c69543f871561893ae4fd500e71e0d979ccd269de5d37ceb3f8815d0f",
+      "compressedBytes": 8678599,
+      "expandedBytes": 51043734,
+      "fileCount": 833
+    },
+    "rollback": {
+      "sourceSHA": "466b8b96b5d870fe053af7c6757cb82a8268b8da",
+      "sha256": "18f3ca39328e5ba5ea3f6c7d49e0ca75cf202af5c5b2fd5231b1b367d34104bd",
+      "manifestSHA256": "f5f0c23e45f2c430d51d8de7343a553e1b9e5624948c54b28af25a7040be75fa",
+      "compressedBytes": 8682495,
+      "expandedBytes": 51044443,
+      "fileCount": 833
+    }
+  },
+  "actualUnpackedAcceptance": {
+    "finalHTTP": 118,
+    "rollbackHTTP": 118,
+    "restoredHTTP": 99,
+    "allArchiveAndUnpackedFileHashes": true,
+    "repeatArchiveHashesIdentical": true,
+    "noBuilderMounted": true,
+    "actualRootTsxAndPayloadBin": true,
+    "migrations": 17,
+    "compatibleRollbackRepeatUpNoOp": true,
+    "tableNames": 69,
+    "honorRestrictForeignKeys": 4,
+    "reviewerSetNullForeignKeys": 1,
+    "emptyGateExit": 0,
+    "markerOnlyGateExit": 1,
+    "allGateReportsNonemptyComplete20": true,
+    "restoredRejectsOldBaseline": true
+  },
+  "backupRestore": {
+    "manifestVersion": 3,
+    "PGClient": "17.11",
+    "newUniqueEmptyAbsoluteDestination": true,
+    "oldBackupsPreserved": true,
+    "tables": 69,
+    "records": 1865,
+    "sourceUntouched": true,
+    "privateHonorAndPermanentMarkerHashesVerified": true,
+    "revokedOldJWTDenied": true,
+    "changedBytesDenied": true,
+    "approvedBytesSHA256": "0300f73826c6c43b31e1ac758a1d8472bb8a95e11670315a53ea2a0d08f91f9d",
+    "offsiteVerified": false
+  },
+  "codeOnlyCapacity": {
+    "sourceSHA": "6f862c7bb876db658ab7c961bf55979cfa276482",
+    "onlyCodeArchivesAndUnpackedDirectories": true,
+    "observedAllocatedBytes": 126611456,
+    "entries": [
+      {
+        "path": "/workspace/zijingwebsite/.data/club-rootdeps-release-work/club-code-6f862c7bb876db658ab7c961bf55979cfa276482.tar.gz",
+        "allocatedBytes": 8679424
+      },
+      {
+        "path": "/workspace/zijingwebsite/.data/club-rootdeps-release-work/club-code-466b8b96b5d870fe053af7c6757cb82a8268b8da.tar.gz",
+        "allocatedBytes": 8683520
+      },
+      {
+        "path": "/workspace/zijingwebsite/.data/club-rootdeps-unpacked-6f862c7",
+        "allocatedBytes": 54624256
+      },
+      {
+        "path": "/workspace/zijingwebsite/.data/club-rootdeps-unpacked-466b8b9",
+        "allocatedBytes": 54624256
+      }
+    ],
+    "excludesCompleteBackupAndDDLPotentialPeak": true,
+    "productionDiskMeasured": false
+  },
+  "unverified": [
+    "official WX GUI3.16",
+    "real device",
+    "platform privacy and domains",
+    "production dependency fingerprint and absolute env/MEDIA/static bindings",
+    "production ordered11-to17 names and physical catalog",
+    "production full v3/offsite restoration and complete backup/DDL capacity"
+  ],
+  "scope": {
+    "onlySyntheticData": true,
+    "productionAccess": false,
+    "productionDeployment": false,
+    "productionMigrations": false,
+    "mainLittleappAndRecoveryUpdated": false,
+    "PRCreated": false,
+    "realMembersOrNotifications": false,
+    "targetDependencyInstallPruneOrReplacement": false
+  },
+  "deliveryDirectory": "/workspace/zijingwebsite/.data/club-rootdeps-final-deliverables",
+  "executionEnvironment": {
+    "transportInterruptionRecovered": true,
+    "readOnlyRecoveryChecked": true,
+    "temporaryWebsiteContainersStoppedBeforeInterruption": true,
+    "noValidationProcessesRestarted": true,
+    "ownedSyntheticPostgresStillRunning": true
+  }
+}

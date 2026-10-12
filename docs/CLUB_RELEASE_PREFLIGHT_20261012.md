@@ -143,3 +143,15 @@ preflight在导入Payload/config、构造适配器或连接DB之前检查所有�
 backup.mjs create会在完成新备份后自动清理当前BACKUP_DEST内超过14天的旧目录。本轮备份必须使用部署线程确认的**新唯一空绝对目标目录**：先确认不存在或为空，任何既有条目均停止；不得把历史备份根目录直接作为dest，不复用旧dest，不触碰既有备份。异机目的地和本地工作空间仍分别核对；本轮未授权清理历史备份，未修改备份架构/清理代码。
 
 3ed56a3是这一轮中间候选，已在匹配平台构建并完成两个833文件代码包、重复哈希、解包118+118 HTTP、17次真实Payload bin up与兼容包no-op、69表逐名和0/1直接TSX门禁。新唯一空目标的v3恢复69表1857条合成记录，恢复副本99 HTTP通过。其136包/23486文件指纹覆盖CLI/native闭包，最终复核发现缺pg/dotenv和Payload根插件；父任务要求的现场依赖合同必须把这些配置/备份/回滚实际加载的根依赖一并核对。中间回执因此明确标为SUPERSEDED_PENDING_ROOT_DEPENDENCY_COVERAGE，不能作为最终发布批准；旧候选、旧包与旧CI保留历史，根依赖补齐后的新精确源码/CI/包另行收口。
+
+## 最终精确来源与实际代码包
+
+最终代码6f862c7bb876db658ab7c961bf55979cfa276482的[CI38263947645](https://github.com/QShin21/zijingwebsite/actions/runs/38263947645)已完整SUCCESS，job114861245721日志实际1222项/70文件、95网页30.8分钟及build核对。中间3ed56a3的CI38260392365亦SUCCESS（1222/70、95网页32.1分钟/build），保留其根依赖遗漏记录；最终6f不沿用该中间包。网站源码、测试、配置、锁文件及迁移在3ed→6f逐字一致；本次仅补全依赖合同。
+
+全部14根依赖、CLI/native及实际运行/已安装peer闭包共436包/53153文件，实际Node24.12.0/Linux x64/glibc2.36探针、pg/适配器缺项和原生/pg字节错误等10项真实拒绝检查通过。两包在新cwd、只读既有依赖且未挂载构建目录实际运行：各118 HTTP通过，真实Payload bin空库17次up、兼容包重复no-op，69表/17日志逐名及四RESTRICT外键和reviewer SET NULL一致；直接根TSX空对照退出0、marker-only退出1，均为非空完整20项JSON。解包后436包/53153文件及14根解析种子复核通过。
+
+最终包club-code-6f862c7bb876db658ab7c961bf55979cfa276482.tar.gz的SHA256为809aaa5ab5cd672382e8ebbc96f6f31c3bc6b694b3344450a2f336f5b9ea4ee0，压缩8678599字节、展开51043734字节。兼容回滚club-code-466b8b96b5d870fe053af7c6757cb82a8268b8da.tar.gz的SHA256为18f3ca39328e5ba5ea3f6c7d49e0ca75cf202af5c5b2fd5231b1b367d34104bd，压缩8682495字节、展开51044443字节。各833文件与重复哈希一致；都满足压缩≤50MiB、展开≤100MiB，不包含env/DB/私有媒体/node_modules。最新产物及完整manifest、验收、CI、原生142输入与文件摘要清单位于.data/club-rootdeps-final-deliverables；此前目录是历史候选。
+
+最终解包产物使用新唯一空绝对BACKUP_DEST与显式PG17.11，v3恢复69表1865条合成记录、私有视频和marker摘要一致，恢复副本99 HTTP通过，旧JWT撤权和改字节拒绝，原库未改。历史1857/1840/1823各阶段计数保留，未覆盖。两压缩包和两实际解包目录占用126611456字节（约120.7MiB），不代报完整生产备份/DDL峰值。执行通道中断后只读恢复检查成功，工作树及产物保留，未重新启动迁移/构建/上传；临时网站容器在中断前已停止。
+
+现场任何根包/CLI/原生/闭包解析、字节或实际平台不符均停止，目标不install/prune/替换依赖。官方GUI3.16/真机/平台隐私域名、生产实际依赖和绝对env/MEDIA/static、11→17逐名/catalog、完整v3/异机恢复及峰值仍由对应线程验收。本线程无生产访问、生产迁移或部署，未更新main/littleapp/recovery、未创建PR或真人触达。[最终实际证据](evidence/club-final-rootdeps-packages-20261012.json)。
