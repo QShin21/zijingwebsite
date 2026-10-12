@@ -1,0 +1,74 @@
+{
+  "at": "2026-10-12T08:33:37Z",
+  "fixSHA": "45d810b927e10c6437fe31dd5f140c27bda8e46c",
+  "applicationSHA": "c05bd29b8c7d285065faf0a8274be407bf1b2541",
+  "authority": "unchanged real core getActiveTeamMembership; current membership/team/user/joinedAt",
+  "credential": "opaque HMAC; checked before idempotency and writes in service and hook",
+  "oldEpochResponse": {
+    "status": 409,
+    "code": "PROFILE_PERIOD_CHANGED",
+    "rowRevisionChanged": false,
+    "rowDataChanged": false,
+    "visibilityRestored": false
+  },
+  "frontend": "Only explicit reload initializes the editor epoch; background GET cannot rebind old opt-in",
+  "tests": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "profileUnit": 55,
+    "fullUnit": 308,
+    "profileBrowser": 9,
+    "build": "passed",
+    "epochBrowser": 3,
+    "fullRemoteBrowser": 70
+  },
+  "cases": [
+    "visible and hidden stored data",
+    "missing/forged/date-supplied epoch",
+    "empty old editor cannot create",
+    "cross-team credential rejected",
+    "repeated revoke/re-admit",
+    "old page and PUT replay unchanged",
+    "explicit refresh hidden by default then opt-in",
+    "delayed PUT rejected",
+    "delayed successful response cannot rebind old draft"
+  ],
+  "schemaChange": false,
+  "coreAuthorityChanged": false,
+  "ci": {
+    "runID": 38221431931,
+    "jobID": 114718368936,
+    "sourceSHA": "c05bd29b8c7d285065faf0a8274be407bf1b2541",
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38221431931",
+    "status": "completed",
+    "conclusion": "success",
+    "attempt": 1,
+    "completedAt": "2026-10-12T08:33:37Z",
+    "unitTestsPassed": 308,
+    "browserTestsPassed": 70,
+    "ownedBrowserTestsPassed": 9,
+    "browserDuration": "23.3m",
+    "migration": "passed",
+    "typecheck": "passed",
+    "lint": "passed",
+    "miniappCheck": "passed",
+    "build": "passed"
+  },
+  "previousCI": {
+    "runID": 38219273484,
+    "sourceSHA": "223d9ebaf8d2ae976b03f4960ec4a3be337bfe01",
+    "conclusion": "failure",
+    "browserPassed": 69,
+    "browserFailed": 1,
+    "cause": "Period spec beforeEach exceeded 90s because registration-flow destroyed the shared default Payload cached instance; cleanup then referenced an uninitialized fixture",
+    "fixSHA": "c05bd29b8c7d285065faf0a8274be407bf1b2541",
+    "fix": "Both owned browser specs use separately keyed Payload instances and close only their own pools; cleanup checks fixture initialization"
+  },
+  "localOrderedReplay": {
+    "sourceSHA": "c05bd29b8c7d285065faf0a8274be407bf1b2541",
+    "ownedBrowserTestsPassed": 9,
+    "otherBaselineFailure": "registration-flow login encountered ECONNRESET in the local ordered subset; no registration code was changed",
+    "finalRemoteResult": "The same exact source later passed all 70 browser cases in CI"
+  },
+  "deliveryNote": "A subsequent documentation-only commit records this exact-code CI result; it does not change runtime or tests"
+}

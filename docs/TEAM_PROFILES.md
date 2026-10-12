@@ -35,7 +35,7 @@
 
 代表队详情 `src/components/Content.tsx` 仅加独立 `<TeamProfilesPanel teamID={doc.id}/>`，不改核心生命周期或荣誉页面。独立编辑页 `/teams/profiles/[teamID]` 支持返回 `/teams/[slug]#team-members`；组件可供核心/统一入口重用。
 
-`GET /api/team-profiles/[teamID]` 返回受控名单及当前用户自己的可编辑状态；`PUT` 仅接受 `{revision, profile:{displayName,position,biography,avatar,visible}}`，拒绝 HTTP context/overrideAccess/member/game/status 等事实。API 使用登录边界、同源检查、流式 2.9 MB 上限和 `private,no-store`。站点原有代表队登录边界保持。
+`GET /api/team-profiles/[teamID]` 返回受控名单及当前用户自己的可编辑状态；`PUT` 仅接受 `{revision, membershipVersion, profile:{displayName,position,biography,avatar,visible}}`，拒绝 HTTP context/overrideAccess/member/game/status 等事实。API 使用登录边界、同源检查、流式 2.9 MB 上限和 `private,no-store`。站点原有代表队登录边界保持。
 
 共享简介集成补丁单独提交 `68c8b81008cc53246f8504ac1ac8053f6efe6544`：collection 注册、迁移索引、生成类型和详情挂载共四文件。后来明确授权的核心依赖使这些文件同时包含核心最小项，统一集成按条目合并并重生成类型，禁止整文件覆盖。
 
@@ -48,3 +48,13 @@
 迁移演练从新空库逐次执行旧基线→核心→简介，61→65→66 表；核心保留 60 张旧业务表的原列数据，简介保留 64 张原表数据（含已有权威关系）。唯一预期变化为迁移日志；旧队伍仍为 unestablished、没有从旧资料编造成员，唯一关系索引及迁移后的真实读取/简介写入与重复保存通过。演练不迁移原开发库，更未连接生产。
 
 最终夹具仅通过核心内部写上下文构造合成有效权威链，**成员判定使用真实数据库与真实核心 getter，没有 mock 资格**。验收范围为真实 schema + 实时读取 API + 简介网页闭环；完整“申请建队→审核→招新→录取”核心运营网页链及荣誉统一入口不属于本模块完成声明，仍由核心与总集成验收。此前隔离组合试验不代替最终分支证据；精确远端 CI 结果单独记录，未完成的 CI 不称通过。
+
+## 独立审查修复：再入队周期并发凭据
+
+旧资料 revision 不随离队/重新录取变化，原实现仅在资料相同比较中检查 joinedAt，旧页或旧请求能把 visible=true 带入新周期。这一版本存在真实授权阻断，旧验证不覆盖该重放，现由 `45d810b927e10c6437fe31dd5f140c27bda8e46c` 修复。
+
+GET 的 own 增加 `membershipVersion`，只向当前本人返回服务端 HMAC 生成的不透明凭据；签名绑定真实 membership ID、teamID、userID 和当前 joinedAt，不公开这些原始字段。PUT 必须带该凭据，服务和集合钩子均用事务内实时核心关系验证，且验证在幂等、头像处理和全部写入之前。缺失、伪造、自报日期、跨队或旧周期凭据统一 409 / PROFILE_PERIOD_CHANGED，不增加 revision、不修改资料、不恢复展示。没有修改核心成员权威或数据库模式。
+
+编辑器保留首次加载周期凭据，普通后台刷新不能换绑旧 checked 草稿；旧周期失败或保存响应迟到后发现新周期，锁住编辑并要求明确重新加载。重载后旧周期资料默认隐藏，新的本人展示选择才可保存公开。针对公开/隐藏资料、旧空编辑器、重复撤销重录、旧页/重放 PUT、异步迟到请求和迟到保存响应增加真实 schema/getter 与浏览器回归。最终修复测试与 CI 记录见 `evidence/team-profiles-period-20261012.json`；上方初次交付记录为历史结果。
+
+最终代码提交 `c05bd29b8c7d285065faf0a8274be407bf1b2541` 的 [CI 38221431931](https://github.com/QShin21/zijingwebsite/actions/runs/38221431931) 于 2026-10-12 08:33:37 UTC 成功：308 项单元、70 项网页（含本模块 9 项、周期回归 3 项）、迁移、类型、Lint、小程序检查、构建全部通过。本地定向 55 项、九项网页及构建通过；顺序组合本地曾出现其他注册用例的登录 ECONNRESET，完整远端同提交已全部通过，原失败记录保留在证据文件。前次 `223d9eb` CI 为 69 通过、1 项简介 beforeEach 超时；`c05bd29` 将两份简介浏览器测试的 Payload 实例按 key 隔离，并保护未初始化夹具的清理。后续证据文档提交不改变代码、测试、核心权威或 schema；CI 通过声明严格对应上述代码 SHA。
