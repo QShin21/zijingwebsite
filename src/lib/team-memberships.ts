@@ -1,6 +1,6 @@
 import { APIError, type Payload, type PayloadRequest } from "payload";
 import type { User, TeamMembership } from "../payload-types";
-import { canParticipate, canPublish, communityIDs, relationID } from "./rules";
+import { canParticipate, canPublish, communityIDs, relationID, type Identity } from "./rules";
 
 export type TeamMembershipView = {
   id: number;
@@ -22,7 +22,7 @@ export async function currentTeamActor(p: Payload, actor: Pick<User, "id"> | nul
   return p.findByID({ collection: "users", id: actor!.id, req, overrideAccess: true, depth: 0,
     select: { roles: true, accountStatus: true, communityOffices: true, name: true } }).catch(() => null);
 }
-export function canProposeTeam(actor: User | null, gameID: number) {
+export function canProposeTeam(actor: Identity | null, gameID: number) {
   return canPublish(actor) || (canParticipate(actor) &&
     ["publishContent", "handleJoins"].some(capability => communityIDs(actor, capability as "publishContent" | "handleJoins").includes(String(gameID))));
 }
@@ -49,7 +49,7 @@ export async function isEstablishedTeam(p: Payload, teamID: number, req?: Payloa
   return Boolean(application?.status === "approved" && positiveID(application.team) === teamID &&
     positiveID(application.game) === gameID && game?._status === "published" && !game.archived);
 }
-const view = (row: TeamMembership): TeamMembershipView => ({
+const view = (row: Pick<TeamMembership, "id" | "team" | "member" | "game" | "season" | "status" | "joinedAt" | "revokedAt" | "leftAt">): TeamMembershipView => ({
   id: row.id, teamID: positiveID(row.team)!, userID: positiveID(row.member)!, gameID: positiveID(row.game)!,
   seasonID: positiveID(row.season), status: row.status, joinedAt: row.joinedAt, revokedAt: row.revokedAt ?? null, leftAt: row.leftAt ?? null,
 });
