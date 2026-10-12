@@ -4,20 +4,31 @@ const session = require('../../lib/session');
 const { render } = require('../../lib/richtext');
 const format = require('../../lib/format');
 const navigation = require('../../lib/navigation');
+const files = require('../../lib/files');
+const video = require('../../lib/video');
 const { actions, error } = require('../../lib/page');
-const socialCollections = ['community-posts'];
+const socialCollections = ['community-posts', 'community-showcase'];
 Page({
   data: { loading: true, error: '', needsLogin: false, collection: '', doc: {}, nodes: [], links: [], photos: [],
     related: [], previewImages: [], registration: '', coverImage: null },
   ...actions,
-  onLoad(options) { this._options = options; this.setData({ collection: options.collection }); },
+  onLoad(options) {
+    this._options = options; this.setData({ collection: options.collection });
+    this._unsubscribe = session.subscribe(user => {
+      if (String(user && user.id) === String(this._userId)) return;
+      this._ticket = (this._ticket || 0) + 1;
+      this.setData({ loading: false, doc: {}, nodes: [], links: [], photos: [], previewImages: [], signupInfo: null, related: [], needsLogin: !user });
+    });
+  },
   onShow() { this.load(); },
   onHide() { this._ticket = (this._ticket || 0) + 1; },
+  onUnload() { this.onHide(); if (this._unsubscribe) this._unsubscribe(); },
   retry() { this.load(); },
   onPullDownRefresh() { this.load().finally(() => wx.stopPullDownRefresh()); },
   async load() {
     const ticket = this._ticket = (this._ticket || 0) + 1;
-    this.setData({ loading: true, error: '', needsLogin: false, user: session.user(), signupInfo: null, signupFailed: false });
+    const user = session.user(); this._userId = user && user.id;
+    this.setData({ loading: true, error: '', needsLogin: false, user, signupInfo: null, signupFailed: false, doc: {}, photos: [], nodes: [], links: [], related: [], previewImages: [] });
     try {
       const { collection, id, slug } = this._options;
       const social = socialCollections.includes(collection);
@@ -25,6 +36,10 @@ Page({
       const rendered = typeof doc.body === 'object' ? render(doc.body) : { nodes: [], links: [] };
       const coverImage = await cms.media(doc.cover);
       const photos = [];
+      for (const image of (doc.images || [])) {
+        const url = await files.localImage(image.source);
+        if (url) photos.push({ url, caption: image.caption || '' });
+      }
       for (const photo of (doc.photos || [])) {
         const image = await cms.media(photo.image);
         if (image) photos.push({ ...image, caption: photo.caption || '' });
@@ -39,6 +54,7 @@ Page({
       this.setData({ loading: false, doc, social, nodes: rendered.nodes, links: rendered.links, photos, qr, coverImage,
         previewImages: photos.map(photo => photo.url), related, dateText: format.date(doc.startAt || doc.date || doc.createdAt),
         endDateText: doc.endAt ? format.date(doc.endAt) : '',
+        videoSource: video.source(doc.videoURL), videoError: false,
         registration: ['events', 'recruitment'].includes(collection) ? format.registrationState(doc) : '' });
       wx.setNavigationBarTitle({ title: doc.title || '内容详情' });
       if (collection === 'events' || (collection === 'community-posts' && doc.category === 'event')) {
@@ -52,5 +68,6 @@ Page({
     if (this.data.registration !== '报名开放') return;
     navigation.copy(this.data.doc.registrationURL || this.data.doc.channelText || '', '报名渠道已复制');
   },
+  videoError() { this.setData({ videoError: true }); },
   onShareAppMessage() { return { title: this.data.doc.title || '竞在紫荆', path: `/pages/detail/index?collection=${this.data.collection}&id=${this.data.doc.id}` }; },
 });

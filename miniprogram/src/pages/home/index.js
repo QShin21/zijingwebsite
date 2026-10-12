@@ -2,6 +2,7 @@
 Page({
   data: { loading: true, error: '', site: {}, user: null, modules: [], announcements: [] },
   onShow: function () { return this.load(); },
+  onHide: function () { this._ticket = (this._ticket || 0) + 1; },
   onPullDownRefresh: function () { return this.load().then(function () { wx.stopPullDownRefresh(); }); },
   load: function () {
     this.setData({ loading: true, error: '' });
@@ -16,5 +17,7 @@ Page({
   openWebsite: function (event) { require('../../lib/navigation').website(event.currentTarget.dataset.url); },
   openContent: function (event) { require('../../lib/navigation').content(event.currentTarget.dataset.doc); },
   openModule: function (event) { require('../../lib/navigation').go('list', { collection: event.currentTarget.dataset.kind }); },
+  openPage: function (event) { require('../../lib/navigation').go(event.currentTarget.dataset.page, event.currentTarget.dataset.params || {}); },
+  retryClub: function () { return require('../../lib/home').loadClub(this); },
   onShareAppMessage: function () { return { title: '竞在紫荆', path: '/pages/home/index' }; },
 });

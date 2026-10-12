@@ -1,0 +1,2 @@
+.panel > .muted { display: block; margin-top: 14rpx; }
+.panel > .section-title { display: block; }

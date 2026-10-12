@@ -9,10 +9,15 @@ Page({
   ...actions,
   onLoad(options) {
     this.setMode(['register', 'reset'].includes(options.mode) ? options.mode : 'login');
-    http.request('/api/miniapp/status', { auth: false }).then(result => this.setData({ bridge: result && result.version === 1 }))
-      .catch(() => this.setData({ bridge: false }));
+    this.retryBridge();
   },
-  onUnload() { clearInterval(this._countdown); this.setData({ password: '', confirm: '', code: '' }); },
+  retryBridge() {
+    const ticket = this._bridgeTicket = (this._bridgeTicket || 0) + 1;
+    return http.request('/api/miniapp/status', { auth: false }).then(result => {
+      if (ticket === this._bridgeTicket) this.setData({ bridge: Boolean(result && Array.isArray(result.authentication) && result.authentication.includes('email') && result.authentication.includes('nickname') && result.registration === true) });
+    }).catch(() => { if (ticket === this._bridgeTicket) this.setData({ bridge: false }); });
+  },
+  onUnload() { this._bridgeTicket = (this._bridgeTicket || 0) + 1; clearInterval(this._countdown); this.setData({ password: '', confirm: '', code: '' }); },
   setMode(mode) { this.setData({ mode, error: '', sent: false, password: '', confirm: '', code: '' }); wx.setNavigationBarTitle({ title: { login: '登录紫荆', register: '注册账号', reset: '重设密码' }[mode] }); },
   switchMode(event) { this.setMode(event.currentTarget.dataset.mode); },
   input(event) { this.setData({ [event.currentTarget.dataset.field]: event.detail.value, error: '' }); },

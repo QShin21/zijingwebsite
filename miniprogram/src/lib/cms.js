@@ -93,7 +93,7 @@ async function social(collection, options = {}) {
 }
 async function socialDetail(collection, id) {
   if (!socials.includes(collection)) throw new Error('内容类型无效');
-  const value = await http.request(`/api/${collection}/${encodeURIComponent(id)}?depth=0&${query(selection(['title', 'body', 'game', 'authorName', 'createdAt', 'status', 'category']))}`, { required: true });
+  const value = await http.request(`/api/${collection}/${encodeURIComponent(id)}?depth=0&${query(selection(['title', 'body', 'game', 'authorName', 'createdAt', 'status', 'category', 'videoURL', 'images']))}`, { required: true });
   if (value.status !== 'visible') throw new Error('内容暂不可用');
   return { ...value, collection };
 }

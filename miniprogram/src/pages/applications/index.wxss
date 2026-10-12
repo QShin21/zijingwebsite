@@ -1,1 +1,6 @@
 .qr { width: 100%; height: 360rpx; margin: 20rpx 0; }
+.panel > .muted { display: block; margin-top: 14rpx; }
+.privacy-note { padding: 20rpx; background: #faf8fc; border-radius: 14rpx; }
+.consent { display: flex; align-items: flex-start; gap: 16rpx; margin: 28rpx 0; line-height: 1.8; font-size: 26rpx; }
+.consent checkbox { flex-shrink: 0; }
+.back { text-align: left; margin-bottom: 20rpx; }

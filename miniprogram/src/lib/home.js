@@ -1,11 +1,12 @@
 const cms = require('./cms');
 const session = require('./session');
+const club = require('./club');
 const { error, labels } = require('./page');
 const defaults = ['events', 'teams', 'honors', 'news', 'albums'];
 async function load(page) {
     const ticket = page._ticket = (page._ticket || 0) + 1;
     const user = session.user();
-    page.setData({ loading: true, error: '', user });
+    page.setData({ loading: true, error: '', user, modules: [], staffBatches: [], promotions: {}, clubError: '' });
     try {
       const site = await cms.site();
       const kinds = user ? (site.modules.length ? site.modules.filter(module => module.enabled).map(module => module.kind) : defaults)
@@ -29,7 +30,15 @@ async function load(page) {
       page.setData({ loading: false, site, modules, hero, announcements: notices.docs,
         showJoin: user && (!site.modules.length || site.modules.some(module => module.kind === 'join' && module.enabled)),
         showAbout: user && (!site.modules.length || site.modules.some(module => module.kind === 'about' && module.enabled)) });
+      await loadClub(page, ticket);
     } catch (cause) { if (ticket === page._ticket) error(page, cause); }
   }
-module.exports = { load };
+async function loadClub(page, ticket = page._ticket) {
+  page.setData({ clubError: '' });
+  try {
+    const value = await club.load();
+    if (ticket === page._ticket) page.setData({ staffBatches: value.staffBatches.map(batch => ({ ...batch, params: { kind: 'staff', id: batch.id } })), promotions: value.promotions });
+  } catch (cause) { if (ticket === page._ticket) page.setData({ clubError: cause.message }); }
+}
+module.exports = { load, loadClub };
 

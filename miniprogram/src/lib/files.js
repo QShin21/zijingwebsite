@@ -1,4 +1,5 @@
 let privateFiles = [];
+let privateEpoch = 0;
 function readImage(path, maxBytes = 2 * 1024 * 1024) {
   return new Promise((resolve, reject) => wx.getFileSystemManager().readFile({
     filePath: path, success(result) {
@@ -17,18 +18,24 @@ function localImage(data) {
   const match = /^data:image\/(png|jpeg|webp|gif);base64,([A-Za-z0-9+/=]+)$/.exec(data || '');
   if (!match || data.length > 11200000) return Promise.resolve('');
   const filePath = `${wx.env.USER_DATA_PATH}/zijing-private-${Date.now()}-${Math.random().toString(36).slice(2)}.${match[1]}`;
+  const epoch = privateEpoch;
   return new Promise(resolve => wx.getFileSystemManager().writeFile({
     filePath, data: match[2], encoding: 'base64',
-    success() { privateFiles.push(filePath); resolve(filePath); }, fail() { resolve(''); },
+    success() {
+      if (epoch !== privateEpoch) { wx.getFileSystemManager().unlink({ filePath, fail() {} }); resolve(''); return; }
+      privateFiles.push(filePath); resolve(filePath);
+    }, fail() { resolve(''); },
   }));
 }
 function clearPrivate() {
+  privateEpoch++;
   const fs = wx.getFileSystemManager();
   privateFiles.forEach(filePath => fs.unlink({ filePath, fail() {} }));
   privateFiles = [];
   // Remove files left by a previous interrupted session, limited to our own prefix.
   fs.readdir({ dirPath: wx.env.USER_DATA_PATH, success(result) {
     (result.files || []).filter(name => /^zijing-private-[\w.-]+\.(png|jpeg|webp|gif)$/.test(name))
+      .filter(name => !privateFiles.includes(`${wx.env.USER_DATA_PATH}/${name}`))
       .forEach(name => fs.unlink({ filePath: `${wx.env.USER_DATA_PATH}/${name}`, fail() {} }));
   }, fail() {} });
 }
