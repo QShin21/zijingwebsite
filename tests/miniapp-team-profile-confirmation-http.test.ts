@@ -133,9 +133,11 @@ function privateDataStaysInternal(h: Harness, versions: (string | null)[]) {
 beforeAll(async () => {
   const db = new URL(process.env.DATABASE_URL!);
   const delegatedQA = db.hostname === "127.0.0.1" && db.port === "55578" && db.pathname === "/miniapp_team_qa_synthetic";
+  const integrationQA = db.hostname === "127.0.0.1" && db.port === "55439" &&
+    db.pathname === "/zijing_integration_synthetic" && db.username === "zijing";
   const repositoryCI = process.env.GITHUB_ACTIONS === "true" && process.env.GITHUB_REPOSITORY === "QShin21/zijingwebsite" &&
     db.hostname === "127.0.0.1" && db.port === "5432" && db.pathname === "/zijing" && db.username === "zijing";
-  if (process.env.APP_ENV !== "development" || process.env.DB_PUSH !== "false" || !(delegatedQA || repositoryCI)) throw new Error("Explicit disposable profile QA or isolated repository CI database required");
+  if (process.env.APP_ENV !== "development" || process.env.DB_PUSH !== "false" || !(delegatedQA || integrationQA || repositoryCI)) throw new Error("Explicit disposable profile QA or isolated repository CI database required");
   p = await getPayload({ config, key: "native-profile-confirmation-" + randomBytes(5).toString("hex") }); locator.cms.mockResolvedValue(p);
 });
 beforeEach(async () => {
