@@ -4,12 +4,14 @@ import { getPayload, type Payload } from "payload";
 import { randomBytes } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import config from "../src/payload.config";
 import type { User } from "../src/payload-types";
 import { activity, submitSignup } from "../src/lib/activity-signups";
 import { communityIDs } from "../src/lib/rules";
 
-let p: Payload, leader: User;
+let p: Payload, leader: User, rollbackMedia: string;
 const suffix = randomBytes(6).toString("hex"), users: number[] = [], games: number[] = [], events: number[] = [];
 const form = { enabled: true, questions: [{ id: "name", label: "合成称呼", type: "text", required: true }] };
 let counter = 0;
@@ -30,13 +32,16 @@ async function grant(actor: User, scope: number, full = false) {
   return p.update({ collection: "users", id: actor.id, user: leader, overrideAccess: false, data: { communityOffices: [{ game: scope, status: "active", publishContent: full, reviewShowcase: full, handleJoins: full, viewSignups: true, exportSignups: true, contactConsent: false }] } });
 }
 function gate() {
-  const run = spawnSync(process.execPath, [path.resolve("node_modules/tsx/dist/cli.mjs"), path.resolve("scripts/club-operations-rollback-check.ts")], { env: process.env, encoding: "utf8", timeout: 20000 });
+  const run = spawnSync(process.execPath, [path.resolve("node_modules/tsx/dist/cli.mjs"), path.resolve("scripts/club-operations-rollback-check.ts")], { env: { ...process.env, MEDIA_DIR: rollbackMedia }, encoding: "utf8", timeout: 20000 });
   if (run.error) throw run.error;
   expect([0, 1]).toContain(run.status);
   return JSON.parse(run.stdout.trim()) as { compatibleWithBaseline: boolean; counts: Record<string, number> };
 }
 beforeAll(async () => {
   if (process.env.APP_ENV !== "development" || !["127.0.0.1", "localhost"].includes(new URL(process.env.DATABASE_URL!).hostname)) throw new Error("Isolated synthetic loopback only");
+  // This private-answer regression owns no honor artifacts. Permanent markers
+  // from the separate honor tests must keep protecting their own storage.
+  rollbackMedia = await mkdtemp(path.join(tmpdir(), "zijing-signup-rollback-"));
   p = await getPayload({ config });
   leader = await p.create({ collection: "users", overrideAccess: true, context: { system: true }, data: { name: `authority-leader-${suffix}`, email: `authority-leader-${suffix}@example.invalid`, password: randomBytes(24).toString("hex"), roles: ["president"] } });
 });
@@ -48,14 +53,16 @@ afterEach(async () => {
   if (games.length) await p.delete({ collection: "games", overrideAccess: true, where: { id: { in: games } } });
   users.length = 0; games.length = 0; events.length = 0;
 });
-afterAll(async () => { if (p) { if (leader) await p.delete({ collection: "users", id: leader.id, overrideAccess: true, context: { system: true } }); await p.destroy(); } });
+afterAll(async () => { if (p) { if (leader) await p.delete({ collection: "users", id: leader.id, overrideAccess: true, context: { system: true } }); await p.destroy(); } if (rollbackMedia) await rm(rollbackMedia, { recursive: true }); });
 
 it("删除唯一游戏后 active 孤儿任职不能成为回滚私人权限的有效授权", async () => {
   let owner = await user(["communityAdmin"]); const member = await user(["member"]), scope = await game();
   owner = await grant(owner, scope, true); const id = await event(owner, scope);
   const value = await activity(p, "events", id, member);
   const receipt = await submitSignup(p, "events", id, member, value.version, { name: "保留的合成答案" });
-  expect(gate().compatibleWithBaseline).toBe(true);
+  const allowed = gate();
+  expect(allowed.counts).toMatchObject({ honor_records: 0, honor_private_files: 0, honor_video_reservations: 0 });
+  expect(allowed.compatibleWithBaseline).toBe(true);
   await p.delete({ collection: "games", id: scope, overrideAccess: true });
   owner = await p.findByID({ collection: "users", id: owner.id, overrideAccess: true, depth: 0 });
   expect(owner.communityOffices![0].status).toBe("active"); expect(owner.communityOffices![0].game).toBeNull();
