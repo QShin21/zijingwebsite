@@ -19,9 +19,11 @@ async function run(request: Request, context: Context, method: string) {
       }
       const own = await ownStaffApplication(p, user, batchID), batch = await publicStaffBatch(p, batchID).catch(() => null);
       if (!batch && !own) return Response.json({ error: "批次尚未发布或已移除" }, { status: 404, headers });
-      const form = batch ? staffForm(batch.signupForm) : staffForm({ enabled: true, questions: own!.questions });
+      if (!batch) return Response.json({ title: own!.batchTitle, form: null, version: own!.formVersion,
+        state: "批次已撤下，仅可查看回执", loggedIn: Boolean(user), application: own }, { headers });
+      const form = staffForm(batch.signupForm);
       const version = formVersion(form);
-      return Response.json({ title: batch?.title ?? own!.batchTitle, form, version, state: batch ? staffWindow(batch) : "批次已撤下，仅可查看回执",
+      return Response.json({ title: batch.title, form, version, state: staffWindow(batch),
         loggedIn: Boolean(user), draftKey: user ? "staff:" + batchID + ":" + user.id + ":" + version : undefined, application: own }, { headers });
     }
     const body = await request.json();

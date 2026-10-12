@@ -120,6 +120,13 @@ export async function ownStaffApplication(p: Payload, actor: User | null, batchI
   return (await p.find({ collection: "staff-applications", user: actor, overrideAccess: false, limit: 1, depth: 0,
     where: { requestKey: { equals: batchID + ":" + actor.id } } })).docs[0] ?? null;
 }
+export async function ownStaffReceiptHeaders(p: Payload, actor: User | null, batchID?: number, page = 1) {
+  if (!actor) return null;
+  if (batchID !== undefined) checkedID(batchID);
+  return p.find({ collection: "staff-applications", user: actor, overrideAccess: false, depth: 0, limit: batchID ? 1 : 20,
+    page, sort: "-updatedAt", where: { and: [{ applicant: { equals: actor.id } }, ...(batchID ? [{ batch: { equals: batchID } }] : [])] },
+    select: { batch: true, batchTitle: true, status: true, updatedAt: true } });
+}
 export async function readStaffApplications(p: Payload, actor: User | null, batchID: number, query: URLSearchParams, exportCSV = false) {
   checkedID(batchID);
   return workflowTransaction(p, actor, {}, async req => {

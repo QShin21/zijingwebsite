@@ -4,7 +4,7 @@ import { beforeAll, beforeEach, afterEach, afterAll, expect, it, vi } from "vite
 import { getPayload, type Payload } from "payload";
 import config from "../src/payload.config";
 import type { StaffBatch, User } from "../src/payload-types";
-import { saveStaffBatch, changeStaffApplication, ownStaffApplication, readStaffApplications, currentStaffBatches, publicStaffBatch } from "../src/lib/staff-recruitment";
+import { saveStaffBatch, changeStaffApplication, ownStaffApplication, ownStaffReceiptHeaders, readStaffApplications, currentStaffBatches, publicStaffBatch } from "../src/lib/staff-recruitment";
 import { defaultStaffForm, staffWindow } from "../src/lib/staff-recruitment-model";
 import { formVersion } from "../src/lib/activity-signups";
 import { canAppoint } from "../src/lib/rules";
@@ -60,6 +60,20 @@ it("重复及同时申请仅一个记录，重试保留原作答", async () => {
   expect(results.some(result => result.status === "fulfilled")).toBe(true);
   const rows = await p.find({ collection: "staff-applications", user: member, overrideAccess: false, where: { batch: { equals: batch.id } } });
   expect(rows.docs).toHaveLength(1); expect((await apply()).id).toBe(rows.docs[0].id); expect(rows.docs[0].answers).toEqual({ ...answers, works: "" });
+});
+it("撤下后的本人回执标题来自原申请，最小列表不读取新草稿或他人资料", async () => {
+  const current = await apply();
+  await saveStaffBatch(p, president, batch.id, batch.updatedAt, { title: "私有新草稿标题", description: "私有新草稿说明", state: "draft", signupForm: defaultStaffForm });
+  await expect(publicStaffBatch(p, batch.id)).rejects.toThrow();
+  expect(await currentStaffBatches(p)).toEqual([]);
+  const own = (await ownStaffReceiptHeaders(p, member, batch.id))!.docs[0];
+  expect(own).toMatchObject({ id: current.id, batch: batch.id, batchTitle: batch.title, status: "submitted" });
+  expect(own).not.toHaveProperty("answers"); expect(own).not.toHaveProperty("reviewNotes");
+  expect((await ownStaffReceiptHeaders(p, other, batch.id))?.docs).toEqual([]);
+  expect((await ownStaffReceiptHeaders(p, vice, batch.id))?.docs).toEqual([]);
+  expect(await ownStaffReceiptHeaders(p, null, batch.id)).toBeNull();
+  for (const action of ["submit", "edit", "withdraw"] as const) await expect(changeStaffApplication(p, member, batch.id, action, { revision: current.updatedAt, version: current.formVersion, answers })).rejects.toThrow();
+  expect((await ownStaffApplication(p, member, batch.id))?.updatedAt).toBe(current.updatedAt);
 });
 it("两个草稿同时发布只产生一个当前批次", async () => {
   await saveStaffBatch(p, president, batch.id, batch.updatedAt, { title: batch.title, state: "closed", endAt: batch.endAt });

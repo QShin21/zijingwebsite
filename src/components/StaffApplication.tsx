@@ -7,7 +7,7 @@ import { formatAnswer } from "@/lib/questionnaire-model";
 import { staffStatusLabels, staffDeadlinePolicy, staffPrivacy } from "@/lib/staff-recruitment-model";
 
 type Receipt = { id: number; status: string; updatedAt: string; formVersion: string; questions: Question[]; answers: Answers; feedback?: string | null };
-type Info = { form: SignupForm; version: string; state: string; loggedIn: boolean; draftKey?: string; application: Receipt | null };
+type Info = { form: SignupForm | null; version: string; state: string; loggedIn: boolean; draftKey?: string; application: Receipt | null };
 export function StaffApplication({ batch }: { batch: number }) {
   const [info, setInfo] = useState<Info | null>(null), [editing, setEditing] = useState(false), [busy, setBusy] = useState(false), [message, setMessage] = useState("");
   const endpoint = "/api/staff/batches/" + batch + "/application";
@@ -22,7 +22,7 @@ export function StaffApplication({ batch }: { batch: number }) {
     if (!response.ok) throw new Error(data.error);
     setInfo(previous => previous ? { ...previous, application: data.application } : previous);
   };
-  return <section className="panel"><h2>骨干申请与本人回执</h2><p>{staffPrivacy}</p><p>{staffDeadlinePolicy}</p><p role="status">{message || info?.state || "正在加载申请表…"}</p>
+  return <section className="panel"><h2>骨干申请与本人回执</h2><p>{staffPrivacy}</p><p>{staffDeadlinePolicy}</p><p role="status">{info?.state || "正在加载申请表…"}</p>{message && <p role="status">{message}</p>}
     {saved && <><h3>{staffStatusLabels[saved.status]} · 申请编号 {saved.id}</h3>{saved.feedback && <p>处理反馈：{saved.feedback}</p>}
       <dl className="account-details">{saved.questions.filter(question => question.type !== "description").map(question => <div key={question.id}><dt>{question.label}</dt><dd>{formatAnswer(saved.answers[question.id], question) || "未填写"}</dd></div>)}</dl>
       {open && !final && !editing && <button className="button light" disabled={busy} onClick={() => setEditing(true)}>{saved.status === "withdrawn" ? "重新提交申请" : "修改申请"}</button>}
@@ -32,7 +32,7 @@ export function StaffApplication({ batch }: { batch: number }) {
       <button className="button light" disabled={busy} onClick={async () => { try { await load(); setEditing(false); setMessage("本人回执已刷新。"); } catch (error) { setMessage((error as Error).message); } }}>刷新回执</button>
     </>}
     {editing && <button type="button" onClick={() => setEditing(false)} disabled={busy}>取消修改</button>}
-    {info && open && (!saved || editing) && (!info.loggedIn ? <Link href="/login">登录后提交骨干申请</Link> : <Questionnaire key={info.version + ":" + (editing ? saved?.updatedAt : "new")}
+    {info?.form && open && (!saved || editing) && (!info.loggedIn ? <Link href="/login">登录后提交骨干申请</Link> : <Questionnaire key={info.version + ":" + (editing ? saved?.updatedAt : "new")}
       form={info.form} initialAnswers={editing ? saved?.answers : undefined} draftKey={editing ? undefined : info.draftKey} busy={busy} submitLabel={editing ? "保存申请并提交" : "提交骨干申请"}
       onSubmit={async answers => {
         setBusy(true); setMessage("");
