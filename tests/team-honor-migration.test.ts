@@ -38,17 +38,19 @@ beforeAll(async () => {
       ...base,
       db: {
         ...base.db,
-        init: (args) => {
-          const adapter = factory.init(args);
-          // Precreate this isolated test pool so the adapter does not retain a bootstrap connectivity lease.
-          adapter.pool = new adapter.pg.Pool(adapter.poolOptions);
-          return adapter;
-        },
+        init: factory.init,
       },
     },
     key: "honor-migration-" + suffix,
     disableOnInit: true,
+    disableDBConnect: true,
   });
+  // Set the isolated pool after Payload finishes adapter initialization. Its
+  // ordinary first connection retains a bootstrap lease, which must not outlive
+  // a database that this test creates and drops.
+  const adapter = p.db as unknown as PostgresAdapter;
+  adapter.pool = new adapter.pg.Pool(adapter.poolOptions);
+  await adapter.connect();
   connection = new pg.Client({ connectionString: isolated.href });
   await connection.connect();
 });
@@ -63,7 +65,7 @@ afterAll(async () => {
     await p.destroy();
   }
   if (admin) {
-    await admin.query('DROP DATABASE IF EXISTS "' + name + '" WITH (FORCE)');
+    await admin.query('DROP DATABASE IF EXISTS "' + name + '"');
     await admin.end();
   }
 });
