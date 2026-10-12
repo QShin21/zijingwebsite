@@ -1,7 +1,9 @@
 import { normalizeSignup, validateAnswers, type SignupForm } from "./signup-schema";
 import { safeURL } from "./rules";
+import { endTarget } from "./questionnaire-flow";
 
 export const staffDepartments = { execution: "执行部", publicity: "宣传部", both: "执行/宣传均可" };
+const staffRequiredFields = ["department", "name", "school", "motivation", "experience", "time", "contact"];
 export const staffStatusLabels: Record<string, string> = { submitted: "已提交", reviewing: "选拔处理中", returned: "待补充", accepted: "已录用", rejected: "未录用", withdrawn: "已撤回" };
 export function canReviewStaffTransition(current: string, target: string) {
   if (!["reviewing", "returned", "accepted", "rejected"].includes(target) || current === "withdrawn") return false;
@@ -22,18 +24,27 @@ export const defaultStaffForm: SignupForm = normalizeSignup({ enabled: true, tit
   ] });
 export function staffForm(value: unknown) {
   const form = normalizeSignup(value);
-  for (const id of ["department", "name", "school", "motivation", "experience", "time", "contact"]) {
+  for (const id of staffRequiredFields) {
     const question = form.questions.find(item => item.id === id);
     if (!question?.required || question.display || question.showWhen) throw new Error("骨干申请须保留必填且直接可见的字段：" + id);
     if (id !== "department" && !["text", "textarea"].includes(question.type)) throw new Error("骨干核心资料须使用文本字段：" + id);
   }
   const direction = form.questions.find(item => item.id === "department")!;
   if (!["single", "select"].includes(direction.type) || JSON.stringify(direction.options) !== JSON.stringify(Object.values(staffDepartments))) throw new Error("方向须为执行部、宣传部或两者均可");
+  // Core fields are directly visible, and normalized jumps only move forwards.
+  // Rejecting every edge across a core field makes it mandatory on every route.
+  form.questions.forEach((question, index) => {
+    for (const jump of question.jumps ?? []) {
+      const targetIndex = jump.target === endTarget ? form.questions.length : form.questions.findIndex(item => item.id === jump.target);
+      const skipped = form.questions.slice(index + 1, targetIndex).find(item => staffRequiredFields.includes(item.id));
+      if (skipped) throw new Error(question.label + "：跳转不得跳过骨干申请核心必填字段：" + skipped.id);
+    }
+  });
   return form;
 }
 export function staffAnswers(form: SignupForm, value: unknown) {
   const answers = validateAnswers(form, value);
-  for (const id of ["department", "name", "school", "motivation", "experience", "time", "contact"])
+  for (const id of staffRequiredFields)
     if (typeof answers[id] !== "string" || !answers[id].trim()) throw new Error("请补齐骨干申请必要资料：" + id);
   const department = Object.entries(staffDepartments).find(([, label]) => label === answers.department)?.[0] as keyof typeof staffDepartments | undefined;
   if (!department) throw new Error("请选择执行/宣传方向");

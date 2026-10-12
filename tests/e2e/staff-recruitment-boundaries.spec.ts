@@ -195,3 +195,69 @@ test("同版本并发结果更新只有一次生效，失败请求及旧版本�
     expect((await p.findByID({ collection: "users", id: member.id, overrideAccess: true })).roles).toEqual(["member"]);
   } finally { await presidentContext.close(); await viceContext.close(); }
 });
+
+test("保存与发布拒绝跳过核心资料的分支，合法扩展分支可提交且撤下历史快照仍可读", async ({ page, browser }) => {
+  test.setTimeout(180000);
+  let batch = await createBatch();
+  const applicantContext = await browser.newContext(), otherContext = await browser.newContext();
+  try {
+    await login(page, president); await page.goto("/staff/manage?batch=" + batch.id);
+    const editor = page.locator("details").filter({ has: page.getByText("配置批次：" + batch.title, { exact: true }) });
+    const conditional = (label: string, target: string) => ({ when: { mode: "all" as const, rules: [{ questionId: "department", operator: "equals" as const, value: label }] }, target });
+    const jumps = [
+      [{ target: "$end" }], [{ target: "school" }],
+      [conditional("执行部", "$end"), conditional("宣传部", "name")],
+      [conditional("执行部", "name"), conditional("宣传部", "school")],
+    ];
+    for (const branches of jumps) for (const state of ["draft", "open"] as const) {
+      await page.goto("/staff/manage?batch=" + batch.id);
+      await editor.locator(":scope > summary").click();
+      const invalid = structuredClone(defaultStaffForm); invalid.questions[0].jumps = branches;
+      await editor.locator('input[name="signupForm"]').evaluate((node, form) => { (node as HTMLInputElement).value = JSON.stringify(form); }, invalid);
+      await editor.getByRole("button", { name: state === "draft" ? "保存草稿" : "发布骨干招新", exact: true }).click();
+      await expect(page.getByRole("status").filter({ hasText: "跳转不得跳过骨干申请核心必填字段" })).toBeVisible();
+      const unchanged = await p.findByID({ collection: "staff-batches", id: batch.id, user: president, overrideAccess: false });
+      expect(unchanged.updatedAt).toBe(batch.updatedAt); expect(unchanged.state).toBe("open"); expect(unchanged.signupForm).toEqual(batch.signupForm);
+    }
+    const invalid = structuredClone(defaultStaffForm); invalid.questions[0].jumps = [{ target: "$end" }];
+    expect((await page.request.patch("/api/staff-batches/" + batch.id, { headers: origin, data: { state: "open", signupForm: invalid, context: { staffBatchWrite: true, system: true } } })).status()).toBe(403);
+    const legal = structuredClone(defaultStaffForm);
+    legal.questions.splice(1, 0, { id: "extra_rating", label: "合成扩展评分", type: "rating", required: true, options: [] }, { id: "role_note", label: "合成宣传扩展说明", type: "description", required: false, options: [] });
+    legal.questions[0].jumps = [conditional("执行部", "name"), conditional("宣传部", "role_note")];
+    legal.questions.find(question => question.id === "contact")!.jumps = [{ target: "$end" }];
+    legal.questions.push({ id: "follow_up", label: "合成可跳过扩展题", type: "single", required: true, options: ["可以", "暂不"] });
+    await page.goto("/staff/manage?batch=" + batch.id);
+    await editor.locator(":scope > summary").click();
+    await editor.locator('input[name="signupForm"]').evaluate((node, form) => { (node as HTMLInputElement).value = JSON.stringify(form); }, legal);
+    await editor.getByRole("button", { name: "发布骨干招新", exact: true }).click();
+    await expect(page.getByRole("status").filter({ hasText: "已发布" })).toBeVisible();
+    batch = await p.findByID({ collection: "staff-batches", id: batch.id, user: president, overrideAccess: false });
+    const applicant = await applicantContext.newPage(); await login(applicant, member); await applicant.goto(path(batch));
+    await applicant.getByLabel("执行部", { exact: true }).check();
+    await applicant.getByRole("button", { name: "下一步", exact: true }).click();
+    await applicant.getByLabel("姓名", { exact: true }).fill(answers.name);
+    await applicant.getByLabel("学校、院系与年级", { exact: true }).fill(answers.school); await applicant.getByLabel("申请动机", { exact: true }).fill(answers.motivation);
+    await applicant.getByLabel("相关经验（无经验可说明兴趣）", { exact: true }).fill(answers.experience);
+    await applicant.getByRole("button", { name: "下一步", exact: true }).click();
+    await applicant.getByLabel("可投入时间与时段", { exact: true }).fill(answers.time);
+    await applicant.getByLabel("一种便于联系的方式（邮箱或微信等）", { exact: true }).fill(answers.contact);
+    await expect(applicant.getByLabel("合成扩展评分", { exact: true })).toHaveCount(0); await expect(applicant.getByLabel("合成可跳过扩展题", { exact: true })).toHaveCount(0);
+    await applicant.getByRole("button", { name: "核对并提交", exact: true }).click(); await applicant.getByRole("button", { name: "提交骨干申请", exact: true }).click();
+    await expect(applicant.getByRole("status").filter({ hasText: "骨干申请已提交" })).toBeVisible();
+    const memberInfo = await (await applicant.request.get(endpoint(batch), { headers: origin })).json();
+    const own = memberInfo.application; expect(own.answers).toMatchObject(answers); expect(own.answers).not.toHaveProperty("follow_up");
+    expect(own.questions.some((question: { id: string }) => question.id === "role_note")).toBe(false);
+    expect(own.questions[0].jumps.some((jump: { target: string }) => jump.target === "role_note")).toBe(true);
+    const outsider = await otherContext.newPage(); await login(outsider, other);
+    const publicity = await outsider.request.post(endpoint(batch), { headers: origin, data: { version: memberInfo.version, answers: { ...answers, department: "宣传部", name: "合成另一申请人", contact: "other-receipt@example.invalid" } } });
+    expect(publicity.status()).toBe(200); const otherReceipt = (await publicity.json()).application; expect(otherReceipt.department).toBe("publicity");
+    expect(otherReceipt.questions.some((question: { id: string }) => question.id === "role_note")).toBe(true);
+    batch = await saveStaffBatch(p, president, batch.id, batch.updatedAt, { title: "合成撤下新草稿-" + suffix, state: "draft", signupForm: legal });
+    for (const [applicantPage, receipt] of [[applicant, own], [outsider, otherReceipt]] as const) {
+      const archived = await applicantPage.request.get(endpoint(batch), { headers: origin }); expect(archived.status()).toBe(200);
+      expect(await archived.json()).toMatchObject({ form: null, state: "批次已撤下，仅可查看回执", application: { id: receipt.id, answers: receipt.answers } });
+      expect((await applicantPage.goto(path(batch)))?.status()).toBe(200); await expect(applicantPage.getByRole("heading", { name: "已提交 · 申请编号 " + receipt.id })).toBeVisible();
+      expect((await applicantPage.request.get("/api/staff-applications/" + (receipt.id === own.id ? otherReceipt.id : own.id), { headers: origin })).status()).toBe(404);
+    }
+  } finally { await applicantContext.close(); await otherContext.close(); }
+});
