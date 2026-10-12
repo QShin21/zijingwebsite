@@ -1,12 +1,12 @@
 # 可复现社团代码包配方 · 2026-10-12
 
-本配方只制作云端代码包，不连接生产、迁移数据库、启动网站或安装依赖。脚本是 scripts/create-club-code-release.mjs，仅使用 Node 内置模块及 Git、GNU tar、gzip。正式网页/runner/目标平台验收由根线程执行；打包成功只证明来源、文件与体积检查通过。
+本配方只制作云端代码包，不连接生产、迁移数据库、启动网站或安装依赖。打包脚本 scripts/create-club-code-release.mjs 与依赖指纹脚本 scripts/club-release-dependency-fingerprint.mjs 仅使用 Node 内置模块及 Git、GNU tar、gzip，并读取已只读绑定的现有依赖。正式网页/runner/目标平台验收由根线程执行；打包成功只证明来源、文件、确定指纹与体积检查通过。
 
 ## 输入与目标平台
 
 脚本接受三个位置参数：完整 40 位小写 Git commit SHA、已完成构建的目录、输出目录。拒绝 HEAD/分支/短 SHA；输出只能位于 /tmp 或 /workspace，拒绝越界链接和覆盖已有产物。构建与输出使用不同目录。
 
-构建目录至少包含五个原始配置输入、.next 和 CLUB_BUILD_METADATA.json。源码通过 Git 精确对象导出，永不从当前工作树或构建目录复制 src。public 仅在该 commit 实际存在时导出；当前仓库没有 public。包内不复制 node_modules、原生依赖、环境、.data、媒体、备份、测试、docs、miniprogram 或 Git。源码仅允许五个根配置、完整 src 以及 backup.mjs / club-operations-rollback-check.ts；.next 完整保留运行文件，排除 cache/dev，拒绝 symlink、特殊文件和原生动态库。
+构建目录至少包含五个原始配置输入、.next、CLUB_BUILD_METADATA.json 和 CLUB_DEPENDENCY_METADATA.json。源码通过 Git 精确对象导出，永不从当前工作树或构建目录复制 src。public 仅在该 commit 实际存在时导出；当前仓库没有 public。包内不复制 node_modules、原生依赖、环境、.data、媒体、备份、测试、docs、miniprogram 或 Git。源码仅允许五个根配置、完整 src 以及 backup.mjs / club-operations-rollback-check.ts；.next 完整保留运行文件，排除 cache/dev，拒绝 symlink、特殊文件和原生动态库。
 
 目标是 Linux x64、glibc 2.36、Node 24.12。根线程使用 node:24.12.0-bookworm-slim builder 和只读既有依赖；本线程不执行 Docker 构建。打包脚本从 builder metadata 读取版本，拒绝缺失或不匹配的 tuple；不会把打包宿主 glibc 2.41 / Node 24.19 写成已匹配目标。metadata 必须由真正完成构建的 builder 生成，不能手填目标版本代替实际测量。
 
@@ -40,6 +40,26 @@
 
 此文件不会将环境秘密装入包。打包同时核对 metadata 的 SHA、BUILD_ID、五个输入摘要与构建目录实字节/Git 对象；完整 .next 的文件列表和摘要在复制前后重复读取，变化即失败。builder source SHA 标签仍需由根线程的精确 Git 导出/构建流程保证，不是构建真实性的独立签名。
 
+## 实际依赖指纹
+
+在同一匹配 Node 24.12 / Linux x64 / glibc 2.36 Docker 中，只读绑定既有 node_modules；root 指定最终完整 SHA。工具路径由根线程绑定，示例为 /tools，构建根为 /code：
+
+    node /tools/club-release-dependency-fingerprint.mjs --source "$CLUB_BUILD_SOURCE_SHA" --root /code --output /code/CLUB_DEPENDENCY_METADATA.json
+
+metadata 合同为 schemaVersion 1 / kind club-release-dependency-fingerprint，含 sourceSHA、实测 runtime、entries、packages、resolutions、aliases、files、probes、pendingRunner 及 fingerprintSHA256。physical file 路径均相对于实际 node_modules realpath，去掉宿主 /workspace、Docker /code 或现场 /srv 等前缀；每个文件记录 SHA-256、bytes、所属包名/版本。指纹还保留模块解析上下文、请求 specifier、实际物理目标和文件 alias，逐项核对这些解析关系，不能只看文件还存在。
+
+实际必需入口与闭包：
+
+- 根 tsx 的 dist/cli.mjs，与 Payload 自己解析的 tsx/esm/api 分开记录；Payload bin.js/API 及其声明运行依赖均核对，不能只签 .bin wrapper。
+- Next dist/bin/next、Next API、SWC loader 与 Linux x64 GNU 的实际 .node；Native SWC 实测最小 TypeScript transform 和 parse，不采用会下载 fallback 的入口。
+- Sharp loader、实际被加载的 Sharp .node，以及实际加载的 libvips .so 和 libvips 包文件闭包；合成 1×1 PNG 编码再读 metadata。
+- 根 tsx 与 Payload tsx 分别解析的 esbuild API、Linux x64 实际 ELF 可执行与包闭包；执行版本检查及最小 transform。
+- 根 tsx CLI --version 与 Next CLI --version，检查输出非空且版本正确。probe 采用无配置/秘密的临时 cwd 与最小环境，不调用 Payload --help/bin/config 或数据库。
+
+完整声明运行依赖及已安装 peer 的所选平台闭包也逐文件记录；缺必需包、缺入口、外部解析、原生 probe 失败、运行 tuple 错误或不支持的 alias 均拒绝输出。打包器要求 metadata 的 sourceSHA/runtime 与 builder 完全一致，再用仓库当前实际 node_modules 逐路径核对解析、完整文件清单、所有 SHA/bytes 和包版本；新增本地 native 或解析换向同样不能默许。完整确定指纹及 metadata 摘要进入归档内 release-contract 和外部 manifest，不复制依赖。
+
+根线程已报告回滚 466 的匹配 Docker 实测通过：136 包 / 23,486 文件，根 TSX/Next CLI、Sharp/libvips、SWC 原生 transform/parse、两套 esbuild 全部通过；该份 metadata 的自摘要为 056008e0dc9825870a486fc4d0c5f588610bc8be98231ba9730807d4a938bcf9。这是该构建/依赖集合的证据，不能复用于另一 sourceSHA 或代报最终包已验收。Payload 实际 bin/config/up、真正回滚门禁及网页仍在 pendingRunner 中，须从解包产物独立执行并验收。
+
 ## 打包与重复哈希
 
 在源码仓库使用已注入的最终完整 SHA 和明确的 /tmp 构建目录；以下路径仅为云端示例，不是生产路径：
@@ -48,7 +68,7 @@
     node scripts/create-club-code-release.mjs "$CLUB_BUILD_SOURCE_SHA" /tmp/club-final-build /tmp/club-code-run2
     sha256sum /tmp/club-code-run1/*.tar.gz /tmp/club-code-run2/*.tar.gz
 
-同一 Git SHA、.next 与同一 metadata 文件重复打包，tar.gz 摘要必须一致。归档使用固定 UTF-8 路径顺序、mtime 0、uid/gid 0、mode 0644、无 atime/ctime 的固定 PAX header 名；gzip -n -9 不记录输入名/时间。源文件 Git blob 也逐一核对，不能混入工作树修改。
+同一 Git SHA、.next、同一 builder/dependency metadata 文件重复打包，tar.gz 摘要必须一致。归档使用固定 UTF-8 路径顺序、mtime 0、uid/gid 0、mode 0644、无 atime/ctime 的固定 PAX header 名；gzip -n -9 不记录输入名/时间。源文件 Git blob 也逐一核对，不能混入工作树修改。
 
 输出：
 
@@ -61,7 +81,30 @@
 
 ## 解包运行与迁移 runner
 
-根线程将实际 tar.gz 解压到新空代码目录，核对 manifest 全部文件与归档摘要，绑定已核对指纹的现有 /srv/zijingwebsite/app/node_modules。保留 app/.data/postgres、实际 PG 二进制目录、受限环境与绝对 DB/MEDIA 路径；不整体替换/删除 app 或依赖，不运行服务器 install/build，不动 FreeKill。
+根线程将实际 tar.gz 解压到新空代码目录，核对 manifest 全部文件与归档摘要，绑定已核对完整确定指纹的现有 /srv/zijingwebsite/app/node_modules。必须逐项比较根 TSX/Payload/Next/SWC/Sharp/esbuild/libvips 的实际物理目标、解析关系、包版本及所有文件 bytes/SHA；任何不符即停止。保留 app/.data/postgres、实际 PG 二进制目录、受限环境与绝对 DB/MEDIA 路径；不整体替换/删除 app 或依赖，不运行目标 npm/pnpm install/prune/build，不动 FreeKill。
+
+现场只读指纹核对还必须核对**现场实际运行平台**。下面假设部署线程已核实并注入 CLUB_CODE_MANIFEST / CLUB_CODE_ROOT，受控 helper 放在 /tools；传给 verifyDependencyMetadata 的最后参数从现场 Node 实测，不能复制 metadata.runtime：
+
+    node --input-type=module <<'NODE'
+    import fs from 'node:fs';
+    import { verifyDependencyMetadata } from '/tools/club-release-dependency-fingerprint.mjs';
+    const manifest = JSON.parse(fs.readFileSync(process.env.CLUB_CODE_MANIFEST, 'utf8'));
+    const actualRuntime = {
+      node: process.version,
+      platform: process.platform,
+      arch: process.arch,
+      glibc: process.report.getReport().header.glibcVersionRuntime,
+    };
+    await verifyDependencyMetadata(
+      manifest.dependencies.fingerprint,
+      fs.realpathSync(process.env.CLUB_CODE_ROOT),
+      manifest.sourceSHA,
+      actualRuntime,
+    );
+    console.log(JSON.stringify({ dependencyFingerprintChecked: true, actualRuntime }));
+    NODE
+
+云端 packager 在 Node 24.19 宿主只做依赖字节核对，比较的是 builder metadata tuple 与 probe tuple，不宣称宿主等于目标；实际 probes 已在 Node 24.12 Docker 执行。上面的现场检查必须使用现场 Node tuple，随后 Payload/门禁/网页实际解包运行仍各自验收。
 
 验证对应 .next/static、运行 manifests 和条件 public 的服务位置，以及目标平台实际运行/native/HTTP 能力。源码 CI 或 metadata tuple 不能代替解包运行。PG_BIN 显式使用 /srv/zijingwebsite/tools/pg17/usr/lib/postgresql/17/bin（17.11），不使用默认 15.15。
 

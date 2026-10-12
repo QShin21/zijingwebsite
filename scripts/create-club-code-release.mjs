@@ -7,6 +7,7 @@ import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import { verifyDependencyMetadata } from "./club-release-dependency-fingerprint.mjs";
 
 const exec = promisify(execFile);
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -242,6 +243,17 @@ async function main() {
     );
   if (!metadata.inputsSHA256 || typeof metadata.inputsSHA256 !== "object")
     throw new Error("Build metadata requires five input digests");
+  const dependencyMetadataPath = path.join(
+    build,
+    "CLUB_DEPENDENCY_METADATA.json",
+  );
+  const dependencyMetadataBytes = await fs.readFile(dependencyMetadataPath);
+  const dependencyMetadata = await verifyDependencyMetadata(
+    JSON.parse(dependencyMetadataBytes),
+    repo,
+    sourceSHA,
+    builder,
+  );
   const destinationArchive = path.join(
     output,
     "club-code-" + sourceSHA + ".tar.gz",
@@ -431,7 +443,11 @@ async function main() {
       JSON.stringify(originalNext) !==
         JSON.stringify(await fingerprint(nextRoot, nextFiles)) ||
       sha256(metadataBytes) !==
-        sha256(await fs.readFile(path.join(build, "CLUB_BUILD_METADATA.json")))
+        sha256(
+          await fs.readFile(path.join(build, "CLUB_BUILD_METADATA.json")),
+        ) ||
+      sha256(dependencyMetadataBytes) !==
+        sha256(await fs.readFile(dependencyMetadataPath))
     )
       throw new Error("Build output or metadata changed during packaging");
     await fs.writeFile(path.join(stage, "SOURCE_REVISION"), sourceSHA + "\n", {
@@ -472,9 +488,11 @@ async function main() {
       },
       target,
       buildMetadataSHA256: sha256(metadataBytes),
+      dependencyMetadataSHA256: sha256(dependencyMetadataBytes),
       inputsSHA256,
       dependencies: {
         copied: false,
+        fingerprint: dependencyMetadata,
         bindPath: "/srv/zijingwebsite/app/node_modules",
         deploymentFingerprintVerificationRequired: true,
         preservePostgresBinaryDirectory: "/srv/zijingwebsite/app/node_modules",
