@@ -50,6 +50,7 @@ beforeAll(async () => {
   // a database that this test creates and drops.
   const adapter = p.db as unknown as PostgresAdapter;
   adapter.pool = new adapter.pg.Pool(adapter.poolOptions);
+  if (!adapter.connect) throw new Error("Synthetic PostgreSQL connection required");
   await adapter.connect();
   connection = new pg.Client({ connectionString: isolated.href });
   await connection.connect();
