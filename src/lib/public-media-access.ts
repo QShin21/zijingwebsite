@@ -7,6 +7,6 @@ export const publicMediaRead: Access = ({ isReadingStaticFile, data }) => {
   const filename = data?.filename;
   return typeof filename === "string" &&
     !filename.startsWith(".") &&
-    !/[\/\\\u0000]/.test(filename) &&
+    !filename.includes("/") && !filename.includes("\\") && !filename.includes("\0") &&
     /\.(png|jpe?g|webp)$/i.test(filename);
 };
