@@ -82,6 +82,20 @@ describe('原生社团展示与既有活动权限合同', () => {
     open({ currentTarget: { dataset: { id: 7 } } }); expect(go).toHaveBeenCalledWith('signup', { kind: 'community-posts', id: 7, mode: 'view' });
   });
 
+  it('活动工作台加载中退出账号时清空名单和加载态，旧账号迟到数据不会恢复', async () => {
+    let user: { id: number } | null = { id: 1 }, notify!: () => void;
+    const late = deferred<Data>(), request = vi.fn().mockReturnValue(late.promise);
+    const session = { user: () => user, subscribe: (listener: () => void) => { notify = listener; return () => {}; } };
+    const target = page('activity-manage', { '../../lib/http': { request }, '../../lib/session': session,
+      '../../lib/page': { ...frame, protect: () => Boolean(user) } });
+    target.onLoad!({}); target.setData({ docs: [{ id: 3, title: '合成旧账号私有活动' }] });
+    const pending = target.load(); expect(target.data.loading).toBe(true);
+    user = null; notify();
+    expect(target.data.loading).toBe(false); expect(target.data.docs).toEqual([]); expect(target.data.needsLogin).toBe(true);
+    late.resolve({ docs: [{ id: 3, title: '迟到私有活动' }], page: 1, hasNextPage: false }); await pending;
+    expect(target.data.docs).toEqual([]); await target.load(); expect(request).toHaveBeenCalledTimes(1);
+  });
+
   it('从已审批风采链接打开原文时保留图片和原生视频，不读取队伍或名单', async () => {
     const cms = { socialDetail: vi.fn().mockResolvedValue({ id: 12, title: '合成社群风采', body: '合成公开记录', status: 'visible',
       images: [{ source: 'synthetic-image', caption: '合成图片' }], videoURL: '/api/showcase-videos/12345678-1234-1234-1234-123456789abc.mp4' }), media: async () => null, list: vi.fn() };
