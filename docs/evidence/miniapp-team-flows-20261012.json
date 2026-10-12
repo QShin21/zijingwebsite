@@ -1,7 +1,7 @@
 {
   "date": "2026-10-12",
   "branch": "codex/miniapp-club-flows-20261012",
-  "phase": "core-native-slice-frozen-before-honor-write-integration",
+  "phase": "native-team-and-honor-source-complete-platform-unverified",
   "preTeamBaseline": {
     "headSha": "72f580f7806d09b8e249f45c63ae215f190f5fcf",
     "lifecycleFixCommit": "b2adf41c350c4ac27388fdf427450a8d8b5d7938",
@@ -148,12 +148,78 @@
   },
   "honorWriteIntegration": {
     "requiredCommit": "196ebf841c77f7a725ed6b41100cd66b341faea5",
-    "state": "authorized contract read; implementation and unified verification pending",
+    "state": "final dependency and native workflows integrated; full1030 tests passed; platform verification remains external",
     "profileRequiredCommit": "3ba056c3dde350b51f28ea72792fe17d54e96b84",
     "CIReportedByParent": {
       "runId": 38227427404,
       "unit": 282,
       "browser": 65
+    },
+    "commitMap": [
+      {
+        "source": "80c9f6961a7fb375bdc4215fe4fca8bdbd30d2e9",
+        "local": "f709fdaf2e4c0f0c11dda5af3a59e0194cd65ba1"
+      },
+      {
+        "source": "2a94cd352d1856dd86db4735b60185c0804134fd",
+        "local": "c864a312ca89f84203a7aa571ac637a9ea2bcd4d"
+      },
+      {
+        "source": "397d6092e11c5b29a91916a5fead339c1a5602c4",
+        "local": "2b24662165efdf958ddb0a1bf16cc736467cd647"
+      },
+      {
+        "source": "d81770b0212ef9b285a6b1858e2300deb9037b78",
+        "local": "aaf1f8ba77260d0624efcf979fb9d411c5ae6169"
+      },
+      {
+        "source": "a37390db3c38eb360c7f5c706193a89e8a7e53cf",
+        "local": "dc4438a436db7842542ae261a225631fc6aac771"
+      },
+      {
+        "source": "196ebf841c77f7a725ed6b41100cd66b341faea5",
+        "local": "cfcee8f1731a5483f9dc671adfc5bf1c1f8476cd"
+      }
+    ],
+    "sourceCI": {
+      "runId": 38227427404,
+      "headSha": "196ebf841c77f7a725ed6b41100cd66b341faea5",
+      "status": "completed",
+      "conclusion": "success",
+      "completedAt": "2026-10-12T09:33:08Z",
+      "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38227427404"
+    },
+    "realHTTP": {
+      "passed": 15,
+      "failed": 0,
+      "report": "/tmp/zijing-miniapp-team-honor-http-20261012.json",
+      "scope": "actual original route handlers + JWT/ACL/core admission chain/honor state service/synthetic SQL/WebP/MP4; locator is sole mock"
+    },
+    "nativeImplemented": [
+      "workspace mine/review independent native page",
+      "private record editor with same-id numeric-revision JSON writes",
+      "feedback and returned edit/resubmit",
+      "original owner withdraw/hide and reviewer actions from GET capabilities",
+      "explicit existing-record MP4 multipart save and JWT private revision video download"
+    ],
+    "nativeCommits": {
+      "media": "ec388e2ec8d01101ca24d6cb3682f77aebac658e",
+      "mediaNetworkText": "44836e627c7453b562763054b0a71b6d56d88fe6",
+      "GETCapabilityCompatibility": "862edcf00a3218f831b29ad09229715f561785f0",
+      "navigation": "922902d1145187f2e85fac4f90acade0b9c2e319",
+      "nativePages": "05f211e2ec2dc2905aa4e19b2cab35c01fd78c3e",
+      "testDatabaseGuard": "4e622239a3e72d964e90d233aa70a21ad2d66d15",
+      "deniedReadCleanup": "94b62e519e5392240fdf9466f8ef653378834e82"
+    },
+    "independentReview": {
+      "readCapabilities": "no scope/archive escalation found; original return/reject/hide cleanup policy preserved",
+      "native": "both current-denial UI/media P2s fixed and independently verified; editor retains own text draft/read-only record with no actions",
+      "beforeReport": "/tmp/zijing-honor-native-review-20261012.json",
+      "afterReport": "/tmp/zijing-honor-native-review-after-20261012.json",
+      "independentCasesPassed": 6,
+      "nativeRegressionPassed": 62,
+      "nativeRegressionReport": "/tmp/zijing-honor-workspaces-readonly-review-after-20261012.json",
+      "noDatabaseUsed": true
     }
   },
   "questionnaireUnchanged": {
@@ -172,7 +238,7 @@
     "name": "miniapp_team_qa",
     "syntheticOnly": true,
     "automaticSchemaPush": false,
-    "migration": "baseline + staff 050000 + existing core 160000 applied once before final core corrections; no production",
+    "migration": "baseline + staff050000 + core160000 previously applied once; honor080000 and profile170000 incrementally applied once; synthetic loopback only",
     "coreDrill": {
       "legacyTablesPreserved": 62,
       "rowsPreserved": 9,
@@ -181,6 +247,30 @@
       "legacyTeamUnestablished": true,
       "repeatNoop": true,
       "downBlocked": true
+    },
+    "additionalFinalQADatabase": {
+      "host": "127.0.0.1",
+      "port": 55578,
+      "name": "miniapp_team_qa_synthetic",
+      "syntheticOnly": true,
+      "automaticSchemaPush": false,
+      "migration": "all registered migrations applied once to a newly owned empty database",
+      "log": "/tmp/zijing-miniapp-synthetic-union-migrate-20261012.log",
+      "reason": "honor source test guard requires _synthetic suffix; original guard preserved"
+    },
+    "combinedProfileDrill": {
+      "evidence": "docs/evidence/miniapp-team-profile-migration-20261012.json",
+      "baselineTables": 64,
+      "beforeProfileTables": 68,
+      "finalTables": 69,
+      "coreOriginalColumnTablesPreserved": 63,
+      "profileOriginalColumnTablesPreserved": 67,
+      "legacyTeamRemainsUnestablished": true,
+      "noInventedMemberships": true,
+      "coreRecordPreserved": true,
+      "uniqueMembershipProfileIndex": true,
+      "migratedRealAuthorityWriteAndRetry": true,
+      "ownedDrillDatabaseRemoved": true
     }
   },
   "regressionProofs": {
@@ -263,6 +353,48 @@
         "failed": 0,
         "skipped": 65
       }
+    },
+    "honorDeniedRead": {
+      "before": {
+        "report": "/tmp/zijing-native-honor-deny-before-20261012.json",
+        "passed": 49,
+        "failed": 13,
+        "total": 62
+      },
+      "after": {
+        "report": "/tmp/zijing-native-honor-deny-after-20261012.json",
+        "passed": 62,
+        "failed": 0,
+        "total": 62
+      }
+    },
+    "honorListMediaCache": {
+      "before": {
+        "report": "/tmp/zijing-native-honor-cache-before-20261012.json",
+        "passed": 48,
+        "failed": 1,
+        "total": 49
+      },
+      "after": {
+        "report": "/tmp/zijing-native-honor-cache-after-20261012.json",
+        "passed": 49,
+        "failed": 0,
+        "total": 49
+      }
+    },
+    "honorMissingNote": {
+      "before": {
+        "report": "/tmp/zijing-native-honor-json-before-20261012.json",
+        "passed": 40,
+        "failed": 3,
+        "total": 43
+      },
+      "after": {
+        "report": "/tmp/zijing-native-honor-json-after-20261012.json",
+        "passed": 43,
+        "failed": 0,
+        "total": 43
+      }
     }
   },
   "officialDocs": {
@@ -271,5 +403,238 @@
     "failure": "non-retryable error / HTTPS CONNECT403; search no reliable official body",
     "officialAPIRepositoryHEAD": "6092df9100c73b84e140c20b9a42a8e8799e0660",
     "scope": "API declarations only; platform requirements and audit acceptance unverified"
-  }
+  },
+  "profileDependency": {
+    "requiredCommit": "3ba056c3dde350b51f28ea72792fe17d54e96b84",
+    "commitMap": [
+      {
+        "source": "c890ed2f1e1b52de6bff5cf1b2381b3dc3882390",
+        "local": "c9f25a0643d378314dac1fc607e3882581239ac6"
+      },
+      {
+        "source": "3d3735b366c4bcc69e05845c8f8fa53df6765e8f",
+        "local": "7b504dc98bbe78b3dc942496ce0435eea03aea78"
+      },
+      {
+        "source": "c0364b0ddaacf4b5ba0d9fc1c6d47412b6f50bd7",
+        "local": "52fe170ac0e00a0beffedd00ead4f8248780799b"
+      },
+      {
+        "source": "a80733998c9f8adadef43f19d518f634ed170a14",
+        "local": "6c5f3b790cdd65367c0d308ae0698cf4ef2c9236"
+      },
+      {
+        "source": "68c8b81008cc53246f8504ac1ac8053f6efe6544",
+        "local": "7696cccf205f2cf885546224125ee41885f5318d"
+      },
+      {
+        "source": "29c99ca43ec93a968611961e5178bc7a0f1d07aa",
+        "local": "f88a2f81bc9aa188b13e4cf9f84f861600070275"
+      },
+      {
+        "source": "890a2d7e94356704432937637986e6f1d825da3d",
+        "local": "97f9edc4c5568341f17905ddd1054e624f4049d2"
+      },
+      {
+        "source": "9e25eb15f232264b042d096d970be842a3825d10",
+        "local": "9338749cca14fd25a2bfe4bd5ac97a0482754120"
+      },
+      {
+        "source": "adfd2c955216f0f2bde1ef1a8bc7cacf9609746a",
+        "local": "63010495e2d9e81acef7d7478dee76318c0cb9cf"
+      },
+      {
+        "source": "cb970fa600b7dd480c53ed32f2210e9837738ce1",
+        "local": "28a554570c460bf2dcb18442c4648ca1e9e59740"
+      },
+      {
+        "source": "45d810b927e10c6437fe31dd5f140c27bda8e46c",
+        "local": "e44b30f4358239c2b4cb556151df4af6ea45f5b0"
+      },
+      {
+        "source": "223d9ebaf8d2ae976b03f4960ec4a3be337bfe01",
+        "local": "aecb038acf61d6bcdcfaf2b7d8a759f8c0e71122"
+      },
+      {
+        "source": "c05bd29b8c7d285065faf0a8274be407bf1b2541",
+        "local": "86b7cec1606b5eb687ec8f4aaea7948553fb1231"
+      },
+      {
+        "source": "3ba056c3dde350b51f28ea72792fe17d54e96b84",
+        "local": "26c1db046d16c9c8583db1f601dea3d9a17a34eb"
+      }
+    ],
+    "sourceCodeCI": {
+      "runId": 38221431931,
+      "headSha": "c05bd29b8c7d285065faf0a8274be407bf1b2541",
+      "status": "completed",
+      "conclusion": "success",
+      "completedAt": "2026-10-12T08:33:37Z",
+      "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38221431931"
+    }
+  },
+  "dependencyIntegration": {
+    "duplicateCoreDependencyCommitsSkipped": true,
+    "duplicateCoreMigrationCommitSkipped": "31d990e0f91a9cb91b783d0e75f421396347315b",
+    "coreMigrationRegistrations": 1,
+    "registrationOrder": [
+      "20261012_050000_staff_recruitment",
+      "20261012_080000_team_honor_records",
+      "20261012_160000_team_core",
+      "20261012_170000_team_member_profiles"
+    ],
+    "coreImportDedupCommit": "f22a086e2e568f5776f1b45d61d14e63c1a3077b",
+    "incrementalMigrationsApplied": [
+      "20261012_080000_team_honor_records",
+      "20261012_170000_team_member_profiles"
+    ],
+    "incrementalMigrationLog": "/tmp/zijing-miniapp-honor-incremental-migrate-20261012.log",
+    "typeGeneration": "passed; no manual type edits",
+    "finalCombinedSnapshot": "parent integration responsibility; source snapshots preserved; no extra DDL"
+  },
+  "browserIntegration": {
+    "firstRun": {
+      "files": 6,
+      "passed": 18,
+      "failed": 1,
+      "didNotRun": 3,
+      "failure": "honor beforeAll synthetic DB name guard; business assertions not reached",
+      "report": "/tmp/zijing-miniapp-union-e2e-20261012.log"
+    },
+    "affectedRerun": {
+      "files": [
+        "tests/e2e/team-honors.spec.ts"
+      ],
+      "passed": 4,
+      "failed": 0,
+      "duration": "1.5m",
+      "report": "/tmp/zijing-miniapp-honor-e2e-20261012.log"
+    },
+    "aggregatePassed": 22,
+    "scope": "actual Next HTTP + Chromium + synthetic owned SQL; not WeChat; four honor cases rerun after owned QA database naming correction"
+  },
+  "sourceHead": "cd337eb2451991548424f4084a906a8202633636",
+  "unitAndDatabase": {
+    "files": 60,
+    "passed": 1030,
+    "failed": 0,
+    "skipped": 0,
+    "success": true,
+    "report": "/tmp/zijing-miniapp-honor-unit-20261012.json",
+    "database": "miniapp_team_qa_synthetic",
+    "syntheticOnly": true
+  },
+  "miniappSuites": {
+    "files": 21,
+    "passed": 690,
+    "scope": "synthetic NodeVM Page/SDK, API projections and 21 actual route/JWT/ACL/SQL tests; not official WeChat SDK",
+    "counts": {
+      "miniapp-api.test.ts": 7,
+      "miniapp-club-api.test.ts": 17,
+      "miniapp-community-flows.test.ts": 30,
+      "miniapp-community-write-lifecycle.test.ts": 34,
+      "miniapp-content-flows.test.ts": 13,
+      "miniapp-honor-media.test.ts": 111,
+      "miniapp-http-contract.test.ts": 9,
+      "miniapp-questionnaire.test.ts": 5,
+      "miniapp-signup-lifecycle.test.ts": 72,
+      "miniapp-staff-flows.test.ts": 28,
+      "miniapp-staff-review-lifecycle.test.ts": 21,
+      "miniapp-startup.test.ts": 4,
+      "miniapp-team-api.test.ts": 21,
+      "miniapp-team-honor-http.test.ts": 15,
+      "miniapp-team-honor-workspaces.test.ts": 62,
+      "miniapp-team-honors.test.ts": 12,
+      "miniapp-team-http.test.ts": 6,
+      "miniapp-team-profiles.test.ts": 70,
+      "miniapp-team-signup.test.ts": 72,
+      "miniapp-team-workspaces.test.ts": 73,
+      "miniapp.test.ts": 8
+    }
+  },
+  "package": {
+    "pages": 25,
+    "files": 142,
+    "bytes": 457658,
+    "domainChecking": true,
+    "nativeDependencies": 0,
+    "sourceVersion": "0.3.1"
+  },
+  "checks": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "build": "exit0; compiled successfully24.8s; TypeScript10.1s; no generic compile warning this run",
+    "diffCheck": "passed",
+    "buildLog": "/tmp/zijing-miniapp-honor-build-20261012.log",
+    "typecheckLog": "/tmp/zijing-miniapp-honor-typecheck-20261012.log",
+    "lintLog": "/tmp/zijing-miniapp-honor-lint-20261012.log"
+  },
+  "historicalCheckpointCI": {
+    "runId": 38231312915,
+    "headSha": "8dc1db0416f6defb166ff2a8fdbdf0694abde099",
+    "status": "completed",
+    "conclusion": "failure",
+    "completedAt": "2026-10-12T09:43:02Z",
+    "scope": "737 passed; staff lifecycle suite unavailable because shallow checkout lacks frozen git history; web/build not run",
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38231312915",
+    "resolutionCommit": "cd337eb2451991548424f4084a906a8202633636",
+    "preservedFixtureChecksums": [
+      {
+        "sourceCommit": "72f580f7806d09b8e249f45c63ae215f190f5fcf",
+        "sourcePath": "miniprogram/src/pages/staff-review/index.js",
+        "sourceBlob": "751a1bb498c4089485328cface08aff37070bbde",
+        "fixture": "tests/fixtures/miniapp-staff-review-72f580f.js.txt",
+        "sha256": "6765c720c65245f90e356ef1bf2886b05ce39ce0a7049b7701f41b7dde4aeebe"
+      },
+      {
+        "sourceCommit": "72f580f7806d09b8e249f45c63ae215f190f5fcf",
+        "sourcePath": "miniprogram/src/pages/staff-review/index.wxml",
+        "sourceBlob": "f373b7653367b1c8eb6213ce8784a3ae6bfaba52",
+        "fixture": "tests/fixtures/miniapp-staff-review-72f580f.wxml.txt",
+        "sha256": "92dc5e04a8d18118ada86823df5db28644fb439755f04c4da32b2823e0527c6f"
+      }
+    ],
+    "actualRecheckPassed": 21,
+    "report": "/tmp/zijing-miniapp-staff-review-ci-20261012.json"
+  },
+  "navigation": {
+    "passed": 8,
+    "scope": "actual module in NodeVM; existing and new routes; not WeChat",
+    "report": "/tmp/zijing-miniapp-honor-navigation-routes-20261012.json"
+  },
+  "sourcePush": {
+    "remote": "origin",
+    "branch": "codex/miniapp-club-flows-20261012",
+    "sourceHead": "cd337eb2451991548424f4084a906a8202633636",
+    "confirmed": true,
+    "force": false
+  },
+  "currentSourceCI": {
+    "runId": 38236841206,
+    "headSha": "cd337eb2451991548424f4084a906a8202633636",
+    "status": "in_progress",
+    "conclusion": null,
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38236841206",
+    "verifiedStepsAtThisPoint": [
+      "migration",
+      "typecheck",
+      "lint",
+      "1030 synthetic unit/database tests",
+      "miniapp static gate",
+      "synthetic demo fixtures",
+      "Chromium installation"
+    ]
+  },
+  "platformUnverified": [
+    "official WeChat compiler and simulator unavailable",
+    "physical iOS/Android device",
+    "legal domains/TLS/redirects",
+    "platform privacy declarations and actual authorization prompt",
+    "actual JWT/Origin transmission and native local MP4 playback/cleanup",
+    "platform operation/audit rules body inaccessible"
+  ],
+  "remainingImplementationBoundary": [
+    "advanced recruitment form creation/arrangement and structured CMS editing retain existing website entry",
+    "final unified schema snapshot belongs to parent integration; source migration snapshots preserved"
+  ]
 }

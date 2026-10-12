@@ -2,7 +2,9 @@
 
 原生入口为 `pages/team-profiles/index?team=<队伍ID>`。实现范围为页面、`lib/team-profile.js`、合成 Page/SDK 测试及本文；未新增名单、成员权限、服务端代理或业务状态机。
 
-后端参考精确提交为 [`3ba056c3dde350b51f28ea72792fe17d54e96b84`](https://github.com/QShin21/zijingwebsite/commit/3ba056c3dde350b51f28ea72792fe17d54e96b84)。已读取该提交的真实 `api/team-profiles/[teamID]/route.ts`、`team-profiles-model.ts`、读取/保存服务、React panel 和 `docs/TEAM_PROFILES.md`。本原生切片没有引入该后端、集合、迁移或密钥；当前测试请求使用合成 HTTP 回应，后端与原生页面的真实联测仍待总集成者完成。网页分支的数据库/E2E/CI 记录不能替代本切片的联测证据。
+后端参考精确提交为 [`3ba056c3dde350b51f28ea72792fe17d54e96b84`](https://github.com/QShin21/zijingwebsite/commit/3ba056c3dde350b51f28ea72792fe17d54e96b84)。已读取该提交的真实 `api/team-profiles/[teamID]/route.ts`、`team-profiles-model.ts`、读取/保存服务、React panel 和 `docs/TEAM_PROFILES.md`。最初原生消费者切片没有引入该后端、集合或迁移；最初测试请求使用合成 HTTP 回应。密钥及平台操作未包含在本轮范围。后续借入情况另记于下方追加说明。网页分支的数据库/E2E/CI 记录不能替代本切片的联测证据。
+
+2026-10-12 追加总集成：父任务随后授权借入上述最终简介依赖及已审迁移，本分支已保留真实核心权威并成功执行简介增量迁移。下文最初 70 项 SDK 证明保持当时消费者范围；联合服务已通过全量1030项unit/DB及包含简介9项的累计22项相关网页回归。原生70项依然属于合成SDK，微信真实PUT/Origin与真机未验证。本轮增量数据库 / HTTP / 网页证据见 [代表队适配记录](../MINIAPP_TEAM_FLOWS.md) 与 [联合证据](../evidence/miniapp-team-flows-20261012.json)，不把旧合成请求改称真实联测。
 
 ## 精确读写
 
