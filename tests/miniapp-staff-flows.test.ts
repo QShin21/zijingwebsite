@@ -172,7 +172,7 @@ describe('原生骨干申请：服务端动作和本人回执', () => {
     expect(wx.showModal).not.toHaveBeenCalled();
     expect(visibleGuard('miniprogram/src/pages/signup/index.wxml', 'bindtap="editAnswers"', page.data)).toBe(false);
     expect(visibleGuard('miniprogram/src/pages/signup/index.wxml', 'bindtap="withdraw"', page.data)).toBe(false);
-    expect(visibleGuard('miniprogram/src/pages/signup/index.wxml', 'form.enabled && (staff ?', page.data)).toBe(false);
+    expect(visibleGuard('miniprogram/src/pages/signup/index.wxml', 'form.enabled && (team ?', page.data)).toBe(false);
   });
 
   it('returned 修改沿用申请编号，通过 PATCH 与旧 revision 写入，再从 helper 获取新能力', async () => {
@@ -614,9 +614,11 @@ describe('原生导航、私有字段投影和隐私辅助接口', () => {
     const requirePrivacyAuthorize = vi.fn<(options: CallbackOptions) => void>(options => { authorization = options; });
     const privacy = commonJS<Privacy>('miniprogram/src/lib/privacy.js', { requirePrivacyAuthorize });
     const files = { choose: vi.fn(), readImage: vi.fn() };
-    const { page, changeUser } = pageHarness<ApplicationsPage>('applications', { apply: '1' }, {
+    const { page, request, changeUser } = pageHarness<ApplicationsPage>('applications', { apply: '1' }, {
       '../../lib/privacy': privacy, '../../lib/files': files, '../../lib/cms': cmsStub(),
     });
+    request.mockResolvedValue({ docs: [], page: 1, totalPages: 1, hasNextPage: false });
+    await page.onShow?.();
     const choosing = page.chooseQr();
     await page.chooseQr();
     expect(requirePrivacyAuthorize).toHaveBeenCalledTimes(1);
