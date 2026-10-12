@@ -7,7 +7,7 @@ import type { StaffBatch, User } from "../../src/payload-types";
 import { saveStaffBatch } from "../../src/lib/staff-recruitment";
 import { defaultStaffForm } from "../../src/lib/staff-recruitment-model";
 
-let p: Payload, president: User, member: User, other: User;
+let p: Payload, president: User, vice: User, member: User, other: User;
 const suffix = randomBytes(6).toString("hex"), password = randomBytes(24).toString("hex"), actors: User[] = [], batches: number[] = [];
 const origin = { Origin: "http://localhost:3000" };
 const answers = { department: "执行部", name: "合成历史申请人", school: "合成院系年级", motivation: "合成申请动机", experience: "合成相关经验", time: "合成每周时段", contact: "own-receipt@example.invalid" };
@@ -21,7 +21,7 @@ test.beforeAll(async () => {
     const user = await p.create({ collection: "users", overrideAccess: true, context: { system: true }, data: { name: name + "-" + suffix, email: name + "-" + suffix + "@example.invalid", password, roles } });
     actors.push(user); return user;
   };
-  president = await actor("staff-boundary-president", ["president"]);
+  president = await actor("staff-boundary-president", ["president"]); vice = await actor("staff-boundary-vice", ["vicePresident"]);
   member = await actor("staff-boundary-member", ["member"]); other = await actor("staff-boundary-other", ["member"]);
 });
 test.afterEach(async () => {
@@ -44,6 +44,7 @@ async function createBatch() {
   batches.push(batch.id); return batch;
 }
 async function login(page: Page, user: User) {
+  page.setDefaultTimeout(15000);
   await page.goto("/login"); await page.getByLabel("昵称或邮箱").fill(user.name); await page.getByLabel("密码", { exact: true }).fill(password);
   await page.getByRole("button", { name: "登录", exact: true }).click(); await expect(page).toHaveURL(/\/account$/);
 }
@@ -111,4 +112,86 @@ test("发布后保存新草稿，本人旧链接及列表回执可读，游客�
     const guestPage = await request.get(path(batch), { maxRedirects: 0 }); expect(guestPage.status()).toBe(307); expect(guestPage.headers().location).toContain("/login");
     expect(await guestPage.text()).not.toContain(batch.title);
   } finally { await managerContext.close(); await otherContext.close(); }
+});
+
+for (const finalStatus of ["accepted", "rejected"] as const) test(finalStatus + " 最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充", async ({ page, browser }) => {
+  test.setTimeout(180000);
+  const batch = await createBatch(), managerContext = await browser.newContext();
+  try {
+    await login(page, member); const receipt = await apply(page, batch);
+    const manager = await managerContext.newPage(); await login(manager, vice);
+    const response = await manager.request.post(endpoint(batch), { headers: origin, data: { action: "review", id: receipt.id, revision: receipt.updatedAt, status: finalStatus, feedback: "合成最终结果反馈", reviewNotes: "合成最终结果私有备注" } });
+    expect(response.status()).toBe(200); const final = (await response.json()).application;
+    for (const feedback of ["", "尝试改变可见反馈"]) {
+      const invalid = await manager.request.post(endpoint(batch), { headers: origin, data: { action: "review", id: final.id, revision: final.updatedAt, status: "reviewing", feedback } });
+      expect(invalid.status()).toBe(409); expect((await invalid.json()).error).toContain("先明确退回补充");
+    }
+    expect((await manager.request.post(endpoint(batch), { headers: origin, data: { action: "review", id: final.id, revision: final.updatedAt, status: finalStatus === "accepted" ? "rejected" : "accepted", feedback: "合成结果更正须先退回" } })).status()).toBe(409);
+    for (const feedback of ["", "   "]) expect((await manager.request.post(endpoint(batch), { headers: origin, data: { action: "review", id: final.id, revision: final.updatedAt, status: "returned", feedback } })).status()).toBe(400);
+    expect((await page.request.patch(endpoint(batch), { headers: origin, data: { revision: final.updatedAt, version: final.formVersion, answers: { ...answers, name: "未经退回擅改" } } })).status()).toBe(409);
+    expect((await page.request.post(endpoint(batch), { headers: origin, data: { action: "withdraw", revision: final.updatedAt } })).status()).toBe(409);
+    const retry = await page.request.post(endpoint(batch), { headers: origin, data: { answers: { ...answers, name: "重试不能改最终答案" } } });
+    expect(retry.status()).toBe(200); expect((await retry.json()).application).toMatchObject({ id: final.id, status: finalStatus, updatedAt: final.updatedAt, answers: final.answers });
+    const unchanged = await p.findByID({ collection: "staff-applications", id: final.id, user: president, overrideAccess: false });
+    expect(unchanged.updatedAt).toBe(final.updatedAt); expect(unchanged.history).toEqual(final.history); expect(unchanged.feedback).toBe(final.feedback);
+    await page.goto(path(batch)); await expect(page.getByRole("button", { name: "修改申请", exact: true })).toHaveCount(0); await expect(page.getByRole("button", { name: "撤回申请", exact: true })).toHaveCount(0);
+    await manager.goto("/staff/manage?batch=" + batch.id);
+    await manager.waitForLoadState("networkidle");
+    const row = manager.locator('[data-staff-application="' + final.id + '"]');
+    await expect(row.getByRole("button", { name: "进入选拔", exact: true })).toBeDisabled();
+    await expect(row.getByRole("button", { name: finalStatus === "accepted" ? "未录用" : "录用", exact: true })).toBeDisabled();
+    await expect(row.getByRole("button", { name: "退回补充", exact: true })).toBeEnabled();
+    await row.getByRole("textbox", { name: /^本人可见反馈/ }).fill("");
+    await expect(row.getByRole("textbox", { name: /^本人可见反馈/ })).toHaveValue("");
+    await row.getByRole("button", { name: "退回补充", exact: true }).click();
+    await expect(manager.getByRole("status").filter({ hasText: "退回或未录用须说明原因" })).toBeVisible();
+    await manager.waitForLoadState("networkidle");
+    await expect(row.getByRole("button", { name: "进入选拔", exact: true })).toBeDisabled();
+    await row.getByRole("textbox", { name: /^本人可见反馈/ }).fill("请补充合成姓名，并重新提交资料");
+    await row.getByRole("button", { name: "退回补充", exact: true }).click();
+    await expect(manager.getByRole("status").filter({ hasText: "申请处理结果已保存" })).toBeVisible();
+    await page.reload(); await expect(page.getByRole("heading", { name: "待补充 · 申请编号 " + final.id })).toBeVisible();
+    await expect(page.getByText("处理反馈：请补充合成姓名，并重新提交资料", { exact: true })).toBeVisible();
+    await expect(page.getByText("合成最终结果私有备注", { exact: true })).toHaveCount(0);
+    await page.getByRole("button", { name: "修改申请", exact: true }).click();
+    await page.getByLabel("姓名", { exact: true }).fill("合成明确退回后补充姓名");
+    await page.getByRole("button", { name: "下一步", exact: true }).click();
+    await page.getByRole("button", { name: "核对并提交", exact: true }).click();
+    await page.getByRole("button", { name: "保存申请并提交", exact: true }).click();
+    await expect(page.getByRole("status").filter({ hasText: "骨干申请已提交" })).toBeVisible();
+    const current = await (await page.request.get(endpoint(batch), { headers: origin })).json();
+    expect(current.application).toMatchObject({ id: final.id, status: "submitted", feedback: null, answers: { name: "合成明确退回后补充姓名" } });
+    expect(current.application.reviewNotes).toBeUndefined();
+    expect(current.application.history).toEqual(expect.arrayContaining([expect.objectContaining({ from: finalStatus, to: "returned", feedback: "请补充合成姓名，并重新提交资料" })]));
+    expect((await p.findByID({ collection: "users", id: member.id, overrideAccess: true })).roles).toEqual(["member"]);
+    await manager.reload(); await manager.waitForLoadState("networkidle"); await expect(row.getByRole("button", { name: "进入选拔", exact: true })).toBeEnabled();
+    await row.getByRole("button", { name: "进入选拔", exact: true }).click(); await expect(manager.getByRole("status").filter({ hasText: "申请处理结果已保存" })).toBeVisible();
+    await expect(row.getByRole("heading", { name: /选拔处理中/ })).toBeVisible();
+    const reviewing = await (await page.request.get(endpoint(batch), { headers: origin })).json(); expect(reviewing.application.status).toBe("reviewing");
+  } finally { await managerContext.close(); }
+});
+
+test("同版本并发结果更新只有一次生效，失败请求及旧版本不能覆盖反馈、答案或角色", async ({ page, browser }) => {
+  const batch = await createBatch(), presidentContext = await browser.newContext(), viceContext = await browser.newContext();
+  try {
+    await login(page, member); const receipt = await apply(page, batch);
+    const manager = await presidentContext.newPage(), deputy = await viceContext.newPage(); await login(manager, president); await login(deputy, vice);
+    const results = await Promise.all([
+      manager.request.post(endpoint(batch), { headers: origin, data: { action: "review", id: receipt.id, revision: receipt.updatedAt, status: "accepted", feedback: "合成并发录用" } }),
+      deputy.request.post(endpoint(batch), { headers: origin, data: { action: "review", id: receipt.id, revision: receipt.updatedAt, status: "rejected", feedback: "合成并发未录用" } }),
+    ]);
+    expect(results.map(response => response.status()).sort()).toEqual([200, 409]);
+    const winner = (await results.find(response => response.status() === 200)!.json()).application;
+    expect(winner.history).toHaveLength(2); expect(winner.answers).toEqual(receipt.answers);
+    expect((await deputy.request.post(endpoint(batch), { headers: origin, data: { action: "review", id: receipt.id, revision: receipt.updatedAt, status: "returned", feedback: "合成过期退回" } })).status()).toBe(409);
+    const returns = await Promise.all([manager, deputy].map((reviewer, index) => reviewer.request.post(endpoint(batch), { headers: origin, data: { action: "review", id: winner.id, revision: winner.updatedAt, status: "returned", feedback: "合成明确退回 " + index } })));
+    expect(returns.map(response => response.status()).sort()).toEqual([200, 409]);
+    const returned = (await returns.find(response => response.status() === 200)!.json()).application;
+    const current = (await (await page.request.get(endpoint(batch), { headers: origin })).json()).application;
+    expect(current).toMatchObject({ id: receipt.id, status: "returned", feedback: returned.feedback, updatedAt: returned.updatedAt, answers: receipt.answers });
+    expect(current.history).toHaveLength(3); expect(current.history[2]).toMatchObject({ from: winner.status, to: "returned", feedback: returned.feedback });
+    const audit = await p.find({ collection: "audit", overrideAccess: true, where: { object: { equals: "staff-applications:" + receipt.id } } });
+    expect(audit.docs.map(row => row.action).sort()).toEqual(["submit:new->submitted", "review:submitted->" + winner.status, "review:" + winner.status + "->returned"].sort());
+    expect((await p.findByID({ collection: "users", id: member.id, overrideAccess: true })).roles).toEqual(["member"]);
+  } finally { await presidentContext.close(); await viceContext.close(); }
 });

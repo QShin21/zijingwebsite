@@ -5,7 +5,7 @@ import { canManageStaffRecruitment, relationID } from "./rules";
 import { workflowTransaction } from "./workflow-transactions";
 import { formVersion } from "./activity-signups";
 import { visibleQuestions } from "./signup-schema";
-import { defaultStaffForm, staffAnswers, staffForm, staffWindow } from "./staff-recruitment-model";
+import { canReviewStaffTransition, defaultStaffForm, staffAnswers, staffForm, staffWindow } from "./staff-recruitment-model";
 import { responseCSV, type ResponseRecord } from "./questionnaire-results";
 import type { Answers, Question } from "./signup-schema";
 
@@ -86,6 +86,7 @@ export async function changeStaffApplication(p: Payload, actor: User | null, bat
       if (!current || current.status === "withdrawn") throw new APIError("已撤回申请不可处理", 409);
       const status = String(options.status), feedback = String(options.feedback ?? "").trim(), notes = String(options.reviewNotes ?? "").trim();
       if (!["reviewing", "returned", "accepted", "rejected"].includes(status) || feedback.length > 1000 || notes.length > 3000 || (["returned", "rejected"].includes(status) && !feedback)) throw new APIError("请填写有效决定；退回或未录用须说明原因", 400);
+      if (!canReviewStaffTransition(current.status, status)) throw new APIError("已有最终结果，请填写本人可见反馈并先明确退回补充", 409);
       Object.assign(data, { status, feedback, reviewNotes: notes });
     } else {
       const window = staffWindow(batch);

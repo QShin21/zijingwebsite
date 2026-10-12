@@ -109,6 +109,24 @@ it("明确退回反馈、内部备注分开；录用不改变角色，任免仍�
   expect(canAppoint(vice)).toBe(false); expect(canAppoint(president)).toBe(true);
   await expect(changeStaffApplication(p, member, batch.id, "edit", { revision: current.updatedAt, version: formVersion(defaultStaffForm), answers })).rejects.toThrow("最终结果");
 });
+it.each(["accepted", "rejected"] as const)("最终 %s 仅可保留结果或带反馈明确退回，不能静默进入选拔解锁", async status => {
+  let current = await apply();
+  current = await changeStaffApplication(p, vice, batch.id, "review", { id: current.id, revision: current.updatedAt, status, feedback: "合成最终结果" });
+  const final = current;
+  await expect(changeStaffApplication(p, vice, batch.id, "review", { id: current.id, revision: current.updatedAt, status: "reviewing" })).rejects.toMatchObject({ status: 409 });
+  await expect(changeStaffApplication(p, vice, batch.id, "review", { id: current.id, revision: current.updatedAt, status: status === "accepted" ? "rejected" : "accepted", feedback: "结果更改须先退回" })).rejects.toMatchObject({ status: 409 });
+  await expect(changeStaffApplication(p, vice, batch.id, "review", { id: current.id, revision: current.updatedAt, status: "returned", feedback: "  " })).rejects.toMatchObject({ status: 400 });
+  await expect(changeStaffApplication(p, member, batch.id, "withdraw", { revision: current.updatedAt })).rejects.toMatchObject({ status: 409 });
+  await expect(changeStaffApplication(p, member, batch.id, "edit", { revision: current.updatedAt, version: current.formVersion, answers })).rejects.toMatchObject({ status: 409 });
+  expect((await ownStaffApplication(p, member, batch.id))?.history).toEqual(final.history);
+  current = await changeStaffApplication(p, vice, batch.id, "review", { id: current.id, revision: current.updatedAt, status, feedback: "合成同结果反馈更新" });
+  await expect(changeStaffApplication(p, member, batch.id, "withdraw", { revision: current.updatedAt })).rejects.toMatchObject({ status: 409 });
+  current = await changeStaffApplication(p, vice, batch.id, "review", { id: current.id, revision: current.updatedAt, status: "returned", feedback: "  请补充合成资料  " });
+  expect(current.feedback).toBe("请补充合成资料");
+  current = await changeStaffApplication(p, member, batch.id, "edit", { revision: current.updatedAt, version: current.formVersion, answers: { ...answers, time: "合成补充时段" } });
+  expect(current.id).toBe(final.id); expect(current.status).toBe("submitted");
+  expect((await p.findByID({ collection: "users", id: member.id, overrideAccess: true })).roles).toEqual(["member"]);
+});
 it("社群管理员、骨干和其他申请人不能读取/导出他人候选资料", async () => {
   const current = await apply();
   for (const actor of [admin, backbone, other]) {

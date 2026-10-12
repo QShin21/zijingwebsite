@@ -5,7 +5,7 @@ import type { Answers, Question } from "@/lib/signup-schema";
 import { cms } from "@/lib/content";
 import { canManageStaffRecruitment, formatDate } from "@/lib/rules";
 import { readStaffApplications } from "@/lib/staff-recruitment";
-import { staffDepartments, staffStatusLabels } from "@/lib/staff-recruitment-model";
+import { canReviewStaffTransition, staffDepartments, staffStatusLabels } from "@/lib/staff-recruitment-model";
 import { formatAnswer } from "@/lib/questionnaire-model";
 import { PageHeading } from "@/components/PageHeading";
 import { StaffBatchEditor } from "@/components/StaffBatchEditor";
@@ -39,8 +39,9 @@ export default async function Manage({ searchParams }: { searchParams: Promise<{
             <input type="hidden" name="batch" value={id} /><input type="hidden" name="id" value={row.id} /><input type="hidden" name="revision" value={row.updatedAt} />
             <label>本人可见反馈（退回/未录用必填）<textarea name="feedback" rows={3} maxLength={1000} defaultValue={row.feedback ?? ""} /></label>
             <label>内部备注（仅管理层可见）<textarea name="reviewNotes" rows={3} maxLength={3000} defaultValue={row.reviewNotes ?? ""} /></label>
+            {["accepted", "rejected"].includes(row.status) && <p>已有最终结果；补充资料或更改结果须填写本人可见反馈并先退回补充。</p>}
             <div className="reaction-bar">{[["reviewing", "进入选拔"], ["returned", "退回补充"], ["accepted", "录用"], ["rejected", "未录用"]] .map(([value, label]) =>
-              <SubmitButton key={value} name="status" value={value} disabled={row.status === "withdrawn"}>{label}</SubmitButton>)}</div>
+              <SubmitButton key={value} name="status" value={value} disabled={!canReviewStaffTransition(row.status, value)}>{label}</SubmitButton>)}</div>
           </form>
         </article>;
       })}</div>{data && <Pagination page={data.result.page ?? 1} total={data.result.totalPages} path="/staff/manage" query={{ batch: String(id), ...(query.department ? { department: query.department } : {}), ...(query.status ? { status: query.status } : {}) }} />}
