@@ -1,0 +1,258 @@
+{
+  "recordedAt": "2026-10-13T09:49:56.100Z",
+  "baseSHA": "a17f6ec53e0f30096b33c6164dbfd43d6b6fec96",
+  "phase": "First real isolated web screens; shared foundation only; parallel modules pending",
+  "routes": [
+    {
+      "file": "home-1440-final.png",
+      "name": "home",
+      "route": "/design-preview",
+      "width": 1440,
+      "height": 1000,
+      "status": 200,
+      "h1": 1,
+      "overflow": false,
+      "axeViolations": [],
+      "browser": "Cloud Chromium145",
+      "syntheticOnly": true,
+      "developmentToolbarRemovedForCapture": true
+    },
+    {
+      "file": "community-1440-final.png",
+      "name": "community",
+      "route": "/design-preview/community/visual-tactical",
+      "width": 1440,
+      "height": 1000,
+      "status": 200,
+      "h1": 1,
+      "overflow": false,
+      "axeViolations": [],
+      "browser": "Cloud Chromium145",
+      "syntheticOnly": true,
+      "developmentToolbarRemovedForCapture": true
+    },
+    {
+      "file": "apply-1440-final.png",
+      "name": "apply",
+      "route": "/design-preview/apply",
+      "width": 1440,
+      "height": 1000,
+      "status": 200,
+      "h1": 1,
+      "overflow": false,
+      "axeViolations": [],
+      "browser": "Cloud Chromium145",
+      "syntheticOnly": true,
+      "developmentToolbarRemovedForCapture": true
+    },
+    {
+      "file": "activity-1440-final.png",
+      "name": "activity",
+      "route": "/design-preview/activity/1",
+      "width": 1440,
+      "height": 1000,
+      "status": 200,
+      "h1": 1,
+      "overflow": false,
+      "axeViolations": [],
+      "browser": "Cloud Chromium145",
+      "syntheticOnly": true,
+      "developmentToolbarRemovedForCapture": true
+    },
+    {
+      "file": "home-390-final.png",
+      "name": "home",
+      "route": "/design-preview",
+      "width": 390,
+      "height": 1000,
+      "status": 200,
+      "h1": 1,
+      "overflow": false,
+      "axeViolations": [],
+      "browser": "Cloud Chromium145",
+      "syntheticOnly": true,
+      "developmentToolbarRemovedForCapture": true
+    },
+    {
+      "file": "community-390-final.png",
+      "name": "community",
+      "route": "/design-preview/community/visual-tactical",
+      "width": 390,
+      "height": 1000,
+      "status": 200,
+      "h1": 1,
+      "overflow": false,
+      "axeViolations": [],
+      "browser": "Cloud Chromium145",
+      "syntheticOnly": true,
+      "developmentToolbarRemovedForCapture": true
+    },
+    {
+      "file": "apply-390-final.png",
+      "name": "apply",
+      "route": "/design-preview/apply",
+      "width": 390,
+      "height": 1000,
+      "status": 200,
+      "h1": 1,
+      "overflow": false,
+      "axeViolations": [],
+      "browser": "Cloud Chromium145",
+      "syntheticOnly": true,
+      "developmentToolbarRemovedForCapture": true
+    },
+    {
+      "file": "activity-390-final.png",
+      "name": "activity",
+      "route": "/design-preview/activity/1",
+      "width": 390,
+      "height": 1000,
+      "status": 200,
+      "h1": 1,
+      "overflow": false,
+      "axeViolations": [],
+      "browser": "Cloud Chromium145",
+      "syntheticOnly": true,
+      "developmentToolbarRemovedForCapture": true
+    }
+  ],
+  "responsiveWidths": [
+    320,
+    390,
+    768,
+    1440
+  ],
+  "flow": {
+    "recordedAt": "2026-10-13T09:25:24.900Z",
+    "syntheticOnly": true,
+    "checks": [
+      "Anonymous preview retains login gate",
+      "Default unchecked, exact alert/focus, no SQL write, text/file retained",
+      "Actual Server Action/Payload/SQL submission; original receipt route and stored true preserved",
+      "Submission does not initialize game or assign platform role",
+      "Reduced motion disables transition",
+      "Native-details mobile navigation opens, Escape closes and restores focus"
+    ],
+    "passed": 6,
+    "actualNextAndSQL": true,
+    "production": false,
+    "previousAttempts": [
+      "First success receipt expectation default5s was shorter than first route compilation; SQL had succeeded, owned row cleaned",
+      "Second launch missing Origin on Payload cookie-auth /users/me returned null before test; fixture corrected to actual origin"
+    ]
+  },
+  "states": {
+    "checks": [
+      "Client API failure shows retry and recovers using real route after intercepted503",
+      "Missing/nonpublic community returns404 with next-step content",
+      "No-JavaScript mobile details navigation remains usable"
+    ],
+    "passed": 3,
+    "syntheticOnly": true,
+    "interception": "Only client network-failure response simulated; all other data uses owned actual Next/Payload/SQL"
+  },
+  "typecheckExit": 0,
+  "targetedESLintExit": 0,
+  "sourceHashes": {
+    "src/app/(design)/design-preview/activity/[id]/page.tsx": {
+      "bytes": 2728,
+      "sha256": "d89c25c20792a0515c66223fa655c7957fb4582af77e8be1f5d8ea092d963237"
+    },
+    "src/app/(design)/design-preview/apply/page.tsx": {
+      "bytes": 2462,
+      "sha256": "82214c014bc2dab03a5ade523d250de767ee6daf182a4514c23289b6764ec08d"
+    },
+    "src/app/(design)/design-preview/community/[slug]/page.tsx": {
+      "bytes": 5090,
+      "sha256": "79c3239a594ad8af300e449ece3316cee1c3e1ba45bc41c4aa0089e252f73bfa"
+    },
+    "src/app/(design)/design-preview/error.tsx": {
+      "bytes": 535,
+      "sha256": "d0d40696df74ba76d0a7945d8605121383653a51c008a40310e2c3860bbdf7d7"
+    },
+    "src/app/(design)/design-preview/not-found.tsx": {
+      "bytes": 431,
+      "sha256": "d01793fada4ce5e3fc46abe7162b5fd31cde754e44f05ce2885a74570b1d2849"
+    },
+    "src/app/(design)/design-preview/page.tsx": {
+      "bytes": 9853,
+      "sha256": "8a8abb54d3b87cd9e4fe30004323c9666ce414ebb50450cf2b64d82db48cb55d"
+    },
+    "src/app/(design)/design.css": {
+      "bytes": 32044,
+      "sha256": "c83cf0faa44a591e3e4bfa9ee605796977ca66bf0cb23e873a9a3cb64882d45e"
+    },
+    "src/app/(design)/layout.tsx": {
+      "bytes": 1286,
+      "sha256": "70dc8c3730de9c9f1eca7b306914e7f2ccbfba41a319288db06a8b47349e3c57"
+    },
+    "src/components/visual-direction/DesignUI.tsx": {
+      "bytes": 5252,
+      "sha256": "392b659f4161c5a3f4930d59a1c2455590e730de88caa0da50567a1e4a4663e0"
+    },
+    "src/components/visual-direction/DesignNavigation.tsx": {
+      "bytes": 3891,
+      "sha256": "6e0d1139c8b0a2a55486896131fcec1374c88ea0d96ce4e8dd743b850bbc81de"
+    }
+  },
+  "businessPathsByteUnchanged": [
+    "src/collections",
+    "src/migrations",
+    "src/lib",
+    "src/app/(frontend)/api",
+    "src/app/(frontend)/community/actions.ts",
+    "src/components/CommunityApplicationForm.tsx",
+    "src/components/ActivitySignup.tsx",
+    "src/components/Questionnaire.tsx",
+    "miniprogram",
+    "package.json",
+    "pnpm-lock.yaml",
+    "next.config.mjs"
+  ],
+  "noNewMigration": true,
+  "productionPreviewGuard": "APP_ENV production returns notFound; existing login proxy and canParticipate are retained",
+  "localEntry": "http://127.0.0.1:3363/design-preview",
+  "persistentPublicPreview": false,
+  "assets": {
+    "desktop": {
+      "path": "public/design/zijing-stage.webp",
+      "bytes": 119604
+    },
+    "mobile": {
+      "path": "public/design/zijing-stage-mobile.webp",
+      "bytes": 22060
+    },
+    "source": "Original artwork generated by this task; no reference-brand assets reused",
+    "formats": "Local responsive picture; no optimizer fetch across auth gate"
+  },
+  "baselineAudit": {
+    "browser": "Cloud Chromium145",
+    "routes": 12,
+    "syntheticRoles": [
+      "member",
+      "reviewer"
+    ],
+    "firstSymlinkRuntime": "Next route scan returned404; changed QA runtime only to real copied src/public folders"
+  },
+  "officialReferences": [
+    "https://www.razer.com/",
+    "https://rog.asus.com/"
+  ],
+  "modelRouting": "No tool exposes current model/fast route inspection or adjustment; not attested",
+  "previousAttempts": [
+    "Default5s receipt wait shorter than first destination compilation; SQL had succeeded, owned synthetic row cleaned",
+    "Own /users/me fixture omitted Origin and returned null before checks; corrected Origin without business code changes",
+    "Native summary accessibility role is group in Chromium145; fixture uses exact aria-label",
+    "Preview loading boundary streamed200 before notFound; removed new boundary and verified true404"
+  ],
+  "remaining": [
+    "Parallel activity/community/team/native patches not yet received",
+    "Modern WeChat official DevTools/base library3.16/device/platform acceptance",
+    "No successful CI result for this new visual slice",
+    "Complete remaining workflows and regular public layout integration after first-screen checkpoint"
+  ],
+  "productionAccess": false,
+  "cmsPublished": false,
+  "wechatUploaded": false,
+  "realMembersUsed": false
+}
