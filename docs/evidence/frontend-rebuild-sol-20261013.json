@@ -1,0 +1,1902 @@
+{
+  "updatedAt": "2026-10-13T16:55:29.654976+00:00",
+  "sourceCommit": "4733a4c55be8811b894f65d2057caee1acd134ca",
+  "sourceInputFiles": 594,
+  "sourceManifestSha256": "4aa6c4150b8210904e23a9e9bba990f047ff2cb538e37fdbeacfb50e7cd9b955",
+  "sourceEdits": false,
+  "testAssertionEdits": false,
+  "branch": "new",
+  "protectedBranches": {
+    "main": "e366f3c6538e6c63c9f13fc183e26c32ce58cf11",
+    "littleapp": "e366f3c6538e6c63c9f13fc183e26c32ce58cf11"
+  },
+  "authoritativeAttachment": {
+    "library_file_id": "libfile_b3ed4f8917948191850dc0b87c3b61a2",
+    "lines": 381,
+    "bytes": 35731,
+    "sha256": "1b1cb8e82084a4b1decb4e6a3864f24bd88354665c32cebd18c282da0d3e3e4a"
+  },
+  "runtime": {
+    "node": "24.19.0",
+    "pnpm": "11.19.0",
+    "playwright": "1.58.2",
+    "browser": "Chrome for Testing 145.0.7632.6",
+    "APP_ENV": "development",
+    "NODE_ENV_server": "production",
+    "DB_PUSH": false,
+    "databases": "synthetic loopback only",
+    "externalSMTP": false,
+    "s3": false,
+    "externalAI": false,
+    "deployment": false
+  },
+  "ci": {
+    "result": "fail",
+    "run": 38421393010,
+    "job": 115379336790,
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38421393010",
+    "unit": {
+      "files": 86,
+      "passed": 1562
+    },
+    "e2e": {
+      "pass": 71,
+      "fail": 37,
+      "notrun": 17,
+      "skippedSubset": 16
+    },
+    "build": "notrun",
+    "logSha256": "5df79bb8246e4f77674c60cf8166113e9d196d996bacda0c2ba3825674fd2d0a"
+  },
+  "checks": {
+    "typecheck": {
+      "result": "pass",
+      "executionState": "finished",
+      "process": {
+        "action": "exec",
+        "profile": "contracts",
+        "label": "sol-typecheck",
+        "startedAt": "2026-10-13T16:27:51.275Z",
+        "runnerPID": 1410,
+        "childPID": 1443,
+        "cwd": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/contracts/app",
+        "executable": "node",
+        "status": "finished",
+        "finishedAt": "2026-10-13T16:28:31.001Z",
+        "exitCode": 0
+      },
+      "log": "/workspace/qa-zijing/logs/typecheck.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "lint": {
+      "result": "pass",
+      "executionState": "finished",
+      "process": {
+        "action": "exec",
+        "profile": "contracts",
+        "label": "sol-lint",
+        "startedAt": "2026-10-13T16:28:31.086Z",
+        "runnerPID": 1582,
+        "childPID": 1597,
+        "cwd": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/contracts/app",
+        "executable": "node",
+        "status": "finished",
+        "finishedAt": "2026-10-13T16:28:42.647Z",
+        "exitCode": 0
+      },
+      "log": "/workspace/qa-zijing/logs/lint.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build": {
+      "result": "pass",
+      "executionState": "finished",
+      "process": {
+        "action": "build",
+        "profile": "contracts",
+        "label": "sol-build-4733",
+        "startedAt": "2026-10-13T16:28:29.453Z",
+        "runnerPID": 1563,
+        "childPID": 1574,
+        "cwd": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/contracts/app",
+        "executable": "node",
+        "status": "finished",
+        "finishedAt": "2026-10-13T16:30:40.832Z",
+        "exitCode": 0
+      },
+      "log": "/workspace/qa-zijing/logs/build-4733.log",
+      "logSha256": "330e57e0420a76ca5a4b3c883c9b0a4253198ee39ae014874686b1dd42c37942"
+    },
+    "vitest_initial": {
+      "result": "fail",
+      "executionState": "finished",
+      "process": {
+        "action": "vitest",
+        "profile": "contracts",
+        "label": "sol-vitest-4733",
+        "startedAt": "2026-10-13T16:28:54.422Z",
+        "runnerPID": 1649,
+        "childPID": 1660,
+        "cwd": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/contracts/app",
+        "executable": "node",
+        "status": "finished",
+        "finishedAt": "2026-10-13T16:31:34.324Z",
+        "exitCode": 1
+      },
+      "log": "/workspace/qa-zijing/logs/vitest-4733.log",
+      "logSha256": "ce4883215fab0c98c54972946e1ebc036d938d513f347098867faa1cadc5ba65"
+    },
+    "consent_http": {
+      "result": "pass",
+      "executionState": "finished",
+      "process": {
+        "action": "vitest",
+        "profile": "consent",
+        "label": "sol-consent-http",
+        "startedAt": "2026-10-13T16:36:44.207Z",
+        "runnerPID": 6067,
+        "childPID": 6078,
+        "cwd": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/consent/app",
+        "executable": "node",
+        "status": "finished",
+        "finishedAt": "2026-10-13T16:37:09.527Z",
+        "exitCode": 0
+      },
+      "log": "/workspace/qa-zijing/logs/consent-http.log",
+      "logSha256": "212b0b1c1a44ee3e3f6940f04331a7ccf3c43ff47ba48ebd78bb6084bce133b1"
+    },
+    "post_edit_http": {
+      "result": "pass",
+      "executionState": "finished",
+      "process": {
+        "action": "vitest",
+        "profile": "post-edit",
+        "label": "sol-post-edit-http",
+        "startedAt": "2026-10-13T16:36:46.443Z",
+        "runnerPID": 6149,
+        "childPID": 6160,
+        "cwd": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/post-edit/app",
+        "executable": "node",
+        "status": "finished",
+        "finishedAt": "2026-10-13T16:37:10.326Z",
+        "exitCode": 0
+      },
+      "log": "/workspace/qa-zijing/logs/post-edit-http.log",
+      "logSha256": "e38c7b5fe7a4b896617295f5fd644a0b3901aee0e3cee40f50527e7c1f6fd2d1"
+    },
+    "native_http": {
+      "result": "pass",
+      "executionState": "finished",
+      "process": {
+        "action": "vitest",
+        "profile": "native",
+        "label": "sol-native-http",
+        "startedAt": "2026-10-13T16:36:43.680Z",
+        "runnerPID": 6042,
+        "childPID": 6055,
+        "cwd": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/native/app",
+        "executable": "node",
+        "status": "finished",
+        "finishedAt": "2026-10-13T16:37:24.488Z",
+        "exitCode": 0
+      },
+      "log": "/workspace/qa-zijing/logs/native-http.log",
+      "logSha256": "b9a392c1c08701417156c64b21e3982694d6b1410eb6b039eb1a7113d96ed73a"
+    },
+    "full_e2e": {
+      "result": "notrun",
+      "executionState": "running",
+      "process": {
+        "action": "playwright",
+        "profile": "prod-browser",
+        "label": "sol-full-e2e-4733",
+        "startedAt": "2026-10-13T16:32:54.004Z",
+        "runnerPID": 3926,
+        "childPID": 3937,
+        "cwd": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app",
+        "executable": "node",
+        "status": "running"
+      },
+      "log": "/workspace/qa-zijing/logs/full-e2e-4733.log",
+      "logSha256": "7b69238db6423b9012aa7d29b137f15620d0f71f9ddf8ee28f8cad4eef1784fd"
+    },
+    "visual_light": {
+      "result": "fail",
+      "executionState": "finished",
+      "process": {
+        "action": "playwright",
+        "profile": "visual",
+        "label": "sol-visual-light",
+        "startedAt": "2026-10-13T16:48:33.337Z",
+        "runnerPID": 17378,
+        "childPID": 17389,
+        "cwd": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/visual/app",
+        "executable": "node",
+        "status": "finished",
+        "finishedAt": "2026-10-13T16:51:47.496Z",
+        "exitCode": 1
+      },
+      "log": "/workspace/qa-zijing/logs/visual-e2e-light.log",
+      "logSha256": "974b2d90115e62ecc0092a58a91fbf452135a6b8cad555c39fa1ba1a66c1c6a0"
+    },
+    "visual_dark": {
+      "result": "notrun",
+      "executionState": "running",
+      "process": {
+        "action": "playwright",
+        "profile": "visual",
+        "label": "sol-visual-dark",
+        "startedAt": "2026-10-13T16:52:56.038Z",
+        "runnerPID": 20529,
+        "childPID": 20542,
+        "cwd": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/visual/app",
+        "executable": "node",
+        "status": "running"
+      },
+      "log": "/workspace/qa-zijing/logs/visual-e2e-dark.log",
+      "logSha256": "4f588698487b26b1c005c822b8e5320a7038745d2405d88fb03dd6215a2de797"
+    },
+    "vitest_distinct_total": {
+      "result": "pass",
+      "passed": 1562,
+      "files": 86,
+      "initialGuardFailuresPreserved": 4,
+      "partialRerunsPassed": 66
+    },
+    "tokens": {
+      "result": "pass",
+      "outputs": 2
+    },
+    "native_static": {
+      "result": "pass",
+      "pages": 25,
+      "files": 161
+    }
+  },
+  "visualMatrix": {
+    "sourceCommit": "4733a4c55be8811b894f65d2057caee1acd134ca",
+    "buildID": "1LQXl0KVPMjo-UFXJdO9l",
+    "startedAt": "2026-10-13T16:35:58.564Z",
+    "origin": "http://localhost:3364",
+    "browser": "145.0.7632.6",
+    "dpr": 1,
+    "conditions": "Headless Chrome for Testing, isolated loopback optimized Next server, APP_ENV=development; fresh browser context for each page, warm local server, no network or CPU throttling. Metrics are observations, not scores.",
+    "widths": [
+      1440,
+      1024,
+      768,
+      390,
+      320
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "finishedAt": "2026-10-13T16:48:39.007Z",
+    "counts": {
+      "total": 260,
+      "raw_pass": 232,
+      "contrast_fail": 25,
+      "navigation_wait_fail": 3,
+      "horizontal_overflow": 0,
+      "page_errors": 0
+    },
+    "failures": [
+      {
+        "name": "announcements",
+        "route": "/announcements",
+        "role": "anonymous",
+        "width": 1440,
+        "theme": "light",
+        "status": 200,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".ActivityPages_primary__UGpHy"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.72 (foreground color: #202124, background color: #6f2d67, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "announcements-1440-light.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "role": "anonymous",
+        "width": 1440,
+        "theme": "light",
+        "status": 404,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".AccountPages_primary__WLN7I"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.72 (foreground color: #202124, background color: #6f2d67, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "missing-event-1440-light.png"
+      },
+      {
+        "name": "event-detail",
+        "route": "/events/demo-club-meetup",
+        "role": "anonymous",
+        "width": 1440,
+        "theme": "dark",
+        "status": null,
+        "error": "page.goto: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3364/events/demo-club-meetup\", waiting until \"networkidle\"\u001b[22m\n",
+        "axeViolations": null,
+        "screenshot": null
+      },
+      {
+        "name": "announcements",
+        "route": "/announcements",
+        "role": "anonymous",
+        "width": 1440,
+        "theme": "dark",
+        "status": 200,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".ActivityPages_primary__UGpHy"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #f6f2f5, background color: #d2a4cd, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "announcements-1440-dark.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "role": "anonymous",
+        "width": 1440,
+        "theme": "dark",
+        "status": 404,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".AccountPages_primary__WLN7I"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #f6f2f5, background color: #d2a4cd, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "missing-event-1440-dark.png"
+      },
+      {
+        "name": "team-recruitment",
+        "route": "/teams/recruitment/1",
+        "role": "member",
+        "width": 1440,
+        "theme": "dark",
+        "status": 200,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".panel > p[role=\"status\"]"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #b6afb9, background color: #f5efff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "team-recruitment-1440-dark.png"
+      },
+      {
+        "name": "event-detail",
+        "route": "/events/demo-club-meetup",
+        "role": "anonymous",
+        "width": 1024,
+        "theme": "light",
+        "status": null,
+        "error": "page.goto: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3364/events/demo-club-meetup\", waiting until \"networkidle\"\u001b[22m\n",
+        "axeViolations": null,
+        "screenshot": null
+      },
+      {
+        "name": "announcements",
+        "route": "/announcements",
+        "role": "anonymous",
+        "width": 1024,
+        "theme": "light",
+        "status": 200,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".ActivityPages_primary__UGpHy"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.72 (foreground color: #202124, background color: #6f2d67, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "announcements-1024-light.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "role": "anonymous",
+        "width": 1024,
+        "theme": "light",
+        "status": 404,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".AccountPages_primary__WLN7I"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.72 (foreground color: #202124, background color: #6f2d67, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "missing-event-1024-light.png"
+      },
+      {
+        "name": "event-detail",
+        "route": "/events/demo-club-meetup",
+        "role": "anonymous",
+        "width": 1024,
+        "theme": "dark",
+        "status": null,
+        "error": "page.goto: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3364/events/demo-club-meetup\", waiting until \"networkidle\"\u001b[22m\n",
+        "axeViolations": null,
+        "screenshot": null
+      },
+      {
+        "name": "announcements",
+        "route": "/announcements",
+        "role": "anonymous",
+        "width": 1024,
+        "theme": "dark",
+        "status": 200,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".ActivityPages_primary__UGpHy"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #f6f2f5, background color: #d2a4cd, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "announcements-1024-dark.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "role": "anonymous",
+        "width": 1024,
+        "theme": "dark",
+        "status": 404,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".AccountPages_primary__WLN7I"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #f6f2f5, background color: #d2a4cd, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "missing-event-1024-dark.png"
+      },
+      {
+        "name": "team-recruitment",
+        "route": "/teams/recruitment/1",
+        "role": "member",
+        "width": 1024,
+        "theme": "dark",
+        "status": 200,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".panel > p[role=\"status\"]"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #b6afb9, background color: #f5efff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "team-recruitment-1024-dark.png"
+      },
+      {
+        "name": "announcements",
+        "route": "/announcements",
+        "role": "anonymous",
+        "width": 768,
+        "theme": "light",
+        "status": 200,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".ActivityPages_primary__UGpHy"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.72 (foreground color: #202124, background color: #6f2d67, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "announcements-768-light.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "role": "anonymous",
+        "width": 768,
+        "theme": "light",
+        "status": 404,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".AccountPages_primary__WLN7I"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.72 (foreground color: #202124, background color: #6f2d67, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "missing-event-768-light.png"
+      },
+      {
+        "name": "announcements",
+        "route": "/announcements",
+        "role": "anonymous",
+        "width": 768,
+        "theme": "dark",
+        "status": 200,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".ActivityPages_primary__UGpHy"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #f6f2f5, background color: #d2a4cd, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "announcements-768-dark.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "role": "anonymous",
+        "width": 768,
+        "theme": "dark",
+        "status": 404,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".AccountPages_primary__WLN7I"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #f6f2f5, background color: #d2a4cd, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "missing-event-768-dark.png"
+      },
+      {
+        "name": "team-recruitment",
+        "route": "/teams/recruitment/1",
+        "role": "member",
+        "width": 768,
+        "theme": "dark",
+        "status": 200,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".panel > p[role=\"status\"]"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #b6afb9, background color: #f5efff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "team-recruitment-768-dark.png"
+      },
+      {
+        "name": "announcements",
+        "route": "/announcements",
+        "role": "anonymous",
+        "width": 390,
+        "theme": "light",
+        "status": 200,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".ActivityPages_primary__UGpHy"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.72 (foreground color: #202124, background color: #6f2d67, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "announcements-390-light.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "role": "anonymous",
+        "width": 390,
+        "theme": "light",
+        "status": 404,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".AccountPages_primary__WLN7I"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.72 (foreground color: #202124, background color: #6f2d67, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "missing-event-390-light.png"
+      },
+      {
+        "name": "announcements",
+        "route": "/announcements",
+        "role": "anonymous",
+        "width": 390,
+        "theme": "dark",
+        "status": 200,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".ActivityPages_primary__UGpHy"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #f6f2f5, background color: #d2a4cd, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "announcements-390-dark.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "role": "anonymous",
+        "width": 390,
+        "theme": "dark",
+        "status": 404,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".AccountPages_primary__WLN7I"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #f6f2f5, background color: #d2a4cd, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "missing-event-390-dark.png"
+      },
+      {
+        "name": "team-recruitment",
+        "route": "/teams/recruitment/1",
+        "role": "member",
+        "width": 390,
+        "theme": "dark",
+        "status": 200,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".panel > p[role=\"status\"]"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #b6afb9, background color: #f5efff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "team-recruitment-390-dark.png"
+      },
+      {
+        "name": "announcements",
+        "route": "/announcements",
+        "role": "anonymous",
+        "width": 320,
+        "theme": "light",
+        "status": 200,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".ActivityPages_primary__UGpHy"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.72 (foreground color: #202124, background color: #6f2d67, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "announcements-320-light.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "role": "anonymous",
+        "width": 320,
+        "theme": "light",
+        "status": 404,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".AccountPages_primary__WLN7I"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.72 (foreground color: #202124, background color: #6f2d67, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "missing-event-320-light.png"
+      },
+      {
+        "name": "announcements",
+        "route": "/announcements",
+        "role": "anonymous",
+        "width": 320,
+        "theme": "dark",
+        "status": 200,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".ActivityPages_primary__UGpHy"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #f6f2f5, background color: #d2a4cd, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "announcements-320-dark.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "role": "anonymous",
+        "width": 320,
+        "theme": "dark",
+        "status": 404,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".AccountPages_primary__WLN7I"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #f6f2f5, background color: #d2a4cd, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "missing-event-320-dark.png"
+      },
+      {
+        "name": "team-recruitment",
+        "route": "/teams/recruitment/1",
+        "role": "member",
+        "width": 320,
+        "theme": "dark",
+        "status": 200,
+        "error": null,
+        "axeViolations": [
+          {
+            "id": "color-contrast",
+            "impact": "serious",
+            "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+            "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+            "nodes": [
+              {
+                "target": [
+                  ".panel > p[role=\"status\"]"
+                ],
+                "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 1.9 (foreground color: #b6afb9, background color: #f5efff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+              }
+            ]
+          }
+        ],
+        "screenshot": "team-recruitment-320-dark.png"
+      }
+    ],
+    "resource_samples": [
+      {
+        "name": "home",
+        "width": 1440,
+        "theme": "light",
+        "observedLoadMs": 1784,
+        "navigation": {
+          "responseStart": 362.60000000009313,
+          "domContentLoaded": 498,
+          "loadEventEnd": 642.5,
+          "transferSize": 9319,
+          "encodedBodySize": 9019,
+          "decodedBodySize": 45511
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 532
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 532
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 179643,
+          "css": 35096,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 10845,
+          "other": 528
+        },
+        "images": []
+      },
+      {
+        "name": "home",
+        "width": 1440,
+        "theme": "dark",
+        "observedLoadMs": 1031,
+        "navigation": {
+          "responseStart": 150.90000000002328,
+          "domContentLoaded": 321.9000000000233,
+          "loadEventEnd": 352.30000000004657,
+          "transferSize": 9272,
+          "encodedBodySize": 8972,
+          "decodedBodySize": 45439
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 288
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 288
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 179643,
+          "css": 35096,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 10842,
+          "other": 528
+        },
+        "images": []
+      },
+      {
+        "name": "home",
+        "width": 390,
+        "theme": "light",
+        "observedLoadMs": 918,
+        "navigation": {
+          "responseStart": 131.4000000001397,
+          "domContentLoaded": 242.4000000001397,
+          "loadEventEnd": 313.10000000009313,
+          "transferSize": 9324,
+          "encodedBodySize": 9024,
+          "decodedBodySize": 45511
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 260
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 260
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 179643,
+          "css": 35096,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 5670,
+          "other": 528
+        },
+        "images": []
+      },
+      {
+        "name": "home",
+        "width": 390,
+        "theme": "dark",
+        "observedLoadMs": 904,
+        "navigation": {
+          "responseStart": 123.60000000009313,
+          "domContentLoaded": 153.4000000001397,
+          "loadEventEnd": 304.9000000001397,
+          "transferSize": 9274,
+          "encodedBodySize": 8974,
+          "decodedBodySize": 45439
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 244
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 244
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 179643,
+          "css": 35096,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 5671,
+          "other": 528
+        },
+        "images": []
+      },
+      {
+        "name": "events",
+        "width": 1440,
+        "theme": "light",
+        "observedLoadMs": 1448,
+        "navigation": {
+          "responseStart": 253.79999999993015,
+          "domContentLoaded": 430.5999999999767,
+          "loadEventEnd": 571.5,
+          "transferSize": 7270,
+          "encodedBodySize": 6970,
+          "decodedBodySize": 22147
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 460
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 460
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 181800,
+          "css": 35096,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 12928,
+          "other": 528
+        },
+        "images": []
+      },
+      {
+        "name": "events",
+        "width": 1440,
+        "theme": "dark",
+        "observedLoadMs": 847,
+        "navigation": {
+          "responseStart": 49.5,
+          "domContentLoaded": 129.69999999995343,
+          "loadEventEnd": 207.59999999997672,
+          "transferSize": 7230,
+          "encodedBodySize": 6930,
+          "decodedBodySize": 22075
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 148
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 148
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 181800,
+          "css": 35096,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 12928,
+          "other": 528
+        },
+        "images": []
+      },
+      {
+        "name": "events",
+        "width": 390,
+        "theme": "light",
+        "observedLoadMs": 1149,
+        "navigation": {
+          "responseStart": 69,
+          "domContentLoaded": 367.89999999990687,
+          "loadEventEnd": 424.0999999998603,
+          "transferSize": 7266,
+          "encodedBodySize": 6966,
+          "decodedBodySize": 22160
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 272
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 272
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 181800,
+          "css": 35096,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 6456,
+          "other": 528
+        },
+        "images": []
+      },
+      {
+        "name": "events",
+        "width": 390,
+        "theme": "dark",
+        "observedLoadMs": 783,
+        "navigation": {
+          "responseStart": 40.699999999953434,
+          "domContentLoaded": 119.19999999995343,
+          "loadEventEnd": 202.69999999995343,
+          "transferSize": 7227,
+          "encodedBodySize": 6927,
+          "decodedBodySize": 22075
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 128
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 128
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 181800,
+          "css": 35096,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 6458,
+          "other": 528
+        },
+        "images": []
+      },
+      {
+        "name": "community-apply",
+        "width": 1440,
+        "theme": "light",
+        "observedLoadMs": 3548,
+        "navigation": {
+          "responseStart": 593.0999999999767,
+          "domContentLoaded": 1457.0999999999767,
+          "loadEventEnd": 1689.5,
+          "transferSize": 8408,
+          "encodedBodySize": 8108,
+          "decodedBodySize": 24841
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 1564
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 1564
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 183634,
+          "css": 40291,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 11421,
+          "other": 528
+        },
+        "images": []
+      },
+      {
+        "name": "community-apply",
+        "width": 1440,
+        "theme": "dark",
+        "observedLoadMs": 1025,
+        "navigation": {
+          "responseStart": 102,
+          "domContentLoaded": 260,
+          "loadEventEnd": 301.69999999995343,
+          "transferSize": 8359,
+          "encodedBodySize": 8059,
+          "decodedBodySize": 24769
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 220
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 220
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 183634,
+          "css": 40291,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 11422,
+          "other": 528
+        },
+        "images": []
+      },
+      {
+        "name": "community-apply",
+        "width": 390,
+        "theme": "light",
+        "observedLoadMs": 961,
+        "navigation": {
+          "responseStart": 128,
+          "domContentLoaded": 262.19999999995343,
+          "loadEventEnd": 400.19999999995343,
+          "transferSize": 8409,
+          "encodedBodySize": 8109,
+          "decodedBodySize": 24841
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 292
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 292
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 183634,
+          "css": 40291,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 1438,
+          "other": 528
+        },
+        "images": []
+      },
+      {
+        "name": "community-apply",
+        "width": 390,
+        "theme": "dark",
+        "observedLoadMs": 869,
+        "navigation": {
+          "responseStart": 101.80000000004657,
+          "domContentLoaded": 131.10000000009313,
+          "loadEventEnd": 308.60000000009313,
+          "transferSize": 8359,
+          "encodedBodySize": 8059,
+          "decodedBodySize": 24769
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 232
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 232
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 183634,
+          "css": 40291,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 1436,
+          "other": 528
+        },
+        "images": []
+      },
+      {
+        "name": "team-detail",
+        "width": 1440,
+        "theme": "light",
+        "observedLoadMs": 2572,
+        "navigation": {
+          "responseStart": 247.40000000002328,
+          "domContentLoaded": 304.60000000009313,
+          "loadEventEnd": 1467.6000000000931,
+          "transferSize": 7692,
+          "encodedBodySize": 7392,
+          "decodedBodySize": 24399
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 1216
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 1216
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 179643,
+          "css": 40291,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 14118,
+          "other": 528
+        },
+        "images": [
+          {
+            "path": "synthetic-inline-image",
+            "naturalWidth": 80,
+            "naturalHeight": 80,
+            "displayWidth": 64,
+            "displayHeight": 64,
+            "complete": true
+          }
+        ]
+      },
+      {
+        "name": "team-detail",
+        "width": 1440,
+        "theme": "dark",
+        "observedLoadMs": 1091,
+        "navigation": {
+          "responseStart": 116.80000000004657,
+          "domContentLoaded": 263.10000000009313,
+          "loadEventEnd": 283.19999999995343,
+          "transferSize": 7633,
+          "encodedBodySize": 7333,
+          "decodedBodySize": 24339
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 228
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 228
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 179643,
+          "css": 40291,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 14125,
+          "other": 528
+        },
+        "images": [
+          {
+            "path": "synthetic-inline-image",
+            "naturalWidth": 80,
+            "naturalHeight": 80,
+            "displayWidth": 64,
+            "displayHeight": 64,
+            "complete": true
+          }
+        ]
+      },
+      {
+        "name": "team-detail",
+        "width": 390,
+        "theme": "light",
+        "observedLoadMs": 937,
+        "navigation": {
+          "responseStart": 111.69999999995343,
+          "domContentLoaded": 239.80000000004657,
+          "loadEventEnd": 270.30000000004657,
+          "transferSize": 7679,
+          "encodedBodySize": 7379,
+          "decodedBodySize": 24411
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 204
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 204
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 179643,
+          "css": 40291,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 8340,
+          "other": 528
+        },
+        "images": [
+          {
+            "path": "synthetic-inline-image",
+            "naturalWidth": 80,
+            "naturalHeight": 80,
+            "displayWidth": 64,
+            "displayHeight": 64,
+            "complete": true
+          }
+        ]
+      },
+      {
+        "name": "team-detail",
+        "width": 390,
+        "theme": "dark",
+        "observedLoadMs": 917,
+        "navigation": {
+          "responseStart": 103.19999999995343,
+          "domContentLoaded": 240.89999999990687,
+          "loadEventEnd": 267.19999999995343,
+          "transferSize": 7636,
+          "encodedBodySize": 7336,
+          "decodedBodySize": 24339
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 196
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 196
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 179643,
+          "css": 40291,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 8335,
+          "other": 528
+        },
+        "images": [
+          {
+            "path": "synthetic-inline-image",
+            "naturalWidth": 80,
+            "naturalHeight": 80,
+            "displayWidth": 64,
+            "displayHeight": 64,
+            "complete": true
+          }
+        ]
+      },
+      {
+        "name": "honor-pending",
+        "width": 1440,
+        "theme": "light",
+        "observedLoadMs": 1522,
+        "navigation": {
+          "responseStart": 236.70000000006985,
+          "domContentLoaded": 350.4000000000233,
+          "loadEventEnd": 617.4000000000233,
+          "transferSize": 8048,
+          "encodedBodySize": 7748,
+          "decodedBodySize": 23759
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 484
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 484
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 185654,
+          "css": 40291,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 12549,
+          "other": 528
+        },
+        "images": [
+          {
+            "path": "synthetic-inline-image",
+            "naturalWidth": 80,
+            "naturalHeight": 80,
+            "displayWidth": 1273,
+            "displayHeight": 518,
+            "complete": true
+          }
+        ]
+      },
+      {
+        "name": "honor-pending",
+        "width": 1440,
+        "theme": "dark",
+        "observedLoadMs": 1499,
+        "navigation": {
+          "responseStart": 121,
+          "domContentLoaded": 433.69999999995343,
+          "loadEventEnd": 567.3999999999069,
+          "transferSize": 8002,
+          "encodedBodySize": 7702,
+          "decodedBodySize": 23687
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 336
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 444
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 185654,
+          "css": 40291,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 12545,
+          "other": 528
+        },
+        "images": [
+          {
+            "path": "synthetic-inline-image",
+            "naturalWidth": 80,
+            "naturalHeight": 80,
+            "displayWidth": 1273,
+            "displayHeight": 518,
+            "complete": true
+          }
+        ]
+      },
+      {
+        "name": "honor-pending",
+        "width": 390,
+        "theme": "light",
+        "observedLoadMs": 940,
+        "navigation": {
+          "responseStart": 134.4000000001397,
+          "domContentLoaded": 274.10000000009313,
+          "loadEventEnd": 324.10000000009313,
+          "transferSize": 8051,
+          "encodedBodySize": 7751,
+          "decodedBodySize": 23759
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 236
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 236
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 185654,
+          "css": 40291,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 4423,
+          "other": 528
+        },
+        "images": [
+          {
+            "path": "synthetic-inline-image",
+            "naturalWidth": 80,
+            "naturalHeight": 80,
+            "displayWidth": 310,
+            "displayHeight": 310,
+            "complete": true
+          }
+        ]
+      },
+      {
+        "name": "honor-pending",
+        "width": 390,
+        "theme": "dark",
+        "observedLoadMs": 908,
+        "navigation": {
+          "responseStart": 106.70000000018626,
+          "domContentLoaded": 139.10000000009313,
+          "loadEventEnd": 306.20000000018626,
+          "transferSize": 8003,
+          "encodedBodySize": 7703,
+          "decodedBodySize": 23687
+        },
+        "paints": [
+          {
+            "name": "first-paint",
+            "startTime": 216
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 216
+          }
+        ],
+        "resource_transfer_bytes": {
+          "js": 185654,
+          "css": 40291,
+          "images": 0,
+          "fonts": 0,
+          "fetch": 4424,
+          "other": 528
+        },
+        "images": [
+          {
+            "path": "synthetic-inline-image",
+            "naturalWidth": 80,
+            "naturalHeight": 80,
+            "displayWidth": 310,
+            "displayHeight": 310,
+            "complete": true
+          }
+        ]
+      }
+    ],
+    "mobile_password_toggle_measurement": {
+      "routes": [
+        "/login",
+        "/register",
+        "/account/reset"
+      ],
+      "widths": [
+        390,
+        320
+      ],
+      "observed_button_size_css_px": [
+        60,
+        36
+      ],
+      "design_target_css_px": 44,
+      "result": "fail",
+      "source": "src/components/account-pages/AccountPages.module.css:214"
+    }
+  },
+  "honorProbe": {
+    "sourceCommit": "4733a4c55be8811b894f65d2057caee1acd134ca",
+    "origin": "http://localhost:3364",
+    "startedAt": "2026-10-13T16:42:55.124Z",
+    "checks": [
+      {
+        "name": "pending honor private DTO",
+        "role": "anonymous",
+        "expectedStatus": 401,
+        "status": 401,
+        "cacheControl": "private, no-store",
+        "result": "pass"
+      },
+      {
+        "name": "pending honor private DTO",
+        "role": "member",
+        "expectedStatus": 200,
+        "status": 200,
+        "cacheControl": "private, no-store",
+        "result": "pass"
+      },
+      {
+        "name": "pending honor private DTO",
+        "role": "communityReviewer",
+        "expectedStatus": 200,
+        "status": 200,
+        "cacheControl": "private, no-store",
+        "result": "pass"
+      },
+      {
+        "name": "pending honor private DTO",
+        "role": "president",
+        "expectedStatus": 200,
+        "status": 200,
+        "cacheControl": "private, no-store",
+        "result": "pass"
+      },
+      {
+        "name": "pending honor private DTO",
+        "role": "backbone",
+        "expectedStatus": 404,
+        "status": 404,
+        "cacheControl": "private, no-store",
+        "result": "pass"
+      },
+      {
+        "name": "browser honor stale revision rejection preserves note, stale CAS and server record",
+        "realRevision": "1",
+        "rejectedRevision": "100001",
+        "notePreserved": true,
+        "alert": "荣誉记录已更新，请刷新后核对",
+        "serverRecordUnchanged": true,
+        "serverRecordDigest": "905b884c1e71fb48b9582ca3d524500de352fa8a01aa2352fa3c5f191fe13729",
+        "result": "pass"
+      },
+      {
+        "name": "explicit refresh restores actual revision",
+        "actualRevision": "1",
+        "result": "pass"
+      },
+      {
+        "name": "anonymous raw REST pending honor denied",
+        "status": 403,
+        "expectedStatus": 403,
+        "result": "pass"
+      },
+      {
+        "name": "unrelated backbone raw REST pending honor hidden",
+        "status": 404,
+        "expectedStatus": 404,
+        "result": "pass"
+      },
+      {
+        "name": "anonymous public archive includes approved record and excludes pending record",
+        "status": 200,
+        "approvedPresent": true,
+        "pendingPresent": false,
+        "result": "pass"
+      },
+      {
+        "name": "anonymous existing page gate retained",
+        "route": "/",
+        "status": 307,
+        "location": "/events",
+        "result": "pass"
+      },
+      {
+        "name": "anonymous existing page gate retained",
+        "route": "/community",
+        "status": 307,
+        "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fcommunity",
+        "result": "pass"
+      },
+      {
+        "name": "anonymous existing page gate retained",
+        "route": "/teams",
+        "status": 307,
+        "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fteams",
+        "result": "pass"
+      }
+    ],
+    "finishedAt": "2026-10-13T16:43:01.306Z"
+  },
+  "eventFollowup": [
+    {
+      "width": 1440,
+      "theme": "dark",
+      "condition": "fresh browser process; original 45s networkidle budget retained",
+      "result": "fail",
+      "error": "page.goto: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3364/events/demo-club-meetup\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "width": 1024,
+      "theme": "light",
+      "condition": "fresh browser process; original 45s networkidle budget retained",
+      "result": "fail",
+      "error": "page.goto: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3364/events/demo-club-meetup\", waiting until \"networkidle\"\u001b[22m\n"
+    },
+    {
+      "width": 1024,
+      "theme": "dark",
+      "condition": "fresh browser process; original 45s networkidle budget retained",
+      "status": 200,
+      "dom": {
+        "scrollWidth": 1024,
+        "h1": 1,
+        "theme": "dark"
+      },
+      "axe": [],
+      "result": "pass"
+    }
+  ],
+  "officialWeChat": {
+    "result": "notrun",
+    "reason": "No official CLI found in PATH or eight explicit paths; no device session available"
+  },
+  "handoff": {
+    "fixModel": "gpt-6-astra max",
+    "retestModel": "gpt-6.1-sol max",
+    "root": "/workspace/zijingwebsite/.data/rebuild-qa-20261013",
+    "logs": "/workspace/qa-zijing/logs",
+    "buildID": "1LQXl0KVPMjo-UFXJdO9l",
+    "keepProcesses": true,
+    "processes": {
+      "main": {
+        "databasePID": 1317,
+        "databaseDir": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/pg",
+        "port": 55613
+      },
+      "contracts": {
+        "databasePID": 1328,
+        "databaseDir": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/contracts/pg",
+        "port": 55617
+      },
+      "prod-browser": {
+        "databasePID": 1308,
+        "databaseDir": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/pg",
+        "port": 55619
+      },
+      "consent": {
+        "databasePID": 5216,
+        "databaseDir": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/consent/pg",
+        "port": 55614
+      },
+      "post-edit": {
+        "databasePID": 5206,
+        "databaseDir": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/post-edit/pg",
+        "port": 55615
+      },
+      "native": {
+        "databasePID": 5226,
+        "databaseDir": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/native/pg",
+        "port": 55578
+      },
+      "visual": {
+        "databasePID": 13827,
+        "databaseDir": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/visual/pg",
+        "port": 55616
+      }
+    }
+  }
+}

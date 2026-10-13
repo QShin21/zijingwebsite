@@ -92,3 +92,25 @@
 5. 微信官方工具、真机、键盘/安全区/隐私授权/媒体能力仍未验。匿名浏览范围和骨干招新管理权限的两项冲突继续保持现有安全权限，另行取得明确决定再改变。
 
 交接后的新开发由项目方指定的接手者推进；原执行者不再自行恢复本轮任务。未执行生产部署、CMS 发布或微信上传。
+
+## Sol 冻结验收接续 · 2026-10-13（进行中）
+
+本次 saved cloud 环境实际为 `/workspace/zijingwebsite`，初始干净 `work` 位于 `e366f3c`，没有旧 `.data`、`.next`、依赖、环境文件或运行进程。已读取 AGENTS，并安全检出现有 `origin/new` 的 `4733a4c55be8811b894f65d2057caee1acd134ca`；保留 `work` 和两个原分支。不能据此确认或恢复前轮未推工作。
+
+权威附件改用本次指定 Library ID `libfile_b3ed4f8917948191850dc0b87c3b61a2`。全文与本环境物化字节均已核验：381 行、35,731 字节，SHA-256 `1b1cb8e82084a4b1decb4e6a3864f24bd88354665c32cebd18c282da0d3e3e4a`。源码/测试脚本修复由 Astra max 负责；此接续只安装锁定依赖、运行隔离验收和记录证据，没有修改源码或断言。
+
+- 精确 SHA CI：run [38421393010](https://github.com/QShin21/zijingwebsite/actions/runs/38421393010)，job `115379336790` 已失败。类型、lint、86 文件/1,562 项 Vitest、原生静态检查通过；E2E 为 71 通过、37 失败、16 跳过、1 未运行，build 跳过。完整日志已保存在本环境，不能把这个 CI 当成本地结果。
+- 本地 Node 24.19.0，官方 npm registry 安装 pnpm 11.19.0 和 frozen lockfile 依赖；Playwright 1.58.2 配套 Chrome for Testing 145.0.7632.6。锁文件不变，未使用系统 Chromium 154 作为验收浏览器。
+- 既有 `rebuild-qa.mjs` 建立独立空环境文件、合成 PostgreSQL 与媒体目录；`APP_ENV=development`、`DB_PUSH=false`，S3/外部 AI 禁用。浏览器服务为本地优化 `next start`，没有生产部署。构建输入 594 文件清单 SHA-256 为 `4aa6c4150b8210904e23a9e9bba990f047ff2cb538e37fdbeacfb50e7cd9b955`，构建前后源仓库及 contracts 快照均无输入变化。
+- typecheck、lint、共享 tokens 生成检查、25 页/161 文件原生静态检查通过。完整 build 16:28:29–16:30:40 UTC 退出 0，BUILD_ID `1LQXl0KVPMjo-UFXJdO9l`；有编译警告，保留原日志。构建产物供后续隔离浏览器服务复用，没有重复构建。
+- 完整 Vitest 首轮在 contracts 库为 1,496 通过、四套件的 66 项因专用库守卫未运行，退出 1；原失败保留。用既有 consent / post-edit / native profile 补跑分别 27、19、20 项均通过。当前累计覆盖全部 86 文件、1,562 项，不能把首轮日志改成一次全绿。
+- 五宽度（1440/1024/768/390/320）×双主题×26 页面，260 个实际浏览器检查已完成：初跑 232 通过，25 个页面对比度违规，3 个活动详情等待 networkidle 45 秒超时。已测 257 个页面均单 H1、无横向溢出、无 pageerror。三项超时按原预算重查为 1 通过、2 再次超时；另一次独立观察中 HTTP 200、无剩余请求。超时原因仍未确定，保留全部记录。此矩阵的通过仅涵盖所列条件，不能代替完整交互验收。
+- 已确认源样式问题：`src/app/(design)/design.css:20` 的 `.z-design a` 覆盖模块 primary 文本色，通知空态及 404 主链接浅色对比 1.72:1，双主题均失败；`src/app/(frontend)/style.css:2704` 的旧 status 浅背景与 ClubPages 深色文字组合使队伍回执对比 1.90:1。密码显隐按钮在 390/320 的登录、注册、找回密码页面实测 60×36 CSS px，未达到任务书的 44px 移动热区目标。均交 Astra 最小修复，不调整验收阈值。
+- 荣誉专项真实浏览器/HTTP 13 项通过：拒绝旧 revision=100001 后保留说明与原 CAS，服务器 pending 记录摘要不变，只有明确刷新才回 revision=1；匿名/无所属骨干不能读待审材料，公开档案含 approved 且排除 pending，原始 REST 与匿名首页/社群/队伍门禁保持。这里的 API/ACL 证据与截图分别保留。
+- 完整 125 项 E2E 在 3000 的优化服务继续运行，未改原预算。专用 visual profile 补跑浅色 11 项为 8 通过、3 失败；失败含旧荣誉空态定位与禁用输入实际背景不符合 tokens 的期望，深色复验继续。尚未有完整 E2E 终态，不能写全通过。
+- 浏览器资源已实际测量：全新浏览器 context、服务器预热、DPR=1、无网络/CPU 限速；首页/活动/社群申请的 JS 实际传输约 180–184 KB，字体下载为 0。观测加载包含 networkidle 等待，细项保留在证据 JSON，不输出性能分数。
+- 官方微信 CLI 在 PATH 与 8 个明确路径均不存在。官方编译、模拟器和真机、键盘/安全区/分享进入/真实图片授权能力均未运行；静态、合成 SDK 和浏览器映射结果不替代它们。
+
+本环境运行信息：日志 `/workspace/qa-zijing/logs`；冻结快照及各 profile 数据位于 `.data/rebuild-qa-20261013`，构建在 `contracts/app/.next`。3000 服务 runner/child PID 为 3834/3845，3364 为 3864/3875，完整 E2E 为 3926/3937；各 runner 的 `processes/*.json` 和 PG 的 `postmaster.pid` 是接手续查依据。保留进行中的进程、失败 trace、数据库和原日志，下一轮读取状态后接续，避免重复启动或重复构建。
+
+后续必须由 Astra 处理真实样式缺陷与已复现的旧 UI 定位/反馈契约问题，再由 Sol 对新源码复测；本轮源码输入仍为 `4733a4c`。机器证据见 `docs/evidence/frontend-rebuild-sol-20261013.json`，后续终态追加到此节。
