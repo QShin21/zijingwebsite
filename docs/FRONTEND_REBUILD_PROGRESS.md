@@ -114,3 +114,20 @@
 本环境运行信息：日志 `/workspace/qa-zijing/logs`；冻结快照及各 profile 数据位于 `.data/rebuild-qa-20261013`，构建在 `contracts/app/.next`。3000 服务 runner/child PID 为 3834/3845，3364 为 3864/3875，完整 E2E 为 3926/3937；各 runner 的 `processes/*.json` 和 PG 的 `postmaster.pid` 是接手续查依据。保留进行中的进程、失败 trace、数据库和原日志，下一轮读取状态后接续，避免重复启动或重复构建。
 
 后续必须由 Astra 处理真实样式缺陷与已复现的旧 UI 定位/反馈契约问题，再由 Sol 对新源码复测；本轮源码输入仍为 `4733a4c`。机器证据见 `docs/evidence/frontend-rebuild-sol-20261013.json`，后续终态追加到此节。
+
+### 17:00 UTC · 按父线程指令交 Astra，保留冻结测试进程
+
+父线程要求发现源码修复需求后立即保存证据并结束此 Sol turn，不等待剩余长测试。本次交接时完整 E2E runner/child `3926/3937` 存活，已运行约 27 分钟，最近第 91 项（公开荣誉档案、6+1 分页与非公开材料隔离）通过；日志已记录 47 通过、32 失败、12 按专用库条件跳过，另 34 项尚未有结果。这个数字是明确的局部快照，最终必须读取 `prod-browser/runs/sol-full-e2e-4733/playwright-results.json` 和 `processes/sol-full-e2e-4733.json`，不能重启同一测试冒充续接。服务 CPU 与新测试日志持续推进，没有证据表明卡在构建、资源或数据库锁。
+
+浅色、深色专用 visual 各 11 项均已结束，分别 8 通过、3 失败，退出 1，耗时 194/201 秒。两套均通过四视口/正文 Axe、名片同意、主题保值与原生默认浅色对应的网页验证；失败为旧荣誉空态文案定位（theme/visual 各一项）和禁用输入背景像素契约。后者浅色期望 `rgb(232,228,229)` 实际 `rgb(255,253,249)`，深色期望 `rgb(53,48,56)` 实际 `rgb(32,32,38)`，不能通过改颜色断言掩盖。主题切换额外观测为 102.4ms/58.6ms，两次均保留已填登录字段；是单次本地观测且包含测试工具开销，不是性能评分。
+
+Astra 最小处理目标：
+
+1. `src/app/(design)/design.css:20` 链接重置优先级，以及 `src/components/activity-pages/ActivityPages.module.css:17` 的 primary hover 覆盖风险；修复主链接的实际语义前景，不改 tokens 对比阈值。另修 `src/app/(frontend)/style.css:2704` 旧 status 的硬编码浅底与深色信息文字组合。
+2. `src/components/account-pages/AccountPages.module.css:214` 密码显隐按钮真实热区；保持输入可用，达到移动 44px。检查 `src/components/visual-direction/theme.css` 和相关页面模块的 disabled 规则优先级，使实际禁用字段回到单源 tokens 的语义状态。
+3. 根据已保留 trace 定向更新旧界面定位与反馈语义：例如 `tests/e2e/activity-signups.spec.ts:211` 仍期待详情内直接出现问卷，实际已链接到真实填写页；同文件 503 场景期待“临时不可用”，实际显示结果未知并要求先核对回执；`tests/e2e/club-theme.spec.ts:381`、`club-visual.spec.ts:346` 使用旧空态文案。保留填写→提交→回执、唯一记录、权限与保值断言，按新职责进入对象页面，不能批量 `.first()` 或删掉行为断言。完整失败列表与原始 trace 路径见本轮证据，复现均绑定 `4733a4c`。
+4. `.github/workflows/ci.yml` 的普通 demo seed 未满足新增 rebuild 用例的专用根目录/账号 fixture；精确 SHA CI 的 `rebuild-activity.spec.ts:44` 在 beforeAll 被隔离守卫拒绝。本地通过既有 QA runner 和专用 seed 正常执行该领域用例；CI 应准备同等安全的合成 fixture，不能伪造守卫标记或放宽生产保护。
+
+其他已执行页面、API/ACL 证据与 source SHA 仍保持；没有 Sol 源码修复。`consent-web`（40071）已迁移，历史 false/null 授权网页场景尚未运行；copy-build 因 3000 被完整 E2E 服务占用而由既有 runner 拒绝，未覆盖正在使用的产物。待当前 E2E 完结，再确认并停止自己拥有的 3000 服务，执行 `REBUILD_QA_SERVER_PORT=3000 node scripts/rebuild-qa.mjs copy-build consent-web`，启动该 profile 后仅运行 `community-application.spec.ts` 的历史授权场景；先处理其依赖的旧定位问题。
+
+继续保留所有环回数据库、三个 `next start`（3000/3364/3365）、trace 和日志。Astra 可编辑源仓库，正在跑的 E2E 只消费冻结副本；修复后按新 SHA 重新冻结并由 Sol 复测。旧构建 BUILD_ID 和各 profile 路径可供读取已有证据，无需为恢复连接重复构建。
