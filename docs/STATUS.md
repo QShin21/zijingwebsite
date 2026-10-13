@@ -418,3 +418,10 @@ cb1f0de修复归档恢复权限、审核与队伍分页串动，以及隐藏批�
 独立分支 codex/miniapp-platform-fixes-20261012 从6f862c7推进：46a7506两条网站POST edit别名复用原PATCH服务；e3a935c原生固定POST改稿及已发布正文门槛、微信正式按钮、明确拒绝、SDK取消后归属锁。799原生合成+19真HTTP/JWT/SQL通过，14独立时序复核通过；类型/全仓lint/静态与原始历史官方29WXML/27WXSS通过。代码source e3a935c冻结，仍0.3.1/25页/16类表单。草案仅列运营者/contact、保留删除、实际配置服务方三组核定事项，未发布。父整合网站补丁、发布正文及现代微信工具/平台/真机验证仍待完成，本轮没有更新部署或生产数据库。见 [收尾记录](MINIAPP_PLATFORM_FIXES_20261012.md)。
 
 推送后的c906f67 CI38292646763因GitHub账户支付/Actions额度失败，runner_id=0、steps为空，测试和构建未开始；本地799原生/19HTTP与14独立验证保留通过。见 [CI阻塞证据](evidence/miniapp-platform-ci-blocked-20261012.json)。账户负责人处理后重跑已有workflow；本轮没有改账单或重复触发。代码仍精确e3a935c，记录阻塞的后续文档使用[skip ci]。
+
+
+## 隐私正文与离线保留审查 integration 验收 · 2026-10-13
+
+1e5802b、ced4d5d、f849e18 已按序纳入，受测源码为 47baede4b61fadd7a186f3d5aeacda66ed9b9ed5。新 src/lib 只由离线 CLI 和测试导入；网站、小程序、成员业务、权限、依赖及迁移均未改动，网站预构建继续使用 d6b5b7be0542867a925170174b699a821ee2afe7，无本轮重建或部署。匹配 Node24.12 的无网络环境实际通过 100/100 合成检查、类型检查、四文件 ESLint、diff 和 25页/146文件静态检查；没有加载 Payload/config、连接数据库或调用真实 CMS。见 [本轮验证](evidence/privacy-retention-integration-20261013.json)。
+
+部署内容取 [CMS payload](privacy-page-20261013.json) 和 [带正文边界的说明](PRIVACY_NOTICE_20261013.md)：两文件与 ced4d5d 原件字节一致，payload SHA256 为 d06cecda4306f5e9b07956b74f219cc297737dc4244397994d330cef888f8269，保留 draft/editing，没有发布或生效日期。已确认运营者叶佳鑫、隐私微信 yejx2003、报名1年/成员关系长期/删除申请本人审核；长期关系不能使整份报名答案长期保留。只读清单没有 purge/执行/调度，不将候选日期或引用声明变为删除资格。实际 SMTP/S3/托管/AI 处理范围、CMS 发布及微信现场验收仍待相应任务。源CI38338763819计费/额度阻塞、runner=0/执行步骤=0；本地结果和源独立审查分别保留，没有购买、调账或重跑CI。

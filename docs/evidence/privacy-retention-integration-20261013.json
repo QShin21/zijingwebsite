@@ -1,0 +1,144 @@
+{
+  "checkedAt": "2026-10-13T03:00:33.870Z",
+  "testedIntegrationSourceCommit": "47baede4b61fadd7a186f3d5aeacda66ed9b9ed5",
+  "runtimeBuildSourceUnchanged": "d6b5b7be0542867a925170174b699a821ee2afe7",
+  "branch": "codex/club-integration-20261012",
+  "sourceCommitsInOrder": [
+    "1e5802baf33ee6c5f599eaa4256f8402af991ef1",
+    "ced4d5d15ade4d909751ed87f5b0fe917df540e1",
+    "f849e18fc2cd1987e8c3bc02817d9811cfc10d4a"
+  ],
+  "cherryPickedCommits": [
+    "3c900c2ba033daa13cf454f9a4fc5cb6bcc3b154",
+    "56e8a651226069f345d15c70b0e803baa30cee1f",
+    "47baede4b61fadd7a186f3d5aeacda66ed9b9ed5"
+  ],
+  "scope": {
+    "changedPaths": [
+      "docs/DECISIONS.md",
+      "docs/MINIAPP_PRIVACY_DRAFT_20261012.md",
+      "docs/PRIVACY_NOTICE_20261013.md",
+      "docs/REGISTRATION_RETENTION_REVIEW_20261013.md",
+      "docs/STATUS.md",
+      "docs/TASKS.md",
+      "docs/evidence/privacy-content-final-review-20261013.json",
+      "docs/evidence/privacy-retention-ci-blocked-20261013.json",
+      "docs/evidence/privacy-retention-review-20261013.json",
+      "docs/evidence/registration-retention-audit-20261013.json",
+      "docs/evidence/registration-retention-independent-review-20261013.json",
+      "docs/evidence/wechat-privacy-official-current-20261013.json",
+      "docs/privacy-page-20261013.json",
+      "scripts/registration-retention-review.ts",
+      "src/lib/registration-retention-review.ts",
+      "tests/fixtures/registration-retention-metadata-synthetic.json",
+      "tests/privacy-publication-content.test.ts",
+      "tests/registration-retention-review.test.ts"
+    ],
+    "websiteRuntimeChanged": false,
+    "nativeRuntimeChanged": false,
+    "collectionsPermissionsMemberBusinessChanged": false,
+    "dependenciesChanged": false,
+    "newMigrations": 0,
+    "offlineLibraryOnlyReferencedByCLIAndTests": true,
+    "websiteRebuildPerformed": false
+  },
+  "localValidation": {
+    "node": "v24.12.0",
+    "network": "none",
+    "databaseAccess": "prohibited; no Payload/config/database import",
+    "passed": 100,
+    "failed": 0,
+    "files": [
+      {
+        "path": "tests/miniapp-privacy-consent.test.ts",
+        "passed": 41
+      },
+      {
+        "path": "tests/miniapp-startup.test.ts",
+        "passed": 4
+      },
+      {
+        "path": "tests/privacy-publication-content.test.ts",
+        "passed": 6
+      },
+      {
+        "path": "tests/registration-retention-review.test.ts",
+        "passed": 49
+      }
+    ],
+    "typecheckExit": 0,
+    "targetedESLintExit": 0,
+    "diffCheckExit": 0,
+    "miniappStatic": {
+      "pages": 25,
+      "files": 146,
+      "bytes": 474072,
+      "domainChecking": true,
+      "nativeDependencies": 0
+    }
+  },
+  "cms": {
+    "payloadPath": "docs/privacy-page-20261013.json",
+    "state": "draft",
+    "reviewState": "editing",
+    "writtenToCMS": false,
+    "published": false,
+    "publicationOrEffectiveDateFabricated": false,
+    "sourceCommit": "ced4d5d15ade4d909751ed87f5b0fe917df540e1"
+  },
+  "sourceFiles": {
+    "docs/privacy-page-20261013.json": {
+      "bytes": 23025,
+      "sha256": "d06cecda4306f5e9b07956b74f219cc297737dc4244397994d330cef888f8269",
+      "gitBlob": "81a8232f3488190f8150f21368c8800d1a5f7286"
+    },
+    "docs/PRIVACY_NOTICE_20261013.md": {
+      "bytes": 12759,
+      "sha256": "264571f2ccff8432795e31eff3cc61df3f8970855bd35aeb4ee53e66aff0daea",
+      "gitBlob": "4405b7d301798698df0c5dfc1e7db6c823cb1e37"
+    },
+    "docs/REGISTRATION_RETENTION_REVIEW_20261013.md": {
+      "bytes": 10508,
+      "sha256": "5d82415fce69359fbb4329a2c3936153842aaa4537454f760c180b705cf8d372",
+      "gitBlob": "1ae496ee84f1c63df58d6f1bbc2392e213568943"
+    },
+    "scripts/registration-retention-review.ts": {
+      "bytes": 1883,
+      "sha256": "163eeff4cec0a6e85b8302c52589f4c0f61ee7784d6df22ee264d15b912b90c4",
+      "gitBlob": "48b7b30d3ca0225519631a41da70f37c5572d359"
+    },
+    "src/lib/registration-retention-review.ts": {
+      "bytes": 11481,
+      "sha256": "099d5e9322aa2ee25be6c4daf9ae14728350bc6eb853cb5aefc208d432a3859b",
+      "gitBlob": "96026622b2fa6313a28b3b28f0fc9a80e9b5a8ae"
+    }
+  },
+  "offlineTool": {
+    "readsOnlyOperatorProvidedMetadata": true,
+    "readOnly": true,
+    "automaticDeletion": false,
+    "expiryConfirmed": false,
+    "datesAreReviewHintsOnly": true,
+    "realDataOrDatabaseUsed": false,
+    "schedulerOrPurgeImplemented": false
+  },
+  "carriedSourceEvidence": {
+    "independentContent15Questionnaire5AndTool16": "Source task records retained; not rerun as part of integration validation"
+  },
+  "ci": {
+    "sourceRunID": 38338763819,
+    "sourceRunBlockedBeforeRunner": true,
+    "sourceExecutedSteps": 0,
+    "sourceCIResult": "failure before runner startup due to billing/spending gate",
+    "candidateHeadHasSkipCI": true,
+    "rerunRequested": false,
+    "billingReadOrChanged": false
+  },
+  "remaining": [
+    "CMS publication and actual publication/effective metadata",
+    "Deployment verification of actual enabled mail/storage/hosting/AI services and involved data",
+    "Official WeChat platform configuration, DevTools and device acceptance"
+  ],
+  "productionOperations": false,
+  "memberMessagesSent": false
+}
