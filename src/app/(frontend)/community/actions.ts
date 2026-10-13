@@ -1,5 +1,7 @@
 "use server";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
+import { workflowFeedback } from "@/components/activity-pages/action-feedback";
 import { redirect } from "next/navigation";
 import { cms } from "@/lib/content";
 import { canPublish, canSubmitClubContent, canReviewShowcase, managesGame } from "@/lib/rules";
@@ -180,4 +182,32 @@ export async function updateCommunityCardAction(form: FormData) {
   }); }
   catch (error) { problem("/community/apply", applicationError(error)); }
   redirect("/community/apply?message=" + encodeURIComponent("名片及展示设置已更新。"));
+}
+
+// Structured presentation adapters preserve rejected form values; legacy redirects remain available.
+export async function publishCommunityResultAction(form: FormData) {
+  const p = await cms(), { user } = await p.auth({ headers: await headers() });
+  if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再发布，已填写的内容保留。" };
+  const game = numeric(form, "game"), kind = value(form, "kind");
+  if (!["event", "notice"].includes(kind)) return { ok: false, message: "发布类型无效，请重新选择。" };
+  try {
+    await p.create({ collection: "community-posts", overrideAccess: false, user, context: { manageSignupForm: true },
+      data: { game, author: user.id, title: value(form, "title"), body: value(form, "body"), category: kind as "event" | "notice", signupForm: kind === "event" && value(form, "signupForm") ? JSON.parse(value(form, "signupForm")) : undefined } });
+    revalidatePath(`${await gamePath(game)}/updates`);
+    return { ok: true, message: "内容已发布到当前社群。" };
+  } catch (error) { return { ok: false, message: workflowFeedback(error) }; }
+}
+export async function reviewShowcaseResultAction(form: FormData) {
+  const p = await cms(), { user } = await p.auth({ headers: await headers() });
+  if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再审核，已填写的说明保留。" };
+  const post = await p.findByID({ collection: "community-showcase", id: numeric(form, "id"), overrideAccess: false, user, depth: 0 }).catch(() => null);
+  if (!post || !canReviewShowcase(user, post.game)) return { ok: false, message: "当前账号无法审核这条社群风采。" };
+  const status = value(form, "status");
+  if (!["visible", "rejected", "hidden"].includes(status)) return { ok: false, message: "审核决定无效，请重新选择。" };
+  try {
+    await p.update({ collection: "community-showcase", id: post.id, overrideAccess: false, user, context: { webShowcaseWrite: true },
+      data: { status: status as "visible" | "rejected" | "hidden", reviewNote: value(form, "reviewNote") } });
+    revalidatePath(`${await gamePath(Number(post.game))}/showcase`);
+    return { ok: true, message: "审核结果已保存。" };
+  } catch (error) { return { ok: false, message: workflowFeedback(error) }; }
 }

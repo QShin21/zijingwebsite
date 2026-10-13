@@ -11,6 +11,7 @@ import {
 } from "@/lib/staff-recruitment-model";
 import styles from "./activity-pages/ApplicationFlow.module.css";
 import { SubmissionSteps } from "./activity-pages/SubmissionSteps";
+import { activityRequest } from "./activity-pages/client-request";
 
 type Receipt = {
   id: number;
@@ -38,17 +39,13 @@ export function StaffApplication({ batch }: { batch: number }) {
     [retry, setRetry] = useState(0);
   const endpoint = "/api/staff/batches/" + batch + "/application";
   async function load() {
-    const response = await fetch(endpoint, { cache: "no-store" }),
-      data = await response.json();
-    if (!response.ok) throw new Error(data.error);
+    const data = await activityRequest(endpoint);
     setInfo(data);
   }
   useEffect(() => {
     let live = true;
-    fetch(endpoint, { cache: "no-store" })
-      .then(async (response) => {
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error);
+    activityRequest(endpoint)
+      .then((data) => {
         if (live) {
           setInfo(data);
           setLoadError("");
@@ -65,13 +62,7 @@ export function StaffApplication({ batch }: { batch: number }) {
     open = info?.state === "申请开放",
     final = saved && ["accepted", "rejected"].includes(saved.status);
   const change = async (method: string, body: unknown) => {
-    const response = await fetch(endpoint, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      }),
-      data = await response.json();
-    if (!response.ok) throw new Error(data.error);
+    const data = await activityRequest(endpoint, method, body);
     setInfo((previous) =>
       previous ? { ...previous, application: data.application } : previous,
     );
@@ -82,7 +73,7 @@ export function StaffApplication({ batch }: { batch: number }) {
       aria-busy={busy || (!info && !loadError)}
     >
       <header className={styles.header}>
-        <p className={styles.kicker}>STAFF / EXECUTION & PUBLICITY</p>
+        <p className={styles.kicker}>骨干招新</p>
         <h2>骨干申请与本人回执</h2>
         <SubmissionSteps />
       </header>
@@ -120,6 +111,17 @@ export function StaffApplication({ batch }: { batch: number }) {
         </p>
       )}
       {message && <p role="status">{message}</p>}
+      {info && !saved && <button type="button" disabled={busy} onClick={async () => {
+        if (busy) return;
+        setBusy(true);
+        try {
+          const latest = await activityRequest(endpoint);
+          if (latest.application) { setInfo(latest); setEditing(false); setMessage("已读取服务器保存的本人回执。"); }
+          else setMessage("当前未查到本人申请回执。已填写内容保留，请核对后再提交。");
+        } catch (cause) { setMessage((cause as Error).message); }
+        finally { setBusy(false); }
+      }}>刷新本人回执</button>}
+
       {saved && (
         <>
           <div className={styles.receipt}>
@@ -127,6 +129,7 @@ export function StaffApplication({ batch }: { batch: number }) {
               {staffStatusLabels[saved.status]} · 申请编号 {saved.id}
             </h3>
             {saved.feedback && <p>处理反馈：{saved.feedback}</p>}
+            <p className="muted">最近更新：{new Date(saved.updatedAt).toLocaleString("zh-CN")}</p>
             <dl className="account-details">
               {saved.questions
                 .filter((question) => question.type !== "description")

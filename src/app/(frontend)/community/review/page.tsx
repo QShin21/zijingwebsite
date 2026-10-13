@@ -8,6 +8,7 @@ import { cms } from "@/lib/content";
 import { canPublish } from "@/lib/rules";
 import { applicationContactConsentLabel, applicationContactConsentRequiredMessage } from "@/lib/community-status";
 import { decideAction } from "../actions";
+import { ClubFrame } from "../../_club/ClubPage";
 export default async function Review({
   searchParams,
 }: {
@@ -44,13 +45,14 @@ export default async function Review({
     : { docs: [] };
   const byId = new Map(applicants.docs.map((person) => [person.id, person]));
   return (
-    <>
+    <ClubFrame>
       <PageHeading
         title="社群管理员申请审核"
-        eyebrow="REVIEW QUEUE"
+        eyebrow="社群工作台"
         description="批准后初始化社群及独立任职，保留原平台角色。退回与拒绝需给出具体意见。微信建群和拉群由管理员人工完成。"
       />
       <section className="member-shell">
+        <p className="result-meta">当前待审核 {apps.totalDocs} 份 · 仅处理授权范围内的申请</p>
         <p role="status">
           {query.message || (query.done ? "审核结果已保存。" : "")}
         </p>
@@ -138,18 +140,20 @@ export default async function Review({
                   <label>审核意见（退回或拒绝必填）<textarea name="reviewNote" maxLength={1000} rows={3} /></label>
                   <p>名片展示：{contactAuthorized ? "申请人已同意展示微信名片作为进群联系方式" : "申请人尚未同意展示管理联系方式"}</p>
                   {!contactAuthorized && <p className="form-feedback">{applicationContactConsentRequiredMessage}。此记录尚未获得申请人同意，不能批准；请退回申请，由本人勾选“{applicationContactConsentLabel}”后重新提交。</p>}
-                  <SubmitButton className="button light" name="decision" value="approved" disabled={!complete || !contactAuthorized}>批准</SubmitButton>
-                  <SubmitButton className="button" name="decision" value="returned">退回补充</SubmitButton>
-                  <SubmitButton className="button light" name="decision" value="rejected">拒绝</SubmitButton>
+                  <div className="reaction-bar">
+                    <SubmitButton className="button" name="decision" value="approved" disabled={!complete || !contactAuthorized}>批准</SubmitButton>
+                    <SubmitButton className="button light" name="decision" value="returned">退回补充</SubmitButton>
+                    <SubmitButton className="button light" name="decision" value="rejected">拒绝</SubmitButton>
+                  </div>
                 </form>
               </article>
             );
           })
         ) : (
-          <p>目前没有待审核申请。</p>
+          <div className="empty"><h2>目前没有待审核申请</h2><p>新申请提交后会出现在这里。已处理结果保存在申请人的记录中。</p></div>
         )}
         <Pagination page={page} total={apps.totalPages} path="/community/review" />
       </section>
-    </>
+    </ClubFrame>
   );
 }

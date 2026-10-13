@@ -1,39 +1,30 @@
 .flow {
-  --flow-bg: var(--z-surface, #fffdf8);
-  --flow-text: var(--z-ink, #211e27);
-  --flow-muted: var(--z-muted, #625c68);
-  --flow-accent: var(--z-action, var(--z-purple, #6839ae));
-  --flow-line: var(--z-line, #d9d3dc);
-  --flow-soft: var(--z-paper, #f4f1ea);
-  --flow-selected: var(--z-tint, #eee7f4);
-  --flow-selected-line: #9a77ba;
-  --flow-control-line: color-mix(
-    in srgb,
-    var(--z-field-border, #8a8092) 75%,
-    var(--flow-text) 25%
-  );
-  --flow-on-accent: var(--z-action-ink, #fffdf8);
-  --flow-focus: var(--z-focus, #6839ae);
-  --flow-danger: var(--z-danger, #963447);
-  --flow-danger-bg: var(--z-danger-bg, #f9e9ec);
-  --flow-danger-line: var(--z-danger-line, #b0334f);
-  --flow-success: #2b4b20;
-  --flow-success-bg: #e8f0df;
-  --flow-success-line: #8caa72;
-  --flow-disabled-bg: var(--z-disabled-bg, #e5dfea);
-  --flow-disabled-text: color-mix(
-    in srgb,
-    var(--z-disabled-ink, #6f6479) 85%,
-    var(--flow-text) 15%
-  );
-  --flow-disabled-line: #b1a8b8;
-  --flow-loading: linear-gradient(90deg, #e6dfee, #cbbddd, #e6dfee);
+  --flow-bg: var(--z-surface);
+  --flow-text: var(--z-ink);
+  --flow-muted: var(--z-muted);
+  --flow-accent: var(--z-action);
+  --flow-line: var(--z-line);
+  --flow-soft: var(--z-paper);
+  --flow-selected: var(--z-tint);
+  --flow-selected-line: var(--z-line);
+  --flow-control-line: var(--z-field-border);
+  --flow-on-accent: var(--z-action-ink);
+  --flow-focus: var(--z-focus);
+  --flow-danger: var(--z-danger);
+  --flow-danger-bg: var(--z-danger-bg);
+  --flow-danger-line: var(--z-danger);
+  --flow-success: var(--z-success);
+  --flow-success-bg: var(--z-surface);
+  --flow-success-line: var(--z-line);
+  --flow-disabled-bg: var(--z-paper);
+  --flow-disabled-text: var(--z-muted);
+  --flow-disabled-line: var(--z-line);
+  --flow-loading: var(--z-line);
   color: var(--flow-text);
   background: var(--flow-bg) !important;
   border: 1px solid var(--flow-line) !important;
   border-radius: var(--z-radius, 6px);
   padding: clamp(18px, 3vw, 32px) !important;
-  color-scheme: light;
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -41,11 +32,11 @@
   color: var(--flow-text);
 }
 .flow h2 {
-  font-size: clamp(28px, 3vw, 36px);
+  font-size: clamp(22px, 2.5vw, 28px);
   line-height: 1.4;
 }
 .flow :is(p, small) {
-  line-height: 1.8;
+  line-height: 1.7;
 }
 .flow :global(.muted),
 .flow small {
@@ -116,7 +107,7 @@
   color: var(--flow-accent);
   font: 11px
     var(--z-mono, "SFMono-Regular", Consolas, "Liberation Mono", monospace);
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   margin-bottom: 12px;
 }
 .steps {
@@ -161,7 +152,7 @@
   border-radius: var(--z-radius, 6px);
   background: var(--flow-soft);
   color: var(--flow-muted);
-  font-size: 13px;
+  font-size: 14px;
   margin: 18px 0;
 }
 .notice p:last-child {
@@ -193,7 +184,7 @@
 .receipt {
   padding: 20px;
   border: 1px solid var(--flow-success-line);
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--flow-success-bg);
   margin: 20px 0;
 }
@@ -389,39 +380,6 @@
   }
 }
 
-/* No system color-scheme media query: an unset root uses the light palette. */
-:global(html[data-z-theme="dark"]) .flow {
-  --flow-bg: var(--z-surface, #1c1922);
-  --flow-text: var(--z-ink, #f3eef7);
-  --flow-muted: var(--z-muted, #bfb5cc);
-  --flow-accent: var(--z-action, #c6a5ef);
-  --flow-line: var(--z-line, #4b4058);
-  --flow-soft: #1c1822;
-  --flow-selected: var(--z-tint, #292135);
-  --flow-selected-line: #9d79c2;
-  --flow-control-line: color-mix(
-    in srgb,
-    var(--z-field-border, #9c8dac) 75%,
-    var(--flow-text) 25%
-  );
-  --flow-on-accent: var(--z-action-ink, #22152f);
-  --flow-focus: var(--z-focus, #edb353);
-  --flow-danger: var(--z-danger, #ffbac6);
-  --flow-danger-bg: var(--z-danger-bg, #321d27);
-  --flow-danger-line: var(--z-danger-line, #e590a4);
-  --flow-success: #d7edbd;
-  --flow-success-bg: #293523;
-  --flow-success-line: #839d6a;
-  --flow-disabled-bg: var(--z-disabled-bg, #38323f);
-  --flow-disabled-text: color-mix(
-    in srgb,
-    var(--z-disabled-ink, #b8a9c5) 85%,
-    var(--flow-text) 15%
-  );
-  --flow-disabled-line: #75697f;
-  --flow-loading: linear-gradient(90deg, #342c40, #614b76, #342c40);
-  color-scheme: dark;
-}
 .flow :is(input, select, textarea):disabled {
   color: var(--flow-disabled-text);
   background: var(--flow-disabled-bg);
@@ -468,3 +426,13 @@
 .flow :global(.questionnaire-counter) {
   color: var(--flow-muted);
 }
+
+.compact h2 { font-size: 21px; }
+.compact .header { margin-bottom: 14px; padding-bottom: 14px; }
+.compact { padding: 20px !important; }
+.compact .notice { padding: 0; border: 0; background: transparent; }
+.compact .steps { display: none; }
+.compact .receipt { border: 0; padding: 0; }
+.compact .receipt > h3 { font-size: 20px; }
+.compact .receipt dl { display: none; }
+.compact > a { width: 100%; }

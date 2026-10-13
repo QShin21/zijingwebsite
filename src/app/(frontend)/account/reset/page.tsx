@@ -1,8 +1,7 @@
-import { SubmitButton } from "@/components/SubmitButton";
-import { MemberLayout, FormStep } from "@/components/MemberUI";
-import Link from "next/link";
+import { MemberLayout } from "@/components/MemberUI";
 import { PageHeading } from "@/components/PageHeading";
-import { resetAction, sendCodeAction } from "../actions";
+import { PasswordResetForm } from "@/components/account-pages/AuthForms";
+export const metadata = { title: "重设密码" };
 export default async function Reset({
   searchParams,
 }: {
@@ -13,8 +12,8 @@ export default async function Reset({
     <>
       <PageHeading
         title="重设密码"
-        eyebrow="ACCOUNT RECOVERY"
-        description="通过注册邮箱的六位验证码重设密码；重设后请重新登录。"
+        eyebrow="我的紫荆 · 账号恢复"
+        description="通过注册邮箱的六位验证码重设密码；更新后使用新密码登录。"
       />
       <MemberLayout
         title="找回账号，继续热爱。"
@@ -25,58 +24,7 @@ export default async function Reset({
           "保存后使用新密码重新登录",
         ]}
       >
-        <p role="status">
-          {query.message || (query.sent ? "如果账户存在，验证码已发送。" : "")}
-        </p>
-        <form className="member-form" action={sendCodeAction}>
-          <FormStep number="01" title="获取邮箱验证码" />
-          <input type="hidden" name="purpose" value="password" />
-          <label>
-            注册邮箱
-            <input name="email" type="email" required autoComplete="email" />
-          </label>
-          <SubmitButton className="button">获取验证码</SubmitButton>
-        </form>
-        <form className="member-form" action={resetAction}>
-          <FormStep number="02" title="验证并设置新密码" />
-          <label>
-            注册邮箱
-            <input name="email" type="email" required autoComplete="email" />
-          </label>
-          <label>
-            六位验证码
-            <input
-              name="code"
-              inputMode="numeric"
-              pattern="[0-9]{6}"
-              maxLength={6}
-              required
-              autoComplete="one-time-code"
-            />
-          </label>
-          <label>
-            新密码（至少 8 位）
-            <input
-              name="password"
-              type="password"
-              minLength={8}
-              required
-              autoComplete="new-password"
-            />
-          </label>
-          <label>
-            确认新密码
-            <input
-              name="confirm"
-              type="password"
-              minLength={8}
-              required
-              autoComplete="new-password"
-            />
-          </label>
-          <SubmitButton className="button light">更新密码</SubmitButton>
-        </form>
-        <Link href="/login">返回登录</Link>
+        <PasswordResetForm message={query.message} sent={Boolean(query.sent)} />
       </MemberLayout>
     </>
   );

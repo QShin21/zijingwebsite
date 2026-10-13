@@ -21,6 +21,7 @@ export function CommunityApplicationForm({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [consentError, setConsentError] = useState("");
+  const [selectedGame, setSelectedGame] = useState(String(initial?.game ?? ""));
   const consent = useRef<HTMLInputElement>(null);
   const pending = useRef(false);
   const consentId = useId();
@@ -38,6 +39,7 @@ export function CommunityApplicationForm({
   return (
     <form
       className="member-form application-form"
+      aria-busy={!ready || busy}
       noValidate
       onSubmit={async (event) => {
         event.preventDefault();
@@ -91,10 +93,10 @@ export function CommunityApplicationForm({
             required
             pattern="\+?[0-9]{6,20}"
             maxLength={21}
-            aria-describedby="phone-hint"
+            aria-describedby={`${consentId}-phone-hint`}
           />
         </label>
-        <p id="phone-hint" className="field-hint">
+        <p id={`${consentId}-phone-hint`} className="field-hint">
           填写可联系到本人的手机号，国际号码可带 + 国家代码。
         </p>
         <label>
@@ -104,16 +106,20 @@ export function CommunityApplicationForm({
             type="file"
             accept="image/png,image/jpeg,image/webp"
             required={!initial}
-            aria-describedby="qr-hint"
+            aria-describedby={`${consentId}-qr-hint`}
+            onChange={(event) => {
+              const file = event.currentTarget.files?.[0];
+              event.currentTarget.setCustomValidity(file && (file.size > 2 * 1024 * 1024 || !["image/png", "image/jpeg", "image/webp"].includes(file.type)) ? "请上传 2 MB 以内的 PNG、JPEG 或 WebP 微信名片二维码。" : "");
+            }}
           />
         </label>
-        <p id="qr-hint" className="field-hint">
+        <p id={`${consentId}-qr-hint`} className="field-hint">
           上传微信个人名片二维码，支持 PNG、JPEG、WebP，最大 2
           MB。请确保二维码清晰可扫描。修改申请时不选文件可保留原名片。
         </p>
         <label>
           已有游戏（申请新游戏则不选）
-          <select name="game" defaultValue={initial?.game ?? ""}>
+          <select name="game" value={selectedGame} onChange={(event) => setSelectedGame(event.currentTarget.value)}>
             <option value="">申请建立新游戏社群</option>
             {games.map((game) => (
               <option value={game.id} key={game.id}>
@@ -124,7 +130,7 @@ export function CommunityApplicationForm({
         </label>
         <label>
           新游戏名称（选择已有游戏后可留空）
-          <input name="proposedGame" maxLength={80} defaultValue={initial?.proposedGame ?? ""} />
+          <input name="proposedGame" maxLength={80} required={!selectedGame} defaultValue={initial?.proposedGame ?? ""} />
         </label>
         <label>
           申请说明（至少 10 字）

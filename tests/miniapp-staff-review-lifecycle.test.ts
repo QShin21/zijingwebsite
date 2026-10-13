@@ -199,10 +199,15 @@ describe("骨干审核生命周期修复", () => {
     expect(h.page.data.message).toContain("暂不可确认"); expect(h.page.data.message).not.toContain("已保存"); expect(h.posts()).toHaveLength(1); expect(h.reads()).toHaveLength(2);
   });
 
-  it("主题元数据以外保持冻结版本WXML，所有生命周期保护在Page中执行", () => {
-    const wxml = "miniprogram/src/pages/staff-review/index.wxml";
+  it("重构后的审核界面保持原输入、决定、加载锁与分页合同", () => {
+    const current = readFileSync("miniprogram/src/pages/staff-review/index.wxml", "utf8");
     expect(createHash("sha256").update(frozen).digest("hex")).toBe("6765c720c65245f90e356ef1bf2886b05ce39ce0a7049b7701f41b7dde4aeebe");
     expect(createHash("sha256").update(frozenWXML).digest("hex")).toBe("92dc5e04a8d18118ada86823df5db28644fb439755f04c4da32b2823e0527c6f");
-    expect(readFileSync(wxml, "utf8").replace(/ placeholder-style="color:\{\{theme === 'dark' \? '#aaa5b9' : '#6c6179'\}\}"/g, "").replace('<page-meta page-style="{{themePageStyle}}" />\n', "")).toBe(frozenWXML);
+    const interactiveContract = (source: string) => [...source.matchAll(/<(?:button|input|textarea|picker)\b(?:[^>"']|"[^"]*"|'[^']*')*>/g)].map(match => {
+      const attributes = Object.fromEntries([...match[0].matchAll(/([\w:-]+)="([^"]*)"/g)].map(item => [item[1], item[2]]));
+      return Object.fromEntries(Object.entries(attributes).filter(([key]) => /^(?:bind|data-)/.test(key) || ["disabled", "loading", "value", "range", "range-key", "maxlength", "wx:if", "wx:else"].includes(key)));
+    });
+    expect(interactiveContract(current)).toEqual(interactiveContract(frozenWXML));
+    for (const binding of ['data="{{loading,error,needsLogin}}"', 'wx:if="{{!loading && !error && !needsLogin}}"', 'wx:for="{{docs}}"', 'wx:for="{{item.rows}}"', 'wx:if="{{item.allowed.length}}"', 'range="{{item.allowed}}"', 'value="{{item.feedbackDraft}}"', '{{answer.answer}}', 'wx:if="{{pages > 1}}"', 'disabled="{{busy || page <= 1}}"', 'disabled="{{busy || page >= pages}}"']) expect(current).toContain(binding);
   });
 });

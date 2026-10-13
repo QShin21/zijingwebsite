@@ -7,7 +7,8 @@ import { CommunityPager, pageNumber } from "@/components/CommunityPager";
 import { CommunityActivityComposer } from "@/components/CommunityActivityComposer";
 import { StaffRecruitmentNotice } from "@/components/StaffRecruitmentNotice";
 import { EmptyState } from "@/components/activity-pages/PublicPages";
-import styles from "@/components/activity-pages/ActivityPages.module.css";
+import { ClubFrame } from "../../../_club/ClubPage";
+import styles from "../../../_club/ClubPages.module.css";
 
 export default async function Updates({
   params,
@@ -41,20 +42,20 @@ export default async function Updates({
     },
   });
   return (
-    <section className={`community-page ${styles.page} ${styles.community}`}>
-      <header className={styles.hero}>
+    <ClubFrame className={styles.communityBody}><section className="community-page">
+      <header className={styles.subHeader}>
         <div>
-          <p className={styles.eyebrow}>COMMUNITY / WHAT’S ON</p>
+          <p className={styles.kicker}>社群日程</p>
           <h2>活动与通知</h2>
           <p>查看本社群的活动安排与参与说明，找到下一次相聚的机会。</p>
         </div>
       </header>
       <p role="status">{query.message}</p>
       <StaffRecruitmentNotice />
-      <div className={styles.noticeList}>
+      <ul className={styles.readingList}>
         {entries.docs.map((post) => (
-          <article className={styles.notice} key={post.id}>
-            <div className={styles.noticeDate}>
+          <li key={post.id}>
+            <div className={styles.recordDate}>
               {formatDate(post.createdAt)}
             </div>
             <div>
@@ -71,9 +72,9 @@ export default async function Updates({
                 阅读全文 ↗
               </Link>
             </div>
-          </article>
+          </li>
         ))}
-      </div>
+      </ul>
       {!entries.docs.length && (
         <EmptyState title="暂无活动与通知">
           <p>
@@ -92,6 +93,6 @@ export default async function Updates({
       {managesGame(user, game.id) && (
         <CommunityActivityComposer game={game.id} />
       )}
-    </section>
+    </section></ClubFrame>
   );
 }

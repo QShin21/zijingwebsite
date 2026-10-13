@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import styles from "./account-pages/AccountPages.module.css";
 
 const domains = [
   { value: "mails.tsinghua.edu.cn", label: "学生邮箱" },
@@ -13,9 +14,9 @@ export function RegistrationEmail() {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   return (
-    <div className="registration-email">
+    <div className={styles.field}>
       <label htmlFor={`${id}-prefix`}>清华邮箱</label>
-      <div className="email-address-row">
+      <div className={styles.emailRow}>
         <input
           id={`${id}-prefix`}
           name="emailPrefix"
@@ -32,7 +33,7 @@ export function RegistrationEmail() {
           @
         </span>
         <div
-          className="email-domain"
+          className={styles.emailDomain}
           onBlur={(event) => {
             if (!event.currentTarget.contains(event.relatedTarget))
               setOpen(false);
@@ -97,7 +98,7 @@ export function RegistrationEmail() {
               id={`${id}-domains`}
               role="listbox"
               aria-label="常用邮箱后缀"
-              className="email-domain-options"
+              className={styles.emailOptions}
             >
               {domains.map((option, index) => (
                 <button
@@ -121,7 +122,7 @@ export function RegistrationEmail() {
           )}
         </div>
       </div>
-      <span id={`${id}-hint`} className="field-hint">
+      <span id={`${id}-hint`} className={styles.hint}>
         后缀可选择学生或校友邮箱，也可直接输入其他清华邮箱后缀。
       </span>
     </div>

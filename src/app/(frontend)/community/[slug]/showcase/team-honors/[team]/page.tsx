@@ -46,9 +46,9 @@ export default async function TeamHonorArchive({
           </Link>
         </nav>
         <header className={styles.archiveHeading}>
-          <p className={styles.kicker}>{game.title} / HONOR ARCHIVE</p>
+          <p className={styles.kicker}>{game.title} · 队伍年鉴</p>
           <h2>{archive.team.title + " · 荣誉档案"}</h2>
-          <p>{archive.records.length} 条已批准荣誉，按赛事日期汇总。</p>
+          <p>{archive.records.length} 条已批准荣誉，按赛事日期汇总。新增成绩经核验后更新本档案；仅展示当前可见的已批准记录。</p>
         </header>
         <TeamHonorArchiveContents archive={archive} user={user} />
       </section>

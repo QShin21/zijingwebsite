@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { bySlug, cms } from "@/lib/content";
 import { canReviewPromotion, managesGame, formatDate } from "@/lib/rules";
-import styles from "@/components/activity-pages/ActivityPages.module.css";
+import { ClubFrame } from "../../../../_club/ClubPage";
+import styles from "../../../../_club/ClubPages.module.css";
 export default async function Update({
   params,
   searchParams,
@@ -36,15 +37,15 @@ export default async function Update({
     .catch(() => null);
   if (!post || Number(post.game) !== game.id) notFound();
   return (
-    <article className={`${styles.page} ${styles.community} ${styles.article}`}>
-      <nav className={styles.breadcrumbs} aria-label="社群活动导航">
+    <ClubFrame className={styles.communityBody}><article className={styles.article}>
+      <nav className="signup-tools" aria-label="社群活动导航">
         <Link href={`/community/${slug}/updates`}>← 活动与通知</Link>
       </nav>
-      <p className={styles.eyebrow}>
-        {post.category === "event" ? "COMMUNITY EVENT" : "COMMUNITY NOTICE"}
+      <p className={styles.kicker}>
+        {post.category === "event" ? "社群活动" : "社群通知"}
       </p>
       <h2>{post.title}</h2>
-      <p className={styles.meta}>
+      <p className={styles.recordMeta}>
         {post.authorName} · {formatDate(post.createdAt)}
       </p>
       <p className="preserve thread-body">{post.body}</p>
@@ -60,6 +61,6 @@ export default async function Update({
           申请社团级展示
         </Link>
       )}
-    </article>
+    </article></ClubFrame>
   );
 }

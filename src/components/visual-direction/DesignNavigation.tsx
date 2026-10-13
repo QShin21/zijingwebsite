@@ -21,8 +21,7 @@ export function DesignNavigation({
   const pathname = usePathname(),
     menu = useRef<HTMLDetailsElement>(null),
     previous = useRef(pathname);
-  const home = preview ? "/design-preview" : "/",
-    apply = preview ? "/design-preview/apply" : "/community/apply";
+  const home = preview ? "/design-preview" : "/";
   const items = navigation ?? [
     { path: home, label: "首页" },
     { path: "/events", label: "社团活动" },
@@ -69,6 +68,11 @@ export function DesignNavigation({
   }, []);
   const active = (path: string) =>
     pathname === path ||
+    (path === "/teams" && pathname?.startsWith("/honors")) ||
+    (path === "/news" &&
+      ["/announcements", "/gallery"].some(
+        (root) => pathname === root || pathname?.startsWith(root + "/"),
+      )) ||
     (path !== "/" &&
       path !== "/design-preview" &&
       pathname?.startsWith(path + "/"));
@@ -93,16 +97,14 @@ export function DesignNavigation({
           href={signedIn ? "/account" : "/login"}
           onClick={close}
         >
-          {signedIn ? "我的紫荆" : "登录"}
+          {signedIn ? "个人中心" : "登录"}
         </Link>
-        <Link
-          className="z-button z-small"
-          href={signedIn ? (preview ? apply : "/join") : "/register"}
-          onClick={close}
-        >
-          {signedIn ? (preview ? "参与组织" : "加入紫荆") : "注册"}
-          <Icon name="diagonal" />
-        </Link>
+        {!signedIn && (
+          <Link className="z-button z-small" href="/register" onClick={close}>
+            注册
+            <Icon name="diagonal" />
+          </Link>
+        )}
         <details className="z-mobile-menu" ref={menu} suppressHydrationWarning>
           <summary aria-label="打开导航">
             菜单 <Icon name="plus" />
@@ -120,8 +122,18 @@ export function DesignNavigation({
               </Link>
             ))}
             {signedIn && (
-              <Link href={apply} onClick={close}>
-                社群管理员申请
+              <Link href="/join" onClick={close}>
+                参与与招新
+              </Link>
+            )}
+            {preview && (
+              <Link href="/design-preview/system" onClick={close}>
+                设计系统样张
+              </Link>
+            )}
+            {!signedIn && (
+              <Link href="/register" onClick={close}>
+                注册账号
               </Link>
             )}
             <Link href={signedIn ? "/account" : "/login"} onClick={close}>

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { PageHeading } from "@/components/PageHeading";
 import { SubmitButton } from "@/components/SubmitButton";
 import { cms, list } from "@/lib/content";
-import { applicationLabels } from "@/lib/community-status";
+import { applicationLabels, applicationContactConsentLabel } from "@/lib/community-status";
 import { relationID } from "@/lib/rules";
 import {
   withdrawApplicationAction,
@@ -76,7 +76,7 @@ export default async function Apply({
     <ClubFrame>
       <PageHeading
         title="申请成为社群管理员"
-        eyebrow="BUILD A COMMUNITY"
+        eyebrow="社群组织"
         description="申请组织已有游戏社群或创建新群。批准后获得对应社群任职，保留原平台角色；微信群由管理员人工建立和拉群。"
       />
       <ClubSteps
@@ -115,7 +115,7 @@ export default async function Apply({
               className={styles.formSurface}
               aria-labelledby="application-form-title"
             >
-              <p className={styles.kicker}>YOUR COMMUNITY STARTS HERE</p>
+              <p className={styles.kicker}>管理员申请</p>
               <h2 id="application-form-title">
                 {initial ? "修改申请资料" : "填写申请资料"}
               </h2>
@@ -200,7 +200,7 @@ export default async function Apply({
                           name="contactConsent"
                           defaultChecked={app.contactConsent ?? false}
                         />
-                        允许在任期间向登录成员展示微信名片
+                        {applicationContactConsentLabel}
                       </label>
                       <SubmitButton>保存名片与展示设置</SubmitButton>
                     </form>

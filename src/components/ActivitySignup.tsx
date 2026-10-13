@@ -8,6 +8,9 @@ import { formatAnswer } from "@/lib/questionnaire-model";
 import { Questionnaire } from "./Questionnaire";
 import styles from "./activity-pages/ApplicationFlow.module.css";
 import { SubmissionSteps } from "./activity-pages/SubmissionSteps";
+import { activityRequest } from "./activity-pages/client-request";
+import pageStyles from "./activity-pages/ActivityPages.module.css";
+import workStyles from "./activity-pages/QuestionnaireSurface.module.css";
 type Receipt = {
   id: number;
   createdAt: string;
@@ -34,15 +37,7 @@ export async function signupRequest(
   method = "GET",
   data?: unknown,
 ) {
-  const response = await fetch(url, {
-    method,
-    cache: "no-store",
-    headers: { "Content-Type": "application/json" },
-    ...(data ? { body: JSON.stringify(data) } : {}),
-  });
-  const value = await response.json();
-  if (!response.ok) throw new Error(value.error || "请求未完成，请重试");
-  return value;
+  return activityRequest(url, method, data);
 }
 function ReceiptView({ receipt }: { receipt: Receipt }) {
   return (
@@ -67,7 +62,7 @@ function ReceiptView({ receipt }: { receipt: Receipt }) {
     </div>
   );
 }
-export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
+export function ActivitySignup({ kind, id, compact = false }: { kind: string; id: number; compact?: boolean }) {
   const endpoint = `/api/activities/${kind}/${id}/signup`,
     [info, setInfo] = useState<Info | null>(null),
     [error, setError] = useState(""),
@@ -132,11 +127,11 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
     return null;
   return (
     <section
-      className={`panel activity-signup ${styles.flow}`}
+      className={`panel activity-signup ${styles.flow} ${compact ? styles.compact : ""}`}
       aria-busy={busy}
     >
       <header className={styles.header}>
-        <p className={styles.kicker}>TAKE PART / APPLICATION</p>
+        <p className={styles.kicker}>参与活动</p>
         <h2>{info.form.title || "活动报名"}</h2>
         <SubmissionSteps />
       </header>
@@ -145,6 +140,19 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
           <Link href={`/activities/${kind}/${id}/manage`}>管理报名问卷 ↗</Link>
         </p>
       )}
+      {!compact && <div className={styles.actions}><button type="button" disabled={busy} onClick={async () => {
+        if (busy) return;
+        setBusy(true);
+        try {
+          const latest = await signupRequest(endpoint);
+          if (latest.signup) { setInfo(latest); setEditing(false); setSavedMessage("已读取服务器保存的本人回执。"); }
+          else { setSavedMessage("当前未查到已保存的本人回执。已填写内容保留，请核对后再提交。"); }
+          setError("");
+        } catch (cause) { setError((cause as Error).message); }
+        finally { setBusy(false); }
+      }}>刷新报名状态与本人回执</button></div>}
+      {savedMessage && <p role="status">{savedMessage}</p>}
+      {error && !editing && <p className={styles.error} role="alert">{error}</p>}
       {!info.canManage && info.canViewSignups && (
         <p>
           <Link href={`/activities/${kind}/${id}/signups`}>
@@ -159,7 +167,7 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
             <p>{info.form.completionMessage || "已收到你的报名信息。"}</p>
             <ReceiptView receipt={info.signup} />
           </div>
-          {info.state === "报名开放" && info.loggedIn ? (
+          {compact ? <Link className="button" href={`/activities/${kind}/${id}/fill`}>查看本人回执{info.state === "报名开放" ? "与修改作答" : ""}</Link> : info.state === "报名开放" && info.loggedIn ? (
             <button
               type="button"
               className="button"
@@ -173,7 +181,6 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
           ) : (
             <p className="muted">{info.state}，暂不能修改作答。</p>
           )}
-          <p role="status">{savedMessage}</p>
         </>
       ) : (
         <>
@@ -232,6 +239,8 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
               <Link className="button" href="/login">
                 登录后填写报名
               </Link>
+            ) : compact ? (
+              <Link className="button" href={`/activities/${kind}/${id}/fill`}>填写报名问卷 →</Link>
             ) : (
               <Questionnaire
                 key={`${info.version}:${editing ? info.signup?.updatedAt : "new"}`}
@@ -241,6 +250,7 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
                 submitLabel={editing ? "提交修改" : "提交并确认报名"}
                 busy={busy}
                 onSubmit={async (answers) => {
+                  if (busy) return;
                   setBusy(true);
                   try {
                     const result = await signupRequest(
@@ -294,6 +304,7 @@ export function SignupManager({
     setBusy(true);
     try {
       const r = await signupRequest(endpoint + "?mode=entries&page=" + n);
+      setMessage("");
       setEntries(r.docs);
       setPage(n);
       setPages(r.totalPages);
@@ -305,9 +316,12 @@ export function SignupManager({
     }
   }
   return (
-    <section className="signup-management">
-      <h1>{info?.title || "活动报名管理"}</h1>
+    <section className={`${pageStyles.page} ${workStyles.surface} signup-management`}>
+      <nav className={pageStyles.breadcrumbs} aria-label="问卷管理导航"><Link href="/activities">问卷工作台</Link><span aria-hidden="true">/</span><span>{readOnly ? "报名与统计" : "编辑问卷"}</span></nav>
+      <header className={pageStyles.hero}><div><p className={pageStyles.eyebrow}>{readOnly ? "报名资料" : "问卷管理"}</p><h1>{info?.title || "活动报名管理"}</h1><p>编辑、名单读取与导出分别依照当前活动范围授权。历史答卷保留提交时的题目和答案。</p></div></header>
       <p role="status">{message}</p>
+      {!info && !message && <p role="status">正在读取问卷与当前权限…</p>}
+      {!info && message && <button type="button" onClick={() => { setMessage(""); signupRequest(endpoint + (readOnly ? "?mode=view" : "?mode=manage")).then(setInfo).catch(e => setMessage(e.message)); }}>重新加载问卷</button>}
       {info && (
         <div className="signup-tools">
           <Link href={`/activities/${kind}/${id}/fill`}>打开填写页</Link>
@@ -364,7 +378,7 @@ export function SignupManager({
           )}
           {readOnly && (
             <p className="panel">
-              此入口仅查看报名与统计；导出按单独授权开放。
+              当前为只读资料入口，可查看报名与统计；导出按单独授权开放。
             </p>
           )}
           {info.canViewSignups && (

@@ -17,8 +17,9 @@ export default async function Batch({
 }) {
   const { id } = await params;
   const p = await cms(),
-    batchID = Number(id),
-    batch = await publicStaffBatch(p, batchID).catch(() => null);
+    batchID = Number(id);
+  if (!Number.isSafeInteger(batchID) || batchID <= 0) notFound();
+  const batch = await publicStaffBatch(p, batchID).catch(() => null);
   const { user } = await p.auth({ headers: await headers() });
   const receipt = !batch
     ? (await ownStaffReceiptHeaders(p, user, batchID).catch(() => null))
@@ -34,7 +35,7 @@ export default async function Batch({
       </nav>
       <header className={styles.hero}>
         <div>
-          <p className={styles.eyebrow}>EXECUTION / PUBLICITY</p>
+          <p className={styles.eyebrow}>执行部 · 宣传部</p>
           <h1>{batch?.title ?? receipt!.batchTitle}</h1>
           <p>
             {batch

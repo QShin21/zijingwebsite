@@ -333,7 +333,7 @@ describe('原生简介真实Page/HTTP：入口与可重试状态', () => {
     const h = harness({ loggedIn: false }); h.page.onLoad({ team: '51' }); await h.page.onShow();
     expect(h.requests).toHaveLength(0); expect(h.page.data).toMatchObject({ needsLogin: true, loading: false, profiles: [] });
     h.page.login(); expect(h.wx.navigateTo).toHaveBeenCalledWith({ url: '/pages/auth/index?mode=login' });
-    h.page.back(); expect(h.wx.navigateBack).toHaveBeenCalledWith({ delta: 1 });
+    h.page.back(); expect(h.wx.navigateBack).toHaveBeenCalledWith(expect.objectContaining({ delta: 1, fail: expect.any(Function) }));
   });
 
   it.each([401, 403, 404, 500, 'network'])('%s读取失败显示可重试状态，不猜权限或请求成员/原始集合', async failure => {

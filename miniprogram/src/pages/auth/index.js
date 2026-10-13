@@ -45,7 +45,7 @@ Page(withVisualTheme({
         session.save(result); this.setData({ password: '', confirm: '', code: '' });
         wx.showToast({ title: '登录成功', icon: 'success' });
         const stack = getCurrentPages();
-        if (stack.length > 1) wx.navigateBack(); else navigation.go('account');
+        if (stack.length > 1) wx.navigateBack({ fail() { navigation.go('account'); } }); else navigation.go('account');
       } else {
         if (!this.data.bridge) throw new Error('注册与重设密码需要更新网站服务接口');
         if (values.password.length < 8 || values.password !== values.confirm) throw new Error('密码至少 8 位，两次输入需一致');

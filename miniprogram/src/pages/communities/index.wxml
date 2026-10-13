@@ -1,16 +1,16 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
-<view class="page mini-page communities-page"><text class="eyebrow">FIND YOUR PEOPLE</text><text class="title">加入我们</text><text class="subtitle">选择游戏社群，查看授权的管理员名片，在微信中主动加好友并等待人工拉群。</text>
+<view class="page mini-page communities-page"><view class="page-heading"><text class="eyebrow">紫荆社群</text><text class="title">找到一起玩的伙伴</text><text class="subtitle">按游戏选择社群，联系在任管理员，在微信中手动添加好友、等待人工拉群。</text></view>
   <template is="feedback" data="{{loading, needsLogin}}" />
   <block wx:if="{{!needsLogin}}">
     <view wx:if="{{error}}"><text class="error">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{loading}}">重试社群列表</button></view>
     <view class="section-head section"><text class="section-title">游戏社群</text><button class="plain" bindtap="applications">我的管理员申请 →</button></view>
-    <button wx:for="{{docs}}" wx:key="id" class="section card content-link" bindtap="openCommunity" data-doc="{{item}}" hover-class="pressed"><image wx:if="{{item.coverImage}}" class="card-image" src="{{item.coverImage.url}}" mode="aspectFill" /><view class="card-body"><view class="row"><text class="community-title">{{item.title}}</text><text class="more">↗</text></view><text wx:if="{{item.summary}}" class="subtitle">{{item.summary}}</text><text class="community-hint">社群名片与进群进度 · 社群活动与通知 · 社群风采</text></view></button>
+    <button wx:for="{{docs}}" wx:key="id" class="content-link directory-row community-entry" bindtap="openCommunity" data-doc="{{item}}" hover-class="pressed"><text class="directory-index">{{index+1}}</text><view class="directory-main"><text class="directory-title">{{item.title}}</text><text wx:if="{{item.summary}}" class="muted">{{item.summary}}</text><image wx:if="{{item.coverImage}}" class="card-image entry-image" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt || item.title}}" /><text class="field-note">联系管理员 · 活动通知 · 社群风采</text></view><text class="directory-arrow">→</text></button>
     <view wx:if="{{!loading && !docs.length && !error}}" class="empty"><text>暂未开放游戏社群</text><text class="muted">已有社群公开后会出现在这里，也可申请参与组织。</text></view>
     <button wx:if="{{hasMore}}" class="plain" bindtap="onReachBottom" disabled="{{loading}}" loading="{{loading}}">加载更多</button>
-    <view class="section panel"><text class="section-title">申请参与社群组织</text><text class="subtitle">可以申请新建游戏社群，或参与已有社群管理。查看、识别名片和批准申请均不会自动进微信群。</text><button class="secondary section" bindtap="apply">申请社群管理员 →</button></view>
+    <view class="section panel community-note"><text class="section-title">申请参与社群组织</text><text class="subtitle">可以申请新建游戏社群，或参与已有社群管理。查看、识别名片和批准申请均不会自动进微信群。</text><button class="secondary section" bindtap="apply">申请社群管理员 →</button></view>
   </block>
-  <view class="section panel"><text class="section-title">社团骨干招新</text><text class="subtitle">全社团共用同一批次申请。从主页和各个社群入口进入，可查看同一份申请与回执。</text><button class="secondary section" bindtap="staff">招新批次与我的申请 →</button>
+  <view class="section panel community-note"><text class="section-title">社团骨干招新</text><text class="subtitle">全社团共用同一批次申请。从主页和各个社群入口进入，可查看同一份申请与回执。</text><button class="secondary section" bindtap="staff">招新批次与我的申请 →</button>
     <view wx:for="{{staffBatches}}" wx:key="id" class="staff-row"><view class="row"><text>{{item.title}}</text><text class="badge">{{item.state}}</text></view><text wx:if="{{item.description}}" class="muted">{{item.description}}</text><button class="plain" bindtap="applyStaff" data-id="{{item.id}}">查看批次与申请状态 →</button></view>
   </view>
   <view class="section"><text class="section-title">社团展示</text><text class="subtitle">经审批升推的社群活动、通知与风采。</text>

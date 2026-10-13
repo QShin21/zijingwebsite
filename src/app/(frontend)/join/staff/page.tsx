@@ -4,7 +4,6 @@ import { cms, fixed, list } from "@/lib/content";
 import { Prose, Cards, Pagination } from "@/components/Content";
 import {
   EmptyState,
-  SignalGraphic,
 } from "@/components/activity-pages/PublicPages";
 import styles from "@/components/activity-pages/ActivityPages.module.css";
 import { formatDate, relationID } from "@/lib/rules";
@@ -47,14 +46,14 @@ export default async function Staff({
     <div className={`${styles.page} ${styles.staff}`}>
       <header className={styles.hero}>
         <div>
-          <p className={styles.eyebrow}>STAFF / OPEN CALL</p>
-          <h1>从想法，到现场。</h1>
+          <p className={styles.eyebrow}>一起做事</p>
+          <h1>骨干招新</h1>
           <p>
             执行部 /
             宣传部骨干招新。参与执行与宣传工作，具体岗位与安排以批次说明为准。
           </p>
         </div>
-        <SignalGraphic label="EXECUTION / PUBLICITY" />
+        {receipts && receipts.totalDocs > 0 && <Link href="#my-staff-receipts">查看本人回执 →</Link>}
       </header>
       <section className="member-shell">
         <p>
@@ -93,7 +92,7 @@ export default async function Staff({
         </div>
         {receipts && receipts.totalDocs > 0 && (
           <>
-            <h2>我的骨干申请回执</h2>
+            <h2 id="my-staff-receipts">我的骨干申请回执</h2>
             <p>已提交记录保留原批次标题；批次撤下后仍可从此查看本人回执。</p>
             <div className="community-list">
               {receipts.docs.map((receipt) => (

@@ -59,7 +59,7 @@ export default async function Recruitment({
     <ClubFrame>
       <PageHeading
         title="代表队招新与我的记录"
-        eyebrow="PLAY AS A TEAM"
+        eyebrow="代表队选拔"
         description="填写游戏、位置、经历、训练时间和一种联系方式，由本社群管理员人工选拔。"
       />
       <ClubSteps
@@ -93,7 +93,7 @@ export default async function Recruitment({
           {batches.docs.length ? (
             batches.docs.map((batch) => (
               <article className="panel" key={batch.id}>
-                <p className={styles.kicker}>TEAM SELECTION</p>
+                <p className={styles.kicker}>代表队招新</p>
                 <h3>{batch.title}</h3>
                 <p className={styles.status}>
                   {teamRecruitmentState(

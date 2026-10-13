@@ -213,10 +213,11 @@ export function TeamProfilesPanel({
       id="team-members"
       className={`panel ${styles.panel}`}
       aria-labelledby={`team-profiles-title-${teamID}`}
+      aria-busy={loading || busy}
     >
       <div className={styles.heading}>
         <div>
-          <p className="eyebrow">TEAM / MEMBERS</p>
+          <p className="eyebrow">队员档案</p>
           <h2 id={`team-profiles-title-${teamID}`}>队员简介</h2>
         </div>
         {editable && !editing && (
@@ -303,10 +304,12 @@ export function TeamProfilesPanel({
                 <textarea
                   value={draft.biography}
                   onChange={(event) => change("biography", event.target.value)}
+                  aria-describedby={`team-profile-bio-count-${teamID}`}
                   maxLength={400}
                   rows={4}
                 />
               </label>
+              <p id={`team-profile-bio-count-${teamID}`} className={styles.note}>已填写 {draft.biography.length} / 400 字</p>
               <label>
                 头像（可选）
                 <input
@@ -317,7 +320,7 @@ export function TeamProfilesPanel({
                 />
               </label>
               <p className={styles.note}>
-                静态 PNG、JPEG、WebP，2 MB 以内。公开前会清除图片元数据。
+                使用 2 MB 以内的静态 PNG、JPEG 或 WebP。请选择获准展示的头像。
               </p>
               {draft.avatar && (
                 <button

@@ -15,13 +15,13 @@ export default async function Page({
   )
     notFound();
   return (
-    <div className={`${styles.page} ${styles.staff}`}>
+    <div className={`${styles.page} ${styles.staff}`} style={{ maxWidth: 840 }}>
       <nav className={styles.breadcrumbs} aria-label="报名页面导航">
         <Link href="/events">浏览活动</Link>
         <span aria-hidden="true">/</span>
         <span>填写问卷</span>
       </nav>
-      <p className={styles.eyebrow}>TAKE PART / ZIJING</p>
+      <p className={styles.eyebrow}>活动报名</p>
       <h1>填写问卷</h1>
       <ActivitySignup kind={kind} id={Number(id)} />
     </div>

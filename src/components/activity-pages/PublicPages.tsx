@@ -3,18 +3,19 @@ import type { Where } from "payload";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { bySlug, cms, list, type Content } from "@/lib/content";
-import { Detail, Pagination, Picture } from "@/components/Content";
+import { Pagination, Picture } from "@/components/Content";
 import { dateParts } from "@/lib/presentation";
 import { eventState, formatDate, routeFor } from "@/lib/rules";
 import styles from "./ActivityPages.module.css";
+import { ActivityDetail } from "./ActivityDetail";
 
 export type PageCollection = "events" | "announcements" | "albums";
 export type Query = Record<string, string | string[] | undefined>;
 const copy = {
   events: {
     title: "活动",
-    headline: "下一场，一起。",
-    label: "WHAT’S ON / ZIJING",
+    headline: "活动日程",
+    label: "一起参与",
     description:
       "比赛、观赛、交流与训练。找到想参加的活动，也回看那些值得记住的现场。",
     empty: "下一场精彩，敬请关注",
@@ -22,8 +23,8 @@ const copy = {
   },
   announcements: {
     title: "通知",
-    headline: "每个重要消息，\n都在这里。",
-    label: "CLUB NOTICES / ZIJING",
+    headline: "社团通知",
+    label: "社团动态",
     description:
       "查看社团通知、参与安排与最新说明。具体事项以已发布的通知内容为准。",
     empty: "暂无已发布的通知",
@@ -31,15 +32,15 @@ const copy = {
   },
   albums: {
     title: "影像",
-    headline: "把这一刻，留下。",
-    label: "IN THE FRAME / ZIJING",
+    headline: "活动影像",
+    label: "社团档案",
     description: "从赛场到日常，在影像里重新相遇。",
     empty: "精彩影像，正在整理",
     hint: "已获准公开的活动相册会在这里展示。也可以先查看社群风采。",
   },
 };
 export function SignalGraphic({
-  label = "ZIJING / NEXT MOMENT",
+  label = "紫荆电竞",
 }: {
   label?: string;
 }) {
@@ -58,7 +59,7 @@ export function EmptyState({
 }) {
   return (
     <div className={styles.empty}>
-      <span>STAY CONNECTED</span>
+      <span>紫荆主场</span>
       <h2>{title}</h2>
       {children}
     </div>
@@ -111,7 +112,7 @@ export async function PublicDetail({
       className={`${styles.page} ${styles.detail}`}
       data-activity-page={collection}
     >
-      <Detail
+      <ActivityDetail
         collection={collection}
         doc={await publicDoc(collection, slug)}
         photoPage={page}
@@ -129,7 +130,7 @@ function DateLabel({ value }: { value?: string }) {
       <span>{date.year}</span>
     </div>
   ) : (
-    <div className={styles.noticeDate}>ZIJING</div>
+    <div className={styles.noticeDate}>日期待定</div>
   );
 }
 export function EventCard({
@@ -139,59 +140,33 @@ export function EventCard({
   doc: Content;
   collection: PageCollection;
 }) {
-  const date = dateParts(doc.startAt || doc.date),
-    state = collection === "events" ? eventState(doc) : "活动相册";
+  const state = collection === "events" ? eventState(doc) : "活动相册";
+  const href = `/${routeFor[collection]}/${doc.slug}`;
   return (
-    <article className={styles.eventCard}>
-      <div className={styles.eventImage}>
-        <Picture
-          id={doc.cover}
-          fallback={
-            <SignalGraphic
-              label={
-                collection === "events"
-                  ? "PLAY / WATCH / CONNECT"
-                  : "ZIJING / IN THE FRAME"
-              }
-            />
-          }
-        />
-        {date && (
-          <div className={styles.date}>
-            <strong>{date.day}</strong>
-            <small>
-              {date.month}月 / {date.year}
-            </small>
-          </div>
-        )}
-      </div>
+    <article className={styles.eventCard} data-kind={collection}>
+      <DateLabel value={doc.startAt || doc.date} />
       <div className={styles.cardBody}>
         <div className={styles.meta}>
-          <span className={styles.status} data-open={state === "进行中"}>
-            {state}
-          </span>
+          <span className={styles.status} data-open={state === "进行中"}>{state}</span>
           {doc.type && <span>{doc.type}</span>}
           {doc.demo && <span className="demo-label">演示资料</span>}
           {doc.archived && <span>历史归档</span>}
         </div>
-        <h2>
-          <Link href={`/${routeFor[collection]}/${doc.slug}`}>{doc.title}</Link>
-        </h2>
+        <h2><Link href={href}>{doc.title}</Link></h2>
         {doc.summary && <p>{doc.summary}</p>}
         <div className={styles.cardFoot}>
           <div className={styles.meta}>
-            <span>{formatDate(doc.startAt || doc.date)}</span>
+            {doc.startAt && <time dateTime={doc.startAt}>{formatDate(doc.startAt)}</time>}
             {doc.location && <span>{doc.location}</span>}
           </div>
-          <Link href={`/${routeFor[collection]}/${doc.slug}`}>
-            {collection === "events" ? "查看活动详情" : "打开相册"}{" "}
-            <span aria-hidden="true">↗</span>
-          </Link>
+          <Link href={href}>{collection === "events" ? "活动详情与报名" : "打开相册"} <span aria-hidden="true">→</span></Link>
         </div>
       </div>
+      {doc.cover && <Link className={styles.eventImage} href={href} aria-label={`查看${doc.title}`} tabIndex={-1}><Picture id={doc.cover} /></Link>}
     </article>
   );
 }
+
 export async function PublicList({
   collection,
   search,
@@ -244,7 +219,11 @@ export async function PublicList({
           <h1 style={{ whiteSpace: "pre-line" }}>{meta.headline}</h1>
           <p>{meta.description}</p>
         </div>
-        <SignalGraphic label={meta.label} />
+        <nav className={styles.sectionNav} aria-label="活动与内容栏目">
+          <Link href="/events" aria-current={collection === "events" ? "page" : undefined}>活动</Link>
+          <Link href="/announcements" aria-current={collection === "announcements" ? "page" : undefined}>通知</Link>
+          <Link href="/gallery" aria-current={collection === "albums" ? "page" : undefined}>影像</Link>
+        </nav>
       </header>
       {games && (
         <form className={styles.filter} method="get" aria-label="筛选内容">
@@ -277,7 +256,7 @@ export async function PublicList({
             </select>
           </label>
           <button className={styles.primary} type="submit">
-            筛选 <span aria-hidden="true">↗</span>
+            查看结果
           </button>
           <Link href={path}>重置</Link>
         </form>

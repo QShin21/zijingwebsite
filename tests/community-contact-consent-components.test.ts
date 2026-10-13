@@ -157,6 +157,7 @@ async function reviewHarness(contactConsent: unknown, complete = true, authorize
     '@/components/SubmitButton': { SubmitButton: 'button' }, '@/components/PageHeading': { PageHeading: 'header' }, '@/components/Content': { Pagination: 'nav' },
     '@/lib/content': { cms: async () => ({ auth: async () => ({ user }), find }) }, '@/lib/rules': rules, '@/lib/community-status': shared,
     '../actions': { decideAction: vi.fn() },
+    '../../_club/ClubPage': { ClubFrame: 'div' },
   }).default as (value: unknown) => Promise<unknown>;
   const tree = await component({ searchParams: Promise.resolve({}) });
   return { tree, find, user };

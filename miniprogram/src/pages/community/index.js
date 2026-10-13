@@ -20,7 +20,7 @@ Page(withVisualTheme({
   data: { loading: true, error: '', needsLogin: false, game: {}, area: 'contacts', docs: [], page: 1,
     hasMore: false, loadingMore: false, nodes: [], contentError: '', contacts: [], contactsLoading: false, contactsError: '',
     join: null, joinActions: {}, joinLoading: false, joinError: '', joinBusy: false, joinDone: '', canHandle: false,
-    clubLoading: false, clubError: '', staffBatches: [], promotions: [] },
+    clubLoading: false, clubError: '', staffBatches: [], promotions: [], honorPins: [], honorsLoading: false, honorsError: '' },
   ...actions,
   onLoad(options = {}) {
     if (this._unsubscribe) this._unsubscribe();
@@ -45,14 +45,14 @@ Page(withVisualTheme({
   resetPrivate() { this.setData({ needsLogin: !session.user(), loading: false, error: '', game: {}, docs: [], nodes: [], page: 1,
     hasMore: false, loadingMore: false, contentError: '', contacts: [], contactsLoading: false, contactsError: '',
     join: null, joinActions: {}, joinLoading: false, joinError: '', joinBusy: Boolean(this._pendingWrite), joinDone: '', canHandle: false,
-    clubLoading: false, clubError: '', staffBatches: [], promotions: [] }); },
+    clubLoading: false, clubError: '', staffBatches: [], promotions: [], honorPins: [], honorsLoading: false, honorsError: '' }); },
   onShow() {
     this._visible = true;
     if (this._disposed) return;
     if (this._identity !== identity()) { this._identity = identity(); this._context = (this._context || 0) + 1; this.invalidate(); this.resetPrivate(); }
     return this.load();
   },
-  onHide() { this._visible = false; this._resumeRead = false; this.invalidate(); this.setData({ loading: false, loadingMore: false, contactsLoading: false, joinLoading: false, joinBusy: Boolean(this._pendingWrite), clubLoading: false }); },
+  onHide() { this._visible = false; this._resumeRead = false; this.invalidate(); this.setData({ loading: false, loadingMore: false, contactsLoading: false, joinLoading: false, joinBusy: Boolean(this._pendingWrite), clubLoading: false, honorPins: [], honorsLoading: false, honorsError: '' }); },
   onUnload() { this.onHide(); this._disposed = true; if (this._unsubscribe) this._unsubscribe(); },
   retry() { return this.load(); },
   onPullDownRefresh() { return this.load().finally(() => wx.stopPullDownRefresh()); },
@@ -69,7 +69,7 @@ Page(withVisualTheme({
       if (!this.valid(scope) || ticket !== this._loadTicket) return;
       this.setData({ game, loading: false, nodes: render(game.body).nodes });
       wx.setNavigationBarTitle({ title: game.title });
-      await Promise.all([this.loadArea(), this.retryContacts(), this.retryJoin(), this.retryClub()]);
+      await Promise.all([this.loadArea(), this.retryContacts(), this.retryJoin(), this.retryClub(), this.data.area === 'showcase' ? this.loadHonorPins() : Promise.resolve()]);
     } catch (cause) { if (this.valid(scope) && ticket === this._loadTicket) this.setData({ loading: false, error: cause.message }); }
   },
   async retryContacts() {
@@ -147,6 +147,20 @@ Page(withVisualTheme({
         page: result.page || page, hasMore: Boolean(result.hasNextPage) });
     } catch (cause) { if (this.valid(scope) && ticket === this._areaTicket) this.setData({ loadingMore: false, contentError: cause.message }); }
   },
+  async loadHonorPins() {
+    if (this._disposed || this._visible === false || !identity() || !this.data.game.id || this.data.honorsLoading) return;
+    const scope = this._scope || 0, ticket = this._honorsTicket = (this._honorsTicket || 0) + 1;
+    const current = () => this.valid(scope) && ticket === this._honorsTicket;
+    this.setData({ honorsLoading: true, honorsError: '' });
+    try {
+      const honorPins = await require('../../lib/community-honors').load(this.data.game.id, current);
+      if (current()) this.setData({ honorPins, honorsLoading: false });
+    } catch (cause) { if (current()) this.setData({ honorPins: [], honorsLoading: false, honorsError: cause.message || '荣誉档案暂不可用，请重试' }); }
+  },
+  openHonorArchive(event) {
+    const id = event.currentTarget.dataset.id;
+    if (this._visible && !this._disposed && this.data.honorPins.some(pin => String(pin.id) === String(id))) navigation.go('team-honors', { team: id });
+  },
   retryContent() { return this.loadArea(); },
   honorWorkspace() {
     if (this._visible && !this._disposed && !this._pendingWrite && !this.data.loading && this.data.game.id)
@@ -157,7 +171,7 @@ Page(withVisualTheme({
     if (area === this.data.area || area !== 'contacts' && !areas[area]) return;
     this._areaTicket = (this._areaTicket || 0) + 1;
     this.setData({ area, docs: [], page: 1, hasMore: false, loadingMore: false, contentError: '' });
-    return this.loadArea();
+    return Promise.all([this.loadArea(), area === 'showcase' ? this.loadHonorPins() : Promise.resolve()]);
   },
   async joinAction(event) {
     if (!identity() || this._disposed || this._visible === false || this._pendingWrite || this.data.loading || this.data.joinBusy || this.data.joinLoading) return;

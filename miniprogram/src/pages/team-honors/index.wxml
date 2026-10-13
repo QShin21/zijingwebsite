@@ -2,9 +2,10 @@
 <import src="../../templates/common.wxml" />
 <view class="page mini-page team-honors-page">
   <button class="plain back" bindtap="back">← 返回</button>
-  <text class="eyebrow">TEAM HONORS</text>
+  <view class="page-heading"><text class="eyebrow">代表队 · 已核验档案</text>
   <text class="title">{{team.title || '队伍荣誉档案'}}</text>
-  <text wx:if="{{team.gameTitle}}" class="subtitle">{{team.gameTitle}}</text>
+  <text wx:if="{{team.gameTitle}}" class="subtitle">{{team.gameTitle}}</text></view>
+  <text class="muted">已核验成果按赛事日期归档。</text>
   <button class="secondary section" bindtap="workspace" disabled="{{loading}}">我的荣誉投稿与工作台 →</button>
   <template is="feedback" data="{{loading,error,needsLogin:false}}" />
   <view wx:if="{{loaded && !records.length && !loading && !error}}" class="state panel">
@@ -12,10 +13,10 @@
     <text class="muted">荣誉记录发布后会出现在这里。</text>
     <button class="secondary" bindtap="retry">重新加载</button>
   </view>
-  <view wx:for="{{records}}" wx:key="key" class="section panel honor">
-    <view class="meta"><text>{{item.competition}}</text><text wx:if="{{item.legacy}}" class="badge">历史荣誉档案</text></view>
+  <view wx:for="{{records}}" wx:key="key" class="record-sheet honor">
+    <view class="meta"><text wx:if="{{item.dateText}}" class="archive-date">{{item.dateText}}</text><text>{{item.competition}}</text><text wx:if="{{item.legacy}}" class="badge">历史荣誉档案</text></view>
     <text class="section-title honor-title">{{item.title}}</text>
-    <text wx:if="{{item.placing}}" class="body">{{item.placing}}</text>
+    <text wx:if="{{item.placing}}" class="honor-placing">{{item.placing}}</text>
     <text wx:if="{{item.dateText}}" class="muted">赛事日期：{{item.dateText}}</text>
     <text wx:if="{{item.description}}" class="body" selectable>{{item.description}}</text>
     <text wx:if="{{item.authorName}}" class="muted author">{{item.authorName}}</text>

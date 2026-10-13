@@ -14,6 +14,7 @@ import "@/components/visual-direction/theme.css";
 import {
   themeFromPreference,
   themeCookieName,
+  themeColors,
 } from "@/components/visual-direction/theme";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -25,7 +26,7 @@ export async function generateViewport(): Promise<Viewport> {
     (await cookies()).get(themeCookieName)?.value,
   );
   return {
-    themeColor: theme === "light" ? "#fffdf8" : "#17151c",
+    themeColor: themeColors[theme],
     colorScheme: theme,
   };
 }

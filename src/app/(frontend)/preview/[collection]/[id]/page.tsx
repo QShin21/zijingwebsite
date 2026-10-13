@@ -4,6 +4,8 @@ import type { CollectionSlug } from "payload";
 import { cms, type Content } from "@/lib/content";
 import { Detail } from "@/components/Content";
 import { canSubmitClubContent } from "@/lib/rules";
+import Link from "next/link";
+import styles from "@/components/account-pages/AccountPages.module.css";
 export const dynamic = "force-dynamic";
 export const metadata = {
   title: "内容预览",
@@ -32,10 +34,7 @@ export default async function Preview({
   const p = await cms();
   const { user } = await p.auth({ headers: await headers() });
   if (!user) notFound();
-  if (
-    !canSubmitClubContent(user)
-  )
-    notFound();
+  if (!canSubmitClubContent(user)) notFound();
   const doc = await p
     .findByID({
       collection: collection as CollectionSlug,
@@ -49,7 +48,15 @@ export default async function Preview({
   if (!doc) notFound();
   return (
     <>
-      <div className="notice">鉴权草稿预览 · 不进入公开缓存</div>
+      <aside className={styles.preview} aria-label="预览状态">
+        <strong>草稿预览 · 仅当前授权人员可见</strong>
+        此页面用于核对内容，不代表已发布。公开列表继续读取已发布内容。
+        <div>
+          <Link href={`/admin/collections/${collection}/${id}`}>
+            返回内容编辑 →
+          </Link>
+        </div>
+      </aside>
       <Detail doc={doc as unknown as Content} collection={collection} />
     </>
   );

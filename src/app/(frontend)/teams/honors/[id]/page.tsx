@@ -94,7 +94,7 @@ export default async function HonorRecord({
         </Link>
         <PageHeading
           title={record.title}
-          eyebrow="TEAM HONOR"
+          eyebrow="荣誉记录与审核"
           description={
             (team?.title || "已归档代表队") +
             " · " +

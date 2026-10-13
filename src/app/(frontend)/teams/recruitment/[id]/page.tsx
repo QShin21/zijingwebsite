@@ -24,7 +24,7 @@ export default async function Recruitment({
     <ClubFrame>
       <PageHeading
         title={info.doc.title}
-        eyebrow="TEAM SELECTION"
+        eyebrow="代表队招新"
         description={info.form.intro}
         parent={{ href: "/teams/recruitment", label: "招新与我的记录" }}
       />

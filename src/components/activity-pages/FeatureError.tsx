@@ -9,7 +9,7 @@ export default function FeatureError({
 }) {
   return (
     <section className={styles.page}>
-      <p className={styles.eyebrow}>CONNECTION / RETRY</p>
+      <p className={styles.eyebrow}>加载异常</p>
       <h1>内容暂时无法加载</h1>
       <p role="alert">
         请稍后重试。若正在报名，请先查看本人回执确认提交结果，再决定是否重试。

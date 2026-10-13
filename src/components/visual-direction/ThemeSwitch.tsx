@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { themeCookieName, type ThemeName } from "./theme";
+import { themeCookieName, themeColors, type ThemeName } from "./theme";
 export function ThemeSwitch({ initialTheme }: { initialTheme: ThemeName }) {
   const [theme, setTheme] = useState(initialTheme);
   const next = theme === "light" ? "dark" : "light";
@@ -19,7 +19,7 @@ export function ThemeSwitch({ initialTheme }: { initialTheme: ThemeName }) {
           ?.setAttribute("content", next);
         document
           .querySelector('meta[name="theme-color"]')
-          ?.setAttribute("content", next === "light" ? "#fffdf8" : "#17151c");
+          ?.setAttribute("content", themeColors[next]);
         setTheme(next);
       }}
     >

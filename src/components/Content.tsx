@@ -1,5 +1,5 @@
-import { ActivitySignup } from './ActivitySignup';
-import { TeamProfilesPanel } from './team-profiles/TeamProfilesPanel';
+import { ActivitySignup } from "./ActivitySignup";
+import { TeamProfilesPanel } from "./team-profiles/TeamProfilesPanel";
 import { headers } from "next/headers";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -13,9 +13,10 @@ import {
   routeFor,
   safeURL,
 } from "@/lib/rules";
-import { dateParts, kindLabels } from "@/lib/presentation";
-import { Artwork, Icon, type IconName } from "./Identity";
+import { kindLabels } from "@/lib/presentation";
+import { Icon, type IconName } from "./Identity";
 import { PageHeading } from "./PageHeading";
+import styles from "./account-pages/ReadingPages.module.css";
 
 export function Empty({
   text,
@@ -26,26 +27,14 @@ export function Empty({
 }) {
   const copy: Record<string, [string, string, IconName]> = {
     events: [
-      "下一场精彩，敬请关注",
-      "活动安排确认后会在这里发布。也可以通过联系页面了解参与方式。",
+      "暂无活动安排",
+      "确认后的活动时间与报名方式会在这里发布。",
       "calendar",
     ],
     teams: ["代表队档案正在整理", "项目介绍与赛季信息将在确认后公开。", "team"],
-    honors: [
-      "为每一份荣誉，留下记录",
-      "经核实的赛事成绩将在这里归档。",
-      "trophy",
-    ],
-    news: [
-      "新的故事，即将更新",
-      "社团公告与活动回顾会在这里与你见面。",
-      "layers",
-    ],
-    albums: [
-      "精彩瞬间，等待入镜",
-      "获准公开的社团影像将在这里发布。",
-      "camera",
-    ],
+    honors: ["暂无公开荣誉", "经核实的赛事成绩将在这里归档。", "trophy"],
+    news: ["暂无社团动态", "社团公告与活动回顾将在这里更新。", "layers"],
+    albums: ["暂无公开影像", "获准公开的社团照片将在这里发布。", "camera"],
     recruitment: [
       "暂未发布匹配的招新批次",
       "后续招新安排与报名渠道将在确认后公布。",
@@ -59,17 +48,13 @@ export function Empty({
     "layers",
   ];
   return (
-    <div className="empty">
-      <div className="empty-icon">
-        <Icon name={entry[2] as IconName} />
-      </div>
+    <div className={styles.empty}>
+      <Icon name={entry[2] as IconName} />
       <div>
         <h3>{text || entry[0]}</h3>
         {!text && <p>{entry[1]}</p>}
+        <Link href="/events">浏览社团活动 →</Link>
       </div>
-      <Link className="text-link" href="/contact">
-        联系社团 <Icon name="diagonal" />
-      </Link>
     </div>
   );
 }
@@ -111,7 +96,7 @@ export async function Picture({
 }
 export function Prose({ doc }: { doc: Content }) {
   return (
-    <div className="prose">
+    <div className={styles.prose}>
       {doc.body && (
         <RichText
           data={doc.body}
@@ -143,53 +128,45 @@ export function JoinCards({ selected }: { selected?: string } = {}) {
   const items: {
     key: string;
     title: string;
-    en: string;
     desc: string;
+    next: string;
     icon: IconName;
   }[] = [
     {
       key: "members",
-      title: "普通社员",
-      en: "PLAY TOGETHER",
-      desc: "寻找同好，参与活动。从共同的热爱开始。",
+      title: "加入游戏社群",
+      desc: "寻找同好，了解活动。通过社群联系入口添加管理员微信，由管理员人工拉群。",
+      next: "了解普通入社",
       icon: "team",
     },
     {
       key: "teams",
-      title: "代表队选拔",
-      en: "RISE AS ONE",
-      desc: "了解各项目选拔安排，找到并肩作战的伙伴。",
+      title: "参加代表队选拔",
+      desc: "查看各项目招新与训练安排，提交入队资料，等待社群管理员人工选拔。",
+      next: "了解代表队选拔",
       icon: "target",
     },
     {
       key: "staff",
-      title: "骨干招新",
-      en: "MAKE IT HAPPEN",
-      desc: "从幕后到台前，一起策划和创造社团的精彩。",
+      title: "参与骨干工作",
+      desc: "了解执行与宣传方向，选择批次提交申请，查看自己的选拔结果。",
+      next: "查看骨干招新",
       icon: "layers",
     },
   ];
   return (
-    <div className="grid join-grid">
-      {items.map((item, i) => (
+    <div className={styles.joinGrid}>
+      {items.map((item) => (
         <Link
-          className={`join-card${selected === item.key ? " is-selected" : ""}`}
+          className={styles.joinCard}
           href={`/join/${item.key}`}
           key={item.key}
           aria-current={selected === item.key ? "page" : undefined}
         >
-          <div className="join-card-top">
-            <span className="number">
-              0{i + 1} / {item.en}
-            </span>
-            <Icon name={item.icon} />
-          </div>
+          <Icon name={item.icon} />
           <h3>{item.title}</h3>
           <p>{item.desc}</p>
-          <div className="join-card-bottom">
-            <span>了解加入方式</span>
-            <Icon name="diagonal" />
-          </div>
+          <span>{item.next} ↗</span>
         </Link>
       ))}
     </div>
@@ -204,11 +181,9 @@ export function Cards({
 }) {
   if (!docs.length) return <Empty collection={collection} />;
   return (
-    <div
-      className={`grid cards-${collection} cards-count-${Math.min(docs.length, 3)}`}
-    >
+    <div className={styles.cards} data-collection={collection}>
       {docs.map((doc) => {
-        const date = dateParts(doc.startAt || doc.date);
+        const href = `/${routeFor[collection]}/${doc.slug}`;
         const label =
           collection === "events"
             ? eventState(doc)
@@ -217,61 +192,47 @@ export function Cards({
               names[collection] ||
               "紫荆电竞";
         return (
-          <article className="card" key={doc.id}>
-            {collection === "honors" ? (
-              <div className="honor-emblem">
-                <Icon name="trophy" />
-                <span>{date?.year || "ZIJING"}</span>
-              </div>
-            ) : (
-              <div className="card-media">
-                <Picture
-                  id={doc.cover}
-                  fallback={<Artwork collection={collection} />}
-                />
-                {collection === "events" && date && (
-                  <span className="date-stamp">
-                    <strong>{date.day}</strong>
-                    <span>
-                      {date.month}月 / {date.year}
-                    </span>
-                  </span>
-                )}
-              </div>
+          <article className={styles.card} key={doc.id}>
+            {doc.cover && collection !== "honors" && (
+              <Link
+                className={styles.cardImage}
+                href={href}
+                aria-label={doc.title}
+                tabIndex={-1}
+              >
+                <Picture id={doc.cover} />
+              </Link>
             )}
-            <div className="card-body">
-              <div className="card-meta">
-                <span
-                  className={`tag${collection === "events" && label === "进行中" ? " tag-live" : ""}`}
-                >
-                  {label}
-                </span>
-                {doc.demo && <span className="demo-label">演示资料</span>}
-                {doc.archived && <span className="meta">历史归档</span>}
+            <div className={styles.cardBody}>
+              <div className={styles.cardMeta}>
+                <span className={styles.cardLabel}>{label}</span>
+                {doc.demo && <span>演示资料</span>}
+                {doc.archived && <span>历史归档</span>}
+                {doc.date && <span>{formatDate(doc.date)}</span>}
               </div>
               {collection === "honors" && doc.placing && (
-                <p className="honor-placing">{doc.placing}</p>
+                <p className={styles.placing}>
+                  {[doc.division, doc.placing].filter(Boolean).join(" · ")}
+                </p>
               )}
               <h3>
-                <Link
-                  className="card-link"
-                  href={`/${routeFor[collection]}/${doc.slug}`}
-                >
-                  {doc.title}
-                </Link>
+                <Link href={href}>{doc.title}</Link>
               </h3>
-              {doc.summary && <p className="card-summary">{doc.summary}</p>}
-              <div className="card-bottom">
-                <span className="meta">
+              {doc.summary && (
+                <p className={styles.cardSummary}>{doc.summary}</p>
+              )}
+              <div className={styles.cardBottom}>
+                <span>
                   {collection === "recruitment"
                     ? registrationState(doc)
                     : doc.startAt
                       ? formatDate(doc.startAt)
-                      : doc.competition || "ZIJING ESPORTS"}
+                      : doc.competition ||
+                        (collection === "teams" ? "代表队档案" : "")}
                 </span>
-                <span className="card-arrow">
-                  <Icon name="diagonal" />
-                </span>
+                <Link href={href} aria-label={`查看${doc.title}`}>
+                  查看详情 ↗
+                </Link>
               </div>
             </div>
           </article>
@@ -331,39 +292,66 @@ export async function Detail({
     <>
       <PageHeading
         title={doc.title}
-        eyebrow={doc.demo ? "演示资料 · 非真实社团记录" : "ZIJING / ARCHIVE"}
+        eyebrow={
+          doc.demo
+            ? "演示资料 · 非真实社团记录"
+            : `紫荆档案 · ${names[collection] || "内容预览"}`
+        }
         description={doc.summary}
         parent={{
-          href: `/${routeFor[collection]}`,
+          href: routeFor[collection] ? `/${routeFor[collection]}` : "/account",
           label: names[collection] || "档案",
         }}
       >
-        {doc.archived && <span className="tag">历史归档</span>}
+        {doc.archived && <span className={styles.status}>历史归档</span>}
+        <div className={styles.metadata}>
+          {(doc.date || doc.startAt) && (
+            <span>时间 · {formatDate(doc.date || doc.startAt)}</span>
+          )}
+          {collection === "events" && <span>{eventState(doc)}</span>}
+          {collection === "recruitment" && <span>{state}</span>}
+          {doc.competition && <span>{doc.competition}</span>}
+        </div>
       </PageHeading>
       {doc.cover && (
-        <div className="detail-cover">
+        <div className={styles.cover}>
           <Picture id={doc.cover} priority />
         </div>
       )}
-      <div className="detail-layout">
-        <div className="detail-main">
+      <div
+        className={styles.detailLayout}
+        data-sidebar={Boolean(
+          linkedTeam ||
+            linkedEvent ||
+            ["events", "recruitment", "honors"].includes(collection),
+        )}
+      >
+        <div className={styles.detailMain}>
           <Prose doc={doc} />
           {collection === "teams" && <TeamProfilesPanel teamID={doc.id} />}
           {collection === "teams" && (
-            <section className="panel">
+            <section className={styles.panel}>
               <h2>加入与管理代表队</h2>
               <div className="signup-tools">
-                <Link className="button" href="/teams/recruitment">查看代表队招新与我的记录</Link>
-                <Link href={`/teams/honors?team=${doc.id}`}>队伍荣誉档案与投稿</Link>
-                {managesTeam && <Link href={`/teams/manage/${doc.id}`}>本队工作台</Link>}
+                <Link className="button" href="/teams/recruitment">
+                  查看代表队招新与我的记录
+                </Link>
+                <Link href={`/teams/honors?team=${doc.id}`}>
+                  队伍荣誉档案与投稿
+                </Link>
+                {managesTeam && (
+                  <Link href={`/teams/manage/${doc.id}`}>本队工作台</Link>
+                )}
               </div>
-              <p>入队资格以已批准的成员关系为准，公开阵容和简介不授管理权限。</p>
+              <p>
+                入队资格以已批准的成员关系为准，公开阵容和简介不授管理权限。
+              </p>
             </section>
           )}
           {Boolean(doc.members?.length) && (
             <section>
               <h2>公开阵容</h2>
-              <ul className="roster">
+              <ul className={styles.roster}>
                 {doc.members?.map((m, i) => (
                   <li key={i}>
                     <span className="number">
@@ -377,10 +365,8 @@ export async function Detail({
             </section>
           )}
           {doc.positions?.map((p, i) => (
-            <section className="panel" key={i}>
-              <p className="eyebrow">
-                POSITION / {String(i + 1).padStart(2, "0")}
-              </p>
+            <section className={styles.panel} key={i}>
+              <p className={styles.eyebrow}>岗位职责与要求</p>
               <h2>{p.name}</h2>
               <p>{p.duties}</p>
               <p>{p.requirements}</p>
@@ -391,7 +377,7 @@ export async function Detail({
           {collection === "albums" && (
             <>
               {!doc.photos?.length && <Empty text="暂无获准公开的照片。" />}
-              <div className="grid photos">
+              <div className={styles.photos}>
                 {doc.photos
                   ?.slice((photoPage - 1) * 12, photoPage * 12)
                   .map((p, i) => (
@@ -413,7 +399,7 @@ export async function Detail({
               {history[0].docs.length > 0 && (
                 <section>
                   <h2>赛季档案</h2>
-                  <nav className="season-nav" aria-label="赛季导航">
+                  <nav className={styles.seasonNav} aria-label="赛季导航">
                     {history[0].docs.map((s) => (
                       <a href={`#season-${s.id}`} key={s.id}>
                         {s.title}
@@ -421,10 +407,14 @@ export async function Detail({
                     ))}
                   </nav>
                   {history[0].docs.map((s) => (
-                    <article className="panel" id={`season-${s.id}`} key={s.id}>
+                    <article
+                      className={styles.panel}
+                      id={`season-${s.id}`}
+                      key={s.id}
+                    >
                       <h3>{s.title}</h3>
                       <Prose doc={s} />
-                      <ul className="roster">
+                      <ul className={styles.roster}>
                         {s.members?.map((m, i) => (
                           <li key={i}>
                             <strong>{m.displayName}</strong>
@@ -459,10 +449,10 @@ export async function Detail({
             </>
           )}
         </div>
-        <aside className="detail-sidebar">
+        <aside className={styles.sidebar}>
           {(linkedTeam || linkedEvent) && (
-            <div className="panel">
-              <p className="eyebrow">CONNECTED</p>
+            <div className={styles.panel}>
+              <p className={styles.eyebrow}>相关内容</p>
               <h2>相关档案</h2>
               {linkedTeam && (
                 <p>
@@ -490,10 +480,10 @@ export async function Detail({
             </div>
           )}
           {collection === "events" && (
-            <div className="panel">
-              <p className="eyebrow">EVENT DETAILS</p>
+            <div className={styles.panel}>
+              <p className={styles.eyebrow}>时间与地点</p>
               <h2>活动信息</h2>
-              <p className="tag">{eventState(doc)}</p>
+              <p className={styles.status}>{eventState(doc)}</p>
               <dl>
                 <dt>开始</dt>
                 <dd>{formatDate(doc.startAt)}</dd>
@@ -504,10 +494,13 @@ export async function Detail({
               </dl>
             </div>
           )}
-          {collection === "events" && <ActivitySignup kind="events" id={doc.id} />}
-          {(collection === "recruitment" || (collection === "events" && !doc.signupForm?.enabled)) && (
-            <div className="panel registration-panel">
-              <p className="eyebrow">TAKE PART</p>
+          {collection === "events" && (
+            <ActivitySignup kind="events" id={doc.id} />
+          )}
+          {(collection === "recruitment" ||
+            (collection === "events" && !doc.signupForm?.enabled)) && (
+            <div className={styles.panel}>
+              <p className={styles.eyebrow}>参与方式</p>
               <h2>{state}</h2>
               <p className="preserve">{doc.requirements}</p>
               <p>开始：{formatDate(doc.registrationStart)}</p>
@@ -547,11 +540,11 @@ export async function Detail({
             </div>
           )}
           {collection === "honors" && (
-            <div className="panel honor-panel">
+            <div className={styles.panel}>
               <Icon name="trophy" />
               <h2>荣誉信息</h2>
               <p>{doc.competition}</p>
-              <p className="honor-placing">
+              <p className={styles.placing}>
                 {[doc.division, doc.placing].filter(Boolean).join(" · ")}
               </p>
               <p>{formatDate(doc.date)}</p>
@@ -586,7 +579,7 @@ export function Pagination({
   const href = (p: number) =>
     `${path}?${new URLSearchParams({ ...query, page: String(p) })}`;
   return (
-    <nav className="pagination" aria-label="分页">
+    <nav className={styles.pagination} aria-label="分页">
       {page > 1 ? (
         <Link href={href(page - 1)}>← 上一页</Link>
       ) : (

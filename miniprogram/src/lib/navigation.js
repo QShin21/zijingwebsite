@@ -10,7 +10,7 @@ function go(page, values = {}) {
 }
 function login() { go('auth', { mode: 'login' }); }
 function back() {
-  if (typeof getCurrentPages === 'function' && getCurrentPages().length > 1) wx.navigateBack({ delta: 1 });
+  if (typeof getCurrentPages === 'function' && getCurrentPages().length > 1) wx.navigateBack({ delta: 1, fail() { go('home'); } });
   else go('home');
 }
 function requireUser() { if (session.user()) return true; login(); return false; }
@@ -52,6 +52,10 @@ function website(path) {
   if (path === '/community/apply') return go('applications', { apply: 1 });
   if (path === '/community/review') return go('review');
   if (path === '/staff/manage') return go('staff');
+  const communityHonor = /^\/community\/([a-z0-9-]+)\/showcase\/team-honors\/([1-9]\d*)$/.exec(path);
+  if (communityHonor) return go('team-honors', { team: communityHonor[2] });
+  const communityArea = /^\/community\/([a-z0-9-]+)\/(updates|showcase|join)$/.exec(path);
+  if (communityArea) return go('community', { slug: communityArea[1], area: communityArea[2] === 'join' ? 'contacts' : communityArea[2] });
   const communityContent = /^\/community\/([a-z0-9-]+)\/(updates|showcase)\/([1-9]\d*)$/.exec(path);
   if (communityContent) return go('detail', { collection: communityContent[2] === 'updates' ? 'community-posts' : 'community-showcase', id: communityContent[3] });
   const community = /^\/community\/([a-z0-9-]+)$/.exec(path);

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { BrandMark } from "./Identity";
+import styles from "./account-pages/AccountPages.module.css";
 
 export function MemberLayout({
   title,
@@ -13,28 +14,31 @@ export function MemberLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="auth-layout">
-      <aside className="auth-intro">
+    <div className={styles.authLayout}>
+      <aside className={styles.authIntro}>
         <BrandMark />
         <h2>{title}</h2>
         <p>{description}</p>
-        <ol>
+        <ol className={styles.steps}>
           {steps.map((step, index) => (
             <li key={step}>
-              <span>0{index + 1}</span>
+              <span className={styles.stepNumber}>{index + 1}</span>
               <div>{step}</div>
             </li>
           ))}
         </ol>
+        <div className={styles.authNotice}>
+          网站账号用于记录报名与申请。加入微信群仍需联系社群管理员，人工添加好友并邀请进群。
+        </div>
       </aside>
-      <section className="member-shell">{children}</section>
+      <section className={styles.authPanel}>{children}</section>
     </div>
   );
 }
 
 export function FormStep({ number, title }: { number: string; title: string }) {
   return (
-    <h2 className="form-heading">
+    <h2 className={styles.formHeading}>
       <span>{number}</span>
       {title}
     </h2>

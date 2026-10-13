@@ -3,7 +3,7 @@ import { DesignNavigation } from "./DesignNavigation";
 import { BrandMark, Icon } from "@/components/Identity";
 import { Picture } from "@/components/Content";
 import type { Content } from "@/lib/content";
-import { formatDate, routeFor } from "@/lib/rules";
+import { formatDate, routeFor, eventState } from "@/lib/rules";
 import type { ThemeName } from "./theme";
 
 export const designBase = "/design-preview";
@@ -24,24 +24,28 @@ export function DesignHeader({
     <>
       {preview && (
         <div className="z-preview-note">
-          <span>视觉方向 01 / 紫荆赛场编辑部</span>
-          <Link href="/">查看功能基线 ↗</Link>
+          <span>紫荆主场 · 设计与交互样张</span>
+          <Link href="/">
+            返回首页 <Icon name="arrow" />
+          </Link>
         </div>
       )}
       <header className="z-header">
-        <Link href={preview ? designBase : "/"} className="z-brand">
-          <BrandMark />
-          <span>
-            紫荆电竞<small>ZIJING ESPORTS</small>
-            <span className="sr-only">{name}</span>
-          </span>
-        </Link>
-        <DesignNavigation
-          signedIn={signedIn}
-          navigation={navigation}
-          preview={preview}
-          theme={theme}
-        />
+        <div className="z-header-inner">
+          <Link href={preview ? designBase : "/"} className="z-brand">
+            <BrandMark />
+            <span>
+              {name}
+              <small>ZIJING ESPORTS</small>
+            </span>
+          </Link>
+          <DesignNavigation
+            signedIn={signedIn}
+            navigation={navigation}
+            preview={preview}
+            theme={theme}
+          />
+        </div>
       </header>
     </>
   );
@@ -55,34 +59,24 @@ export function DesignFooter({
     <footer className="z-footer">
       <div className="z-footer-top">
         <div>
-          <p className="z-kicker">BEYOND THE SCREEN</p>
-          <h2>
-            赛场内外，
-            <br />
-            共同热爱。
-          </h2>
+          <strong>{name}</strong>
+          <p>{footer || "在校园里，为共同的热爱相遇。"}</p>
         </div>
         <nav aria-label="页脚">
-          <Link href="/about">关于紫荆</Link>
+          <Link href="/about">关于社团</Link>
           <Link href="/contact">联系与合作</Link>
           <Link href="/privacy">隐私说明</Link>
-          <Link href="/account">我的账号</Link>
+          <Link href="/account">个人中心</Link>
         </nav>
       </div>
-      <div className="z-footer-mark" aria-hidden="true">
-        ZIJING
-        <span>
-          <Icon name="diagonal" />
-        </span>
-      </div>
       <p className="z-footer-bottom">
-        {preview
-          ? "原创界面图形与生成主视觉 · 隔离设计预览 · 内容与操作权限沿用功能基线"
-          : `© ${new Date().getFullYear()} ${name} · ${footer || "赛场内外，共同热爱。"}`}
+        © {new Date().getFullYear()} {name}
+        {preview ? " · 隔离设计预览，内容与权限沿用真实业务" : ""}
       </p>
     </footer>
   );
 }
+// Kept for existing preview routes. No generated or unlicensed imagery is loaded.
 export function StageArt({
   className = "",
   priority = false,
@@ -99,29 +93,22 @@ export function StageArt({
   );
 }
 export function SectionHeading({
-  index,
-  en,
   title,
   href,
   action = "查看全部",
 }: {
-  index: string;
-  en: string;
+  index?: string;
+  en?: string;
   title: string;
   href?: string;
   action?: string;
 }) {
   return (
     <div className="z-section-heading">
-      <div>
-        <p className="z-kicker">
-          <span>{index}</span> / {en}
-        </p>
-        <h2>{title}</h2>
-      </div>
+      <h2>{title}</h2>
       {href && (
         <Link className="z-text-link" href={href}>
-          {action} <Icon name="diagonal" />
+          {action} <Icon name="arrow" />
         </Link>
       )}
     </div>
@@ -131,8 +118,8 @@ export function DemoTag({ demo }: { demo?: boolean }) {
   return demo ? <span className="z-demo">合成演示 · 非实际安排</span> : null;
 }
 export function EmptyState({
-  title = "新的故事，正在准备。",
-  description = "发布后的内容会出现在这里。",
+  title = "这里暂时没有内容",
+  description = "新内容公开后会出现在这里。",
   href,
   action = "返回社群",
 }: {
@@ -143,7 +130,6 @@ export function EmptyState({
 }) {
   return (
     <div className="z-empty">
-      <Icon name="layers" />
       <h3>{title}</h3>
       <p>{description}</p>
       {href && (
@@ -156,14 +142,15 @@ export function EmptyState({
 }
 export function EventCard({
   doc,
-  index = 0,
   collection = "events",
   preview = true,
+  gameTitle,
 }: {
   doc: Content;
   index?: number;
   collection?: string;
   preview?: boolean;
+  gameTitle?: string;
 }) {
   const href =
     collection === "events"
@@ -171,46 +158,62 @@ export function EventCard({
         ? designBase + "/activity/" + doc.id
         : "/events/" + doc.slug
       : "/" + (routeFor[collection] || collection) + "/" + doc.slug;
+  const date = doc.startAt || doc.date;
+  const isEvent = collection === "events";
+  const labels: Record<string, string> = {
+    events: "活动",
+    teams: "代表队",
+    honors: "荣誉档案",
+    news: "社团动态",
+    albums: "影像",
+    recruitment: "招新",
+    announcements: "通知",
+  };
   return (
-    <article className="z-event-card">
-      <Link
-        className={"z-card-visual z-card-visual-" + (index % 3)}
-        href={href}
-        tabIndex={-1}
-        aria-hidden="true"
-      >
-        <Picture
-          id={doc.cover}
-          fallback={
-            <>
-              <span className="z-card-cross">+</span>
-              <span className="z-poster-label">
-                {collection === "events" ? "PLAY" : "ZIJING"}
-                <br />
-                <i>{["TOGETHER", "AS ONE", "YOUR WAY"][index % 3]}</i>
-              </span>
-              <BrandMark />
-            </>
-          }
-        />
-      </Link>
+    <article
+      className={`z-event-card ${isEvent ? "z-event-row" : "z-story-entry"}`}
+    >
+      {isEvent ? (
+        <div className="z-event-date">
+          {date ? (
+            <time dateTime={date}>{formatDate(date)}</time>
+          ) : (
+            <span>时间待公布</span>
+          )}
+          <span>{eventState(doc)}</span>
+        </div>
+      ) : doc.cover ? (
+        <Link
+          className="z-story-image"
+          href={href}
+          tabIndex={-1}
+          aria-hidden="true"
+        >
+          <Picture id={doc.cover} />
+        </Link>
+      ) : null}
       <div className="z-card-content">
         <div className="z-card-meta">
-          <span>
-            {doc.type || (collection === "teams" ? "代表队" : "社团活动")}
-          </span>
-          <span>{doc.startAt ? formatDate(doc.startAt) : "ZIJING / CLUB"}</span>
+          <span>{gameTitle || labels[collection] || "社团内容"}</span>
+          {!isEvent && date && <time dateTime={date}>{formatDate(date)}</time>}
+          {doc.placing && <span>{doc.placing}</span>}
         </div>
         <DemoTag demo={doc.demo} />
         <h3>
           <Link href={href}>{doc.title}</Link>
         </h3>
-        <p>{doc.summary || "查看公开内容，找到你的参与方式。"}</p>
-        <Link className="z-card-action" href={href}>
-          {collection === "events" ? "活动详情与报名" : "查看详情"}
-          <Icon name="diagonal" />
-        </Link>
+        <p>
+          {doc.summary ||
+            (isEvent ? "查看活动安排、参与条件与报名方式。" : "查看完整内容。")}
+        </p>
+        {isEvent && doc.location && (
+          <p className="z-location">{doc.location}</p>
+        )}
       </div>
+      <Link className="z-card-action" href={href}>
+        {isEvent ? "活动详情" : "查看详情"}
+        <Icon name="arrow" />
+      </Link>
     </article>
   );
 }

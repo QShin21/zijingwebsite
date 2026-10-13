@@ -33,7 +33,7 @@ export default async function Page({
     <ClubFrame className={styles.profileScope}>
       <PageHeading
         title={team.title}
-        eyebrow="TEAM / PROFILE"
+        eyebrow="我的队内简介"
         description="我的队内简介"
         parent={{ href: `/teams/${team.slug}`, label: "返回代表队" }}
       />

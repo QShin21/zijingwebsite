@@ -1,18 +1,21 @@
 "use client";
+import styles from "./activity-pages/Workspace.module.css";
 import { useEffect, useState } from "react";
 import { SignupBuilder } from "./SignupBuilder";
 import { emptySignup } from "@/lib/signup-schema";
 import { SubmitButton } from "./SubmitButton";
-import { publishCommunityAction } from "@/app/(frontend)/community/actions";
+import { ActionForm } from "./activity-pages/ActionForm";
+import { publishCommunityResultAction } from "@/app/(frontend)/community/actions";
 export function CommunityActivityComposer({ game }: { game: number }) {
   const [kind, setKind] = useState("event"),
     [signup, setSignup] = useState(emptySignup);
   const [ready, setReady] = useState(false);
   useEffect(() => setReady(true), []);
   return (
-    <details className="panel">
+    <details className={styles.batch}>
       <summary>发布活动与通知</summary>
-      <form className="member-form" action={publishCommunityAction}>
+      <p>发布范围为当前游戏社群。活动可配置报名问卷，通知用于发布安排与说明。</p>
+      <ActionForm action={publishCommunityResultAction} resetOnSuccess onSuccess={() => setSignup(emptySignup)}>
         <fieldset className="composer-fields" disabled={!ready}>
           <input type="hidden" name="game" value={game} />
           <label>
@@ -46,7 +49,7 @@ export function CommunityActivityComposer({ game }: { game: number }) {
           )}
           <SubmitButton className="button">发布</SubmitButton>
         </fieldset>
-      </form>
+      </ActionForm>
     </details>
   );
 }

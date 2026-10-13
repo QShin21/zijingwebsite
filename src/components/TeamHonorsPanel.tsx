@@ -14,6 +14,7 @@ import { TeamHonorRecordCard } from "./TeamHonorRecord";
 import { TeamHonorEditor } from "./TeamHonorEditor";
 import { CommunityPager } from "./CommunityPager";
 import { teamHonorQuery } from "./TeamHonorNavigation";
+import styles from "@/app/(frontend)/_club/ClubPages.module.css";
 
 // Parent's unified Teams & Honors route can embed this component without rebuilding teams.
 export async function TeamHonorsPanel({
@@ -94,6 +95,11 @@ export async function TeamHonorsPanel({
         )}
       </nav>
       {membershipError && <p role="status">{membershipError}</p>}
+      <div className={styles.sectionHead}>
+        <h2>{records ? view === "review" ? "待核验与处理记录" : "我的荣誉记录" : "队伍荣誉档案"}</h2>
+        <p>{records ? `${records.totalDocs} 条记录` : `${archives.length} 支队伍有已批准荣誉`}</p>
+      </div>
+      <p className="field-hint">{view === "review" ? "仅显示当前授权社群的材料。退回或拒绝时，请给出可执行的说明。" : view === "mine" ? "本人投稿、审核结果与改稿记录保存在这里。待审材料须经他人核验后展示。" : "按队伍汇总已批准成绩；点击档案，可按赛事年份查阅完整记录。"}</p>
       {records ? (
         <>
           <div className="showcase-feed">
@@ -112,7 +118,7 @@ export async function TeamHonorsPanel({
               />
             ))}
           </div>
-          {!records.docs.length && <p>此处暂无荣誉记录。</p>}
+          {!records.docs.length && <div className="empty"><h3>{view === "review" ? "当前没有需要处理的荣誉记录" : "你还没有荣誉投稿"}</h3><p>{view === "review" ? "有权限处理的新投稿会出现在此处。" : "如果你是现任队员，可在下方填写荣誉并上传成果材料。"}</p></div>}
           <CommunityPager
             page={page}
             pages={records.totalPages}
@@ -124,7 +130,7 @@ export async function TeamHonorsPanel({
         <>
           <TeamHonorArchiveCards archives={archives} />
           {!archives.length && (
-            <p>暂无可展示的队伍荣誉档案，批准后的记录会自动汇总。</p>
+            <div className="empty"><h3>暂无已批准的荣誉档案</h3><p>队员投稿经核验后，将汇入所属队伍的同一档案。</p></div>
           )}
         </>
       )}
@@ -138,7 +144,7 @@ export async function TeamHonorsPanel({
           />
         ) : (
           !membershipError && (
-            <p>当前没有可投稿的有效代表队。已批准历史荣誉会继续保留。</p>
+            <div className={styles.nextStep}><h3>投稿需要当前有效队员身份</h3><p>当前没有可投稿的有效代表队。已批准历史荣誉会继续保留。</p><Link className={styles.cardLink} href="/teams/recruitment">查看代表队招新与本人记录 →</Link></div>
           )
         ))}
     </section>

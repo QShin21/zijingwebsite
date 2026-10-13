@@ -16,6 +16,7 @@ import "@/components/visual-direction/theme.css";
 import {
   themeFromPreference,
   themeCookieName,
+  themeColors,
 } from "@/components/visual-direction/theme";
 export const dynamic = "force-dynamic";
 export async function generateViewport(): Promise<Viewport> {
@@ -23,7 +24,7 @@ export async function generateViewport(): Promise<Viewport> {
     (await cookies()).get(themeCookieName)?.value,
   );
   return {
-    themeColor: theme === "light" ? "#fffdf8" : "#17151c",
+    themeColor: themeColors[theme],
     colorScheme: theme,
   };
 }
@@ -40,11 +41,11 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 const nav = [
+  { path: "/", label: "首页" },
   { path: "/events", label: "活动" },
+  { path: "/community", label: "游戏社群" },
   { path: "/teams", label: "代表队与荣誉" },
   { path: "/news", label: "社团动态" },
-  { path: "/announcements", label: "通知" },
-  { path: "/community", label: "游戏社群" },
 ];
 export default async function Layout({
   children,
@@ -69,7 +70,7 @@ export default async function Layout({
     return items;
   }, []);
   return (
-    <html lang="zh-CN" data-scroll-behavior="smooth" data-z-theme={theme}>
+    <html lang="zh-CN" data-z-theme={theme}>
       <body className="z-design field-design">
         <a className="skip" href="#main">
           跳到正文
@@ -85,9 +86,10 @@ export default async function Layout({
           navigation={
             signedIn
               ? navigation
-              : nav.filter((item) =>
-                  ["/events", "/announcements"].includes(item.path),
-                )
+              : [
+                  { path: "/events", label: "活动" },
+                  { path: "/announcements", label: "通知" },
+                ]
           }
           signedIn={signedIn}
           theme={theme}

@@ -11,7 +11,8 @@ import {
 import { ShowcaseCard } from "@/components/ShowcaseCard";
 import { SubmitButton } from "@/components/SubmitButton";
 import { replaceShowcaseVideoAction } from "../../../actions";
-import styles from "@/components/activity-pages/ActivityPages.module.css";
+import { ClubFrame } from "../../../../_club/ClubPage";
+import styles from "../../../../_club/ClubPages.module.css";
 
 export default async function ShowcaseDetail({
   params,
@@ -58,13 +59,11 @@ export default async function ShowcaseDetail({
   )
     notFound();
   return (
-    <section
-      className={`community-page ${styles.page} ${styles.community} ${styles.detail}`}
-    >
+    <ClubFrame className={styles.communityBody}><section className="community-page">
       <Link href={"/community/" + slug + "/showcase"}>← 社群风采</Link>
-      <header className={styles.hero}>
+      <header className={styles.archiveHeading}>
         <div>
-          <p className={styles.eyebrow}>{game.title} / MOMENTS</p>
+          <p className={styles.kicker}>{game.title} · 社群记录</p>
           <h2>{post.title}</h2>
           <p>来自社群的风采记录。</p>
         </div>
@@ -101,6 +100,6 @@ export default async function ShowcaseDetail({
           </form>
         </details>
       )}
-    </section>
+    </section></ClubFrame>
   );
 }

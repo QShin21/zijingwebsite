@@ -1,8 +1,10 @@
-import { SubmitButton } from "@/components/SubmitButton";
 import { MemberLayout } from "@/components/MemberUI";
 import Link from "next/link";
 import { PageHeading } from "@/components/PageHeading";
-import { loginAction } from "../account/actions";
+import { LoginForm } from "@/components/account-pages/AuthForms";
+import { safeReturnPath } from "@/components/account-pages/auth-return";
+import styles from "@/components/account-pages/AccountPages.module.css";
+export const metadata = { title: "登录" };
 export default async function Login({
   searchParams,
 }: {
@@ -10,14 +12,19 @@ export default async function Login({
     message?: string;
     registered?: string;
     reset?: string;
+    returnTo?: string;
+    next?: string;
   }>;
 }) {
   const query = await searchParams;
+  const returnTo = safeReturnPath(query.returnTo || query.next);
+  const onward =
+    returnTo === "/account" ? "" : `?returnTo=${encodeURIComponent(returnTo)}`;
   return (
     <>
       <PageHeading
         title="登录"
-        eyebrow="MEMBER ACCESS"
+        eyebrow="我的紫荆 · 账号登录"
         description="使用昵称或已验证的清华邮箱登录。"
       />
       <MemberLayout
@@ -29,35 +36,25 @@ export default async function Login({
           "查看本人回执，联系管理员加入微信群",
         ]}
       >
-        <p role="status">
-          {query.message ||
+        <LoginForm
+          returnTo={returnTo}
+          message={
+            query.message ||
             (query.registered
               ? "注册成功，请登录。"
               : query.reset
                 ? "密码已更新，请重新登录。"
-                : "")}
-        </p>
-        <form className="member-form" action={loginAction}>
-          <h2 className="form-heading">欢迎回来</h2>
-          <label>
-            昵称或邮箱
-            <input name="identifier" required autoComplete="username" />
-          </label>
-          <label>
-            密码
-            <input
-              name="password"
-              type="password"
-              required
-              autoComplete="current-password"
-            />
-          </label>
-          <SubmitButton className="button">登录</SubmitButton>
-        </form>
-        <div className="form-footer">
-          <Link href="/register">还没有账号？前往注册</Link>
+                : "")
+          }
+          success={!query.message && Boolean(query.registered || query.reset)}
+        />
+        <div className={styles.formFooter}>
+          <Link href={`/register${onward}`}>还没有账号？前往注册</Link>
           <Link href="/account/reset">忘记密码</Link>
         </div>
+        <p className={styles.hint} style={{ marginTop: 20 }}>
+          账号及报名资料的处理方式见<Link href="/privacy">隐私说明</Link>。
+        </p>
       </MemberLayout>
     </>
   );

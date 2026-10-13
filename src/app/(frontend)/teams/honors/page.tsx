@@ -23,7 +23,7 @@ export default async function TeamHonors({
       <section className="community-page">
         <PageHeading
           title="代表队与荣誉"
-          eyebrow="OUR TEAMS"
+          eyebrow="代表队档案"
           description="队员投稿，由对应社群管理员审核；批准后实时汇总成队伍档案。"
         />
         <p role="status">

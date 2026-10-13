@@ -1,6 +1,7 @@
 "use client";
 import { useId, useRef, useState } from "react";
 import { Questionnaire } from "./Questionnaire";
+import surface from "./activity-pages/QuestionnaireSurface.module.css";
 import {
   emptySignup,
   normalizeSignup,
@@ -138,7 +139,7 @@ export function SignupBuilder({
   }
   return (
     <section
-      className="signup-builder questionnaire-designer"
+      className={`${surface.surface} signup-builder questionnaire-designer`}
       aria-label="问卷制作"
     >
       <div className="designer-heading">

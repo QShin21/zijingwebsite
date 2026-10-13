@@ -13,11 +13,9 @@ import { CommunityPager, pageNumber } from "@/components/CommunityPager";
 import { ShowcaseForm } from "@/components/ShowcaseForm";
 import { ShowcaseCard } from "@/components/ShowcaseCard";
 import { TeamHonorPins } from "@/components/TeamHonorArchives";
-import {
-  EmptyState,
-  SignalGraphic,
-} from "@/components/activity-pages/PublicPages";
-import styles from "@/components/activity-pages/ActivityPages.module.css";
+import { EmptyState } from "@/components/activity-pages/PublicPages";
+import { ClubFrame } from "../../../_club/ClubPage";
+import styles from "../../../_club/ClubPages.module.css";
 export default async function Showcase({
   params,
   searchParams,
@@ -66,16 +64,15 @@ export default async function Showcase({
   });
   const base = `/community/${slug}/showcase`;
   return (
-    <section className={`community-page ${styles.page} ${styles.community}`}>
-      <header className={styles.hero}>
+    <ClubFrame className={styles.communityBody}><section className="community-page">
+      <header className={styles.subHeader}>
         <div>
-          <p className={styles.eyebrow}>MOMENTS / COMMUNITY</p>
+          <p className={styles.kicker}>社群记录</p>
           <h2>社群风采</h2>
           <p>把共同经历的精彩留在这里。</p>
         </div>
-        <SignalGraphic label="MOMENTS WE SHARE" />
       </header>
-      <nav className={styles.tabs} aria-label="风采筛选">
+      <nav className="community-tabs" aria-label="风采筛选">
         <Link href={base} aria-current={view === "public" ? "page" : undefined}>
           公开风采
         </Link>
@@ -149,6 +146,6 @@ export default async function Showcase({
           登录后分享社群风采
         </Link>
       )}
-    </section>
+    </section></ClubFrame>
   );
 }

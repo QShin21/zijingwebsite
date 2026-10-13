@@ -2,9 +2,9 @@
   "navigationBarTitle": "队伍荣誉档案",
   "enablePullDownRefresh": true,
   "usingComponents": {},
-  "navigationBarBackgroundColor": "#fffdf8",
+  "navigationBarBackgroundColor": "#fffdf9",
   "navigationBarTextStyle": "black",
-  "backgroundColor": "#f4f1ea",
+  "backgroundColor": "#f7f5f0",
   "backgroundTextStyle": "dark",
   "navigationBarTitleText": "队伍荣誉档案"
 }

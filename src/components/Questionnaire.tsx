@@ -17,6 +17,7 @@ import {
 } from "@/lib/questionnaire-model";
 import { questionRoute, endTarget } from "@/lib/questionnaire-flow";
 import { QuestionnaireAdvanced } from "./QuestionnaireAdvanced";
+import surface from "./activity-pages/QuestionnaireSurface.module.css";
 
 export function Questionnaire({
   form,
@@ -169,7 +170,7 @@ export function Questionnaire({
   }
   return (
     <div
-      className={`questionnaire member-form questionnaire-theme-${form.theme || "purple"}`}
+      className={`${surface.surface} questionnaire member-form questionnaire-theme-${form.theme || "purple"}`}
       ref={root}
       aria-busy={locked}
     >
@@ -234,6 +235,7 @@ export function Questionnaire({
       <h3 className="questionnaire-step" tabIndex={-1}>
         {review ? "核对报名信息" : `第 ${current + 1} / ${pages} 页`}
       </h3>
+      {Object.keys(errors).length > 0 && <div className={surface.errorSummary} role="alert" aria-label="请核对以下题目"><p>有 {Object.keys(errors).length} 题需要核对，已填写内容保留。</p><ul>{visible.filter(q => errors[q.id]).map(q => <li key={q.id}><button type="button" onClick={() => { setReview(false); setStep(grouped.findIndex(page => page.some(item => item.id === q.id))); requestAnimationFrame(() => document.getElementById(`${prefix}-${q.id}`)?.focus()); }}>{q.label}：{errors[q.id]}</button></li>)}</ul></div>}
       {review ? (
         <>
           <p>请核对以下内容，确认后提交保存。</p>

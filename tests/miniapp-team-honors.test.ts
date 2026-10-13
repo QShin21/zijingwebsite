@@ -98,7 +98,7 @@ describe("实际荣誉档案HTTP合同的原生只读消费者", () => {
     h.page.preview({ currentTarget: { dataset: { url: "https://evil.invalid/private.jpg" } } }); expect(h.wx.previewImage).toHaveBeenCalledTimes(1);
     h.page.source({ currentTarget: { dataset: { key: "honors:9" } } });
     expect(h.wx.navigateTo).toHaveBeenCalledWith({ url: "/pages/detail/index?collection=honors&slug=synthetic-history" });
-    h.page.back(); expect(h.wx.navigateBack).toHaveBeenCalledWith({ delta: 1 });
+    h.page.back(); expect(h.wx.navigateBack).toHaveBeenCalledWith(expect.objectContaining({ delta: 1, fail: expect.any(Function) }));
     expect(h.wx.chooseMedia).not.toHaveBeenCalled(); expect(h.wx.requestSubscribeMessage).not.toHaveBeenCalled();
     expect(h.requests.every(request => request.method === "GET")).toBe(true);
   });

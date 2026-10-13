@@ -24,7 +24,7 @@ export default async function CommunityLayout({
       <ClubFrame className={styles.communityHeading}>
         <PageHeading
           title={game.title}
-          eyebrow="GAME COMMUNITY / ZIJING"
+          eyebrow="游戏社群"
           description={game.summary || "查看社群活动、通知与精彩记录。"}
           parent={{ href: "/community", label: "游戏社群" }}
           action={<CommunityJoin slug={slug} />}

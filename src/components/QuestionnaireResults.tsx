@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import surface from "./activity-pages/QuestionnaireSurface.module.css";
 import type { Question } from "@/lib/signup-schema";
 import type { QuestionSummary } from "@/lib/questionnaire-results";
 import type { ResponseExportLayout } from "@/lib/questionnaire-export";
@@ -72,8 +73,9 @@ export function QuestionnaireResults({
     }
   }
   return (
-    <section className="panel member-form questionnaire-results">
-      <h2>统计与导出</h2>
+    <section className={`${surface.surface} panel member-form questionnaire-results`}>
+      <h2>{canExport ? "统计与导出" : "报名统计"}</h2>
+      {!canExport && <p role="note">当前账号有名单读取权限。导出需要单独授权。</p>}
       <p>
         按问卷版本分别统计，历史题目保持原义。比例按已作答人数计算，多选合计可能超过
         100%。日期按北京时间筛选。
@@ -159,6 +161,7 @@ export function QuestionnaireResults({
         </button>
         <button
           type="button"
+          disabled={busy}
           onClick={() => {
             setFilters({
               name: "",

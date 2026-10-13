@@ -2,12 +2,23 @@ import { RegistrationForm } from "@/components/RegistrationForm";
 import { MemberLayout } from "@/components/MemberUI";
 import Link from "next/link";
 import { PageHeading } from "@/components/PageHeading";
-export default function Register() {
+import { safeReturnPath } from "@/components/account-pages/auth-return";
+import styles from "@/components/account-pages/AccountPages.module.css";
+export const metadata = { title: "注册社团账号" };
+export default async function Register({
+  searchParams,
+}: {
+  searchParams: Promise<{ returnTo?: string; next?: string }>;
+}) {
+  const query = await searchParams;
+  const returnTo = safeReturnPath(query.returnTo || query.next);
+  const onward =
+    returnTo === "/account" ? "" : `?returnTo=${encodeURIComponent(returnTo)}`;
   return (
     <>
       <PageHeading
         title="注册社团账号"
-        eyebrow="JOIN THE COMMUNITY"
+        eyebrow="我的紫荆 · 邮箱验证"
         description="填写账号资料后验证清华邮箱，即可完成注册。"
       />
       <MemberLayout
@@ -19,10 +30,11 @@ export default function Register() {
           "在弹窗完成验证，再登录使用",
         ]}
       >
-        <RegistrationForm />
-        <p>
-          已有账户？<Link href="/login">前往登录</Link>
-        </p>
+        <RegistrationForm returnTo={returnTo} />
+        <div className={styles.formFooter}>
+          <Link href={`/login${onward}`}>已有账号？前往登录</Link>
+          <Link href="/privacy">隐私说明</Link>
+        </div>
       </MemberLayout>
     </>
   );

@@ -3,6 +3,8 @@ import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 
 const source = readFileSync('miniprogram/src/lib/theme.js', 'utf8');
+const generated = { exports: {} as { tokens: Record<Mode, Record<string, string>>; chrome: Record<Mode, Record<string, string>> } };
+runInNewContext(readFileSync('miniprogram/src/lib/design-tokens.js', 'utf8'), { module: generated });
 type Mode = 'light' | 'dark';
 type ThemePage = { data: Record<string, unknown>; setData(value: Record<string, unknown>): void; onLoad(...args: unknown[]): unknown; onShow(): unknown; onHide(): unknown; onUnload(): unknown; setVisualTheme(event: unknown): void };
 type Theme = { KEY: string; get(): Mode; init(): Mode; set(value: string): { ok: boolean; persisted: boolean }; style(mode: Mode): string; page(definition: Record<string, unknown>): Record<string, unknown>; tokens: Record<Mode, Record<string, string>> };
@@ -24,7 +26,7 @@ function harness(storage = new Map<string, unknown>(), options: { readFails?: bo
     };
   }
   const module = { exports: {} as Theme };
-  runInNewContext(source, { module, wx });
+  runInNewContext(source, { module, wx, require: (name: string) => { if (name !== './design-tokens') throw new Error('Unexpected native theme dependency'); return generated.exports; } });
   return { theme: module.exports, storage, calls, systemReads: () => systemReads };
 }
 function nativePage(theme: Theme, definition: Record<string, unknown> = {}) {
@@ -38,7 +40,7 @@ describe('Explicit native light/dark appearance', () => {
     expect(h.theme.init()).toBe('light');
     expect(h.systemReads()).toBe(0);
     expect(h.storage.size).toBe(0);
-    expect(h.calls.find(c => c.name === 'setNavigationBarColor')?.args).toMatchObject({ frontColor: '#000000', backgroundColor: '#fffdf8', animation: { duration: 0 } });
+    expect(h.calls.find(c => c.name === 'setNavigationBarColor')?.args).toMatchObject({ frontColor: '#000000', backgroundColor: '#fffdf9', animation: { duration: 0 } });
   });
   it.each(['auto', 'system', '', null, { theme: 'dark' }])('ignores invalid stored preference %j and uses light', value => {
     const h = harness(new Map([['zijing_theme', value]]));
@@ -51,7 +53,7 @@ describe('Explicit native light/dark appearance', () => {
     expect(first.theme.set('dark')).toMatchObject({ ok: true, persisted: true });
     const restartedDark = harness(storage);
     expect(restartedDark.theme.init()).toBe('dark');
-    expect(restartedDark.calls.find(c => c.name === 'setTabBarStyle')?.args).toMatchObject({ backgroundColor: '#17151c', selectedColor: '#cdb2fa' });
+    expect(restartedDark.calls.find(c => c.name === 'setTabBarStyle')?.args).toMatchObject({ backgroundColor: '#202026', selectedColor: '#d2a4cd' });
     restartedDark.theme.set('light');
     expect(harness(storage).theme.init()).toBe('light');
   });
