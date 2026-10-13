@@ -1,0 +1,9 @@
+/* Shared, additive v4 tokens. Page-specific styling stays in each module. */
+:root {
+ --z-paper:#f4f1ea; --z-surface:#fffdf8; --z-ink:#211e27; --z-muted:#625c68;
+ --z-dark:#17151c; --z-dark-muted:#bdb6c7; --z-purple:#6839ae;
+ --z-lilac:#c6a5ef; --z-amber:#edb353; --z-line:#d9d3dc;
+ --z-sans:Arial,"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif;
+ --z-mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+ --z-gutter:clamp(22px,5.5vw,88px); --z-max:1440px; --z-radius:6px;
+}
