@@ -84,6 +84,15 @@ describe("小程序公开社团投影与当前权限", () => {
 });
 
 describe("建群与管理员申请兼容层", () => {
+  describe.each(["submit", "edit"])("%s 严格主动同意", action => {
+    it.each([undefined, false, null, "true", "false", 1, {}, []].map(contactConsent => ({ contactConsent })))("拒绝非布尔true: $contactConsent，伪造上下文不生效", async ({ contactConsent }) => {
+      const response = await post("community/applications", { ...application, action, revision: timestamp,
+        contactConsent, context: { system: true, applicationResolved: true } });
+      expect(response.status).toBe(400);
+      expect(await response.json()).toEqual({ error: "由于入社流程规定，必须展示管理联系方式" });
+      expect(p.create).not.toHaveBeenCalled(); expect(mocked.edit).not.toHaveBeenCalled();
+    });
+  });
   it("本人列表带分页与必要字段，关系展开不会泄露邮箱或大二维码", async () => {
     p.find.mockResolvedValue(paged([{ ...application, applicant: { id: member.id, email: "private@example.invalid" }, status: "returned", reviewNote: "请补充" }], 2));
     const response = await get("community/applications", "?page=2"), data = await response.json();
@@ -115,10 +124,10 @@ describe("建群与管理员申请兼容层", () => {
   it("重提与撤回直接使用旧服务，修订值原样传递，撤回忽略其他资料", async () => {
     const revision = "opaque-server-revision";
     await post("community/applications", { action: "edit", id: application.id, revision, game: 11, realName: application.realName,
-      phone: application.phone, proposedGame: application.proposedGame, reason: application.reason, context: { system: true }, status: "approved" });
+      phone: application.phone, proposedGame: application.proposedGame, reason: application.reason, contactConsent: true, context: { system: true }, status: "approved" });
     expect(mocked.edit).toHaveBeenLastCalledWith(p, fresh, application.id, revision, {
       game: 11, realName: application.realName, phone: application.phone, proposedGame: application.proposedGame,
-      reason: application.reason, contactConsent: false, applicant: member.id, status: "pending" });
+      reason: application.reason, contactConsent: true, applicant: member.id, status: "pending" });
     await post("community/applications", { action: "withdraw", id: application.id, revision, reason: "ignore", applicant: 99, context: { system: true } });
     expect(mocked.edit).toHaveBeenLastCalledWith(p, fresh, application.id, revision, { status: "withdrawn" });
     expect(p.update).not.toHaveBeenCalled();
@@ -138,7 +147,7 @@ describe("建群与管理员申请兼容层", () => {
   });
   it("仅申请路由接收2MB图片base64，超3MiB或伪装Content-Length停止；auth仍32KiB", async () => {
     const qr = "data:image/png;base64," + Buffer.alloc(2 * 1024 * 1024, 1).toString("base64");
-    expect((await post("community/applications", { action: "submit", wechatQr: qr })).status).toBe(200);
+    expect((await post("community/applications", { action: "submit", wechatQr: qr, contactConsent: true })).status).toBe(200);
     p.create.mockClear(); mocked.cms.mockClear();
     expect((await post("community/applications", { action: "submit", reason: "x".repeat(3 * 1024 * 1024) }, { "content-length": "1" })).status).toBe(400);
     expect((await post("auth/login", { payload: "x".repeat(40_000) })).status).toBe(400);

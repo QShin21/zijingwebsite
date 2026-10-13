@@ -98,10 +98,10 @@ function harness(name: string, options: HarnessOptions = {}) {
 }
 
 describe('Native community applications — synthetic VM only', () => {
-  it('keeps failed new applications and submits only the allowed fields with opt-in contact consent', async () => {
+  it('keeps failed new applications and submits only the allowed fields after explicit contact consent', async () => {
     let fail = true;
     const h = harness('applications', { request: (path, options) => {
-      if (options.method === 'POST') { if (fail) throw new Error('合成断网'); return { application: application('pending') }; }
+      if (options.method === 'POST') { if (fail) throw new Error('合成断网'); return { application: application('pending', { contactConsent: true }) }; }
       if (path.startsWith('/api/miniapp/community/applications')) return pageResult([]);
       throw new Error('Unexpected read');
     } });
@@ -109,11 +109,13 @@ describe('Native community applications — synthetic VM only', () => {
     expect(h.privacy.authorize).not.toHaveBeenCalled();
     h.page.setData({ apply: true, proposedGame: '合成测试新游戏', realName: '合成测试申请人', phone: '00000000000', reason: '合成测试：每周共同组织社群活动' });
     await h.page.chooseQr();
+    h.page.consent(event({}, ['contact']));
     await h.page.submit();
     expect(h.page.data.formError).toBe('合成断网');
     expect(h.page.data.realName).toBe('合成测试申请人'); expect(h.page.data.qr).toContain('synthetic-chosen'); expect(h.page.data.apply).toBe(true);
-    expect(h.calls.find(call => call.options.method === 'POST')?.options.data?.contactConsent).toBe(false);
-    h.page.consent(event({}, ['contact'])); fail = false; await h.page.submit();
+    expect(h.calls.find(call => call.options.method === 'POST')?.options.data?.contactConsent).toBe(true);
+    expect(h.page.data.contactConsent).toBe(true);
+    fail = false; await h.page.submit();
     const payload = h.calls.filter(call => call.options.method === 'POST').at(-1)?.options.data;
     expect(payload).toMatchObject({ action: 'submit', game: null, proposedGame: '合成测试新游戏', contactConsent: true, wechatQr: qr });
     expect(Object.keys(payload || {}).sort()).toEqual(['action', 'contactConsent', 'game', 'phone', 'proposedGame', 'realName', 'reason', 'wechatQr'].sort());
@@ -132,6 +134,7 @@ describe('Native community applications — synthetic VM only', () => {
     await h.page.openForm(event({ id: original.id, action: 'edit' }));
     expect(h.page.data.editId).toBe(17); expect(h.page.data.revision).toBe('synthetic-v1');
     h.page.setData({ reason: '合成测试：补充组织计划和时间安排' });
+    h.page.consent(event({}, ['contact']));
     await h.page.submit();
     expect(h.calls.find(call => call.options.method === 'POST')?.options.data).toMatchObject({ action: 'edit', id: 17, revision: 'synthetic-v1', wechatQr: qr });
     expect(h.page.data.reason).toBe('合成测试：补充组织计划和时间安排'); expect(h.page.data.mode).toBe('edit'); expect(h.page.data.formError).toContain('刷新');
@@ -141,10 +144,10 @@ describe('Native community applications — synthetic VM only', () => {
     let saved = application('returned', { actions: { edit: true } });
     const h = harness('applications', { request: (path, options) => {
       if (path.startsWith('/api/community-applications/')) return { wechatQr: qr };
-      if (options.method === 'POST') { saved = application('pending', { updatedAt: 'synthetic-v2', actions: { withdraw: true }, reason: options.data?.reason }); return { application: saved }; }
+      if (options.method === 'POST') { saved = application('pending', { updatedAt: 'synthetic-v2', contactConsent: true, actions: { withdraw: true }, reason: options.data?.reason }); return { application: saved }; }
       return pageResult([saved]);
     } });
-    await h.page.onShow(); await h.page.openForm(event({ id: 17, action: 'edit' })); h.page.setData({ reason: '合成测试：新的组织计划已补充' }); await h.page.submit();
+    await h.page.onShow(); await h.page.openForm(event({ id: 17, action: 'edit' })); h.page.setData({ reason: '合成测试：新的组织计划已补充' }); h.page.consent(event({}, ['contact'])); await h.page.submit();
     expect(h.page.data.docs).toHaveLength(1); expect(h.page.data.docs[0]).toMatchObject({ id: 17, updatedAt: 'synthetic-v2', status: 'pending', reason: '合成测试：新的组织计划已补充' });
     expect(h.page.data.apply).toBe(false);
   });

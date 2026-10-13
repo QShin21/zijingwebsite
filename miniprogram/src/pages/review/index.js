@@ -95,6 +95,10 @@ Page({
     const { id, decision } = event.currentTarget.dataset;
     const doc = this.data.docs.find(value => String(value.id) === String(id));
     if (!this.data.allowed || !doc || !doc.actions.review || !decisions[decision]) return;
+    if (decision === 'approved' && doc.contactConsent !== true) {
+      this.setData({ operationError: '申请人尚未同意展示管理联系方式，请退回由本人补充同意后重新提交。' });
+      return;
+    }
     const scope = this._scope || 0, operation = this._operation = (this._operation || 0) + 1;
     const context = this._context, actor = identity(), writeID = this.beginWrite();
     this.setData({ busy: true, operationError: '', done: '' });

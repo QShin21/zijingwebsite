@@ -125,7 +125,7 @@ describe.sequential("申请、建群、网页投稿与跨级审核", () => {
     const image = "data:image/png;base64," + picture.toString("base64");
     expect(image.length).toBeGreaterThan(40_000);
     const request = await p.create({ collection: "community-applications", overrideAccess: false, user: member,
-      data: { applicant: member.id, proposedGame: "图片边界回归", reason: "这是一条验证实际尺寸图片可以正常提交的申请。", realName: "测试申请人", phone: "13900000000", wechatQr: image } });
+      data: { applicant: member.id, proposedGame: "图片边界回归", reason: "这是一条验证实际尺寸图片可以正常提交的申请。", realName: "测试申请人", phone: "13900000000", wechatQr: image, contactConsent: true } });
     try { expect(request.wechatQr!.length).toBeGreaterThan(40_000); }
     finally { await p.delete({ collection: "community-applications", id: request.id, overrideAccess: true }); }
   });

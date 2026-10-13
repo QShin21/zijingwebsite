@@ -12,10 +12,11 @@
     <button class="plain" bindtap="retry" disabled="{{loading || busy}}">刷新审核列表</button>
     <view wx:for="{{docs}}" wx:key="id" class="section panel"><text class="section-title">{{item.proposedGame || '游戏社群申请'}}</text><text class="muted">回执 {{item.id}} · {{item.dateText}}</text>
       <text class="body" selectable>{{item.realName}} · {{item.phone}}</text><text class="body">{{item.reason}}</text>
-      <text class="muted">名片展示：{{item.contactConsent ? '申请人已授权在任期间展示' : '未授权展示，批准后不提供成员可见名片'}}</text>
+      <text class="muted">名片展示：{{item.contactConsent === true ? '申请人已同意展示微信名片作为进群联系方式' : '申请人尚未同意'}}</text>
+      <text wx:if="{{item.contactConsent !== true}}" class="error" aria-role="alert">申请人尚未同意展示管理联系方式，请退回由本人补充同意后重新提交。</text>
       <button wx:if="{{item.actions.review}}" class="secondary section" bindtap="inspect" data-id="{{item.id}}" disabled="{{busy || imageBusy}}">查看微信名片二维码</button>
       <view wx:if="{{item.actions.review}}" class="field"><text class="field-label">处理意见</text><textarea value="{{item.reviewDraft}}" bindinput="note" data-id="{{item.id}}" maxlength="1000" placeholder="退回或拒绝时必填具体原因" disabled="{{busy}}" /></view>
-      <view class="actions" wx:if="{{item.actions.review}}"><button class="primary" bindtap="decide" data-id="{{item.id}}" data-decision="approved" disabled="{{busy || imageBusy}}">批准</button><button class="secondary" bindtap="decide" data-id="{{item.id}}" data-decision="returned" disabled="{{busy || imageBusy}}">退回补充</button><button class="danger" bindtap="decide" data-id="{{item.id}}" data-decision="rejected" disabled="{{busy || imageBusy}}">拒绝</button></view>
+      <view class="actions" wx:if="{{item.actions.review}}"><button wx:if="{{item.contactConsent === true}}" class="primary" bindtap="decide" data-id="{{item.id}}" data-decision="approved" disabled="{{busy || imageBusy}}">批准</button><button class="secondary" bindtap="decide" data-id="{{item.id}}" data-decision="returned" disabled="{{busy || imageBusy}}">退回补充</button><button class="danger" bindtap="decide" data-id="{{item.id}}" data-decision="rejected" disabled="{{busy || imageBusy}}">拒绝</button></view>
       <text wx:if="{{!item.actions.review}}" class="muted">该申请暂无可执行操作，请刷新列表核对。</text>
     </view>
     <view wx:if="{{!docs.length && !loading && !error}}" class="empty"><text>没有待审核申请</text></view>

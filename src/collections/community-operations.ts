@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { APIError, type Access, type CollectionConfig, type CollectionAfterChangeHook, type Where } from "payload";
 import { canParticipate, canPublish, canReviewCommunityApplication, communityIDs, relationID, type Identity } from "../lib/rules";
 import { MAX_WECHAT_QR_TEXT_LENGTH, normalizeWechatQr, validApplicantName, validApplicantPhone } from "../lib/application-details";
+import { applicationContactConsentLabel, applicationContactConsentRequiredMessage } from "../lib/community-status";
 
 const ownApplication: Access = ({ req }) => {
   if (req.context.publicCommunityContacts) return { and: [{ game: { equals: req.context.publicCommunityContacts } }, { status: { equals: "approved" } }, { contactConsent: { equals: true } }] } as Where;
@@ -32,6 +33,18 @@ export const CommunityApplications: CollectionConfig = {
     delete: () => false,
   },
   hooks: {
+    beforeOperation: [({ args, operation, req }) => {
+      if (req.context.applicationResolved === true) return args;
+      // Check the caller's raw value before Payload turns checkbox strings into
+      // booleans or merges old consent into an omitted resubmission field.
+      if (operation === "create" || operation === "update" && req.context.communityApplicationEdit === true) {
+        if (!canParticipate(req.user as Identity)) throw new APIError("请登录可用账号", 403);
+        const data = "data" in args ? args.data : undefined;
+        if (operation === "update" && data?.status === "withdrawn") return args;
+        if (data?.contactConsent !== true) throw new APIError(applicationContactConsentRequiredMessage, 400);
+      }
+      return args;
+    }],
     beforeChange: [async ({ data, originalDoc, req, operation }) => {
       if (req.context.applicationResolved === true) return data;
       if (!canParticipate(req.user as Identity)) throw new APIError("请登录可用账号", 403);
@@ -49,6 +62,8 @@ export const CommunityApplications: CollectionConfig = {
         if (changedOutside(data, originalDoc, ["status", "reviewNote", "updatedAt"])) throw new APIError("审核时不能修改申请资料", 403);
         data.reviewNote = String(data.reviewNote ?? "").trim();
         if (data.status !== "approved" && !data.reviewNote) throw new APIError("退回或拒绝需填写具体原因", 400);
+        if (data.status === "approved" && originalDoc.contactConsent !== true)
+          throw new APIError("由于入社流程规定，必须展示管理联系方式；请退回申请，由本人勾选同意后重新提交", 409);
         if (data.status === "approved" && (!originalDoc.realName || !originalDoc.phone || !originalDoc.wechatQr)) throw new APIError("旧申请资料不全，请退回后由申请人重新提交", 400);
         const applicant = await req.payload.findByID({ collection: "users", id: Number(relationID(originalDoc.applicant)), req, overrideAccess: true, depth: 0 });
         if (!canParticipate(applicant)) throw new APIError("申请者账号已停用，不能批准任职", 409);
@@ -66,6 +81,7 @@ export const CommunityApplications: CollectionConfig = {
         if (data.status !== "pending") throw new APIError("申请状态无效", 400);
       }
       const merged = { ...originalDoc, ...data };
+      if (merged.contactConsent !== true) throw new APIError(applicationContactConsentRequiredMessage, 400);
       data.realName = String(merged.realName ?? "").trim();
       data.phone = String(merged.phone ?? "").trim();
       if (!validApplicantName(data.realName)) throw new APIError("请填写 1–80 字的姓名", 400);
@@ -134,7 +150,7 @@ export const CommunityApplications: CollectionConfig = {
     { name: "realName", label: "姓名", type: "text", maxLength: 80 },
     { name: "phone", label: "手机号", type: "text", maxLength: 21 },
     { name: "wechatQr", type: "textarea", maxLength: MAX_WECHAT_QR_TEXT_LENGTH, admin: { hidden: true } },
-    { name: "contactConsent", label: "同意在任期间向登录成员展示名片", type: "checkbox", defaultValue: false },
+    { name: "contactConsent", label: applicationContactConsentLabel, type: "checkbox", defaultValue: false },
     { name: "requestKey", type: "text", unique: true, admin: { hidden: true }, access: { read: () => false } },
     { name: "status", type: "select", defaultValue: "pending", options: ["pending", "approved", "returned", "rejected", "withdrawn"] },
     { name: "reviewNote", label: "处理意见", type: "textarea", maxLength: 1000 },

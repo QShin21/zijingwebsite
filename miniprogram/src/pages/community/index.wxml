@@ -52,7 +52,7 @@
         </view>
         <button class="plain" bindtap="retryContacts" disabled="{{contactsLoading || joinBusy}}">刷新授权名片</button>
       </view>
-      <view class="section panel"><text class="section-title">想参与组织这个社群？</text><text class="muted">可以申请参与已有社群管理。名片展示需要你单独主动勾选授权。</text><button class="secondary section" bindtap="apply">申请社群管理员 →</button></view>
+      <view class="section panel"><text class="section-title">想参与组织这个社群？</text><text class="muted">可以申请参与已有社群管理。申请和修改重提时，需要本人主动同意展示微信名片作为进群联系方式；默认不勾选，获批后仍可关闭展示。</text><button class="secondary section" bindtap="apply">申请社群管理员 →</button></view>
     </block>
     <view class="section panel"><text class="section-title">代表队招新</text><text class="muted">查看队伍选拔、本人申请及成员记录；普通入社仍通过上方管理员人工拉群。</text><button class="secondary section" bindtap="openWebsite" data-url="/teams/recruitment">招新与我的代表队记录 →</button><button class="plain" bindtap="honorWorkspace" disabled="{{loading || joinBusy}}">本社群荣誉投稿 / 当前审核入口 →</button></view>
     <view class="section panel"><text class="section-title">社团骨干招新</text><text class="muted">全社团共用同一批次申请；从本页和主页进入可查看同一份回执。</text><button class="secondary section" bindtap="staff">招新批次与我的申请 →</button>

@@ -6,6 +6,7 @@ import { PageHeading } from "@/components/PageHeading";
 import { Pagination } from "@/components/Content";
 import { cms } from "@/lib/content";
 import { canPublish } from "@/lib/rules";
+import { applicationContactConsentLabel, applicationContactConsentRequiredMessage } from "@/lib/community-status";
 import { decideAction } from "../actions";
 export default async function Review({
   searchParams,
@@ -63,6 +64,7 @@ export default async function Review({
             const complete = Boolean(
               app.realName && app.phone && app.wechatQr && person,
             );
+            const contactAuthorized = app.contactConsent === true;
             return (
               <article className="panel" key={app.id}>
                 <h2>{app.proposedGame}</h2>
@@ -134,8 +136,9 @@ export default async function Review({
                   <input type="hidden" name="id" value={app.id} />
                   <input type="hidden" name="revision" value={app.updatedAt} />
                   <label>审核意见（退回或拒绝必填）<textarea name="reviewNote" maxLength={1000} rows={3} /></label>
-                  <p>名片展示：{app.contactConsent ? "申请人已同意在任期间展示" : "未授权展示，批准后不提供公开名片"}</p>
-                  <SubmitButton className="button light" name="decision" value="approved" disabled={!complete}>批准</SubmitButton>
+                  <p>名片展示：{contactAuthorized ? "申请人已同意展示微信名片作为进群联系方式" : "申请人尚未同意展示管理联系方式"}</p>
+                  {!contactAuthorized && <p className="form-feedback">{applicationContactConsentRequiredMessage}。此记录尚未获得申请人同意，不能批准；请退回申请，由本人勾选“{applicationContactConsentLabel}”后重新提交。</p>}
+                  <SubmitButton className="button light" name="decision" value="approved" disabled={!complete || !contactAuthorized}>批准</SubmitButton>
                   <SubmitButton className="button" name="decision" value="returned">退回补充</SubmitButton>
                   <SubmitButton className="button light" name="decision" value="rejected">拒绝</SubmitButton>
                 </form>

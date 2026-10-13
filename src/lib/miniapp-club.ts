@@ -6,6 +6,7 @@ import { canReviewStaffTransition, staffDeadlinePolicy, staffForm, staffPrivacy,
 import { formVersion } from "./activity-signups";
 import { promotedContent } from "./content-promotions";
 import { changeCommunityJoin, decideCommunityApplication, editCommunityApplication, updateCommunityCard } from "./community-operations";
+import { applicationContactConsentRequiredMessage } from "./community-status";
 
 const applicationPath = "community/applications";
 const staffPath = /^staff\/([^/]+)$/;
@@ -139,6 +140,7 @@ export async function miniappClubPOST(p: Payload, request: Request, path: string
   if (path === applicationPath) {
     let saved: CommunityApplication;
     if (action === "submit" || action === "edit") {
+      if (data.contactConsent !== true) throw new APIError(applicationContactConsentRequiredMessage, 400);
       const value = { game: optionalID(data.game) ?? null, proposedGame: text(data.proposedGame), realName: text(data.realName),
         phone: text(data.phone), reason: text(data.reason), contactConsent: data.contactConsent === true,
         ...(data.wechatQr === undefined ? {} : { wechatQr: text(data.wechatQr) }), status: "pending" as const, applicant: user.id };

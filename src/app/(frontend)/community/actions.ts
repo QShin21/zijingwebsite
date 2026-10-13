@@ -8,6 +8,7 @@ import { decideCommunityApplication, editCommunityApplication, updateCommunityCa
 import { applicationError } from "@/lib/application-error";
 import { workflowTransaction } from "@/lib/workflow-transactions";
 import { APIError } from "payload";
+import { applicationContactConsentRequiredMessage } from "@/lib/community-status";
 
 const value = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 const numeric = (form: FormData, key: string) => {
@@ -29,6 +30,7 @@ async function gamePath(id: number) {
 }
 export async function applyAction(form: FormData) {
   const { p, user } = await current();
+  if (form.get("contactConsent") !== "on") return { error: applicationContactConsentRequiredMessage, field: "contactConsent" };
   const game = numeric(form, "game");
   const id = numeric(form, "id");
   const image = form.get("wechatQr");

@@ -6,6 +6,7 @@ const privacy = require('../../lib/privacy');
 const format = require('../../lib/format');
 const { actions, protect } = require('../../lib/page');
 const labels = { pending: '待审核', approved: '已批准并开放社群', returned: '退回补充', rejected: '已拒绝', withdrawn: '已撤回' };
+const consentMessage = '由于入社流程规定，必须展示管理联系方式';
 const identity = () => String((session.user() || {}).id || '');
 const relation = value => value && typeof value === 'object' ? value.id : value;
 const decorate = doc => ({ ...doc, actions: doc.actions || {}, dateText: format.date(doc.createdAt), statusText: labels[doc.status] || '状态待核对' });
@@ -111,7 +112,11 @@ Page({
     const field = event.currentTarget.dataset.field;
     if (!this.data.busy && ['proposedGame', 'realName', 'phone', 'reason'].includes(field)) this.setData({ [field]: event.detail.value });
   },
-  consent(event) { if (!this.data.busy) this.setData({ contactConsent: (event.detail.value || []).includes('contact') }); },
+  consent(event) {
+    if (this.data.busy) return;
+    const contactConsent = Array.isArray(event.detail.value) && event.detail.value.includes('contact');
+    this.setData({ contactConsent, ...(contactConsent && this.data.formError === consentMessage ? { formError: '' } : {}) });
+  },
   game(event) {
     const index = Number(event.detail.value);
     if (!this.data.busy && Number.isInteger(index) && this.data.games[index]) { this._initialGame = ''; this.setData({ gameIndex: index }); }
@@ -173,8 +178,17 @@ Page({
   },
   inspectSaved() { if (this.data.editId) return this.loadSavedQr(this.data.editId, this.data.mode === 'edit'); },
   async submit() {
-    if (!identity() || this._disposed || this._visible === false || this._pendingWrite || this.data.loading || this.data.busy || this.data.imageBusy) return;
+    if (!identity() || this._disposed || this._visible === false || this._pendingWrite || this.data.busy || this.data.imageBusy) return;
     const mode = this.data.mode;
+    if (mode !== 'card' && this.data.contactConsent !== true) {
+      const scope = this._scope || 0;
+      this.setData({ formError: consentMessage, operationError: '', done: '' }, () => {
+        if (!this.valid(scope) || this._pendingWrite || !this.data.apply || this.data.formError !== consentMessage || this.data.mode === 'card' || this.data.contactConsent === true) return;
+        if (typeof wx.pageScrollTo === 'function') wx.pageScrollTo({ selector: '#contact-consent', duration: 0, fail() {} });
+      });
+      return;
+    }
+    if (this.data.loading) return;
     if (mode !== 'submit') {
       const current = this.data.docs.find(doc => String(doc.id) === String(this.data.editId));
       if (!current || !current.actions[mode]) { this.setData({ formError: '申请已更新，请刷新回执后核对' }); return; }

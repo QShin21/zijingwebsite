@@ -66,7 +66,7 @@ describe.sequential("社群任职、最小权限与人工流程", () => {
     await expect(decideCommunityApplication(p, vice, app.id, "returned", "", app.updatedAt)).rejects.toThrow();
     const returned = await decideCommunityApplication(p, vice, app.id, "returned", "请补充每周运营安排", app.updatedAt);
     await expect(editCommunityApplication(p, outsider, app.id, returned.updatedAt, { status: "pending", reason: "越权修改申请资料的测试文本" })).rejects.toThrow();
-    const resubmitted = await editCommunityApplication(p, publicity, app.id, returned.updatedAt, { status: "pending", reason: "每周组织两次交流并及时维护游戏社群通知。" });
+    const resubmitted = await editCommunityApplication(p, publicity, app.id, returned.updatedAt, { status: "pending", reason: "每周组织两次交流并及时维护游戏社群通知。", contactConsent: true });
     expect(resubmitted.id).toBe(app.id); expect(resubmitted.status).toBe("pending");
     const withdrawn = await editCommunityApplication(p, publicity, app.id, resubmitted.updatedAt, { status: "withdrawn" });
     expect(withdrawn.status).toBe("withdrawn");

@@ -25,9 +25,12 @@
         <button wx:if="{{savedQr}}" class="plain" bindtap="inspectSaved" disabled="{{busy || imageBusy}}">查看已保存名片</button>
         <text class="muted">仅接受 2 MB 以内的 PNG、JPEG 或 WebP。授权拒绝或取消后可再次点击选择；已填内容会保留。</text>
       </view>
-      <view class="privacy-note"><text class="muted">姓名、手机号、申请说明与名片用于申请审核，由本人及获得审核权限的负责人读取。名片展示由下方独立设置决定，默认不勾选；获批后仍可关闭。</text><button class="plain" bindtap="openContract">阅读微信平台隐私保护指引</button><button class="plain" bindtap="openPage" data-page="fixed" data-params="{{ {key: 'privacy'} }}">阅读社团隐私说明</button></view>
-      <checkbox-group bindchange="consent"><label class="consent"><checkbox value="contact" checked="{{contactConsent}}" disabled="{{busy}}" /><text>同意在任期间向登录成员展示我的微信名片（可选）</text></label></checkbox-group>
-      <text wx:if="{{formError}}" class="error" aria-role="alert">{{formError}}</text>
+      <view class="privacy-note"><text class="muted">姓名、手机号、申请说明与名片用于申请审核，由本人及获得审核权限的负责人读取。名片展示需本人主动同意，默认不勾选；申请和修改重提时须勾选，获批后仍可关闭。</text><button class="plain" bindtap="openContract">阅读微信平台隐私保护指引</button><button class="plain" bindtap="openPage" data-page="fixed" data-params="{{ {key: 'privacy'} }}">阅读社团隐私说明</button></view>
+      <view id="contact-consent">
+        <checkbox-group bindchange="consent"><label class="consent"><checkbox value="contact" checked="{{contactConsent}}" disabled="{{busy}}" aria-label="我同意展示我的微信名片作为进群联系方式" /><text>我同意展示我的微信名片作为进群联系方式</text></label></checkbox-group>
+        <text class="muted">{{mode === 'card' ? '已批准名片可取消勾选并保存，以关闭展示。' : '提交申请或修改重提时，需本人主动勾选；获批后仍可关闭展示。'}}</text>
+        <text wx:if="{{formError}}" class="error" aria-role="alert">{{formError}}</text>
+      </view>
       <button class="primary" bindtap="submit" loading="{{busy}}" disabled="{{busy || imageBusy || (mode !== 'card' && gamesLoading)}}">{{mode === 'card' ? '保存名片与展示设置' : mode === 'edit' ? '保存并重新提交' : '提交申请'}}</button>
     </view>
     <text wx:if="{{operationError || (!apply && formError)}}" class="error" aria-role="alert">{{operationError || formError}}</text>

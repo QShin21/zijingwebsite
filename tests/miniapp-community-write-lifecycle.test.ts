@@ -11,7 +11,7 @@ type Event = { currentTarget: { dataset: Record<string, unknown> }; detail: { va
 type NativePage = { data: Data; _qr: string; setData(value: Record<string, unknown>): void; onLoad(options?: Record<string, string>): void;
   onShow(): Promise<unknown>; onHide(): void; onUnload(): void; retry(): Promise<unknown>; submit(): Promise<void>; withdraw(event: Event): Promise<void>;
   openForm(event: Event): Promise<void>; note(event: Event): void; decide(event: Event): Promise<void>; joinAction(event: Event): Promise<void>;
-  handle(event: Event): Promise<void>; chooseQr(): Promise<void>; inspect(event: Event): Promise<void>; retryJoin(): Promise<void> };
+  handle(event: Event): Promise<void>; chooseQr(): Promise<void>; inspect(event: Event): Promise<void>; retryJoin(): Promise<void>; consent(event: Event): void };
 type RequestOptions = { method?: string; required?: boolean; data?: Record<string, unknown> };
 type Modal = { success(value: { confirm: boolean }): void };
 type FileWrite = { filePath: string; success(): void };
@@ -42,7 +42,7 @@ function harness(flow: Flow, options: { deferredPost?: boolean; modalAuto?: bool
   const post = deferred<unknown>(), calls: { path: string; options: RequestOptions }[] = [], modals: Modal[] = [], fileWrites: FileWrite[] = [];
   const oldApp = application({ ...(flow.action === 'edit' ? { status: 'returned', actions: { edit: true } } : flow.action === 'card' ? { status: 'approved', contactConsent: true, actions: { card: true } } : {}) });
   const oldJoin = join({ ...(flow.action === 'confirmJoined' ? { status: 'awaitingInvite', actions: { confirmJoined: true } } : {}) });
-  const confirmedApp = application({ status: flow.action === 'withdraw' ? 'withdrawn' : flow.action === 'review' ? 'returned' : flow.action === 'card' ? 'approved' : 'pending', updatedAt: 'synthetic-v2', actions: { edit: true, withdraw: true, card: true, review: true } });
+  const confirmedApp = application({ status: flow.action === 'withdraw' ? 'withdrawn' : flow.action === 'review' ? 'returned' : flow.action === 'card' ? 'approved' : 'pending', updatedAt: 'synthetic-v2', contactConsent: ['submit', 'edit', 'card'].includes(flow.action), actions: { edit: true, withdraw: true, card: true, review: true } });
   const confirmedJoin = join({ status: flow.action === 'confirmJoined' ? 'joined' : flow.action === 'confirmFriend' ? 'awaitingInvite' : flow.action === 'withdraw' ? 'withdrawn' : flow.action === 'reportFriend' ? 'friendReported' : 'requested',
     updatedAt: 'synthetic-v2', actions: { confirmJoined: true } });
   const confirmed = ['applications', 'review'].includes(flow.page) ? { application: confirmedApp } : { record: confirmedJoin, actions: { reportFriend: true, withdraw: true } };
@@ -93,6 +93,7 @@ async function prepare(h: Harness, flow: Flow) {
   if (flow.page === 'applications') {
     if (['edit', 'card'].includes(flow.action)) await h.page.openForm(event({ id: 17, action: flow.action }));
     else { h.page.setData({ apply: true, proposedGame: '合成测试新游戏', realName: '合成测试申请人', phone: '00000000000', reason: '合成测试：尚未提交的组织计划' }); h.page._qr = qr; }
+    if (['submit', 'edit'].includes(flow.action)) h.page.consent(event({}, ['contact']));
   }
   if (flow.page === 'review') h.page.note(event({ id: 17 }, '合成测试：请补充训练安排'));
   if (flow.page === 'community-joins') h.page.note(event({ id: 23 }, '合成测试：已人工核实好友'));
@@ -122,7 +123,7 @@ describe('Community real deferred POST lock regression — synthetic VM', () => 
       if (flow.page === 'community') expect(record).toBeNull();
       else expect(record).toMatchObject({ updatedAt: 'synthetic-v1', status: flow.page === 'community-joins' ? 'requested' : 'pending' });
     }
-    if (flow.error && flow.page === 'applications') { expect(h.page.data.reason).toBe('合成测试：尚未提交的组织计划'); expect(h.page._qr).toBe(qr); expect(h.page.data.contactConsent).toBe(false); }
+    if (flow.error && flow.page === 'applications') { expect(h.page.data.reason).toBe('合成测试：尚未提交的组织计划'); expect(h.page._qr).toBe(qr); expect(h.page.data.contactConsent).toBe(true); }
     if (flow.error && flow.page === 'review') expect(h.page.data.docs[0].reviewDraft).toBe('合成测试：请补充训练安排');
     if (flow.error && flow.page === 'community-joins') expect(h.page.data.docs[0].noteDraft).toBe('合成测试：已人工核实好友');
   });
