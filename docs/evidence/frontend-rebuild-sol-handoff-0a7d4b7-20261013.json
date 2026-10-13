@@ -1,0 +1,100 @@
+{
+  "recordedAt": "2026-10-13T17:51:19.098492+00:00",
+  "sourceCommit": "0a7d4b7ca45f07970cb3814be02d65866fd91715",
+  "branch": "new",
+  "reason": "User corrected goal to comprehensive frontend rebuild by Astra using the complete authoritative prompt and frontend-design; Sol testing paused at read-only checkpoint.",
+  "sourceEdits": false,
+  "testImplementationEdits": false,
+  "sourceManifest": {
+    "path": "/workspace/qa-zijing/source-manifest-astra-design.json",
+    "files": 594,
+    "manifestSha256": "340e7ba6ad83fb7d8f12088eb43d57f7c57dc0b74036bf82e1d477cf968b8759",
+    "mismatches": [],
+    "status": "pass"
+  },
+  "newBuild": {
+    "status": "notrun"
+  },
+  "newRegression": {
+    "typecheck": "notrun",
+    "lint": "notrun",
+    "vitest": "notrun",
+    "full125E2E": "notrun",
+    "visualMatrix": "notrun",
+    "dedicatedAuthorization": "notrun"
+  },
+  "newProcessesStarted": [],
+  "newExpensiveJobsCancelled": [],
+  "preservedServices": [
+    {
+      "port": 3000,
+      "pids": [
+        3834,
+        3845
+      ],
+      "alive": [
+        true,
+        true
+      ],
+      "health": 200,
+      "buildId": "1LQXl0KVPMjo-UFXJdO9l"
+    },
+    {
+      "port": 3364,
+      "pids": [
+        3864,
+        3875
+      ],
+      "alive": [
+        true,
+        true
+      ],
+      "health": 200,
+      "buildId": "1LQXl0KVPMjo-UFXJdO9l"
+    },
+    {
+      "port": 3365,
+      "pids": [
+        16627,
+        16638
+      ],
+      "alive": [
+        true,
+        true
+      ],
+      "health": 200,
+      "buildId": "1LQXl0KVPMjo-UFXJdO9l"
+    }
+  ],
+  "ci": {
+    "headSha": "0a7d4b7ca45f07970cb3814be02d65866fd91715",
+    "runId": 38441230936,
+    "jobId": 115448027011,
+    "status": "completed",
+    "conclusion": "failure",
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38441230936",
+    "savedRunMetadata": "/workspace/qa-zijing/ci-0a7d4b7-runs.json",
+    "jobLogs": "GitHub log fetch returned HTTP 404 BlobNotFound; failure cause not verified"
+  },
+  "nextOwner": "Astra max",
+  "nextGoal": "Read complete authoritative prompt and frontend-design instructions; comprehensively rebuild information architecture, composition, typography, colors, components and interactions with existing business and security contracts intact.",
+  "authoritativePrompt": {
+    "path": "/workspace/qa-zijing/library-source/zijing_frontend_rebuild_prompt.md",
+    "libraryFileId": "libfile_b3ed4f8917948191850dc0b87c3b61a2",
+    "bytes": 35731,
+    "sha256": "1b1cb8e82084a4b1decb4e6a3864f24bd88354665c32cebd18c282da0d3e3e4a"
+  },
+  "frontendDesignSkill": {
+    "path": "/workspace/qa-zijing/skills/frontend-design/SKILL.md",
+    "url": "https://github.com/anthropics/skills/blob/main/skills/frontend-design/SKILL.md",
+    "gitBlob": "a5333457c414d20d625f307df945842c0952ecc3"
+  },
+  "safety": {
+    "productionDeployment": false,
+    "cmsPublication": false,
+    "wechatUpload": false,
+    "realDataAccess": false,
+    "protectedBranchesChanged": false
+  },
+  "officialWeChat": "notrun; no official tool/device"
+}

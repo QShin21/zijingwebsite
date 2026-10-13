@@ -172,3 +172,15 @@ Astra 最小处理目标：
 补充机器证据在 [frontend-design review JSON](evidence/frontend-design-review-20261013.json)。前后映射目录分别为 `/workspace/qa-zijing/frontend-design-native-before` 和 `.data/rebuild-native-preview`；每张截图带有合成/非官方标注。最终构建输入清单更新为 `/workspace/qa-zijing/source-manifest-astra-design.json`（594 文件，规范化清单 SHA-256 `340e7ba6ad83fb7d8f12088eb43d57f7c57dc0b74036bf82e1d477cf968b8759`），后续 Sol 应从包含本节两处精简的最终提交冻结。先前的 Astra 清单、旧构建、服务、数据库及失败证据全部保留。
 
 下步切回 Sol max：执行前节列出的新版完整回归，并把通知空态与原生首页的两处精简纳入代表截图。若真实运行再暴露源码问题，保存明确复现后交 Astra；当前没有需要继续推迟至另一 Astra turn 的已确认修复目标。
+
+## 用户纠正目标后的 Sol 检查点 · 2026-10-13 17:51 UTC
+
+正式测试轮从干净的 `new@0a7d4b7ca45f07970cb3814be02d65866fd91715` 接续，远端一致，两个保护分支仍为 `e366f3c`。已读取最新 AGENTS、交接、合同与 Astra 修复/设计记录；594 个源码输入与最终清单逐文件核对一致，权威附件物化字节仍为 35,731，SHA-256 `1b1cb8e82084a4b1decb4e6a3864f24bd88354665c32cebd18c282da0d3e3e4a`。
+
+用户随后明确要求：将相关完整 prompt 输入 frontend-design，按技能推进信息架构、构图、排版、配色、组件和交互的全面重构。此前审查与两处精简尚未完成这一新增目标。应父线程指令，本 Sol 轮在只读核验点停止，交回 Astra max；当前修复版不作为最终交付。未修改源码或测试实现，未启动新构建、类型/lint/单元、完整 E2E、视觉矩阵或专用授权回归，均保持“未运行”。没有新启动的昂贵作业需要取消。
+
+精确 SHA 的 GitHub CI [38441230936](https://github.com/QShin21/zijingwebsite/actions/runs/38441230936) 已 completed/failure，quality job `115448027011`。原始 run 元数据保存在 `/workspace/qa-zijing/ci-0a7d4b7-runs.json`；读取 job 日志返回 HTTP 404 `BlobNotFound`，失败原因尚未验证。这个远端终态不能代替本地正式回归。
+
+17:51 再核验三组旧服务均存活且健康 200：3000 runner/child `3834/3845`，3364 `3864/3875`，3365 `16627/16638`；三者 BUILD_ID 均仍为 `1LQXl0KVPMjo-UFXJdO9l`，尚未轮换至当前修复源码。没有停止、覆盖这些服务、旧快照、数据库或证据。原生官方工具/真机仍未执行。
+
+交接机器记录见 [Sol 安全检查点](evidence/frontend-rebuild-sol-handoff-0a7d4b7-20261013.json)。Astra 可直接读取全文 `/workspace/qa-zijing/library-source/zijing_frontend_rebuild_prompt.md` 与 `/workspace/qa-zijing/skills/frontend-design/SKILL.md`（已核验官方 blob `a5333457c414d20d625f307df945842c0952ecc3`），结合当前真实源码和既有业务合同开始全面设计/实现。用户的暖浅默认、紫色、中文无衬线、权限与功能范围继续有效。仅 `new`；不部署、发布 CMS、上传微信或读取真实用户资料。
