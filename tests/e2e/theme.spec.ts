@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { memberTest } from "./member-layout-fixture";
 import sharp from "sharp";
-import tokens from "../../src/design/tokens.json";
+import tokens from "../../src/design/tokens.json" with { type: "json" };
 
 const rgb = (hex: string) =>
   `rgb(${[1, 3, 5].map((offset) => parseInt(hex.slice(offset, offset + 2), 16)).join(", ")})`;

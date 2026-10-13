@@ -9,7 +9,7 @@ import config from "../../src/payload.config";
 import { profileFixture, saveLoadedProfile } from "../team-profiles-fixture";
 import { defaultTeamForm, saveTeamRecruitment } from "../../src/lib/team-core";
 import { teamHonorService } from "../../src/lib/team-honor-service";
-import tokens from "../../src/design/tokens.json";
+import tokens from "../../src/design/tokens.json" with { type: "json" };
 
 const rgb = (hex: string) =>
   `rgb(${[1, 3, 5].map((offset) => parseInt(hex.slice(offset, offset + 2), 16)).join(", ")})`;
