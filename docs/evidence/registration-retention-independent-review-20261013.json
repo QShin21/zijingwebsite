@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-10-13",
+  "reviewer": "miniapp_bridge independent source review",
+  "commit": "1e5802baf33ee6c5f599eaa4256f8402af991ef1",
+  "initialCommit": "db5e19ec5de73e0683ada0b925c56c4ae470eea3",
+  "result": "PASS within offline metadata-review scope; original status-contract finding resolved",
+  "fingerprints": [
+    {
+      "path": "src/lib/registration-retention-review.ts",
+      "sha256": "099d5e9322aa2ee25be6c4daf9ae14728350bc6eb853cb5aefc208d432a3859b",
+      "binding": "pinned-commit-and-matching-working-source",
+      "blob": "96026622b2fa6313a28b3b28f0fc9a80e9b5a8ae"
+    },
+    {
+      "path": "scripts/registration-retention-review.ts",
+      "sha256": "163eeff4cec0a6e85b8302c52589f4c0f61ee7784d6df22ee264d15b912b90c4",
+      "binding": "pinned-commit-and-matching-working-source",
+      "blob": "48b7b30d3ca0225519631a41da70f37c5572d359"
+    },
+    {
+      "path": "tests/registration-retention-review.test.ts",
+      "sha256": "f1ec55054ab00f5eaf7bfebb5096feee8943358eec8daacaf39b98670065040e",
+      "binding": "pinned-commit-and-matching-working-source",
+      "blob": "4476f5ac2ea0276b857be301db4843c38fac5781"
+    },
+    {
+      "path": "tests/fixtures/registration-retention-metadata-synthetic.json",
+      "sha256": "162ee3ceb1a9824fe86dae2346b0b1a6a5a57d03922f69d16d940ee46602e578",
+      "binding": "pinned-commit-and-matching-working-source",
+      "blob": "d74339b9c1fe6050eba949669bd9c5e351e227e6"
+    },
+    {
+      "path": "docs/REGISTRATION_RETENTION_REVIEW_20261013.md",
+      "sha256": "5d82415fce69359fbb4329a2c3936153842aaa4537454f760c180b705cf8d372",
+      "binding": "current-reviewed-document"
+    }
+  ],
+  "boundaries": {
+    "repositoryEdits": false,
+    "databaseAccess": false,
+    "realRegistrationInput": false,
+    "environmentFileOrSecretRead": false,
+    "networkAccess": false,
+    "businessMutation": false,
+    "deletionOrCleanup": false,
+    "schedulerOrLiveEndpoint": false
+  },
+  "implementationFindings": [
+    {
+      "id": "RETENTION-STATUS-001",
+      "status": "resolved",
+      "severity": "contract mismatch",
+      "originalEvidence": [
+        "db5e19ec:src/lib/registration-retention-review.ts:45-51",
+        "db5e19ec:tests/registration-retention-review.test.ts:96-106",
+        "src/collections/team-core.ts:166",
+        "src/migrations/20261012_160000_team_core.ts:13"
+      ],
+      "description": "Original metadata whitelist and positive test invented draft for establishment applications. Actual established collection has only pending/returned/rejected/withdrawn/approved.",
+      "resolution": "1e5802ba removes nonexistent status, tests rejection while preserving actual join draft, and changes synthetic fixture to pending."
+    }
+  ],
+  "passScope": [
+    "Pure helper imports no DB, environment, filesystem, network, Payload or business service. It does not mutate supplied input.",
+    "CLI accepts only --input/--as-of/--output or standalone --help, reads explicit JSON, and writes only a new report with wx/0600; it has no execution mode.",
+    "JSON record, top-level and reference fields are restricted; private values are rejected and not echoed in errors/output. Dates are normalized or classified for manual review rather than copied blindly.",
+    "Recent updatedAt does not hide records created at least one year ago or establish renewal. Actual join drafts, invalid/missing dates and related-policy scope remain manual-review matters.",
+    "All input records remain in output. No canDelete/deleteEligible field exists. readOnly=true, automaticDeletion=false and expiryConfirmed=false apply to the whole report.",
+    "Current and revoked canonical memberships and joined community relations are classified separately from application material. Source application, establishment, historical team version and community office reference warnings preserve dependency review.",
+    "referencesComplete is an operator assertion only; it neither checks DB completeness nor grants row deletion permission.",
+    "Confirmed one-year registration policy, long-term membership policy and Ye Jiaxin responsibility match user instructions. Document explicitly states automatic enforcement is unimplemented and deployed services/copies remain unverified."
+  ],
+  "syntheticValidation": {
+    "method": "Pinned TypeScript transpiled in Node VM; helper has no injected external API. CLI uses in-memory synthetic fs and explicit synthetic argv with no process.env. Only the final review evidence is written to /tmp.",
+    "passed": 16,
+    "failed": 0,
+    "probes": [
+      {
+        "name": "old-created-recent-updated-retained-without-expiry-or-renewal",
+        "passed": true
+      },
+      {
+        "name": "actual-join-draft-classified-without-submission-assumption",
+        "passed": true
+      },
+      {
+        "name": "nonexistent-establishment-draft-rejected-after-fix",
+        "passed": true
+      },
+      {
+        "name": "missing-invalid-future-reversed-dates-require-review",
+        "passed": true
+      },
+      {
+        "name": "related-community-scope-not-confirmed-expiry",
+        "passed": true
+      },
+      {
+        "name": "current-and-ended-memberships-preserved-with-separate-answers-review",
+        "passed": true
+      },
+      {
+        "name": "four-reference-contracts-protected-and-isolated-by-collection",
+        "passed": true
+      },
+      {
+        "name": "absence-of-declared-complete-references-does-not-imply-no-dependencies",
+        "passed": true
+      },
+      {
+        "name": "private-fields-execution-flags-and-invalid-reference-rejected",
+        "passed": true
+      },
+      {
+        "name": "duplicate-unknown-and-size-limit-input-rejected",
+        "passed": true
+      },
+      {
+        "name": "calendar-year-leap-clamp-and-timezone-do-not-create-submittedAt",
+        "passed": true
+      },
+      {
+        "name": "deep-frozen-input-unchanged-and-deterministic",
+        "passed": true
+      },
+      {
+        "name": "cli-execution-flags-rejected-before-any-fs-operation",
+        "passed": true
+      },
+      {
+        "name": "cli-private-input-errors-never-echo-values",
+        "passed": true
+      },
+      {
+        "name": "cli-new-file-exclusive-0600-or-existing-file-rejection",
+        "passed": true
+      },
+      {
+        "name": "cli-same-file-or-oversized-input-refused-without-read-write",
+        "passed": true
+      }
+    ]
+  },
+  "testSourceReview": {
+    "path": "tests/registration-retention-review.test.ts",
+    "parentReportedAssertions": 49,
+    "parentReportedCombinedAssertions": 100,
+    "independentVitestRerun": false,
+    "notes": [
+      "Reviewed synthetic fixtures, literal statuses, rejection cases and CLI checks. Test cleanup removes only its mkdtemp-owned fixture folder; CLI itself implements no removal.",
+      "Parent reports 100/100 plus lint and typecheck after amendment; these are parent evidence, not independently rerun here."
+    ]
+  },
+  "sourceDependencyEvidence": [
+    "src/collections/signups.ts:57 event-signups handles both event/community-post activity kinds",
+    "src/collections/staff-recruitment.ts:70 actual six statuses",
+    "src/collections/team-core.ts:166 establishment statuses and :253 join statuses; :289 active/revoked memberships",
+    "src/collections/community-operations.ts:139 and :172 actual application/join statuses",
+    "src/migrations/20261012_160000_team_core.ts:34-38 team and historical establishment source FKs; :77 non-null membership source application FK",
+    "src/migrations/20261011_180000_club_operations.ts:30 community office source application FK",
+    "src/lib/team-memberships.ts:88-135 establishment qualification reads approved source application and matching team/game"
+  ],
+  "correctedPriorAudit": {
+    "path": "/tmp/zijing-registration-retention-audit-20261013.json",
+    "sha256": "e1999b0666d71efdb437da73580b638e7fbe432d24dabadecda994f920f8b135",
+    "modifiedScope": "Recommendation paragraph and two synthetic case descriptions only; original c28efb1 source facts unchanged; establishment statuses originally already correct."
+  },
+  "limitations": [
+    "No live records, age counts, physical dependencies, deployed external services, exports, backups, devices or request handling outcomes were inspected.",
+    "This report verifies an offline review aid. It does not verify automatic one-year deletion or any actual deletion, publication, platform configuration or review.",
+    "Policy start/renewal date rules are deliberately not created by the module. Human review must verify real submission/reapplication history and purpose scope.",
+    "Record/source metadata input is operator supplied; syntactic acceptance and reference completeness do not verify identity, authorization or existence."
+  ],
+  "remainingContractBlockers": []
+}

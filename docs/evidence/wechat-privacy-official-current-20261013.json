@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-10-13T02:41:02.588896+00:00",
+  "repository": "wechat-miniprogram/api-typings",
+  "branch": "master",
+  "commit": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+  "commitTime": "2026-09-01T12:25:38Z",
+  "sourceURL": "https://raw.githubusercontent.com/wechat-miniprogram/api-typings/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts",
+  "sha256": "25e9e6fdab1b4282ee5231d8f8de7a31a177d2edc690ec834e0da479cc166245",
+  "bytes": 1633209,
+  "lines": 36799,
+  "locations": {
+    "监听隐私接口需要用户授权事件": [
+      28790
+    ],
+    "为确保用户有同意的操作": [
+      28802,
+      28881
+    ],
+    "interface GetPrivacySettingSuccessCallbackResult": [
+      6211
+    ]
+  },
+  "platformHTMLRead": false,
+  "platformHTMLLimitation": "Official PrivacyAuthorize and onNeedPrivacyAuthorization web pages could not be fetched by the browser tool on 2026-10-13.",
+  "documentationOnly": true,
+  "platformConfigurationVerified": false,
+  "deviceVerified": false
+}

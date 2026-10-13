@@ -1,0 +1,620 @@
+{
+  "auditVersion": 1,
+  "auditedAt": "2026-10-13T02:27:48.072677+00:00",
+  "sourceCommit": "c28efb1fe18a047256a43a51af1f8482c9b4d9d0",
+  "workspaceHeadAtReport": "c28efb1fe18a047256a43a51af1f8482c9b4d9d0",
+  "workspaceBranch": "codex/privacy-retention-review-20261013",
+  "confirmedUserChoices": {
+    "operator": "社长叶佳鑫",
+    "privacyWeChat": "yejx2003",
+    "registrationMaterials": "1年",
+    "membershipRecords": "长期保留",
+    "deletionRequestsHandledBy": "叶佳鑫",
+    "confirmationAlreadyProvided": true
+  },
+  "scope": {
+    "sourceReadOnly": true,
+    "repositoryFilesModified": false,
+    "databaseConnected": false,
+    "realRegistrationRead": false,
+    "credentialsRead": false,
+    "productionOrDeploymentAccess": false,
+    "recordMutations": false,
+    "purgeOrSchedulerCreated": false,
+    "allRecordsMustRemain": true
+  },
+  "primaryRegistrationCollections": [
+    {
+      "collection": "event-signups",
+      "sqlTable": "event_signups",
+      "classification": "活动报名答卷",
+      "activityTypes": [
+        "events",
+        "community-posts"
+      ],
+      "contentFields": [
+        "memberName",
+        "questions",
+        "answers",
+        "formVersion"
+      ],
+      "statuses": null,
+      "payloadTimestamps": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "submittedAtField": false,
+      "editedAtField": false,
+      "builtInPayloadVersions": false,
+      "automaticOneYearDeletionInInspectedSource": false,
+      "collectionDeleteAccess": false,
+      "reviewedAtField": false,
+      "timestampMeaning": {
+        "createdAt": "首次报名记录建立；重复POST返回同一记录",
+        "updatedAt": "最后修改作答；不是独立editedAt字段"
+      },
+      "snapshotBehavior": "questions/answers/formVersion保存该行当前作答快照；PATCH或POST action=edit覆盖当前快照。没有逐次答案版本表。",
+      "withdrawalReapply": "没有报名撤回状态机；重复提交按activityType/activityID/member唯一键保留一行，改答沿用ID。",
+      "references": [
+        "member→users NO ACTION",
+        "organizer→users SET NULL",
+        "game→games SET NULL",
+        "activityID是numeric标识，不是指向events/community_posts的数据库FK",
+        "payload_locked_documents_rels→event_signups CASCADE"
+      ],
+      "metadataWhitelist": [
+        "id",
+        "activityType",
+        "activityID",
+        "createdAt",
+        "updatedAt"
+      ],
+      "evidence": [
+        "src/collections/signups.ts:57",
+        "src/lib/activity-signups.ts:166",
+        "src/lib/activity-signups.ts:227",
+        "src/migrations/20261011_160000_activity_signups.ts:8"
+      ]
+    },
+    {
+      "collection": "staff-applications",
+      "sqlTable": "staff_applications",
+      "classification": "骨干招新申请答卷",
+      "contentFields": [
+        "memberName",
+        "batchTitle",
+        "questions",
+        "answers",
+        "formVersion",
+        "feedback",
+        "reviewNotes",
+        "history"
+      ],
+      "payloadTimestamps": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "submittedAtField": false,
+      "editedAtField": false,
+      "builtInPayloadVersions": false,
+      "automaticOneYearDeletionInInspectedSource": false,
+      "collectionDeleteAccess": false,
+      "reviewedAtField": false,
+      "statuses": [
+        "submitted",
+        "reviewing",
+        "returned",
+        "accepted",
+        "rejected",
+        "withdrawn"
+      ],
+      "timestampMeaning": {
+        "createdAt": "该用户在该批次第一次建行；重提保留原时间",
+        "updatedAt": "提交/改稿/撤回/审核及反馈更新都可推进",
+        "history.at": "已有action+at+from+to+feedback历史；submit/edit动作时间能说明提交/修改，但history整体包含私人反馈，当前纯metadata阶段不读取它"
+      },
+      "snapshotBehavior": "当前questions/answers随submit/edit覆盖；history保留动作和反馈，不保留每次完整旧答案；审核内部reviewNotes可能延续。",
+      "withdrawalReapply": "batchID:userID唯一requestKey；withdraw→submit、edit均复用同一申请ID。",
+      "references": [
+        "batch→staff_batches NO ACTION",
+        "applicant→users NO ACTION",
+        "payload_locked_documents_rels→staff_applications CASCADE；源码未见长期任职/成员来源指向staff申请的FK"
+      ],
+      "metadataWhitelist": [
+        "id",
+        "batch",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ],
+      "evidence": [
+        "src/collections/staff-recruitment.ts:35",
+        "src/lib/staff-recruitment.ts:65",
+        "src/lib/staff-recruitment.ts:106",
+        "src/migrations/20261012_050000_staff_recruitment.ts:15"
+      ]
+    },
+    {
+      "collection": "team-join-applications",
+      "sqlTable": "team_join_applications",
+      "classification": "代表队选拔申请，含未提交草稿",
+      "contentFields": [
+        "title（包含申请人昵称）",
+        "formSnapshot",
+        "answers",
+        "formVersion",
+        "reviewNote"
+      ],
+      "payloadTimestamps": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "submittedAtField": false,
+      "editedAtField": false,
+      "builtInPayloadVersions": false,
+      "automaticOneYearDeletionInInspectedSource": false,
+      "collectionDeleteAccess": false,
+      "reviewedAtField": true,
+      "statuses": [
+        "draft",
+        "pending",
+        "returned",
+        "rejected",
+        "withdrawn",
+        "approved"
+      ],
+      "timestampMeaning": {
+        "createdAt": "可能仅是首次保存草稿，不能称首次正式提交",
+        "updatedAt": "草稿、提交、改稿、撤回、审核均更新",
+        "reviewedAt": "审批时间，重提时清空"
+      },
+      "snapshotBehavior": "formSnapshot/answers随保存或重提覆盖当前快照；hidden招新仍给本人这个原快照回执，没有逐次答案版本表。",
+      "withdrawalReapply": "recruitmentID:applicantID唯一；draft→submit、withdraw→draft/submit复用ID；新批次使用新申请。",
+      "references": [
+        "team_memberships.source_application_id NOT NULL → team_join_applications NO ACTION",
+        "team/game/recruitment/applicant必填FK分别指向teams/games/team_recruitments/users",
+        "reviewedBy→users SET NULL",
+        "payload_locked_documents_rels CASCADE"
+      ],
+      "protectFromPurge": "任何长期team-memberships源引用均阻止整行删除；不可因申请已满一年删除其成员来源。",
+      "metadataWhitelist": [
+        "id",
+        "team",
+        "recruitment",
+        "status",
+        "createdAt",
+        "updatedAt",
+        "reviewedAt"
+      ],
+      "evidence": [
+        "src/collections/team-core.ts:230",
+        "src/lib/team-core.ts:672",
+        "src/lib/team-core.ts:758",
+        "src/lib/team-core.ts:905",
+        "src/migrations/20261012_160000_team_core.ts:52",
+        "src/migrations/20261012_160000_team_core.ts:77"
+      ]
+    },
+    {
+      "collection": "team-establishment-applications",
+      "sqlTable": "team_establishment_applications",
+      "classification": "建队申请与批准来源",
+      "contentFields": [
+        "title",
+        "reason",
+        "reviewNote"
+      ],
+      "payloadTimestamps": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "submittedAtField": false,
+      "editedAtField": false,
+      "builtInPayloadVersions": false,
+      "automaticOneYearDeletionInInspectedSource": false,
+      "collectionDeleteAccess": false,
+      "reviewedAtField": true,
+      "statuses": [
+        "pending",
+        "returned",
+        "rejected",
+        "withdrawn",
+        "approved"
+      ],
+      "timestampMeaning": {
+        "createdAt": "最初建行",
+        "updatedAt": "改稿/重提、撤回、审核等更新时间",
+        "reviewedAt": "审批时间，重提清空"
+      },
+      "snapshotBehavior": "退回/撤回重提覆盖title/reason/审核字段并沿用ID；状态变化另写最小审计，未见逐次计划快照表。",
+      "withdrawalReapply": "返回或撤回后编辑原ID；同社群/队名requestKey保持唯一。",
+      "references": [
+        "teams.establishment_application_id → team_establishment_applications SET NULL",
+        "_teams_v.version_establishment_application_id → team_establishment_applications SET NULL",
+        "申请team反向→teams SET NULL",
+        "applicant/game必填FK NO ACTION"
+      ],
+      "protectFromPurge": "isEstablishedTeam实际读取原申请status=approved及team/game对应关系；即使FK允许SET NULL，删除也会使队伍失去既有资格判定，牵连招新/成员简介/荣誉资格。历史_teams_v引用同样要审查。",
+      "metadataWhitelist": [
+        "id",
+        "team",
+        "game",
+        "status",
+        "createdAt",
+        "updatedAt",
+        "reviewedAt"
+      ],
+      "evidence": [
+        "src/collections/team-core.ts:135",
+        "src/lib/team-core.ts:233",
+        "src/lib/team-core.ts:345",
+        "src/lib/team-memberships.ts:88",
+        "src/migrations/20261012_160000_team_core.ts:17",
+        "src/migrations/20261012_160000_team_core.ts:33"
+      ]
+    },
+    {
+      "collection": "community-applications",
+      "sqlTable": "community_applications",
+      "classification": "建群及管理员申请资料",
+      "contentFields": [
+        "proposedGame",
+        "realName",
+        "phone",
+        "reason",
+        "wechatQr",
+        "reviewNote"
+      ],
+      "payloadTimestamps": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "submittedAtField": false,
+      "editedAtField": false,
+      "builtInPayloadVersions": false,
+      "automaticOneYearDeletionInInspectedSource": false,
+      "collectionDeleteAccess": false,
+      "reviewedAtField": true,
+      "statuses": [
+        "pending",
+        "approved",
+        "returned",
+        "rejected",
+        "withdrawn"
+      ],
+      "timestampMeaning": {
+        "createdAt": "最初申请建行，旧行重提不重置",
+        "updatedAt": "重提/撤回/审批/已批准名片或展示同意变更均可更新",
+        "reviewedAt": "审批时间，重提清空"
+      },
+      "snapshotBehavior": "姓名、手机、说明、QR直接存当前申请；名片是受控data:image/png;base64而非公开media文件。未见逐次内容快照表。",
+      "withdrawalReapply": "退回/撤回申请原ID重提，唯一requestKey和旧申请检查防止另建绕过；approved名片可更新但审批材料不随名片动作改写。",
+      "references": [
+        "users_community_offices.source_application_id → community_applications SET NULL",
+        "applicant/game/reviewer关系",
+        "批准可创建games并授予communityOffices，不改变平台角色",
+        "公开联系人和新进群请求会查询approved且contactConsent=true的申请QR"
+      ],
+      "protectFromPurge": "保留任职来源证据并审查在任名片依赖；删除approved来源申请会清source引用、丢失名片支持，不能当普通过期答卷整行清理。",
+      "metadataWhitelist": [
+        "id",
+        "game",
+        "status",
+        "createdAt",
+        "updatedAt",
+        "reviewedAt"
+      ],
+      "evidence": [
+        "src/collections/community-operations.ts:24",
+        "src/collections/community-operations.ts:105",
+        "src/lib/community-operations.ts:17",
+        "src/lib/community-operations.ts:26",
+        "src/lib/community-contacts.ts:15",
+        "src/migrations/20261011_180000_club_operations.ts:30"
+      ]
+    }
+  ],
+  "relatedCollectionsRequiringSeparateReview": [
+    {
+      "collection": "community-joins",
+      "sqlTable": "community_joins",
+      "classification": "普通人工进群意向、联系及确认记录；单列相关人工审查范围",
+      "fields": [
+        "memberName",
+        "contact",
+        "note",
+        "confirmedBy",
+        "confirmedAt",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ],
+      "statuses": [
+        "requested",
+        "friendReported",
+        "awaitingInvite",
+        "joined",
+        "withdrawn"
+      ],
+      "notes": [
+        "不是event-signups答卷，不能遗漏该普通入社渠道。",
+        "member/game唯一dedupeKey；withdraw→request复用ID并覆盖contact/note/confirmation。",
+        "joined记录用于成员/人工拉群证明，应按已确认的成员长期保留安排审查，不能自动归入一年可删除清单。"
+      ],
+      "evidence": [
+        "src/collections/community-operations.ts:146",
+        "src/lib/community-operations.ts:39"
+      ]
+    },
+    {
+      "collection": "team-memberships",
+      "sqlTable": "team_memberships",
+      "classification": "长期权威成员关系，不纳入报名资料整行到期删除",
+      "fields": [
+        "member",
+        "team",
+        "game",
+        "status",
+        "joinedAt",
+        "revokedAt",
+        "leftAt",
+        "sourceApplication",
+        "grantedBy",
+        "revocationReason"
+      ],
+      "notes": [
+        "同team/member通常一行；重新录取会复用membershipID，推进joinedAt并更新sourceApplication，不是完整逐次入队历史表。",
+        "team_member_profiles.membership_id NOT NULL FK依赖此行；team_honor_records.membershipRef是逻辑数字引用，不能只按数据库FK判断无影响。",
+        "长期保留成员行与原申请关联证据；保留或处理答案属于单独人工审查，当前任务所有行保持。"
+      ],
+      "evidence": [
+        "src/collections/team-core.ts:269",
+        "src/lib/team-core.ts:905",
+        "src/migrations/20261012_170000_team_member_profiles.ts:13",
+        "src/collections/team-honor-records.ts:149"
+      ]
+    },
+    {
+      "collection": "users.communityOffices / users.communities / users.teams",
+      "classification": "任职/旧投影/管理关系；非申请答卷",
+      "notes": [
+        "communityOffices含sourceApplication/grantedAt，撤任记录保留。",
+        "users.teams是负责分部管理关系，不能作为第二份正式队伍成员名单。"
+      ],
+      "evidence": [
+        "src/collections/index.ts:547"
+      ]
+    },
+    {
+      "collection": "team-member-profiles / seasons.members / team-honor-records / honors",
+      "classification": "自愿公开简介、赛季阵容与荣誉档案；不套用报名一年的整行清理",
+      "notes": [
+        "简介avatar存数据库，隐藏或离队不等于物理删除资料。",
+        "荣誉history/approvedSnapshot存私人历史证据，包括图片和视频指针；withdraw/save保留旧批准snapshot。",
+        "team-honor-records有submittedAt但它属于荣誉投稿，不能借给五类报名申请假定同名字段。"
+      ],
+      "evidence": [
+        "src/lib/team-honor-service.ts:478",
+        "src/collections/team-honor-records.ts:172",
+        "src/collections/index.ts:633",
+        "src/migrations/20261012_170000_team_member_profiles.ts:18"
+      ]
+    },
+    {
+      "collection": "staff-batches / team-recruitments / recruitment / events / community-posts",
+      "classification": "报名窗口或公开内容配置；不是个人报名答卷",
+      "notes": [
+        "events/_events_v保存signupForm配置；team-recruitments/signupForm保存配置，个人作答在独立申请行。",
+        "普通content()有Payload drafts/maxPerDoc30，包括teams、events、seasons、recruitment等；_teams_v存在建队来源引用。",
+        "maxPerDoc=30是版本数量限制，不能解读成一年保留或所有答卷版本自动清理。"
+      ],
+      "evidence": [
+        "src/collections/index.ts:334",
+        "src/migrations/20261011_160000_activity_signups.ts:5",
+        "src/migrations/20261012_160000_team_core.ts:39"
+      ]
+    }
+  ],
+  "mechanismConclusion": [
+    "当前源码有权限、窗口、版本并发保护及人工状态操作，未见针对五类报名/申请的一年自动TTL、purge或保留定时任务。",
+    "撤回、拒绝、关闭、归档、隐藏均保留现有记录；读不到不等于删除。",
+    "没有五类共用submittedAt/editedAt字段。createdAt无法表示重提时间；updatedAt也可能仅因审核、反馈或名片更新而变化。",
+    "当前范围只能交付人工审查候选清单和执行记录；不能声称本轮已经把超过一年资料删除。"
+  ],
+  "copiesAndRetention": {
+    "databaseBackups": {
+      "facts": [
+        "scripts/backup.mjs pg_dump --format=custom没有排除任何报名表或答案列，完整库含答案、QR、历史、账号哈希及仍保留的旧表。",
+        "census通过row_to_json读取全表内容算hash；即使输出仅count/hash，也不是metadata-only导出，当前纯清单不得调用它。",
+        "脚本权限目录0700/manifest0600及哈希用于保护/完整性；源码没有为database.dump提供加密，不能从custom格式或SHA256宣称已加密。"
+      ],
+      "evidence": [
+        "scripts/backup.mjs:159",
+        "scripts/backup.mjs:205",
+        "scripts/backup.mjs:197",
+        "scripts/backup.mjs:233"
+      ]
+    },
+    "fourteenDayLimit": {
+      "facts": [
+        "BACKUP_RETENTION_DAYS默认14，清理仅在成功create分支执行。",
+        "按BACKUP_DEST内目录mtime筛选，只删除zijing-*且存在manifest的目录；不是持续服务，也不按每条报名年龄清理。",
+        "BACKUP_REMOTE副本先复制，未见相同过期删除；MEDIA_BACKUP_SOURCE/S3镜像没有由该逻辑清理。",
+        "restore verify创建zijing_restore_<timestamp>数据库及.data下媒体，保留检查；没有对应自动保留清理。",
+        "docs记录community-*/realtime-*/questionnaire-responses-mini-*等恢复备份不满足zijing-*命名条件，不能把14天推广到它们。"
+      ],
+      "actualProductionInventoryVerified": false,
+      "evidence": [
+        "scripts/backup.mjs:238",
+        "scripts/backup.mjs:247",
+        "scripts/backup.mjs:270",
+        "docs/DEPLOYMENT.md:90",
+        "docs/DEPLOYMENT.md:94",
+        "docs/DEPLOYMENT.md:100",
+        "docs/DEPLOYMENT.md:109",
+        "docs/DEPLOYMENT.md:115"
+      ]
+    },
+    "media": {
+      "facts": [
+        "申请QR存在community_applications.wechat_qr的dataURI；删除media目录或收回名片展示不会清数据库/备份中的QR。",
+        "成员简介avatar和荣誉images/approvedSnapshot/history可存数据库；荣誉MP4在MEDIA_DIR/.team-honor-videos，旧视频和永久隔离标记在.showcase-videos及.team-honor-reserved。",
+        "backup v3同时复制media、本地普通视频、私有荣誉视频和隔离标记。",
+        "现有永久隔离标记防止旧荣誉视频路径复公开，应保留；不能因年限/孤立文件名直接清。"
+      ],
+      "evidence": [
+        "src/lib/application-details.ts:11",
+        "src/lib/team-honor-service.ts:478",
+        "src/lib/team-honor-videos.ts:19",
+        "src/lib/team-honor-videos.ts:49",
+        "scripts/backup.mjs:29",
+        "scripts/backup.mjs:41"
+      ]
+    },
+    "audit": {
+      "facts": [
+        "全局audit保留actor/object/action/status及Payload时间；状态日志通常不直接复制答案。",
+        "staff-applications.history包含feedback，honor history含actorName/note/approvedSnapshot，比全局audit更敏感。",
+        "授权查看/导出staff会写审计，CSV活动导出也记录audit；审计仍指向记录ID，删除行不会自动删除这些字符串引用。",
+        "源码未见audit一年保留机制，不能当普通答案或一律同步删除。"
+      ],
+      "evidence": [
+        "src/collections/index.ts:799",
+        "src/lib/staff-recruitment.ts:106",
+        "src/lib/staff-recruitment.ts:146",
+        "src/app/(frontend)/api/activities/[kind]/[id]/signup/route.ts:86",
+        "src/lib/team-honor-service.ts:479"
+      ]
+    },
+    "exportsAndClients": {
+      "facts": [
+        "活动CSV的答卷表/成员明细/按题明细含实名/昵称、时间、快照题目和完整答案；staff CSV也含答卷。",
+        "Content-Disposition下载后文件由下载者持有；未见导出文件注册、过期回收、对接删除传播机制。",
+        "导出字段标题首次提交时间读取createdAt，staff重提或team草稿场景不能泛化成最后提交时间。",
+        "网站Questionnaire记忆默认关闭；选中后localStorage保存answers和at。7天过期在再次打开同draftKey时惰性删除，提交成功或关闭记忆也删除；不是7天时刻自动清所有旧key。",
+        "native signup草稿和回执在Page内存，session持久化token和最小用户投影；私有QR/头像/视频本地文件按生命周期和登出清理。用户主动下载的QR或外部截图不归清单脚本控制。",
+        "外部报名链接/微信联系人渠道的外部副本无法从本源码枚举或代为删除。"
+      ],
+      "evidence": [
+        "src/lib/questionnaire-export.ts:75",
+        "src/lib/questionnaire-export.ts:280",
+        "src/lib/staff-recruitment.ts:143",
+        "src/components/Questionnaire.tsx:75",
+        "src/components/CommunityJoinFlow.tsx:45",
+        "miniprogram/src/lib/session.js:23",
+        "miniprogram/src/lib/files.js:30"
+      ]
+    }
+  },
+  "minimalMetadataOnlyListRecommendation": {
+    "implementationScope": "纯函数或本地CLI消费显式metadata JSON及显式asOf；本轮只用合成输入，不连Payload/SQL，不新增后台入口。",
+    "collections": "列出上述五类主申请；community-joins作为相关记录单列，长期成员和来源引用仅作保留/人工核查提示。",
+    "allowedInputFields": [
+      "collection",
+      "id",
+      "activityType",
+      "activityID",
+      "status（有该字段的集合）",
+      "createdAt",
+      "updatedAt",
+      "reviewedAt（实际存在的集合）",
+      "显式提供的来源引用计数/保留标记"
+    ],
+    "excludeFields": [
+      "answers",
+      "questions",
+      "formSnapshot",
+      "history",
+      "reviewNote",
+      "feedback",
+      "reviewNotes",
+      "realName",
+      "phone",
+      "wechatQr",
+      "memberName",
+      "applicantName",
+      "email",
+      "title中含昵称的申请标题",
+      "token",
+      "requestKey",
+      "membershipKey"
+    ],
+    "dateDesignChoice": "以createdAt加一UTC自然年发现旧记录，并同时提供max(createdAt,updatedAt)加一UTC自然年辅助审查近期改稿/审核/重提；旧创建近期修改仍须保留在人工审查清单。两个技术参考点不等于submittedAt或已确认到期日，也不自行建立更新即续期制度；闰日按下一年的月末排序。",
+    "invalidOrUnknownMetadata": "缺日期/未来/逆序日期转人工核查；未知集合/状态/引用及私人字段应拒绝。近期编辑/重提不能隐去旧记录，也不能仅凭旧createdAt认定已到期；真实提交/重提时间及政策范围由人工核验。",
+    "outputFields": [
+      "collection",
+      "id",
+      "existingStatus",
+      "anchorField",
+      "anchorAt",
+      "reviewAfter",
+      "reasonCodes",
+      "referenceChecksRequired",
+      "manualReviewOnly"
+    ],
+    "outputSemantics": "仅候选清单，供叶佳鑫按申请记录和长期关系人工审查；没有deleteEligible、删除命令、HTTP写动作或状态迁移。所有record保持原状。",
+    "rootCopyableScope": [
+      "仅一个或两个独立metadata规则/CLI .mjs文件（Node内置模块，无Payload/env/DB依赖）",
+      "合成metadata样例与纯边界测试",
+      "解释五类范围、日期语义、来源关联及备份/导出人工审查步骤的文档"
+    ],
+    "neverIncludeInCopy": [
+      ".env或凭据",
+      "真实答卷JSON/CSV",
+      "数据库dump",
+      "媒体目录",
+      "BACKUP_DEST/BACKUP_REMOTE内容",
+      "恢复库或恢复媒体"
+    ],
+    "syntheticCases": [
+      "events/community-posts同属event-signups",
+      "旧createdAt但新updatedAt仍保留created-one-year-review；不认定到期或自动续期",
+      "仅实际存在的team-join草稿createdAt不标成submittedAt；建队draft不属于现有状态",
+      "withdraw/reapply同ID保留",
+      "approved申请有成员或team/_teams_v/office引用只显示保留核查",
+      "日期缺失/未来/闰日/未知集合保守处理",
+      "含answers/QR/history输入拒绝或剔除且结果不得含私有值",
+      "没有任何连接/删除/scheduler副作用"
+    ],
+    "recommendationRevision": "2026-10-13 独立复核最终离线实现后更新建议；原 c28efb1 源码事实保持不变。"
+  },
+  "operatorManualReviewChecklist": [
+    "核对资料用途与现有状态，保留所有记录；本轮不执行删除。",
+    "长期team-memberships、profiles、honor逻辑引用，以及teams/_teams_v、users_community_offices的源申请引用逐项核查，禁止整行purge。",
+    "一年报名资料的人工处理与长期资格证明需分开评估；当前schema把二者放在关联记录里，不能用统一DELETE代替审查。",
+    "处理请求时一并盘点受控答卷导出、备份/异机副本/恢复库/媒体副本与浏览器草稿；不得承诺系统可远程清除他人下载。",
+    "审查结果记录collection/id/处理依据及副本处置安排，不把答卷、QR或联系方式复制进新日志。"
+  ],
+  "limitations": [
+    "仅源码审查；实际数据库记录年龄、生产备份目录、外部导出和外部调度均未读取或验证。",
+    "用户已确认运营方和保存安排；本审查不增设制度或平台权限，不提供审核/法律通过保证。"
+  ],
+  "sourceBlobs": {
+    "src/collections/signups.ts": "cdd6b16c3885693c3087ec981183bee9c7ceea91",
+    "src/collections/staff-recruitment.ts": "d5083c2a4bedd9431a0f79cd93cc7790f7aac72d",
+    "src/collections/team-core.ts": "6b79f4a6e4934fb21fa4121eb048cfa4ceff0a60",
+    "src/collections/community-operations.ts": "d0fe53e15c4efaf3e817499dadf261e4823bc2af",
+    "src/collections/index.ts": "27bf9da869845b0aeb565b882f53c9967ca7a640",
+    "src/collections/team-profiles.ts": "3a432c1bbe122fddfc4b721c8183e2ecb05f26de",
+    "src/collections/team-honor-records.ts": "e26b9580092d74a54061c544fd51dbdc45a89463",
+    "src/lib/activity-signups.ts": "7ca4273cfeb5b0a0b34df2d0a858f82751b9a99e",
+    "src/lib/staff-recruitment.ts": "da9361f021d473dd44ed852496f297841f8af4d4",
+    "src/lib/team-core.ts": "241283719430e11e5f2d9f4d3dc37f3873d04274",
+    "src/lib/team-memberships.ts": "46a892f0554f02172d23896195c8661d0afa5967",
+    "src/lib/community-operations.ts": "ce5aaf27b02b3fde2d9a97150dac244f10881a17",
+    "src/lib/community-contacts.ts": "e5b798704226e1aeea7f2f08a275e4b162560ae3",
+    "src/lib/application-details.ts": "e00cf4d3e666768300d0bde32cf62755a39acbe4",
+    "src/lib/questionnaire-export.ts": "5d8898d7f01a166f30e7ddbc6a68674b3e53c706",
+    "src/lib/team-honor-service.ts": "894cc677895920e1672c6dca8290e7fd91329b79",
+    "src/lib/team-honor-videos.ts": "a71e67442540e893f6d7c992afdd1f97b5760ec9",
+    "src/components/Questionnaire.tsx": "ffa678675655a7df31a93211b3c0a12c9e559683",
+    "scripts/backup.mjs": "52fb1df305ff59955aa01f52b14cf508170ef54d",
+    "docs/DEPLOYMENT.md": "46924178c87a3bd16190d5ec2a35486ae9d06971",
+    "compose.yaml": "a726bd882e26a931b5eb8700db29f90de86acaf7",
+    "src/migrations/20261011_160000_activity_signups.ts": "4804db974cb54e8301b97ac5681709c4f555bcf6",
+    "src/migrations/20261011_180000_club_operations.ts": "6121952ffa185f8ba7a17b76cfdf75edb5cff4c2",
+    "src/migrations/20261012_050000_staff_recruitment.ts": "9a9747b94b4ffe05fad23fbe28a9e217e0610f88",
+    "src/migrations/20261012_160000_team_core.ts": "a47f81e6a8f62f596da3bb2808750216c114257d",
+    "src/migrations/20261012_170000_team_member_profiles.ts": "267d590f3424be25648036b2ba54a9b6aad8ed20"
+  }
+}

@@ -1,0 +1,638 @@
+{
+  "key": "privacy",
+  "title": "网站与微信小程序隐私说明",
+  "slug": "privacy",
+  "summary": "运营者为叶佳鑫（清华大学学生紫荆电竞社社长），隐私微信 yejx2003。报名资料保留政策为 1 年，成员关系记录长期保留；当前无自动到期删除，超期资料需要人工复核处理。",
+  "body": {
+    "root": {
+      "children": [
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "运营者与隐私联系渠道",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "heading",
+          "version": 1,
+          "tag": "h2"
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "本网站与「竞在紫荆」微信小程序的运营者为叶佳鑫（清华大学学生紫荆电竞社社长）。个人信息与隐私事务由叶佳鑫负责，隐私联系微信为 yejx2003。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "本说明适用于 home.thuzijing.top 网站及对应小程序提供的账号、报名、社群、代表队、简介和荣誉功能。有关查看、更正、关闭展示或删除资料的问题，可通过上述微信联系叶佳鑫。删除申请由叶佳鑫审核处理。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "按功能提供的信息与用途",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "heading",
+          "version": 1,
+          "tag": "h2"
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "我们按你实际使用的功能处理相应资料。具体填写项目、必填或选填要求，以提交前显示的表单和功能说明为准。请只提供完成当前事项所需的信息；提交组员或其他人的资料、图片、视频前，请确认已取得其相应授权。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "账号与认证：你提供的昵称、邮箱、登录密码或邮箱验证码用于注册、登录、恢复账号和验证身份。小程序沿用本站账号，保存有到期时间的登录凭证及有限账号资料，以便识别本人并执行服务端授权。该登录流程不获取微信手机号，也不会自动把本站账号绑定为微信身份。",
+                  "type": "text",
+                  "version": 1
+                }
+              ],
+              "direction": null,
+              "format": "",
+              "indent": 0,
+              "type": "listitem",
+              "version": 1,
+              "value": 1
+            },
+            {
+              "children": [
+                {
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "活动与社群活动报名：保存本人账号、报名关联、填写的答案、题目和答案快照、提交及修改时间，用于对应活动组织、报名处理和本人回执。表单可能按活动需要收集姓名、联系方式、游戏信息、时间安排或组员资料；填写项以实际展示的问卷为准。",
+                  "type": "text",
+                  "version": 1
+                }
+              ],
+              "direction": null,
+              "format": "",
+              "indent": 0,
+              "type": "listitem",
+              "version": 1,
+              "value": 2
+            },
+            {
+              "children": [
+                {
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "骨干招新与代表队申请：保存本人账号、所属批次或队伍、填写的资料、表单版本及快照、申请状态和审核记录，用于选拔、联系及申请处理。骨干表单包括方向、姓名、学校院系年级、动机、经验、可投入时间和一种联系方式；入队表单包括游戏 ID 或昵称、位置、经历、训练时间和一种联系方式，另有按实际表单显示的项目。建队申请还涉及组织和训练方案。",
+                  "type": "text",
+                  "version": 1
+                }
+              ],
+              "direction": null,
+              "format": "",
+              "indent": 0,
+              "type": "listitem",
+              "version": 1,
+              "value": 3
+            },
+            {
+              "children": [
+                {
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "人工入社及社群管理员申请：保存社群、本人账号、选定联系管理员、进群意向和处理进度。建群或管理员申请可包括姓名、手机、申请说明和主动提供的微信名片图片，用于审核及人工联络。记录意向、查看名片或提交申请不会自动加入微信群；好友申请、建群和拉群由用户与管理员在微信中人工完成。",
+                  "type": "text",
+                  "version": 1
+                }
+              ],
+              "direction": null,
+              "format": "",
+              "indent": 0,
+              "type": "listitem",
+              "version": 1,
+              "value": 4
+            },
+            {
+              "children": [
+                {
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "队员简介：你主动填写的展示名称、位置、简介、头像和展示选择，用于对应代表队页面的自愿介绍。简介展示依据有效成员周期和本人选择；成员周期变化后，重新展示需要再次明确选择。",
+                  "type": "text",
+                  "version": 1
+                }
+              ],
+              "direction": null,
+              "format": "",
+              "indent": 0,
+              "type": "listitem",
+              "version": 1,
+              "value": 5
+            },
+            {
+              "children": [
+                {
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "荣誉投稿：保存作者、队伍、赛季、赛事和名次、日期、文字说明、主动提供的图片或视频证据，以及修订和审核记录，用于投稿、审核及已批准版本的展示。",
+                  "type": "text",
+                  "version": 1
+                }
+              ],
+              "direction": null,
+              "format": "",
+              "indent": 0,
+              "type": "listitem",
+              "version": 1,
+              "value": 6
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "listType": "bullet",
+          "start": 1,
+          "tag": "ul",
+          "type": "list",
+          "version": 1
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "资料的读取与展示范围",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "heading",
+          "version": 1,
+          "tag": "h2"
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "私人报名与申请资料供本人及具有当前相应权限的审核或管理人员读取，具体范围由服务端授权控制。普通社群任职不会因此获得骨干申请答卷的查看权限。成员关系、社群任职与平台角色分别维护。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "管理员名片使用独立、可选的展示授权。获批且任职仍有效、本人同意展示的名片，才会进入登录成员可见的联系入口。队员简介也使用独立的主动展示选择。你可以通过相应功能关闭展示；关闭展示仅改变可见性，删除服务器资料需要另行提出请求。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "荣誉私有原稿供本人和有权限的审核人员读取。展示渠道使用已审批版本；修改、撤回和撤下按当前服务规则处理。已经被合法导出、下载或保存到其他设备的副本，需要由持有人另行处理。关闭展示或清理服务器记录不会自动清除这些副本，系统无法从他人的设备远程收回这些资料。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "报名资料与成员记录的保留",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "heading",
+          "version": 1,
+          "tag": "h2"
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "活动报名、社群活动报名、骨干招新、代表队等报名资料，运营保留政策为 1 年。此类资料包括对应报名表单中的身份与联系资料、答案、表单快照及报名处理记录。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "成员关系记录长期保留，用于维护成员关系和相应历史。成员关系的长期保留不表示原始报名答案、联系方式、答卷快照和整份申请资料也可以作为成员记录长期保留；报名资料仍适用上述 1 年政策。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "当前系统尚未启用自动到期删除。超过保留期的报名资料需要由叶佳鑫人工复核处理，1 年保留政策目前需要人工落实。历史回执仍可见或记录仍存在，不表示资料已经按期清除。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "你可以通过隐私微信 yejx2003 提出删除申请，并说明所涉及的账号或记录，由叶佳鑫审核处理。账号资料、简介、荣誉等其他资料，也可通过同一渠道申请更正、停止展示或删除，由叶佳鑫审核处理。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "撤回申请、关闭展示、离队和退出登录各自改变相应业务状态或本机状态。服务器中的申请、处理记录及历史快照仍可能保留，需删除时可另行提出请求。小程序退出登录会清理本机登录资料及应用管理的临时媒体，不会修改相册原件，也不会因此删除已提交的服务器回执。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "网站问卷可由你选择在当前浏览器保存未提交草稿。草稿以最近一次本机保存时间记录 7 天有效期，过期后在再次读取该草稿时清理，未再读取时没有后台定时清除。关闭保存或成功提交时也会尝试清理当前草稿。公用设备请勿开启此功能；本机草稿的有效期不改变服务器报名资料的 1 年保留政策。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "媒体选择与隐私授权",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "heading",
+          "version": 1,
+          "tag": "h2"
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "名片、头像和荣誉证据的图片或视频由你主动选择。选择文件后，保存、独立视频上传、提交审核和展示授权分别由明确操作触发；选择本身不会自动上传或自动公开。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "小程序在媒体选择前提供网站已发布的隐私正文，并按微信平台流程处理当前隐私授权。正文未加载、读取失败、未发布或为空时，不能继续选择媒体。首次平台授权通过微信提供的同意按钮完成；拒绝、取消、离开页面或账号变化后，旧授权回调不会替你发起新的媒体选择或上传。需要时可以重新操作。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "网站隐私正文与微信平台《用户隐私保护指引》分别展示。打开平台指引不会表示同意；名片或简介的展示勾选也不会替代平台隐私授权。相机、相册的设备权限另由微信与系统管理。应用会按页面、账号与操作状态清理自行管理的临时媒体。已经明确发出的保存或上传请求，结果以服务端回执为准；本机清理不替代服务器资料的删除处理。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "功能处理服务与外部渠道",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "heading",
+          "version": 1,
+          "tag": "h2"
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "账号验证、媒体保存等功能按你实际使用时的流程处理相应资料，可能涉及邮件、存储、托管等技术处理服务。请结合实际使用功能的提示了解处理范围；本说明不作资料绝不经过其他处理服务的保证。通过外部平台报名或访问其他服务时，请同时阅读该平台的隐私说明。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "如使用 AI 辅助制作问卷，应按该功能的单独提示提交需求或草稿。请勿把真实报名资料、私人答卷、密码或其他与制作需求无关的个人资料提交为 AI 需求或草稿。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "你的选择与联系",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "heading",
+          "version": 1,
+          "tag": "h2"
+        },
+        {
+          "children": [
+            {
+              "detail": 0,
+              "format": 0,
+              "mode": "normal",
+              "style": "",
+              "text": "你可以按当前页面提供的服务端授权动作查看、修改或撤回本人记录，并选择是否展示名片和简介。操作不可用、资料过期或需要更正、删除时，请联系叶佳鑫，隐私微信 yejx2003。删除请求由叶佳鑫审核处理；本说明不会将撤回或关闭展示自动视为删除完成。",
+              "type": "text",
+              "version": 1
+            }
+          ],
+          "direction": null,
+          "format": "",
+          "indent": 0,
+          "type": "paragraph",
+          "version": 1,
+          "textFormat": 0,
+          "textStyle": ""
+        }
+      ],
+      "direction": null,
+      "format": "",
+      "indent": 0,
+      "type": "root",
+      "version": 1
+    }
+  },
+  "_status": "draft",
+  "reviewState": "editing"
+}

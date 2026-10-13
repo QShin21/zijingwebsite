@@ -1,0 +1,140 @@
+{
+  "checkedAt": "2026-10-13T02:49:43.499260+00:00",
+  "baseCommit": "c28efb1fe18a047256a43a51af1f8482c9b4d9d0",
+  "sourceCodeCommit": "1e5802baf33ee6c5f599eaa4256f8402af991ef1",
+  "branch": "codex/privacy-retention-review-20261013",
+  "confirmedChoices": {
+    "operator": "叶佳鑫（清华大学学生紫荆电竞社社长）本人",
+    "privacyWeChat": "yejx2003",
+    "registrationRetention": "1 年",
+    "memberRecords": "长期保留",
+    "deletionRequests": "叶佳鑫处理"
+  },
+  "scope": {
+    "syntheticOnly": true,
+    "realRegistrationRead": false,
+    "databaseConnected": false,
+    "businessWrites": false,
+    "cmsReadOrWrite": false,
+    "automaticDeletion": false,
+    "permanentDeletion": false,
+    "purgeOrScheduler": false,
+    "collectionOrMigrationChange": false,
+    "productionAccessOrDeployment": false,
+    "platformUploadOrAudit": false,
+    "realSubscriptionMessage": false
+  },
+  "tests": {
+    "total": 100,
+    "passed": 100,
+    "failed": 0,
+    "success": true,
+    "files": [
+      {
+        "file": "tests/miniapp-privacy-consent.test.ts",
+        "total": 41,
+        "passed": 41,
+        "status": "passed"
+      },
+      {
+        "file": "tests/miniapp-startup.test.ts",
+        "total": 4,
+        "passed": 4,
+        "status": "passed"
+      },
+      {
+        "file": "tests/privacy-publication-content.test.ts",
+        "total": 6,
+        "passed": 6,
+        "status": "passed"
+      },
+      {
+        "file": "tests/registration-retention-review.test.ts",
+        "total": 49,
+        "passed": 49,
+        "status": "passed"
+      }
+    ],
+    "command": "vitest run tests/registration-retention-review.test.ts tests/privacy-publication-content.test.ts tests/miniapp-privacy-consent.test.ts tests/miniapp-startup.test.ts"
+  },
+  "independentContentReview": {
+    "file": "docs/evidence/privacy-content-final-review-20261013.json",
+    "total": 15,
+    "passed": 15,
+    "questionnaireTests": {
+      "path": "/tmp/zijing-privacy-final-questionnaire-20261013.json",
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "success": true
+    },
+    "publishedInput": "synthetic in-memory copy only; no CMS publish"
+  },
+  "static": {
+    "targetedESLintExitCode": 0,
+    "typecheckNoIncrementalExitCode": 0,
+    "miniappCheckExitCode": 0,
+    "pages": 25,
+    "files": 146,
+    "bytes": 474072,
+    "domainChecking": true,
+    "nativeDependencies": 0,
+    "questionTypes": 16,
+    "changedNativeCollectionsMigrationsAPIRoutes": [],
+    "diffCheckExitCode": 0
+  },
+  "syntheticCLI": {
+    "input": "tests/fixtures/registration-retention-metadata-synthetic.json",
+    "reportOnlyInTmp": true,
+    "asOf": "2026-10-13T00:00:00.000Z",
+    "summary": {
+      "inputRecords": 7,
+      "reviewItems": 5,
+      "longTermMembers": 2,
+      "notYetOneYear": 0
+    },
+    "readOnly": true,
+    "expiryConfirmed": false,
+    "outputMode": "0600; exclusive new file; no overwrite"
+  },
+  "evidenceFiles": [
+    "docs/evidence/registration-retention-audit-20261013.json",
+    "docs/evidence/privacy-content-final-review-20261013.json",
+    "docs/evidence/wechat-privacy-official-current-20261013.json",
+    "docs/evidence/registration-retention-independent-review-20261013.json"
+  ],
+  "sourceSHA256": {
+    "src/lib/registration-retention-review.ts": "099d5e9322aa2ee25be6c4daf9ae14728350bc6eb853cb5aefc208d432a3859b",
+    "scripts/registration-retention-review.ts": "163eeff4cec0a6e85b8302c52589f4c0f61ee7784d6df22ee264d15b912b90c4",
+    "tests/registration-retention-review.test.ts": "f1ec55054ab00f5eaf7bfebb5096feee8943358eec8daacaf39b98670065040e",
+    "tests/privacy-publication-content.test.ts": "6d83ff576ee7203b2e76df52d8042c169eb164a70048f29994fecab30317ba4f",
+    "tests/fixtures/registration-retention-metadata-synthetic.json": "162ee3ceb1a9824fe86dae2346b0b1a6a5a57d03922f69d16d940ee46602e578",
+    "docs/PRIVACY_NOTICE_20261013.md": "264571f2ccff8432795e31eff3cc61df3f8970855bd35aeb4ee53e66aff0daea",
+    "docs/privacy-page-20261013.json": "d06cecda4306f5e9b07956b74f219cc297737dc4244397994d330cef888f8269",
+    "docs/REGISTRATION_RETENTION_REVIEW_20261013.md": "5d82415fce69359fbb4329a2c3936153842aaa4537454f760c180b705cf8d372",
+    "miniprogram/src/components/privacy-consent/index.js": "569b512b91ebc240dc50290325b023a6484ed9bd5dffed25cadcfd2cbcff74c7",
+    "miniprogram/src/lib/cms.js": "e01e0a7e409a381182c49edd8eb28b45e1e875764b4fc721bfe1fd9d23ba9654",
+    "miniprogram/src/lib/richtext.js": "74de5f6201e6b912c2e96d96fc694951500fc5f1f4b1bbee0ae0f0b2baf88c0f",
+    "src/collections/index.ts": "f458ffa36d9ef17e440f7a3ed60ef35091564eab6f1df253bbb474b99a496324",
+    "src/lib/content.ts": "d7679a6461b48bab94f9e104d38eaab130821d2793117d15d5f2d23a8a2f33c3",
+    "src/components/Content.tsx": "bfbcc5442d035f8ac3491223213ac89eb34ebcc7d592ccb05ee84e17f7daf650"
+  },
+  "remaining": [
+    "实际SMTP/S3/托管/AI及资料范围由父部署任务核查后纳入发布内容或对应功能提示",
+    "Pages仍为draft/editing，未写CMS；正式发布时间及生效安排尚未设置",
+    "真实报名积压、提交/重提时间和来源依赖未读取；报告只对操作者提供元数据负责",
+    "永久清除/字段擦除/副本清理未实施，需另行授权并验证业务关系",
+    "官方平台HTML仍不可读取；后台域名/声明、现代GUI与iOS/Android真机未验证",
+    "本地针对检查不替代最终合入源码的全量CI、构建及平台审核"
+  ],
+  "currentCollectionStatesChecked": true,
+  "teamEstablishmentDraftRejected": true,
+  "independentToolReview": {
+    "file": "docs/evidence/registration-retention-independent-review-20261013.json",
+    "sourceCodeCommit": "1e5802baf33ee6c5f599eaa4256f8402af991ef1",
+    "additionalPureMemoryVMChecks": 16,
+    "passed": 16,
+    "realDBOrPrivateReads": false,
+    "remainingContractBlockers": []
+  }
+}

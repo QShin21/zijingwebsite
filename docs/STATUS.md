@@ -1,5 +1,13 @@
 # 当前状态
 
+## 隐私确认与报名保留审查 · 2026-10-13
+
+在独立 `codex/privacy-retention-review-20261013` 从 `c28efb1` 完成叶佳鑫本人运营、隐私微信 `yejx2003`、报名 1 年、成员关系长期保留及叶佳鑫处理删除请求的中文正文和 Pages 草稿 JSON；未写入运行中的 CMS。源码审查确认未启用统一一年清除，成员、成立队伍及社群任职引用原申请，不能整行删除或把整份答卷长期留作成员记录。
+
+新增离线元数据清单及人工审查步骤，不连 DB、不读取答卷、不执行业务写入、不清除、不调度。技术参考日期不认定实际报名到期；缺日期、草稿、重提及已有来源引用明确需人工核验。100 项合成验证、类型、定向 Lint 和原生静态通过，25 页 / 146 文件 / 474072 字节与 16 类表单保持。证据及剩余范围见 [保留审查](REGISTRATION_RETENTION_REVIEW_20261013.md)、[确认后正文](PRIVACY_NOTICE_20261013.md)。实际服务方、正式发布、真实积压和依赖、永久清除、微信后台 / 官方 GUI / 真机由父任务后续核验，不以本轮结果代报完成。
+
+最终 JSON / Markdown 31 个正文块在实际网页 Prose / Lexical 和原生 CMS / richtext / fixed / consent 链路一致，独立 15 项及原问卷 5 项通过；draft 仅维持不可读 / 不启动授权，published 为测试内存副本，没有发布 CMS。[最终正文证据](evidence/privacy-content-final-review-20261013.json) 与 [实施检查](evidence/privacy-retention-review-20261013.json) 绑定当前文件摘要。清单已按真实建队枚举拒绝虚构 draft，入队仍支持草稿，无业务状态或权限变更。
+
 ## 统一集成收口 · 2026-10-12
 
 批准的staff/core/profile/honor、完整原生58eb542及简介确认987309b/a026516已合入唯一integration。网页候选6b6b5f6的CI38248423773全成功，日志1172项/68文件、95网页38.3分钟/build核实；本地95网页31分钟、类型/lint/25页静态也通过。候选与兼容回滚466b8b9两个代码包在Node24.12/glibc2.36实际解包运行、17迁移/重复no-op、v3备份恢复及私人媒体门禁通过，包5.9MiB/展开31.3MiB，两个归档+解包目录约78.2MiB。父平台发现四WXML/16处编码逻辑与编译失败，当前原生包不可发布；等待原作者获批完整SHA，不在integration重复改同文件。官方GUI/真机、现场依赖/绝对环境媒体绑定、11→17逐名/schema与真实完整备份峰值仍单列。本线程没有生产访问、更新main/PR/部署。见 [统一说明](CLUB_INTEGRATION_20261012.md)、[集成证据](evidence/club-integration-20261012.json) 和 [代码包证据](evidence/club-code-packages-20261012.json)。
