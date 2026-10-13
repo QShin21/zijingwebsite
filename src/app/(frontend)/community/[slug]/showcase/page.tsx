@@ -104,6 +104,7 @@ export default async function Showcase({
             post={post}
             manager={manager}
             privateView={view !== "public"}
+            returnQuery={new URLSearchParams({ view, ...(query.page ? { page: String(page) } : {}) }).toString()}
             promotionHref={
               post.status === "visible" &&
               (managesGame(user, game.id) || canReviewPromotion(user))

@@ -422,11 +422,16 @@ test("队员简介预览、返回、取消与空态沿用原流程", async ({ pa
   ).toBeVisible();
   await screenshot(page, "team-filter-empty-390");
   await navigate(page, `/teams/honors?team=${f.second.id}`);
+  const honors = page.getByRole("region", { name: "代表队荣誉", exact: true });
   await expect(
-    page.getByText("暂无可展示的队伍荣誉档案，批准后的记录会自动汇总。", {
+    honors.getByRole("heading", { name: "暂无已批准的荣誉档案", exact: true }),
+  ).toBeVisible();
+  await expect(
+    honors.getByText("队员投稿经核验后，将汇入所属队伍的同一档案。", {
       exact: true,
     }),
   ).toBeVisible();
+  await expect(honors.locator("[data-team-honor-archive]")).toHaveCount(0);
   const syntheticGames = [f.game.id, ...extraGames];
   try {
     for (const id of syntheticGames)

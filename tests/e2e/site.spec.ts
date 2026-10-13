@@ -9,6 +9,7 @@ import sharp from "sharp";
 let p: Payload,
   adminID: number,
   eventID: number,
+  deniedPreviewEventID: number,
   teamID: number,
   leaderID: number;
 const suffix = Date.now(),
@@ -30,11 +31,23 @@ test.beforeAll(async () => {
 });
 test.beforeEach(async ({ page }, info) => {
   if (/三类招新|首页配置|布局/.test(info.title)) {
-    expect((await page.request.post("/api/users/login", { data: { email, password } })).ok()).toBe(true);
+    expect(
+      (
+        await page.request.post("/api/users/login", {
+          data: { email, password },
+        })
+      ).ok(),
+    ).toBe(true);
   }
 });
 
 test.afterAll(async () => {
+  if (deniedPreviewEventID)
+    await p.delete({
+      collection: "events",
+      id: deniedPreviewEventID,
+      overrideAccess: true,
+    });
   if (eventID)
     await p.delete({ collection: "events", id: eventID, overrideAccess: true });
   if (leaderID)
@@ -66,12 +79,30 @@ test("后台登录、创建活动草稿、预览、发布、访客查看、撤�
   await expect(
     publicPage.getByRole("heading", { name: "暂时找不到这一页" }),
   ).toBeVisible();
+  const guestPreview = await visitor.request.get(`/preview/events/${eventID}`);
+  expect(guestPreview.status()).toBe(404);
+  expect(await guestPreview.text()).not.toContain(
+    "浏览器验收 · 活动发布全链路",
+  );
   await page.goto(`/preview/events/${eventID}`);
-  await expect(page.getByText("鉴权草稿预览")).toBeVisible();
+  const preview = page.getByRole("complementary", { name: "预览状态" });
+  await expect(preview).toContainText("草稿预览 · 仅当前授权人员可见");
+  await expect(preview).toContainText("不代表已发布");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "浏览器验收 · 活动发布全链路",
   );
-  await page.goto(`/admin/collections/events/${eventID}`);
+  const edit = preview.getByRole("link", {
+    name: "返回内容编辑 →",
+    exact: true,
+  });
+  await expect(edit).toHaveAttribute(
+    "href",
+    `/admin/collections/events/${eventID}`,
+  );
+  await edit.click();
+  await expect(page).toHaveURL(
+    new RegExp(`/admin/collections/events/${eventID}$`),
+  );
   await page
     .getByRole("button", { name: /^发布修改$|^Publish Changes$/ })
     .click();
@@ -87,11 +118,26 @@ test("后台登录、创建活动草稿、预览、发布、访客查看、撤�
   );
   await publicPage.goto("/events");
   await expect(
-    publicPage.getByRole("link", { name: "浏览器验收 · 活动发布全链路" }),
+    publicPage.getByRole("link", {
+      name: "浏览器验收 · 活动发布全链路",
+      exact: true,
+    }),
   ).toBeVisible();
   await publicPage.goto("/");
+  await expect(publicPage).toHaveURL(/\/events$/);
   await expect(
-    publicPage.getByRole("link", { name: "浏览器验收 · 活动发布全链路" }),
+    publicPage.getByRole("link", {
+      name: "浏览器验收 · 活动发布全链路",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/$/);
+  await expect(
+    page.locator('[data-section="events"]').getByRole("link", {
+      name: "浏览器验收 · 活动发布全链路",
+      exact: true,
+    }),
   ).toBeVisible();
   const renamed = await page.request.patch(`/api/events/${eventID}`, {
     headers: { Origin: "http://localhost:3000" },
@@ -120,7 +166,9 @@ test("后台登录、创建活动草稿、预览、发布、访客查看、撤�
   await visitor.close();
 });
 test("404 HTTP 状态与预览环境不收录", async ({ request }) => {
-  expect((await request.get("/missing-page-for-test", { maxRedirects: 0 })).status()).toBe(307);
+  expect(
+    (await request.get("/missing-page-for-test", { maxRedirects: 0 })).status(),
+  ).toBe(307);
   expect((await request.get("/events/missing-event-for-test")).status()).toBe(
     404,
   );
@@ -195,8 +243,25 @@ test("公开 API、预览、首次注册与分部越权拒绝", async ({ request
   expect(
     json.docs.every((u: { id: number }) => u.id === leaderID),
   ).toBeTruthy();
-  const preview = await request.get(`/preview/events/${eventID}`);
-  expect(await preview.text()).not.toContain("浏览器验收 · 活动发布全链路");
+  const previewTitle = "浏览器验收 · 权限隔离预览草稿";
+  deniedPreviewEventID = (
+    await p.create({
+      collection: "events",
+      overrideAccess: false,
+      user,
+      data: {
+        title: previewTitle,
+        slug: `browser-private-preview-${suffix}`,
+        _status: "draft",
+        demo: true,
+      },
+    })
+  ).id;
+  const preview = await request.get(`/preview/events/${deniedPreviewEventID}`, {
+    headers,
+  });
+  expect(preview.status()).toBe(404);
+  expect(await preview.text()).not.toContain(previewTitle);
 });
 test("公开页可访问性、CSP 与实际加载指标", async ({ page }) => {
   const records = [];
@@ -235,7 +300,11 @@ test("三类招新、历史批次和所有公开栏目", async ({ page }) => {
     await expect(
       page.getByRole("heading", { name: "招新批次与历史记录" }),
     ).toBeVisible();
-    await page.getByRole("link", { name: `演示 · ${kind} 招新批次` }).click();
+    await page
+      .getByRole("heading", { name: `演示 · ${kind} 招新批次`, exact: true })
+      .getByRole("link", { name: `演示 · ${kind} 招新批次`, exact: true })
+      .click();
+    await expect(page).toHaveURL(new RegExp(`/recruitment/demo-${kind}$`));
     await expect(page.getByRole("heading", { name: "已关闭" })).toBeVisible();
     await expect(page.getByRole("link", { name: /前往外部报名/ })).toHaveCount(
       0,
@@ -340,6 +409,7 @@ test("首页配置即时更新、回顾关联、相册分页和长中文标题",
           { kind: "events", enabled: true },
           { kind: "events", enabled: true },
           { kind: "join", enabled: true },
+          { kind: "news", enabled: false },
         ],
         featuredEvents: [event.id],
       },
@@ -348,9 +418,57 @@ test("首页配置即时更新、回顾关联、相册分页和长中文标题",
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "演示 · 首页后台配置验证",
     );
+    const eventSection = page.locator('[data-section="events"]');
+    await expect(eventSection).toHaveCount(1);
     await expect(
-      page.getByRole("heading", { name: "活动", exact: true }),
+      eventSection.getByRole("heading", { name: "活动日程", exact: true }),
     ).toHaveCount(1);
+    const moduleHeadings = page.locator(
+      '[data-section="events"] h2, .z-participation h2',
+    );
+    await expect(moduleHeadings).toHaveText([
+      "活动日程",
+      "找到适合你的参与方式",
+    ]);
+    await expect(page.locator('[data-section="news"]')).toHaveCount(0);
+    await p.updateGlobal({
+      slug: "site",
+      overrideAccess: false,
+      user,
+      data: {
+        modules: [
+          { kind: "join", enabled: true, title: "演示 · 首页参与入口" },
+          { kind: "events", enabled: true, title: "演示 · 首页活动日程" },
+          { kind: "events", enabled: true, title: "演示 · 重复活动模块" },
+          { kind: "news", enabled: false },
+        ],
+      },
+    });
+    await page.reload();
+    await expect(eventSection).toHaveCount(1);
+    await expect(moduleHeadings).toHaveText([
+      "演示 · 首页参与入口",
+      "演示 · 首页活动日程",
+    ]);
+    await expect(page.locator('[data-section="news"]')).toHaveCount(0);
+    await p.updateGlobal({
+      slug: "site",
+      overrideAccess: false,
+      user,
+      data: {
+        modules: [
+          { kind: "join", enabled: false },
+          { kind: "events", enabled: false },
+          { kind: "news", enabled: false },
+        ],
+      },
+    });
+    await page.reload();
+    await expect(moduleHeadings).toHaveCount(0);
+    await expect(page.locator('[data-section="news"]')).toHaveCount(0);
+    await expect(
+      page.getByRole("link", { name: title, exact: true }),
+    ).toHaveCount(0);
     await page.setViewportSize({ width: 390, height: 900 });
     await page.goto(`/events/${event.slug}`);
     expect(

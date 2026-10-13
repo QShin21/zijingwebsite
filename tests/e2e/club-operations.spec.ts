@@ -59,7 +59,7 @@ test("人工进群完整回执、后台确认、隐私隔离及旧会话撤权",
     await managerPage.getByRole("button", { name: "好友已通过，等待拉群" }).click();
     await expect(managerPage.getByText("管理员已确认好友通过 · 等待人工拉群", { exact: true })).toBeVisible();
     await managerPage.getByRole("button", { name: "已人工拉群，确认进群" }).click();
-    await expect(managerPage.getByText("暂无待处理进群意向。", { exact: true })).toBeVisible();
+    await expect(managerPage.getByRole("heading", { name: "暂无待处理进群意向", exact: true })).toBeVisible();
     await page.reload(); await expect(page.getByRole("status").filter({ hasText: "管理员已人工确认进群" })).toBeVisible();
     await page.goto("/account"); await expect(page.getByText("已有管理员人工确认进群", { exact: true })).toBeVisible();
     const endpoint = `/api/activities/community-posts/${post}/signup`;
@@ -98,12 +98,12 @@ test("预览居中、进群空态、联系兜底及四个响应式断点", async
     await expect(page.getByRole("button", { name: "3 · 预览试填", exact: true })).toBeFocused();
     await page.goto(`/community/${slug}/join`); expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await page.goto("/contact"); expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-    await expect(page.getByRole("link", { name: "申请组织已有或新游戏社群", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "申请组织社群", exact: true })).toBeVisible();
     expect(await page.locator('main a[href="/contact"]').count()).toBe(0);
   }
   expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
-  await page.getByRole("link", { name: "查看游戏社群与管理员名片", exact: true }).click(); await expect(page).toHaveURL(/\/community$/);
-  await page.goto("/contact"); await page.getByRole("link", { name: "申请组织已有或新游戏社群", exact: true }).click(); await expect(page).toHaveURL(/\/community\/apply$/);
+  await page.getByRole("link", { name: "查看社群与管理员名片", exact: true }).click(); await expect(page).toHaveURL(/\/community$/);
+  await page.goto("/contact"); await page.getByRole("link", { name: "申请组织社群", exact: true }).click(); await expect(page).toHaveURL(/\/community\/apply$/);
 });
 
 test("模板预览返回可继续键盘操作，关闭及Escape恢复制作入口焦点", async ({ page }) => {

@@ -183,7 +183,13 @@ export async function hideLegacyTeamHonorResultAction(form: FormData) {
   try {
     await hideLegacyHonor(form);
     invalidateHonors();
-    return { ok: true, message: "历史荣誉已撤下，原作者、赛季和内容保留。" };
+    const message = "历史荣誉已撤下，原作者、赛季和内容保留。";
+    return {
+      ok: true,
+      message,
+      // The last hidden record can remove this archive route entirely.
+      successHref: resultHref("/teams/honors", form, message),
+    };
   } catch (error) {
     return { ok: false, message: workflowFeedback(error) };
   }

@@ -4,12 +4,14 @@ import { promotionAction } from "@/app/(frontend)/community/promotions/actions";
 import type { ContentPromotion } from "@/payload-types";
 import type { PromotionSource } from "@/lib/promotion-model";
 
-export function PromotionControls({ collection, id, version, current, manager, reviewer, actor, canApprove = true }: {
+export function PromotionControls({ collection, id, version, current, manager, reviewer, actor, canApprove = true, returnQuery = "" }: {
   collection: PromotionSource; id: number; version: string; current?: ContentPromotion; manager: boolean; reviewer: boolean; actor: number; canApprove?: boolean;
+  returnQuery?: string;
 }) {
   const fields = <>
     <input type="hidden" name="sourceCollection" value={collection} /><input type="hidden" name="sourceID" value={id} />
     <input type="hidden" name="revision" value={current?.updatedAt ?? ""} /><input type="hidden" name="sourceVersion" value={version} />
+    <input type="hidden" name="returnQuery" value={returnQuery} />
   </>;
   if (current?.status === "pending") return <>
     {manager && Number(typeof current.requestedBy === "object" ? current.requestedBy?.id : current.requestedBy) === actor &&

@@ -228,7 +228,12 @@ test("骨干录用独立于入队；成立/招新/录取→简介opt-in→荣誉
     expect((await (await other.request.get(profileURL)).json()).profiles).toEqual([]);
     expect((await request.get(archiveURL)).status()).toBe(404);
     expect((await other.request.get("/api/team-core?mode=recruitment&id=" + recruitment.id, { headers: origin })).status()).toBe(404);
-    await page.goto("/account"); await page.getByRole("link", { name: /我的代表队与入队申请/ }).click(); await expect(page).toHaveURL(/\/teams\/recruitment$/);
+    await page.goto("/account");
+    await page
+      .getByRole("region", { name: "我的代表队", exact: true })
+      .getByRole("link", { name: "成员记录与入队申请 →", exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/teams\/recruitment$/);
     await expect(page.getByRole("navigation", { name: "参与方式", exact: true }).getByRole("link", { name: "骨干招新", exact: true })).toHaveAttribute("href", "/join/staff");
   } finally { await Promise.all([highContext.close(), managerContext.close(), otherContext.close(), crossContext.close()]); }
 });

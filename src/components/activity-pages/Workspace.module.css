@@ -19,7 +19,7 @@
 .actionFields :is(input,textarea,select) { color: var(--z-ink); background: var(--z-field); border: 1px solid var(--z-field-border); border-radius: 6px; padding: 10px 12px; min-width: 0; max-width: 100%; font-size: 16px; }
 .actionFields > label :is(input,textarea,select) { width: 100%; }
 .actionFields :global(.reaction-bar) { display: flex; flex-wrap: wrap; gap: 10px; }
-.actionFields:disabled { opacity: .7; }
+.actionFields:disabled { opacity: 1; }
 .error, .feedback { margin: 16px 0 0; padding: 12px 16px; border-left: 3px solid var(--z-success); color: var(--z-success); background: var(--z-success-bg); border-radius: 4px; }
 .error { color: var(--z-danger); background: var(--z-danger-bg); border-color: var(--z-danger); }
 .receipt { display: grid; gap: 0; margin: 20px 0; }

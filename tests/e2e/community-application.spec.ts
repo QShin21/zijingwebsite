@@ -51,7 +51,7 @@ test("完整申请、备案提示、私有二维码、社长查看全部资料�
   await page.getByLabel("申请说明", { exact: false }).fill("希望负责本游戏的日常交流和社群组织工作。");
   await page.setViewportSize({ width: 390, height: 900 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
-  const consent = page.getByRole("checkbox", { name: "我同意展示我的微信名片作为进群联系方式", exact: true });
+  const consent = page.locator("form.application-form").getByRole("checkbox", { name: "我同意展示我的微信名片作为进群联系方式", exact: true });
   await expect(consent).not.toBeChecked();
   await page.getByRole("button", { name: "提交审核", exact: true }).click();
   await expect(page.locator('form.application-form').getByRole('alert')).toHaveText('由于入社流程规定，必须展示管理联系方式');
@@ -119,8 +119,8 @@ test("完整申请、备案提示、私有二维码、社长查看全部资料�
   expect((await p.findByID({ collection: "users", id: applicant.id, overrideAccess: true })).roles).toEqual(["member"]);
   await page.context().clearCookies(); await login(page, applicant);
   await page.goto("/community/apply");
-  await page.getByRole("checkbox", { name: "允许在任期间", exact: false }).uncheck();
-  await page.getByRole("button", { name: "保存名片与展示设置", exact: true }).click();
+  await card.getByRole("checkbox", { name: "我同意展示我的微信名片作为进群联系方式", exact: true }).uncheck();
+  await card.getByRole("button", { name: "保存名片与展示设置", exact: true }).click();
   await expect(page.getByRole("status").first()).toContainText("名片及展示设置已更新");
   const created = await p.findByID({ collection: "games", id: game, overrideAccess: true });
   expect(await (await page.request.get(`/community/${created.slug}/contacts`, { headers: { Origin: "http://localhost:3000" } })).json()).toEqual([]);
@@ -134,7 +134,7 @@ test("无效二维码被拒绝并保留填写资料", async ({ page }) => {
   await page.getByLabel("微信名片二维码", { exact: true }).setInputFiles({ name: "bad.png", mimeType: "image/png", buffer: Buffer.from("invalid") });
   await page.getByLabel("新游戏名称", { exact: false }).fill("失败申请测试");
   await page.getByLabel("申请说明", { exact: false }).fill("这是一条测试错误资料保留的申请说明。");
-  await page.getByRole("checkbox", { name: "我同意展示我的微信名片作为进群联系方式", exact: true }).check();
+  await page.locator("form.application-form").getByRole("checkbox", { name: "我同意展示我的微信名片作为进群联系方式", exact: true }).check();
   await page.getByRole("button", { name: "提交审核", exact: true }).click();
   await expect(page.locator("form").getByRole("status")).toContainText("有效微信名片二维码图片");
   await expect(page.getByLabel("姓名", { exact: true })).toHaveValue("测试申请人");
@@ -151,7 +151,7 @@ test("历史false或缺失授权不可批准，退回后本人明确同意再重
   await page.getByLabel('微信名片二维码', { exact: true }).setInputFiles({ name: 'legacy.png', mimeType: 'image/png', buffer: qr });
   await page.getByLabel('新游戏名称', { exact: false }).fill(proposedGame);
   await page.getByLabel('申请说明', { exact: false }).fill('合成历史申请，验证必须由申请人本人补充同意。');
-  const consent = page.getByRole('checkbox', { name: '我同意展示我的微信名片作为进群联系方式', exact: true });
+  const consent = page.locator('form.application-form').getByRole('checkbox', { name: '我同意展示我的微信名片作为进群联系方式', exact: true });
   await consent.check(); await page.getByRole('button', { name: '提交审核', exact: true }).click();
   await expect(page.getByRole('heading', { name: '申请已提交' })).toBeVisible();
   const saved = (await p.find({ collection: 'community-applications', overrideAccess: true, where: { and: [{ applicant: { equals: applicant.id } }, { proposedGame: { equals: proposedGame } }] }, depth: 0 })).docs[0];

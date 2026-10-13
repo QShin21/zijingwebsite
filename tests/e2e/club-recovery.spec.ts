@@ -71,8 +71,8 @@ test("只读成员可从详情与工作台查看报名，独立导出且不可�
     await page.goto("/activities"); await page.getByLabel("活动来源").selectOption("community-posts");
     await expect(page.getByRole("heading", { name: "只读报名测试活动", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "跨社群拒绝测试活动", exact: true })).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "编辑与统计", exact: true })).toHaveCount(0);
-    await page.getByRole("link", { name: "查看报名与统计", exact: true }).click();
+    await expect(page.getByRole("link", { name: "编辑问卷 →", exact: true })).toHaveCount(0);
+    await page.getByRole("link", { name: "报名与统计 →", exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/activities/community-posts/${post}/signups$`));
     await expect(page.getByRole("heading", { name: "统计与导出", exact: true })).toBeVisible();
     reader = await p.update({ collection: "users", id: reader.id, user: leader, overrideAccess: false, data: { communityOffices: reader.communityOffices!.map(office => ({ ...office, exportSignups: true })) } });

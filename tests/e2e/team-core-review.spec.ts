@@ -65,7 +65,9 @@ async function login(page: Page, user: User) {
   });
   expect(response.status(), await response.text()).toBe(200);
   await page.goto("/account");
-  await expect(page.getByRole("heading", { name: user.name })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: user.name, exact: true }),
+  ).toBeVisible();
 }
 test.beforeAll(async () => {
   if (
@@ -290,9 +292,8 @@ test("超过20条队伍和建队审核时，两套分页独立跨页并互相保
   }
   await login(page, leader);
   await page.goto(`/teams/manage?game=${game}&page=1&reviewPage=1`);
-  const firstTeams = await page
-    .locator("main .community-list a")
-    .allTextContents();
+  const teamLinks = page.locator('main li h3 > a[href^="/teams/manage/"]');
+  const firstTeams = await teamLinks.allTextContents();
   expect(firstTeams).toHaveLength(20);
   await expect(
     page.getByRole("heading", { name: titles[0], exact: true }),
@@ -307,15 +308,11 @@ test("超过20条队伍和建队审核时，两套分页独立跨页并互相保
   await expect(
     page.getByRole("heading", { name: titles[0], exact: true }),
   ).toHaveCount(0);
-  expect(
-    await page.locator("main .community-list a").allTextContents(),
-  ).toEqual(firstTeams);
+  expect(await teamLinks.allTextContents()).toEqual(firstTeams);
   expect(new URL(page.url()).searchParams.get("page")).toBe("1");
   await page.getByRole("link", { name: "下一页代表队", exact: true }).click();
-  await expect(page.locator("main .community-list a")).toHaveCount(3);
-  const secondTeams = await page
-    .locator("main .community-list a")
-    .allTextContents();
+  await expect(teamLinks).toHaveCount(3);
+  const secondTeams = await teamLinks.allTextContents();
   expect(secondTeams).not.toEqual(firstTeams);
   await expect(
     page.getByRole("heading", { name: titles[20], exact: true }),
@@ -325,9 +322,7 @@ test("超过20条队伍和建队审核时，两套分页独立跨页并互相保
   await expect(
     page.getByRole("heading", { name: titles[0], exact: true }),
   ).toBeVisible();
-  expect(
-    await page.locator("main .community-list a").allTextContents(),
-  ).toEqual(secondTeams);
+  expect(await teamLinks.allTextContents()).toEqual(secondTeams);
   expect(new URL(page.url()).searchParams.get("page")).toBe("2");
   expect(new URL(page.url()).searchParams.get("game")).toBe(String(game));
 });
@@ -399,7 +394,12 @@ for (const mode of ["draft", "team-archived"] as const)
       ).status(),
     ).toBe(404);
     await page.goto("/teams/recruitment");
-    await page.locator(`main a[href="/teams/recruitment/${batch.id}"]`).first().click();
+    const ownReceipt = page.getByRole("article").filter({
+      has: page.getByRole("heading", { name: application.title, exact: true }),
+    });
+    await ownReceipt
+      .getByRole("link", { name: "查看回执 / 继续修改", exact: true })
+      .click();
     await expect(
       page.getByText("合成旧草稿答案", { exact: true }),
     ).toBeVisible();

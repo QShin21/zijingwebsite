@@ -29,7 +29,7 @@
 .page :global(.button:hover) { color: var(--z-action-ink); background: var(--z-hover, var(--z-action)); border-color: var(--z-hover, var(--z-action)); transform: none; }
 .page :global(.button.light) { color: var(--z-ink); background: var(--z-surface); border-color: var(--z-field-border); }
 .page :global(.button.light:hover) { color: var(--z-action); border-color: var(--z-action); background: var(--z-tint); }
-.page :global(.button:disabled), .page :global(.button:disabled:hover) { color: var(--z-muted); background: var(--z-paper); border-color: var(--z-line); opacity: .75; cursor: not-allowed; }
+.page :global(.button:disabled), .page :global(.button:disabled:hover) { color: var(--z-disabled-ink); background: var(--z-disabled-bg); border-color: var(--z-line); opacity: 1; cursor: not-allowed; }
 .page :global(.member-shell), .page :global(.community-page) { max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .page :global(.community-page > section) { margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
 .page :global(.panel) { margin-block: 0 20px; padding: 24px; color: var(--z-ink); background: var(--z-surface); border: 1px solid var(--z-line); border-radius: 8px; box-shadow: none; }
@@ -39,9 +39,9 @@
 .page :global(.member-form label), .page :global(.filters label) { color: var(--z-ink); font-size: 15px; display: grid; gap: 7px; min-width: 0; }
 .page :global(.member-form fieldset) { min-width: 0; padding: 0; margin: 0; border: 0; display: grid; gap: 18px; }
 .page :global(.member-form legend) { font-weight: 600; font-size: 20px; padding: 0 0 16px; }
-.page :global(.member-form input:not([type="checkbox"]):not([type="radio"])), .page :global(.member-form select), .page :global(.member-form textarea), .page :global(.filters input), .page :global(.filters select) { color: var(--z-ink); background: var(--z-field); border: 1px solid var(--z-field-border); border-radius: 6px; width: 100%; min-width: 0; max-width: 100%; min-height: 46px; padding: 10px 12px; font-size: 16px; line-height: 1.5; }
+.page :global(.member-form input:where(:not([type="checkbox"]):not([type="radio"]))), .page :global(.member-form select), .page :global(.member-form textarea), .page :global(.filters input), .page :global(.filters select) { color: var(--z-ink); background: var(--z-field); border: 1px solid var(--z-field-border); border-radius: 6px; width: 100%; min-width: 0; max-width: 100%; min-height: 46px; padding: 10px 12px; font-size: 16px; line-height: 1.5; }
 .page :global(.member-form textarea) { resize: vertical; }
-.page :global(.member-form input:disabled), .page :global(.member-form textarea:disabled), .page :global(.member-form select:disabled) { color: var(--z-muted); background: var(--z-paper); cursor: not-allowed; }
+.page :global(.member-form input:disabled), .page :global(.member-form textarea:disabled), .page :global(.member-form select:disabled) { color: var(--z-disabled-ink); background: var(--z-disabled-bg); border-color: var(--z-line); opacity: 1; cursor: not-allowed; }
 .page input::placeholder, .page textarea::placeholder { color: var(--z-muted); }
 .page input[type="file"] { font-size: 14px; }
 .page input::file-selector-button { color: var(--z-ink); background: var(--z-tint); border: 0; border-radius: 4px; margin-right: 12px; padding: 8px 10px; cursor: pointer; }

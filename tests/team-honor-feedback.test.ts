@@ -132,7 +132,11 @@ function actionHarness(authorized = true) {
     transaction,
     actions: actions as Record<
       string,
-      (form: FormData) => Promise<{ ok: boolean; message: string }>
+      (form: FormData) => Promise<{
+        ok: boolean;
+        message: string;
+        successHref?: string;
+      }>
     >,
   };
 }
@@ -206,7 +210,7 @@ function formHarness(
   if (kind === "legacy") values.set("revision", "legacy-current");
   const reset = vi.fn(),
     focus = vi.fn(),
-    router = { refresh: vi.fn() };
+    router = { refresh: vi.fn(), replace: vi.fn() };
   const hooks = {
     useSyncExternalStore: () => true,
     useRef(value: unknown) {
@@ -341,6 +345,7 @@ describe("荣誉网页薄适配保留原服务、CAS与权限边界", () => {
       expect(result.message).toContain(
         authorized ? "请刷新后核对" : "无权撤下",
       );
+      expect(result).not.toHaveProperty("successHref");
       expect(h.p.update).not.toHaveBeenCalled();
       expect(h.p.create).not.toHaveBeenCalled();
       expect(h.revalidate).not.toHaveBeenCalled();
@@ -352,13 +357,28 @@ describe("荣誉网页薄适配保留原服务、CAS与权限边界", () => {
       });
     }
   });
-  it("历史隐藏继续在原事务内按权限更新并写入原审计", async () => {
+  it("历史隐藏按原事务写入审计，成功反馈转到保留筛选的站内页面", async () => {
     const h = actionHarness(),
       form = makeForm();
     form.set("revision", "legacy-current");
-    expect((await h.actions.hideLegacyTeamHonorResultAction(form)).ok).toBe(
-      true,
+    form.set(
+      "returnQuery",
+      "view=review&team=22&game=24&page=3&next=https://synthetic.invalid&successHref=https://synthetic.invalid",
     );
+    const message = "历史荣誉已撤下，原作者、赛季和内容保留。";
+    expect(await h.actions.hideLegacyTeamHonorResultAction(form)).toEqual({
+      ok: true,
+      message,
+      successHref:
+        "/teams/honors?" +
+        new URLSearchParams({
+          view: "review",
+          team: "22",
+          game: "24",
+          page: "3",
+          message,
+        }),
+    });
     expect(h.transaction).toHaveBeenCalledOnce();
     expect(h.p.update).toHaveBeenCalledExactlyOnceWith({
       collection: "honors",
@@ -462,6 +482,31 @@ describe("荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值", () 
     await h.submit();
     expect(text(h.getTree())).toContain("操作结果尚未确认");
     expect(h.reset).not.toHaveBeenCalled();
+    expect(h.values.get("note")).toContain("合成需要保留");
+  });
+  it("成功移出当前列表时导航到服务器给出的回执页，不再刷新失效的原详情", async () => {
+    const successHref = "/teams/honors?view=review&message=saved";
+    const h = formHarness("legacy", vi.fn().mockResolvedValue({ ok: true, message: "已保存", successHref }));
+    await h.submit();
+    expect(h.router.replace).toHaveBeenCalledExactlyOnceWith(successHref);
+    expect(h.router.refresh).not.toHaveBeenCalled();
+    expect(text(h.getTree())).not.toContain("已保存");
+    expect(h.reset).not.toHaveBeenCalled();
+  });
+  it("没有成功目标页时继续刷新当前记录并展示已保存反馈", async () => {
+    const h = formHarness("record", vi.fn().mockResolvedValue({ ok: true, message: "审核已保存" }));
+    await h.submit();
+    expect(h.router.refresh).toHaveBeenCalledOnce();
+    expect(h.router.replace).not.toHaveBeenCalled();
+    expect(text(h.getTree())).toContain("审核已保存");
+  });
+  it("失败结果即使带有目标页也不能导航或清空当前说明", async () => {
+    const h = formHarness("record", vi.fn().mockResolvedValue({ ok: false, message: "记录已更新，请核对", successHref: "/teams/honors" }));
+    await h.submit();
+    expect(h.router.replace).not.toHaveBeenCalled();
+    expect(h.router.refresh).not.toHaveBeenCalled();
+    expect(h.reset).not.toHaveBeenCalled();
+    expect(text(h.getTree())).toContain("记录已更新，请核对");
     expect(h.values.get("note")).toContain("合成需要保留");
   });
 });

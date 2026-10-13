@@ -668,25 +668,36 @@ test("私有详情与原始 REST 守住社群边界，网页退回/拒绝需说�
     await page.goto("/teams/honors/" + pending.id);
     const record = page.locator('[data-honor-record="' + pending.id + '"]');
     await record.getByRole("button", { name: "退回修改", exact: true }).click();
-    await expect(page.getByRole("status")).toContainText("须填写具体说明");
+    await expect(record.getByRole("alert")).toContainText("须填写具体说明");
+    await expect(record.locator('input[name="revision"]')).toHaveValue(
+      String(pending.revision),
+    );
     await record
       .getByLabel("审核说明（退回或拒绝必填）")
       .fill("合成网页退回说明");
     await record.getByRole("button", { name: "退回修改", exact: true }).click();
-    await expect(page.getByRole("status")).toContainText("已退回");
+    await expect(record.getByRole("status")).toContainText("已退回");
     await expect(record).toContainText("合成网页退回说明");
     await page.goto("/teams/honors/" + approved.id);
-    await page.getByLabel("隐藏说明").fill("合成网页隐藏荣誉");
-    await page.getByRole("button", { name: "隐藏荣誉", exact: true }).click();
-    await expect(page.getByRole("status")).toContainText("荣誉已隐藏");
+    const approvedRecord = page.locator(`[data-honor-record="${approved.id}"]`);
+    await approvedRecord.getByLabel("隐藏说明").fill("合成网页隐藏荣誉");
+    await approvedRecord
+      .getByRole("button", { name: "隐藏荣誉", exact: true })
+      .click();
+    await expect(approvedRecord.getByRole("status")).toContainText(
+      "荣誉已隐藏",
+    );
     await page.goto("/community/" + slug + "/showcase/team-honors/" + team);
     await page.getByLabel("隐藏历史荣誉说明").fill("合成历史荣誉隐藏说明");
     await page
       .getByRole("button", { name: "隐藏历史荣誉", exact: true })
       .click();
-    await expect(page.getByRole("status").first()).toContainText(
-      "历史荣誉已撤下",
-    );
+    await expect(page).toHaveURL(/\/teams\/honors\?/);
+    await expect(
+      page.locator('main .community-page > [role="status"]'),
+    ).toContainText("历史荣誉已撤下");
+    expect(new URL(page.url()).searchParams.get("team")).toBe(String(team));
+    expect(new URL(page.url()).searchParams.get("game")).toBe(String(game));
     expect(
       (await request.get("/api/team-honor-archives/" + team)).status(),
     ).toBe(404);
@@ -712,15 +723,18 @@ test("真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/�
     await login(page, player);
     await login(reviewPage, reviewer);
     await page.goto("/teams/honors?view=mine");
+    const receipt = page.locator('main .community-page > [role="status"]');
     let editor = page.locator("[data-honor-editor]");
     await editor
       .getByLabel("荣誉标题", { exact: true })
       .fill("合成完整网页荣誉流程");
     await editor.getByRole("button", { name: "保存草稿", exact: true }).click();
-    await expect(page.getByRole("status")).toContainText("草稿已保存");
+    await expect(receipt).toContainText("草稿已保存");
     const id = Number(new URL(page.url()).pathname.split("/").pop());
     records.push(id);
     const detail = "/teams/honors/" + id;
+    const record = page.locator(`[data-honor-record="${id}"]`);
+    const reviewRecord = reviewPage.locator(`[data-honor-record="${id}"]`);
     editor = page.locator("[data-honor-editor]");
     await editor.getByRole("button", { name: "提交审核", exact: true }).click();
     await expect(editor.getByRole("alert")).toContainText("赛事");
@@ -750,16 +764,23 @@ test("真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/�
       });
     await editor.getByLabel(/新证据 1 说明/).fill("合成网页证据");
     await editor.getByRole("button", { name: "提交审核", exact: true }).click();
-    await expect(page.getByRole("status")).toContainText("荣誉已提交");
-    await page
+    await expect(receipt).toContainText("荣誉已提交");
+    await record
       .getByRole("button", { name: "撤回待审记录", exact: true })
       .click();
-    await expect(page.getByRole("status")).toContainText("已撤回");
+    await expect(record.getByRole("status")).toContainText("已撤回");
+    const withdrawnRevision = Number(
+      await editor.locator('input[name="revision"]').inputValue(),
+    );
     await page
       .locator("[data-honor-editor]")
       .getByRole("button", { name: "提交审核", exact: true })
       .click();
-    await expect(page.getByRole("status")).toContainText("荣誉已提交");
+    await expect(editor.locator('input[name="revision"]')).toHaveValue(
+      String(withdrawnRevision + 1),
+    );
+    await expect(record.getByText("待审核", { exact: true })).toBeVisible();
+    await expect(receipt).toContainText("荣誉已提交");
     await reviewPage.goto(detail);
     await reviewPage
       .getByLabel("审核说明（退回或拒绝必填）")
@@ -767,7 +788,7 @@ test("真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/�
     await reviewPage
       .getByRole("button", { name: "退回修改", exact: true })
       .click();
-    await expect(reviewPage.getByRole("status")).toContainText("已退回");
+    await expect(reviewRecord.getByRole("status")).toContainText("已退回");
     await page.reload();
     await expect(page.locator("[data-honor-record]")).toContainText(
       "请补充合成获奖说明",
@@ -793,12 +814,12 @@ test("真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/�
     await expect(
       page.locator("[data-honor-editor] input[name=revision]"),
     ).toHaveValue(String(resubmitRevision + 1));
-    await expect(page.getByRole("status")).toContainText("荣誉已提交");
+    await expect(receipt).toContainText("荣誉已提交");
     await reviewPage.reload();
     await reviewPage
       .getByRole("button", { name: "批准荣誉", exact: true })
       .click();
-    await expect(reviewPage.getByRole("status")).toContainText("已批准");
+    await expect(reviewRecord.getByRole("status")).toContainText("已批准");
     const archiveURL = "/community/" + slug + "/showcase/team-honors/" + team;
     await page.goto(archiveURL);
     await expect(
@@ -818,7 +839,7 @@ test("真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/�
       .locator("[data-honor-editor]")
       .getByRole("button", { name: "提交审核", exact: true })
       .click();
-    await expect(page.getByRole("status")).toContainText("荣誉已提交");
+    await expect(receipt).toContainText("荣誉已提交");
     const beforeReview = await page.request.get(
       "/api/team-honor-archives/" + team,
     );
@@ -827,7 +848,7 @@ test("真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/�
     await reviewPage
       .getByRole("button", { name: "批准荣誉", exact: true })
       .click();
-    await expect(reviewPage.getByRole("status")).toContainText("已批准");
+    await expect(reviewRecord.getByRole("status")).toContainText("已批准");
     await p.update({
       collection: "team-memberships",
       id: chain.memberships.get(player.id)!,

@@ -171,8 +171,12 @@
 .form input[aria-invalid="true"] {
   border-color: var(--z-danger);
 }
-.form input:disabled {
-  opacity: 0.7;
+.form :is(input, select):disabled {
+  background: var(--z-disabled-bg);
+  color: var(--z-disabled-ink);
+  border-color: var(--z-line);
+  opacity: 1;
+  cursor: not-allowed;
 }
 .form .hint,
 .hint {
@@ -213,9 +217,10 @@
 }
 .password button {
   position: absolute;
-  inset: 5px 5px 5px auto;
+  inset: 1px 1px 1px auto;
   padding: 0 12px;
   min-width: 60px;
+  min-height: 44px;
   border: 0;
   border-radius: 4px;
   background: transparent;
@@ -258,7 +263,11 @@
 }
 .primary:disabled,
 .secondary:disabled {
-  opacity: 0.6;
+  background: var(--z-disabled-bg);
+  color: var(--z-disabled-ink);
+  border-color: var(--z-line);
+  opacity: 1;
+  filter: none;
   cursor: wait;
 }
 .feedback {

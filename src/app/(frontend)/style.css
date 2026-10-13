@@ -2701,12 +2701,12 @@ textarea:focus-visible,
 [role="status"]:empty {
   display: none;
 }
-p[role="status"]:not(:empty) {
+:where(p[role="status"]:not(:empty)) {
   padding: 16px 20px;
-  border: 1px solid #dacbef;
-  border-radius: 12px;
-  background: #f5efff;
-  color: #56377c;
+  border: 1px solid var(--z-line);
+  border-radius: var(--z-radius-small);
+  background: var(--z-tint);
+  color: var(--z-ink);
 }
 .form-footer {
   border-top: 1px solid var(--line);

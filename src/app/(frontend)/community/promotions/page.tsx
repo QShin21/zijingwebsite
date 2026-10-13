@@ -17,6 +17,7 @@ export default async function Promotions({ searchParams }: { searchParams: Promi
   const query = await searchParams, reviewer = canReviewPromotion(user), review = query.view === "review";
   if (review && !reviewer) notFound();
   const page = Math.max(1, Math.min(10000, Math.floor(Number(query.page) || 1)));
+  const returnQuery = new URLSearchParams({ ...(review ? { view: "review" } : {}), ...(query.source ? { source: query.source } : {}), ...(query.id ? { id: query.id } : {}), ...(query.page ? { page: String(page) } : {}) }).toString();
   const records = await p.find({ collection: "content-promotions", user, overrideAccess: false, depth: 0, page, limit: 20, sort: "-updatedAt",
     where: review ? { status: { equals: "pending" } } : {} });
   const scope: Where[] = [{ status: { equals: "visible" } }, { category: { in: supportedPromotionKinds.filter(kind => kind !== "showcase") } }];
@@ -42,13 +43,13 @@ export default async function Promotions({ searchParams }: { searchParams: Promi
     <section>
       <nav className={pageStyles.tabs} aria-label="升推工作台"><Link href="/community/promotions" aria-current={!review ? "page" : undefined}>内容与进度</Link>{reviewer && <Link href="/community/promotions?view=review" aria-current={review ? "page" : undefined}>待审核申请</Link>}</nav>
       <p className={styles.scope}>升推仅改变同一内容的展示范围。社群归属、报名入口与报名记录沿用原内容；申请与审核依照当前权限进行。</p>
-      <p role="status">{query.message}</p>
+      {query.message && <p role="status" aria-label="升推操作结果">{query.message}</p>}
       {!review && <><h2>可升推内容</h2>{!sources.length && <p>暂无可升推的已发布内容。请先在负责的社群发布内容，或核对当前任职。</p>}
         <div className={styles.records}>{sources.map(source => { const key = source.collection + ":" + source.doc.id, row = byKey.get(key); return <article className={styles.record} key={key} data-promotion-source={key}>
           <small>{source.game.title} · {promotionKindLabels[source.kind]} · {row ? promotionStatusLabels[row.status] : "尚未申请"}</small>
           <h3><Link href={source.href}>{source.snapshot.title}</Link></h3><p className={styles.excerpt}>{source.snapshot.body}</p>
           {row?.reviewNote && <p>处理意见：{row.reviewNote}</p>}
-          <PromotionControls collection={source.collection} id={source.doc.id} version={source.version} current={row} manager={managesGame(user, source.game.id)} reviewer={reviewer} actor={user!.id} />
+          <PromotionControls collection={source.collection} id={source.doc.id} version={source.version} current={row} manager={managesGame(user, source.game.id)} reviewer={reviewer} actor={user!.id} returnQuery={returnQuery} />
         </article>; })}</div></>}
       <h2>{review ? "待审核" : "升推记录"}</h2>
       {!records.docs.length && <p>{review ? "目前没有待审核的升推申请。" : "暂无升推记录。"}</p>}
@@ -62,7 +63,7 @@ export default async function Promotions({ searchParams }: { searchParams: Promi
           {original ? <Link href={original.href}>查看原内容、照片或报名表 ↗</Link> : <p>原内容目前无法公开，升推展示已关闭。</p>}
           {review && <><p className="preserve">{snapshot?.body}</p><PromotionControls collection={row.sourceCollection as PromotionSource} id={row.sourceID}
             version={row.requestedVersion ?? ""} current={row} manager={false} reviewer={reviewer} actor={user!.id}
-            canApprove={Boolean(original && original.version === row.requestedVersion)} /></>}
+            canApprove={Boolean(original && original.version === row.requestedVersion)} returnQuery={returnQuery} /></>}
           <details><summary>查看处理记录</summary><ol>{history.map((entry, index) => <li key={index}>{formatDate(entry.at)} · {entry.actorName} · {promotionStatusLabels[entry.to] ?? entry.to}{entry.reason && "：" + entry.reason}</li>)}</ol></details>
         </article>;
       })}</div><Pagination page={page} total={records.totalPages} path="/community/promotions" query={{ ...(review ? { view: "review" } : {}), ...(query.source ? { source: query.source } : {}), ...(query.id ? { id: query.id } : {}) }} />

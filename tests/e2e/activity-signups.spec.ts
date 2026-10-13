@@ -207,10 +207,14 @@ test("site event management and API token submission share the same questionnair
     page.locator(".signup-management > p[role=status]"),
   ).toContainText("已保存");
   await page.goto(`/events/signup-ui-${suffix}`);
-  await expect(page.getByLabel("参加理由", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "暂无报名渠道" })).toHaveCount(
     0,
   );
+  const signupLink = page.getByRole("link", { name: "填写报名问卷 →", exact: true });
+  await expect(signupLink).toHaveAttribute("href", `/activities/events/${event}/fill`);
+  await signupLink.click();
+  await expect(page).toHaveURL(new RegExp(`/activities/events/${event}/fill$`));
+  await expect(page.getByLabel("参加理由", { exact: true })).toBeVisible();
   const loginResult = await p.login({
     collection: "users",
     data: { email: member.email, password },
@@ -443,11 +447,20 @@ test("conditional questionnaire previews, validates, preserves steps and retries
     else await route.continue();
   });
   await signup.getByRole("button", { name: "提交并确认报名" }).click();
-  await expect(signup.getByRole("alert")).toContainText("临时不可用");
+  await expect(signup.getByRole("alert")).toContainText("服务器暂时无法确认提交结果");
+  await expect(signup.getByRole("alert")).toContainText("填写内容已保留，请先刷新本人回执或已保存记录");
   await expect(signup.locator(".questionnaire-review")).toContainText(
     "下午、上午",
   );
   await page.unroute("**" + endpoint);
+  const checked = page.waitForResponse(response => new URL(response.url()).pathname === endpoint && response.request().method() === "GET");
+  await signup.getByRole("button", { name: "刷新报名状态与本人回执", exact: true }).click();
+  const receiptCheck = await checked;
+  expect(receiptCheck.status()).toBe(200);
+  expect((await receiptCheck.json()).signup).toBeNull();
+  await expect(signup.getByRole("status").filter({ hasText: "当前未查到已保存的本人回执" })).toContainText("当前未查到已保存的本人回执。已填写内容保留");
+  await expect(signup.locator(".questionnaire-review")).toContainText("下午、上午");
+  await expect(signup.locator(".questionnaire-review")).not.toContainText("联系邮箱");
   await signup.getByRole("button", { name: "提交并确认报名" }).click();
   await expect(
     signup.getByRole("heading", { name: "已报名", exact: true }),

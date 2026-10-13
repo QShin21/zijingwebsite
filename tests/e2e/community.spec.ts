@@ -57,7 +57,8 @@ test("社群保留通知、风采和微信入口，已移除论坛与聊天", as
   await page.goto(`/community/${slug}`);
   await expect(page.getByRole("textbox")).toHaveCount(0);
   const sections = page.getByRole("navigation", { name: "社群分区" });
-  await expect(sections.getByRole("link")).toHaveCount(3);
+  await expect(sections.getByRole("link")).toHaveCount(4);
+  await expect(sections.getByRole("link", { name: "社群首页", exact: true })).toHaveAttribute("href", `/community/${slug}`);
   for (const [name, section] of [["活动与通知", "updates"], ["社群风采", "showcase"], ["进群进度", "join"]])
     await expect(sections.getByRole("link", { name, exact: true })).toHaveAttribute("href", `/community/${slug}/${section}`);
   await expect(page.locator('a[href*="/chat"]')).toHaveCount(0);
@@ -106,26 +107,26 @@ test("邮箱也可登录同一账号，错误登录统一提示", async ({ page 
     await page.getByLabel("昵称或邮箱").fill(identifier);
     await page.getByLabel("密码", { exact: true }).fill(secret);
     await page.getByRole("button", { name: "登录", exact: true }).click();
-    await expect(page.getByRole("status")).toHaveText("昵称、邮箱或密码错误");
+    await expect(page.getByRole("main").getByRole("alert")).toHaveText("昵称、邮箱或密码错误，请核对后重试。");
   }
   await page.goto("/login");
   await page.getByLabel("昵称或邮箱").fill(email.toUpperCase());
   await page.getByLabel("密码", { exact: true }).fill(password);
   await page.getByRole("button", { name: "登录", exact: true }).click();
   await expect(page).toHaveURL(/\/account$/);
-  await expect(page.locator("main h1")).toContainText(nickname);
+  await expect(page.getByRole("complementary", { name: nickname, exact: true }).getByRole("heading", { level: 2 })).toHaveText(nickname);
 });
 
 test("注册拒绝已占用昵称且没有数字账户输入", async ({ page }) => {
   await page.goto("/register");
   await expect(page.locator('input[name="account"]')).toHaveCount(0);
-  const form = page.locator("form.registration-form");
+  const form = page.locator("form").filter({ has: page.getByRole("heading", { name: "创建账号", exact: true }) });
   await form.getByLabel("邮箱前缀").fill(`new-${suffix}`);
   await form.locator('input[name="name"]').fill(nickname.toUpperCase());
   await form.locator('input[name="password"]').fill(password);
   await form.locator('input[name="confirm"]').fill(password);
   await form.getByRole("button", { name: "验证并注册" }).click();
-  await expect(page.getByRole("status")).toHaveText("该昵称已被使用，请更换昵称");
+  await expect(form.getByRole("alert")).toHaveText("该昵称已被使用，请更换昵称");
 });
 test.afterAll(async () => {
   if (!p) return;
@@ -143,7 +144,7 @@ test("昵称登录、论坛关闭与社群只读导航", async ({ page }) => {
   await page.getByLabel("密码", { exact: true }).fill(password);
   await page.getByRole("button", { name: "登录", exact: true }).click();
   await expect(page).toHaveURL(/\/account$/);
-  await expect(page.locator("main h1")).toContainText(nickname);
+  await expect(page.getByRole("complementary", { name: nickname, exact: true }).getByRole("heading", { level: 2 })).toHaveText(nickname);
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     for (const route of [

@@ -1,0 +1,1408 @@
+{
+  "updatedAt": "2026-10-13T17:31:15.214894+00:00",
+  "branch": "new",
+  "gitParentCommit": "3bd8e6f627a6bc507d413e1838dc49282b11e20f",
+  "frozenFailureSourceCommit": "4733a4c55be8811b894f65d2057caee1acd134ca",
+  "repairModel": "gpt-6-astra max",
+  "retestModel": "gpt-6.1-sol max",
+  "status": "implemented-awaiting-fresh-build-regression",
+  "sourceInputFiles": 594,
+  "sourceInputManifestSha256": "87534447c6312b3ff4538c9a9613d40dfd6b26b6bdd92b9adf704c873960d02e",
+  "sourceInputManifest": "/workspace/qa-zijing/source-manifest-astra.json",
+  "diagnosticSnapshotMatchesInputs": true,
+  "repairFiles": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "621f058f7bd7f7c1f8a5f0120dba7d16a2ecfb861af32ae44c3147d390a6980f"
+    },
+    {
+      "path": "src/app/(design)/design.css",
+      "sha256": "a588af957c458821d002d5a5bc7fde71fbfb0288455b97eef44247449bb1d07a"
+    },
+    {
+      "path": "src/app/(frontend)/_club/ClubPages.module.css",
+      "sha256": "aca44d9f147dba6ac38faa56bae816ebc0a3f0fe2af42c37b6e68ca1f0db9ed3"
+    },
+    {
+      "path": "src/app/(frontend)/community/[slug]/showcase/page.tsx",
+      "sha256": "d2e211509541deaacdff6ff35f6209295034ddbcf63626d9a06da8ad48a2c4b1"
+    },
+    {
+      "path": "src/app/(frontend)/community/actions.ts",
+      "sha256": "f4857229947d8777b16d4d12e451139577c75b1e28fc68932511ed9e0cf0f2ea"
+    },
+    {
+      "path": "src/app/(frontend)/community/promotions/actions.ts",
+      "sha256": "20ea2d698997b7c2cd02624c4854afcb1a4b763a1de8311f9dfd02d03a6be053"
+    },
+    {
+      "path": "src/app/(frontend)/community/promotions/page.tsx",
+      "sha256": "11c8fea83fa351dfeffae40dbfd354c71b5bea0c9f41ee6eeddbcc9f52678162"
+    },
+    {
+      "path": "src/app/(frontend)/style.css",
+      "sha256": "27a0870a7b7f4323eb7789a116434ce78fadf249f52fab5a28c0ad877e14c319"
+    },
+    {
+      "path": "src/app/(frontend)/teams/honors/actions.ts",
+      "sha256": "d6fba4d5c57c76896b6ae81f09f89ec3358e879b58f1a271d37009ddd8703d37"
+    },
+    {
+      "path": "src/components/PromotionControls.tsx",
+      "sha256": "e475d5cfa794f537590c81ea6082808ba9278e0025644f4e111736a1671b8401"
+    },
+    {
+      "path": "src/components/ShowcaseCard.tsx",
+      "sha256": "de76d66ab02c7e715ccbbfcc11862ff6c7f2a9a711986128f8e1614420e9ea66"
+    },
+    {
+      "path": "src/components/account-pages/AccountPages.module.css",
+      "sha256": "5bd2edf44cbbfc4a5e5a82c5279bffa200fbc3c030700a61770c7fedb76fe4a1"
+    },
+    {
+      "path": "src/components/activity-pages/ActionForm.tsx",
+      "sha256": "e6484c12bccf086706dbf111506184edecb2b210a682cca5bb4f9d4fb8e3c4a1"
+    },
+    {
+      "path": "src/components/activity-pages/ActivityPages.module.css",
+      "sha256": "37670b0df96cc6456aaac88cd8da83369eef55acbeb3e69113955dfe7840f843"
+    },
+    {
+      "path": "src/components/activity-pages/Workspace.module.css",
+      "sha256": "9b5629be51f74f0834bd8134ef49136fe094508067ecd79c04c7466b35d386bf"
+    },
+    {
+      "path": "src/components/visual-direction/theme.css",
+      "sha256": "37cd19c693aff7e502f9946ed4ea4ca7227348c0613d88f059d6890080a4b797"
+    },
+    {
+      "path": "tests/e2e/activity-signups.spec.ts",
+      "sha256": "ddec2559668231646c8e25f22d22d3df4dcea4ba1533812acc881b422acbd0b7"
+    },
+    {
+      "path": "tests/e2e/club-integration.spec.ts",
+      "sha256": "888d0df382ae633cd47fe974ff67b161abf8f051889cae14902600e7c575c746"
+    },
+    {
+      "path": "tests/e2e/club-operations.spec.ts",
+      "sha256": "68a86815240e52caba7f6d33e6fa27d2ef4ba24f8daffaf913033c339a3ec4d0"
+    },
+    {
+      "path": "tests/e2e/club-recovery.spec.ts",
+      "sha256": "30ad0e6fe1e96722811845a8108a7e0a98929c709338c4d02df3727bcc5f7c75"
+    },
+    {
+      "path": "tests/e2e/club-theme.spec.ts",
+      "sha256": "a463b70b328407e23a5b88e1bd2b2da81893aaf4d8f0559251b0a11c18014881"
+    },
+    {
+      "path": "tests/e2e/club-visual.spec.ts",
+      "sha256": "87834b881adcea87e7fe977604bbe207e50e3ff7d168e305604229ac6acbb2c0"
+    },
+    {
+      "path": "tests/e2e/community-application.spec.ts",
+      "sha256": "85d64c8e0e798e7d482666ef94adc1c794dd9cd2bccdcce8369872c385acb47b"
+    },
+    {
+      "path": "tests/e2e/community-spaces.spec.ts",
+      "sha256": "797d4a8f368b143e2ff12a73ecc307840e8a5954adfbd5d6b861745b04807eb8"
+    },
+    {
+      "path": "tests/e2e/community.spec.ts",
+      "sha256": "b10b844575f512577c8ae9869b8b8fddc54eec10a99940c114c9a16823b30289"
+    },
+    {
+      "path": "tests/e2e/content-promotions.spec.ts",
+      "sha256": "179fbb0820f70530d4e668276cf29dd3f071cf8ec727f429283224c23a0f88e8"
+    },
+    {
+      "path": "tests/e2e/design-refresh.spec.ts",
+      "sha256": "07a4fd5d12bf2248cd9cc932ee6317eacf00f8f7fabd2f8ff0b2470af7f20fde"
+    },
+    {
+      "path": "tests/e2e/registration-flow.spec.ts",
+      "sha256": "2bb9a98620986e349885e650869b523d80e95790a66b35a3a4d598b3ba37bdd1"
+    },
+    {
+      "path": "tests/e2e/site.spec.ts",
+      "sha256": "529b8b05fc2e7b3577af810458e2816b0bc596a956ec8e6b0bf68182ca24d04c"
+    },
+    {
+      "path": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+      "sha256": "609cd0eca9c64eda31bff21653d7bc37faeb55f103c55dd96bff2107997b7b9e"
+    },
+    {
+      "path": "tests/e2e/team-core-review.spec.ts",
+      "sha256": "afefbfa45a72323911d6602760838e4b5c868dc6d26a9632641eadf7764be331"
+    },
+    {
+      "path": "tests/e2e/team-core.spec.ts",
+      "sha256": "67d76220025c296f78078aa1a118fa41a5ece95972fdc5c05914ee55799da46c"
+    },
+    {
+      "path": "tests/e2e/team-honors.spec.ts",
+      "sha256": "93f5e37970fba654eba4af5a81e1e6cec6ac1934bc2f24abba1064c12f324549"
+    },
+    {
+      "path": "tests/team-honor-feedback.test.ts",
+      "sha256": "c0cb74ab066d30ffa0a6e396a5e6e6ad018c890d7965e00ccf8f7ed245439adc"
+    }
+  ],
+  "originalFullE2ECounts": {
+    "pass": 79,
+    "fail": 34,
+    "notrun": 12,
+    "flaky": 0
+  },
+  "failureRepairs": [
+    {
+      "file": "activity-signups.spec.ts",
+      "originalLine": 197,
+      "title": "site event management and API token submission share the same questionnaire",
+      "classification": "test-ui-flow",
+      "repair": "Follow actual detail-to-fill link; after unknown 503 perform real receipt GET, retain answers and uniqueness checks.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/activity-signups-site-even-8dc2f-hare-the-same-questionnaire/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/activity-signups-site-even-8dc2f-hare-the-same-questionnaire/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/activity-signups-site-even-8dc2f-hare-the-same-questionnaire/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "activity-signups.spec.ts",
+      "originalLine": 298,
+      "title": "conditional questionnaire previews, validates, preserves steps and retries without losing answers",
+      "classification": "test-ui-flow",
+      "repair": "Follow actual detail-to-fill link; after unknown 503 perform real receipt GET, retain answers and uniqueness checks.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/activity-signups-condition-cca99-ries-without-losing-answers/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/activity-signups-condition-cca99-ries-without-losing-answers/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/activity-signups-condition-cca99-ries-without-losing-answers/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "club-integration.spec.ts",
+      "originalLine": 105,
+      "title": "骨干录用独立于入队；成立/招新/录取→简介opt-in→荣誉复审→撤权与同ID重录保持门禁",
+      "classification": "test-locator",
+      "repair": "Scope actual member-record navigation within 我的代表队; retain integrated membership/authority checks.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-integration-骨干录用独立于入队-92a56-→简介opt-in→荣誉复审→撤权与同ID重录保持门禁/test-failed-1.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-integration-骨干录用独立于入队-92a56-→简介opt-in→荣誉复审→撤权与同ID重录保持门禁/test-failed-3.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-integration-骨干录用独立于入队-92a56-→简介opt-in→荣誉复审→撤权与同ID重录保持门禁/test-failed-4.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-integration-骨干录用独立于入队-92a56-→简介opt-in→荣誉复审→撤权与同ID重录保持门禁/test-failed-2.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-integration-骨干录用独立于入队-92a56-→简介opt-in→荣誉复审→撤权与同ID重录保持门禁/test-failed-5.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-integration-骨干录用独立于入队-92a56-→简介opt-in→荣誉复审→撤权与同ID重录保持门禁/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-integration-骨干录用独立于入队-92a56-→简介opt-in→荣誉复审→撤权与同ID重录保持门禁/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "club-operations.spec.ts",
+      "originalLine": 37,
+      "title": "人工进群完整回执、后台确认、隐私隔离及旧会话撤权",
+      "classification": "test-locator",
+      "repair": "Use current empty heading and contact link names; retain manual-join, privacy and revocation checks.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-operations-人工进群完整回执、后台确认、隐私隔离及旧会话撤权/test-failed-1.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-operations-人工进群完整回执、后台确认、隐私隔离及旧会话撤权/test-failed-2.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-operations-人工进群完整回执、后台确认、隐私隔离及旧会话撤权/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-operations-人工进群完整回执、后台确认、隐私隔离及旧会话撤权/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "club-operations.spec.ts",
+      "originalLine": 85,
+      "title": "预览居中、进群空态、联系兜底及四个响应式断点",
+      "classification": "test-locator",
+      "repair": "Use current empty heading and contact link names; retain manual-join, privacy and revocation checks.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-operations-预览居中、进群空态、联系兜底及四个响应式断点/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-operations-预览居中、进群空态、联系兜底及四个响应式断点/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-operations-预览居中、进群空态、联系兜底及四个响应式断点/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "club-recovery.spec.ts",
+      "originalLine": 32,
+      "title": "只读成员可从详情与工作台查看报名，独立导出且不可编辑/越权，撤销后旧会话立即失效",
+      "classification": "test-locator",
+      "repair": "Use current separate view/edit questionnaire labels; retain negative edit/export access assertions.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-recovery-只读成员可从详情与工作台查看报名，独立导出且不可编辑-越权，撤销后旧会话立即失效/test-failed-1.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-recovery-只读成员可从详情与工作台查看报名，独立导出且不可编辑-越权，撤销后旧会话立即失效/test-failed-2.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-recovery-只读成员可从详情与工作台查看报名，独立导出且不可编辑-越权，撤销后旧会话立即失效/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-recovery-只读成员可从详情与工作台查看报名，独立导出且不可编辑-越权，撤销后旧会话立即失效/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "community-application.spec.ts",
+      "originalLine": 44,
+      "title": "完整申请、备案提示、私有二维码、社长查看全部资料后批准",
+      "classification": "test-locator",
+      "repair": "Scope canonical consent label to the matching approved record or application form; retain opt-in and contact removal.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-application-完整申请、备案提示、私有二维码、社长查看全部资料后批准/test-failed-1.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-application-完整申请、备案提示、私有二维码、社长查看全部资料后批准/test-failed-2.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-application-完整申请、备案提示、私有二维码、社长查看全部资料后批准/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-application-完整申请、备案提示、私有二维码、社长查看全部资料后批准/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "community-spaces.spec.ts",
+      "originalLine": 35,
+      "title": "多管理员微信、只读活动、网页风采投稿审核及B站预览",
+      "classification": "test-external-fixture-and-product-feedback",
+      "repair": "Exact synthetic Bilibili iframe fixture removes external pending-load dependency; retained embed policy and durable real review-success assertion.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-spaces-多管理员微信、只读活动、网页风采投稿审核及B站预览/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-spaces-多管理员微信、只读活动、网页风采投稿审核及B站预览/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-spaces-多管理员微信、只读活动、网页风采投稿审核及B站预览/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "community.spec.ts",
+      "originalLine": 55,
+      "title": "社群保留通知、风采和微信入口，已移除论坛与聊天",
+      "classification": "test-locator",
+      "repair": "Assert actual four-link navigation, focused error alert and exact account identity sidebar.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-社群保留通知、风采和微信入口，已移除论坛与聊天/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-社群保留通知、风采和微信入口，已移除论坛与聊天/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-社群保留通知、风采和微信入口，已移除论坛与聊天/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "community.spec.ts",
+      "originalLine": 103,
+      "title": "邮箱也可登录同一账号，错误登录统一提示",
+      "classification": "test-locator",
+      "repair": "Assert actual four-link navigation, focused error alert and exact account identity sidebar.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-邮箱也可登录同一账号，错误登录统一提示/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-邮箱也可登录同一账号，错误登录统一提示/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-邮箱也可登录同一账号，错误登录统一提示/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "community.spec.ts",
+      "originalLine": 119,
+      "title": "注册拒绝已占用昵称且没有数字账户输入",
+      "classification": "test-locator",
+      "repair": "Assert actual four-link navigation, focused error alert and exact account identity sidebar.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-注册拒绝已占用昵称且没有数字账户输入/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-注册拒绝已占用昵称且没有数字账户输入/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-注册拒绝已占用昵称且没有数字账户输入/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "community.spec.ts",
+      "originalLine": 140,
+      "title": "昵称登录、论坛关闭与社群只读导航",
+      "classification": "test-locator",
+      "repair": "Assert actual four-link navigation, focused error alert and exact account identity sidebar.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-昵称登录、论坛关闭与社群只读导航/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-昵称登录、论坛关闭与社群只读导航/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-昵称登录、论坛关闭与社群只读导航/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "content-promotions.spec.ts",
+      "originalLine": 42,
+      "title": "活动网页申请/撤回/退回/重提/审核/改稿复审及主动升降级，报名ID与隐私权限保持",
+      "classification": "product-feedback-and-test-flow",
+      "repair": "Preserve server-validated success on stable list route; assert exact outcome and pending-list removal before viewing content progress.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-活动网页申请-撤回-退回-重提-审核-改稿复审及主动升降级，报名ID与隐私权限保持/test-failed-1.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-活动网页申请-撤回-退回-重提-审核-改稿复审及主动升降级，报名ID与隐私权限保持/test-failed-2.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-活动网页申请-撤回-退回-重提-审核-改稿复审及主动升降级，报名ID与隐私权限保持/test-failed-3.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-活动网页申请-撤回-退回-重提-审核-改稿复审及主动升降级，报名ID与隐私权限保持/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-活动网页申请-撤回-退回-重提-审核-改稿复审及主动升降级，报名ID与隐私权限保持/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "content-promotions.spec.ts",
+      "originalLine": 101,
+      "title": "公告网页申请由宣传部骨干审核，社团首页链接原公告且不出现报名",
+      "classification": "product-feedback-and-test-flow",
+      "repair": "Preserve server-validated success on stable list route; assert exact outcome and pending-list removal before viewing content progress.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-公告网页申请由宣传部骨干审核，社团首页链接原公告且不出现报名/test-failed-1.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-公告网页申请由宣传部骨干审核，社团首页链接原公告且不出现报名/test-failed-2.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-公告网页申请由宣传部骨干审核，社团首页链接原公告且不出现报名/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-公告网页申请由宣传部骨干审核，社团首页链接原公告且不出现报名/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "content-promotions.spec.ts",
+      "originalLine": 122,
+      "title": "风采本地批准后网页申请升推，隐藏关闭首页且重新公开仍需复审",
+      "classification": "product-feedback-and-test-flow",
+      "repair": "Preserve server-validated success on stable list route; assert exact outcome and pending-list removal before viewing content progress.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-风采本地批准后网页申请升推，隐藏关闭首页且重新公开仍需复审/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-风采本地批准后网页申请升推，隐藏关闭首页且重新公开仍需复审/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-风采本地批准后网页申请升推，隐藏关闭首页且重新公开仍需复审/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "content-promotions.spec.ts",
+      "originalLine": 169,
+      "title": "外链风采保留社群展示，在同一风采上传受控视频后才可审核升推",
+      "classification": "product-feedback-and-test-flow",
+      "repair": "Preserve server-validated success on stable list route; assert exact outcome and pending-list removal before viewing content progress.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-外链风采保留社群展示，在同一风采上传受控视频后才可审核升推/test-failed-1.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-外链风采保留社群展示，在同一风采上传受控视频后才可审核升推/test-failed-2.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-外链风采保留社群展示，在同一风采上传受控视频后才可审核升推/test-failed-3.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-外链风采保留社群展示，在同一风采上传受控视频后才可审核升推/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-外链风采保留社群展示，在同一风采上传受控视频后才可审核升推/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "design-refresh.spec.ts",
+      "originalLine": 40,
+      "title": "registration guidance, server feedback and unique mobile community navigation",
+      "classification": "test-locator",
+      "repair": "Use actual error role and exact signed-out/signed-in navigation destinations; retain mobile uniqueness and return path.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/design-refresh-registratio-e9c5e-mobile-community-navigation/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/design-refresh-registratio-e9c5e-mobile-community-navigation/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/design-refresh-registratio-e9c5e-mobile-community-navigation/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "registration-flow.spec.ts",
+      "originalLine": 101,
+      "title": "点击注册后弹窗验证，错误验证码不入库，正确验证码才创建用户",
+      "classification": "test-locator",
+      "repair": "Use actual dialog/main error alerts and identity sidebar; retain SMTP, no-account-before-verification, cooldown and retention checks.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-点击注册后弹窗验证，错误验证码不入库，正确验证码才创建用户/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-点击注册后弹窗验证，错误验证码不入库，正确验证码才创建用户/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-点击注册后弹窗验证，错误验证码不入库，正确验证码才创建用户/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "registration-flow.spec.ts",
+      "originalLine": 146,
+      "title": "关闭弹窗保留输入且不创建账号，重发限制在服务端执行",
+      "classification": "test-locator",
+      "repair": "Use actual dialog/main error alerts and identity sidebar; retain SMTP, no-account-before-verification, cooldown and retention checks.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-关闭弹窗保留输入且不创建账号，重发限制在服务端执行/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-关闭弹窗保留输入且不创建账号，重发限制在服务端执行/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-关闭弹窗保留输入且不创建账号，重发限制在服务端执行/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "registration-flow.spec.ts",
+      "originalLine": 161,
+      "title": "发送失败保留资料且不创建账号",
+      "classification": "test-locator",
+      "repair": "Use actual dialog/main error alerts and identity sidebar; retain SMTP, no-account-before-verification, cooldown and retention checks.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-发送失败保留资料且不创建账号/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-发送失败保留资料且不创建账号/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-发送失败保留资料且不创建账号/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "site.spec.ts",
+      "originalLine": 48,
+      "title": "后台登录、创建活动草稿、预览、发布、访客查看、撤下",
+      "classification": "test-locator-and-fixture",
+      "repair": "Scope existing draft banner, current titles and section modules; independently seed denied-preview record; retain publish/withdraw, CMS, album, CSP and performance checks.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-后台登录、创建活动草稿、预览、发布、访客查看、撤下/test-failed-1.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-后台登录、创建活动草稿、预览、发布、访客查看、撤下/test-failed-2.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-后台登录、创建活动草稿、预览、发布、访客查看、撤下/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-后台登录、创建活动草稿、预览、发布、访客查看、撤下/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "site.spec.ts",
+      "originalLine": 201,
+      "title": "公开页可访问性、CSP 与实际加载指标",
+      "classification": "product-css",
+      "repair": "Reduce generic link reset specificity so primary CTA foreground uses semantic tokens; Axe assertion unchanged.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-公开页可访问性、CSP-与实际加载指标/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-公开页可访问性、CSP-与实际加载指标/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-公开页可访问性、CSP-与实际加载指标/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "site.spec.ts",
+      "originalLine": 232,
+      "title": "三类招新、历史批次和所有公开栏目",
+      "classification": "test-locator-and-fixture",
+      "repair": "Scope existing draft banner, current titles and section modules; independently seed denied-preview record; retain publish/withdraw, CMS, album, CSP and performance checks.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-三类招新、历史批次和所有公开栏目/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-三类招新、历史批次和所有公开栏目/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-三类招新、历史批次和所有公开栏目/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "site.spec.ts",
+      "originalLine": 261,
+      "title": "首页配置即时更新、回顾关联、相册分页和长中文标题",
+      "classification": "test-locator-and-fixture",
+      "repair": "Scope existing draft banner, current titles and section modules; independently seed denied-preview record; retain publish/withdraw, CMS, album, CSP and performance checks.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-首页配置即时更新、回顾关联、相册分页和长中文标题/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-首页配置即时更新、回顾关联、相册分页和长中文标题/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-首页配置即时更新、回顾关联、相册分页和长中文标题/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "staff-recruitment-boundaries.spec.ts",
+      "originalLine": 160,
+      "title": "accepted 最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充",
+      "classification": "test-feedback-role",
+      "repair": "Business rejection is an alert; retain final-state, required-field, feedback and access assertions.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-49524-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/test-failed-1.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-49524-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/test-failed-2.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-49524-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-49524-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "staff-recruitment-boundaries.spec.ts",
+      "originalLine": 160,
+      "title": "rejected 最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充",
+      "classification": "test-feedback-role",
+      "repair": "Business rejection is an alert; retain final-state, required-field, feedback and access assertions.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-67642-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/test-failed-1.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-67642-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/test-failed-2.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-67642-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-67642-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "staff-recruitment-boundaries.spec.ts",
+      "originalLine": 244,
+      "title": "保存与发布拒绝跳过核心资料的分支，合法扩展分支可提交且撤下历史快照仍可读",
+      "classification": "test-feedback-role",
+      "repair": "Business rejection is an alert; retain final-state, required-field, feedback and access assertions.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-e43bc-核心资料的分支，合法扩展分支可提交且撤下历史快照仍可读/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-e43bc-核心资料的分支，合法扩展分支可提交且撤下历史快照仍可读/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-e43bc-核心资料的分支，合法扩展分支可提交且撤下历史快照仍可读/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "team-core-review.spec.ts",
+      "originalLine": 275,
+      "title": "超过20条队伍和建队审核时，两套分页独立跨页并互相保留筛选",
+      "classification": "test-locator",
+      "repair": "Use actual 20/3 list and exact identity/receipt selectors; retain independent pagination axes and historical private read-only data checks.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-超过20条队伍和建队审核时，两套分页独立跨页并互相保留筛选/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-超过20条队伍和建队审核时，两套分页独立跨页并互相保留筛选/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-超过20条队伍和建队审核时，两套分页独立跨页并互相保留筛选/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "team-core-review.spec.ts",
+      "originalLine": 335,
+      "title": "draft后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝",
+      "classification": "test-locator",
+      "repair": "Use actual 20/3 list and exact identity/receipt selectors; retain independent pagination axes and historical private read-only data checks.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-draft后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-draft后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-draft后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "team-core-review.spec.ts",
+      "originalLine": 335,
+      "title": "team-archived后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝",
+      "classification": "test-locator",
+      "repair": "Use actual 20/3 list and exact identity/receipt selectors; retain independent pagination axes and historical private read-only data checks.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-team-arch-b829c-读取旧snapshot且只读，隐藏当前配置及旁人均拒绝/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-team-arch-b829c-读取旧snapshot且只读，隐藏当前配置及旁人均拒绝/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-team-arch-b829c-读取旧snapshot且只读，隐藏当前配置及旁人均拒绝/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "team-core.spec.ts",
+      "originalLine": 414,
+      "title": "招新关闭、跨站拒绝和表单工作台四个视口",
+      "classification": "test-locator-and-fixture",
+      "repair": "Assert closed badge and detailed status; close only the original synthetic open batch via current-revision authorized workflow before independent new-batch scenario.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-招新关闭、跨站拒绝和表单工作台四个视口/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-招新关闭、跨站拒绝和表单工作台四个视口/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-招新关闭、跨站拒绝和表单工作台四个视口/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "team-core.spec.ts",
+      "originalLine": 530,
+      "title": "真实API表单版本冲突保留草稿，新批次录取后本人网页离队",
+      "classification": "test-locator-and-fixture",
+      "repair": "Assert closed badge and detailed status; close only the original synthetic open batch via current-revision authorized workflow before independent new-batch scenario.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-真实API表单版本冲突保留草稿，新批次录取后本人网页离队/test-failed-1.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-真实API表单版本冲突保留草稿，新批次录取后本人网页离队/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-真实API表单版本冲突保留草稿，新批次录取后本人网页离队/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "team-honors.spec.ts",
+      "originalLine": 633,
+      "title": "私有详情与原始 REST 守住社群边界，网页退回/拒绝需说明并可隐藏公开荣誉",
+      "classification": "product-feedback-and-test-locator",
+      "repair": "Scope rejection/record/editor receipts; keep CAS and resubmission checks; last legacy hide navigates to sanitized stable honor feedback page while archive stays hidden.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-私有详情与原始-REST-守住社群边界，网页退回-拒绝需说明并可隐藏公开荣誉/test-failed-1.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-私有详情与原始-REST-守住社群边界，网页退回-拒绝需说明并可隐藏公开荣誉/test-failed-2.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-私有详情与原始-REST-守住社群边界，网页退回-拒绝需说明并可隐藏公开荣誉/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-私有详情与原始-REST-守住社群边界，网页退回-拒绝需说明并可隐藏公开荣誉/trace.zip"
+        }
+      ]
+    },
+    {
+      "file": "team-honors.spec.ts",
+      "originalLine": 704,
+      "title": "真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/改稿复审/离队保留历史",
+      "classification": "product-feedback-and-test-locator",
+      "repair": "Scope rejection/record/editor receipts; keep CAS and resubmission checks; last legacy hide navigates to sanitized stable honor feedback page while archive stays hidden.",
+      "newBrowserStatus": "notrun",
+      "originalEvidence": [
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-真实成员网页草稿-错误保留-提交-撤回-退回重提-批准-改稿复审-离队保留历史/test-failed-1.png"
+        },
+        {
+          "name": "screenshot",
+          "contentType": "image/png",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-真实成员网页草稿-错误保留-提交-撤回-退回重提-批准-改稿复审-离队保留历史/test-failed-2.png"
+        },
+        {
+          "name": "error-context",
+          "contentType": "text/markdown",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-真实成员网页草稿-错误保留-提交-撤回-退回重提-批准-改稿复审-离队保留历史/error-context.md"
+        },
+        {
+          "name": "trace",
+          "contentType": "application/zip",
+          "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-真实成员网页草稿-错误保留-提交-撤回-退回重提-批准-改稿复审-离队保留历史/trace.zip"
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "name": "final-typecheck",
+      "result": "pass",
+      "command": "node node_modules/typescript/bin/tsc --noEmit --incremental false",
+      "exitCode": 0,
+      "log": "/workspace/qa-zijing/logs/astra-typecheck-final.log"
+    },
+    {
+      "name": "changed-source-test-lint",
+      "result": "pass",
+      "files": 26,
+      "exitCode": 0,
+      "log": "/workspace/qa-zijing/logs/astra-lint.log"
+    },
+    {
+      "name": "shared-design-tokens",
+      "result": "pass",
+      "command": "node scripts/build-design-tokens.mjs --check",
+      "outputs": 2,
+      "exitCode": 0
+    },
+    {
+      "name": "css-parse",
+      "result": "pass",
+      "files": 7,
+      "tool": "installed Prettier parser; no rewrite"
+    },
+    {
+      "name": "next-css-modules-pure-transform",
+      "result": "pass",
+      "files": 4,
+      "tool": "installed Next bundled postcss-modules-local-by-default(mode=pure) and scope"
+    },
+    {
+      "name": "ci-yaml-and-bash-syntax",
+      "result": "pass",
+      "command": "PyYAML parse and bash -n of extracted run block",
+      "script": "/workspace/qa-zijing/astra-ci-step.sh",
+      "execution": "notrun"
+    },
+    {
+      "name": "team-honor-feedback-unit",
+      "result": "pass",
+      "tests": 16,
+      "durationSeconds": 2.12,
+      "command": "pnpm exec vitest run tests/team-honor-feedback.test.ts",
+      "scope": "mocked component/action contract; no database/browser",
+      "workerHandoff": "/workspace/qa-zijing/astra-team-handoff.md"
+    },
+    {
+      "name": "e2e-collection",
+      "result": "pass",
+      "tests": 125,
+      "files": 28,
+      "command": "REBUILD_QA_RUN_LABEL=astra-collection node scripts/rebuild-qa.mjs playwright browser --list",
+      "exitCode": 0,
+      "log": "/workspace/qa-zijing/logs/astra-collection.log",
+      "execution": "collection only; no test bodies executed"
+    },
+    {
+      "name": "old-build-site-locator-checks",
+      "result": "pass",
+      "checks": 5,
+      "evidence": "/workspace/qa-zijing/astra-site-check/results.json",
+      "sourceCommit": "4733a4c55be8811b894f65d2057caee1acd134ca",
+      "scope": "stored failure DOM and one GET-only navigation; not new-source E2E"
+    },
+    {
+      "name": "git-diff-check",
+      "result": "pass",
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "reviewedScreenshots": [
+    {
+      "path": "/workspace/qa-zijing/browser-matrix/home-1440-light.png",
+      "sha256": "1b69d5e6bf9f461174afee79d736951bebb4d26bb4efc8b50dd27416f481895f"
+    },
+    {
+      "path": "/workspace/qa-zijing/browser-matrix/home-390-dark.png",
+      "sha256": "fd09bcad156be24fb4237f5342c7b5cb5edccadebcbaf733826483ae74f5c030"
+    },
+    {
+      "path": "/workspace/qa-zijing/browser-matrix/home-320-light.png",
+      "sha256": "ed23e8a483201de66f93ab892331d972a78ff3127f0788220101827cd3b0fdaf"
+    },
+    {
+      "path": "/workspace/qa-zijing/browser-matrix/community-390-light.png",
+      "sha256": "1522e4bc98e530a7bc7290a44812c58128e8c98ba7db02cd639e1fb7710a46d7"
+    },
+    {
+      "path": "/workspace/qa-zijing/browser-matrix/community-apply-320-dark.png",
+      "sha256": "0df6247804eb660f28fe2f63d83260270a5b61d25e29e7b3f0b5b246234a7cdc"
+    },
+    {
+      "path": "/workspace/qa-zijing/browser-matrix/honor-own-390-light.png",
+      "sha256": "b0186ede99627f2574fe2325fc9517ed1460ee58541ee00f2d440fa51e4e1359"
+    },
+    {
+      "path": "/workspace/qa-zijing/browser-matrix/honor-pending-390-dark.png",
+      "sha256": "73351a0d3c6080c38c355973d2488b97d7c01e388bcbd0d68cf87cfab36257e6"
+    },
+    {
+      "path": "/workspace/qa-zijing/browser-matrix/profile-390-light.png",
+      "sha256": "6cfe1f09d158d0ff0013b5cea0b902bb6be6777d196ed3636e501e9adf681696"
+    },
+    {
+      "path": "/workspace/qa-zijing/browser-matrix/team-manage-1440-dark.png",
+      "sha256": "29449c2b60edae9fc4c44ada6007b2397c95ce8874658c4d7b6475a9b34ac3cc"
+    },
+    {
+      "path": "/workspace/qa-zijing/browser-matrix/announcements-390-light.png",
+      "sha256": "834bd8bd9b295eecced43dab446dd28ed594bce00199186608a6b954f6b6c43a"
+    },
+    {
+      "path": "/workspace/qa-zijing/browser-matrix/missing-event-390-dark.png",
+      "sha256": "c47072ca14cb365c7833c05bab819095ba5b05e6f48a8b6ae1d823a1d6062297"
+    },
+    {
+      "path": "/workspace/qa-zijing/browser-matrix/team-recruitment-390-dark.png",
+      "sha256": "3a6ee256c38b77b5d49d338ab0f3f9163b3e2531250687b138bb52c7b032c0e2"
+    },
+    {
+      "path": "/workspace/qa-zijing/honor-probe/stale-revision-390-light.png",
+      "sha256": "b8b55c504d404c4148ba8f161b93bfffa752266c6a7b5553596b7b1db0ba1c59"
+    }
+  ],
+  "visualRepairs": {
+    "linkContrast": "shared reset no longer outranks primary foreground; hover excludes primary/button links",
+    "statusContrast": "generic status consumes shared theme variables and yields to component semantics",
+    "passwordControl": "absolute inset1px; min-height44px; reserved input padding preserved",
+    "disabledFields": "base exclusions use :where; disabled state uses semantic tokens with opacity1; no pixel assertion changes",
+    "original260CellResultsRemainHistorical": true
+  },
+  "ci": {
+    "isolatedRunner": "scripts/rebuild-qa.mjs",
+    "profiles": [
+      "contracts",
+      "prod-browser"
+    ],
+    "seed": "existing demo + guarded synthetic-browser-users fixture",
+    "localOptimizedServer": true,
+    "APP_ENV": "development",
+    "DB_PUSH": "false",
+    "smtp": "loopback127.0.0.1:2526; existing receiver controlled by tests",
+    "externalSecretsInherited": false,
+    "guardsRelaxed": false,
+    "fullExecutionStatus": "notrun-locally; check repair commit GitHub run after push"
+  },
+  "preservedContracts": [
+    "anonymous homepage/community/team gates",
+    "staff recruitment management remains president/vice-president",
+    "backend record ownership and revision checks",
+    "private/public media authority",
+    "failed write values and manual refresh semantics",
+    "all existing E2E time budgets and accessibility thresholds"
+  ],
+  "processes": {
+    "at": "2026-10-13T17:28:05.600177+00:00",
+    "servers": [
+      {
+        "port": 3000,
+        "runnerPID": 3834,
+        "childPID": 3845,
+        "log": "/workspace/qa-zijing/logs/next-start-3000.log",
+        "runnerPIDAlive": true,
+        "childPIDAlive": true,
+        "healthStatus": 200
+      },
+      {
+        "port": 3364,
+        "runnerPID": 3864,
+        "childPID": 3875,
+        "log": "/workspace/qa-zijing/logs/next-start-3364.log",
+        "runnerPIDAlive": true,
+        "childPIDAlive": true,
+        "healthStatus": 200
+      },
+      {
+        "port": 3365,
+        "runnerPID": 16627,
+        "childPID": 16638,
+        "log": "/workspace/qa-zijing/logs/next-start-3365.log",
+        "runnerPIDAlive": true,
+        "childPIDAlive": true,
+        "healthStatus": 200
+      }
+    ],
+    "databases": {
+      "main": {
+        "databasePID": 1317,
+        "databaseDir": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/pg",
+        "port": 55613,
+        "alive": true
+      },
+      "contracts": {
+        "databasePID": 1328,
+        "databaseDir": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/contracts/pg",
+        "port": 55617,
+        "alive": true
+      },
+      "prod-browser": {
+        "databasePID": 1308,
+        "databaseDir": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/pg",
+        "port": 55619,
+        "alive": true
+      },
+      "consent": {
+        "databasePID": 5216,
+        "databaseDir": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/consent/pg",
+        "port": 55614,
+        "alive": true
+      },
+      "post-edit": {
+        "databasePID": 5206,
+        "databaseDir": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/post-edit/pg",
+        "port": 55615,
+        "alive": true
+      },
+      "native": {
+        "databasePID": 5226,
+        "databaseDir": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/native/pg",
+        "port": 55578,
+        "alive": true
+      },
+      "visual": {
+        "databasePID": 13827,
+        "databaseDir": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/visual/pg",
+        "port": 55616,
+        "alive": true
+      },
+      "consent-web": {
+        "databasePID": 20629,
+        "databaseDir": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/consent-web/pg",
+        "port": 40071,
+        "alive": true
+      }
+    },
+    "oldBuildID": "1LQXl0KVPMjo-UFXJdO9l",
+    "diagnosticSnapshot": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/browser/app",
+    "diagnosticDatabaseStarted": false
+  },
+  "workerHandoffs": [
+    "/workspace/qa-zijing/astra-activity-handoff.md",
+    "/workspace/qa-zijing/astra-team-handoff.md",
+    "/workspace/qa-zijing/astra-community-handoff.md",
+    "/workspace/qa-zijing/astra-site-handoff.md"
+  ],
+  "remaining": [
+    {
+      "item": "new-source optimized build",
+      "status": "notrun",
+      "owner": "Sol",
+      "instruction": "Preserve old evidence; verify ownership and rotate old local services before replacing their app/build. Freeze the repair commit and build once."
+    },
+    {
+      "item": "targeted + full125 E2E",
+      "status": "notrun",
+      "owner": "Sol",
+      "priority": [
+        "stable promotion/showcase success after list removal",
+        "last legacy-honor hide success after archive becomes404",
+        "503 real receipt check + retained values",
+        "independent team fixture and preview authorization"
+      ]
+    },
+    {
+      "item": "260 width/theme cells and resource measurement",
+      "status": "notrun",
+      "owner": "Sol",
+      "priority": [
+        "all25 contrast failures",
+        "primary hover",
+        "390/320 auth reveal target>=44px",
+        "disabled-bg and opacity unchanged assertions"
+      ]
+    },
+    {
+      "item": "visual profile both themes",
+      "status": "notrun",
+      "owner": "Sol",
+      "files": [
+        "tests/e2e/club-theme.spec.ts",
+        "tests/e2e/club-visual.spec.ts"
+      ]
+    },
+    {
+      "item": "legacy false/null consent browser scenario",
+      "status": "notrun",
+      "owner": "Sol",
+      "profile": "consent-web",
+      "databasePort": 40071,
+      "serverPort": 3000,
+      "guardUnchanged": true
+    },
+    {
+      "item": "event-detail networkidle timeouts",
+      "status": "unresolved",
+      "owner": "Sol",
+      "instruction": "Original3 timeout observations retained; no proven cause and no budget relaxation."
+    },
+    {
+      "item": "official WeChat tools and devices",
+      "status": "notrun",
+      "instruction": "No official tool/device validation; browser/VM substitutes are not official evidence."
+    },
+    {
+      "item": "third-party Bilibili actual playback",
+      "status": "notrun",
+      "instruction": "Exact inert iframe fixture checks local embed/workflow only."
+    }
+  ]
+}

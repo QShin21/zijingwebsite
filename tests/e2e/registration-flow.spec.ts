@@ -130,7 +130,7 @@ test("点击注册后弹窗验证，错误验证码不入库，正确验证码�
     .getByLabel("六位验证码")
     .fill(code === "000000" ? "999999" : "000000");
   await dialog.getByRole("button", { name: "确认验证码并完成注册" }).click();
-  await expect(dialog.getByRole("status")).toContainText("验证码错误");
+  await expect(dialog.getByRole("alert")).toContainText("验证码错误");
   expect(await count(names[0])).toBe(0);
   await dialog.getByLabel("六位验证码").fill(code!);
   await dialog.getByRole("button", { name: "确认验证码并完成注册" }).click();
@@ -140,7 +140,7 @@ test("点击注册后弹窗验证，错误验证码不入库，正确验证码�
   await page.getByLabel("密码", { exact: true }).fill(password);
   await page.getByRole("button", { name: "登录", exact: true }).click();
   await expect(page).toHaveURL(/\/account$/);
-  await expect(page.locator("main h1")).toContainText(names[0]);
+  await expect(page.getByRole("complementary", { name: names[0], exact: true }).getByRole("heading", { level: 2 })).toHaveText(names[0]);
 });
 
 test("关闭弹窗保留输入且不创建账号，重发限制在服务端执行", async ({ page }) => {
@@ -154,7 +154,7 @@ test("关闭弹窗保留输入且不创建账号，重发限制在服务端执�
   expect(await count(names[1])).toBe(0);
   await page.getByRole("button", { name: "验证并注册", exact: true }).click();
   await expect(
-    page.locator(".registration-form").getByRole("status"),
+    page.getByRole("main").getByRole("alert"),
   ).toContainText("60 秒");
 });
 
@@ -163,7 +163,7 @@ test("发送失败保留资料且不创建账号", async ({ page }) => {
   rejectNext = true;
   await page.getByRole("button", { name: "验证并注册", exact: true }).click();
   await expect(
-    page.locator(".registration-form").getByRole("status"),
+    page.getByRole("main").getByRole("alert"),
   ).toContainText("验证码发送失败");
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page.locator('input[name="name"]')).toHaveValue(names[2]);

@@ -8,7 +8,8 @@
 .z-design :where(input, select, textarea)[aria-invalid="true"] {
   border-color: var(--z-danger);
 }
-.z-design :where(button:disabled, .z-button[aria-disabled="true"]) {
+.z-design :is(button, input, select, textarea):disabled,
+.z-design .z-button[aria-disabled="true"] {
   cursor: not-allowed;
   background: var(--z-disabled-bg);
   color: var(--z-disabled-ink);

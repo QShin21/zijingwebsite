@@ -207,7 +207,14 @@ export async function reviewShowcaseResultAction(form: FormData) {
   try {
     await p.update({ collection: "community-showcase", id: post.id, overrideAccess: false, user, context: { webShowcaseWrite: true },
       data: { status: status as "visible" | "rejected" | "hidden", reviewNote: value(form, "reviewNote") } });
-    revalidatePath(`${await gamePath(Number(post.game))}/showcase`);
-    return { ok: true, message: "审核结果已保存。" };
+    const path = `${await gamePath(Number(post.game))}/showcase`;
+    revalidatePath(path);
+    const requested = new URLSearchParams(value(form, "returnQuery")), query = new URLSearchParams();
+    const view = requested.get("view"), page = requested.get("page");
+    query.set("view", view === "public" || view === "mine" ? view : "review");
+    if (page && /^\d+$/.test(page) && Number(page) > 0 && Number(page) <= 100000) query.set("page", page);
+    const message = "审核结果已保存。";
+    query.set("message", message);
+    return { ok: true, message, successHref: path + "?" + query.toString() };
   } catch (error) { return { ok: false, message: workflowFeedback(error) }; }
 }

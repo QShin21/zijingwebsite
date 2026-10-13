@@ -189,7 +189,7 @@ for (const finalStatus of ["accepted", "rejected"] as const) test(finalStatus + 
     await row.getByRole("textbox", { name: /^本人可见反馈/ }).fill("");
     await expect(row.getByRole("textbox", { name: /^本人可见反馈/ })).toHaveValue("");
     await row.getByRole("button", { name: "退回补充", exact: true }).click();
-    await expect(manager.getByRole("status").filter({ hasText: "退回或未录用须说明原因" })).toBeVisible();
+    await expect(row.getByRole("alert").filter({ hasText: "退回或未录用须说明原因" })).toBeVisible();
     await managementFormReady(manager, final.id);
     await expect(row.getByRole("button", { name: "进入选拔", exact: true })).toBeDisabled();
     await row.getByRole("textbox", { name: /^本人可见反馈/ }).fill("请补充合成姓名，并重新提交资料");
@@ -260,7 +260,7 @@ test("保存与发布拒绝跳过核心资料的分支，合法扩展分支可�
       const invalid = structuredClone(defaultStaffForm); invalid.questions[0].jumps = branches;
       await editor.locator('input[name="signupForm"]').evaluate((node, form) => { (node as HTMLInputElement).value = JSON.stringify(form); }, invalid);
       await editor.getByRole("button", { name: state === "draft" ? "保存草稿" : "发布骨干招新", exact: true }).click();
-      await expect(page.getByRole("status").filter({ hasText: "跳转不得跳过骨干申请核心必填字段" })).toBeVisible();
+      await expect(editor.getByRole("alert").filter({ hasText: "跳转不得跳过骨干申请核心必填字段" })).toBeVisible();
       const unchanged = await p.findByID({ collection: "staff-batches", id: batch.id, user: president, overrideAccess: false });
       expect(unchanged.updatedAt).toBe(batch.updatedAt); expect(unchanged.state).toBe("open"); expect(unchanged.signupForm).toEqual(batch.signupForm);
     }

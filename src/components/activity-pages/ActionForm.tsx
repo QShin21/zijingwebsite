@@ -2,7 +2,7 @@
 import { useRef, useState, useSyncExternalStore, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./Workspace.module.css";
-export type ActionResult = { ok: boolean; message: string; id?: number; revision?: string };
+export type ActionResult = { ok: boolean; message: string; id?: number; revision?: string; successHref?: string };
 
 /** Keep entered values when a controlled workflow rejects or its response is lost. */
 export function ActionForm({ action, children, className = "member-form", onSuccess, resetOnSuccess = false }: {
@@ -32,7 +32,10 @@ export function ActionForm({ action, children, className = "member-form", onSucc
       if (next.ok) {
         onSuccess?.(next);
         if (resetOnSuccess) form.reset();
-        startRefresh(() => router.refresh());
+        // A successful action can remove this form from its filtered list or detail route.
+        // Keep its receipt on a stable, server-selected page in that case.
+        const destination = next.successHref;
+        startRefresh(() => destination ? router.replace(destination) : router.refresh());
       }
     } catch {
       setResult({ ok: false, message: "操作结果尚未确认，填写内容已保留。请先刷新已保存记录核对，再决定是否重试。" });
@@ -42,7 +45,7 @@ export function ActionForm({ action, children, className = "member-form", onSucc
     }
   }}>
     <fieldset className={styles.actionFields} disabled={busy}>{children}</fieldset>
-    {(busy || result) && <p ref={feedback} tabIndex={-1} className={result && !result.ok ? styles.error : styles.feedback} role={result && !result.ok ? "alert" : "status"}>{busy ? "正在保存，请稍候…" : result?.message}</p>}
+    {(busy || (result && (!result.ok || !result.successHref))) && <p ref={feedback} tabIndex={-1} className={result && !result.ok ? styles.error : styles.feedback} role={result && !result.ok ? "alert" : "status"}>{busy ? "正在保存，请稍候…" : result?.message}</p>}
     {result && !result.ok && <button type="button" className="button light" disabled={busy} onClick={() => startRefresh(() => router.refresh())}>刷新已保存记录</button>}
   </form>;
 }

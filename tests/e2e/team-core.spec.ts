@@ -9,6 +9,7 @@ import {
   submitTeamEstablishment,
   decideTeamEstablishment,
   saveTeamRecruitment,
+  closeTeamRecruitment,
   defaultTeamForm,
 } from "../../src/lib/team-core";
 import { getActiveTeamMembership } from "../../src/lib/team-memberships";
@@ -158,7 +159,9 @@ async function login(page: Page, user: User) {
   });
   expect(response.status(), await response.text()).toBe(200);
   await page.goto("/account");
-  await expect(page.getByRole("heading", { name: user.name })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: user.name, exact: true }),
+  ).toBeVisible();
 }
 test("建队网页退回、修改重提与高权限批准可进入招新工作台", async ({
   page,
@@ -437,10 +440,19 @@ test("招新关闭、跨站拒绝和表单工作台四个视口", async ({ page,
     ).violations,
   ).toEqual([]);
   await page.goto(`/teams/manage/${team}`);
-  await page.getByRole("button", { name: "关闭本轮招新", exact: true }).click();
+  const recruitmentCard = page.getByRole("article").filter({
+    has: page.getByRole("heading", {
+      name: "合成浏览器招新批次",
+      exact: true,
+    }),
+  });
+  await recruitmentCard
+    .getByRole("button", { name: "关闭本轮招新", exact: true })
+    .click();
   await expect(
-    page.getByText("已关闭 · 招新已关闭", { exact: true }),
+    recruitmentCard.getByText("已关闭", { exact: true }),
   ).toBeVisible();
+  await expect(recruitmentCard.getByText(/^招新已关闭 · 更新于/)).toBeVisible();
   const teamRecord = await p.findByID({
     collection: "teams",
     id: team,
@@ -532,6 +544,25 @@ test("真实API表单版本冲突保留草稿，新批次录取后本人网页�
   browser,
 }) => {
   await login(page, participant);
+  // This scenario can run alone or in a fresh worker after an earlier failure.
+  // Close only its original synthetic batch through the revision-checked workflow.
+  const initialBatch = await p.findByID({
+    collection: "team-recruitments",
+    id: batch,
+    user: manager,
+    overrideAccess: false,
+    depth: 0,
+  });
+  if (initialBatch.status === "open") {
+    const closed = await closeTeamRecruitment(
+      p,
+      manager,
+      initialBatch.id,
+      "closed",
+      initialBatch.updatedAt,
+    );
+    expect(closed.status).toBe("closed");
+  }
   let recruitment = await saveTeamRecruitment(p, manager, {
     teamID: team,
     title: "合成离队与版本批次",

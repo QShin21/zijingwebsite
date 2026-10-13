@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { getPayload, type Payload } from "payload";
 import config from "../../src/payload.config";
 import { decideCommunityApplication } from "../../src/lib/community-operations";
@@ -10,6 +10,14 @@ import { randomBytes } from "node:crypto";
 let p: Payload; let member: User; let admin: User; let vice: User; let game: number; let event: number;
 const suffix = Date.now(); const slug = `spaces-${suffix}`; const password = randomBytes(24).toString("hex");
 let picture: Buffer;
+const bilibiliPlayerURL = "https://player.bilibili.com/player.html?autoplay=0&poster=1&bvid=BV1B7411m7LV";
+async function fixtureBilibiliPlayer(page: Page) {
+  // Verify our embed and review flow without depending on third-party playback or availability.
+  await page.route(url => url.href === bilibiliPlayerURL, route => route.fulfill({
+    contentType: "text/html",
+    body: "<!doctype html><html><head><title>Synthetic video preview</title></head><body>Isolated embed fixture</body></html>",
+  }));
+}
 test.beforeAll(async () => {
   if (process.env.APP_ENV !== "development") throw new Error("Development only");
   p = await getPayload({ config });
@@ -33,6 +41,7 @@ test.afterAll(async () => {
   for (const user of [member, admin, vice]) if (user) await p.delete({ collection: "users", id: user.id, overrideAccess: true, context: { system: true } });
 });
 test("多管理员微信、只读活动、网页风采投稿审核及B站预览", async ({ page, browser }) => {
+  await fixtureBilibiliPlayer(page);
   await page.goto("/login"); await page.getByLabel("昵称或邮箱").fill(member.name); await page.getByLabel("密码", { exact: true }).fill(password); await page.getByRole("button", { name: "登录", exact: true }).click(); await expect(page).toHaveURL(/\/account$/);
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 960 });
@@ -60,15 +69,19 @@ test("多管理员微信、只读活动、网页风采投稿审核及B站预览"
   await page.getByRole("link", { name: "我的投稿", exact: true }).click();
   await expect(page.getByRole("heading", { name: "精彩活动图文记录" })).toBeVisible(); await expect(page.locator(".showcase-card")).toContainText("待审核");
   const other = await browser.newContext(); const managerPage = await other.newPage();
+  await fixtureBilibiliPlayer(managerPage);
   await managerPage.goto(`/community/${slug}/showcase`); await expect(managerPage.getByRole("heading", { name: "精彩活动图文记录" })).toHaveCount(0);
   await managerPage.goto("/login"); await managerPage.getByLabel("昵称或邮箱").fill(admin.name); await managerPage.getByLabel("密码", { exact: true }).fill(password); await managerPage.getByRole("button", { name: "登录", exact: true }).click(); await expect(managerPage).toHaveURL(/\/account$/);
   await managerPage.goto(`/community/${slug}/showcase?view=review`); await managerPage.getByRole("button", { name: "批准发布" }).click();
-  await expect(managerPage.getByRole("status")).toContainText("审核已保存");
+  await expect(managerPage.getByRole("status").filter({ hasText: "审核结果已保存。" })).toHaveText("审核结果已保存。");
   await page.goto(`/community/${slug}/showcase`); await expect(page.getByRole("heading", { name: "精彩活动图文记录" })).toBeVisible();
   await expect(page.locator(".showcase-images img")).toHaveCount(1);
   await expect(page.getByRole("button", { name: /站内预览 B 站视频|收起预览/ })).toHaveCount(0);
   await expect(page.getByTitle("B站视频预览")).toBeVisible();
-  await expect(page.getByTitle("B站视频预览")).toHaveAttribute("src", /https:\/\/player\.bilibili\.com\/player\.html.*bvid=BV1B7411m7LV/);
+  await expect(page.getByTitle("B站视频预览")).toHaveAttribute("src", bilibiliPlayerURL);
+  await expect(page.getByTitle("B站视频预览")).toHaveAttribute("allow", "fullscreen");
+  await expect(page.getByTitle("B站视频预览")).toHaveAttribute("sandbox", "allow-scripts allow-same-origin allow-presentation allow-popups");
+  await expect(page.getByTitle("B站视频预览")).toHaveAttribute("referrerpolicy", "strict-origin-when-cross-origin");
   await expect(page.getByRole("link", { name: "前往 B 站观看 ↗" })).toHaveAttribute("href", "https://www.bilibili.com/video/BV1B7411m7LV/");
   for (const width of [390, 1440]) { await page.setViewportSize({ width, height: 960 }); expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width); await page.screenshot({ path: `.data/community-showcase-${width}.png` }); }
   await other.close();

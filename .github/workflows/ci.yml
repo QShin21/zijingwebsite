@@ -32,14 +32,60 @@ jobs:
       - run: pnpm migrate
       - run: pnpm typecheck && pnpm lint && pnpm test
       - run: pnpm miniapp:check
-      - run: pnpm seed:demo
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:e2e
-      - run: pnpm build
+      - name: Build and test the isolated synthetic browser environment
+        env:
+          REBUILD_QA_SERVER_PORT: '3000'
+        run: |
+          set -euo pipefail
+          qa_root="$GITHUB_WORKSPACE/.data/rebuild-qa-20261013"
+          mkdir -p "$qa_root/ci-logs"
+          qa_pids=()
+          cleanup() {
+            for pid in "${qa_pids[@]}"; do kill "$pid" 2>/dev/null || true; done
+            for pid in "${qa_pids[@]}"; do wait "$pid" 2>/dev/null || true; done
+          }
+          trap cleanup EXIT
+          wait_for_database() {
+            for attempt in {1..60}; do
+              if grep -q "Disposable $1 database ready" "$qa_root/ci-logs/db-$1.log"; then return; fi
+              kill -0 "$2" 2>/dev/null || { cat "$qa_root/ci-logs/db-$1.log"; return 1; }
+              sleep 1
+            done
+            cat "$qa_root/ci-logs/db-$1.log"
+            return 1
+          }
+          for profile in contracts prod-browser; do
+            node scripts/rebuild-qa.mjs sync "$profile"
+            node scripts/rebuild-qa.mjs db "$profile" > "$qa_root/ci-logs/db-$profile.log" 2>&1 &
+            qa_db_pid=$!
+            qa_pids+=("$qa_db_pid")
+            wait_for_database "$profile" "$qa_db_pid"
+            node scripts/rebuild-qa.mjs migrate "$profile"
+          done
+          node scripts/rebuild-qa.mjs seed prod-browser
+          node scripts/rebuild-qa.mjs build contracts 2>&1 | tee "$qa_root/ci-logs/build.log"
+          node scripts/rebuild-qa.mjs copy-build prod-browser
+          node scripts/rebuild-qa.mjs start prod-browser > "$qa_root/ci-logs/server.log" 2>&1 &
+          qa_server_pid=$!
+          qa_pids+=("$qa_server_pid")
+          qa_ready=false
+          for attempt in {1..60}; do
+            if curl --fail --silent --connect-timeout 2 --max-time 5 http://127.0.0.1:3000/health/ready > /dev/null; then qa_ready=true; break; fi
+            kill -0 "$qa_server_pid" 2>/dev/null || { cat "$qa_root/ci-logs/server.log"; exit 1; }
+            sleep 1
+          done
+          if [ "$qa_ready" != true ]; then cat "$qa_root/ci-logs/server.log"; exit 1; fi
+          REBUILD_QA_BROWSER="$(pnpm exec node --input-type=module -e 'import { chromium } from "@playwright/test"; process.stdout.write(chromium.executablePath())')"
+          export REBUILD_QA_BROWSER
+          REBUILD_QA_RUN_LABEL=ci-full-e2e node scripts/rebuild-qa.mjs playwright prod-browser
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: verification
           path: |
-            playwright-report
+            .data/rebuild-qa-20261013/ci-logs
+            .data/rebuild-qa-20261013/prod-browser/runs/ci-full-e2e/playwright-results.json
+            .data/rebuild-qa-20261013/prod-browser/runs/ci-full-e2e/playwright-report
             docs/evidence
+          include-hidden-files: true
