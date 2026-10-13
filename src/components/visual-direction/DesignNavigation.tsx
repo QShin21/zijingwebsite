@@ -4,15 +4,19 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { Icon } from "@/components/Identity";
 import { Pending } from "@/components/Pending";
+import { ThemeSwitch } from "./ThemeSwitch";
+import type { ThemeName } from "./theme";
 type NavItem = { path: string; label: string };
 export function DesignNavigation({
   signedIn,
   navigation,
   preview = true,
+  theme = "light",
 }: {
   signedIn: boolean;
   navigation?: NavItem[];
   preview?: boolean;
+  theme?: ThemeName;
 }) {
   const pathname = usePathname(),
     menu = useRef<HTMLDetailsElement>(null),
@@ -51,11 +55,12 @@ export function DesignNavigation({
       }
     };
     const resize = () => {
-      if (window.innerWidth > 960) close();
+      if (window.innerWidth > 1100) close();
     };
     document.addEventListener("pointerdown", outside);
     document.addEventListener("keydown", escape);
     window.addEventListener("resize", resize);
+    if (menu.current) menu.current.dataset.enhanced = "true";
     return () => {
       document.removeEventListener("pointerdown", outside);
       document.removeEventListener("keydown", escape);
@@ -82,6 +87,7 @@ export function DesignNavigation({
         ))}
       </nav>
       <div className="z-header-end">
+        <ThemeSwitch initialTheme={theme} />
         <Link
           className="z-user"
           href={signedIn ? "/account" : "/login"}
@@ -91,13 +97,13 @@ export function DesignNavigation({
         </Link>
         <Link
           className="z-button z-small"
-          href={signedIn ? apply : "/register"}
+          href={signedIn ? (preview ? apply : "/join") : "/register"}
           onClick={close}
         >
-          {signedIn ? "参与组织" : "注册"}
+          {signedIn ? (preview ? "参与组织" : "加入紫荆") : "注册"}
           <Icon name="diagonal" />
         </Link>
-        <details className="z-mobile-menu" ref={menu}>
+        <details className="z-mobile-menu" ref={menu} suppressHydrationWarning>
           <summary aria-label="打开导航">
             菜单 <Icon name="plus" />
           </summary>

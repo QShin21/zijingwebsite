@@ -22,11 +22,11 @@ export default async function Login({
       />
       <MemberLayout
         title="再次相遇，一起上场。"
-        description="登录后参与游戏社群、发表讨论，也可以管理自己的账号。"
+        description="登录后查看游戏社群、提交活动资料，也可以管理自己的账号。"
         steps={[
           "使用昵称或清华邮箱登录",
           "进入感兴趣的游戏社群",
-          "分享经验，找到一起玩的伙伴",
+          "查看本人回执，联系管理员加入微信群",
         ]}
       >
         <p role="status">
@@ -52,7 +52,7 @@ export default async function Login({
               autoComplete="current-password"
             />
           </label>
-          <SubmitButton className="button light">登录</SubmitButton>
+          <SubmitButton className="button">登录</SubmitButton>
         </form>
         <div className="form-footer">
           <Link href="/register">还没有账号？前往注册</Link>

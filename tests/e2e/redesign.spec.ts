@@ -16,7 +16,7 @@ test("desktop navigation exposes the current section", async ({ page }) => {
 test("mobile menu closes on navigation, Escape and outside interaction", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/announcements");
-  const menu = page.locator(".mobile-nav");
+  const menu = page.locator(".z-mobile-menu");
   const trigger = menu.locator("summary");
   // Native details works before hydration; Escape/outside dismissal is a client enhancement.
   await expect(menu).toHaveAttribute("data-enhanced", "true");
@@ -42,8 +42,8 @@ test("mobile navigation remains operable without JavaScript", async ({ browser }
   try {
     const page = await context.newPage();
     await page.goto("http://localhost:3000/");
-    await page.locator(".mobile-nav summary").click();
-    await page.locator('.mobile-nav a[href="/events"]').click();
+    await page.locator(".z-mobile-menu summary").click();
+    await page.locator('.z-mobile-menu a[href="/events"]').click();
     await expect(page).toHaveURL(/\/events$/);
     await expect(page.locator("main h1")).toBeVisible();
   } finally {

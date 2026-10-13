@@ -1,0 +1,419 @@
+/* Shared v4 shell and legacy flow bridge. Existing data and service gates stay intact. */
+:root {
+  --paper: var(--z-paper);
+  --surface: var(--z-surface);
+  --raised: #e9e3ef;
+  --ink: var(--z-ink);
+  --muted: var(--z-muted);
+  --purple: var(--z-purple);
+  --violet: var(--z-purple);
+  --accent: var(--z-lilac);
+  --line: var(--z-line);
+  --font-sans: var(--z-sans);
+  --font-mono: var(--z-mono);
+  --gutter: var(--z-gutter);
+}
+.field-design .environment {
+  background: #28232f;
+  color: #ded7e7;
+  font-size: 10px;
+  padding: 5px 20px;
+  letter-spacing: 0.04em;
+}
+.field-design .z-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+.field-design .z-desktop-nav [aria-current="page"] {
+  color: var(--z-lilac);
+  border-bottom-color: var(--z-lilac);
+}
+.field-design .z-header .meta {
+  color: #ded7e7;
+  font-size: 11px;
+}
+.field-design .page-head {
+  padding-top: 50px;
+  padding-bottom: 40px;
+  margin-bottom: 35px;
+  border-bottom: 1px solid var(--z-line);
+  background: none;
+}
+.field-design .page-head h1 {
+  font-size: clamp(34px, 4.2vw, 58px);
+  line-height: 1.3;
+  letter-spacing: -0.045em;
+}
+.field-design .page-head .lead {
+  font-size: 16px;
+  line-height: 1.85;
+  color: var(--z-muted);
+  max-width: 780px;
+}
+.field-design .breadcrumbs {
+  font-size: 12px;
+  line-height: 1.8;
+  margin-bottom: 35px;
+  color: var(--z-muted);
+}
+.field-design .page-head-cross {
+  color: var(--z-purple);
+  background: none;
+  border: 1px solid var(--z-line);
+  border-radius: 3px;
+  width: 64px;
+  height: 64px;
+  font-size: 30px;
+}
+.field-design .eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+.field-design .panel,
+.field-design .member-shell,
+.field-design .auth-card,
+.field-design .reading-panel {
+  border-radius: 4px;
+  box-shadow: none;
+  background: var(--z-surface);
+  border-color: var(--z-line);
+}
+.field-design .member-shell {
+  max-width: 1000px;
+  border-top: 3px solid var(--z-purple);
+  padding: 35px;
+  margin-top: 35px;
+  margin-bottom: 60px;
+}
+.field-design .member-shell > h2 {
+  font-size: 28px;
+  padding-top: 20px;
+}
+.field-design .member-form {
+  gap: 22px;
+}
+.field-design .member-form label {
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.7;
+}
+.field-design
+  .member-form
+  :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  background: #fffefa;
+  border: 1px solid #bcb3c5;
+  border-radius: 3px;
+  min-height: 48px;
+  font-size: 16px;
+  padding: 11px 13px;
+}
+.field-design .member-form input[type="checkbox"],
+.field-design .member-form input[type="radio"] {
+  accent-color: var(--z-purple);
+  width: 19px;
+  height: 19px;
+}
+.field-design .member-form input[type="file"] {
+  background: #f1eaf7;
+  border-style: dashed;
+  min-height: 70px;
+  font-size: 13px;
+}
+.field-design .field-hint {
+  color: var(--z-muted);
+  font-size: 13px;
+  line-height: 1.85;
+}
+.field-design .member-form .check {
+  background: #eee6f5;
+  border: 1px solid #d7c5e9;
+  border-radius: 3px;
+  padding: 16px;
+  font-weight: 500;
+}
+.field-design .application-form {
+  border: 0;
+  border-top: 0;
+  padding: 0;
+  background: transparent;
+}
+.field-design .application-form fieldset {
+  gap: 20px 24px;
+}
+.field-design .application-form .field-hint {
+  margin: 0;
+  font-size: 13px;
+}
+.field-design .application-form .form-feedback {
+  grid-column: 1/-1;
+}
+.field-design .application-form button {
+  grid-column: 1/-1;
+  justify-self: start;
+}
+.field-design .button,
+.field-design .member-form button[type="submit"] {
+  border-radius: 3px;
+  box-shadow: none;
+  min-height: 48px;
+  font-size: 14px;
+}
+.field-design .button.light {
+  box-shadow: none;
+}
+.field-design .account-details {
+  border: 0;
+  border-top: 1px solid var(--z-line);
+  border-bottom: 1px solid var(--z-line);
+  border-radius: 0;
+  background: transparent;
+  margin-bottom: 32px;
+}
+.field-design .account-details > div {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--z-line);
+}
+.field-design .account-details > div:last-child {
+  border-bottom: 0;
+}
+.field-design .account-details dt {
+  color: var(--z-muted);
+  font-size: 12px;
+}
+.field-design .account-details dd {
+  font-size: 15px;
+}
+.field-design .account-actions {
+  gap: 0 28px;
+  margin-top: 25px;
+  border-top: 1px solid var(--z-line);
+}
+.field-design .account-action {
+  border: 0;
+  border-bottom: 1px solid var(--z-line);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 24px 0;
+  background: transparent;
+  min-height: 130px;
+}
+.field-design .account-action:hover {
+  background: #eee8f3;
+  transform: none;
+  box-shadow: none;
+}
+.field-design .account-action strong {
+  font-size: 18px;
+}
+.field-design .account-action small {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--z-muted);
+}
+.field-design .tag,
+.field-design .badge {
+  border-radius: 3px;
+  background: #eee5f7;
+  color: #5c309a;
+  font-size: 12px;
+}
+.field-design .prose {
+  font-size: 17px;
+  line-height: 1.95;
+  color: var(--z-ink);
+}
+.field-design .prose h2 {
+  font-size: 30px;
+  margin-top: 45px;
+  margin-bottom: 20px;
+}
+.field-design .prose h3 {
+  font-size: 23px;
+  margin-top: 32px;
+}
+.field-design .prose p {
+  margin-bottom: 22px;
+}
+.field-design .prose a {
+  color: var(--z-purple);
+  text-underline-offset: 4px;
+}
+.field-design .empty {
+  background: var(--z-surface);
+  border-radius: 4px;
+  border: 1px solid var(--z-line);
+  box-shadow: none;
+  padding: 38px;
+}
+.field-design .empty-icon {
+  background: #e9dff1;
+  border-radius: 3px;
+  color: var(--z-purple);
+}
+.field-design .empty h3 {
+  font-size: 25px;
+}
+.field-design .empty p {
+  font-size: 14px;
+  color: var(--z-muted);
+}
+.field-design .auth-shell {
+  gap: 55px;
+}
+.field-design .auth-copy h1 {
+  font-size: clamp(40px, 4vw, 64px);
+  letter-spacing: -0.05em;
+  line-height: 1.3;
+}
+.field-design .auth-copy {
+  background: var(--z-dark);
+  color: #f8f2fb;
+  border-radius: 4px;
+}
+.field-design .auth-copy p {
+  color: #d7cfe0;
+}
+.field-design .auth-copy .eyebrow {
+  color: var(--z-lilac);
+}
+.field-design .auth-copy .brand-symbol {
+  color: var(--z-lilac);
+}
+.field-design .auth-card {
+  padding: 35px;
+  border-top: 3px solid var(--z-purple);
+}
+.field-design .auth-card h2 {
+  font-size: 30px;
+}
+.field-design .join-card,
+.field-design .content-card {
+  border-radius: 4px;
+  box-shadow: none;
+  border-color: var(--z-line);
+}
+.field-design .join-card:hover,
+.field-design .content-card:hover {
+  box-shadow: none;
+}
+.field-design .cover-art {
+  border-radius: 0;
+  background: #442957;
+  color: #dfc7f2;
+}
+.field-design .cover-art-teams {
+  background: #bcb5ca;
+  color: #3a2d47;
+}
+.field-design .cover-art-news {
+  background: #dabc89;
+  color: #413326;
+}
+.field-design .cover-art-albums {
+  background: #25202d;
+  color: #d6c5e5;
+}
+.field-design .cover-art .cover-coordinate {
+  color: inherit;
+  opacity: 0.8;
+}
+.field-design .hero-art,
+.field-design .arena-monogram {
+  animation: none;
+}
+.field-design .z-footer-mark span > .icon {
+  width: 0.8em;
+  height: 0.8em;
+  stroke-width: 1.2;
+}
+.field-design .signup-question {
+  border-radius: 3px;
+  box-shadow: none;
+}
+.field-design .filter-panel,
+.field-design .filters,
+.field-design .signup-tools {
+  border-radius: 3px;
+  box-shadow: none;
+}
+@media (max-width: 760px) {
+  .field-design .page-head {
+    padding-top: 30px;
+    padding-bottom: 28px;
+    margin-bottom: 25px;
+  }
+  .field-design .page-head h1 {
+    font-size: 31px;
+    line-height: 1.4;
+  }
+  .field-design .page-head .lead {
+    font-size: 14px;
+    line-height: 1.85;
+  }
+  .field-design .breadcrumbs {
+    font-size: 11px;
+    margin-bottom: 25px;
+  }
+  .field-design .page-head-cross {
+    display: none;
+  }
+  .field-design .member-shell {
+    padding: 25px 20px;
+    margin: 28px var(--z-gutter) 45px;
+  }
+  .field-design .member-shell > h2 {
+    font-size: 25px;
+  }
+  .field-design .member-form label {
+    font-size: 14px;
+  }
+  .field-design .field-hint,
+  .field-design .application-form .field-hint {
+    font-size: 12px;
+  }
+  .field-design .application-form fieldset {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .field-design .account-actions {
+    grid-template-columns: 1fr;
+  }
+  .field-design .account-action {
+    min-height: 105px;
+    padding: 22px 0;
+  }
+  .field-design .account-action strong {
+    font-size: 17px;
+  }
+  .field-design .account-action small {
+    font-size: 12px;
+  }
+  .field-design .prose {
+    font-size: 16px;
+    line-height: 1.95;
+  }
+  .field-design .prose h2 {
+    font-size: 26px;
+    margin-top: 32px;
+  }
+  .field-design .auth-card {
+    padding: 28px 22px;
+  }
+  .field-design .auth-copy h1 {
+    font-size: 38px;
+  }
+  .field-design .auth-shell {
+    gap: 28px;
+  }
+  .field-design .empty {
+    padding: 28px 22px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .field-design * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

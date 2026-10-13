@@ -4,35 +4,53 @@ import { BrandMark, Icon } from "@/components/Identity";
 import { Picture } from "@/components/Content";
 import type { Content } from "@/lib/content";
 import { formatDate, routeFor } from "@/lib/rules";
+import type { ThemeName } from "./theme";
 
 export const designBase = "/design-preview";
 export function DesignHeader({
   name,
   signedIn,
+  navigation,
+  preview = true,
+  theme = "light",
 }: {
   name: string;
   signedIn: boolean;
+  navigation?: { path: string; label: string }[];
+  preview?: boolean;
+  theme?: ThemeName;
 }) {
   return (
     <>
-      <div className="z-preview-note">
-        <span>视觉方向 01 / 紫荆赛场编辑部</span>
-        <Link href="/">查看功能基线 ↗</Link>
-      </div>
+      {preview && (
+        <div className="z-preview-note">
+          <span>视觉方向 01 / 紫荆赛场编辑部</span>
+          <Link href="/">查看功能基线 ↗</Link>
+        </div>
+      )}
       <header className="z-header">
-        <Link href={designBase} className="z-brand">
+        <Link href={preview ? designBase : "/"} className="z-brand">
           <BrandMark />
           <span>
             紫荆电竞<small>ZIJING ESPORTS</small>
             <span className="sr-only">{name}</span>
           </span>
         </Link>
-        <DesignNavigation signedIn={signedIn} />
+        <DesignNavigation
+          signedIn={signedIn}
+          navigation={navigation}
+          preview={preview}
+          theme={theme}
+        />
       </header>
     </>
   );
 }
-export function DesignFooter() {
+export function DesignFooter({
+  name = "紫荆电竞",
+  footer,
+  preview = true,
+}: { name?: string; footer?: string | null; preview?: boolean } = {}) {
   return (
     <footer className="z-footer">
       <div className="z-footer-top">
@@ -52,10 +70,15 @@ export function DesignFooter() {
         </nav>
       </div>
       <div className="z-footer-mark" aria-hidden="true">
-        ZIJING<span>↗</span>
+        ZIJING
+        <span>
+          <Icon name="diagonal" />
+        </span>
       </div>
       <p className="z-footer-bottom">
-        原创界面图形与生成主视觉 · 隔离设计预览 · 内容与操作权限沿用功能基线
+        {preview
+          ? "原创界面图形与生成主视觉 · 隔离设计预览 · 内容与操作权限沿用功能基线"
+          : `© ${new Date().getFullYear()} ${name} · ${footer || "赛场内外，共同热爱。"}`}
       </p>
     </footer>
   );
@@ -68,22 +91,11 @@ export function StageArt({
   priority?: boolean;
 }) {
   return (
-    <div className={"z-stage " + className} aria-hidden="true">
-      <picture>
-        <source
-          media="(max-width:760px)"
-          srcSet="/design/zijing-stage-mobile.webp"
-        />
-        <img
-          src="/design/zijing-stage.webp"
-          alt=""
-          width={1942}
-          height={810}
-          loading={priority ? "eager" : "lazy"}
-          fetchPriority={priority ? "high" : "auto"}
-        />
-      </picture>
-    </div>
+    <div
+      className={"z-stage " + className}
+      aria-hidden="true"
+      data-priority={priority ? "true" : undefined}
+    />
   );
 }
 export function SectionHeading({
@@ -146,14 +158,18 @@ export function EventCard({
   doc,
   index = 0,
   collection = "events",
+  preview = true,
 }: {
   doc: Content;
   index?: number;
   collection?: string;
+  preview?: boolean;
 }) {
   const href =
     collection === "events"
-      ? designBase + "/activity/" + doc.id
+      ? preview
+        ? designBase + "/activity/" + doc.id
+        : "/events/" + doc.slug
       : "/" + (routeFor[collection] || collection) + "/" + doc.slug;
   return (
     <article className="z-event-card">

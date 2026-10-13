@@ -1,9 +1,99 @@
-/* Shared, additive v4 tokens. Page-specific styling stays in each module. */
+/* Shared semantic tokens. Default is light, independent of the system theme. */
 :root {
- --z-paper:#f4f1ea; --z-surface:#fffdf8; --z-ink:#211e27; --z-muted:#625c68;
- --z-dark:#17151c; --z-dark-muted:#bdb6c7; --z-purple:#6839ae;
- --z-lilac:#c6a5ef; --z-amber:#edb353; --z-line:#d9d3dc;
- --z-sans:Arial,"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif;
- --z-mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
- --z-gutter:clamp(22px,5.5vw,88px); --z-max:1440px; --z-radius:6px;
+  color-scheme: light;
+  --z-paper: #f4f1ea;
+  --z-surface: #fffdf8;
+  --z-ink: #211e27;
+  --z-muted: #625c68;
+  --z-purple: #6839ae;
+  --z-action: #6839ae;
+  --z-action-ink: #fffdf8;
+  --z-hover: #552995;
+  --z-line: #d9d3dc;
+  --z-tint: #eee7f4;
+  --z-field: #fffefa;
+  --z-field-border: #bcb3c5;
+  --z-danger: #963447;
+  --z-danger-bg: #f9e9ec;
+  --z-danger-line: #d9a3ae;
+  --z-focus: #6839ae;
+  --z-disabled-bg: #e5dfea;
+  --z-disabled-ink: #6f6479;
+  --z-header-bg: #fffdf8;
+  --z-header-ink: #211e27;
+  --z-footer-bg: #fffdf8;
+  --z-footer-ink: #211e27;
+  --z-stage-bg: #ece7df;
+  --z-stage-ink: #211e27;
+  --z-stage-muted: #625c68;
+  --z-stage-action: #6839ae;
+  --z-stage-action-ink: #fffdf8;
+  --z-stage-image: url("/design/zijing-stage-light.webp");
+  --z-stage-image-mobile: url("/design/zijing-stage-light-mobile.webp");
+  --z-stage-overlay: linear-gradient(
+    90deg,
+    rgba(244, 241, 234, 0.92),
+    rgba(244, 241, 234, 0.64) 35%,
+    rgba(244, 241, 234, 0) 73%
+  );
+  --z-stage-overlay-mobile: linear-gradient(
+    180deg,
+    #f4f1ea 4%,
+    rgba(244, 241, 234, 0.91) 34%,
+    rgba(244, 241, 234, 0.12) 78%
+  );
+  --z-dark: #17151c;
+  --z-dark-muted: #bdb6c7;
+  --z-lilac: #c6a5ef;
+  --z-amber: #edb353;
+  --z-sans:
+    Arial, "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  --z-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --z-gutter: clamp(22px, 5.5vw, 88px);
+  --z-max: 1440px;
+  --z-radius: 6px;
+}
+:root[data-z-theme="dark"] {
+  color-scheme: dark;
+  --z-paper: #131217;
+  --z-surface: #1c1922;
+  --z-ink: #f3eef7;
+  --z-muted: #bfb5cc;
+  --z-purple: #c6a5ef;
+  --z-action: #c6a5ef;
+  --z-action-ink: #22152f;
+  --z-hover: #dbc2f6;
+  --z-line: #4b4058;
+  --z-tint: #292135;
+  --z-field: #17141d;
+  --z-field-border: #685a78;
+  --z-danger: #ffbac6;
+  --z-danger-bg: #321d27;
+  --z-danger-line: #8b5162;
+  --z-focus: #edb353;
+  --z-disabled-bg: #38323f;
+  --z-disabled-ink: #b8a9c5;
+  --z-header-bg: #17151c;
+  --z-header-ink: #f3eef7;
+  --z-footer-bg: #17151c;
+  --z-footer-ink: #f3eef7;
+  --z-stage-bg: #17151c;
+  --z-stage-ink: #fffdf8;
+  --z-stage-muted: #bdb6c7;
+  --z-stage-action: #c6a5ef;
+  --z-stage-action-ink: #22152f;
+  --z-stage-image: url("/design/zijing-stage.webp");
+  --z-stage-image-mobile: url("/design/zijing-stage-mobile.webp");
+  --z-stage-overlay: linear-gradient(
+    90deg,
+    rgba(18, 16, 22, 0.9),
+    rgba(18, 16, 22, 0.64) 35%,
+    rgba(18, 16, 22, 0.04) 73%
+  );
+  --z-stage-overlay-mobile: linear-gradient(
+    180deg,
+    #17151c 4%,
+    rgba(23, 21, 28, 0.91) 34%,
+    rgba(23, 21, 28, 0.12) 78%
+  );
 }

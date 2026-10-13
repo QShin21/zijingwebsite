@@ -1,0 +1,200 @@
+{
+  "recordedAt": "2026-10-13",
+  "scope": "Shared website shell/home/account and preference initialization; module theme deltas pending",
+  "default": "light even when system dark",
+  "preference": "validated zijing_theme cookie; exact light/dark, invalid defaults light; SSR/client same initial value",
+  "themeE2E": {
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0,
+    "actualNextAndPostgreSQL": true,
+    "covered": [
+      "System dark/no preference/no JavaScript light SSR and navigation",
+      "Invalid preference light fallback",
+      "Explicit toggle preserves consent/text/file/error, route/refresh/reopening persistence, no hydration errors"
+    ]
+  },
+  "productionBuild": {
+    "exitCode": 0,
+    "deployed": false,
+    "node": "24.19.0",
+    "next": "16.3.5",
+    "warnings": [
+      "Compiled with warnings; detailed compiler warning body absent",
+      "Build-time loopback SMTP receiver2526 not running, transport verification ECONNREFUSED; no real mail destination"
+    ]
+  },
+  "screens": [
+    {
+      "path": "/",
+      "width": 390,
+      "requestedTheme": "light",
+      "status": 200,
+      "theme": "light",
+      "h1": 1,
+      "overflow": false,
+      "background": "rgb(244, 241, 234)",
+      "stage": {
+        "url": "/design/zijing-stage-light-mobile.webp",
+        "width": 900,
+        "height": 1000
+      },
+      "violations": [],
+      "errors": [],
+      "screenshot": "canonical-home-light-390-production.png"
+    },
+    {
+      "path": "/account",
+      "width": 390,
+      "requestedTheme": "light",
+      "status": 200,
+      "theme": "light",
+      "h1": 1,
+      "overflow": false,
+      "background": "rgb(244, 241, 234)",
+      "stage": null,
+      "violations": [],
+      "errors": [],
+      "screenshot": "canonical-account-light-390-production.png"
+    },
+    {
+      "path": "/",
+      "width": 1440,
+      "requestedTheme": "light",
+      "status": 200,
+      "theme": "light",
+      "h1": 1,
+      "overflow": false,
+      "background": "rgb(244, 241, 234)",
+      "stage": {
+        "url": "/design/zijing-stage-light.webp",
+        "width": 1941,
+        "height": 810
+      },
+      "violations": [],
+      "errors": [],
+      "screenshot": "canonical-home-light-1440-production.png"
+    },
+    {
+      "path": "/account",
+      "width": 1440,
+      "requestedTheme": "light",
+      "status": 200,
+      "theme": "light",
+      "h1": 1,
+      "overflow": false,
+      "background": "rgb(244, 241, 234)",
+      "stage": null,
+      "violations": [],
+      "errors": [],
+      "screenshot": "canonical-account-light-1440-production.png"
+    },
+    {
+      "path": "/",
+      "width": 390,
+      "requestedTheme": "dark",
+      "status": 200,
+      "theme": "dark",
+      "h1": 1,
+      "overflow": false,
+      "background": "rgb(19, 18, 23)",
+      "stage": {
+        "url": "/design/zijing-stage-mobile.webp",
+        "width": 900,
+        "height": 375
+      },
+      "violations": [],
+      "errors": [],
+      "screenshot": "canonical-home-dark-390-production.png"
+    },
+    {
+      "path": "/account",
+      "width": 390,
+      "requestedTheme": "dark",
+      "status": 200,
+      "theme": "dark",
+      "h1": 1,
+      "overflow": false,
+      "background": "rgb(19, 18, 23)",
+      "stage": null,
+      "violations": [],
+      "errors": [],
+      "screenshot": "canonical-account-dark-390-production.png"
+    },
+    {
+      "path": "/",
+      "width": 1440,
+      "requestedTheme": "dark",
+      "status": 200,
+      "theme": "dark",
+      "h1": 1,
+      "overflow": false,
+      "background": "rgb(19, 18, 23)",
+      "stage": {
+        "url": "/design/zijing-stage.webp",
+        "width": 1942,
+        "height": 809
+      },
+      "violations": [],
+      "errors": [],
+      "screenshot": "canonical-home-dark-1440-production.png"
+    },
+    {
+      "path": "/account",
+      "width": 1440,
+      "requestedTheme": "dark",
+      "status": 200,
+      "theme": "dark",
+      "h1": 1,
+      "overflow": false,
+      "background": "rgb(19, 18, 23)",
+      "stage": null,
+      "violations": [],
+      "errors": [],
+      "screenshot": "canonical-account-dark-1440-production.png"
+    }
+  ],
+  "earlierAttempt": {
+    "lightContrast": "Participation description retained old pale text; corrected semantic muted selector and verified both widths",
+    "accountDevelopment500": "Observed after live edits; unchanged Account find call; initial optimized build eight capture paths all200; continued final stable regression required"
+  },
+  "beforeModuleThemeDeltasUnitRegression": {
+    "uniqueFiles": 78,
+    "uniqueTests": 1455,
+    "initialCommand": {
+      "passed": 1386,
+      "failed": 3,
+      "skipped": 66,
+      "failedSuites": 4
+    },
+    "splitReruns": {
+      "profileAPI": 6,
+      "contactConsentHTTP": 27,
+      "postEditHTTP": 19,
+      "nativeHonorAndProfileHTTP": 20
+    },
+    "distinctTotalPassed": 1455,
+    "oneSingleGreenCommandClaimed": false,
+    "strictSyntheticDatabaseGuardsPreserved": true,
+    "businessOriginChecksUnchanged": true
+  },
+  "assets": [
+    {
+      "file": "public/design/zijing-stage-light.webp",
+      "bytes": 143232,
+      "sha256": "7404932b4b0b8eded93426ff1104bfc4e521cf4a6f5299dcce917fd7f7caf9b4"
+    },
+    {
+      "file": "public/design/zijing-stage-light-mobile.webp",
+      "bytes": 80526,
+      "sha256": "11486fd1d55c8acecf18315b855a92cf9bbcd12d8e8ab819443738a7e51ae1fe"
+    }
+  ],
+  "notCompleted": [
+    "Three module light/dark theme deltas and combined regression",
+    "Final exact GitHub CI",
+    "Official WeChat runtime/base3.16/device/platform"
+  ],
+  "schemaOrACLChanges": false,
+  "productionAccess": false
+}

@@ -1,18 +1,32 @@
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import { cms } from "@/lib/content";
 import { canParticipate } from "@/lib/rules";
 import type { Metadata, Viewport } from "next";
-import Link from "next/link";
 import { site } from "@/lib/content";
 import { serverURL } from "@/lib/environment";
-import { SiteHeader } from "@/components/SiteHeader";
-import { BrandMark, Icon } from "@/components/Identity";
+import {
+  DesignHeader,
+  DesignFooter,
+} from "@/components/visual-direction/DesignUI";
 import "./style.css";
+import "@/components/visual-direction/tokens.css";
+import "../(design)/design.css";
+import "./field.css";
+import "@/components/visual-direction/theme.css";
+import {
+  themeFromPreference,
+  themeCookieName,
+} from "@/components/visual-direction/theme";
 export const dynamic = "force-dynamic";
-export const viewport: Viewport = {
-  themeColor: "#f7f7fb",
-  colorScheme: "light",
-};
+export async function generateViewport(): Promise<Viewport> {
+  const theme = themeFromPreference(
+    (await cookies()).get(themeCookieName)?.value,
+  );
+  return {
+    themeColor: theme === "light" ? "#fffdf8" : "#17151c",
+    colorScheme: theme,
+  };
+}
 export async function generateMetadata(): Promise<Metadata> {
   const s = await site();
   return {
@@ -40,17 +54,23 @@ export default async function Layout({
   const s = await site();
   const { user } = await (await cms()).auth({ headers: await headers() });
   const signedIn = canParticipate(user);
+  const theme = themeFromPreference(
+    (await cookies()).get(themeCookieName)?.value,
+  );
   const navigation = (s.navigation?.length ? s.navigation : nav).reduce<
     { path: string; label: string }[]
   >((items, item) => {
     const path = item.path === "/honors" ? "/teams" : item.path;
     if (!items.some((entry) => entry.path === path))
-      items.push({ path, label: path === "/teams" ? "代表队与荣誉" : item.label });
+      items.push({
+        path,
+        label: path === "/teams" ? "代表队与荣誉" : item.label,
+      });
     return items;
   }, []);
   return (
-    <html lang="zh-CN" data-scroll-behavior="smooth">
-      <body>
+    <html lang="zh-CN" data-scroll-behavior="smooth" data-z-theme={theme}>
+      <body className="z-design field-design">
         <a className="skip" href="#main">
           跳到正文
         </a>
@@ -59,58 +79,23 @@ export default async function Layout({
             开发 / 预览环境 · 内容以正式发布为准
           </div>
         )}
-        <SiteHeader
+        <DesignHeader
+          preview={false}
           name={s.name}
-          navigation={signedIn ? navigation : nav.filter(item => ["/events", "/announcements"].includes(item.path))}
+          navigation={
+            signedIn
+              ? navigation
+              : nav.filter((item) =>
+                  ["/events", "/announcements"].includes(item.path),
+                )
+          }
           signedIn={signedIn}
+          theme={theme}
         />
         <main id="main" tabIndex={-1}>
           {children}
         </main>
-        <footer className="site-footer">
-          <div className="footer-main">
-            <div className="footer-identity">
-              <Link className="brand" href="/">
-                <BrandMark />
-                <span>
-                  {s.name}
-                  <small>ZIJING ESPORTS CLUB</small>
-                </span>
-              </Link>
-              <p>{s.footer || "赛场内外，共同热爱。"}</p>
-            </div>
-            <nav aria-label="探索社团">
-              <span className="eyebrow">EXPLORE</span>
-              <Link href="/events">社团活动</Link>
-              {signedIn && <Link href="/teams">代表队与荣誉</Link>}
-              {signedIn && <Link href="/gallery">社团影像</Link>}
-            </nav>
-            {signedIn && <nav aria-label="参与社团">
-              <span className="eyebrow">TAKE PART</span>
-              <Link href="/join/members">普通社员</Link>
-              <Link href="/join/teams">代表队选拔</Link>
-              <Link href="/join/staff">骨干招新</Link>
-              <Link href="/community">游戏社群</Link>
-              <Link href="/contact">
-                联系与合作 <Icon name="diagonal" />
-              </Link>
-            </nav>}
-          </div>
-          <div className="footer-bottom">
-            <span>
-              © {new Date().getFullYear()} {s.name}
-            </span>
-            <nav aria-label="页脚">
-              <Link href="/privacy">隐私说明</Link>
-              <Link href="/account">我的账号</Link>
-              <Link href="/admin">内容管理</Link>
-              <a href="#main">回到顶部 ↑</a>
-            </nav>
-          </div>
-          <div className="footer-wordmark" aria-hidden="true">
-            ZIJING ESPORTS<span>↗</span>
-          </div>
-        </footer>
+        <DesignFooter preview={false} name={s.name} footer={s.footer} />
       </body>
     </html>
   );

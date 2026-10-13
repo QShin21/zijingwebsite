@@ -63,9 +63,9 @@ test("registration guidance, server feedback and unique mobile community navigat
   ).toBeEnabled();
   await page.setViewportSize({ width: 390, height: 900 });
   await page.goto("/community");
-  await page.locator(".mobile-nav summary").click();
-  const link = page.locator('.mobile-nav a[href="/community"]');
+  await page.locator(".z-mobile-menu summary").click();
+  const link = page.locator('.z-mobile-menu a[href="/community"]');
   await expect(page).toHaveURL(/\/login\?/);
   await expect(link).toHaveCount(0);
-  await expect(page.locator(".mobile-nav nav a")).toHaveCount(3);
+  await expect(page.locator(".z-mobile-menu nav a")).toHaveCount(3);
 });
