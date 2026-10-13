@@ -159,4 +159,16 @@ Astra 最小处理目标：
 
 后续交回 Sol：保留旧日志、trace、截图和合成 DB 证据，核验并轮换本任务拥有的服务后，按修复提交冻结一次新构建。优先复测成功移出队列/隐藏最终荣誉的反馈、503 核对与失败保值、禁用状态、主按钮 hover 和密码热区，再执行全 125 项及 5 宽度×双主题矩阵。专用 visual 两套和 40071 的历史 false/null 授权场景须各在原规定 profile 执行；不放宽守卫。旧 event-detail 的 3 次 networkidle 超时尚未证实原因，保留原预算继续诊断。官方微信开发工具/真机仍未验证。本轮只正常提交推送 `new`，不部署、不发布 CMS、不上传微信。
 
-本地复核包 `/workspace/qa-zijing/frontend-rebuild-evidence-4733.zip` 包含进度、机器证据、源码清单与 13 张代表截图，约 2.4 MB；不包含数据库、账号 fixture、环境文件、媒体原件或原始 trace。所有截图为合成数据；完整截图和 trace 仍留在上述运行目录。最终交接只新增文档/证据，未改源码、未动 main/littleapp、未部署或上传微信。
+上一轮 Sol 的本地复核包 `/workspace/qa-zijing/frontend-rebuild-evidence-4733.zip` 包含当时进度、机器证据、源码清单与 13 张代表截图，约 2.4 MB；不包含数据库、账号 fixture、环境文件、媒体原件或原始 trace，也不包含本轮 Astra 修复。所有截图为合成数据；完整截图和 trace 仍留在上述运行目录。上一轮 Sol 交接仅追加证据，本轮 Astra 则有上述已列出的源码/测试/CI 修复；两轮均未动 main/littleapp、未部署或上传微信。
+
+## frontend-design 补充审查 · 2026-10-13 17:43 UTC
+
+修复提交 `3f2ea932cec18f41c718eb4f15153ef55266fe9b` 已正常推送并核验远端 `new`；`main`、`littleapp` 均仍为 `e366f3c6538e6c63c9f13fc183e26c32ce58cf11`。收到用户补充要求后，全文读取官方 [frontend-design SKILL.md](https://github.com/anthropics/skills/blob/main/skills/frontend-design/SKILL.md)，核对 Git blob `a5333457c414d20d625f307df945842c0952ecc3`。没有安装第三方工具。按任务书优先制定颜色/字体/布局计划，再结合 13 张实际网站截图和七类原生源码映射进行审查，具体取舍见 [设计审查记录](FRONTEND_DESIGN_REVIEW_20261013.md)。
+
+本次新增两处最小呈现改进：通知等公共空态删去重复品牌眉题，让状态与去向先出现；原生首页删去并列参与方式前固定的 01/02/03，入口保留顺序、说明与路由。真实人工进群/荣誉流程步骤保留。未重做已完成模块、引入新字体或改变主题与业务权限。
+
+原样运行既有原生映射脚本前后各一次，均为 7 页 × 两宽度（390/320）× 两主题共 28 格，退出 0；脚本记录的越界、热区不足、关键小字、裁切、页面错误与外部请求均为 0。亲自查看了首页、社群联系、荣誉编辑/审核/档案、问卷和个人中心，并复查修改后的两种窄屏首页。25 页/161 文件原生静态检查、变更 TSX ESLint、diff 检查通过。**这些是有标注的 WXML 浏览器映射及静态检查，官方微信编译/模拟器/真机仍未运行**。网站改进后的真实画面、新构建及完整 E2E 继续为未运行，不能将本次审查写为整站视觉已验收。
+
+补充机器证据在 [frontend-design review JSON](evidence/frontend-design-review-20261013.json)。前后映射目录分别为 `/workspace/qa-zijing/frontend-design-native-before` 和 `.data/rebuild-native-preview`；每张截图带有合成/非官方标注。最终构建输入清单更新为 `/workspace/qa-zijing/source-manifest-astra-design.json`（594 文件，规范化清单 SHA-256 `340e7ba6ad83fb7d8f12088eb43d57f7c57dc0b74036bf82e1d477cf968b8759`），后续 Sol 应从包含本节两处精简的最终提交冻结。先前的 Astra 清单、旧构建、服务、数据库及失败证据全部保留。
+
+下步切回 Sol max：执行前节列出的新版完整回归，并把通知空态与原生首页的两处精简纳入代表截图。若真实运行再暴露源码问题，保存明确复现后交 Astra；当前没有需要继续推迟至另一 Astra turn 的已确认修复目标。

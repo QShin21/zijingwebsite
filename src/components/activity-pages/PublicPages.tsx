@@ -59,7 +59,6 @@ export function EmptyState({
 }) {
   return (
     <div className={styles.empty}>
-      <span>紫荆主场</span>
       <h2>{title}</h2>
       {children}
     </div>

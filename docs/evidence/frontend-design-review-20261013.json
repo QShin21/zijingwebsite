@@ -1,0 +1,1714 @@
+{
+  "recordedAt": "2026-10-13T17:43:12.797815+00:00",
+  "baseRepairCommit": "3f2ea932cec18f41c718eb4f15153ef55266fe9b",
+  "branch": "new",
+  "scope": "Evidence-led representative design review, two presentation-only refinements, no full regression",
+  "skill": {
+    "userUrl": "https://www.skills.sh/anthropics/skills/frontend-design",
+    "sourceUrl": "https://github.com/anthropics/skills/blob/main/skills/frontend-design/SKILL.md",
+    "gitBlob": "a5333457c414d20d625f307df945842c0952ecc3",
+    "bytes": 9390,
+    "sha256": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3",
+    "installedThirdPartyTools": false
+  },
+  "authoritativePrompt": {
+    "libraryFileId": "libfile_b3ed4f8917948191850dc0b87c3b61a2",
+    "sha256": "1b1cb8e82084a4b1decb4e6a3864f24bd88354665c32cebd18c282da0d3e3e4a"
+  },
+  "designReviewDocument": "docs/FRONTEND_DESIGN_REVIEW_20261013.md",
+  "websiteEvidence": {
+    "report": "docs/evidence/frontend-rebuild-astra-20261013.json",
+    "personallyReviewedScreenshots": 13,
+    "buildId": "1LQXl0KVPMjo-UFXJdO9l",
+    "repairedSourceStatus": "notrun",
+    "note": "Old actual browser screenshots support diagnosis and composition review; they do not establish repair results."
+  },
+  "changedSourceFiles": [
+    {
+      "path": "src/components/activity-pages/PublicPages.tsx",
+      "bytes": 11525,
+      "sha256": "841e934cef680af7628b61a6518d0884f700530f31150a9d32b55474514e10e7"
+    },
+    {
+      "path": "miniprogram/src/pages/home/index.wxml",
+      "bytes": 4854,
+      "sha256": "314025dd944b0c6378e8feba80cc4a5e3bf4cc990d88b0c5bc3c5e604d6c7d21"
+    }
+  ],
+  "finalSourceManifest": {
+    "path": "/workspace/qa-zijing/source-manifest-astra-design.json",
+    "files": 594,
+    "manifestSha256": "340e7ba6ad83fb7d8f12088eb43d57f7c57dc0b74036bf82e1d477cf968b8759",
+    "manifestFileSha256": "1f74bb58abb57042dfabac5d73edee40a2a3333cb7ed00a17f00490e392f254f",
+    "note": "Supersedes earlier Astra manifest for source freeze; no running immutable build/snapshot was overwritten."
+  },
+  "nativeBrowserMapping": [
+    {
+      "phase": "before",
+      "recordedAt": "2026-10-13T17:38:11.246Z",
+      "status": "pass",
+      "command": "node scripts/rebuild-native-preview.mjs",
+      "exitCode": 0,
+      "scope": "Current WXML/WXSS/JS data layout mapping; no native lifecycle/events/SDK/official compilation/device validation",
+      "mappingLimits": {
+        "rpx": "viewport / 750",
+        "safeAreaBottom": "20px explicitly simulated",
+        "media": "No QR, private evidence, real photos, or identifying user data",
+        "network": "all browser requests blocked; native wx side effects throw",
+        "hostUI": "Native navigation/tab bar/keyboard excluded; this is page content only",
+        "controls": "Browser controls approximate static native appearance; checked/disabled/value/progress colors follow current WXML bindings",
+        "limits": "No custom component rendering, image-mode measurement, native text measurement, input focus/keyboard, gesture, modal, media, auth or business event verification"
+      },
+      "browser": "145.0.7632.6",
+      "playwright": "1.58.2",
+      "resultFile": "/workspace/qa-zijing/frontend-design-native-before/results.json",
+      "resultSha256": "b45a996f8d831abaf3604e9745f5f27c247f8768c0683ef85acb672467050710",
+      "sourceFiles": [
+        {
+          "path": "miniprogram/src/app.wxss",
+          "sha256": "6f74805dbb17461db8b7459fd8e385ca647d56dc74d4dded2a1a286175e5ed1e"
+        },
+        {
+          "path": "miniprogram/src/config.js",
+          "sha256": "69970d6e1e205ca7bc225edc0fd215b70ea99b7408fc36612b070a4c0ddcd021"
+        },
+        {
+          "path": "miniprogram/src/lib/brand.js",
+          "sha256": "695c2b3583150395b668b3ead96f87bc054cc5eb173950d2ca85aa2cfbf73887"
+        },
+        {
+          "path": "miniprogram/src/lib/cms.js",
+          "sha256": "e01e0a7e409a381182c49edd8eb28b45e1e875764b4fc721bfe1fd9d23ba9654"
+        },
+        {
+          "path": "miniprogram/src/lib/design-tokens.js",
+          "sha256": "1c613fd99a3441001596fe832b7b018521c55922c29438eac719695a14c0b0f6"
+        },
+        {
+          "path": "miniprogram/src/lib/files.js",
+          "sha256": "1cd8b892613589b0e2da1681cc56df8088584c394c2babef3d50ec172a848b5a"
+        },
+        {
+          "path": "miniprogram/src/lib/format.js",
+          "sha256": "a5a6f6608e83ff09eaf32f8d733a8bd6c21e66e0a2e3b427e14dc20687d9839d"
+        },
+        {
+          "path": "miniprogram/src/lib/generated/questionnaire-flow.js",
+          "sha256": "401c0a12480dafda92b65f44548ab9c09824a047d81774bca94e457484333067"
+        },
+        {
+          "path": "miniprogram/src/lib/generated/questionnaire-model.js",
+          "sha256": "4247e00d87d3d345b5e01f3604e3e19e5c4169da9e1e5579a9f9159380c2caa5"
+        },
+        {
+          "path": "miniprogram/src/lib/generated/signup-schema.js",
+          "sha256": "8b5341a7d251d0801ee52770ad3698188b4ddde259ff82fcefc0919fb3ac7bd1"
+        },
+        {
+          "path": "miniprogram/src/lib/honor-media.js",
+          "sha256": "f4ecd8e9945547146f3c93ec74eb4c6099513026b3f0bcee820c410f2d0c7519"
+        },
+        {
+          "path": "miniprogram/src/lib/http.js",
+          "sha256": "90cf9f0f9d20b51a3f2ce3259c40c383b1e5855626296d3adb49dcd4c5b2f226"
+        },
+        {
+          "path": "miniprogram/src/lib/navigation.js",
+          "sha256": "938a1d301c0379544bdf878381578254f5e9adf6daa022dc7d2236d454d0b47f"
+        },
+        {
+          "path": "miniprogram/src/lib/page.js",
+          "sha256": "bb68ffcc8f49ab1d762472bdd54564363dfb8a0db78741adfc6e139f78de7a18"
+        },
+        {
+          "path": "miniprogram/src/lib/privacy.js",
+          "sha256": "c166579696da8074be37e094f2db0157b7d9e5e756716652b546e47531821d9a"
+        },
+        {
+          "path": "miniprogram/src/lib/questionnaire-runtime.js",
+          "sha256": "45c9f153b1315e15c550d3829d53d1980e683b4291646f4abc33069a7acb2574"
+        },
+        {
+          "path": "miniprogram/src/lib/questionnaire.js",
+          "sha256": "8a30c13b9e5b645f8fb4541b1a5fb0c20a5878987d22a1ec516e93c19cd398ab"
+        },
+        {
+          "path": "miniprogram/src/lib/richtext.js",
+          "sha256": "74de5f6201e6b912c2e96d96fc694951500fc5f1f4b1bbee0ae0f0b2baf88c0f"
+        },
+        {
+          "path": "miniprogram/src/lib/session.js",
+          "sha256": "d2c2e765ee7b9903a180330aa808ab660380874df331dc78e5d647bb6a5e11c8"
+        },
+        {
+          "path": "miniprogram/src/lib/staff.js",
+          "sha256": "71428396bdf3d27d0c8896cc313d60e511272bab62b0abf1b926c8a63d231ede"
+        },
+        {
+          "path": "miniprogram/src/lib/team-honor-workflow.js",
+          "sha256": "019a99d2b8da8f88f168a9b83706b12a9bc3b2f20877ef59c2040dd317f8fe4e"
+        },
+        {
+          "path": "miniprogram/src/lib/team-honor.js",
+          "sha256": "b245e4cf6f0b8553865e9afa68b6e423daea3da54c2e251306f44d5da781af7b"
+        },
+        {
+          "path": "miniprogram/src/lib/team.js",
+          "sha256": "7be75905c693c22e70172a2c58b9a203a46219bdf89a0501d3f36d2fd254dd18"
+        },
+        {
+          "path": "miniprogram/src/lib/theme.js",
+          "sha256": "9b1cb530c303807de195244ba7578cea8e0c072798a1dd97f15d261ce0cc76a1"
+        },
+        {
+          "path": "miniprogram/src/lib/video.js",
+          "sha256": "b8425a41e41cf706f11671d25fd67f48a39cfc1d5df9d494663880b6279c66c2"
+        },
+        {
+          "path": "miniprogram/src/pages/account/index.js",
+          "sha256": "039cbe36f2af136eb22d2b1c77649d71f0a7fa010b6cab319550e61c750a4214"
+        },
+        {
+          "path": "miniprogram/src/pages/account/index.wxml",
+          "sha256": "030ae05d66a687af860dc206ebbad9dbe1404b7c78de6d11eb557e4d61ef3708"
+        },
+        {
+          "path": "miniprogram/src/pages/account/index.wxss",
+          "sha256": "34cba1fd218b345d685bd1bab5f649ea942989b8ff0293c6fbb1c013fa5272f1"
+        },
+        {
+          "path": "miniprogram/src/pages/community/index.js",
+          "sha256": "c6a0acaae86fd988c4202c1332a51ec1145c19bdc4d138856d3184c81145d335"
+        },
+        {
+          "path": "miniprogram/src/pages/community/index.wxml",
+          "sha256": "0a80c8e5cb051b07ad0510e182c43b8167fd845f19ad47ff62addd7548c45242"
+        },
+        {
+          "path": "miniprogram/src/pages/community/index.wxss",
+          "sha256": "544b4d8264dc99a616fc39f7653c404f886b2a6fb0f96fdeb1610b88bf6ad94b"
+        },
+        {
+          "path": "miniprogram/src/pages/home/index.js",
+          "sha256": "d5a9d42c8cbda554021941ddb53bed478032454a692dcc3ed406a5131e3abe88"
+        },
+        {
+          "path": "miniprogram/src/pages/home/index.wxml",
+          "sha256": "3d23c816f67ff4e72abb4c1ba0969229e5bee40d8e096f0e6f06e65f188c717c"
+        },
+        {
+          "path": "miniprogram/src/pages/home/index.wxss",
+          "sha256": "5223d976b5a0a7328acea7ac280e086ce44aadc20ed4fc955725592ce66a2b20"
+        },
+        {
+          "path": "miniprogram/src/pages/signup/index.js",
+          "sha256": "f5e71b476c9eb31dcb9574a3cdded849b6edc59206d8472850c17fb8e5c69b62"
+        },
+        {
+          "path": "miniprogram/src/pages/signup/index.wxml",
+          "sha256": "5ac4a4241ec9a1166f21972cc63304aa36ad07e01363969e03aba92ccefdc156"
+        },
+        {
+          "path": "miniprogram/src/pages/signup/index.wxss",
+          "sha256": "9fa0fbfcd7183d09bb948a8e63945461e12a77871191b5481550fcb972557c7a"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honor-edit/index.js",
+          "sha256": "d107509e454dc1895dcf332584db6bc59d518a31703ff6103d39032ad0ddb766"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honor-edit/index.wxml",
+          "sha256": "70bd98c97d7654380514ee705abd4ede9dd2e329652cee722b99d7b3c1d79ebc"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honor-edit/index.wxss",
+          "sha256": "d9ad9a952bdd96b093db87e703362acc173b5bba5dfb80c8ac5043d798cf5a0a"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honor-workspace/index.js",
+          "sha256": "aeb74044307d59e1ee0b69a16b0663b374b27b89881ca93abb02421455660b27"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honor-workspace/index.wxml",
+          "sha256": "1c5dc016ec33062cc850b665301c3abb8c7b920961851141221c0b8027284c65"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honor-workspace/index.wxss",
+          "sha256": "d9ad9a952bdd96b093db87e703362acc173b5bba5dfb80c8ac5043d798cf5a0a"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honors/index.js",
+          "sha256": "794a47dd6f26817fc362418368cd1bcc5d6741667366df59c545b072dda45b0f"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honors/index.wxml",
+          "sha256": "df948ab90591405ff9f9ffdcb97bc68970fa32663b5ba30455d8871c322053d2"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honors/index.wxss",
+          "sha256": "d9ad9a952bdd96b093db87e703362acc173b5bba5dfb80c8ac5043d798cf5a0a"
+        },
+        {
+          "path": "miniprogram/src/templates/club.wxml",
+          "sha256": "eacc604d74fdcc66ec54b3df879c6912bd0e393d49d66fc536ecfeb1366f2f69"
+        },
+        {
+          "path": "miniprogram/src/templates/common.wxml",
+          "sha256": "22da7c913047a321a3122d05eab27a4e117dc5b59b0c99e905bbffa6b3ab7185"
+        },
+        {
+          "path": "miniprogram/src/templates/questionnaire.wxml",
+          "sha256": "66f7db88b164d1abd71cc70349b8c5de0edf76c994aabdabffe46f266ae6d69b"
+        }
+      ],
+      "rows": [
+        {
+          "page": "home",
+          "fixture": "home",
+          "theme": "light",
+          "width": 390,
+          "pageHeight": 1487,
+          "controls": 10,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "home",
+          "fixture": "home",
+          "theme": "light",
+          "width": 320,
+          "pageHeight": 1334,
+          "controls": 10,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "community",
+          "fixture": "community-contact",
+          "theme": "light",
+          "width": 390,
+          "pageHeight": 2083,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "community",
+          "fixture": "community-contact",
+          "theme": "light",
+          "width": 320,
+          "pageHeight": 1918,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-edit",
+          "fixture": "honor-edit",
+          "theme": "light",
+          "width": 390,
+          "pageHeight": 1825,
+          "controls": 14,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-edit",
+          "fixture": "honor-edit",
+          "theme": "light",
+          "width": 320,
+          "pageHeight": 1726,
+          "controls": 14,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-workspace",
+          "fixture": "honor-review",
+          "theme": "light",
+          "width": 390,
+          "pageHeight": 1112,
+          "controls": 9,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-workspace",
+          "fixture": "honor-review",
+          "theme": "light",
+          "width": 320,
+          "pageHeight": 1006,
+          "controls": 9,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honors",
+          "fixture": "honor-archive",
+          "theme": "light",
+          "width": 390,
+          "pageHeight": 900,
+          "controls": 3,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honors",
+          "fixture": "honor-archive",
+          "theme": "light",
+          "width": 320,
+          "pageHeight": 900,
+          "controls": 3,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "signup",
+          "fixture": "questionnaire",
+          "theme": "light",
+          "width": 390,
+          "pageHeight": 1862,
+          "controls": 12,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "signup",
+          "fixture": "questionnaire",
+          "theme": "light",
+          "width": 320,
+          "pageHeight": 1688,
+          "controls": 12,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "account",
+          "fixture": "account",
+          "theme": "light",
+          "width": 390,
+          "pageHeight": 1366,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "account",
+          "fixture": "account",
+          "theme": "light",
+          "width": 320,
+          "pageHeight": 1234,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "home",
+          "fixture": "home",
+          "theme": "dark",
+          "width": 390,
+          "pageHeight": 1487,
+          "controls": 10,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "home",
+          "fixture": "home",
+          "theme": "dark",
+          "width": 320,
+          "pageHeight": 1334,
+          "controls": 10,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "community",
+          "fixture": "community-contact",
+          "theme": "dark",
+          "width": 390,
+          "pageHeight": 2083,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "community",
+          "fixture": "community-contact",
+          "theme": "dark",
+          "width": 320,
+          "pageHeight": 1918,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-edit",
+          "fixture": "honor-edit",
+          "theme": "dark",
+          "width": 390,
+          "pageHeight": 1825,
+          "controls": 14,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-edit",
+          "fixture": "honor-edit",
+          "theme": "dark",
+          "width": 320,
+          "pageHeight": 1726,
+          "controls": 14,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-workspace",
+          "fixture": "honor-review",
+          "theme": "dark",
+          "width": 390,
+          "pageHeight": 1112,
+          "controls": 9,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-workspace",
+          "fixture": "honor-review",
+          "theme": "dark",
+          "width": 320,
+          "pageHeight": 1006,
+          "controls": 9,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honors",
+          "fixture": "honor-archive",
+          "theme": "dark",
+          "width": 390,
+          "pageHeight": 900,
+          "controls": 3,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honors",
+          "fixture": "honor-archive",
+          "theme": "dark",
+          "width": 320,
+          "pageHeight": 900,
+          "controls": 3,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "signup",
+          "fixture": "questionnaire",
+          "theme": "dark",
+          "width": 390,
+          "pageHeight": 1862,
+          "controls": 12,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "signup",
+          "fixture": "questionnaire",
+          "theme": "dark",
+          "width": 320,
+          "pageHeight": 1688,
+          "controls": 12,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "account",
+          "fixture": "account",
+          "theme": "dark",
+          "width": 390,
+          "pageHeight": 1366,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "account",
+          "fixture": "account",
+          "theme": "dark",
+          "width": 320,
+          "pageHeight": 1234,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        }
+      ],
+      "totals": {
+        "overflow": 0,
+        "undersized": 0,
+        "smallFieldText": 0,
+        "smallBodyText": 0,
+        "smallActionText": 0,
+        "smallAuxiliaryText": 0,
+        "clippedText": 0,
+        "errors": 0,
+        "blockedRequests": 0
+      },
+      "personallyReviewedScreenshots": [
+        {
+          "path": "/workspace/qa-zijing/frontend-design-native-before/home-light-390.png",
+          "sha256": "c72c8ed55c44dfecd12358f01a5c6add8febd57df41ee5847a1c331cd2a5a65f"
+        },
+        {
+          "path": "/workspace/qa-zijing/frontend-design-native-before/community-contact-dark-320.png",
+          "sha256": "8c03ef1e0418f5eef21f27aa33b80cb1af1a967b9072961f426651f8275d219a"
+        },
+        {
+          "path": "/workspace/qa-zijing/frontend-design-native-before/honor-edit-light-390.png",
+          "sha256": "8299c0466532e8f0e840415bfc89e48aee9daa65413ac0f3c30123c984a5c975"
+        },
+        {
+          "path": "/workspace/qa-zijing/frontend-design-native-before/honor-review-dark-390.png",
+          "sha256": "c533e33fadb50ae5879460b65be4e1d8829c2460ef4ba87266f02dd702a17c0a"
+        },
+        {
+          "path": "/workspace/qa-zijing/frontend-design-native-before/honor-archive-light-320.png",
+          "sha256": "1dba0ceaeab42d7034a83de67317eccba5c4caba0e7dcf335d514613f0fc0b96"
+        },
+        {
+          "path": "/workspace/qa-zijing/frontend-design-native-before/questionnaire-dark-320.png",
+          "sha256": "991b1c6a5967d278ba83de0205c0a5cf94afbe86ce8136da8754e83bd3ea09f3"
+        },
+        {
+          "path": "/workspace/qa-zijing/frontend-design-native-before/account-light-390.png",
+          "sha256": "d661692c64407c6b3cb621ef3cae9f089b6f9f3fc5b14fb9b34ca359956eea53"
+        }
+      ]
+    },
+    {
+      "phase": "after",
+      "recordedAt": "2026-10-13T17:41:46.936Z",
+      "status": "pass",
+      "command": "node scripts/rebuild-native-preview.mjs",
+      "exitCode": 0,
+      "scope": "Current WXML/WXSS/JS data layout mapping; no native lifecycle/events/SDK/official compilation/device validation",
+      "mappingLimits": {
+        "rpx": "viewport / 750",
+        "safeAreaBottom": "20px explicitly simulated",
+        "media": "No QR, private evidence, real photos, or identifying user data",
+        "network": "all browser requests blocked; native wx side effects throw",
+        "hostUI": "Native navigation/tab bar/keyboard excluded; this is page content only",
+        "controls": "Browser controls approximate static native appearance; checked/disabled/value/progress colors follow current WXML bindings",
+        "limits": "No custom component rendering, image-mode measurement, native text measurement, input focus/keyboard, gesture, modal, media, auth or business event verification"
+      },
+      "browser": "145.0.7632.6",
+      "playwright": "1.58.2",
+      "resultFile": "/workspace/zijingwebsite/.data/rebuild-native-preview/results.json",
+      "resultSha256": "a385951597aafc1f05d7124ec737fac94dec81e1ad9fe1591f63dec821492f30",
+      "sourceFiles": [
+        {
+          "path": "miniprogram/src/app.wxss",
+          "sha256": "6f74805dbb17461db8b7459fd8e385ca647d56dc74d4dded2a1a286175e5ed1e"
+        },
+        {
+          "path": "miniprogram/src/config.js",
+          "sha256": "69970d6e1e205ca7bc225edc0fd215b70ea99b7408fc36612b070a4c0ddcd021"
+        },
+        {
+          "path": "miniprogram/src/lib/brand.js",
+          "sha256": "695c2b3583150395b668b3ead96f87bc054cc5eb173950d2ca85aa2cfbf73887"
+        },
+        {
+          "path": "miniprogram/src/lib/cms.js",
+          "sha256": "e01e0a7e409a381182c49edd8eb28b45e1e875764b4fc721bfe1fd9d23ba9654"
+        },
+        {
+          "path": "miniprogram/src/lib/design-tokens.js",
+          "sha256": "1c613fd99a3441001596fe832b7b018521c55922c29438eac719695a14c0b0f6"
+        },
+        {
+          "path": "miniprogram/src/lib/files.js",
+          "sha256": "1cd8b892613589b0e2da1681cc56df8088584c394c2babef3d50ec172a848b5a"
+        },
+        {
+          "path": "miniprogram/src/lib/format.js",
+          "sha256": "a5a6f6608e83ff09eaf32f8d733a8bd6c21e66e0a2e3b427e14dc20687d9839d"
+        },
+        {
+          "path": "miniprogram/src/lib/generated/questionnaire-flow.js",
+          "sha256": "401c0a12480dafda92b65f44548ab9c09824a047d81774bca94e457484333067"
+        },
+        {
+          "path": "miniprogram/src/lib/generated/questionnaire-model.js",
+          "sha256": "4247e00d87d3d345b5e01f3604e3e19e5c4169da9e1e5579a9f9159380c2caa5"
+        },
+        {
+          "path": "miniprogram/src/lib/generated/signup-schema.js",
+          "sha256": "8b5341a7d251d0801ee52770ad3698188b4ddde259ff82fcefc0919fb3ac7bd1"
+        },
+        {
+          "path": "miniprogram/src/lib/honor-media.js",
+          "sha256": "f4ecd8e9945547146f3c93ec74eb4c6099513026b3f0bcee820c410f2d0c7519"
+        },
+        {
+          "path": "miniprogram/src/lib/http.js",
+          "sha256": "90cf9f0f9d20b51a3f2ce3259c40c383b1e5855626296d3adb49dcd4c5b2f226"
+        },
+        {
+          "path": "miniprogram/src/lib/navigation.js",
+          "sha256": "938a1d301c0379544bdf878381578254f5e9adf6daa022dc7d2236d454d0b47f"
+        },
+        {
+          "path": "miniprogram/src/lib/page.js",
+          "sha256": "bb68ffcc8f49ab1d762472bdd54564363dfb8a0db78741adfc6e139f78de7a18"
+        },
+        {
+          "path": "miniprogram/src/lib/privacy.js",
+          "sha256": "c166579696da8074be37e094f2db0157b7d9e5e756716652b546e47531821d9a"
+        },
+        {
+          "path": "miniprogram/src/lib/questionnaire-runtime.js",
+          "sha256": "45c9f153b1315e15c550d3829d53d1980e683b4291646f4abc33069a7acb2574"
+        },
+        {
+          "path": "miniprogram/src/lib/questionnaire.js",
+          "sha256": "8a30c13b9e5b645f8fb4541b1a5fb0c20a5878987d22a1ec516e93c19cd398ab"
+        },
+        {
+          "path": "miniprogram/src/lib/richtext.js",
+          "sha256": "74de5f6201e6b912c2e96d96fc694951500fc5f1f4b1bbee0ae0f0b2baf88c0f"
+        },
+        {
+          "path": "miniprogram/src/lib/session.js",
+          "sha256": "d2c2e765ee7b9903a180330aa808ab660380874df331dc78e5d647bb6a5e11c8"
+        },
+        {
+          "path": "miniprogram/src/lib/staff.js",
+          "sha256": "71428396bdf3d27d0c8896cc313d60e511272bab62b0abf1b926c8a63d231ede"
+        },
+        {
+          "path": "miniprogram/src/lib/team-honor-workflow.js",
+          "sha256": "019a99d2b8da8f88f168a9b83706b12a9bc3b2f20877ef59c2040dd317f8fe4e"
+        },
+        {
+          "path": "miniprogram/src/lib/team-honor.js",
+          "sha256": "b245e4cf6f0b8553865e9afa68b6e423daea3da54c2e251306f44d5da781af7b"
+        },
+        {
+          "path": "miniprogram/src/lib/team.js",
+          "sha256": "7be75905c693c22e70172a2c58b9a203a46219bdf89a0501d3f36d2fd254dd18"
+        },
+        {
+          "path": "miniprogram/src/lib/theme.js",
+          "sha256": "9b1cb530c303807de195244ba7578cea8e0c072798a1dd97f15d261ce0cc76a1"
+        },
+        {
+          "path": "miniprogram/src/lib/video.js",
+          "sha256": "b8425a41e41cf706f11671d25fd67f48a39cfc1d5df9d494663880b6279c66c2"
+        },
+        {
+          "path": "miniprogram/src/pages/account/index.js",
+          "sha256": "039cbe36f2af136eb22d2b1c77649d71f0a7fa010b6cab319550e61c750a4214"
+        },
+        {
+          "path": "miniprogram/src/pages/account/index.wxml",
+          "sha256": "030ae05d66a687af860dc206ebbad9dbe1404b7c78de6d11eb557e4d61ef3708"
+        },
+        {
+          "path": "miniprogram/src/pages/account/index.wxss",
+          "sha256": "34cba1fd218b345d685bd1bab5f649ea942989b8ff0293c6fbb1c013fa5272f1"
+        },
+        {
+          "path": "miniprogram/src/pages/community/index.js",
+          "sha256": "c6a0acaae86fd988c4202c1332a51ec1145c19bdc4d138856d3184c81145d335"
+        },
+        {
+          "path": "miniprogram/src/pages/community/index.wxml",
+          "sha256": "0a80c8e5cb051b07ad0510e182c43b8167fd845f19ad47ff62addd7548c45242"
+        },
+        {
+          "path": "miniprogram/src/pages/community/index.wxss",
+          "sha256": "544b4d8264dc99a616fc39f7653c404f886b2a6fb0f96fdeb1610b88bf6ad94b"
+        },
+        {
+          "path": "miniprogram/src/pages/home/index.js",
+          "sha256": "d5a9d42c8cbda554021941ddb53bed478032454a692dcc3ed406a5131e3abe88"
+        },
+        {
+          "path": "miniprogram/src/pages/home/index.wxml",
+          "sha256": "314025dd944b0c6378e8feba80cc4a5e3bf4cc990d88b0c5bc3c5e604d6c7d21"
+        },
+        {
+          "path": "miniprogram/src/pages/home/index.wxss",
+          "sha256": "5223d976b5a0a7328acea7ac280e086ce44aadc20ed4fc955725592ce66a2b20"
+        },
+        {
+          "path": "miniprogram/src/pages/signup/index.js",
+          "sha256": "f5e71b476c9eb31dcb9574a3cdded849b6edc59206d8472850c17fb8e5c69b62"
+        },
+        {
+          "path": "miniprogram/src/pages/signup/index.wxml",
+          "sha256": "5ac4a4241ec9a1166f21972cc63304aa36ad07e01363969e03aba92ccefdc156"
+        },
+        {
+          "path": "miniprogram/src/pages/signup/index.wxss",
+          "sha256": "9fa0fbfcd7183d09bb948a8e63945461e12a77871191b5481550fcb972557c7a"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honor-edit/index.js",
+          "sha256": "d107509e454dc1895dcf332584db6bc59d518a31703ff6103d39032ad0ddb766"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honor-edit/index.wxml",
+          "sha256": "70bd98c97d7654380514ee705abd4ede9dd2e329652cee722b99d7b3c1d79ebc"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honor-edit/index.wxss",
+          "sha256": "d9ad9a952bdd96b093db87e703362acc173b5bba5dfb80c8ac5043d798cf5a0a"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honor-workspace/index.js",
+          "sha256": "aeb74044307d59e1ee0b69a16b0663b374b27b89881ca93abb02421455660b27"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honor-workspace/index.wxml",
+          "sha256": "1c5dc016ec33062cc850b665301c3abb8c7b920961851141221c0b8027284c65"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honor-workspace/index.wxss",
+          "sha256": "d9ad9a952bdd96b093db87e703362acc173b5bba5dfb80c8ac5043d798cf5a0a"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honors/index.js",
+          "sha256": "794a47dd6f26817fc362418368cd1bcc5d6741667366df59c545b072dda45b0f"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honors/index.wxml",
+          "sha256": "df948ab90591405ff9f9ffdcb97bc68970fa32663b5ba30455d8871c322053d2"
+        },
+        {
+          "path": "miniprogram/src/pages/team-honors/index.wxss",
+          "sha256": "d9ad9a952bdd96b093db87e703362acc173b5bba5dfb80c8ac5043d798cf5a0a"
+        },
+        {
+          "path": "miniprogram/src/templates/club.wxml",
+          "sha256": "eacc604d74fdcc66ec54b3df879c6912bd0e393d49d66fc536ecfeb1366f2f69"
+        },
+        {
+          "path": "miniprogram/src/templates/common.wxml",
+          "sha256": "22da7c913047a321a3122d05eab27a4e117dc5b59b0c99e905bbffa6b3ab7185"
+        },
+        {
+          "path": "miniprogram/src/templates/questionnaire.wxml",
+          "sha256": "66f7db88b164d1abd71cc70349b8c5de0edf76c994aabdabffe46f266ae6d69b"
+        }
+      ],
+      "rows": [
+        {
+          "page": "home",
+          "fixture": "home",
+          "theme": "light",
+          "width": 390,
+          "pageHeight": 1487,
+          "controls": 10,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "home",
+          "fixture": "home",
+          "theme": "light",
+          "width": 320,
+          "pageHeight": 1334,
+          "controls": 10,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "community",
+          "fixture": "community-contact",
+          "theme": "light",
+          "width": 390,
+          "pageHeight": 2083,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "community",
+          "fixture": "community-contact",
+          "theme": "light",
+          "width": 320,
+          "pageHeight": 1918,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-edit",
+          "fixture": "honor-edit",
+          "theme": "light",
+          "width": 390,
+          "pageHeight": 1825,
+          "controls": 14,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-edit",
+          "fixture": "honor-edit",
+          "theme": "light",
+          "width": 320,
+          "pageHeight": 1726,
+          "controls": 14,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-workspace",
+          "fixture": "honor-review",
+          "theme": "light",
+          "width": 390,
+          "pageHeight": 1112,
+          "controls": 9,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-workspace",
+          "fixture": "honor-review",
+          "theme": "light",
+          "width": 320,
+          "pageHeight": 1006,
+          "controls": 9,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honors",
+          "fixture": "honor-archive",
+          "theme": "light",
+          "width": 390,
+          "pageHeight": 900,
+          "controls": 3,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honors",
+          "fixture": "honor-archive",
+          "theme": "light",
+          "width": 320,
+          "pageHeight": 900,
+          "controls": 3,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "signup",
+          "fixture": "questionnaire",
+          "theme": "light",
+          "width": 390,
+          "pageHeight": 1862,
+          "controls": 12,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "signup",
+          "fixture": "questionnaire",
+          "theme": "light",
+          "width": 320,
+          "pageHeight": 1688,
+          "controls": 12,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "account",
+          "fixture": "account",
+          "theme": "light",
+          "width": 390,
+          "pageHeight": 1366,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "account",
+          "fixture": "account",
+          "theme": "light",
+          "width": 320,
+          "pageHeight": 1234,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "home",
+          "fixture": "home",
+          "theme": "dark",
+          "width": 390,
+          "pageHeight": 1487,
+          "controls": 10,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "home",
+          "fixture": "home",
+          "theme": "dark",
+          "width": 320,
+          "pageHeight": 1334,
+          "controls": 10,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "community",
+          "fixture": "community-contact",
+          "theme": "dark",
+          "width": 390,
+          "pageHeight": 2083,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "community",
+          "fixture": "community-contact",
+          "theme": "dark",
+          "width": 320,
+          "pageHeight": 1918,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-edit",
+          "fixture": "honor-edit",
+          "theme": "dark",
+          "width": 390,
+          "pageHeight": 1825,
+          "controls": 14,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-edit",
+          "fixture": "honor-edit",
+          "theme": "dark",
+          "width": 320,
+          "pageHeight": 1726,
+          "controls": 14,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-workspace",
+          "fixture": "honor-review",
+          "theme": "dark",
+          "width": 390,
+          "pageHeight": 1112,
+          "controls": 9,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honor-workspace",
+          "fixture": "honor-review",
+          "theme": "dark",
+          "width": 320,
+          "pageHeight": 1006,
+          "controls": 9,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honors",
+          "fixture": "honor-archive",
+          "theme": "dark",
+          "width": 390,
+          "pageHeight": 900,
+          "controls": 3,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "team-honors",
+          "fixture": "honor-archive",
+          "theme": "dark",
+          "width": 320,
+          "pageHeight": 900,
+          "controls": 3,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "signup",
+          "fixture": "questionnaire",
+          "theme": "dark",
+          "width": 390,
+          "pageHeight": 1862,
+          "controls": 12,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "signup",
+          "fixture": "questionnaire",
+          "theme": "dark",
+          "width": 320,
+          "pageHeight": 1688,
+          "controls": 12,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "account",
+          "fixture": "account",
+          "theme": "dark",
+          "width": 390,
+          "pageHeight": 1366,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        },
+        {
+          "page": "account",
+          "fixture": "account",
+          "theme": "dark",
+          "width": 320,
+          "pageHeight": 1234,
+          "controls": 11,
+          "violations": {
+            "overflow": 0,
+            "undersized": 0,
+            "smallFieldText": 0,
+            "smallBodyText": 0,
+            "smallActionText": 0,
+            "smallAuxiliaryText": 0,
+            "clippedText": 0,
+            "errors": 0,
+            "blockedRequests": 0
+          }
+        }
+      ],
+      "totals": {
+        "overflow": 0,
+        "undersized": 0,
+        "smallFieldText": 0,
+        "smallBodyText": 0,
+        "smallActionText": 0,
+        "smallAuxiliaryText": 0,
+        "clippedText": 0,
+        "errors": 0,
+        "blockedRequests": 0
+      },
+      "personallyReviewedScreenshots": [
+        {
+          "path": "/workspace/zijingwebsite/.data/rebuild-native-preview/home-light-390.png",
+          "sha256": "e913eea0a67adc5833a7d0f38b1cc4bd3e96832ac607e06d7d380c32b1754690"
+        },
+        {
+          "path": "/workspace/zijingwebsite/.data/rebuild-native-preview/home-dark-320.png",
+          "sha256": "265313e1f31742f6c031a34cb5b9d290e5852b307691a80eefe59cc3481b1ef4"
+        }
+      ]
+    }
+  ],
+  "quickChecks": [
+    {
+      "name": "native static check",
+      "command": "node scripts/check-miniapp.mjs",
+      "exitCode": 0,
+      "status": "pass",
+      "log": "/workspace/qa-zijing/logs/frontend-design-miniapp-check.log",
+      "logSha256": "d1f29bab1af2dd67b230fecd20c9e5cfda57dce5a1598d4096d2be480c93a43e",
+      "result": {
+        "pages": 25,
+        "files": 161,
+        "bytes": 591692,
+        "domainChecking": true,
+        "nativeDependencies": 0
+      }
+    },
+    {
+      "name": "changed TSX ESLint",
+      "command": "node node_modules/eslint/bin/eslint.js src/components/activity-pages/PublicPages.tsx",
+      "exitCode": 0,
+      "status": "pass",
+      "log": "/workspace/qa-zijing/logs/frontend-design-lint.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "git diff --check",
+      "status": "pass",
+      "exitCode": 0
+    },
+    {
+      "name": "final 594 source input hash verification",
+      "status": "pass",
+      "mismatches": 0
+    }
+  ],
+  "pending": [
+    {
+      "name": "new source production build and complete browser regression",
+      "status": "notrun",
+      "owner": "Sol max"
+    },
+    {
+      "name": "website empty-state refinement in real new build",
+      "status": "notrun",
+      "owner": "Sol max"
+    },
+    {
+      "name": "official WeChat compile/simulator/device and native capabilities",
+      "status": "notrun",
+      "blocker": "Official tooling/device absent; browser mapping does not substitute."
+    }
+  ],
+  "safety": {
+    "realDatabaseAccess": false,
+    "productionDeployment": false,
+    "cmsPublication": false,
+    "wechatUpload": false,
+    "changedPermissions": false,
+    "changedThemeContract": false,
+    "changedNavigationTargets": false,
+    "modifiedTestsOrThresholds": false
+  },
+  "preservedServices": {
+    "at": "2026-10-13T17:44:56.181718+00:00",
+    "buildId": "1LQXl0KVPMjo-UFXJdO9l",
+    "note": "Existing immutable build, not final revised source",
+    "servers": [
+      {
+        "port": 3000,
+        "runner": 3834,
+        "child": 3845,
+        "alive": [
+          true,
+          true
+        ],
+        "health": 200
+      },
+      {
+        "port": 3364,
+        "runner": 3864,
+        "child": 3875,
+        "alive": [
+          true,
+          true
+        ],
+        "health": 200
+      },
+      {
+        "port": 3365,
+        "runner": 16627,
+        "child": 16638,
+        "alive": [
+          true,
+          true
+        ],
+        "health": 200
+      }
+    ]
+  }
+}
