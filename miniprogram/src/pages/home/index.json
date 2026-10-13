@@ -1,1 +1,8 @@
-{"usingComponents": {}}
+{
+  "usingComponents": {},
+  "navigationBarBackgroundColor": "#17151c",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#f4f1ea",
+  "backgroundTextStyle": "light",
+  "navigationBarTitleText": "竞在紫荆"
+}

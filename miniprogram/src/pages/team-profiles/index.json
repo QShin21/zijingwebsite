@@ -1,1 +1,11 @@
-{ "navigationBarTitleText": "队员简介", "enablePullDownRefresh": true, "usingComponents": {"privacy-consent": "/components/privacy-consent/index"} }
+{
+  "navigationBarTitleText": "队员简介",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "privacy-consent": "/components/privacy-consent/index"
+  },
+  "navigationBarBackgroundColor": "#17151c",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#f4f1ea",
+  "backgroundTextStyle": "light"
+}

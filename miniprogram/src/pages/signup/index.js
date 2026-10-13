@@ -104,10 +104,10 @@ Page({
   checkAnswers(all) {
     const route=questionnaire.questionRoute(this.data.form,this.data.answers),pages=questionnaire.questionPages(route.questions,this.data.form.pageSize||5),scope=all?route.questions:pages[this.data.step],errors=questionnaire.answerErrors(this.data.form,this.data.answers),first=scope.find(q=>errors[q.id]);
     if(!first)return true;
-    const step=pages.findIndex(page=>page.some(q=>q.id===first.id));this.setData({answerErrors:errors,step,review:false,message:'请检查提示的题目后继续。'});this.renderQuestions();wx.pageScrollTo({selector:'#question-'+first.id,duration:200});return false;
+    const step=pages.findIndex(page=>page.some(q=>q.id===first.id));this.setData({answerErrors:errors,step,review:false,message:'请检查提示的题目后继续。'});this.renderQuestions();wx.pageScrollTo({selector:'#question-'+first.id,duration:0});return false;
   },
-  answerNext() { if(this.data.busy||!this.checkAnswers(this.data.step===this.data.answerPages-1))return;if(this.data.step<this.data.answerPages-1){this.setData({step:this.data.step+1});this.renderQuestions();}else{const answers=questionnaire.validateAnswers(this.data.form,this.data.answers);this.setData({review:true,reviewRows:receipt({questions:questionnaire.visibleQuestions(this.data.form,answers),answers}).rows,message:''});}wx.pageScrollTo({scrollTop:0,duration:200}); },
-  answerPrevious() { if(this.data.busy)return;this.setData(this.data.review?{review:false}:{step:Math.max(0,this.data.step-1)});this.renderQuestions();wx.pageScrollTo({scrollTop:0,duration:200}); },
+  answerNext() { if(this.data.busy||!this.checkAnswers(this.data.step===this.data.answerPages-1))return;if(this.data.step<this.data.answerPages-1){this.setData({step:this.data.step+1});this.renderQuestions();}else{const answers=questionnaire.validateAnswers(this.data.form,this.data.answers);this.setData({review:true,reviewRows:receipt({questions:questionnaire.visibleQuestions(this.data.form,answers),answers}).rows,message:''});}wx.pageScrollTo({scrollTop:0,duration:0}); },
+  answerPrevious() { if(this.data.busy)return;this.setData(this.data.review?{review:false}:{step:Math.max(0,this.data.step-1)});this.renderQuestions();wx.pageScrollTo({scrollTop:0,duration:0}); },
   editAnswers() { if(this.data.busy||!this.data.info||!this.data.receipt||!(this._staff||this._team?this.data.info.actions&&this.data.info.actions.edit:this.data.info.state==='报名开放'))return;this.setData({responseEditing:true,answers:questionnaire.initialAnswers(this.data.form,this.data.receipt.answers),answerErrors:{},step:0,review:false,message:''});this.renderQuestions(); },
   async refreshStaff(message) {
     const ticket=this._ticket,userId=this._userId,endpoint=this._readEndpoint;

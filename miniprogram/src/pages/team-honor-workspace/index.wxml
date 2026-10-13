@@ -1,5 +1,5 @@
 <import src="../../templates/common.wxml" />
-<view class="page">
+<view class="page mini-page team-honor-workspace-page">
   <button class="plain" bindtap="back">返回</button><text class="eyebrow">TEAM HONOR WORKSPACE</text><text class="title">{{view === 'review' ? '荣誉审核工作台' : '我的荣誉投稿'}}</text>
   <text class="subtitle">投稿材料供本人及当前有权限的审核者查看。批准后证据会展示在队伍荣誉档案，请提交获准公开的成果材料。</text>
   <template is="feedback" data="{{needsLogin}}" />
@@ -23,7 +23,7 @@
       <text wx:if="{{!ready}}" class="muted">当前回执只读，请重新加载核对操作。</text>
     </view>
     <view wx:if="{{detail}}" class="panel section"><text class="section-title">{{detail.title}} · 本次证据</text><text class="body" selectable>{{detail.description}}</text><text wx:if="{{detail.reviewNote}}" class="body">处理反馈：{{detail.reviewNote}}</text>
-      <view wx:for="{{detailImages}}" wx:key="index"><image wx:if="{{item.path}}" class="photo" mode="widthFix" src="{{item.path}}" bindtap="previewEvidence" data-path="{{item.path}}" aria-label="{{item.caption || '荣誉证据图片'}}" /><text class="muted">{{item.caption}}</text></view>
+      <view wx:for="{{detailImages}}" wx:key="index"><button class="image-button" hover-class="pressed" wx:if="{{item.path}}" bindtap="previewEvidence" data-path="{{item.path}}" aria-label="{{item.caption || '荣誉证据图片'}}"><image class="photo" mode="widthFix" src="{{item.path}}" aria-label="{{item.caption || '荣誉证据图片'}}"/></button><text class="muted">{{item.caption}}</text></view>
       <text wx:if="{{imageError}}" class="muted">{{imageError}}</text><button wx:if="{{detail.hasVideo}}" class="secondary section" bindtap="viewVideo" disabled="{{busy || loading}}">读取本次视频证据</button><video wx:if="{{videoSource}}" id="honor-evidence" class="evidence-video" src="{{videoSource}}" controls autoplay="{{false}}" binderror="videoError" data-id="{{detail.id}}" data-revision="{{detail.revision}}" aria-label="本次荣誉视频证据" /><text wx:if="{{videoError}}" class="error">{{videoError}}</text><button wx:if="{{detail.hasVideo}}" class="plain" bindtap="websiteEvidence" disabled="{{busy}}">复制网站证据页地址</button><button class="plain" bindtap="closeDetail" disabled="{{busy}}">收起证据</button>
     </view>
     <view wx:if="{{!docs.length && ready && !loading}}" class="empty"><text>{{view === 'review' ? '当前范围暂无可查看的荣誉记录' : '尚无本人荣誉投稿'}}</text><text class="muted">可刷新核对最新状态。</text></view>

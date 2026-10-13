@@ -1,5 +1,5 @@
 <import src="../../templates/common.wxml" />
-<view class="page">
+<view class="page mini-page community-joins-page">
   <button class="plain" bindtap="back">返回社群</button><text class="eyebrow">MANUAL WECHAT JOIN</text><text class="title">人工进群管理</text><text class="subtitle">{{title}} · 先到微信核实好友，再实际拉群。仅在微信操作完成后保存对应人工确认。</text>
   <template is="feedback" data="{{needsLogin}}" />
   <text wx:if="{{loading}}" class="muted">正在核对管理权限与进群意向…</text>

@@ -1,5 +1,5 @@
 <import src="../../templates/common.wxml" />
-<view class="page">
+<view class="page mini-page team-profiles-page">
   <button class="plain back" bindtap="back">← 返回</button>
   <text class="eyebrow">TEAM PROFILES</text>
   <text class="title">队员简介</text>

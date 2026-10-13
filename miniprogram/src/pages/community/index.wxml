@@ -1,5 +1,5 @@
 <import src="../../templates/common.wxml" />
-<view class="page">
+<view class="page mini-page community-page">
   <button class="plain" bindtap="back">返回</button>
   <template is="feedback" data="{{loading, error, needsLogin}}" />
   <block wx:if="{{!loading && !error && !needsLogin}}">
@@ -7,21 +7,21 @@
     <text wx:if="{{game.summary}}" class="subtitle">{{game.summary}}</text>
     <view wx:if="{{nodes.length}}" class="body"><rich-text nodes="{{nodes}}" /></view>
     <scroll-view scroll-x class="chips">
-      <view class="chip {{area === 'contacts' ? 'active' : ''}}" bindtap="area" data-area="contacts">联系管理与进群进度</view>
-      <view class="chip {{area === 'updates' ? 'active' : ''}}" bindtap="area" data-area="updates">社群活动与通知</view>
-      <view class="chip {{area === 'showcase' ? 'active' : ''}}" bindtap="area" data-area="showcase">社群风采</view>
+      <button class="chip {{area === 'contacts' ? 'active' : ''}}" bindtap="area" data-area="contacts" hover-class="pressed">联系管理与进群进度</button>
+      <button class="chip {{area === 'updates' ? 'active' : ''}}" bindtap="area" data-area="updates" hover-class="pressed">社群活动与通知</button>
+      <button class="chip {{area === 'showcase' ? 'active' : ''}}" bindtap="area" data-area="showcase" hover-class="pressed">社群风采</button>
     </scroll-view>
     <view wx:if="{{area !== 'contacts' && contentError}}" class="section"><text class="error">{{contentError}}</text><button class="secondary" bindtap="retryContent" disabled="{{loadingMore}}">重试社群内容</button></view>
     <text wx:if="{{area !== 'contacts' && loadingMore}}" class="muted">正在读取社群内容…</text>
     <view wx:if="{{area !== 'contacts'}}" wx:for="{{docs}}" wx:key="id" class="card community-card">
-      <view wx:if="{{area === 'updates'}}" class="card-body" bindtap="openContent" data-doc="{{item}}">
+      <button wx:if="{{area === 'updates'}}" class="card-body content-link" bindtap="openContent" data-doc="{{item}}" hover-class="pressed">
         <view class="meta"><text>{{item.kindText}} · {{item.authorName}}</text><text>{{item.dateText}}</text></view>
         <text class="card-title">{{item.title}}</text><text class="card-summary">{{item.body}}</text><text class="more">查看详情 →</text>
-      </view>
+      </button>
       <view wx:else class="card-body">
         <text class="card-title">{{item.title}}</text><text class="meta">社群风采 · {{item.authorName}} · {{item.dateText}}</text><text class="body">{{item.body}}</text>
         <view wx:for="{{item.localImages}}" wx:for-item="photo" wx:key="source">
-          <image wx:if="{{photo.source}}" class="photo" src="{{photo.source}}" mode="widthFix" bindtap="previewImage" data-url="{{photo.source}}" /><text wx:if="{{photo.caption}}" class="muted">{{photo.caption}}</text>
+          <button class="image-button" hover-class="pressed" wx:if="{{photo.source}}" bindtap="previewImage" data-url="{{photo.source}}" aria-label="预览图片"><image class="photo" src="{{photo.source}}" mode="widthFix"/></button><text wx:if="{{photo.caption}}" class="muted">{{photo.caption}}</text>
         </view>
         <video id="showcase-video-{{index}}" wx:if="{{item.videoSource}}" class="showcase-video" src="{{item.videoSource}}" controls="{{true}}" autoplay="{{false}}" object-fit="contain" show-center-play-btn="{{true}}" binderror="videoError" data-index="{{index}}" />
         <text wx:if="{{item.videoError}}" class="error">视频暂时无法播放，请检查网络或使用下方链接。</text>
@@ -46,7 +46,7 @@
         <view wx:if="{{contactsError}}"><text class="error">{{contactsError}}</text><button class="secondary" bindtap="retryContacts" disabled="{{contactsLoading}}">重试管理员名片</button></view>
         <text wx:if="{{!contacts.length && !contactsLoading && !contactsError}}" class="empty">暂无授权展示的管理员名片，可稍后刷新或申请参与社群组织。</text>
         <view wx:for="{{contacts}}" wx:key="id" class="contact"><view><text class="section-title">{{item.name}}</text><text class="muted">已授权展示的个人名片</text></view>
-          <image wx:if="{{item.image}}" class="contact-qr" mode="aspectFit" src="{{item.image}}" show-menu-by-longpress bindtap="previewImage" data-url="{{item.image}}" aria-label="{{item.name}}的微信名片" />
+          <button class="image-button" hover-class="pressed" wx:if="{{item.image}}" bindtap="previewImage" data-url="{{item.image}}" aria-label="{{item.name}}的微信名片"><image class="contact-qr" mode="aspectFit" src="{{item.image}}" show-menu-by-longpress aria-label="{{item.name}}的微信名片"/></button>
           <text wx:else class="muted">名片图片暂时无法显示</text>
           <button wx:if="{{joinActions.request && item.image && item.id}}" class="secondary" bindtap="joinAction" data-action="request" data-contact="{{item.id}}" disabled="{{joinBusy || joinLoading}}">记录联系这位管理员的加入意向</button>
         </view>
@@ -59,7 +59,7 @@
       <view wx:for="{{staffBatches}}" wx:key="id" class="staff-row"><view class="row"><text>{{item.title}}</text><text class="badge">{{item.state}}</text></view><text wx:if="{{item.description}}" class="muted">{{item.description}}</text><button class="plain" bindtap="applyStaff" data-id="{{item.id}}">查看批次与申请状态 →</button></view>
     </view>
     <view class="section"><text class="section-title">社团展示</text><text class="muted">经审批升推的社群活动、通知与风采。</text>
-      <view wx:for="{{promotions}}" wx:key="sourceKey" class="section card" bindtap="openWebsite" data-url="{{item.href}}"><view class="card-body"><view class="meta"><text>{{item.kindText}}</text><text>{{item.gameTitle}}</text></view><text class="card-title">{{item.snapshot.title}}</text><text class="card-summary">{{item.snapshot.body}}</text><text class="more">查看原内容 →</text></view></view>
+      <button wx:for="{{promotions}}" wx:key="sourceKey" class="section card content-link" bindtap="openWebsite" data-url="{{item.href}}" hover-class="pressed"><view class="card-body"><view class="meta"><text>{{item.kindText}}</text><text>{{item.gameTitle}}</text></view><text class="card-title">{{item.snapshot.title}}</text><text class="card-summary">{{item.snapshot.body}}</text><text class="more">查看原内容 →</text></view></button>
       <text wx:if="{{!promotions.length && !clubLoading && !clubError}}" class="empty">暂无已审批的社团展示</text>
       <text wx:if="{{clubLoading}}" class="muted">正在读取社团批次与展示…</text><view wx:if="{{clubError}}"><text class="error">{{clubError}}</text><button class="secondary" bindtap="retryClub" disabled="{{clubLoading}}">重试社团信息</button></view>
     </view>

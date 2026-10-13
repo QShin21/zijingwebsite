@@ -1,1 +1,8 @@
-{"navigationBarTitleText":"活动报名","enablePullDownRefresh":false}
+{
+  "navigationBarTitleText": "活动报名",
+  "enablePullDownRefresh": false,
+  "navigationBarBackgroundColor": "#17151c",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#f4f1ea",
+  "backgroundTextStyle": "light"
+}

@@ -1,5 +1,5 @@
 <import src="../../templates/common.wxml" />
-<view class="page">
+<view class="page mini-page applications-page">
   <button class="plain back" bindtap="back">返回</button>
   <text class="eyebrow">BUILD YOUR COMMUNITY</text><text class="title">社群管理员申请</text>
   <text class="subtitle">申请新建游戏社群或参与已有社群管理。负责人批准后，微信群由管理员人工建立与拉群。</text>
@@ -19,7 +19,7 @@
         <view class="field"><text class="field-label">申请说明</text><textarea value="{{reason}}" bindinput="input" data-field="reason" placeholder="说明组织计划与投入，10–3000 字" maxlength="3000" disabled="{{busy}}" /></view>
       </block>
       <view class="field"><text class="field-label">微信个人名片二维码</text>
-        <image wx:if="{{qr}}" class="qr" src="{{qr}}" mode="aspectFit" bindtap="previewImage" data-url="{{qr}}" />
+        <button class="image-button" hover-class="pressed" wx:if="{{qr}}" bindtap="previewImage" data-url="{{qr}}" aria-label="预览图片"><image class="qr" src="{{qr}}" mode="aspectFit"/></button>
         <text wx:if="{{savedQr && !qr}}" class="muted">保留已保存的名片；选择新图片后才更换。</text>
         <button class="secondary" bindtap="chooseQr" disabled="{{busy || imageBusy}}" loading="{{imageBusy}}">{{qr || savedQr ? '选择新二维码图片' : '选择二维码图片'}}</button>
         <button wx:if="{{savedQr}}" class="plain" bindtap="inspectSaved" disabled="{{busy || imageBusy}}">查看已保存名片</button>

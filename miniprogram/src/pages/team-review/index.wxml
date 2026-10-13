@@ -1,5 +1,5 @@
 <import src="../../templates/common.wxml" />
-<view class="page"><button class="plain" bindtap="back">返回</button><text class="eyebrow">TEAM WORKSPACE</text><text class="title">{{mode === 'join' ? teamDoc.title || '队伍工作台' : '建队申请审核'}}</text><text class="subtitle">根据你当前的管理权限查看与处理申请。核对提交时的答卷后，再保存人工决定。</text><template is="feedback" data="{{needsLogin}}" />
+<view class="page mini-page team-review-page"><button class="plain" bindtap="back">返回</button><text class="eyebrow">TEAM WORKSPACE</text><text class="title">{{mode === 'join' ? teamDoc.title || '队伍工作台' : '建队申请审核'}}</text><text class="subtitle">根据你当前的管理权限查看与处理申请。核对提交时的答卷后，再保存人工决定。</text><template is="feedback" data="{{needsLogin}}" />
   <text wx:if="{{busy}}" class="muted">本次确认或保存尚未完成，完成后会核对最新记录。</text><text wx:if="{{loading}}" class="muted">正在核对权限与工作台…</text><view wx:if="{{error}}"><text class="error">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{loading || busy}}">重新加载</button></view><text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text><text wx:if="{{done}}" class="body" aria-role="status">{{done}}</text>
   <view wx:if="{{!needsLogin && !loading && !error && !allowed}}" class="empty"><text>当前暂无此工作台的查看权限</text><button class="secondary" bindtap="retry">重新核对权限</button></view>
   <block wx:if="{{allowed && !needsLogin}}">

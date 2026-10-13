@@ -1,1 +1,10 @@
-{"usingComponents": {"privacy-consent": "/components/privacy-consent/index"}}
+{
+  "usingComponents": {
+    "privacy-consent": "/components/privacy-consent/index"
+  },
+  "navigationBarBackgroundColor": "#17151c",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#f4f1ea",
+  "backgroundTextStyle": "light",
+  "navigationBarTitleText": "管理员申请"
+}

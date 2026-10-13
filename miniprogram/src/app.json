@@ -28,16 +28,16 @@
   ],
   "window": {
     "navigationBarTitleText": "竞在紫荆",
-    "navigationBarBackgroundColor": "#faf8fc",
-    "navigationBarTextStyle": "black",
-    "backgroundColor": "#faf8fc",
+    "navigationBarBackgroundColor": "#17151c",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f4f1ea",
     "backgroundTextStyle": "dark",
     "enablePullDownRefresh": true
   },
   "tabBar": {
-    "color": "#78717f",
-    "selectedColor": "#6536a6",
-    "backgroundColor": "#ffffff",
+    "color": "#625c68",
+    "selectedColor": "#6839ae",
+    "backgroundColor": "#fffdf8",
     "borderStyle": "white",
     "list": [
       {

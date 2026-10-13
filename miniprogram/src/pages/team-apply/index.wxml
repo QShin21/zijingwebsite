@@ -1,5 +1,5 @@
 <import src="../../templates/common.wxml" />
-<view class="page"><button class="plain" bindtap="back">返回</button><text class="eyebrow">TEAM FORMATION</text><text class="title">申请建立代表队</text><text class="subtitle">当前有建队申请权限的社群管理员提交组织与训练计划，由负责人审核批准后成立。</text><template is="feedback" data="{{needsLogin}}" />
+<view class="page mini-page team-apply-page"><button class="plain" bindtap="back">返回</button><text class="eyebrow">TEAM FORMATION</text><text class="title">申请建立代表队</text><text class="subtitle">当前有建队申请权限的社群管理员提交组织与训练计划，由负责人审核批准后成立。</text><template is="feedback" data="{{needsLogin}}" />
   <block wx:if="{{!needsLogin}}">
     <text wx:if="{{busy}}" class="muted">本次确认或保存尚未完成，完成后会核对最新记录。</text>
     <view class="actions"><button wx:if="{{actions.establish}}" class="secondary" bindtap="newApplication" disabled="{{loading || busy}}">填写新建队申请</button><button wx:if="{{apply}}" class="plain" bindtap="toggle" disabled="{{busy}}">收起表单</button><button wx:if="{{!apply && (title || reason)}}" class="plain" bindtap="toggle" disabled="{{busy}}">继续填写</button><button wx:if="{{actions.reviewEstablishments}}" class="plain" bindtap="review" disabled="{{loading || busy}}">建队申请审核 →</button></view>

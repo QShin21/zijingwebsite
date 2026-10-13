@@ -1,1 +1,10 @@
-{"navigationBarTitle":"队伍荣誉档案","enablePullDownRefresh":true,"usingComponents":{}}
+{
+  "navigationBarTitle": "队伍荣誉档案",
+  "enablePullDownRefresh": true,
+  "usingComponents": {},
+  "navigationBarBackgroundColor": "#17151c",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#f4f1ea",
+  "backgroundTextStyle": "light",
+  "navigationBarTitleText": "队伍荣誉档案"
+}

@@ -1,5 +1,5 @@
 <import src="../../templates/common.wxml" />
-<view class="page">
+<view class="page mini-page team-honors-page">
   <button class="plain back" bindtap="back">← 返回</button>
   <text class="eyebrow">TEAM HONORS</text>
   <text class="title">{{team.title || '队伍荣誉档案'}}</text>
@@ -20,7 +20,7 @@
     <text wx:if="{{item.authorName}}" class="muted author">{{item.authorName}}</text>
     <text wx:if="{{item.mediaLoading}}" class="muted">正在加载证据图片…</text>
     <view wx:for="{{item.localImages}}" wx:for-item="picture" wx:key="url" class="evidence">
-      <image class="photo" src="{{picture.url}}" mode="widthFix" aria-label="{{picture.caption}}" bindtap="preview" data-url="{{picture.url}}" />
+      <button class="image-button" hover-class="pressed" bindtap="preview" data-url="{{picture.url}}" aria-label="{{picture.caption}}"><image class="photo" src="{{picture.url}}" mode="widthFix" aria-label="{{picture.caption}}"/></button>
       <text class="muted">{{picture.caption}}</text>
     </view>
     <text wx:if="{{item.mediaError}}" class="error">{{item.mediaError}}</text>

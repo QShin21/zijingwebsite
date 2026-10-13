@@ -1,5 +1,5 @@
 <import src="../../templates/common.wxml" />
-<view class="page">
+<view class="page mini-page review-page">
   <button class="plain" bindtap="back">返回</button>
   <text class="eyebrow">COMMUNITY MANAGEMENT</text><text class="title">管理员申请审核</text>
   <text class="subtitle">根据你当前的管理权限显示待审申请。处理意见将出现在申请人的回执中。</text>
