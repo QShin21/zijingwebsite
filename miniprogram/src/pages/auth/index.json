@@ -1,8 +1,8 @@
 {
   "usingComponents": {},
-  "navigationBarBackgroundColor": "#17151c",
-  "navigationBarTextStyle": "white",
+  "navigationBarBackgroundColor": "#fffdf8",
+  "navigationBarTextStyle": "black",
   "backgroundColor": "#f4f1ea",
-  "backgroundTextStyle": "light",
+  "backgroundTextStyle": "dark",
   "navigationBarTitleText": "登录紫荆"
 }

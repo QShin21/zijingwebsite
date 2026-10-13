@@ -1,8 +1,12 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const http=require('../../lib/http');
 const navigation=require('../../lib/navigation');
 const session=require('../../lib/session');
 const {actions,protect,error}=require('../../lib/page');
-Page({data:{loading:false,error:'',needsLogin:false,kind:'community-posts',docs:[],page:1,hasNextPage:false},...actions,
+Page(withVisualTheme({data:{loading:false,error:'',needsLogin:false,kind:'community-posts',docs:[],page:1,hasNextPage:false},...actions,
  onLoad(){this._unsubscribe=session.subscribe(()=>{this._ticket=(this._ticket||0)+1;this.setData({loading:false,docs:[],page:1,hasNextPage:false,needsLogin:!session.user()});});},
  onShow(){return this.load();},retry(){return this.load();},
  onHide(){this._ticket=(this._ticket||0)+1;this.setData({loading:false});},
@@ -12,4 +16,4 @@ Page({data:{loading:false,error:'',needsLogin:false,kind:'community-posts',docs:
  area(event){this.setData({kind:event.currentTarget.dataset.kind,docs:[]});this.load();},
  open(event){const doc=this.data.docs.find(doc=>String(doc.id)===String(event.currentTarget.dataset.id));if(doc&&(doc.canManage||doc.canViewSignups))navigation.go('signup',{kind:this.data.kind,id:doc.id,mode:doc.canManage?'manage':'view'});},
  previous(){if(this.data.page>1)this.load(this.data.page-1);},next(){if(this.data.hasNextPage)this.load(this.data.page+1);},
-});
+}));

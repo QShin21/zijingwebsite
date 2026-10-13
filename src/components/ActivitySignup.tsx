@@ -6,6 +6,8 @@ import { QuestionnaireResults } from "./QuestionnaireResults";
 import { SignupBuilder } from "./SignupBuilder";
 import { formatAnswer } from "@/lib/questionnaire-model";
 import { Questionnaire } from "./Questionnaire";
+import styles from "./activity-pages/ApplicationFlow.module.css";
+import { SubmissionSteps } from "./activity-pages/SubmissionSteps";
 type Receipt = {
   id: number;
   createdAt: string;
@@ -91,62 +93,137 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
   }, [endpoint, retry]);
   if (!info)
     return (
-      <section className="panel">
-        <p role="status">{error || "正在加载报名信息…"}</p>
-        {error && <button onClick={() => setRetry(retry + 1)}>重试</button>}
+      <section
+        className={`panel ${styles.flow}`}
+        aria-busy={!error}
+        aria-label="活动报名"
+      >
+        {error ? (
+          <>
+            <h2>报名信息暂时无法加载</h2>
+            <p className={styles.error} role="alert">
+              {error}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setError("");
+                setRetry(retry + 1);
+              }}
+            >
+              重试
+            </button>
+          </>
+        ) : (
+          <div className={styles.loading}>
+            <p role="status">正在加载报名信息…</p>
+            <div className={styles.loadingLine} aria-hidden="true" />
+            <div className={styles.loadingLine} aria-hidden="true" />
+          </div>
+        )}
       </section>
     );
-  if (!info.form.enabled && !info.canManage && !info.canViewSignups && !info.signup) return null;
+  if (
+    !info.form.enabled &&
+    !info.canManage &&
+    !info.canViewSignups &&
+    !info.signup
+  )
+    return null;
   return (
-    <section className="panel activity-signup">
-      <h2>{info.form.title || "活动报名"}</h2>
+    <section
+      className={`panel activity-signup ${styles.flow}`}
+      aria-busy={busy}
+    >
+      <header className={styles.header}>
+        <p className={styles.kicker}>TAKE PART / APPLICATION</p>
+        <h2>{info.form.title || "活动报名"}</h2>
+        <SubmissionSteps />
+      </header>
       {info.canManage && (
         <p>
-          <Link href={`/activities/${kind}/${id}/manage`}>
-            管理报名问卷 ↗
-          </Link>
+          <Link href={`/activities/${kind}/${id}/manage`}>管理报名问卷 ↗</Link>
         </p>
       )}
       {!info.canManage && info.canViewSignups && (
-        <p><Link href={`/activities/${kind}/${id}/signups`}>查看报名与统计 ↗</Link></p>
+        <p>
+          <Link href={`/activities/${kind}/${id}/signups`}>
+            查看报名与统计 ↗
+          </Link>
+        </p>
       )}
       {info.signup && !editing ? (
         <>
-          <h3 aria-live="polite">已报名</h3>
-          <p>{info.form.completionMessage || "已收到你的报名信息。"}</p>
-          <ReceiptView receipt={info.signup} />
+          <div className={styles.receipt}>
+            <h3 aria-live="polite">已报名</h3>
+            <p>{info.form.completionMessage || "已收到你的报名信息。"}</p>
+            <ReceiptView receipt={info.signup} />
+          </div>
           {info.state === "报名开放" && info.loggedIn ? (
-            <button type="button" className="button" onClick={() => {
-              setEditing(true);
-              setSavedMessage("");
-            }}>修改作答</button>
-          ) : <p className="muted">{info.state}，暂不能修改作答。</p>}
+            <button
+              type="button"
+              className="button"
+              onClick={() => {
+                setEditing(true);
+                setSavedMessage("");
+              }}
+            >
+              修改作答
+            </button>
+          ) : (
+            <p className="muted">{info.state}，暂不能修改作答。</p>
+          )}
           <p role="status">{savedMessage}</p>
         </>
       ) : (
         <>
           <p className="preserve">{info.form.intro}</p>
-          <p>{info.state}</p>
+          <p className={styles.state}>{info.state}</p>
           {editing && (
             <>
               <h3>修改作答</h3>
-              <p>已带入上次提交的内容，请修改后再次核对并提交。提交成功前保留原作答。</p>
-              {info.signup?.formVersion !== info.version && <p role="status">问卷已更新，请检查保留的答案并补充新题目。</p>}
-              <button type="button" disabled={busy} onClick={() => setEditing(false)}>取消修改</button>
-              <button type="button" disabled={busy} onClick={async () => {
-                setBusy(true);
-                try {
-                  setInfo(await signupRequest(endpoint));
-                  setEditing(false);
-                  setSavedMessage("已重新加载上次提交的内容，可再次进入修改。");
-                  setError("");
-                } catch (cause) { setError((cause as Error).message); }
-                finally { setBusy(false); }
-              }}>重新加载已提交内容</button>
-              <p role="alert">{error}</p>
+              <p>
+                已带入上次提交的内容，请修改后再次核对并提交。提交成功前保留原作答。
+              </p>
+              {info.signup?.formVersion !== info.version && (
+                <p role="status">问卷已更新，请检查保留的答案并补充新题目。</p>
+              )}
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => setEditing(false)}
+              >
+                取消修改
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={async () => {
+                  setBusy(true);
+                  try {
+                    setInfo(await signupRequest(endpoint));
+                    setEditing(false);
+                    setSavedMessage(
+                      "已重新加载上次提交的内容，可再次进入修改。",
+                    );
+                    setError("");
+                  } catch (cause) {
+                    setError((cause as Error).message);
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+              >
+                重新加载已提交内容
+              </button>
+              {error && (
+                <p className={styles.error} role="alert">
+                  {error}
+                </p>
+              )}
             </>
           )}
-          <p className="muted">
+          <p className={styles.notice}>
             提交的答案仅供你本人和有权限的活动管理者查看，用于本次活动组织。
           </p>
           {info.form.enabled &&
@@ -166,11 +243,17 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
                 onSubmit={async (answers) => {
                   setBusy(true);
                   try {
-                    const result = await signupRequest(endpoint, editing ? "PATCH" : "POST", {
-                      version: info.version,
-                      ...(editing ? { revision: info.signup?.updatedAt } : {}),
-                      answers,
-                    });
+                    const result = await signupRequest(
+                      endpoint,
+                      editing ? "PATCH" : "POST",
+                      {
+                        version: info.version,
+                        ...(editing
+                          ? { revision: info.signup?.updatedAt }
+                          : {}),
+                        answers,
+                      },
+                    );
                     setInfo({ ...info, signup: result.signup });
                     setEditing(false);
                     setSavedMessage(result.message);
@@ -185,7 +268,15 @@ export function ActivitySignup({ kind, id }: { kind: string; id: number }) {
     </section>
   );
 }
-export function SignupManager({ kind, id, readOnly = false }: { kind: string; id: number; readOnly?: boolean }) {
+export function SignupManager({
+  kind,
+  id,
+  readOnly = false,
+}: {
+  kind: string;
+  id: number;
+  readOnly?: boolean;
+}) {
   const endpoint = `/api/activities/${kind}/${id}/signup`,
     [info, setInfo] = useState<Info | null>(null),
     [message, setMessage] = useState(""),
@@ -240,79 +331,93 @@ export function SignupManager({ kind, id, readOnly = false }: { kind: string; id
       )}
       {info && (
         <>
-          {!readOnly && info.canManage && <form
-            className="member-form panel"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              if (busy) return;
-              setBusy(true);
-              setMessage("");
-              try {
-                const r = await signupRequest(endpoint, "PUT", {
-                  version: info.version,
-                  form: info.form,
-                });
-                setInfo({ ...info, form: r.form, version: r.version });
-                setMessage(r.message);
-              } catch (e) {
-                setMessage((e as Error).message);
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
-            <SignupBuilder
-              value={info.form}
-              onChange={(form) => setInfo({ ...info, form })}
-            />
-            <button disabled={busy} className="button">
-              {busy ? "正在保存…" : "保存报名问卷"}
-            </button>
-          </form>}
-          {readOnly && <p className="panel">此入口仅查看报名与统计；导出按单独授权开放。</p>}
-          {info.canViewSignups && <QuestionnaireResults
-            endpoint={endpoint}
-            questions={info.form.questions}
-            canExport={info.canExportSignups}
-          />}
-          {info.canViewSignups ? <section className="panel">
-            <h2>报名名单{total !== null ? `（${total} 人）` : ""}</h2>
-            <button
-              className="button light"
-              disabled={busy}
-              onClick={() => loadEntries(1)}
+          {!readOnly && info.canManage && (
+            <form
+              className="member-form panel"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (busy) return;
+                setBusy(true);
+                setMessage("");
+                try {
+                  const r = await signupRequest(endpoint, "PUT", {
+                    version: info.version,
+                    form: info.form,
+                  });
+                  setInfo({ ...info, form: r.form, version: r.version });
+                  setMessage(r.message);
+                } catch (e) {
+                  setMessage((e as Error).message);
+                } finally {
+                  setBusy(false);
+                }
+              }}
             >
-              查看 / 刷新报名名单
-            </button>
-            {entries.map((record) => (
-              <details key={record.id}>
-                <summary>
-                  {record.memberName} · 报名编号 {record.id}
-                </summary>
-                <ReceiptView receipt={record} />
-              </details>
-            ))}
-            {total === 0 && <p>暂无报名。</p>}
-            {pages > 1 && (
-              <div className="signup-tools">
-                <button
-                  disabled={busy || page <= 1}
-                  onClick={() => loadEntries(page - 1)}
-                >
-                  上一页
-                </button>
-                <span>
-                  {page} / {pages}
-                </span>
-                <button
-                  disabled={busy || page >= pages}
-                  onClick={() => loadEntries(page + 1)}
-                >
-                  下一页
-                </button>
-              </div>
-            )}
-          </section> : <p className="panel">你可维护报名问卷。读取或导出个人报名需社长单独授权。</p>}
+              <SignupBuilder
+                value={info.form}
+                onChange={(form) => setInfo({ ...info, form })}
+              />
+              <button disabled={busy} className="button">
+                {busy ? "正在保存…" : "保存报名问卷"}
+              </button>
+            </form>
+          )}
+          {readOnly && (
+            <p className="panel">
+              此入口仅查看报名与统计；导出按单独授权开放。
+            </p>
+          )}
+          {info.canViewSignups && (
+            <QuestionnaireResults
+              endpoint={endpoint}
+              questions={info.form.questions}
+              canExport={info.canExportSignups}
+            />
+          )}
+          {info.canViewSignups ? (
+            <section className="panel">
+              <h2>报名名单{total !== null ? `（${total} 人）` : ""}</h2>
+              <button
+                className="button light"
+                disabled={busy}
+                onClick={() => loadEntries(1)}
+              >
+                查看 / 刷新报名名单
+              </button>
+              {entries.map((record) => (
+                <details key={record.id}>
+                  <summary>
+                    {record.memberName} · 报名编号 {record.id}
+                  </summary>
+                  <ReceiptView receipt={record} />
+                </details>
+              ))}
+              {total === 0 && <p>暂无报名。</p>}
+              {pages > 1 && (
+                <div className="signup-tools">
+                  <button
+                    disabled={busy || page <= 1}
+                    onClick={() => loadEntries(page - 1)}
+                  >
+                    上一页
+                  </button>
+                  <span>
+                    {page} / {pages}
+                  </span>
+                  <button
+                    disabled={busy || page >= pages}
+                    onClick={() => loadEntries(page + 1)}
+                  >
+                    下一页
+                  </button>
+                </div>
+              )}
+            </section>
+          ) : (
+            <p className="panel">
+              你可维护报名问卷。读取或导出个人报名需社长单独授权。
+            </p>
+          )}
         </>
       )}
     </section>

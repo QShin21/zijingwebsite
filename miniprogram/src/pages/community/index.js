@@ -1,3 +1,7 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const cms = require('../../lib/cms');
 const http = require('../../lib/http');
 const session = require('../../lib/session');
@@ -12,7 +16,7 @@ const identity = () => String((session.user() || {}).id || '');
 const joinLabels = { requested: '已记录加入意向，请联系管理员', friendReported: '已报告发送好友申请，待管理员确认',
   awaitingInvite: '管理员已确认好友通过，等待人工拉群', joined: '管理员已人工确认进群', withdrawn: '网站意向已撤回' };
 const receipt = record => record ? { ...record, statusText: joinLabels[record.status] || '进度待核对', confirmedText: format.date(record.confirmedAt) } : null;
-Page({
+Page(withVisualTheme({
   data: { loading: true, error: '', needsLogin: false, game: {}, area: 'contacts', docs: [], page: 1,
     hasMore: false, loadingMore: false, nodes: [], contentError: '', contacts: [], contactsLoading: false, contactsError: '',
     join: null, joinActions: {}, joinLoading: false, joinError: '', joinBusy: false, joinDone: '', canHandle: false,
@@ -186,4 +190,4 @@ Page({
   applyStaff(event) { navigation.go('signup', { kind: 'staff', id: event.currentTarget.dataset.id }); },
   videoError(event) { const index = Number(event.currentTarget.dataset.index); if (this.data.docs[index]) this.setData({ [`docs[${index}].videoError`]: true }); },
   onShareAppMessage() { return { title: this.data.game.title || '竞在紫荆游戏社群', path: `/pages/community/index?id=${this.data.game.id || ''}&slug=${this.data.game.slug || ''}` }; },
-});
+}));

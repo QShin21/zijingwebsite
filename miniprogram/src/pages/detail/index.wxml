@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" />
 <template name="visual-cards">
   <button wx:for="{{docs}}" wx:key="id" class="card content-link" bindtap="openContent" data-doc="{{item}}" hover-class="pressed">
     <image wx:if="{{item.coverImage}}" class="card-image" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt}}" />

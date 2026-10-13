@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
 <view class="page mini-page community-joins-page">
   <button class="plain" bindtap="back">返回社群</button><text class="eyebrow">MANUAL WECHAT JOIN</text><text class="title">人工进群管理</text><text class="subtitle">{{title}} · 先到微信核实好友，再实际拉群。仅在微信操作完成后保存对应人工确认。</text>
@@ -8,7 +9,7 @@
   <text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text><text wx:if="{{done}}" class="body" aria-role="status">{{done}}</text>
   <block wx:if="{{allowed && !needsLogin}}"><button class="plain" bindtap="retry" disabled="{{loading || busy}}">刷新进群意向</button>
     <view wx:for="{{docs}}" wx:key="id" class="section panel"><text class="section-title">{{item.memberName}}</text><text class="muted">{{item.statusText}}</text><text class="muted">回执 {{item.id}} · {{item.dateText}}</text><text wx:if="{{item.note}}" class="body">上次处理说明：{{item.note}}</text>
-      <view wx:if="{{item.actions.confirmFriend || item.actions.confirmJoined}}" class="field"><text class="field-label">处理说明（可选）</text><textarea value="{{item.noteDraft}}" bindinput="note" data-id="{{item.id}}" maxlength="500" placeholder="本人可见的处理说明" disabled="{{busy}}" /></view>
+      <view wx:if="{{item.actions.confirmFriend || item.actions.confirmJoined}}" class="field"><text class="field-label">处理说明（可选）</text><textarea placeholder-style="color:{{theme === 'dark' ? '#aaa5b9' : '#6c6179'}}" value="{{item.noteDraft}}" bindinput="note" data-id="{{item.id}}" maxlength="500" placeholder="本人可见的处理说明" disabled="{{busy}}" /></view>
       <view class="actions"><button wx:if="{{item.actions.confirmFriend}}" class="primary" bindtap="handle" data-id="{{item.id}}" data-action="confirmFriend" disabled="{{busy}}">好友已通过，等待拉群</button><button wx:if="{{item.actions.confirmJoined}}" class="primary" bindtap="handle" data-id="{{item.id}}" data-action="confirmJoined" disabled="{{busy}}">已人工拉群，确认进群</button></view>
       <text wx:if="{{!item.actions.confirmFriend && !item.actions.confirmJoined}}" class="muted">暂无可执行操作，请刷新核对最新进度。</text>
     </view>

@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
 <view class="page mini-page team-profiles-page">
   <button class="plain back" bindtap="back">← 返回</button>
@@ -29,7 +30,7 @@
     <button wx:if="{{draft.hasAvatar}}" class="plain" bindtap="removeAvatar" disabled="{{busy || loading || locked || confirmationPending}}">移除头像</button>
     <text class="muted">主动选择 2 MB 以内的 PNG、JPEG 或 WebP 静态图片。保存时由网站清除图片元数据。</text>
     <button class="plain" bindtap="openPrivacy" disabled="{{busy}}">查看微信隐私指引</button>
-    <label class="consent"><text>在本代表队页面展示我的简介</text><switch checked="{{draft.visible}}" bindchange="consent" disabled="{{busy || loading || locked || confirmationPending}}" aria-label="在本代表队页面展示我的简介" /></label>
+    <label class="consent"><text>在本代表队页面展示我的简介</text><switch color="{{theme === 'dark' ? '#bb9bf9' : '#6536a6'}}" checked="{{draft.visible}}" bindchange="consent" disabled="{{busy || loading || locked || confirmationPending}}" aria-label="在本代表队页面展示我的简介" /></label>
     <text class="muted">取消展示后预览并保存即可隐藏；离队或资格撤销后，简介会退出名单。</text>
     <button class="primary section" bindtap="preview" disabled="{{busy || loading}}">预览简介</button>
     <button class="plain" bindtap="cancel" disabled="{{busy || loading}}">取消修改</button>

@@ -1,3 +1,7 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const http = require('../../lib/http');
 const session = require('../../lib/session');
 const navigation = require('../../lib/navigation');
@@ -14,7 +18,7 @@ function decorate(doc, section) {
     statusText: section === 'memberships' ? doc.status === 'active' ? '成员关系未撤销' : doc.leftAt ? '已离队' : '已撤销'
       : section === 'managedTeams' ? lifecycle[doc.teamStatus] || '状态待核对' : team.labels[doc.status] || doc.state || '状态待核对' };
 }
-Page({
+Page(withVisualTheme({
   data: { needsLogin: false, loading: false, error: '', operationError: '', done: '', busy: false, actions: {},
     view: 'recruitments', docs: [], page: 1, hasMore: false, total: 0, recruitments: empty(), ownApplications: empty(), memberships: empty(), managedTeams: empty() },
   ...actions,
@@ -137,4 +141,4 @@ Page({
     } catch (cause) { if (this.writeValid(context, actor, writeID)) this.setData({ operationError: cause.message }); }
     finally { await this.finishWrite(writeID); }
   },
-});
+}));

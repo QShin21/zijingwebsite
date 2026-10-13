@@ -1,8 +1,12 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const honor = require('../../lib/team-honor');
 const session = require('../../lib/session');
 const navigation = require('../../lib/navigation');
 const identity = () => String((session.user() || {}).id || '');
-Page({
+Page(withVisualTheme({
   data: { loading: false, error: '', needsLogin: false, team: null, records: [], previewImages: [], loaded: false },
   onLoad(options = {}) {
     if (this._unsubscribe) this._unsubscribe();
@@ -83,4 +87,4 @@ Page({
     this.setData({ records: this.data.records.map(record => record.key === key && record.videoSource === source
       ? { ...record, videoError: '视频暂时无法加载，请重新加载档案后重试' } : record) });
   },
-});
+}));

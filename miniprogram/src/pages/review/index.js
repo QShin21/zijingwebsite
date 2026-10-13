@@ -1,3 +1,7 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const http = require('../../lib/http');
 const session = require('../../lib/session');
 const files = require('../../lib/files');
@@ -5,7 +9,7 @@ const format = require('../../lib/format');
 const { actions, protect } = require('../../lib/page');
 const identity = () => String((session.user() || {}).id || '');
 const decisions = { approved: '批准', returned: '退回补充', rejected: '拒绝' };
-Page({
+Page(withVisualTheme({
   data: { needsLogin: false, allowed: false, loading: false, error: '', operationError: '', done: '',
     docs: [], page: 1, hasMore: false, busy: false, imageBusy: false },
   ...actions,
@@ -117,4 +121,4 @@ Page({
     } catch (cause) { if (this.writeValid(context, actor, writeID)) this.setData({ operationError: cause.message }); }
     finally { await this.finishWrite(writeID); }
   },
-});
+}));

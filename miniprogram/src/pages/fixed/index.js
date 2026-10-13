@@ -1,9 +1,13 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const cms = require('../../lib/cms');
 const { render } = require('../../lib/richtext');
 const { actions, error } = require('../../lib/page');
 const session = require('../../lib/session');
 const names = { about: '关于紫荆', contact: '联系与合作', privacy: '隐私说明', join: '加入紫荆', 'join-members': '普通社员', 'join-teams': '代表队选拔', 'join-staff': '骨干招新' };
-Page({
+Page(withVisualTheme({
   data: { loading: true, error: '', needsLogin: false, key: '', title: '', doc: null, nodes: [], links: [], contacts: [], batches: [] },
   ...actions,
   onLoad(options) { this.setData({ key: options.key, isJoin: options.key && options.key.startsWith('join'), title: names[options.key] || '社团资料' }); wx.setNavigationBarTitle({ title: names[options.key] || '社团资料' }); },
@@ -27,4 +31,4 @@ Page({
       this.setData({ loading: false, doc, nodes: rendered.nodes, links: rendered.links, contacts, batches });
     } catch (cause) { error(this, cause); }
   },
-});
+}));

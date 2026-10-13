@@ -1,10 +1,14 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const http = require('../../lib/http');
 const session = require('../../lib/session');
 const team = require('../../lib/team');
 const format = require('../../lib/format');
 const { actions, protect } = require('../../lib/page');
 const identity = () => String((session.user() || {}).id || '');
-Page({
+Page(withVisualTheme({
   data: { needsLogin: false, loading: false, error: '', operationError: '', done: '', allowed: false, busy: false,
     teamDoc: null, docs: [], page: 1, hasMore: false },
   ...actions,
@@ -96,4 +100,4 @@ Page({
     } catch (cause) { if (this.writeValid(context, actor, writeID)) this.setData({ operationError: cause.message }); }
     finally { await this.finishWrite(writeID); }
   },
-});
+}));

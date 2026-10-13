@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
 <view class="page mini-page team-honors-page">
   <button class="plain back" bindtap="back">← 返回</button>

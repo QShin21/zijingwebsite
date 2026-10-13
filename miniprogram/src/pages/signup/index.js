@@ -1,3 +1,7 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const brand = require('../../lib/brand');
 const http = require('../../lib/http');
 const session = require('../../lib/session');
@@ -10,7 +14,7 @@ const { actions, protect, error } = require('../../lib/page');
 const types = ['text', 'textarea', 'single', 'multiple'];
 const receipt = questionnaire.receipt;
 function localParts(value) { if (!value) return { date: '', time: '' }; const d = new Date(value), pad = v => String(v).padStart(2,'0'); return { date: d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()), time: pad(d.getHours())+':'+pad(d.getMinutes()) }; }
-Page({
+Page(withVisualTheme({
   data: { loading: true, error: '', needsLogin: false, busy: false, message: '', info: null, form: {}, answers: {}, questions: [], receipt: null, responseEditing: false, review: false, reviewRows: [], recoveryRows: [], answerErrors: {}, step: 0, answerPages: 1, completed: 0, answerTotal: 0, progress: 0, branchNotice: '', advancedEditing: false, edit: false, tab: 'edit', entries: [], page: 1, pages: 0, total: 0, typeLabels: ['单行文本','多行文本','单选','多选'] },
   ...actions,
   onLoad(options) {
@@ -196,4 +200,4 @@ Page({
   async loadEntries(page) { if(this.data.busy||!this.data.info||!this.data.info.canViewSignups)return;const ticket=this._ticket;this.setData({busy:true,message:''});try{const result=await http.request(this._endpoint+'?mode=entries&page='+page,{raw:true,required:true,questionnaire:true});if(ticket!==this._ticket)return;this.setData({entries:result.docs.map(receipt),page:result.page,pages:result.totalPages,total:result.totalDocs});}catch(cause){if(ticket===this._ticket)this.setData({message:cause.message});}finally{await this.completeOperation();} },
   previous() { if(this.data.page>1)this.loadEntries(this.data.page-1); },
   next() { if(this.data.page<this.data.pages)this.loadEntries(this.data.page+1); },
-});
+}));

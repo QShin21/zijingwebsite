@@ -1,5 +1,9 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 // Keep startup independent of compiled business modules so errors remain visible.
-Page({
+Page(withVisualTheme({
   data: { loading: true, error: '', site: {}, user: null, modules: [], announcements: [] },
   onShow: function () { return this.load(); },
   onHide: function () { this._ticket = (this._ticket || 0) + 1; },
@@ -20,4 +24,4 @@ Page({
   openPage: function (event) { require('../../lib/navigation').go(event.currentTarget.dataset.page, event.currentTarget.dataset.params || {}); },
   retryClub: function () { return require('../../lib/home').loadClub(this); },
   onShareAppMessage: function () { return { title: '竞在紫荆', path: '/pages/home/index' }; },
-});
+}));

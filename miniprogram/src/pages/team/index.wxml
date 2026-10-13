@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
 <view class="page mini-page team-page"><button class="plain" bindtap="back">返回</button><text class="eyebrow">PLAY AS A TEAM</text><text class="title">代表队招新与我的记录</text><text class="subtitle">由对应社群管理员人工选拔。录取、成员关系、社群任职与平台角色分别维护。</text>
   <template is="feedback" data="{{needsLogin}}" />

@@ -1,10 +1,14 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const cms = require('../../lib/cms');
 const http = require('../../lib/http');
 const session = require('../../lib/session');
 const navigation = require('../../lib/navigation');
 const { actions, protect } = require('../../lib/page');
 const identity = () => String((session.user() || {}).id || '');
-Page({
+Page(withVisualTheme({
   data: { loading: false, error: '', needsLogin: false, user: null, docs: [], page: 1, hasMore: false,
     clubLoading: false, clubError: '', staffBatches: [], promotions: [] },
   ...actions,
@@ -60,4 +64,4 @@ Page({
   applications() { if (navigation.requireUser()) navigation.go('applications'); },
   staff() { navigation.go('staff'); },
   applyStaff(event) { navigation.go('signup', { kind: 'staff', id: event.currentTarget.dataset.id }); },
-});
+}));

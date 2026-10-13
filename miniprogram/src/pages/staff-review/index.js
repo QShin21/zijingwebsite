@@ -1,10 +1,14 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const http = require('../../lib/http');
 const session = require('../../lib/session');
 const staff = require('../../lib/staff');
 const cms = require('../../lib/cms');
 const { actions, protect, error } = require('../../lib/page');
 const identity = () => String((session.user() || {}).id || '');
-Page({
+Page(withVisualTheme({
   data: { loading: true, error: '', needsLogin: false, busy: false, docs: [], page: 1, pages: 1, total: 0,
     department: '', status: '', message: '', directions: [{ value: '', label: '全部方向' }, { value: 'execution', label: '执行部' }, { value: 'publicity', label: '宣传部' }, { value: 'both', label: '执行/宣传均可' }],
     states: [{ value: '', label: '全部状态' }, ...Object.keys(staff.labels).map(value => ({ value, label: staff.labels[value] }))], departmentIndex: 0, statusIndex: 0 },
@@ -122,4 +126,4 @@ Page({
   },
   previous() { if (this.data.page > 1) return this.load(this.data.page - 1); },
   next() { if (this.data.page < this.data.pages) return this.load(this.data.page + 1); },
-});
+}));

@@ -1,3 +1,7 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const http = require('../../lib/http');
 const session = require('../../lib/session');
 const navigation = require('../../lib/navigation');
@@ -6,7 +10,7 @@ const format = require('../../lib/format');
 const { actions, protect } = require('../../lib/page');
 const identity = () => String((session.user() || {}).id || '');
 const decorate = doc => ({ ...doc, actions: doc.actions || {}, statusText: team.labels[doc.status] || '状态待核对', dateText: format.date(doc.updatedAt) });
-Page({
+Page(withVisualTheme({
   data: { needsLogin: false, loading: false, error: '', formError: '', operationError: '', done: '', busy: false,
     docs: [], page: 1, hasMore: false, games: [], actions: {}, apply: false, editId: '', revision: '', formGameID: '', gameIndex: 0,
     gameTitle: '', title: '', reason: '', canSubmit: false, pendingEdit: '' },
@@ -154,4 +158,4 @@ Page({
     finally { await this.finishWrite(writeID); }
   },
   review() { if (!this.data.loading && this.data.actions.reviewEstablishments) navigation.go('team-review', { mode: 'establishment' }); },
-});
+}));

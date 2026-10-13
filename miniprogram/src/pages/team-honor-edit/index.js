@@ -1,8 +1,12 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const flow = require('../../lib/team-honor-workflow');
 const privacy = require('../../lib/privacy');
 const navigation = require('../../lib/navigation');
 const media = require('../../lib/honor-media');
-Page({
+Page(withVisualTheme({
   data: { needsLogin: false, loading: false, ready: false, busy: false, error: '', operationError: '', message: '', record: null,
     teams: [], teamIndex: 0, teamTitle: '', fields: flow.fields(flow.empty()), images: [], imageError: '', editable: false, canSave: false, canSubmit: false,
     conflict: false, uncertainCreate: false, recentDocs: [], hasSelectedVideo: false, selectedVideoSize: '', canUploadVideo: false, videoSource: '', videoError: '' },
@@ -236,4 +240,4 @@ Page({
   },
   mine() { if (this._visible && !flow.pending(this)) navigation.go('team-honor-workspace', { view: 'mine' }); },
   openRecent(event) { const id = flow.id(event.currentTarget.dataset.id); if (this._visible && !flow.pending(this) && this.data.recentDocs.some(doc => doc.id === id)) navigation.go('team-honor-edit', { id }); },
-});
+}));

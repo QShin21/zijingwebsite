@@ -1,10 +1,14 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const http = require('../../lib/http');
 const session = require('../../lib/session');
 const format = require('../../lib/format');
 const { actions, protect } = require('../../lib/page');
 const identity = () => String((session.user() || {}).id || '');
 const labels = { requested: '已记录意向，待联系管理员', friendReported: '本人已报告好友申请，待核实', awaitingInvite: '好友已人工确认通过，等待拉群', joined: '管理员已人工确认进群', withdrawn: '网站意向已撤回' };
-Page({
+Page(withVisualTheme({
   data: { title: '', needsLogin: false, allowed: false, loading: false, error: '', operationError: '', done: '',
     docs: [], page: 1, hasMore: false, busy: false },
   ...actions,
@@ -92,4 +96,4 @@ Page({
     } catch (cause) { if (this.writeValid(context, actor, writeID)) this.setData({ operationError: cause.message }); }
     finally { await this.finishWrite(writeID); }
   },
-});
+}));

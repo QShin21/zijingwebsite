@@ -1,7 +1,11 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const cms = require('../../lib/cms');
 const club = require('../../lib/club');
 const { actions, error } = require('../../lib/page');
-Page({
+Page(withVisualTheme({
   data: { loading: true, error: '', mode: 'events', types: ['全部', '比赛', '观赛', '交流', '训练', '其他'], type: '全部', search: '', docs: [], page: 1, hasMore: false, loadingMore: false, promoted: [], clubError: '' },
   ...actions,
   onShow() { return this.load(); },
@@ -36,4 +40,4 @@ Page({
     } catch (cause) { if (ticket === this._promotionTicket && mode === this.data.mode) this.setData({ clubError: cause.message }); }
   },
   onShareAppMessage() { return { title: '竞在紫荆 · 活动与通知', path: '/pages/events/index' }; },
-});
+}));

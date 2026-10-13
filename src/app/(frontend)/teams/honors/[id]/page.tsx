@@ -12,6 +12,7 @@ import {
   teamHonorQuery,
   teamHonorScopeID,
 } from "@/components/TeamHonorNavigation";
+import { ClubFrame } from "../../../_club/ClubPage";
 export const dynamic = "force-dynamic";
 export default async function HonorRecord({
   params,
@@ -86,37 +87,39 @@ export default async function HonorRecord({
       .catch(() => null),
   ]);
   return (
-    <section className="community-page">
-      <Link href={"/teams/honors?" + returnQuery}>
-        {!owner && reviewer ? "← 审核本社群荣誉" : "← 我的荣誉记录"}
-      </Link>
-      <PageHeading
-        title={record.title}
-        eyebrow="TEAM HONOR"
-        description={
-          (team?.title || "已归档代表队") +
-          " · " +
-          (game?.title || "已归档游戏社群")
-        }
-      />
-      <p role="status">
-        {typeof query.message === "string" ? query.message || error : error}
-      </p>
-      <TeamHonorRecordCard
-        record={record}
-        reviewer={reviewer}
-        owner={owner}
-        editable={editable}
-        returnQuery={returnQuery}
-      />
-      {editable && (
-        <TeamHonorEditor
-          key={record.id + ":" + record.revision}
+    <ClubFrame>
+      <section className="community-page">
+        <Link href={"/teams/honors?" + returnQuery}>
+          {!owner && reviewer ? "← 审核本社群荣誉" : "← 我的荣誉记录"}
+        </Link>
+        <PageHeading
+          title={record.title}
+          eyebrow="TEAM HONOR"
+          description={
+            (team?.title || "已归档代表队") +
+            " · " +
+            (game?.title || "已归档游戏社群")
+          }
+        />
+        <p role="status">
+          {typeof query.message === "string" ? query.message || error : error}
+        </p>
+        <TeamHonorRecordCard
           record={record}
-          memberships={memberships}
+          reviewer={reviewer}
+          owner={owner}
+          editable={editable}
           returnQuery={returnQuery}
         />
-      )}
-    </section>
+        {editable && (
+          <TeamHonorEditor
+            key={record.id + ":" + record.revision}
+            record={record}
+            memberships={memberships}
+            returnQuery={returnQuery}
+          />
+        )}
+      </section>
+    </ClubFrame>
   );
 }

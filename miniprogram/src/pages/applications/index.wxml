@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
 <view class="page mini-page applications-page">
   <button class="plain back" bindtap="back">返回</button>
@@ -13,10 +14,10 @@
       <block wx:if="{{mode !== 'card'}}">
         <view class="field"><text class="field-label">游戏社群</text><picker range="{{games}}" range-key="title" value="{{gameIndex}}" bindchange="game" disabled="{{busy || gamesLoading}}"><view>{{games[gameIndex].title}} ▾</view></picker></view>
         <view wx:if="{{gamesError}}"><text class="error">社群选项加载失败：{{gamesError}}</text><button class="plain" bindtap="loadGames" disabled="{{gamesLoading || busy}}">重试社群选项</button></view>
-        <view wx:if="{{!games[gameIndex].id}}" class="field"><text class="field-label">新游戏名称</text><input value="{{proposedGame}}" bindinput="input" data-field="proposedGame" maxlength="80" placeholder="2–80 字" disabled="{{busy}}" /></view>
+        <view wx:if="{{!games[gameIndex].id}}" class="field"><text class="field-label">新游戏名称</text><input placeholder-style="color:{{theme === 'dark' ? '#aaa5b9' : '#6c6179'}}" value="{{proposedGame}}" bindinput="input" data-field="proposedGame" maxlength="80" placeholder="2–80 字" disabled="{{busy}}" /></view>
         <view class="field"><text class="field-label">姓名</text><input value="{{realName}}" bindinput="input" data-field="realName" maxlength="80" disabled="{{busy}}" /></view>
-        <view class="field"><text class="field-label">手机号</text><input value="{{phone}}" bindinput="input" data-field="phone" maxlength="21" placeholder="可含 + 国际区号" disabled="{{busy}}" /></view>
-        <view class="field"><text class="field-label">申请说明</text><textarea value="{{reason}}" bindinput="input" data-field="reason" placeholder="说明组织计划与投入，10–3000 字" maxlength="3000" disabled="{{busy}}" /></view>
+        <view class="field"><text class="field-label">手机号</text><input placeholder-style="color:{{theme === 'dark' ? '#aaa5b9' : '#6c6179'}}" value="{{phone}}" bindinput="input" data-field="phone" maxlength="21" placeholder="可含 + 国际区号" disabled="{{busy}}" /></view>
+        <view class="field"><text class="field-label">申请说明</text><textarea placeholder-style="color:{{theme === 'dark' ? '#aaa5b9' : '#6c6179'}}" value="{{reason}}" bindinput="input" data-field="reason" placeholder="说明组织计划与投入，10–3000 字" maxlength="3000" disabled="{{busy}}" /></view>
       </block>
       <view class="field"><text class="field-label">微信个人名片二维码</text>
         <button class="image-button" hover-class="pressed" wx:if="{{qr}}" bindtap="previewImage" data-url="{{qr}}" aria-label="预览图片"><image class="qr" src="{{qr}}" mode="aspectFit"/></button>
@@ -27,7 +28,7 @@
       </view>
       <view class="privacy-note"><text class="muted">姓名、手机号、申请说明与名片用于申请审核，由本人及获得审核权限的负责人读取。名片展示需本人主动同意，默认不勾选；申请和修改重提时须勾选，获批后仍可关闭。</text><button class="plain" bindtap="openContract">阅读微信平台隐私保护指引</button><button class="plain" bindtap="openPage" data-page="fixed" data-params="{{ {key: 'privacy'} }}">阅读社团隐私说明</button></view>
       <view id="contact-consent">
-        <checkbox-group bindchange="consent"><label class="consent"><checkbox value="contact" checked="{{contactConsent}}" disabled="{{busy}}" aria-label="我同意展示我的微信名片作为进群联系方式" /><text>我同意展示我的微信名片作为进群联系方式</text></label></checkbox-group>
+        <checkbox-group bindchange="consent"><label class="consent"><checkbox color="{{theme === 'dark' ? '#bb9bf9' : '#6536a6'}}" value="contact" checked="{{contactConsent}}" disabled="{{busy}}" aria-label="我同意展示我的微信名片作为进群联系方式" /><text>我同意展示我的微信名片作为进群联系方式</text></label></checkbox-group>
         <text class="muted">{{mode === 'card' ? '已批准名片可取消勾选并保存，以关闭展示。' : '提交申请或修改重提时，需本人主动勾选；获批后仍可关闭展示。'}}</text>
         <text wx:if="{{formError}}" class="error" aria-role="alert">{{formError}}</text>
       </view>

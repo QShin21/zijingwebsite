@@ -4,8 +4,9 @@ import { notFound } from "next/navigation";
 import { bySlug, cms } from "@/lib/content";
 import { teamHonorService } from "@/lib/team-honor-service";
 import { TeamHonorArchiveContents } from "@/components/TeamHonorArchives";
-import { PageHeading } from "@/components/PageHeading";
 import { teamHonorQuery } from "@/components/TeamHonorNavigation";
+import { ClubFrame } from "../../../../../_club/ClubPage";
+import styles from "../../../../../_club/ClubPages.module.css";
 export const dynamic = "force-dynamic";
 export default async function TeamHonorArchive({
   params,
@@ -31,24 +32,26 @@ export default async function TeamHonorArchive({
   )[0];
   if (!archive) notFound();
   return (
-    <section className="community-page">
-      <nav className="signup-tools" aria-label="档案返回">
-        <Link href={"/community/" + slug + "/showcase"}>← 社群风采</Link>
-        <Link
-          href={
-            "/teams/honors?" +
-            teamHonorQuery({ team: archive.team.id, game: game.id })
-          }
-        >
-          代表队与荣誉
-        </Link>
-      </nav>
-      <PageHeading
-        title={archive.team.title + " · 荣誉档案"}
-        eyebrow={game.title}
-        description={archive.records.length + " 条已批准荣誉，按赛事日期汇总。"}
-      />
-      <TeamHonorArchiveContents archive={archive} user={user} />
-    </section>
+    <ClubFrame className={styles.communityBody}>
+      <section className="community-page">
+        <nav className="signup-tools" aria-label="档案返回">
+          <Link href={"/community/" + slug + "/showcase"}>← 社群风采</Link>
+          <Link
+            href={
+              "/teams/honors?" +
+              teamHonorQuery({ team: archive.team.id, game: game.id })
+            }
+          >
+            代表队与荣誉
+          </Link>
+        </nav>
+        <header className={styles.archiveHeading}>
+          <p className={styles.kicker}>{game.title} / HONOR ARCHIVE</p>
+          <h2>{archive.team.title + " · 荣誉档案"}</h2>
+          <p>{archive.records.length} 条已批准荣誉，按赛事日期汇总。</p>
+        </header>
+        <TeamHonorArchiveContents archive={archive} user={user} />
+      </section>
+    </ClubFrame>
   );
 }

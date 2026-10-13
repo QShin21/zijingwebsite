@@ -1,3 +1,7 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const cms = require('../../lib/cms');
 const http = require('../../lib/http');
 const session = require('../../lib/session');
@@ -12,7 +16,7 @@ const relation = value => value && typeof value === 'object' ? value.id : value;
 const decorate = doc => ({ ...doc, actions: doc.actions || {}, dateText: format.date(doc.createdAt), statusText: labels[doc.status] || '状态待核对' });
 const confirm = (title, content) => new Promise((resolve, reject) => wx.showModal({ title, content, success: value => resolve(value.confirm), fail: () => reject(new Error('确认未完成，请重试')) }));
 
-Page({
+Page(withVisualTheme({
   data: { user: null, needsLogin: false, loading: false, error: '', docs: [], page: 1, hasMore: false,
     games: [{ id: '', title: '申请新游戏社群' }], gamesLoading: false, gamesError: '', gameIndex: 0,
     apply: false, mode: 'submit', editId: '', revision: '', proposedGame: '', realName: '', phone: '', reason: '',
@@ -237,4 +241,4 @@ Page({
     } catch (cause) { if (this.writeValid(context, actor, writeID)) this.setData({ operationError: cause.message }); }
     finally { await this.finishWrite(writeID); }
   },
-});
+}));

@@ -1,3 +1,7 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const http = require('../../lib/http');
 const cms = require('../../lib/cms');
 const session = require('../../lib/session');
@@ -8,7 +12,7 @@ const files = require('../../lib/files');
 const video = require('../../lib/video');
 const { actions, error } = require('../../lib/page');
 const socialCollections = ['community-posts', 'community-showcase'];
-Page({
+Page(withVisualTheme({
   data: { loading: true, error: '', needsLogin: false, collection: '', doc: {}, nodes: [], links: [], photos: [],
     related: [], previewImages: [], registration: '', coverImage: null },
   ...actions,
@@ -75,4 +79,4 @@ Page({
   },
   videoError() { this.setData({ videoError: true }); },
   onShareAppMessage() { return { title: this.data.doc.title || '竞在紫荆', path: `/pages/detail/index?collection=${this.data.collection}&id=${this.data.doc.id}` }; },
-});
+}));

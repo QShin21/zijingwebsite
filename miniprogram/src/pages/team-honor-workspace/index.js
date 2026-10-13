@@ -1,8 +1,12 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const flow = require('../../lib/team-honor-workflow');
 const navigation = require('../../lib/navigation');
 const config = require('../../config');
 const media = require('../../lib/honor-media');
-Page({
+Page(withVisualTheme({
   data: { needsLogin: false, loading: false, ready: false, busy: false, error: '', operationError: '', message: '', view: 'mine',
     actions: {}, teams: [], docs: [], page: 1, totalPages: 0, totalDocs: 0, hasMore: false, detail: null, detailImages: [], imageError: '', videoSource: '', videoError: '' },
   back: navigation.back,
@@ -159,4 +163,4 @@ Page({
       this.setData({ operationError: cause.message || '保存失败，处理意见已保留，请先重新加载核对' });
     } finally { await flow.finish(this, token); }
   },
-});
+}));

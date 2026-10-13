@@ -15,7 +15,12 @@ import { PageHeading } from "@/components/PageHeading";
 import { Icon } from "@/components/Identity";
 import { kindLabels, sectionMeta } from "@/lib/presentation";
 import { safeURL } from "@/lib/rules";
-import { teamHonorQuery, teamHonorScopeID } from "@/components/TeamHonorNavigation";
+import { ClubFrame } from "../_club/ClubPage";
+import clubStyles from "../_club/ClubPages.module.css";
+import {
+  teamHonorQuery,
+  teamHonorScopeID,
+} from "@/components/TeamHonorNavigation";
 
 type Props = {
   params: Promise<{ path: string[] }>;
@@ -111,14 +116,21 @@ export default async function Page({ params, searchParams }: Props) {
     });
     permanentRedirect("/teams/honors" + (query ? "?" + query : ""));
   }
-  if (c && path.length === 2)
+  if (c && path.length === 2) {
+    const doc = await resolveDetail(c, path);
     return (
-      <Detail
-        collection={c}
-        doc={await resolveDetail(c, path)}
-        photoPage={page}
-      />
+      <ClubFrame
+        active={
+          c === "teams" ||
+          c === "honors" ||
+          (c === "recruitment" && doc.kind === "teams")
+        }
+        className={clubStyles.profileScope}
+      >
+        <Detail collection={c} doc={doc} photoPage={page} />
+      </ClubFrame>
     );
+  }
   if (c && path.length === 1) {
     const and: Where[] = [];
     const query: Record<string, string> = {};
@@ -173,7 +185,7 @@ export default async function Page({ params, searchParams }: Props) {
       c === "honors" ? list("teams", {}, 1, 100) : null,
     ]);
     return (
-      <>
+      <ClubFrame active={c === "teams"}>
         <PageHeading
           title={c === "teams" ? "代表队与荣誉" : names[c]}
           eyebrow={`ZIJING / ${sectionMeta[c]?.label || path[0].toUpperCase()}`}
@@ -185,11 +197,25 @@ export default async function Page({ params, searchParams }: Props) {
         />
         {c === "teams" && (
           <nav className="community-tabs" aria-label="代表队与荣誉">
-            <Link href="/teams" aria-current="page">代表队档案</Link>
-            <Link href={"/teams/honors" + (query.game ? "?game=" + query.game : "")}>队伍荣誉档案与投稿</Link>
+            <Link href="/teams" aria-current="page">
+              代表队档案
+            </Link>
+            <Link
+              href={"/teams/honors" + (query.game ? "?game=" + query.game : "")}
+            >
+              队伍荣誉档案与投稿
+            </Link>
           </nav>
         )}
-        {c === "teams" && <nav className="signup-tools" aria-label="代表队入口"><Link className="button" href="/teams/recruitment">代表队招新与我的记录</Link><Link href="/teams/manage">代表队工作台</Link><Link href="/teams/apply">申请建立代表队</Link></nav>}
+        {c === "teams" && (
+          <nav className="signup-tools" aria-label="代表队入口">
+            <Link className="button" href="/teams/recruitment">
+              代表队招新与我的记录
+            </Link>
+            <Link href="/teams/manage">代表队工作台</Link>
+            <Link href="/teams/apply">申请建立代表队</Link>
+          </nav>
+        )}
         {games && (
           <form className="filters" method="get" aria-label="筛选内容">
             <label>
@@ -278,7 +304,7 @@ export default async function Page({ params, searchParams }: Props) {
           path={`/${path[0]}`}
           query={query}
         />
-      </>
+      </ClubFrame>
     );
   }
   if (
@@ -291,7 +317,7 @@ export default async function Page({ params, searchParams }: Props) {
       path[1] ? list("recruitment", { kind: { equals: path[1] } }, page) : null,
     ]);
     return (
-      <>
+      <ClubFrame active={path[1] === "teams"}>
         <PageHeading
           title={titles[path[1] || "join"]}
           eyebrow="FIND YOUR PLACE / JOIN ZIJING"
@@ -304,7 +330,17 @@ export default async function Page({ params, searchParams }: Props) {
           </div>
         )}
         <JoinCards selected={path[1]} />
-        {path[1] === "teams" && <section className="panel"><h2>站内代表队申请</h2><p>普通入社、骨干招新和入队申请分别处理。由本社群管理员人工审核，录取不授予管理角色。</p><Link className="button" href="/teams/recruitment">查看代表队招新与我的记录</Link></section>}
+        {path[1] === "teams" && (
+          <section className="panel">
+            <h2>站内代表队申请</h2>
+            <p>
+              普通入社、骨干招新和入队申请分别处理。由本社群管理员人工审核，录取不授予管理角色。
+            </p>
+            <Link className="button" href="/teams/recruitment">
+              查看代表队招新与我的记录
+            </Link>
+          </section>
+        )}
         {batches && (
           <section className="join-history">
             <p className="eyebrow">RECRUITMENT ARCHIVE</p>
@@ -317,7 +353,7 @@ export default async function Page({ params, searchParams }: Props) {
             />
           </section>
         )}
-      </>
+      </ClubFrame>
     );
   }
   if (path.length === 1 && ["about", "contact", "privacy"].includes(path[0])) {

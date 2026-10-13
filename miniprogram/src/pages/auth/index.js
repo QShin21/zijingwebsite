@@ -1,8 +1,12 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const http = require('../../lib/http');
 const session = require('../../lib/session');
 const navigation = require('../../lib/navigation');
 const { actions } = require('../../lib/page');
-Page({
+Page(withVisualTheme({
   data: { mode: 'login', identifier: '', password: '', name: '', emailPrefix: '', emailDomain: 'mails.tsinghua.edu.cn',
     domains: ['mails.tsinghua.edu.cn', 'tsinghua.org.cn', 'tsinghua.edu.cn', 'mail.tsinghua.edu.cn', 'mail.tsinghua.org.cn'],
     email: '', confirm: '', code: '', error: '', busy: false, sent: false, countdown: 0, bridge: true },
@@ -68,4 +72,4 @@ Page({
     } catch (cause) { this.setData({ error: cause.message }); }
     finally { this.setData({ busy: false }); }
   },
-});
+}));

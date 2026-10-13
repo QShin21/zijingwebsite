@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
 <view class="page mini-page communities-page"><text class="eyebrow">FIND YOUR PEOPLE</text><text class="title">加入我们</text><text class="subtitle">选择游戏社群，查看授权的管理员名片，在微信中主动加好友并等待人工拉群。</text>
   <template is="feedback" data="{{loading, needsLogin}}" />

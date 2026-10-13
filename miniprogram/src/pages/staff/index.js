@@ -1,3 +1,7 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const http = require('../../lib/http');
 const cms = require('../../lib/cms');
 const session = require('../../lib/session');
@@ -5,7 +9,7 @@ const navigation = require('../../lib/navigation');
 const { date } = require('../../lib/format');
 const { labels } = require('../../lib/staff');
 const { actions, error } = require('../../lib/page');
-Page({
+Page(withVisualTheme({
   data: { loading: true, error: '', needsLogin: false, user: null, docs: [], page: 1, hasMore: false,
     own: [], ownPage: 1, ownHasMore: false, ownLoading: false, ownError: '', legacy: [], legacyError: '', reviewStaff: false },
   ...actions,
@@ -70,4 +74,4 @@ Page({
   },
   openBatch(event) { if (navigation.requireUser()) navigation.go('signup', { kind: 'staff', id: event.currentTarget.dataset.id }); },
   reviewBatch(event) { if (this.data.reviewStaff) navigation.go('staff-review', { id: event.currentTarget.dataset.id }); },
-});
+}));

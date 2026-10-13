@@ -1,3 +1,7 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const session = require('../../lib/session');
 const http = require('../../lib/http');
 const navigation = require('../../lib/navigation');
@@ -7,7 +11,7 @@ function profile(user) {
   return { user, initial: user ? user.name.substring(0, 1) : 'Z',
     role: user ? { president: '社长', vicePresident: '副社长', backbone: '社团骨干', communityAdmin: '社群管理员', member: '社团成员' }[user.roles[0]] || '社团成员' : '' };
 }
-Page({
+Page(withVisualTheme({
   data: { user: null, initial: 'Z', role: '', reviewCommunity: false, reviewStaff: false, version: config.version, error: '', refreshing: false },
   ...actions,
   onShow() { this.refresh(); },
@@ -43,4 +47,4 @@ Page({
     } finally { this._loggingOut = false; }
   },
   openAdmin() { navigation.copy(config.origin + '/admin', '后台链接已复制'); },
-});
+}));

@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
 <view class="page mini-page team-honor-workspace-page">
   <button class="plain" bindtap="back">返回</button><text class="eyebrow">TEAM HONOR WORKSPACE</text><text class="title">{{view === 'review' ? '荣誉审核工作台' : '我的荣誉投稿'}}</text>

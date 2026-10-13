@@ -1,3 +1,4 @@
+<page-meta page-style="{{themePageStyle}}" />
 <template name="visual-promotions">
   <button wx:for="{{docs}}" wx:key="sourceKey" class="panel section content-link" bindtap="openWebsite" data-url="{{item.href}}" hover-class="pressed"><text class="badge">已审批社团展示</text><text class="muted">来自 {{item.gameTitle}}</text><text class="card-title">{{item.snapshot.title}}</text><text class="card-summary">{{item.snapshot.body}}</text><text class="more">查看原社群内容 →</text></button>
 </template>
@@ -18,8 +19,8 @@
     <view class="hero-top"><text class="eyebrow">{{user ? 'WELCOME BACK' : 'MEET AT ZIJING'}}</text><text class="hero-signal" aria-hidden="true">＋</text></view>
     <text class="hero-title">{{site.heroTitle || '因热爱相遇。'}}</text>
     <text wx:if="{{site.heroSubtitle}}" class="hero-description">{{site.heroSubtitle}}</text>
-    <image wx:if="{{hero}}" class="hero-image" src="{{hero.url}}" mode="aspectFill" aria-label="{{hero.alt || site.heroTitle}}" />
-    <image wx:else class="hero-image hero-stage" src="/assets/zijing-stage.webp" mode="aspectFill" aria-label="紫荆原创主视觉" />
+    <view wx:if="{{hero}}" class="hero-media"><image class="hero-image" src="{{hero.url}}" mode="aspectFill" aria-label="{{hero.alt || site.heroTitle}}" /><view class="hero-media-shade" aria-hidden="true"></view></view>
+    <image wx:else class="hero-image hero-stage" src="{{theme === 'dark' ? '/assets/zijing-stage.webp' : '/assets/zijing-stage-light.webp'}}" mode="aspectFill" aria-label="紫荆原创主视觉" />
     <button class="primary hero-button" bindtap="{{user ? 'openWebsite' : 'login'}}" data-url="{{site.heroButtonURL}}" disabled="{{loading || !!error}}" hover-class="pressed"><text>{{user ? (site.heroButtonLabel || '继续探索紫荆') : '登录，加入你的社群'}}</text><text aria-hidden="true">↗</text></button>
     <text wx:if="{{!user}}" class="hero-hint">活动与通知可直接浏览</text>
   </view>

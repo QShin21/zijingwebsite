@@ -1,8 +1,12 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const cms = require('../../lib/cms');
 const club = require('../../lib/club');
 const session = require('../../lib/session');
 const { actions, error, labels } = require('../../lib/page');
-Page({
+Page(withVisualTheme({
   data: { loading: true, error: '', needsLogin: false, collection: '', title: '', docs: [], page: 1, hasMore: false,
     loadingMore: false, search: '', years: ['全部年份'], year: '全部年份', kinds: ['全部', '普通社员', '代表队选拔', '骨干招新'], kind: '全部', games: [{ id: '', title: '全部项目' }], gameIndex: 0 },
   ...actions,
@@ -46,4 +50,4 @@ Page({
     } catch (cause) { if (ticket === this._ticket) { error(this, cause); this.setData({ loadingMore: false }); } }
   },
   onShareAppMessage() { return { title: `竞在紫荆 · ${this.data.title}`, path: `/pages/list/index?collection=${this.data.collection}` }; },
-});
+}));

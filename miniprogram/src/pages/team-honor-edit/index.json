@@ -2,9 +2,9 @@
   "usingComponents": {
     "privacy-consent": "/components/privacy-consent/index"
   },
-  "navigationBarBackgroundColor": "#17151c",
-  "navigationBarTextStyle": "white",
+  "navigationBarBackgroundColor": "#fffdf8",
+  "navigationBarTextStyle": "black",
   "backgroundColor": "#f4f1ea",
-  "backgroundTextStyle": "light",
+  "backgroundTextStyle": "dark",
   "navigationBarTitleText": "荣誉投稿"
 }

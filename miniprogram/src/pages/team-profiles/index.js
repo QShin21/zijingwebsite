@@ -1,3 +1,7 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const profile = require('../../lib/team-profile');
 const session = require('../../lib/session');
 const navigation = require('../../lib/navigation');
@@ -5,7 +9,7 @@ const privacy = require('../../lib/privacy');
 const files = require('../../lib/files');
 const account = () => String((session.user() || {}).id || '');
 const periodMessage = '入队周期已更新，请重新加载已保存资料，再确认当前周期的展示选择。';
-Page({
+Page(withVisualTheme({
   data: { loading: false, loaded: false, needsLogin: false, error: '', operationError: '', message: '', busy: false,
     profiles: [], eligible: false, editing: false, previewing: false, locked: false, conflict: false, confirmationPending: false,
     draft: profile.display(profile.empty()), draftAvatar: '', imageError: '' },
@@ -249,4 +253,4 @@ Page({
     catch (cause) { if (this.valid(context, epoch, actor, team)) this.setData({ operationError: cause.message }); }
     finally { await this.finish('_modal', id); }
   },
-});
+}));

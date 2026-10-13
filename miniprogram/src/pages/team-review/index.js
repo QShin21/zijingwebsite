@@ -1,3 +1,7 @@
+function withVisualTheme(definition) {
+  try { return require('../../lib/theme').page(definition); }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+}
 const http = require('../../lib/http');
 const session = require('../../lib/session');
 const navigation = require('../../lib/navigation');
@@ -10,7 +14,7 @@ const decisionLabels = { approved: '批准', returned: '退回补充', rejected:
 const lifecycle = { active: '活跃', resting: '休整', archived: '已归档', unestablished: '尚未批准成立' };
 const statuses = ['pending', 'returned', 'approved', 'rejected', 'withdrawn'];
 const unique = docs => docs.filter((doc, index) => docs.findIndex(value => String(value.id) === String(doc.id)) === index);
-Page({
+Page(withVisualTheme({
   data: { needsLogin: false, loading: false, error: '', operationError: '', done: '', allowed: false, busy: false,
     mode: 'establishment', teamID: '', teamDoc: null, teamActions: {}, lifecycleChoices: [], docs: [], page: 1, hasMore: false,
     status: 'pending', statusIndex: 0, statusLabels: ['待人工审核', '退回补充', '已批准', '未通过', '已撤回'],
@@ -173,4 +177,4 @@ Page({
     } catch (cause) { if (this.writeValid(context, actor, writeID)) this.setData({ operationError: cause.message }); }
     finally { await this.finishWrite(writeID); }
   },
-});
+}));

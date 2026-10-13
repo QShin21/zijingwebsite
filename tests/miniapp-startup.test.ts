@@ -8,7 +8,7 @@ describe('Mini Program startup resilience', () => {
   it('registers the home page before loading business modules and displays initialization failures', async () => {
     let page!: StartupPage; let imports = 0;
     runInNewContext(source('pages/home/index.js'), { Page: (value: StartupPage) => { page = value; }, Promise,
-      require: () => { imports++; throw new Error('compiled module unavailable'); } });
+      require: (name: string) => { if (name.endsWith('/theme')) return { page: (value: StartupPage) => value }; imports++; throw new Error('compiled module unavailable'); } });
     expect(imports).toBe(0);
     page.setData = (data: unknown) => Object.assign(page.data, data);
     await page.onShow();
@@ -19,7 +19,7 @@ describe('Mini Program startup resilience', () => {
   it('supports recovery by retrying module loading', async () => {
     let page!: StartupPage; let failed = true;
     runInNewContext(source('pages/home/index.js'), { Page: (value: StartupPage) => { page = value; }, Promise,
-      require: () => { if (failed) throw new Error('unavailable'); return { load: (target: StartupPage) => target.setData({ loading: false, modules: [{ kind: 'events' }] }) }; } });
+      require: (name: string) => { if (name.endsWith('/theme')) return { page: (value: StartupPage) => value }; if (failed) throw new Error('unavailable'); return { load: (target: StartupPage) => target.setData({ loading: false, modules: [{ kind: 'events' }] }) }; } });
     page.setData = (data: unknown) => Object.assign(page.data, data);
     await page.load(); failed = false; await page.retry();
     expect(page.data.error).toBe(''); expect(page.data.modules).toHaveLength(1);
