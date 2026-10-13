@@ -1,0 +1,153 @@
+{
+  "checkedAt": "2026-10-13T03:33:18.557034+00:00",
+  "baseCommit": "3d819038c96e9cc8a09ee5103d238d66cba9d5b9",
+  "codeCommit": "1d0b0818b1ead24b0115b4b6fc1fa06d36a0f8b8",
+  "branch": "codex/community-contact-consent-20261013",
+  "requestedLabel": "我同意展示我的微信名片作为进群联系方式",
+  "requestedError": "由于入社流程规定，必须展示管理联系方式",
+  "scope": {
+    "syntheticOnly": true,
+    "databaseProfile": "new loopback-only disposable API and web databases",
+    "realApplicationsReadOrExecuted": false,
+    "productionAccess": false,
+    "deployment": false,
+    "liveCMSWrites": false,
+    "platformUploadOrAudit": false,
+    "realMessages": false,
+    "historicalConsentBackfill": false,
+    "newMigration": false,
+    "nativeVersion": "0.3.1",
+    "questionTypes": 16
+  },
+  "unit": {
+    "total": 272,
+    "passed": 272,
+    "failed": 0,
+    "success": true,
+    "files": [
+      {
+        "path": "tests/community-contact-consent-components.test.ts",
+        "total": 20,
+        "passed": 20
+      },
+      {
+        "path": "tests/miniapp-club-api.test.ts",
+        "total": 36,
+        "passed": 36
+      },
+      {
+        "path": "tests/miniapp-community-contact-consent.test.ts",
+        "total": 27,
+        "passed": 27
+      },
+      {
+        "path": "tests/miniapp-community-flows.test.ts",
+        "total": 30,
+        "passed": 30
+      },
+      {
+        "path": "tests/miniapp-community-write-lifecycle.test.ts",
+        "total": 34,
+        "passed": 34
+      },
+      {
+        "path": "tests/miniapp-privacy-consent.test.ts",
+        "total": 41,
+        "passed": 41
+      },
+      {
+        "path": "tests/privacy-publication-content.test.ts",
+        "total": 6,
+        "passed": 6
+      },
+      {
+        "path": "tests/questionnaire-platform.test.ts",
+        "total": 29,
+        "passed": 29
+      },
+      {
+        "path": "tests/registration-retention-review.test.ts",
+        "total": 49,
+        "passed": 49
+      }
+    ]
+  },
+  "realHTTPJWTSQL": {
+    "total": 27,
+    "passed": 27,
+    "failed": 0,
+    "success": true,
+    "adapter": "Real loopback socket, actual miniapp routes and Payload REST builder, real JWT/auth/collection/services/transactions/SQL; CMS location and unused registration module replaced only. Does not test Next proxy or WeChat SDK."
+  },
+  "legacyDatabaseRegressions": {
+    "community": {
+      "passed": 11,
+      "total": 11
+    },
+    "clubOperations": {
+      "passed": 10,
+      "total": 10
+    }
+  },
+  "browser": {
+    "startTime": "2026-10-13T03:27:34.719Z",
+    "duration": 57565.311,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "checks": {
+    "targetedLintExitCode": 0,
+    "typecheckAfterGeneratedFileRestoreExitCode": 0,
+    "miniappCheckExitCode": 0,
+    "pages": 25,
+    "files": 146,
+    "bytes": 475772,
+    "domainChecking": true,
+    "nativeDependencies": 0,
+    "diffCheckExitCode": 0,
+    "unchangedSchemaTypesRetentionToolsGeneratedQuestionnaire": true,
+    "protectedPathDiff": []
+  },
+  "sourceSHA256": {
+    "miniprogram/src/pages/applications/index.js": "c8ef1fdc49e7ea78282c785c2a5a80b55cfd7210dbfea98898487726068b70cc",
+    "miniprogram/src/pages/applications/index.wxml": "aa18850bb1ea8b605d969b485973debe5ff277317a4185bf7afdd5a501a48dbf",
+    "miniprogram/src/pages/community/index.wxml": "8f41ab6c51855ea92ee4e5c2a3250fc551b06907818dc502b0454d9f9ed39fd7",
+    "miniprogram/src/pages/review/index.js": "987c281632d650ee764a654f6259208bddeef15eeb7e203b6f9f3a9ec16fe24f",
+    "miniprogram/src/pages/review/index.wxml": "181317f0c158501306c9ec0a49aa500fbed8a793d9f06bc9bdd86d8cb394435c",
+    "src/app/(frontend)/community/actions.ts": "611c5c3b15d86597726495d9b3e65b40d795dafb1a528f50096900861fafeb56",
+    "src/app/(frontend)/community/review/page.tsx": "d90dd4c57f3c4b0524673941382d275df5fd126ddaa6459ca6027bf2cd2630e6",
+    "src/collections/community-operations.ts": "70837877763c8cb094227e193958a8875808ce7c43b3417ac201e478ee33b218",
+    "src/components/CommunityApplicationForm.tsx": "b591a7c5162a7da93a65df47579ae5a9da9b467e7802e72680fe1f84b4a562c4",
+    "src/lib/community-operations.ts": "b44c717bbc6612fc530ace06baa65265f77caf3e250b14e1b7ca72c7b6813d99",
+    "src/lib/community-status.ts": "ebb49ff0c553e0ce397a2e24bcdba2fce7ed3af8083994f7e48747e20c283fc5",
+    "src/lib/miniapp-club.ts": "690052afd8321cd94032a087da42611685e1442cf0fda56655d223dbb6e4efdf",
+    "tests/club-operations.test.ts": "a578554d6db6566c1139ba8770372e16ec0039c2b8c62dcdc914653f10858519",
+    "tests/community-contact-consent-components.test.ts": "9e874d1b38687dfaab4001aad6a31cb9f08b328370c79cf095659119271721f1",
+    "tests/community-contact-consent-http.test.ts": "4702d583d7ee378537f4c72c89b134cf50a7ca706827855d0869cba64a4419a4",
+    "tests/community.test.ts": "bf5388f6924686a991fc31402bf2629791f9fb073b7261e6ce1c94a11b042ce6",
+    "tests/e2e/community-application.spec.ts": "67c3120291e8f82795c017cff7dfc7876e5f086abb65c07bb1f530e60d759537",
+    "tests/miniapp-club-api.test.ts": "b45148f5c49d064cac05e0d18b6c1a84522810a3549e3f7d0e31f155cabc2ae1",
+    "tests/miniapp-community-contact-consent.test.ts": "f9438f2c49ac9a4463011c38fab629ae5f7eb60e07926b2a8e14c278e0014a85",
+    "tests/miniapp-community-flows.test.ts": "03d8aba2c833b68b28ead5cfb7c7eeccdc47c2980c79a8be44c322e155bbf77c",
+    "tests/miniapp-community-write-lifecycle.test.ts": "ce4905a9bb86fe4d5a19c8901a3d69a20062c7f576a2cd1c845cda8b970a7708",
+    "docs/PRIVACY_NOTICE_20261013.md": "0570e83ab39fcacbeca41b89b13ca9379638c3925dc979915ec88c163808049a",
+    "docs/privacy-page-20261013.json": "d6d22cf3b552d35c795ec0301d423686bf7c5233465c5ade459c532e82447894"
+  },
+  "independentReports": [
+    "docs/evidence/community-contact-consent-native-20261013.json",
+    "docs/evidence/community-contact-consent-frontend-20261013.json"
+  ],
+  "priorAttempts": {
+    "http": "Initial harness lacked an unused Next registration alias; isolated registration entry fixed. Synthetic fixture expectations corrected for preserved revoked offices, 404 private ACL and a freshly-read revision; pool owned explicitly and closed. Runtime consent guard was not loosened.",
+    "browserMissingRuntime": "Initial browser launch did not execute business checks; browser installed to task-owned /tmp path.",
+    "browserSelectors": "Two new whole-page alert selectors matched Next route announcer; assertions scoped to actual application form and accessible description, source behavior unchanged."
+  },
+  "remaining": [
+    "No real pending record counts or actual stored permissions inspected; historical false/null must be returned to applicant, no automatic grant.",
+    "Official WeChat GUI/compiler, device scrolling and screen-reader behavior not validated.",
+    "CMS JSON remains draft/editing; parent must publish updated authorization sentence with actual service facts and sync platform notice.",
+    "Final integrated code/native import bundle must be regenerated and CI verified separately; no deployment or upload here."
+  ]
+}

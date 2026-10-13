@@ -1,0 +1,55 @@
+{
+  "sources": [
+    {
+      "path": "src/components/CommunityApplicationForm.tsx",
+      "sha256": "b591a7c5162a7da93a65df47579ae5a9da9b467e7802e72680fe1f84b4a562c4"
+    },
+    {
+      "path": "src/app/(frontend)/community/review/page.tsx",
+      "sha256": "d90dd4c57f3c4b0524673941382d275df5fd126ddaa6459ca6027bf2cd2630e6"
+    },
+    {
+      "path": "tests/community-contact-consent-components.test.ts",
+      "sha256": "9e874d1b38687dfaab4001aad6a31cb9f08b328370c79cf095659119271721f1"
+    },
+    {
+      "path": "tests/e2e/community-application.spec.ts",
+      "sha256": "67c3120291e8f82795c017cff7dfc7876e5f086abb65c07bb1f530e60d759537"
+    }
+  ],
+  "unit": {
+    "numTotalTests": 20,
+    "numPassedTests": 20,
+    "numFailedTests": 0,
+    "success": true
+  },
+  "browser": {
+    "startTime": "2026-10-13T03:27:34.719Z",
+    "duration": 57565.311,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "before": {
+    "stats": {
+      "startTime": "2026-10-13T03:22:37.848Z",
+      "duration": 39941.452,
+      "expected": 1,
+      "skipped": 0,
+      "unexpected": 2,
+      "flaky": 0
+    },
+    "note": "Two new whole-page role alert test selectors also matched Next route announcer. Source unchanged; corrected to application-form scoped alert and added real accessibleDescription."
+  },
+  "environment": {
+    "database": "community_contact_consent_web_qa_synthetic",
+    "host": "127.0.0.1:40071",
+    "web": "localhost:3000",
+    "browser": "Chromium145 /tmp-owned runtime",
+    "records": "fresh synthetic actors and scoped own legacy rows only",
+    "production": false,
+    "publication": false,
+    "committed": false
+  }
+}

@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-13",
+  "task": "native community contact consent",
+  "branch": "codex/community-contact-consent-20261013",
+  "baseCommit": "3d819038c96e9cc8a09ee5103d238d66cba9d5b9",
+  "status": "implemented and frozen in authorized native scope; not committed or pushed by child",
+  "files": [
+    {
+      "path": "miniprogram/src/pages/applications/index.js",
+      "sha256": "c8ef1fdc49e7ea78282c785c2a5a80b55cfd7210dbfea98898487726068b70cc"
+    },
+    {
+      "path": "miniprogram/src/pages/applications/index.wxml",
+      "sha256": "aa18850bb1ea8b605d969b485973debe5ff277317a4185bf7afdd5a501a48dbf"
+    },
+    {
+      "path": "miniprogram/src/pages/review/index.js",
+      "sha256": "987c281632d650ee764a654f6259208bddeef15eeb7e203b6f9f3a9ec16fe24f"
+    },
+    {
+      "path": "miniprogram/src/pages/review/index.wxml",
+      "sha256": "181317f0c158501306c9ec0a49aa500fbed8a793d9f06bc9bdd86d8cb394435c"
+    },
+    {
+      "path": "miniprogram/src/pages/community/index.wxml",
+      "sha256": "8f41ab6c51855ea92ee4e5c2a3250fc551b06907818dc502b0454d9f9ed39fd7"
+    },
+    {
+      "path": "tests/miniapp-community-flows.test.ts",
+      "sha256": "03d8aba2c833b68b28ead5cfb7c7eeccdc47c2980c79a8be44c322e155bbf77c"
+    },
+    {
+      "path": "tests/miniapp-community-write-lifecycle.test.ts",
+      "sha256": "ce4905a9bb86fe4d5a19c8901a3d69a20062c7f576a2cd1c845cda8b970a7708"
+    },
+    {
+      "path": "tests/miniapp-community-contact-consent.test.ts",
+      "sha256": "f9438f2c49ac9a4463011c38fab629ae5f7eb60e07926b2a8e14c278e0014a85"
+    }
+  ],
+  "behavior": {
+    "applicationCheckbox": "我同意展示我的微信名片作为进群联系方式",
+    "defaultContactConsent": false,
+    "submitAndEditError": "由于入社流程规定，必须展示管理联系方式",
+    "strictBooleanConsent": true,
+    "uncheckedSubmitRequests": 0,
+    "errorBeforeWriteLock": true,
+    "uncheckedFormAndQrPreserved": true,
+    "uncheckedSubmitButtonEnabled": true,
+    "initialSlowGetShowsConsentError": true,
+    "slowGetStillBlocksAllBusinessWrites": true,
+    "renderedError": "aria-role=alert with same exact error, checkbox aria-label, and stable #contact-consent region",
+    "scroll": "wx.pageScrollTo after setData callback; selector #contact-consent/duration 0/fail callback, isolated by visibility, account, route scope, pending write and current error/consent",
+    "checkingConsentDoesNotAutoSubmit": true,
+    "storedTrueAccuratelyReplayed": true,
+    "storedFalseNeverChangedToTrue": true,
+    "approvedCardCanDisableDisplay": true,
+    "cardFalsePayloadContainsOnlyCardFields": true,
+    "historicalMissingOrFalseConsent": "No approved button or approve POST/modal; actionable request to return application so owner can add consent and re-submit",
+    "reviewAndEditPermissionSource": "Existing server actions.review/actions.edit remain required. Consent is an extra restriction and never grants permissions.",
+    "existingAPIPaths": [
+      "POST /api/miniapp/community/applications",
+      "GET /api/miniapp/community/applications",
+      "GET /api/miniapp/community/applications?mode=review",
+      "GET /api/miniapp/workbench"
+    ],
+    "unchanged": [
+      "native source version 0.3.1",
+      "all 16 existing questionnaire types and branching/group logic",
+      "shared http/session/files/privacy component",
+      "business APIs and authoritative services",
+      "database rows and migrations",
+      "approved card opt-out"
+    ]
+  },
+  "validation": {
+    "unit": {
+      "command": "pnpm exec vitest run tests/miniapp-community-contact-consent.test.ts tests/miniapp-community-flows.test.ts tests/miniapp-community-write-lifecycle.test.ts --reporter=json --outputFile=/tmp/zijing-community-contact-consent-native-20261013.json",
+      "total": 91,
+      "passed": 91,
+      "failed": 0,
+      "success": true,
+      "files": [
+        {
+          "file": "miniapp-community-contact-consent.test.ts",
+          "total": 27,
+          "status": "passed"
+        },
+        {
+          "file": "miniapp-community-flows.test.ts",
+          "total": 30,
+          "status": "passed"
+        },
+        {
+          "file": "miniapp-community-write-lifecycle.test.ts",
+          "total": 34,
+          "status": "passed"
+        }
+      ],
+      "method": "Real Page JS, actual http/session/page runtime, synthetic wx.request/storage transport; existing private-file epoch and deferred-POST tests retained.",
+      "targetedNewCoverage": [
+        "unchecked fields/QR/revision retention and repeated submit zero requests",
+        "strict true gate and non-array checkbox event rejected",
+        "active checkbox clears only consent error without auto submit",
+        "returned/withdrawn false owner receipt and true owner receipt accurate",
+        "new application resets consent false",
+        "approved card can save false regardless old display setting",
+        "409 and network failure after explicit consent preserve all drafts",
+        "initial delayed GET still gives immediate consent error, true still cannot POST until GET completes",
+        "hide/actor/route/unload/consent changes discard late rendering scroll",
+        "server edit/review action remains necessary",
+        "historical false/missing/malformed consent cannot approve but authorized return works",
+        "WXML exact label, aria error/label, button enabled independently of consent, server review parent and stored-true approve visibility"
+      ]
+    },
+    "lint": {
+      "command": "pnpm exec eslint miniprogram/src/pages/applications/index.js miniprogram/src/pages/review/index.js tests/miniapp-community-flows.test.ts tests/miniapp-community-write-lifecycle.test.ts tests/miniapp-community-contact-consent.test.ts",
+      "passed": true
+    },
+    "typecheck": {
+      "command": "pnpm typecheck",
+      "passed": true,
+      "initialOutsideOwnedScopeFailure": "Initial shared tests/miniapp-club-api.test.ts:89 TS2783 duplicate id; resolved by owner before final successful typecheck."
+    },
+    "static": {
+      "command": "pnpm miniapp:check",
+      "passed": true,
+      "pages": 25,
+      "files": 146,
+      "bytes": 475772,
+      "domainChecking": true,
+      "nativeDependencies": 0,
+      "officialCompilation": false
+    },
+    "diff": {
+      "command": "git diff --check",
+      "passed": true
+    }
+  },
+  "officialSource": {
+    "repository": "https://github.com/wechat-miniprogram/api-typings",
+    "headQuery": "git ls-remote https://github.com/wechat-miniprogram/api-typings.git HEAD",
+    "observedCurrentHead": "6092df9100c73b84e140c20b9a42a8e8799e0660",
+    "source": "https://github.com/wechat-miniprogram/api-typings/blob/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts#L9750",
+    "fetchedRaw": "https://raw.githubusercontent.com/wechat-miniprogram/api-typings/6092df9100c73b84e140c20b9a42a8e8799e0660/types/wx/lib.wx.api.d.ts",
+    "fact": "Current official PageScrollToOption provides selector (base library 2.7.3+), duration and fail callback. This only verifies SDK contract, not device behavior.",
+    "selection": "Use stable selector and zero-duration scroll after view update; show accessible error even when API missing/fails. Consent is a separate user action from platform privacy authorization.",
+    "officialPagesAttemptedButUnreadable": [
+      "https://developers.weixin.qq.com/miniprogram/dev/api/ui/scroll/wx.pageScrollTo.html",
+      "https://developers.weixin.qq.com/miniprogram/dev/component/checkbox.html",
+      "https://developers.weixin.qq.com/miniprogram/dev/framework/view/accessibility.html"
+    ]
+  },
+  "boundaries": {
+    "realRegistrationRead": false,
+    "envOrKeyRead": false,
+    "databaseAccess": false,
+    "productionRequest": false,
+    "realSDKMessage": false,
+    "subscriptionMessage": false,
+    "platformPermissionOrConfigurationChange": false,
+    "officialUploadOrReview": false,
+    "commitOrPush": false
+  },
+  "remainingPlatformValidation": [
+    "Import unchanged 0.3.1 project into official developer tools and compile with legitimate-domain check enabled; this static/VM evidence does not prove official compilation.",
+    "With synthetic records on authorized isolated service, test unchecked new/edit submission shows exact error and retains QR/input; explicit check then submit, and approved card close display.",
+    "On iOS/Android test scroll-to-consent region, error announcement and checkbox label with screen reader, long form/keyboard and slow first GET; selector requires base library 2.7.3+.",
+    "Test hide/show, account change, late callback, 409/weak network and duplicate submit with synthetic SDK/dev service; do not use real members, admins or subscription messages.",
+    "Backend submit/edit/review validation and historic stored-record behavior are owned by root; this evidence covers native consumers and synthetic transport only."
+  ],
+  "remainingOwnedSourceBlockers": []
+}
