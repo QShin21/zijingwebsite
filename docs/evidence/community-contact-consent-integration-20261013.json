@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-13T08:12:00.473Z",
+  "branch": "codex/club-integration-20261012",
+  "remoteHeadAtInitialReadOnlyCheck": "135fea43fc6872ebb24ae2bda0c6219cea4e5317",
+  "runtimeAndBuildSourceSHA": "135fea43fc6872ebb24ae2bda0c6219cea4e5317",
+  "reviewedSourceSHA": "3a3c83a7af3a1def623db6cfdc0b55d0168e54bb",
+  "identicalReviewedSourceTree": "481400c67d4d4dd62b0cc1a69042bf0643a55d68",
+  "sourceEvidenceHashesAllMatched": true,
+  "latestInstruction": {
+    "delivery": "GitHub source and non-secret verification summary only",
+    "deploymentCancelled": true,
+    "cmsPublicationCancelled": true,
+    "miniappUploadCancelled": true,
+    "mainUpdate": false,
+    "visualRedesign": "Not cancelled; separate later task"
+  },
+  "scopeThisTurn": {
+    "remoteAndRepositoryReadOnlyChecks": true,
+    "onlyMissingNonSecretDocumentationAdded": true,
+    "testsBuildOrPackageRerun": false,
+    "productionOrCredentialsAccess": false,
+    "realDataOrNotifications": false
+  },
+  "included": {
+    "contactConsent": {
+      "sourcePaths": [
+        "src/app/(frontend)/community/actions.ts",
+        "src/app/(frontend)/community/review/page.tsx",
+        "src/collections/community-operations.ts",
+        "src/components/CommunityApplicationForm.tsx",
+        "src/lib/community-operations.ts",
+        "src/lib/community-status.ts",
+        "src/lib/miniapp-club.ts"
+      ],
+      "nativePaths": [
+        "miniprogram/src/pages/applications/index.js",
+        "miniprogram/src/pages/applications/index.wxml",
+        "miniprogram/src/pages/community/index.wxml",
+        "miniprogram/src/pages/review/index.js",
+        "miniprogram/src/pages/review/index.wxml"
+      ],
+      "label": "我同意展示我的微信名片作为进群联系方式",
+      "error": "由于入社流程规定，必须展示管理联系方式",
+      "strictRawBooleanBeforePayloadCastAndMerge": true,
+      "approvalRechecksStoredConsent": true,
+      "historicalFalseOrNullBackfill": false,
+      "approvedCardCanHide": true
+    },
+    "postEditAndPrivacy": {
+      "unchangedFrom": "d6b5b7be0542867a925170174b699a821ee2afe7",
+      "byteIdenticalPaths": [
+        "src/app/(frontend)/api/activities/[kind]/[id]/signup/route.ts",
+        "src/app/(frontend)/api/staff/batches/[id]/application/route.ts",
+        "miniprogram/src/lib/privacy.js"
+      ],
+      "originalPATCHAndOrdinaryPOSTPreserved": true
+    },
+    "privacy": {
+      "operator": "叶佳鑫（清华大学学生紫荆电竞社社长）",
+      "contactWechat": "yejx2003",
+      "cmsKey": "privacy",
+      "status": "draft",
+      "reviewState": "editing",
+      "cmsWritten": false,
+      "cmsPublished": false,
+      "sourceFiles": {
+        "docs/privacy-page-20261013.json": {
+          "bytes": 23157,
+          "sha256": "d6d22cf3b552d35c795ec0301d423686bf7c5233465c5ade459c532e82447894"
+        },
+        "docs/PRIVACY_NOTICE_20261013.md": {
+          "bytes": 12891,
+          "sha256": "0570e83ab39fcacbeca41b89b13ca9379638c3925dc979915ec88c163808049a"
+        }
+      }
+    },
+    "retention": {
+      "paths": [
+        "scripts/registration-retention-review.ts",
+        "src/lib/registration-retention-review.ts",
+        "tests/registration-retention-review.test.ts",
+        "docs/REGISTRATION_RETENTION_REVIEW_20261013.md"
+      ],
+      "unchangedFrom": "3d819038c96e9cc8a09ee5103d238d66cba9d5b9",
+      "operatorMetadataOnly": true,
+      "noDatabaseConnectionOrBusinessWrites": true,
+      "noDeletionOrScheduler": true
+    },
+    "versions": {
+      "native": "0.3.1",
+      "questionTypes": 16,
+      "existingMigrations": 17,
+      "newMigrations": 0
+    }
+  },
+  "previousIntegrationValidation": {
+    "executedEarlierThisTask": true,
+    "notRerunDuringGitDeliveryCheck": true,
+    "sourceSHA": "135fea43fc6872ebb24ae2bda0c6219cea4e5317",
+    "incrementalTests": {
+      "passed": 99,
+      "failed": 0,
+      "files": 5,
+      "groups": {
+        "websiteConsentComponent": 20,
+        "nativeConsent": 27,
+        "nativeSignupMethods": 13,
+        "nativeWXMLBindings": 33,
+        "privacyContent": 6
+      },
+      "runtime": {
+        "node": "v24.12.0",
+        "platform": "linux",
+        "arch": "x64",
+        "glibc": "2.36"
+      },
+      "testFiles": [
+        {
+          "path": "tests/community-contact-consent-components.test.ts",
+          "passed": 20,
+          "status": "passed"
+        },
+        {
+          "path": "tests/miniapp-community-contact-consent.test.ts",
+          "passed": 27,
+          "status": "passed"
+        },
+        {
+          "path": "tests/miniapp-signup-methods.test.ts",
+          "passed": 13,
+          "status": "passed"
+        },
+        {
+          "path": "tests/miniapp-wxml-bindings.test.ts",
+          "passed": 33,
+          "status": "passed"
+        },
+        {
+          "path": "tests/privacy-publication-content.test.ts",
+          "passed": 6,
+          "status": "passed"
+        }
+      ]
+    },
+    "actualUnpackedNextHTTP": {
+      "passed": 27,
+      "failed": 0,
+      "scope": "Actual unpacked Next/proxy/miniapp API/Payload REST/JWT/hooks/services/transactions/PostgreSQL; original 27 source assertions with QA-only origin override",
+      "transport": {
+        "sourceSHA": "135fea43fc6872ebb24ae2bda0c6219cea4e5317",
+        "originalTestSHA256": "4702d583d7ee378537f4c72c89b134cf50a7ca706827855d0869cba64a4419a4",
+        "qaTestSHA256": "40c30b2f9d69c6c8c5aa0d498d2511050671aeca236c36ff5f4d7fe5592a008e",
+        "onlyChange": "Replace Node adapter origin assignment with owned unpacked Next origin http://127.0.0.1:3353; all 27 original assertions and fixture guards retained",
+        "repositoryTestFileUnchanged": true
+      }
+    },
+    "actualUnpackedNextPOSTCompatibility": {
+      "passed": true,
+      "assertions": 34,
+      "checks": [
+        "Unpacked Next readiness and reviewed schema",
+        "Unpacked Next liveness",
+        "Unpacked public events page",
+        "Unpacked static asset served",
+        "Real Next HTTP JWT login: synthetic-next-president",
+        "Real Next HTTP JWT login: synthetic-next-member",
+        "Real Next HTTP JWT login: synthetic-next-outsider",
+        "events: current form/version",
+        "events: ordinary POST retry preserves original",
+        "events: POST edit keeps ID, six players, SQL write, private no-store",
+        "events: stale revision/version rejected without SQL change",
+        "events: GET action remains read only",
+        "events: outsider spoof rejected without SQL change",
+        "events: anonymous edit rejected",
+        "events: original PATCH still updates same SQL row",
+        "community-posts: current form/version",
+        "community-posts: ordinary POST retry preserves original",
+        "community-posts: POST edit keeps ID, six players, SQL write, private no-store",
+        "community-posts: stale revision/version rejected without SQL change",
+        "community-posts: GET action remains read only",
+        "community-posts: outsider spoof rejected without SQL change",
+        "community-posts: anonymous edit rejected",
+        "community-posts: original PATCH still updates same SQL row",
+        "staff: current form/version",
+        "staff: ordinary POST retry preserves original",
+        "staff: POST edit keeps ID, six players, SQL write, private no-store",
+        "staff: stale revision/version rejected without SQL change",
+        "staff: GET action remains read only",
+        "staff: outsider spoof rejected without SQL change",
+        "staff: anonymous edit rejected",
+        "staff: original PATCH still updates same SQL row",
+        "events: suspended account old JWT rejected",
+        "community-posts: suspended account old JWT rejected",
+        "staff: suspended account old JWT rejected"
+      ]
+    },
+    "fullRepositoryTypecheckExit": 0,
+    "fullRepositoryESLintExit": 0,
+    "diffCheckExit": 0,
+    "miniappStatic": {
+      "exit": 0,
+      "pages": 25,
+      "files": 146,
+      "bytes": 475772,
+      "domainChecking": true,
+      "nativeDependencies": 0
+    },
+    "webpackProductionBuild": {
+      "exit": 0,
+      "sourceSHA": "135fea43fc6872ebb24ae2bda0c6219cea4e5317",
+      "buildID": "FVldoysgOrG4eEsijKzlk",
+      "builder": {
+        "node": "v24.12.0",
+        "platform": "linux",
+        "arch": "x64",
+        "glibc": "2.36"
+      },
+      "image": "node@sha256:7326fb2dbdce998edd72140946851be64ef4a643e8715e138ca467e8e9d92c99"
+    },
+    "dependencyBaselineMatch": {
+      "sourceSHA": "135fea43fc6872ebb24ae2bda0c6219cea4e5317",
+      "baselineSourceSHA": "d6b5b7be0542867a925170174b699a821ee2afe7",
+      "identicalExceptSourceIdentity": true,
+      "rootDependencies": 14,
+      "packages": 436,
+      "files": 53153,
+      "runtime": {
+        "node": "v24.12.0",
+        "platform": "linux",
+        "arch": "x64",
+        "glibc": "2.36"
+      },
+      "fingerprintSHA256": "fdc194551e1bf96f7f19278a91db1b1ad44912d8ada8de1f75d5ca6221b7105f",
+      "baselineFingerprintSHA256": "f28edbc6af47d45ba14c191e8c47c3271fdad089edc3497c094144d2e7b4da93"
+    },
+    "cleanup": {
+      "syntheticOnly": true,
+      "allBusinessAndAuditRowsZero": true,
+      "existingMigrationRows": 17,
+      "ownedNextStopped": true,
+      "ownedPostgresStopped": true,
+      "packagedFilesHashUnchanged": true,
+      "filesVerified": 834
+    },
+    "fixtureWarnings": [
+      "Non-failing pg concurrent-query deprecation warning; dependency version unchanged",
+      "First HTTP harness launch hit read-only Vite cache before any test executed; rerun used isolated writable caches only"
+    ]
+  },
+  "carriedSourceEvidence": {
+    "path": "docs/evidence/community-contact-consent-20261013.json",
+    "targeted": 272,
+    "socketHTTPJWTSQL": 27,
+    "database": 21,
+    "chromium": 3,
+    "reusedNotRerun": true,
+    "sourceSHA": "3a3c83a7af3a1def623db6cfdc0b55d0168e54bb",
+    "nextTransportDistinctFromSourceSocketAdapter": true
+  },
+  "ci": {
+    "checkedAt": "2026-10-13T04:05:24.441Z",
+    "headSHA": "135fea43fc6872ebb24ae2bda0c6219cea4e5317",
+    "runID": 38344701122,
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38344701122",
+    "status": "completed",
+    "conclusion": "failure",
+    "jobs": [
+      {
+        "id": 115123268241,
+        "status": "completed",
+        "conclusion": "failure",
+        "runnerID": 0,
+        "steps": []
+      }
+    ],
+    "rerunRequested": false,
+    "billingReadOrChanged": false,
+    "recheckedAt": "2026-10-13T08:12:00.477Z",
+    "passed": false,
+    "executedSteps": 0,
+    "documentationTailCommit": "[skip ci]; no CI requested for documentation only change"
+  },
+  "localDeliveryAudit": {
+    "initialTrackedAndUntrackedStatusClean": true,
+    "noIgnoredSourceOrReportUnderSourceDirectories": true,
+    "missingPublicSummary": "Previous 99/27/34 integration results were in ignored QA output and Library only; recorded here without runtime archive or private data",
+    "excludedFromGit": [
+      "runtime archives and build output",
+      "node_modules",
+      "environment and credential files",
+      "database/media/backup and real member data"
+    ]
+  },
+  "remaining": {
+    "ci": "135fea43 runner never started; no green CI",
+    "wechat": "No modern official DevTools, base library 3.16, device or platform acceptance",
+    "privacy": "Draft unpublished; actual enabled service-provider facts remain unverified",
+    "deployment": "Cancelled by latest user instruction; no deployment is scheduled or performed",
+    "visual": "Separate later task; no redesign in this delivery check"
+  }
+}

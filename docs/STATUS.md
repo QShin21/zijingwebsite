@@ -1,5 +1,11 @@
 # 当前状态
 
+## Git 交付核对与停止部署 · 2026-10-13
+
+只读确认远端 `codex/club-integration-20261012` 为 `135fea43fc6872ebb24ae2bda0c6219cea4e5317`；明确名片同意、d6b5 的 POST 兼容与原生隐私入口、叶佳鑫 / `yejx2003` 的隐私正文和 draft/editing CMS JSON、离线只读保留工具及版本/测试说明均已提交。没有遗漏的源文件。补入此前只在本地与 Library 中的 integration 实测摘要：99 项针对、解压包真实 Next HTTP 27 项及 POST 兼容 34 项断言、类型/全仓 Lint/静态/构建通过；本次只核对记录，没有重跑。源码/构建仍冻结于 135fea43，后续仅追加文档。
+
+候选 CI 38344701122 仍为 failure，runnerID=0、steps=[]，没有执行测试，不能记为通过。微信官方工具、基础库3.16、真机和平台验收未完成。用户最新要求停止后续部署，本轮仅完成 Git 交付，不执行旧记录中的 main 更新、生产部署、CMS 发布或小程序上传待办；视觉重设计保留为另起任务。精确来源、当前正文摘要及验证边界见 [integration 交付证据](evidence/community-contact-consent-integration-20261013.json)。
+
 ## 社群管理员申请必须主动同意联系方式展示 · 2026-10-13
 
 在最新个人 integration `3d81903` 的独立 `codex/community-contact-consent-20261013` 同步网站和已有原生入口，精确 Checkbox / 提示且默认不勾选。提交可触发可访问错误/定位并保留填写，原始布尔严格门禁在 Payload 转换/合并之前；历史未同意的 pending 申请阻断批准并要求退回由本人补同意，不代授权/回填。已批准本人名片关闭、私有权限、进群规则、0.3.1 和 16 类表单保持。
