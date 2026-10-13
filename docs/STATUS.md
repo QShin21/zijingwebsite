@@ -8,6 +8,8 @@
 
 最终 JSON / Markdown 31 个正文块在实际网页 Prose / Lexical 和原生 CMS / richtext / fixed / consent 链路一致，独立 15 项及原问卷 5 项通过；draft 仅维持不可读 / 不启动授权，published 为测试内存副本，没有发布 CMS。[最终正文证据](evidence/privacy-content-final-review-20261013.json) 与 [实施检查](evidence/privacy-retention-review-20261013.json) 绑定当前文件摘要。清单已按真实建队枚举拒绝虚构 draft，入队仍支持草稿，无业务状态或权限变更。
 
+代码 `1e5802b` 与正文/证据 `ced4d5d` 已推送本工作分支；独立工具 16 项内存/VM 核验通过，无剩余契约阻断。精确 `ced4d5d` 的 [CI 38338763819](https://github.com/QShin21/zijingwebsite/actions/runs/38338763819) completed/failure，runner=0、执行步骤=0，GitHub 支付或支出额度阻止启动；没有完整 CI 验证，未访问或修改账单、未请求重跑。[当次 CI 证据](evidence/privacy-retention-ci-blocked-20261013.json) 区分阻断 failure 和普通 runner 标签迁移 notice。恢复额度后负责人对已有 workflow 重跑，最终合入 SHA 仍须验证；追加本段仅记录事实，不触发新 CI。
+
 ## 统一集成收口 · 2026-10-12
 
 批准的staff/core/profile/honor、完整原生58eb542及简介确认987309b/a026516已合入唯一integration。网页候选6b6b5f6的CI38248423773全成功，日志1172项/68文件、95网页38.3分钟/build核实；本地95网页31分钟、类型/lint/25页静态也通过。候选与兼容回滚466b8b9两个代码包在Node24.12/glibc2.36实际解包运行、17迁移/重复no-op、v3备份恢复及私人媒体门禁通过，包5.9MiB/展开31.3MiB，两个归档+解包目录约78.2MiB。父平台发现四WXML/16处编码逻辑与编译失败，当前原生包不可发布；等待原作者获批完整SHA，不在integration重复改同文件。官方GUI/真机、现场依赖/绝对环境媒体绑定、11→17逐名/schema与真实完整备份峰值仍单列。本线程没有生产访问、更新main/PR/部署。见 [统一说明](CLUB_INTEGRATION_20261012.md)、[集成证据](evidence/club-integration-20261012.json) 和 [代码包证据](evidence/club-code-packages-20261012.json)。

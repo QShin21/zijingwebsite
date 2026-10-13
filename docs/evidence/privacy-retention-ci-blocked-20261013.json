@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-10-13T02:50:24.720250+00:00",
+  "headSha": "ced4d5d15ade4d909751ed87f5b0fe917df540e1",
+  "readOnly": true,
+  "rerunRequested": false,
+  "billingSettingsReadOrChanged": false,
+  "runs": [
+    {
+      "id": 38338763819,
+      "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38338763819",
+      "headSha": "ced4d5d15ade4d909751ed87f5b0fe917df540e1",
+      "status": "completed",
+      "conclusion": "failure",
+      "jobs": [
+        {
+          "id": 115104788964,
+          "status": "completed",
+          "conclusion": "failure",
+          "runnerID": 0,
+          "stepsExecuted": 0
+        }
+      ],
+      "startupAnnotations": [
+        {
+          "billingOrSpendingGate": true,
+          "messageSHA256": "50bb56fefaf723c0d0c313ef4c3956b162021cd5415576fa872c2245e9fc53f1",
+          "summary": "GitHub账户支付或支出额度阻止任务启动。",
+          "annotationLevel": "failure"
+        },
+        {
+          "billingOrSpendingGate": false,
+          "messageSHA256": "f8ad47234b9fbce6ba7a513bccbccc02847158f52c59aa0bbea1b988541847ed",
+          "summary": "ubuntu-latest后续迁移提示；该notice不是当前任务未启动的失败原因。",
+          "annotationLevel": "notice"
+        }
+      ],
+      "blockedBeforeRunnerStart": true
+    }
+  ],
+  "annotationsVerifiedAt": "2026-10-13T02:51:53.213196+00:00",
+  "codeSourceCommit": "1e5802baf33ee6c5f599eaa4256f8402af991ef1",
+  "localChecksRemain": {
+    "targetedSyntheticTestsPassed": 100,
+    "independentContentChecksPassed": 15,
+    "existingQuestionnaireTestsPassed": 5,
+    "independentToolMemoryVMChecksPassed": 16,
+    "typecheckExitCode": 0,
+    "targetedLintExitCode": 0,
+    "nativeStaticExitCode": 0
+  },
+  "nextStep": "由账户负责人处理支付或Actions额度；恢复后对已存在workflow一次重跑，不必重推相同代码。本任务不修改账单或请求重跑。"
+}
