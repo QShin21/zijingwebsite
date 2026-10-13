@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "referencesComplete": false,
+  "records": [
+    {
+      "collection": "event-signups",
+      "id": 91001,
+      "createdAt": "2025-10-12T00:00:00Z",
+      "updatedAt": "2025-10-12T00:00:00Z"
+    },
+    {
+      "collection": "staff-applications",
+      "id": 91002,
+      "status": "returned",
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2026-10-12T00:00:00Z"
+    },
+    {
+      "collection": "team-join-applications",
+      "id": 91003,
+      "status": "approved",
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-02T00:00:00Z"
+    },
+    {
+      "collection": "team-memberships",
+      "id": 92001,
+      "status": "active",
+      "createdAt": "2025-08-02T00:00:00Z",
+      "updatedAt": "2025-08-02T00:00:00Z"
+    },
+    {
+      "collection": "team-establishment-applications",
+      "id": 91004,
+      "status": "pending",
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2026-10-12T00:00:00Z"
+    },
+    {
+      "collection": "community-applications",
+      "id": 91005,
+      "status": "approved",
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-02T00:00:00Z"
+    },
+    {
+      "collection": "community-joins",
+      "id": 91006,
+      "status": "joined",
+      "createdAt": "2025-08-01T00:00:00Z",
+      "updatedAt": "2025-08-02T00:00:00Z"
+    }
+  ],
+  "references": [
+    {
+      "sourceCollection": "team-memberships",
+      "sourceID": 92001,
+      "sourceField": "sourceApplication",
+      "targetCollection": "team-join-applications",
+      "targetID": 91003
+    },
+    {
+      "sourceCollection": "users",
+      "sourceID": 93001,
+      "sourceField": "communityOffices.sourceApplication",
+      "targetCollection": "community-applications",
+      "targetID": 91005
+    }
+  ]
+}
