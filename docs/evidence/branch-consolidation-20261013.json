@@ -1,0 +1,390 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-13T08:44:13.467Z",
+  "retainedBranches": [
+    "main",
+    "littleapp"
+  ],
+  "defaultBranch": "main",
+  "branchCountBefore": 26,
+  "branchCountAfter": 2,
+  "synchronizedSourceSHA": "323aadebe3897167462e0147f82129400a9b9d0b",
+  "runtimeBuildSourceSHA": "135fea43fc6872ebb24ae2bda0c6219cea4e5317",
+  "oldRetainedHeads": {
+    "littleapp": "80a0129d3ea27d564fc456642619239b70a0f819",
+    "main": "2ce3ad87cac78ce97002881469ab5cbaad6b1308"
+  },
+  "syncStrategy": "Both original branches normally fast-forwarded; no independent commits or conflicts; complete repository/native structure preserved",
+  "backup": {
+    "libraryFileID": "libfile_a3fc69d086288191808cf0faef0e35a7",
+    "fileID": "file_00000000d89881fbb480b5f7e159e5e8",
+    "version": 0,
+    "fileName": "zijing-branch-history-and-paused-design-20261013.tar.gz",
+    "bytes": 6837005,
+    "sha256": "2e1a71c11c083c8f2ef82b6e5b42b9bf64c6e0b78b47f7b10805ea06ee4f8e1e",
+    "pinnedReadbackMatches": true,
+    "allMemberHashesMatched": true,
+    "bundleVerifiedComplete": true
+  },
+  "stashSHA": "a0ce19a7a7093d5090387ba81ac409f23113f22b",
+  "deleted": [
+    {
+      "branch": "codex/activity-signups",
+      "oldSHA": "89a76f4cfee44046bae3dc41697b2673eab066ef",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/activity-signups",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/club-integration-20261012",
+      "oldSHA": "323aadebe3897167462e0147f82129400a9b9d0b",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/club-integration-20261012",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/club-operations-recovery",
+      "oldSHA": "ed965ef457b5913d4590753c9d931e82811244b9",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/club-operations-recovery",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/club-operations-vnext",
+      "oldSHA": "8ec605a6d29257430718fbd598a458c8b402e846",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/club-operations-vnext",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/community-contact-consent-20261013",
+      "oldSHA": "3a3c83a7af3a1def623db6cfdc0b55d0168e54bb",
+      "containedByRetainedHistory": false,
+      "uniqueCommitCount": 2,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/community-contact-consent-20261013",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/fix-video-fixture-20261012",
+      "oldSHA": "1d57dfb5abbe0ed9c88b097d2478f1495a87b99f",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/fix-video-fixture-20261012",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/inline-bilibili-preview",
+      "oldSHA": "f9f992840fb2c4d8c1b713e409ddb670f8fe0d53",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/inline-bilibili-preview",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/join-showcase-video",
+      "oldSHA": "7e6bb47f30ee595cea2aa3fca53acadbcfacd2bd",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/join-showcase-video",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/miniapp-club-flows-20261012",
+      "oldSHA": "816bf555a592f47b78380aa5e57b6dc2d1751f89",
+      "containedByRetainedHistory": false,
+      "uniqueCommitCount": 7,
+      "patchDistinctNonMergeCommits": 4,
+      "uniqueCommits": [
+        "816bf555a592f47b78380aa5e57b6dc2d1751f89 docs(miniapp): prepare exact deployed-source import and platform acceptance [skip ci]",
+        "116f4f47e075047471e8425025c5f5a8df4fcfd0 docs(miniapp): record exact WXML compilation and passing CI [skip ci]",
+        "115e9bb40cf668f78d643d3ffd84bbc9ff46fbde docs(miniapp): record passing CI retry gates and teardown diagnosis [skip ci]",
+        "a0aabcf12a6e4059a5c5facf1e61a42191148674 docs(miniapp): record profile confirmation regressions and exact CI retry [skip ci]"
+      ],
+      "backupRef": "refs/remotes/origin/codex/miniapp-club-flows-20261012",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/miniapp-platform-fixes-20261012",
+      "oldSHA": "c28efb1fe18a047256a43a51af1f8482c9b4d9d0",
+      "containedByRetainedHistory": false,
+      "uniqueCommitCount": 4,
+      "patchDistinctNonMergeCommits": 1,
+      "uniqueCommits": [
+        "c906f67d3ed29cac6febf5f15e1e8bd06d80081e docs(miniapp): record platform fixes, operator draft and import checkpoint"
+      ],
+      "backupRef": "refs/remotes/origin/codex/miniapp-platform-fixes-20261012",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/miniapp-preview-brand",
+      "oldSHA": "fb6cc229169f2904ce9445ad2b9a2065c8441cca",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/miniapp-preview-brand",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/privacy-retention-review-20261013",
+      "oldSHA": "f849e18fc2cd1987e8c3bc02817d9811cfc10d4a",
+      "containedByRetainedHistory": false,
+      "uniqueCommitCount": 7,
+      "patchDistinctNonMergeCommits": 1,
+      "uniqueCommits": [
+        "c906f67d3ed29cac6febf5f15e1e8bd06d80081e docs(miniapp): record platform fixes, operator draft and import checkpoint"
+      ],
+      "backupRef": "refs/remotes/origin/codex/privacy-retention-review-20261013",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/questionnaire-ai-reliability",
+      "oldSHA": "324034500aa1457231329f0887965586a1ee493f",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/questionnaire-ai-reliability",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/questionnaire-export",
+      "oldSHA": "2ce3ad87cac78ce97002881469ab5cbaad6b1308",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/questionnaire-export",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/questionnaire-flow-ai",
+      "oldSHA": "13544d9ff1162a4e145d63f276bbf68b4646f035",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/questionnaire-flow-ai",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/questionnaire-improvements",
+      "oldSHA": "aadecde3d26d70ca844c658541e5b06b0c5c990e",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/questionnaire-improvements",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/questionnaire-platform",
+      "oldSHA": "d83e5a3facb8dd39093dd2fc72c3b634abcb2bf3",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/questionnaire-platform",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/remove-community-chat",
+      "oldSHA": "94ea4aeb1ef07b12de5d554640fffead7feb4305",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/remove-community-chat",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/remove-forum-miniapp-readonly",
+      "oldSHA": "8aeb9c783310bd6a354fd1c7b7e1ecf39b456d9d",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/remove-forum-miniapp-readonly",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/remove-retired-domains",
+      "oldSHA": "fb51bbb71009aec66395fb2892402d814ddca744",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/remove-retired-domains",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/restore-thuzijing-domain",
+      "oldSHA": "0e13faf7c970e4e9675926f7d6ab63484cc5d293",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/restore-thuzijing-domain",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/team-core-20261012",
+      "oldSHA": "bf6665c57d83ffa269845c76ff6903d23e0510de",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/team-core-20261012",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/team-honors-20261012",
+      "oldSHA": "196ebf841c77f7a725ed6b41100cd66b341faea5",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/team-honors-20261012",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    },
+    {
+      "branch": "codex/team-profiles-20261012",
+      "oldSHA": "3ba056c3dde350b51f28ea72792fe17d54e96b84",
+      "containedByRetainedHistory": true,
+      "uniqueCommitCount": 0,
+      "patchDistinctNonMergeCommits": 0,
+      "uniqueCommits": [],
+      "backupRef": "refs/remotes/origin/codex/team-profiles-20261012",
+      "backupVerified": true,
+      "deleteSucceeded": true
+    }
+  ],
+  "validation": {
+    "executedOnSourceSHA": "323aadebe3897167462e0147f82129400a9b9d0b",
+    "node": "v24.12.0",
+    "platform": "linux",
+    "arch": "x64",
+    "glibc": "2.36",
+    "network": "none",
+    "readOnlySourceAndDependencies": true,
+    "passed": 148,
+    "failed": 0,
+    "files": [
+      {
+        "path": "tests/community-contact-consent-components.test.ts",
+        "passed": 20,
+        "status": "passed"
+      },
+      {
+        "path": "tests/miniapp-community-contact-consent.test.ts",
+        "passed": 27,
+        "status": "passed"
+      },
+      {
+        "path": "tests/miniapp-signup-methods.test.ts",
+        "passed": 13,
+        "status": "passed"
+      },
+      {
+        "path": "tests/miniapp-wxml-bindings.test.ts",
+        "passed": 33,
+        "status": "passed"
+      },
+      {
+        "path": "tests/privacy-publication-content.test.ts",
+        "passed": 6,
+        "status": "passed"
+      },
+      {
+        "path": "tests/registration-retention-review.test.ts",
+        "passed": 49,
+        "status": "passed"
+      }
+    ],
+    "fullTypecheckExit": 0,
+    "fullESLintExit": 0,
+    "miniappStatic": {
+      "pages": 25,
+      "files": 146,
+      "bytes": 475772,
+      "domainChecking": true,
+      "nativeDependencies": 0
+    },
+    "carriedActualNextHTTP": 27,
+    "carriedActualPOSTAssertions": 34,
+    "carriedValidationReexecuted": false,
+    "newRuntimeChange": false,
+    "newMigrations": 0
+  },
+  "ci": {
+    "runtimeSourceRunID": 38344701122,
+    "runnerID": 0,
+    "steps": [],
+    "runtimeSourceConclusion": "failure",
+    "documentationTailHasSkipCI": true,
+    "newCIClaimedPassed": false,
+    "recheckedAt": "2026-10-13T08:46:03.225Z",
+    "jobID": 115123268241
+  },
+  "openPullRequests": 0,
+  "workflow": "Only quality checks; no deployment, native upload or topic-ref dependency",
+  "externalHostingAccessed": false,
+  "policy": {
+    "noNewDevelopmentBranches": true,
+    "mainAndLittleappOnly": true,
+    "noForce": true,
+    "protectionChanged": false,
+    "deploymentCancelled": true,
+    "cmsPublished": false,
+    "wechatUploaded": false,
+    "visualDraftNotMerged": true
+  },
+  "remaining": [
+    "Modern WeChat DevTools/base library3.16/device/platform acceptance",
+    "No successful CI for runtime source",
+    "Paused incomplete visual screens: resume on original branches separately"
+  ]
+}
