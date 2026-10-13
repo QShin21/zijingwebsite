@@ -131,3 +131,11 @@ Astra 最小处理目标：
 其他已执行页面、API/ACL 证据与 source SHA 仍保持；没有 Sol 源码修复。`consent-web`（40071）已迁移，历史 false/null 授权网页场景尚未运行；copy-build 因 3000 被完整 E2E 服务占用而由既有 runner 拒绝，未覆盖正在使用的产物。待当前 E2E 完结，再确认并停止自己拥有的 3000 服务，执行 `REBUILD_QA_SERVER_PORT=3000 node scripts/rebuild-qa.mjs copy-build consent-web`，启动该 profile 后仅运行 `community-application.spec.ts` 的历史授权场景；先处理其依赖的旧定位问题。
 
 继续保留所有环回数据库、三个 `next start`（3000/3364/3365）、trace 和日志。Astra 可编辑源仓库，正在跑的 E2E 只消费冻结副本；修复后按新 SHA 重新冻结并由 Sol 复测。旧构建 BUILD_ID 和各 profile 路径可供读取已有证据，无需为恢复连接重复构建。
+
+### 17:02 UTC · 保存交接期间完整 E2E 自然结束
+
+本次 125 项冻结 E2E 已在 `17:02:41 UTC` 退出 1：**79 通过、34 失败、12 跳过、0 flaky、0 未完成**，耗时 1,784.83 秒（29.7 分钟），报告无全局运行错误。上节 91 项数字保留为历史局部快照；当前以完整 JSON 终态为准。12 个跳过中，11 个专用视觉用例已经在 visual profile 按浅/深分别运行（各 8 通过、3 失败）；剩余历史 false/null 授权网页场景继续未运行。无需重新启动旧冻结 E2E。
+
+本轮 build、单元测试和浏览器矩阵都已有终态，修复阻塞明确存在。完整 34 条失败的文件、行号、原始错误和 trace 路径已纳入本轮机器证据，含旧详情内联问卷/反馈定位、双标题的非精确 heading 定位、页面改版后的旧 CSS 定位、样式对比度及共享队伍 fixture 的后续状态依赖。不能统一把这些失败视作测试问题，Astra 应逐条根据实际 DOM/API 修复并保留行为约束。
+
+本地复核包 `/workspace/qa-zijing/frontend-rebuild-evidence-4733.zip` 包含进度、机器证据、源码清单与 13 张代表截图，约 2.4 MB；不包含数据库、账号 fixture、环境文件、媒体原件或原始 trace。所有截图为合成数据；完整截图和 trace 仍留在上述运行目录。最终交接只新增文档/证据，未改源码、未动 main/littleapp、未部署或上传微信。

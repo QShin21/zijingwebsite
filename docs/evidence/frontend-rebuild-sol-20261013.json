@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-13T17:02:06.602057+00:00",
+  "updatedAt": "2026-10-13T17:04:53.620135+00:00",
   "sourceCommit": "4733a4c55be8811b894f65d2057caee1acd134ca",
   "sourceInputFiles": 594,
   "sourceManifestSha256": "4aa6c4150b8210904e23a9e9bba990f047ff2cb538e37fdbeacfb50e7cd9b955",
@@ -183,8 +183,8 @@
       "logSha256": "b9a392c1c08701417156c64b21e3982694d6b1410eb6b039eb1a7113d96ed73a"
     },
     "full_e2e": {
-      "result": "notrun",
-      "executionState": "running",
+      "result": "fail",
+      "executionState": "finished",
       "process": {
         "action": "playwright",
         "profile": "prod-browser",
@@ -194,10 +194,12 @@
         "childPID": 3937,
         "cwd": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app",
         "executable": "node",
-        "status": "running"
+        "status": "finished",
+        "finishedAt": "2026-10-13T17:02:41.007Z",
+        "exitCode": 1
       },
       "log": "/workspace/qa-zijing/logs/full-e2e-4733.log",
-      "logSha256": "f9c2052b2fa329d51551b2b8c4bf01f5a4b9e123230b5ebae3982d31ddbe080e",
+      "logSha256": "74365daeb4b89a8846b2d0d29ff35af11b4cb8b151b7032ec072d755240033ea",
       "partialResults": [
         {
           "result": "pass",
@@ -842,8 +844,1977 @@
         "fail": 32,
         "notrun": 12
       },
-      "notFinished": 34,
-      "complete": false
+      "notFinished": 0,
+      "complete": true,
+      "finalCounts": {
+        "pass": 79,
+        "fail": 34,
+        "notrun": 12,
+        "flaky": 0
+      },
+      "stats": {
+        "startTime": "2026-10-13T16:32:55.175Z",
+        "duration": 1784825.379,
+        "expected": 79,
+        "skipped": 12,
+        "unexpected": 34,
+        "flaky": 0
+      },
+      "reportSha256": "68d8b30a7a5b7566663db44d112587d3eda4c39ddc25797784add0baa40f3f7b",
+      "finalCases": [
+        {
+          "file": "activity-signups.spec.ts",
+          "line": 119,
+          "title": "publisher builds questionnaire, member submits once, organizer reads private answers",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 10081,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "activity-signups.spec.ts",
+          "line": 197,
+          "title": "site event management and API token submission share the same questionnaire",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 17021,
+          "errors": [
+            "Error: expect(locator).toBeVisible() failed\n\nLocator: getByLabel('参加理由', { exact: true })\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 15000ms\n  - waiting for getByLabel('参加理由', { exact: true })\n\n\n  208 |   ).toContainText(\"已保存\");\n  209 |   await page.goto(`/events/signup-ui-${suffix}`);\n> 210 |   await expect(page.getByLabel(\"参加理由\", { exact: true })).toBeVisible();\n      |                                                          ^\n  211 |   await expect(page.getByRole(\"heading\", { name: \"暂无报名渠道\" })).toHaveCount(\n  212 |     0,\n  213 |   );\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/activity-signups.spec.ts:210:58"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/activity-signups-site-even-8dc2f-hare-the-same-questionnaire/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/activity-signups-site-even-8dc2f-hare-the-same-questionnaire/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/activity-signups-site-even-8dc2f-hare-the-same-questionnaire/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "activity-signups.spec.ts",
+          "line": 253,
+          "title": "publisher includes questionnaire before publishing and CMS offers editor link",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 7488,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "activity-signups.spec.ts",
+          "line": 298,
+          "title": "conditional questionnaire previews, validates, preserves steps and retries without losing answers",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 28495,
+          "errors": [
+            "Error: expect(locator).toContainText(expected) failed\n\nLocator: locator('.activity-signup').getByRole('alert')\nExpected substring: \"临时不可用\"\nReceived string:    \"服务器暂时无法确认提交结果。填写内容已保留，请先刷新本人回执或已保存记录，再决定是否重试。\"\nTimeout: 15000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 15000ms\n  - waiting for locator('.activity-signup').getByRole('alert')\n    19 × locator resolved to <p role=\"alert\">服务器暂时无法确认提交结果。填写内容已保留，请先刷新本人回执或已保存记录，再决定是否重试。</p>\n       - unexpected value \"服务器暂时无法确认提交结果。填写内容已保留，请先刷新本人回执或已保存记录，再决定是否重试。\"\n\n\n  444 |   });\n  445 |   await signup.getByRole(\"button\", { name: \"提交并确认报名\" }).click();\n> 446 |   await expect(signup.getByRole(\"alert\")).toContainText(\"临时不可用\");\n      |                                           ^\n  447 |   await expect(signup.locator(\".questionnaire-review\")).toContainText(\n  448 |     \"下午、上午\",\n  449 |   );\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/activity-signups.spec.ts:446:43"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/activity-signups-condition-cca99-ries-without-losing-answers/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/activity-signups-condition-cca99-ries-without-losing-answers/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/activity-signups-condition-cca99-ries-without-losing-answers/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "activity-signups.spec.ts",
+          "line": 463,
+          "title": "advanced types, account-scoped drafts, statistics, exports and permissions work together",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 18338,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "activity-signups.spec.ts",
+          "line": 623,
+          "title": "organizer downloads one-row responses and member details with filters and private access",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 5176,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "activity-signups.spec.ts",
+          "line": 815,
+          "title": "editor templates, text import, undo redo and exported JSON preserve editable settings",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 4319,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "activity-signups.spec.ts",
+          "line": 890,
+          "title": "complex branches recompute on back navigation and persist only the actual path",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 5717,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "activity-signups.spec.ts",
+          "line": 1021,
+          "title": "template library previews real branches and designer manages logic safely",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 9407,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "activity-signups.spec.ts",
+          "line": 1113,
+          "title": "AI creation preserves current content on failure and previews editable generated drafts",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 4087,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "activity-signups.spec.ts",
+          "line": 1173,
+          "title": "AI streaming, refinement and 5–6 member registration work through save, validation and export",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 12567,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "activity-signups.spec.ts",
+          "line": 1378,
+          "title": "saved roster answers prefill edits, survive failed PATCH and adapt to a changed form",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 21275,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "activity-signups.spec.ts",
+          "line": 1492,
+          "title": "AI endpoint enforces manager authorization and serves a real generated draft",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 3706,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "club-integration.spec.ts",
+          "line": 51,
+          "title": "五类问卷入口双轴居中，短屏/滚动/关闭与Escape返回焦点，预览不产生报名",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 25317,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "club-integration.spec.ts",
+          "line": 105,
+          "title": "骨干录用独立于入队；成立/招新/录取→简介opt-in→荣誉复审→撤权与同ID重录保持门禁",
+          "result": "fail",
+          "actualStatus": "timedOut",
+          "durationMs": 241179,
+          "errors": [
+            "Test timeout of 240000ms exceeded.",
+            "Error: locator.click: Test timeout of 240000ms exceeded.\nCall log:\n  - waiting for getByRole('link', { name: /我的代表队与入队申请/ })\n\n\n  229 |     expect((await request.get(archiveURL)).status()).toBe(404);\n  230 |     expect((await other.request.get(\"/api/team-core?mode=recruitment&id=\" + recruitment.id, { headers: origin })).status()).toBe(404);\n> 231 |     await page.goto(\"/account\"); await page.getByRole(\"link\", { name: /我的代表队与入队申请/ }).click(); await expect(page).toHaveURL(/\\/teams\\/recruitment$/);\n      |                                                                                       ^\n  232 |     await expect(page.getByRole(\"navigation\", { name: \"参与方式\", exact: true }).getByRole(\"link\", { name: \"骨干招新\", exact: true })).toHaveAttribute(\"href\", \"/join/staff\");\n  233 |   } finally { await Promise.all([highContext.close(), managerContext.close(), otherContext.close(), crossContext.close()]); }\n  234 | });\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/club-integration.spec.ts:231:87"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-integration-骨干录用独立于入队-92a56-→简介opt-in→荣誉复审→撤权与同ID重录保持门禁/test-failed-1.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-integration-骨干录用独立于入队-92a56-→简介opt-in→荣誉复审→撤权与同ID重录保持门禁/test-failed-3.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-integration-骨干录用独立于入队-92a56-→简介opt-in→荣誉复审→撤权与同ID重录保持门禁/test-failed-4.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-integration-骨干录用独立于入队-92a56-→简介opt-in→荣誉复审→撤权与同ID重录保持门禁/test-failed-2.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-integration-骨干录用独立于入队-92a56-→简介opt-in→荣誉复审→撤权与同ID重录保持门禁/test-failed-5.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-integration-骨干录用独立于入队-92a56-→简介opt-in→荣誉复审→撤权与同ID重录保持门禁/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-integration-骨干录用独立于入队-92a56-→简介opt-in→荣誉复审→撤权与同ID重录保持门禁/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "club-integration.spec.ts",
+          "line": 236,
+          "title": "荣誉本人分页保留队伍和社群；断网与丢响应保留附件，并先核对已写入结果",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 19664,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "club-operations.spec.ts",
+          "line": 37,
+          "title": "人工进群完整回执、后台确认、隐私隔离及旧会话撤权",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 27395,
+          "errors": [
+            "Error: expect(locator).toBeVisible() failed\n\nLocator: getByText('暂无待处理进群意向。', { exact: true })\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 15000ms\n  - waiting for getByText('暂无待处理进群意向。', { exact: true })\n\n\n  60 |     await expect(managerPage.getByText(\"管理员已确认好友通过 · 等待人工拉群\", { exact: true })).toBeVisible();\n  61 |     await managerPage.getByRole(\"button\", { name: \"已人工拉群，确认进群\" }).click();\n> 62 |     await expect(managerPage.getByText(\"暂无待处理进群意向。\", { exact: true })).toBeVisible();\n     |                                                                        ^\n  63 |     await page.reload(); await expect(page.getByRole(\"status\").filter({ hasText: \"管理员已人工确认进群\" })).toBeVisible();\n  64 |     await page.goto(\"/account\"); await expect(page.getByText(\"已有管理员人工确认进群\", { exact: true })).toBeVisible();\n  65 |     const endpoint = `/api/activities/community-posts/${post}/signup`;\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/club-operations.spec.ts:62:72"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-operations-人工进群完整回执、后台确认、隐私隔离及旧会话撤权/test-failed-1.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-operations-人工进群完整回执、后台确认、隐私隔离及旧会话撤权/test-failed-2.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-operations-人工进群完整回执、后台确认、隐私隔离及旧会话撤权/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-operations-人工进群完整回执、后台确认、隐私隔离及旧会话撤权/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "club-operations.spec.ts",
+          "line": 85,
+          "title": "预览居中、进群空态、联系兜底及四个响应式断点",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 20218,
+          "errors": [
+            "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('link', { name: '申请组织已有或新游戏社群', exact: true })\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 15000ms\n  - waiting for getByRole('link', { name: '申请组织已有或新游戏社群', exact: true })\n\n\n   99 |     await page.goto(`/community/${slug}/join`); expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);\n  100 |     await page.goto(\"/contact\"); expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);\n> 101 |     await expect(page.getByRole(\"link\", { name: \"申请组织已有或新游戏社群\", exact: true })).toBeVisible();\n      |                                                                                 ^\n  102 |     expect(await page.locator('main a[href=\"/contact\"]').count()).toBe(0);\n  103 |   }\n  104 |   expect((await new AxeBuilder({ page }).withTags([\"wcag2a\", \"wcag2aa\", \"wcag21aa\"]).analyze()).violations).toEqual([]);\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/club-operations.spec.ts:101:81"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-operations-预览居中、进群空态、联系兜底及四个响应式断点/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-operations-预览居中、进群空态、联系兜底及四个响应式断点/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-operations-预览居中、进群空态、联系兜底及四个响应式断点/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "club-operations.spec.ts",
+          "line": 109,
+          "title": "模板预览返回可继续键盘操作，关闭及Escape恢复制作入口焦点",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 4617,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "club-recovery.spec.ts",
+          "line": 32,
+          "title": "只读成员可从详情与工作台查看报名，独立导出且不可编辑/越权，撤销后旧会话立即失效",
+          "result": "fail",
+          "actualStatus": "timedOut",
+          "durationMs": 90458,
+          "errors": [
+            "Test timeout of 90000ms exceeded.",
+            "Error: locator.click: Test timeout of 90000ms exceeded.\nCall log:\n  - waiting for getByRole('link', { name: '查看报名与统计', exact: true })\n\n\n  73 |     await expect(page.getByRole(\"heading\", { name: \"跨社群拒绝测试活动\", exact: true })).toHaveCount(0);\n  74 |     await expect(page.getByRole(\"link\", { name: \"编辑与统计\", exact: true })).toHaveCount(0);\n> 75 |     await page.getByRole(\"link\", { name: \"查看报名与统计\", exact: true }).click();\n     |                                                                    ^\n  76 |     await expect(page).toHaveURL(new RegExp(`/activities/community-posts/${post}/signups$`));\n  77 |     await expect(page.getByRole(\"heading\", { name: \"统计与导出\", exact: true })).toBeVisible();\n  78 |     reader = await p.update({ collection: \"users\", id: reader.id, user: leader, overrideAccess: false, data: { communityOffices: reader.communityOffices!.map(office => ({ ...office, exportSignups: true })) } });\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/club-recovery.spec.ts:75:68"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-recovery-只读成员可从详情与工作台查看报名，独立导出且不可编辑-越权，撤销后旧会话立即失效/test-failed-1.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-recovery-只读成员可从详情与工作台查看报名，独立导出且不可编辑-越权，撤销后旧会话立即失效/test-failed-2.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-recovery-只读成员可从详情与工作台查看报名，独立导出且不可编辑-越权，撤销后旧会话立即失效/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/club-recovery-只读成员可从详情与工作台查看报名，独立导出且不可编辑-越权，撤销后旧会话立即失效/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "club-theme.spec.ts",
+          "line": 253,
+          "title": "负责页面在四个视口无溢出、标题清晰并通过正文无障碍扫描",
+          "result": "notrun",
+          "actualStatus": "skipped",
+          "durationMs": 0,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "club-theme.spec.ts",
+          "line": 334,
+          "title": "微信名片未同意仍阻止提交，提示精确且键盘焦点可见",
+          "result": "notrun",
+          "actualStatus": "skipped",
+          "durationMs": 0,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "club-theme.spec.ts",
+          "line": 381,
+          "title": "队员简介预览、返回、取消与空态沿用原流程",
+          "result": "notrun",
+          "actualStatus": "skipped",
+          "durationMs": 0,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "club-theme.spec.ts",
+          "line": 460,
+          "title": "简介实际请求的加载、网络失败和重试状态可用",
+          "result": "notrun",
+          "actualStatus": "skipped",
+          "durationMs": 0,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "club-theme.spec.ts",
+          "line": 502,
+          "title": "两套局部主题在实际页面即时切换，保留输入与同意状态",
+          "result": "notrun",
+          "actualStatus": "skipped",
+          "durationMs": 0,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "club-theme.spec.ts",
+          "line": 534,
+          "title": "无显式主题属性时，系统深色仍使用局部浅色方案",
+          "result": "notrun",
+          "actualStatus": "skipped",
+          "durationMs": 0,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "club-theme.spec.ts",
+          "line": 549,
+          "title": "真实提交等待与中断状态保持可读，已填资料不丢失",
+          "result": "notrun",
+          "actualStatus": "skipped",
+          "durationMs": 0,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "club-visual.spec.ts",
+          "line": 223,
+          "title": "负责页面在四个视口无溢出、标题清晰并通过正文无障碍扫描",
+          "result": "notrun",
+          "actualStatus": "skipped",
+          "durationMs": 0,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "club-visual.spec.ts",
+          "line": 299,
+          "title": "微信名片未同意仍阻止提交，提示精确且键盘焦点可见",
+          "result": "notrun",
+          "actualStatus": "skipped",
+          "durationMs": 0,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "club-visual.spec.ts",
+          "line": 346,
+          "title": "队员简介预览、返回、取消与空态沿用原流程",
+          "result": "notrun",
+          "actualStatus": "skipped",
+          "durationMs": 0,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "club-visual.spec.ts",
+          "line": 425,
+          "title": "简介实际请求的加载、网络失败和重试状态可用",
+          "result": "notrun",
+          "actualStatus": "skipped",
+          "durationMs": 0,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "community-application.spec.ts",
+          "line": 44,
+          "title": "完整申请、备案提示、私有二维码、社长查看全部资料后批准",
+          "result": "fail",
+          "actualStatus": "timedOut",
+          "durationMs": 91156,
+          "errors": [
+            "Test timeout of 90000ms exceeded.",
+            "Error: locator.uncheck: Test timeout of 90000ms exceeded.\nCall log:\n  - waiting for getByRole('checkbox', { name: '允许在任期间' })\n\n\n  120 |   await page.context().clearCookies(); await login(page, applicant);\n  121 |   await page.goto(\"/community/apply\");\n> 122 |   await page.getByRole(\"checkbox\", { name: \"允许在任期间\", exact: false }).uncheck();\n      |                                                                      ^\n  123 |   await page.getByRole(\"button\", { name: \"保存名片与展示设置\", exact: true }).click();\n  124 |   await expect(page.getByRole(\"status\").first()).toContainText(\"名片及展示设置已更新\");\n  125 |   const created = await p.findByID({ collection: \"games\", id: game, overrideAccess: true });\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/community-application.spec.ts:122:70"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-application-完整申请、备案提示、私有二维码、社长查看全部资料后批准/test-failed-1.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-application-完整申请、备案提示、私有二维码、社长查看全部资料后批准/test-failed-2.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-application-完整申请、备案提示、私有二维码、社长查看全部资料后批准/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-application-完整申请、备案提示、私有二维码、社长查看全部资料后批准/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "community-application.spec.ts",
+          "line": 129,
+          "title": "无效二维码被拒绝并保留填写资料",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 4530,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "community-application.spec.ts",
+          "line": 144,
+          "title": "历史false或缺失授权不可批准，退回后本人明确同意再重提同一编号",
+          "result": "notrun",
+          "actualStatus": "skipped",
+          "durationMs": 151,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "community-spaces.spec.ts",
+          "line": 35,
+          "title": "多管理员微信、只读活动、网页风采投稿审核及B站预览",
+          "result": "fail",
+          "actualStatus": "timedOut",
+          "durationMs": 100376,
+          "errors": [
+            "Test timeout of 90000ms exceeded.",
+            "Error: page.goto: Test ended.\nCall log:\n  - navigating to \"http://localhost:3000/community/spaces-1791909913921/showcase?view=review\", waiting until \"load\"\n\n\n  63 |   await managerPage.goto(`/community/${slug}/showcase`); await expect(managerPage.getByRole(\"heading\", { name: \"精彩活动图文记录\" })).toHaveCount(0);\n  64 |   await managerPage.goto(\"/login\"); await managerPage.getByLabel(\"昵称或邮箱\").fill(admin.name); await managerPage.getByLabel(\"密码\", { exact: true }).fill(password); await managerPage.getByRole(\"button\", { name: \"登录\", exact: true }).click(); await expect(managerPage).toHaveURL(/\\/account$/);\n> 65 |   await managerPage.goto(`/community/${slug}/showcase?view=review`); await managerPage.getByRole(\"button\", { name: \"批准发布\" }).click();\n     |                     ^\n  66 |   await expect(managerPage.getByRole(\"status\")).toContainText(\"审核已保存\");\n  67 |   await page.goto(`/community/${slug}/showcase`); await expect(page.getByRole(\"heading\", { name: \"精彩活动图文记录\" })).toBeVisible();\n  68 |   await expect(page.locator(\".showcase-images img\")).toHaveCount(1);\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/community-spaces.spec.ts:65:21"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-spaces-多管理员微信、只读活动、网页风采投稿审核及B站预览/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-spaces-多管理员微信、只读活动、网页风采投稿审核及B站预览/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-spaces-多管理员微信、只读活动、网页风采投稿审核及B站预览/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "community-spaces.spec.ts",
+          "line": 78,
+          "title": "仅标题投稿与 MP4 审核、播放、拖动和隐藏权限",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 7269,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "community.spec.ts",
+          "line": 55,
+          "title": "社群保留通知、风采和微信入口，已移除论坛与聊天",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 16776,
+          "errors": [
+            "Error: expect(locator).toHaveCount(expected) failed\n\nLocator:  getByRole('navigation', { name: '社群分区' }).getByRole('link')\nExpected: 3\nReceived: 4\nTimeout:  15000ms\n\nCall log:\n  - Expect \"toHaveCount\" with timeout 15000ms\n  - waiting for getByRole('navigation', { name: '社群分区' }).getByRole('link')\n    19 × locator resolved to 4 elements\n       - unexpected value \"4\"\n\n\n  58 |   await expect(page.getByRole(\"textbox\")).toHaveCount(0);\n  59 |   const sections = page.getByRole(\"navigation\", { name: \"社群分区\" });\n> 60 |   await expect(sections.getByRole(\"link\")).toHaveCount(3);\n     |                                            ^\n  61 |   for (const [name, section] of [[\"活动与通知\", \"updates\"], [\"社群风采\", \"showcase\"], [\"进群进度\", \"join\"]])\n  62 |     await expect(sections.getByRole(\"link\", { name, exact: true })).toHaveAttribute(\"href\", `/community/${slug}/${section}`);\n  63 |   await expect(page.locator('a[href*=\"/chat\"]')).toHaveCount(0);\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/community.spec.ts:60:44"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-社群保留通知、风采和微信入口，已移除论坛与聊天/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-社群保留通知、风采和微信入口，已移除论坛与聊天/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-社群保留通知、风采和微信入口，已移除论坛与聊天/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "community.spec.ts",
+          "line": 74,
+          "title": "旧聊天页面和接口对访客及登录用户都返回404，拒绝发送和修改",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 2542,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "community.spec.ts",
+          "line": 87,
+          "title": "访客仅活动通知可用，直接社群接口与伪造会话被拒绝",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 3851,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "community.spec.ts",
+          "line": 103,
+          "title": "邮箱也可登录同一账号，错误登录统一提示",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 15738,
+          "errors": [
+            "Error: expect(locator).toHaveText(expected) failed\n\nLocator: getByRole('status')\nExpected: \"昵称、邮箱或密码错误\"\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toHaveText\" with timeout 15000ms\n  - waiting for getByRole('status')\n\n\n  107 |     await page.getByLabel(\"密码\", { exact: true }).fill(secret);\n  108 |     await page.getByRole(\"button\", { name: \"登录\", exact: true }).click();\n> 109 |     await expect(page.getByRole(\"status\")).toHaveText(\"昵称、邮箱或密码错误\");\n      |                                            ^\n  110 |   }\n  111 |   await page.goto(\"/login\");\n  112 |   await page.getByLabel(\"昵称或邮箱\").fill(email.toUpperCase());\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/community.spec.ts:109:44"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-邮箱也可登录同一账号，错误登录统一提示/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-邮箱也可登录同一账号，错误登录统一提示/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-邮箱也可登录同一账号，错误登录统一提示/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "community.spec.ts",
+          "line": 119,
+          "title": "注册拒绝已占用昵称且没有数字账户输入",
+          "result": "fail",
+          "actualStatus": "timedOut",
+          "durationMs": 90335,
+          "errors": [
+            "Test timeout of 90000ms exceeded.",
+            "Error: locator.fill: Test timeout of 90000ms exceeded.\nCall log:\n  - waiting for locator('form.registration-form').getByLabel('邮箱前缀')\n\n\n  121 |   await expect(page.locator('input[name=\"account\"]')).toHaveCount(0);\n  122 |   const form = page.locator(\"form.registration-form\");\n> 123 |   await form.getByLabel(\"邮箱前缀\").fill(`new-${suffix}`);\n      |                                 ^\n  124 |   await form.locator('input[name=\"name\"]').fill(nickname.toUpperCase());\n  125 |   await form.locator('input[name=\"password\"]').fill(password);\n  126 |   await form.locator('input[name=\"confirm\"]').fill(password);\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/community.spec.ts:123:33"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-注册拒绝已占用昵称且没有数字账户输入/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-注册拒绝已占用昵称且没有数字账户输入/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-注册拒绝已占用昵称且没有数字账户输入/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "community.spec.ts",
+          "line": 140,
+          "title": "昵称登录、论坛关闭与社群只读导航",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 18273,
+          "errors": [
+            "Error: expect(locator).toContainText(expected) failed\n\nLocator: locator('main h1')\nExpected substring: \"Shin-1791910182875\"\nReceived string:    \"我的紫荆\"\nTimeout: 15000ms\n\nCall log:\n  - Expect \"toContainText\" with timeout 15000ms\n  - waiting for locator('main h1')\n    18 × locator resolved to <h1>我的紫荆</h1>\n       - unexpected value \"我的紫荆\"\n\n\n  144 |   await page.getByRole(\"button\", { name: \"登录\", exact: true }).click();\n  145 |   await expect(page).toHaveURL(/\\/account$/);\n> 146 |   await expect(page.locator(\"main h1\")).toContainText(nickname);\n      |                                         ^\n  147 |   for (const width of [390, 1440]) {\n  148 |     await page.setViewportSize({ width, height: 900 });\n  149 |     for (const route of [\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/community.spec.ts:146:41"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-昵称登录、论坛关闭与社群只读导航/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-昵称登录、论坛关闭与社群只读导航/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/community-昵称登录、论坛关闭与社群只读导航/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "content-promotions.spec.ts",
+          "line": 42,
+          "title": "活动网页申请/撤回/退回/重提/审核/改稿复审及主动升降级，报名ID与隐私权限保持",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 35013,
+          "errors": [
+            "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('status')\nExpected substring: \"升推结果已保存\"\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" with timeout 15000ms\n  - waiting for getByRole('status')\n    3 × locator resolved to <p tabindex=\"-1\" role=\"status\" class=\"Workspace_feedback__UdV4X\">正在保存，请稍候…</p>\n      - unexpected value \"正在保存，请稍候…\"\n\n\n  65 |     const record = staff.locator('[data-promotion-record=\"' + pending.id + '\"]');\n  66 |     await record.getByLabel(\"审核意见（退回或拒绝必填）\").fill(\"请补充活动安排\");\n> 67 |     await record.getByRole(\"button\", { name: \"退回修改\", exact: true }).click(); await expect(staff.getByRole(\"status\")).toContainText(\"升推结果已保存\");\n     |                                                                                                                      ^\n  68 |     const staffSource = staff.locator('[data-promotion-source=\"community-posts:' + post + '\"]');\n  69 |     await expect(staffSource).toContainText(\"已退回\");\n  70 |     await page.goto(\"/community/promotions\"); await expect(source).toContainText(\"请补充活动安排\");\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/content-promotions.spec.ts:67:118"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-活动网页申请-撤回-退回-重提-审核-改稿复审及主动升降级，报名ID与隐私权限保持/test-failed-1.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-活动网页申请-撤回-退回-重提-审核-改稿复审及主动升降级，报名ID与隐私权限保持/test-failed-2.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-活动网页申请-撤回-退回-重提-审核-改稿复审及主动升降级，报名ID与隐私权限保持/test-failed-3.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-活动网页申请-撤回-退回-重提-审核-改稿复审及主动升降级，报名ID与隐私权限保持/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-活动网页申请-撤回-退回-重提-审核-改稿复审及主动升降级，报名ID与隐私权限保持/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "content-promotions.spec.ts",
+          "line": 101,
+          "title": "公告网页申请由宣传部骨干审核，社团首页链接原公告且不出现报名",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 24932,
+          "errors": [
+            "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('status')\nExpected substring: \"升推结果已保存\"\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" with timeout 15000ms\n  - waiting for getByRole('status')\n    3 × locator resolved to <p tabindex=\"-1\" role=\"status\" class=\"Workspace_feedback__UdV4X\">正在保存，请稍候…</p>\n      - unexpected value \"正在保存，请稍候…\"\n\n\n  112 |     const pending = (await p.find({ collection: \"content-promotions\", user: admin, overrideAccess: false, where: { sourceKey: { equals: \"community-posts:\" + notice.id } } })).docs[0];\n  113 |     const staff = await staffContext.newPage(); await login(staff, publicity); await staff.goto(\"/community/promotions?view=review\");\n> 114 |     await staff.locator('[data-promotion-record=\"' + pending.id + '\"]').getByRole(\"button\", { name: \"通过升推\", exact: true }).click(); await expect(staff.getByRole(\"status\")).toContainText(\"升推结果已保存\");\n      |                                                                                                                                                                             ^\n  115 |     await expect(staff.locator('[data-promotion-source=\"community-posts:' + notice.id + '\"]')).toContainText(\"已升推\");\n  116 |     await page.goto(\"/\"); const projected = page.locator('[data-section=\"promoted-notice\"] [data-promotion-source=\"community-posts:' + notice.id + '\"]');\n  117 |     await expect(projected.getByRole(\"link\", { name: \"合成网页升推公告\", exact: true })).toHaveAttribute(\"href\", sourcePath);\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/content-promotions.spec.ts:114:173"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-公告网页申请由宣传部骨干审核，社团首页链接原公告且不出现报名/test-failed-1.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-公告网页申请由宣传部骨干审核，社团首页链接原公告且不出现报名/test-failed-2.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-公告网页申请由宣传部骨干审核，社团首页链接原公告且不出现报名/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-公告网页申请由宣传部骨干审核，社团首页链接原公告且不出现报名/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "content-promotions.spec.ts",
+          "line": 122,
+          "title": "风采本地批准后网页申请升推，隐藏关闭首页且重新公开仍需复审",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 18339,
+          "errors": [
+            "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('status').filter({ hasText: '审核已保存' })\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 15000ms\n  - waiting for getByRole('status').filter({ hasText: '审核已保存' })\n\n\n  129 |     let card = page.locator(\"#showcase-\" + source.id); await expect(card.getByRole(\"link\", { name: \"申请社团级展示\" })).toHaveCount(0);\n  130 |     await card.getByRole(\"button\", { name: \"批准发布\", exact: true }).click();\n> 131 |     await expect(page.getByRole(\"status\").filter({ hasText: \"审核已保存\" })).toBeVisible();\n      |                                                                         ^\n  132 |     const newerPosts = async (start: number) => {\n  133 |       for (let i = start; i < start + 7; i++) {\n  134 |         const newer = await p.create({ collection: \"community-showcase\", user: admin, overrideAccess: false, context: { webShowcaseWrite: true },\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/content-promotions.spec.ts:131:73"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-风采本地批准后网页申请升推，隐藏关闭首页且重新公开仍需复审/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-风采本地批准后网页申请升推，隐藏关闭首页且重新公开仍需复审/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-风采本地批准后网页申请升推，隐藏关闭首页且重新公开仍需复审/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "content-promotions.spec.ts",
+          "line": 169,
+          "title": "外链风采保留社群展示，在同一风采上传受控视频后才可审核升推",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 25335,
+          "errors": [
+            "Error: expect(locator).toContainText(expected) failed\n\nLocator: locator('[data-promotion-source=\"community-showcase:5\"]')\nExpected substring: \"已升推\"\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" with timeout 15000ms\n  - waiting for locator('[data-promotion-source=\"community-showcase:5\"]')\n\n\n  207 |     const pending = (await p.find({ collection: \"content-promotions\", user: admin, overrideAccess: false, where: { sourceKey: { equals: \"community-showcase:\" + source.id } } })).docs[0];\n  208 |     await staff.goto(\"/community/promotions?view=review\"); await staff.locator('[data-promotion-record=\"' + pending.id + '\"]').getByRole(\"button\", { name: \"通过升推\", exact: true }).click();\n> 209 |     await expect(staff.locator('[data-promotion-source=\"community-showcase:' + source.id + '\"]')).toContainText(\"已升推\");\n      |                                                                                                   ^\n  210 |     await page.goto(\"/\"); await expect(page.locator('[data-section=\"promoted-showcase\"] [data-promotion-source=\"community-showcase:' + source.id + '\"]')).toBeVisible();\n  211 |   } finally { await staffContext.close(); }\n  212 | });\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/content-promotions.spec.ts:209:99"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-外链风采保留社群展示，在同一风采上传受控视频后才可审核升推/test-failed-1.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-外链风采保留社群展示，在同一风采上传受控视频后才可审核升推/test-failed-2.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-外链风采保留社群展示，在同一风采上传受控视频后才可审核升推/test-failed-3.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-外链风采保留社群展示，在同一风采上传受控视频后才可审核升推/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/content-promotions-外链风采保留社群展示，在同一风采上传受控视频后才可审核升推/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "design-refresh.spec.ts",
+          "line": 6,
+          "title": "member and community reading layouts at 320px",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 3395,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "design-refresh.spec.ts",
+          "line": 6,
+          "title": "member and community reading layouts at 390px",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 5745,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "design-refresh.spec.ts",
+          "line": 6,
+          "title": "member and community reading layouts at 768px",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 2785,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "design-refresh.spec.ts",
+          "line": 6,
+          "title": "member and community reading layouts at 1440px",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 5149,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "design-refresh.spec.ts",
+          "line": 40,
+          "title": "registration guidance, server feedback and unique mobile community navigation",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 17097,
+          "errors": [
+            "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('status')\nExpected substring: \"错误\"\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" with timeout 15000ms\n  - waiting for getByRole('status')\n\n\n  58 |     .fill(\"invalid-design-password\");\n  59 |   await page.getByRole(\"button\", { name: \"登录\", exact: true }).click();\n> 60 |   await expect(page.getByRole(\"status\")).toContainText(\"错误\");\n     |                                          ^\n  61 |   await expect(\n  62 |     page.getByRole(\"button\", { name: \"登录\", exact: true }),\n  63 |   ).toBeEnabled();\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/design-refresh.spec.ts:60:42"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/design-refresh-registratio-e9c5e-mobile-community-navigation/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/design-refresh-registratio-e9c5e-mobile-community-navigation/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/design-refresh-registratio-e9c5e-mobile-community-navigation/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "rebuild-account.spec.ts",
+          "line": 54,
+          "title": "登录错误就地聚焦，密码显隐和主题切换保留输入",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 2088,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "rebuild-account.spec.ts",
+          "line": 83,
+          "title": "注册与恢复校验保留输入，不发送真实邮件",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 5909,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "rebuild-account.spec.ts",
+          "line": 138,
+          "title": "本人事务与权限入口、深链和退出完整导航",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 6384,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "rebuild-account.spec.ts",
+          "line": 187,
+          "title": "长文、旧荣誉链接与管理角色仍走原授权",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 9419,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "rebuild-activity.spec.ts",
+          "line": 44,
+          "title": "activity detail to questionnaire: validation, theme retention, failed write, receipt and one record",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 7297,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "rebuild-activity.spec.ts",
+          "line": 82,
+          "title": "staff batch business refusal preserves fields then saves the same draft record",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 10265,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "rebuild-shell.spec.ts",
+          "line": 16,
+          "title": "rebuild member routes preserve one title and fit 320px",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 4687,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "rebuild-shell.spec.ts",
+          "line": 16,
+          "title": "rebuild member routes preserve one title and fit 390px",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 4711,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "rebuild-shell.spec.ts",
+          "line": 16,
+          "title": "rebuild member routes preserve one title and fit 768px",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 5163,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "rebuild-shell.spec.ts",
+          "line": 16,
+          "title": "rebuild member routes preserve one title and fit 1024px",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 5399,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "rebuild-shell.spec.ts",
+          "line": 16,
+          "title": "rebuild member routes preserve one title and fit 1440px",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 6136,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "rebuild-shell.spec.ts",
+          "line": 35,
+          "title": "rebuild uses light SSR on a dark system before hydration and keeps native mobile navigation",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 1630,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "rebuild-shell.spec.ts",
+          "line": 54,
+          "title": "rebuild theme control preserves text, files, consent and exact error; dark preference reaches fresh SSR",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 3848,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "rebuild-shell.spec.ts",
+          "line": 105,
+          "title": "rebuild keyboard entry, reduced motion and key pages remain accessible in both themes",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 11307,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "rebuild-shell.spec.ts",
+          "line": 124,
+          "title": "rebuild missing content offers a usable return path and expired sessions cannot read member areas",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 1337,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "redesign.spec.ts",
+          "line": 7,
+          "title": "desktop navigation exposes the current section",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 1098,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "redesign.spec.ts",
+          "line": 16,
+          "title": "mobile menu closes on navigation, Escape and outside interaction",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 1439,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "redesign.spec.ts",
+          "line": 40,
+          "title": "mobile navigation remains operable without JavaScript",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 769,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "redesign.spec.ts",
+          "line": 54,
+          "title": "reduced motion and essential interface accessibility",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 2383,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "redesign.spec.ts",
+          "line": 68,
+          "title": "redesign responsive routes at 320px",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 3397,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "redesign.spec.ts",
+          "line": 68,
+          "title": "redesign responsive routes at 390px",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 3169,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "redesign.spec.ts",
+          "line": 68,
+          "title": "redesign responsive routes at 768px",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 3124,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "redesign.spec.ts",
+          "line": 68,
+          "title": "redesign responsive routes at 1080px",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 3294,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "redesign.spec.ts",
+          "line": 68,
+          "title": "redesign responsive routes at 1440px",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 3308,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "redesign.spec.ts",
+          "line": 68,
+          "title": "redesign responsive routes at 1920px",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 3456,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "registration-email.spec.ts",
+          "line": 4,
+          "title": "邮箱只填一次，前后缀同栏，后缀可选择也可直接输入",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 5394,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "registration-flow.spec.ts",
+          "line": 101,
+          "title": "点击注册后弹窗验证，错误验证码不入库，正确验证码才创建用户",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 19800,
+          "errors": [
+            "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('dialog', { name: '验证邮箱', exact: true }).getByRole('status')\nExpected substring: \"验证码错误\"\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" with timeout 15000ms\n  - waiting for getByRole('dialog', { name: '验证邮箱', exact: true }).getByRole('status')\n\n\n  131 |     .fill(code === \"000000\" ? \"999999\" : \"000000\");\n  132 |   await dialog.getByRole(\"button\", { name: \"确认验证码并完成注册\" }).click();\n> 133 |   await expect(dialog.getByRole(\"status\")).toContainText(\"验证码错误\");\n      |                                            ^\n  134 |   expect(await count(names[0])).toBe(0);\n  135 |   await dialog.getByLabel(\"六位验证码\").fill(code!);\n  136 |   await dialog.getByRole(\"button\", { name: \"确认验证码并完成注册\" }).click();\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/registration-flow.spec.ts:133:44"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-点击注册后弹窗验证，错误验证码不入库，正确验证码才创建用户/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-点击注册后弹窗验证，错误验证码不入库，正确验证码才创建用户/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-点击注册后弹窗验证，错误验证码不入库，正确验证码才创建用户/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "registration-flow.spec.ts",
+          "line": 146,
+          "title": "关闭弹窗保留输入且不创建账号，重发限制在服务端执行",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 20008,
+          "errors": [
+            "Error: expect(locator).toContainText(expected) failed\n\nLocator: locator('.registration-form').getByRole('status')\nExpected substring: \"60 秒\"\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" with timeout 15000ms\n  - waiting for locator('.registration-form').getByRole('status')\n\n\n  156 |   await expect(\n  157 |     page.locator(\".registration-form\").getByRole(\"status\"),\n> 158 |   ).toContainText(\"60 秒\");\n      |     ^\n  159 | });\n  160 |\n  161 | test(\"发送失败保留资料且不创建账号\", async ({ page }) => {\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/registration-flow.spec.ts:158:5"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-关闭弹窗保留输入且不创建账号，重发限制在服务端执行/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-关闭弹窗保留输入且不创建账号，重发限制在服务端执行/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-关闭弹窗保留输入且不创建账号，重发限制在服务端执行/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "registration-flow.spec.ts",
+          "line": 161,
+          "title": "发送失败保留资料且不创建账号",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 19266,
+          "errors": [
+            "Error: expect(locator).toContainText(expected) failed\n\nLocator: locator('.registration-form').getByRole('status')\nExpected substring: \"验证码发送失败\"\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" with timeout 15000ms\n  - waiting for locator('.registration-form').getByRole('status')\n\n\n  165 |   await expect(\n  166 |     page.locator(\".registration-form\").getByRole(\"status\"),\n> 167 |   ).toContainText(\"验证码发送失败\");\n      |     ^\n  168 |   await expect(page.getByRole(\"dialog\")).not.toBeVisible();\n  169 |   await expect(page.locator('input[name=\"name\"]')).toHaveValue(names[2]);\n  170 |   expect(await count(names[2])).toBe(0);\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/registration-flow.spec.ts:167:5"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-发送失败保留资料且不创建账号/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-发送失败保留资料且不创建账号/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/registration-flow-发送失败保留资料且不创建账号/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "signup-authority.spec.ts",
+          "line": 29,
+          "title": "站点活动A→B：旧范围拒绝列表/单条/导出，本人回执及骨干边界保留",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 7297,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "signup-authority.spec.ts",
+          "line": 29,
+          "title": "站点活动NULL→B：旧范围拒绝列表/单条/导出，本人回执及骨干边界保留",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 6708,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "site.spec.ts",
+          "line": 48,
+          "title": "后台登录、创建活动草稿、预览、发布、访客查看、撤下",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 20839,
+          "errors": [
+            "Error: expect(locator).toBeVisible() failed\n\nLocator: getByText('鉴权草稿预览')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 15000ms\n  - waiting for getByText('鉴权草稿预览')\n\n\n  68 |   ).toBeVisible();\n  69 |   await page.goto(`/preview/events/${eventID}`);\n> 70 |   await expect(page.getByText(\"鉴权草稿预览\")).toBeVisible();\n     |                                          ^\n  71 |   await expect(page.getByRole(\"heading\", { level: 1 })).toHaveText(\n  72 |     \"浏览器验收 · 活动发布全链路\",\n  73 |   );\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/site.spec.ts:70:42"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-后台登录、创建活动草稿、预览、发布、访客查看、撤下/test-failed-1.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-后台登录、创建活动草稿、预览、发布、访客查看、撤下/test-failed-2.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-后台登录、创建活动草稿、预览、发布、访客查看、撤下/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-后台登录、创建活动草稿、预览、发布、访客查看、撤下/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "site.spec.ts",
+          "line": 122,
+          "title": "404 HTTP 状态与预览环境不收录",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 632,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "site.spec.ts",
+          "line": 134,
+          "title": "公开 API、预览、首次注册与分部越权拒绝",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 693,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "site.spec.ts",
+          "line": 201,
+          "title": "公开页可访问性、CSP 与实际加载指标",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 3284,
+          "errors": [
+            "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  -  1\n+ Received  + 58\n\n- Array []\n+ Array [\n+   Object {\n+     \"description\": \"Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds\",\n+     \"help\": \"Elements must meet minimum color contrast ratio thresholds\",\n+     \"helpUrl\": \"https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright\",\n+     \"id\": \"color-contrast\",\n+     \"impact\": \"serious\",\n+     \"nodes\": Array [\n+       Object {\n+         \"all\": Array [],\n+         \"any\": Array [\n+           Object {\n+             \"data\": Object {\n+               \"bgColor\": \"#6f2d67\",\n+               \"contrastRatio\": 1.72,\n+               \"expectedContrastRatio\": \"4.5:1\",\n+               \"fgColor\": \"#202124\",\n+               \"fontSize\": \"11.3pt (15px)\",\n+               \"fontWeight\": \"normal\",\n+               \"messageKey\": null,\n+             },\n+             \"id\": \"color-contrast\",\n+             \"impact\": \"serious\",\n+             \"message\": \"Element has insufficient color contrast of 1.72 (foreground color: #202124, background color: #6f2d67, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1\",\n+             \"relatedNodes\": Array [\n+               Object {\n+                 \"html\": \"<a class=\\\"ActivityPages_primary__UGpHy\\\" href=\\\"/events\\\">浏览活动</a>\",\n+                 \"target\": Array [\n+                   \".ActivityPages_primary__UGpHy\",\n+                 ],\n+               },\n+             ],\n+           },\n+         ],\n+         \"failureSummary\": \"Fix any of the following:\n+   Element has insufficient color contrast of 1.72 (foreground color: #202124, background color: #6f2d67, font size: 11.3pt (15px), font weight: normal). Expected contrast ratio of 4.5:1\",\n+         \"html\": \"<a class=\\\"ActivityPages_primary__UGpHy\\\" href=\\\"/events\\\">浏览活动</a>\",\n+         \"impact\": \"serious\",\n+         \"none\": Array [],\n+         \"target\": Array [\n+           \".ActivityPages_primary__UGpHy\",\n+         ],\n+       },\n+     ],\n+     \"tags\": Array [\n+       \"cat.color\",\n+       \"wcag2aa\",\n+       \"wcag143\",\n+       \"TTv5\",\n+       \"TT13.c\",\n+       \"EN-301-549\",\n+       \"EN-9.1.4.3\",\n+       \"ACT\",\n+       \"RGAAv4\",\n+       \"RGAA-3.2.1\",\n+     ],\n+   },\n+ ]\n\n  209 |       .withTags([\"wcag2a\", \"wcag2aa\", \"wcag21aa\"])\n  210 |       .analyze();\n> 211 |     expect(result.violations).toEqual([]);\n      |                               ^\n  212 |     const timing ="
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-公开页可访问性、CSP-与实际加载指标/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-公开页可访问性、CSP-与实际加载指标/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-公开页可访问性、CSP-与实际加载指标/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "site.spec.ts",
+          "line": 232,
+          "title": "三类招新、历史批次和所有公开栏目",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 1373,
+          "errors": [
+            "Error: locator.click: Error: strict mode violation: getByRole('link', { name: '演示 · members 招新批次' }) resolved to 2 elements:\n    1) <a href=\"/recruitment/demo-members\">演示 · members 招新批次</a> aka getByRole('link', { name: '演示 · members 招新批次', exact: true })\n    2) <a aria-label=\"查看演示 · members 招新批次\" href=\"/recruitment/demo-members\">查看详情 ↗</a> aka getByRole('link', { name: '查看演示 · members 招新批次' })\n\nCall log:\n  - waiting for getByRole('link', { name: '演示 · members 招新批次' })\n\n\n  236 |       page.getByRole(\"heading\", { name: \"招新批次与历史记录\" }),\n  237 |     ).toBeVisible();\n> 238 |     await page.getByRole(\"link\", { name: `演示 · ${kind} 招新批次` }).click();\n      |                                                                 ^\n  239 |     await expect(page.getByRole(\"heading\", { name: \"已关闭\" })).toBeVisible();\n  240 |     await expect(page.getByRole(\"link\", { name: /前往外部报名/ })).toHaveCount(\n  241 |       0,\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/site.spec.ts:238:65"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-三类招新、历史批次和所有公开栏目/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-三类招新、历史批次和所有公开栏目/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-三类招新、历史批次和所有公开栏目/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "site.spec.ts",
+          "line": 261,
+          "title": "首页配置即时更新、回顾关联、相册分页和长中文标题",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 16496,
+          "errors": [
+            "Error: expect(locator).toHaveCount(expected) failed\n\nLocator:  getByRole('heading', { name: '活动', exact: true })\nExpected: 1\nReceived: 0\nTimeout:  15000ms\n\nCall log:\n  - Expect \"toHaveCount\" with timeout 15000ms\n  - waiting for getByRole('heading', { name: '活动', exact: true })\n    19 × locator resolved to 0 elements\n       - unexpected value \"0\"\n\n\n  351 |     await expect(\n  352 |       page.getByRole(\"heading\", { name: \"活动\", exact: true }),\n> 353 |     ).toHaveCount(1);\n      |       ^\n  354 |     await page.setViewportSize({ width: 390, height: 900 });\n  355 |     await page.goto(`/events/${event.slug}`);\n  356 |     expect(\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/site.spec.ts:353:7"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-首页配置即时更新、回顾关联、相册分页和长中文标题/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-首页配置即时更新、回顾关联、相册分页和长中文标题/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/site-首页配置即时更新、回顾关联、相册分页和长中文标题/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "site.spec.ts",
+          "line": 411,
+          "title": "布局 360px、导航、键盘焦点与截图",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 3483,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "site.spec.ts",
+          "line": 411,
+          "title": "布局 390px、导航、键盘焦点与截图",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 2572,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "site.spec.ts",
+          "line": 411,
+          "title": "布局 768px、导航、键盘焦点与截图",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 2426,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "site.spec.ts",
+          "line": 411,
+          "title": "布局 1440px、导航、键盘焦点与截图",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 2543,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "staff-recruitment-boundaries.spec.ts",
+          "line": 66,
+          "title": "发布后保存新草稿，本人旧链接及列表回执可读，游客和他人无权，撤下后不可写",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 8551,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "staff-recruitment-boundaries.spec.ts",
+          "line": 136,
+          "title": "原生同形审核请求缺省保留内部备注，显式清空仍生效，普通申请人读取与审核均隔离",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 2518,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "staff-recruitment-boundaries.spec.ts",
+          "line": 160,
+          "title": "accepted 最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 19584,
+          "errors": [
+            "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('status').filter({ hasText: '退回或未录用须说明原因' })\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 15000ms\n  - waiting for getByRole('status').filter({ hasText: '退回或未录用须说明原因' })\n\n\n  190 |     await expect(row.getByRole(\"textbox\", { name: /^本人可见反馈/ })).toHaveValue(\"\");\n  191 |     await row.getByRole(\"button\", { name: \"退回补充\", exact: true }).click();\n> 192 |     await expect(manager.getByRole(\"status\").filter({ hasText: \"退回或未录用须说明原因\" })).toBeVisible();\n      |                                                                                  ^\n  193 |     await managementFormReady(manager, final.id);\n  194 |     await expect(row.getByRole(\"button\", { name: \"进入选拔\", exact: true })).toBeDisabled();\n  195 |     await row.getByRole(\"textbox\", { name: /^本人可见反馈/ }).fill(\"请补充合成姓名，并重新提交资料\");\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/staff-recruitment-boundaries.spec.ts:192:82"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-49524-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/test-failed-1.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-49524-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/test-failed-2.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-49524-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-49524-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "staff-recruitment-boundaries.spec.ts",
+          "line": 160,
+          "title": "rejected 最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 20530,
+          "errors": [
+            "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('status').filter({ hasText: '退回或未录用须说明原因' })\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 15000ms\n  - waiting for getByRole('status').filter({ hasText: '退回或未录用须说明原因' })\n\n\n  190 |     await expect(row.getByRole(\"textbox\", { name: /^本人可见反馈/ })).toHaveValue(\"\");\n  191 |     await row.getByRole(\"button\", { name: \"退回补充\", exact: true }).click();\n> 192 |     await expect(manager.getByRole(\"status\").filter({ hasText: \"退回或未录用须说明原因\" })).toBeVisible();\n      |                                                                                  ^\n  193 |     await managementFormReady(manager, final.id);\n  194 |     await expect(row.getByRole(\"button\", { name: \"进入选拔\", exact: true })).toBeDisabled();\n  195 |     await row.getByRole(\"textbox\", { name: /^本人可见反馈/ }).fill(\"请补充合成姓名，并重新提交资料\");\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/staff-recruitment-boundaries.spec.ts:192:82"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-67642-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/test-failed-1.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-67642-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/test-failed-2.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-67642-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-67642-最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "staff-recruitment-boundaries.spec.ts",
+          "line": 219,
+          "title": "同版本并发结果更新只有一次生效，失败请求及旧版本不能覆盖反馈、答案或角色",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 5515,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "staff-recruitment-boundaries.spec.ts",
+          "line": 244,
+          "title": "保存与发布拒绝跳过核心资料的分支，合法扩展分支可提交且撤下历史快照仍可读",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 17832,
+          "errors": [
+            "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('status').filter({ hasText: '跳转不得跳过骨干申请核心必填字段' })\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 15000ms\n  - waiting for getByRole('status').filter({ hasText: '跳转不得跳过骨干申请核心必填字段' })\n\n\n  261 |       await editor.locator('input[name=\"signupForm\"]').evaluate((node, form) => { (node as HTMLInputElement).value = JSON.stringify(form); }, invalid);\n  262 |       await editor.getByRole(\"button\", { name: state === \"draft\" ? \"保存草稿\" : \"发布骨干招新\", exact: true }).click();\n> 263 |       await expect(page.getByRole(\"status\").filter({ hasText: \"跳转不得跳过骨干申请核心必填字段\" })).toBeVisible();\n      |                                                                                      ^\n  264 |       const unchanged = await p.findByID({ collection: \"staff-batches\", id: batch.id, user: president, overrideAccess: false });\n  265 |       expect(unchanged.updatedAt).toBe(batch.updatedAt); expect(unchanged.state).toBe(\"open\"); expect(unchanged.signupForm).toEqual(batch.signupForm);\n  266 |     }\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/staff-recruitment-boundaries.spec.ts:263:86"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-e43bc-核心资料的分支，合法扩展分支可提交且撤下历史快照仍可读/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-e43bc-核心资料的分支，合法扩展分支可提交且撤下历史快照仍可读/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/staff-recruitment-boundari-e43bc-核心资料的分支，合法扩展分支可提交且撤下历史快照仍可读/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "staff-recruitment.spec.ts",
+          "line": 58,
+          "title": "单批次网页草稿/发布、申请/撤回重提、审核回执、私有导出及关闭；现有和新社群共用入口",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 22564,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-core-review.spec.ts",
+          "line": 166,
+          "title": "既有teams REST归档后低权限恢复拒绝，过期revision和并发请求保持失效，高权限明确恢复",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 2560,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-core-review.spec.ts",
+          "line": 275,
+          "title": "超过20条队伍和建队审核时，两套分页独立跨页并互相保留筛选",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 2577,
+          "errors": [
+            "Error: expect(received).toHaveLength(expected)\n\nExpected length: 20\nReceived length: 0\nReceived array:  []\n\n  294 |     .locator(\"main .community-list a\")\n  295 |     .allTextContents();\n> 296 |   expect(firstTeams).toHaveLength(20);\n      |                      ^\n  297 |   await expect(\n  298 |     page.getByRole(\"heading\", { name: titles[0], exact: true }),\n  299 |   ).toBeVisible();\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/team-core-review.spec.ts:296:22"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-超过20条队伍和建队审核时，两套分页独立跨页并互相保留筛选/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-超过20条队伍和建队审核时，两套分页独立跨页并互相保留筛选/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-超过20条队伍和建队审核时，两套分页独立跨页并互相保留筛选/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "team-core-review.spec.ts",
+          "line": 335,
+          "title": "draft后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 1586,
+          "errors": [
+            "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('heading', { name: 'ReviewOutsider-fe4d32db18' })\nExpected: visible\nError: strict mode violation: getByRole('heading', { name: 'ReviewOutsider-fe4d32db18' }) resolved to 2 elements:\n    1) <h3>…</h3> aka getByRole('heading', { name: '合成历史回执批次 · ReviewOutsider-' })\n    2) <h2 id=\"profile-title\">ReviewOutsider-fe4d32db18</h2> aka getByRole('heading', { name: 'ReviewOutsider-fe4d32db18', exact: true })\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 15000ms\n  - waiting for getByRole('heading', { name: 'ReviewOutsider-fe4d32db18' })\n\n\n  66 |   expect(response.status(), await response.text()).toBe(200);\n  67 |   await page.goto(\"/account\");\n> 68 |   await expect(page.getByRole(\"heading\", { name: user.name })).toBeVisible();\n     |                                                                ^\n  69 | }\n  70 | test.beforeAll(async () => {\n  71 |   if (\n    at login (/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/team-core-review.spec.ts:68:64)\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/team-core-review.spec.ts:379:5"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-draft后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-draft后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-draft后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "team-core-review.spec.ts",
+          "line": 335,
+          "title": "team-archived后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 1708,
+          "errors": [
+            "Error: expect(locator).toBeVisible() failed\n\nLocator: getByRole('heading', { name: 'ReviewOutsider-cde4ec30cf' })\nExpected: visible\nError: strict mode violation: getByRole('heading', { name: 'ReviewOutsider-cde4ec30cf' }) resolved to 2 elements:\n    1) <h3>…</h3> aka getByRole('heading', { name: '合成历史回执批次 · ReviewOutsider-' })\n    2) <h2 id=\"profile-title\">ReviewOutsider-cde4ec30cf</h2> aka getByRole('heading', { name: 'ReviewOutsider-cde4ec30cf', exact: true })\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 15000ms\n  - waiting for getByRole('heading', { name: 'ReviewOutsider-cde4ec30cf' })\n\n\n  66 |   expect(response.status(), await response.text()).toBe(200);\n  67 |   await page.goto(\"/account\");\n> 68 |   await expect(page.getByRole(\"heading\", { name: user.name })).toBeVisible();\n     |                                                                ^\n  69 | }\n  70 | test.beforeAll(async () => {\n  71 |   if (\n    at login (/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/team-core-review.spec.ts:68:64)\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/team-core-review.spec.ts:379:5"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-team-arch-b829c-读取旧snapshot且只读，隐藏当前配置及旁人均拒绝/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-team-arch-b829c-读取旧snapshot且只读，隐藏当前配置及旁人均拒绝/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-review-team-arch-b829c-读取旧snapshot且只读，隐藏当前配置及旁人均拒绝/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "team-core.spec.ts",
+          "line": 163,
+          "title": "建队网页退回、修改重提与高权限批准可进入招新工作台",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 7767,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-core.spec.ts",
+          "line": 234,
+          "title": "本人草稿、提交、退回重提、人工录取、撤销与真实REST权限",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 13913,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-core.spec.ts",
+          "line": 414,
+          "title": "招新关闭、跨站拒绝和表单工作台四个视口",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 20352,
+          "errors": [
+            "Error: expect(locator).toBeVisible() failed\n\nLocator: getByText('已关闭 · 招新已关闭', { exact: true })\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" with timeout 15000ms\n  - waiting for getByText('已关闭 · 招新已关闭', { exact: true })\n\n\n  441 |   await expect(\n  442 |     page.getByText(\"已关闭 · 招新已关闭\", { exact: true }),\n> 443 |   ).toBeVisible();\n      |     ^\n  444 |   const teamRecord = await p.findByID({\n  445 |     collection: \"teams\",\n  446 |     id: team,\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/team-core.spec.ts:443:5"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-招新关闭、跨站拒绝和表单工作台四个视口/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-招新关闭、跨站拒绝和表单工作台四个视口/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-招新关闭、跨站拒绝和表单工作台四个视口/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "team-core.spec.ts",
+          "line": 530,
+          "title": "真实API表单版本冲突保留草稿，新批次录取后本人网页离队",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 1546,
+          "errors": [
+            "APIError: 该队已有开放批次，请先关闭旧批次\n\n   at ../../src/lib/team-core.ts:540\n\n  538 |       });\n  539 |       if (other.docs.length)\n> 540 |         throw new APIError(\"该队已有开放批次，请先关闭旧批次\", 409);\n      |               ^\n  541 |     }\n  542 |     const data = {\n  543 |       title,\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/src/lib/team-core.ts:540:15\n    at workflowTransaction (/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/src/lib/workflow-transactions.ts:29:20)\n    at tx (/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/src/lib/team-core.ts:177:14)\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/team-core.spec.ts:535:21"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-真实API表单版本冲突保留草稿，新批次录取后本人网页离队/test-failed-1.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-真实API表单版本冲突保留草稿，新批次录取后本人网页离队/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-core-真实API表单版本冲突保留草稿，新批次录取后本人网页离队/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "team-honor-storage.spec.ts",
+          "line": 20,
+          "title": "真实 Media HTTP 保留公开图片，但解码目录/反斜杠/Range 无法旁路私有荣誉和旧视频标记",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 5028,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-honors.spec.ts",
+          "line": 230,
+          "title": "队伍荣誉只有一个置顶档案，普通风采仍为 6+1 分页，稳定详情不含待审材料",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 2254,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-honors.spec.ts",
+          "line": 270,
+          "title": "真实 HTTP JWT 上传及审核；旧共享视频跨集合借用在改稿/退回/隐藏/队伍归档后无法再请求字节",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 6064,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-honors.spec.ts",
+          "line": 633,
+          "title": "私有详情与原始 REST 守住社群边界，网页退回/拒绝需说明并可隐藏公开荣誉",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 16630,
+          "errors": [
+            "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('status')\nExpected substring: \"须填写具体说明\"\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" with timeout 15000ms\n  - waiting for getByRole('status')\n    3 × locator resolved to <p tabindex=\"-1\" role=\"status\" class=\"Workspace_feedback__UdV4X\">正在保存，请稍候…</p>\n      - unexpected value \"正在保存，请稍候…\"\n\n\n  669 |     const record = page.locator('[data-honor-record=\"' + pending.id + '\"]');\n  670 |     await record.getByRole(\"button\", { name: \"退回修改\", exact: true }).click();\n> 671 |     await expect(page.getByRole(\"status\")).toContainText(\"须填写具体说明\");\n      |                                            ^\n  672 |     await record\n  673 |       .getByLabel(\"审核说明（退回或拒绝必填）\")\n  674 |       .fill(\"合成网页退回说明\");\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/team-honors.spec.ts:671:44"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-私有详情与原始-REST-守住社群边界，网页退回-拒绝需说明并可隐藏公开荣誉/test-failed-1.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-私有详情与原始-REST-守住社群边界，网页退回-拒绝需说明并可隐藏公开荣誉/test-failed-2.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-私有详情与原始-REST-守住社群边界，网页退回-拒绝需说明并可隐藏公开荣誉/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-私有详情与原始-REST-守住社群边界，网页退回-拒绝需说明并可隐藏公开荣誉/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "team-honors.spec.ts",
+          "line": 704,
+          "title": "真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/改稿复审/离队保留历史",
+          "result": "fail",
+          "actualStatus": "failed",
+          "durationMs": 9325,
+          "errors": [
+            "Error: expect(locator).toContainText(expected) failed\n\nLocator: getByRole('status')\nExpected substring: \"已撤回\"\nError: strict mode violation: getByRole('status') resolved to 2 elements:\n    1) <p role=\"status\">荣誉已提交，等待对应社群管理员审核。</p> aka getByText('荣誉已提交，等待对应社群管理员审核。')\n    2) <p tabindex=\"-1\" role=\"status\" class=\"Workspace_feedback__UdV4X\">正在保存，请稍候…</p> aka getByText('正在保存，请稍候…')\n\nCall log:\n  - Expect \"toContainText\" with timeout 15000ms\n  - waiting for getByRole('status')\n\n\n  755 |       .getByRole(\"button\", { name: \"撤回待审记录\", exact: true })\n  756 |       .click();\n> 757 |     await expect(page.getByRole(\"status\")).toContainText(\"已撤回\");\n      |                                            ^\n  758 |     await page\n  759 |       .locator(\"[data-honor-editor]\")\n  760 |       .getByRole(\"button\", { name: \"提交审核\", exact: true })\n    at /workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/app/tests/e2e/team-honors.spec.ts:757:44"
+          ],
+          "evidence": [
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-真实成员网页草稿-错误保留-提交-撤回-退回重提-批准-改稿复审-离队保留历史/test-failed-1.png"
+            },
+            {
+              "name": "screenshot",
+              "contentType": "image/png",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-真实成员网页草稿-错误保留-提交-撤回-退回重提-批准-改稿复审-离队保留历史/test-failed-2.png"
+            },
+            {
+              "name": "error-context",
+              "contentType": "text/markdown",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-真实成员网页草稿-错误保留-提交-撤回-退回重提-批准-改稿复审-离队保留历史/error-context.md"
+            },
+            {
+              "name": "trace",
+              "contentType": "application/zip",
+              "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/prod-browser/runs/sol-full-e2e-4733/test-results/team-honors-真实成员网页草稿-错误保留-提交-撤回-退回重提-批准-改稿复审-离队保留历史/trace.zip"
+            }
+          ]
+        },
+        {
+          "file": "team-profiles-period.spec.ts",
+          "line": 56,
+          "title": "旧预览页及重放PUT跨再入队周期均409；刷新后隐藏默认且新明确选择才能展示",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 3545,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-profiles-period.spec.ts",
+          "line": 143,
+          "title": "旧周期异步迟到请求不能把隐藏资料恢复展示或递增版本",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 1746,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-profiles-period.spec.ts",
+          "line": 189,
+          "title": "保存响应迟到后后台读取新周期，不给旧草稿换发凭据或恢复授权",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 1919,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-profiles.spec.ts",
+          "line": 68,
+          "title": "访客沿用登录边界；未入队者无编辑入口且伪造上下文被拒",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 2158,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-profiles.spec.ts",
+          "line": 104,
+          "title": "本人上传头像、预览、单次保存、修改/取消与隐藏；桌面/窄屏可用",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 8398,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-profiles.spec.ts",
+          "line": 211,
+          "title": "加载失败可重试，保存失败保留输入与预览并能实际重试成功",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 4917,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-profiles.spec.ts",
+          "line": 262,
+          "title": "简介预览返回和取消后焦点回到可继续操作的控件，不保存草稿",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 3388,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-profiles.spec.ts",
+          "line": 275,
+          "title": "撤销资格后旧页面拒绝提交，旧会话读取名单也立即隐藏",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 1949,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-profiles.spec.ts",
+          "line": 313,
+          "title": "改队伍重置表单，未加入新队不能写，新队入队后简介独立",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 3069,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "team-profiles.spec.ts",
+          "line": 354,
+          "title": "两个页面旧版本冲突保留输入；真实接口拒绝 XSS、敏感字段、跨站保存",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 2789,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "theme.spec.ts",
+          "line": 9,
+          "title": "system dark without a preference renders light HTML, metadata and native navigation before JavaScript",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 497,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "theme.spec.ts",
+          "line": 49,
+          "title": "an invalid preference falls back to light even on a dark system",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 462,
+          "errors": [],
+          "evidence": []
+        },
+        {
+          "file": "theme.spec.ts",
+          "line": 69,
+          "title": "explicit themes preserve form input and consent, persist across routes and reopening, without hydration errors",
+          "result": "pass",
+          "actualStatus": "passed",
+          "durationMs": 2811,
+          "errors": [],
+          "evidence": []
+        }
+      ]
     },
     "visual_light": {
       "result": "fail",
@@ -2588,7 +4559,14 @@
     "screenshots": "/workspace/qa-zijing/browser-matrix",
     "honorProbe": "/workspace/qa-zijing/honor-probe/results.json",
     "astraRequired": true,
-    "changedBuildInputs": []
+    "changedBuildInputs": [],
+    "fullE2eFinished": true,
+    "doNotRestartOldE2e": true,
+    "remainingBlockers": [
+      "Astra source and test repairs detailed in progress and finalCases",
+      "Official WeChat tools and device checks unavailable",
+      "Legacy false/null consent browser scenario notrun in required profile"
+    ]
   },
   "interactionObservations": {
     "origin": "http://localhost:3364",
