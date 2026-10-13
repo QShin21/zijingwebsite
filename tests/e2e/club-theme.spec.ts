@@ -9,6 +9,10 @@ import config from "../../src/payload.config";
 import { profileFixture, saveLoadedProfile } from "../team-profiles-fixture";
 import { defaultTeamForm, saveTeamRecruitment } from "../../src/lib/team-core";
 import { teamHonorService } from "../../src/lib/team-honor-service";
+import tokens from "../../src/design/tokens.json";
+
+const rgb = (hex: string) =>
+  `rgb(${[1, 3, 5].map((offset) => parseInt(hex.slice(offset, offset + 2), 16)).join(", ")})`;
 
 let p: Payload, f: Awaited<ReturnType<typeof profileFixture>>;
 let batchID: number, honorID: number;
@@ -592,7 +596,7 @@ test("真实提交等待与中断状态保持可读，已填资料不丢失", as
       await page
         .getByLabel("姓名", { exact: true })
         .evaluate((el) => getComputedStyle(el).backgroundColor),
-    ).toBe(theme === "dark" ? "rgb(56, 50, 63)" : "rgb(229, 223, 234)");
+    ).toBe(rgb(tokens[theme]["disabled-bg"]));
     expect(await pending.evaluate((el) => getComputedStyle(el).opacity)).toBe(
       "1",
     );

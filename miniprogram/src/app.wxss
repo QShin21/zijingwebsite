@@ -4,7 +4,7 @@ view, button, input, textarea, picker, scroll-view { box-sizing: border-box; }
 button { margin: 0; font: inherit; white-space: normal; }
 button::after { border: 0; }
 .mini-page { width: 100%; max-width: 720px; margin: 0 auto; padding: 32rpx 36rpx 56rpx; padding-bottom: calc(56rpx + env(safe-area-inset-bottom)); }
-.mini-page button { min-height: 44px; border: 1rpx solid var(--z-control-border); border-radius: 12rpx; background: var(--z-control); color: var(--z-text); padding: 20rpx 26rpx; line-height: 1.55; font-size: 28rpx; }
+.mini-page button { min-width: 44px; min-height: 44px; border: 1rpx solid var(--z-control-border); border-radius: 12rpx; background: var(--z-control); color: var(--z-text); padding: 20rpx 26rpx; line-height: 1.55; font-size: 28rpx; }
 .mini-page button[disabled], .mini-page input[disabled], .mini-page textarea[disabled] { opacity: 1; color: var(--z-disabled-text); background: var(--z-disabled-bg); border-color: var(--z-disabled-border); }
 .mini-page .primary { background: var(--z-primary); color: var(--z-on-primary); border-color: var(--z-primary); font-weight: 600; }
 .mini-page .secondary { background: var(--z-secondary-bg); color: var(--z-secondary-text); border-color: var(--z-secondary-border); font-weight: 500; }
@@ -23,7 +23,7 @@ button::after { border: 0; }
 .section-title { display: block; font-size: 34rpx; line-height: 1.5; font-weight: 600; word-break: break-word; }
 .section-kicker { display: block; margin-bottom: 10rpx; font-size: 24rpx; color: var(--z-primary); }
 .section-index { color: var(--z-muted); font-size: 25rpx; margin-right: 18rpx; font-weight: 400; }
-.mini-page .more { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: flex-end; min-width: 88rpx; min-height: 44px; padding: 16rpx 0 16rpx 12rpx; border: 0; background: transparent; color: var(--z-link); font-size: 26rpx; }
+.mini-page .more { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: flex-end; min-width: 44px; min-height: 44px; padding: 16rpx 0 16rpx 12rpx; border: 0; background: transparent; color: var(--z-link); font-size: 26rpx; }
 .panel { padding: 28rpx 0; border: 0; border-top: 1rpx solid var(--z-line); background: transparent; border-radius: 0; }
 .form-sheet, .status-panel, .notice-panel { padding: 28rpx; border: 1rpx solid var(--z-line); border-radius: 16rpx; background: var(--z-surface); }
 .form-sheet .panel { border-top: 1rpx solid var(--z-line); padding: 26rpx 0; }
@@ -128,4 +128,13 @@ video, .evidence-video, .honor-video, .showcase-video { display: block; width: 1
 .archive-date { font-variant-numeric: tabular-nums; color: var(--z-primary); }
 .evidence-detail { border-color: var(--z-primary); }
 .review-decision { padding-top: 24rpx; border-top: 1rpx solid var(--z-line); }
-@media (max-width: 359px) { .body, .subtitle, .field-label, .label, .answer-label, input, textarea, .mini-page button { font-size: 15px; } .muted, .field-note { font-size: 14px; } .meta, .badge, .eyebrow, .bottom-note, .section-kicker { font-size: 12px; } .mini-page { padding-left: 24rpx; padding-right: 24rpx; } }
+@media (max-width: 359px) {
+  page { font-size: 15px; }
+  .body, .subtitle, .field-label, .label, .answer-label, input, textarea, .mini-page .field picker, .mini-page .picker-value,
+  .mini-page button, .mini-page .back, .mini-page > .plain:first-child, .mini-page .more, .mini-page .chip,
+  .mini-page .consent, .mini-page .privacy-note, .mini-page .branch-notice, .mini-page .error, .mini-page .question-error, .mini-page .reading-body { font-size: 15px; }
+  .muted, .field-note, .card-summary { font-size: 14px; }
+  .timeline-step { font-size: 13px; }
+  .meta, .badge, .eyebrow, .bottom-note, .section-kicker, .timeline-number, .record-id { font-size: 12px; }
+  .mini-page { padding-left: 24rpx; padding-right: 24rpx; }
+}

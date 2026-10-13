@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { SignupForm, Question, Answers } from "@/lib/signup-schema";
 import { QuestionnaireResults } from "./QuestionnaireResults";
 import { SignupBuilder } from "./SignupBuilder";
@@ -68,8 +68,10 @@ export function ActivitySignup({ kind, id, compact = false }: { kind: string; id
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [editing, setEditing] = useState(false),
+    [verifiedReceipt, setVerifiedReceipt] = useState<Receipt | null>(null),
     [savedMessage, setSavedMessage] = useState(""),
     [retry, setRetry] = useState(0);
+  const reloadHelp = useId();
   useEffect(() => {
     let alive = true;
     signupRequest(endpoint)
@@ -145,7 +147,12 @@ export function ActivitySignup({ kind, id, compact = false }: { kind: string; id
         setBusy(true);
         try {
           const latest = await signupRequest(endpoint);
-          if (latest.signup) { setInfo(latest); setEditing(false); setSavedMessage("已读取服务器保存的本人回执。"); }
+          if (editing) {
+            // Checking a saved receipt must not replace local answers or advance their CAS revision.
+            setVerifiedReceipt(latest.signup);
+            setSavedMessage(latest.signup ? "已核对服务器保存的本人回执，当前修改仍保留。" : "当前未查到已保存的本人回执。当前修改仍保留，请核对后再提交。");
+          }
+          else if (latest.signup) { setInfo(latest); setEditing(false); setSavedMessage("已读取服务器保存的本人回执。"); }
           else { setSavedMessage("当前未查到已保存的本人回执。已填写内容保留，请核对后再提交。"); }
           setError("");
         } catch (cause) { setError((cause as Error).message); }
@@ -173,6 +180,7 @@ export function ActivitySignup({ kind, id, compact = false }: { kind: string; id
               className="button"
               onClick={() => {
                 setEditing(true);
+                setVerifiedReceipt(null);
                 setSavedMessage("");
               }}
             >
@@ -202,9 +210,13 @@ export function ActivitySignup({ kind, id, compact = false }: { kind: string; id
               >
                 取消修改
               </button>
+              <p id={reloadHelp} className={styles.notice}>
+                “重新加载已提交内容”会放弃当前未提交的修改，并载入最新问卷与已保存回执。
+              </p>
               <button
                 type="button"
                 disabled={busy}
+                aria-describedby={reloadHelp}
                 onClick={async () => {
                   setBusy(true);
                   try {
@@ -227,6 +239,13 @@ export function ActivitySignup({ kind, id, compact = false }: { kind: string; id
                 <p className={styles.error} role="alert">
                   {error}
                 </p>
+              )}
+              {verifiedReceipt && (
+                <section className={styles.receipt} aria-label="服务器保存的本人回执">
+                  <h4>服务器保存的本人回执</h4>
+                  <p>以下内容仅供核对，当前未提交的修改仍保留在下方问卷中。</p>
+                  <ReceiptView receipt={verifiedReceipt} />
+                </section>
               )}
             </>
           )}

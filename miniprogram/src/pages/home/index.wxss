@@ -16,3 +16,4 @@
 .home-module > .section-head, .home-directory, .about-brief { border-top: 1rpx solid var(--z-line); padding-top: 30rpx; }
 .home-module .card:last-child { border-bottom: 0; }
 @media (min-width: 600px) { .hero-title { font-size: 48px; } .hero-description { font-size: 18px; } }
+@media (max-width: 359px) { .hero-description, .notice-title { font-size: 15px; } .cover-note { font-size: 14px; } .masthead-note, .notice-date { font-size: 12px; } }

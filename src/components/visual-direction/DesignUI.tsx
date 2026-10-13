@@ -76,22 +76,6 @@ export function DesignFooter({
     </footer>
   );
 }
-// Kept for existing preview routes. No generated or unlicensed imagery is loaded.
-export function StageArt({
-  className = "",
-  priority = false,
-}: {
-  className?: string;
-  priority?: boolean;
-}) {
-  return (
-    <div
-      className={"z-stage " + className}
-      aria-hidden="true"
-      data-priority={priority ? "true" : undefined}
-    />
-  );
-}
 export function SectionHeading({
   title,
   href,

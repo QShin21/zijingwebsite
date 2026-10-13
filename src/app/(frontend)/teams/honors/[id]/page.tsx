@@ -106,6 +106,7 @@ export default async function HonorRecord({
         </p>
         <TeamHonorRecordCard
           record={record}
+          headingLevel="h2"
           reviewer={reviewer}
           owner={owner}
           editable={editable}

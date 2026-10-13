@@ -69,8 +69,8 @@ export default async function Apply({
     <ClubFrame>
       <PageHeading
         title="申请建立代表队"
-        eyebrow="TEAM FORMATION"
-        description="本社群管理员提交组织与训练计划，由现有高权限管理人员审核批准后成立。"
+        eyebrow="发起建队"
+        description="本社群管理员提交组织与训练计划，由有建队审批权限的负责人审核批准后成立。"
       />
       <ClubSteps
         label="建队申请流程"
@@ -113,7 +113,7 @@ export default async function Apply({
             <p>说明你希望如何组织队伍、安排训练，以及开展选拔。</p>
             <h3>谁可以发起</h3>
             <p>
-              申请入口仅列出你当前有资格组织的游戏社群。最终建队由现有高权限管理人员批准。
+              申请入口仅列出你当前有资格组织的游戏社群。最终建队由有审批权限的负责人批准。
             </p>
             <h3>申请与任职</h3>
             <p>

@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { Questionnaire } from "./Questionnaire";
 import { SignupBuilder } from "./SignupBuilder";
@@ -11,16 +11,126 @@ import {
 } from "@/lib/signup-schema";
 import { sanitizeDraft, formatAnswer } from "@/lib/questionnaire-model";
 
+class UnconfirmedTeamRequest extends Error {
+  constructor() {
+    super("连接中断，操作结果尚未确认。已填内容保留，请先核对最新记录。");
+  }
+}
+
 export async function teamRequest(data: Record<string, unknown>) {
-  const response = await fetch("/api/team-core", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    cache: "no-store",
-    body: JSON.stringify(data),
+  let response: Response;
+  try {
+    response = await fetch("/api/team-core", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      body: JSON.stringify(data),
+    });
+  } catch {
+    throw new UnconfirmedTeamRequest();
+  }
+  if (response.status >= 500) throw new UnconfirmedTeamRequest();
+  const result = await response.json().catch(() => {
+    throw new UnconfirmedTeamRequest();
   });
-  const result = await response.json();
+  if (!result || typeof result !== "object") throw new UnconfirmedTeamRequest();
   if (!response.ok) throw new Error(result.error || "操作未完成，请重试");
+  if (!Object.hasOwn(result, "result")) throw new UnconfirmedTeamRequest();
   return result;
+}
+
+const subscribeToHydration = () => () => {};
+function useTeamAction() {
+  const ready = useSyncExternalStore(
+    subscribeToHydration,
+    () => true,
+    () => false,
+  );
+  const pending = useRef(false);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const [failed, setFailed] = useState(false);
+  const [unconfirmed, setUnconfirmed] = useState(false);
+  const [confirmedMissing, setConfirmedMissing] = useState(false);
+  const blocked = !ready || busy || (unconfirmed && !confirmedMissing);
+
+  function fail(message: string) {
+    setFailed(true);
+    setMessage(message);
+  }
+  async function run(data: Record<string, unknown>, success: string) {
+    if (!ready || pending.current || (unconfirmed && !confirmedMissing))
+      return {
+        ok: false as const,
+        error: new Error("请先核对上一项操作的结果。"),
+      };
+    pending.current = true;
+    setBusy(true);
+    setMessage("");
+    setFailed(false);
+    try {
+      const result = await teamRequest(data);
+      setUnconfirmed(false);
+      setConfirmedMissing(false);
+      setMessage(success);
+      return { ok: true as const, result };
+    } catch (cause) {
+      const error =
+        cause instanceof Error
+          ? cause
+          : new Error("操作未完成，已填内容保留。");
+      fail(error.message);
+      setUnconfirmed(cause instanceof UnconfirmedTeamRequest);
+      setConfirmedMissing(false);
+      return { ok: false as const, error };
+    } finally {
+      pending.current = false;
+      setBusy(false);
+    }
+  }
+  return {
+    ready,
+    busy,
+    blocked,
+    message,
+    failed,
+    unconfirmed,
+    confirmedMissing,
+    setConfirmedMissing,
+    fail,
+    run,
+  };
+}
+
+function TeamActionFeedback({
+  action,
+  reviewHref,
+}: {
+  action: ReturnType<typeof useTeamAction>;
+  reviewHref: string;
+}) {
+  return (
+    <div className="team-core-feedback">
+      <p role={action.failed ? "alert" : "status"}>{action.message}</p>
+      {action.unconfirmed && (
+        <>
+          <a href={reviewHref} target="_blank" rel="noopener noreferrer">
+            打开最新记录核对
+          </a>
+          <label className="checkbox-row">
+            <input
+              type="checkbox"
+              checked={action.confirmedMissing}
+              onChange={(event) =>
+                action.setConfirmedMissing(event.currentTarget.checked)
+              }
+            />
+            已核对最新记录，确认本次未保存
+          </label>
+        </>
+      )}
+    </div>
+  );
 }
 export function TeamCoreOperation({
   operation,
@@ -38,32 +148,27 @@ export function TeamCoreOperation({
   noteRequired?: boolean;
 }) {
   const router = useRouter(),
-    [message, setMessage] = useState(""),
-    [busy, setBusy] = useState(false);
+    action = useTeamAction();
   return (
     <form
+      method="post"
       className="member-form team-core-operation"
+      aria-busy={action.busy}
       onSubmit={async (e) => {
         e.preventDefault();
-        if (busy) return;
+        if (action.blocked) return;
         const values = new FormData(e.currentTarget);
-        setBusy(true);
-        setMessage("");
-        try {
-          await teamRequest({
+        const result = await action.run(
+          {
             operation,
             id,
             revision,
             status,
             note: values.get("note"),
-          });
-          setMessage("已保存。");
-          router.refresh();
-        } catch (error) {
-          setMessage((error as Error).message);
-        } finally {
-          setBusy(false);
-        }
+          },
+          "已保存。",
+        );
+        if (result.ok) router.refresh();
       }}
     >
       {noteRequired && (
@@ -72,10 +177,23 @@ export function TeamCoreOperation({
           <textarea name="note" required maxLength={1000} rows={2} />
         </label>
       )}
-      <button className="button light" disabled={busy}>
-        {busy ? "正在保存…" : label}
+      <button className="button light" disabled={action.blocked}>
+        {action.busy ? "正在保存…" : label}
       </button>
-      <p role="status">{message}</p>
+      <TeamActionFeedback
+        action={action}
+        reviewHref={
+          operation === "withdraw-establishment"
+            ? "/teams/apply"
+            : operation === "lifecycle"
+              ? `/teams/manage/${id}`
+              : operation === "close-recruitment"
+                ? `/teams/recruitment/${id}`
+                : operation === "revoke"
+                  ? "/teams/manage"
+                  : "/teams/recruitment"
+        }
+      />
     </form>
   );
 }
@@ -89,48 +207,49 @@ export function TeamCoreDecision({
   revision: string;
 }) {
   const router = useRouter(),
-    [message, setMessage] = useState(""),
-    [busy, setBusy] = useState(false);
+    action = useTeamAction();
+  const note = useRef<HTMLTextAreaElement>(null);
   return (
     <form
+      method="post"
       className="member-form"
+      aria-busy={action.busy}
       onSubmit={async (e) => {
         e.preventDefault();
-        if (busy) return;
+        if (action.blocked) return;
         const native = e.nativeEvent as SubmitEvent,
           button = native.submitter as HTMLButtonElement | null;
         const decision = button?.value,
           form = new FormData(e.currentTarget);
         if (!decision) return;
-        setBusy(true);
-        setMessage("");
-        try {
-          await teamRequest({
+        if (decision !== "approved" && !String(form.get("note") || "").trim()) {
+          action.fail("请填写审核意见，说明需要补充的内容或未通过原因。");
+          note.current?.focus();
+          return;
+        }
+        const result = await action.run(
+          {
             operation: `decide-${kind}`,
             id,
             revision,
             decision,
             note: form.get("note"),
-          });
-          setMessage("审核结果已保存。");
-          router.refresh();
-        } catch (error) {
-          setMessage((error as Error).message);
-        } finally {
-          setBusy(false);
-        }
+          },
+          "审核结果已保存。",
+        );
+        if (result.ok) router.refresh();
       }}
     >
       <label>
         审核意见（退回 / 未通过时必填）
-        <textarea name="note" maxLength={1000} rows={3} />
+        <textarea ref={note} name="note" maxLength={1000} rows={3} />
       </label>
       <div className="signup-tools">
         <button
           className="button"
           name="decision"
           value="approved"
-          disabled={busy}
+          disabled={action.blocked}
         >
           批准{kind === "join" ? "入队" : "建队"}
         </button>
@@ -138,7 +257,7 @@ export function TeamCoreDecision({
           className="button light"
           name="decision"
           value="returned"
-          disabled={busy}
+          disabled={action.blocked}
         >
           退回补充
         </button>
@@ -146,12 +265,12 @@ export function TeamCoreDecision({
           className="button light"
           name="decision"
           value="rejected"
-          disabled={busy}
+          disabled={action.blocked}
         >
           未通过
         </button>
       </div>
-      <p role="status">{message}</p>
+      <TeamActionFeedback action={action} reviewHref="/teams/manage" />
     </form>
   );
 }
@@ -169,8 +288,7 @@ export function TeamCoreEstablishmentForm({
   };
 }) {
   const router = useRouter(),
-    [message, setMessage] = useState(""),
-    [busy, setBusy] = useState(false),
+    action = useTeamAction(),
     [saved, setSaved] = useState(false);
   if (!games.length)
     return (
@@ -183,34 +301,33 @@ export function TeamCoreEstablishmentForm({
     return (
       <div role="status">
         <h2>建队申请已提交</h2>
-        <p>请在下方查看状态与处理意见，等待高权限管理人员审核。</p>
+        <p>请在下方查看状态与处理意见，等待有建队审批权限的负责人审核。</p>
         <Link href="/teams/manage">返回代表队工作台</Link>
       </div>
     );
   return (
     <form
+      method="post"
       className="member-form"
+      aria-busy={action.busy}
       onSubmit={async (e) => {
         e.preventDefault();
-        if (busy) return;
+        if (action.blocked) return;
         const values = new FormData(e.currentTarget);
-        setBusy(true);
-        setMessage("");
-        try {
-          await teamRequest({
+        const result = await action.run(
+          {
             operation: "establish",
             id: initial?.id,
             revision: initial?.revision,
             gameID: initial?.gameID ?? values.get("gameID"),
             title: values.get("title"),
             reason: values.get("reason"),
-          });
+          },
+          "建队申请已提交。",
+        );
+        if (result.ok) {
           setSaved(true);
           router.refresh();
-        } catch (error) {
-          setMessage((error as Error).message);
-        } finally {
-          setBusy(false);
         }
       }}
     >
@@ -253,10 +370,10 @@ export function TeamCoreEstablishmentForm({
       <p>
         描述组织安排和训练计划即可。批准建队不授予新的管理角色，也不宣称未经核实的学校官方资格。
       </p>
-      <button className="button" disabled={busy}>
-        {busy ? "正在提交…" : "提交建队申请"}
+      <button className="button" disabled={action.blocked}>
+        {action.busy ? "正在提交…" : "提交建队申请"}
       </button>
-      <p role="status">{message}</p>
+      <TeamActionFeedback action={action} reviewHref="/teams/apply" />
     </form>
   );
 }
@@ -279,22 +396,25 @@ export function TeamCoreRecruitmentEditor({
     [form, setForm] = useState(initial?.form ?? defaultForm),
     [title, setTitle] = useState(initial?.title ?? "代表队新一轮招新"),
     [status, setStatus] = useState(initial?.status ?? "draft"),
-    [message, setMessage] = useState(""),
-    [busy, setBusy] = useState(false);
+    action = useTeamAction();
+  const titleInput = useRef<HTMLInputElement>(null);
   return (
-    <section className="team-core-editor">
+    <section className="team-core-editor" aria-busy={action.busy}>
       <h2>{initial ? "编辑招新批次" : "建立招新批次"}</h2>
       <label className="member-form">
         批次名称
         <input
+          ref={titleInput}
           value={title}
+          required
+          minLength={2}
           maxLength={120}
           onChange={(e) => setTitle(e.target.value)}
         />
       </label>
       <p>
         核心资料为游戏
-        ID、位置、经历、训练时间和一种联系方式。可修改提示和加入选拔题；核心题须可达。开放时须设置未来截止时间。
+        ID、位置、经历、训练时间和一种联系方式。可修改提示和加入选拔题；每位申请人均须填写核心题。开放招新前请设置截止时间。
       </p>
       <SignupBuilder value={form} onChange={setForm} />
       <div className="member-form">
@@ -309,12 +429,12 @@ export function TeamCoreRecruitmentEditor({
         </label>
         <button
           className="button"
-          disabled={busy}
+          disabled={action.blocked}
           onClick={async () => {
-            setBusy(true);
-            setMessage("");
-            try {
-              await teamRequest({
+            if (action.blocked) return;
+            if (!titleInput.current?.reportValidity()) return;
+            const result = await action.run(
+              {
                 operation: "save-recruitment",
                 teamID,
                 id: initial?.id,
@@ -322,20 +442,21 @@ export function TeamCoreRecruitmentEditor({
                 title,
                 status,
                 form,
-              });
-              setMessage("批次已保存。");
+              },
+              "批次已保存。",
+            );
+            if (result.ok) {
               router.push(`/teams/manage/${teamID}`);
               router.refresh();
-            } catch (error) {
-              setMessage((error as Error).message);
-            } finally {
-              setBusy(false);
             }
           }}
         >
-          {busy ? "正在保存…" : "保存招新批次"}
+          {action.busy ? "正在保存…" : "保存招新批次"}
         </button>
-        <p role="status">{message}</p>
+        <TeamActionFeedback
+          action={action}
+          reviewHref={`/teams/manage/${teamID}`}
+        />
       </div>
     </section>
   );
@@ -386,8 +507,7 @@ export function TeamCoreApplicant({
 }) {
   const [receipt, setReceipt] = useState(initial),
     [editing, setEditing] = useState(!initial || initial.status === "draft"),
-    [message, setMessage] = useState(""),
-    [busy, setBusy] = useState(false);
+    mutation = useTeamAction();
   const editable =
     !readOnly &&
     state === "招新开放" &&
@@ -402,39 +522,31 @@ export function TeamCoreApplicant({
     approved: "已录取入队",
   };
   async function save(answers: Answers, action: "draft" | "submit") {
-    setBusy(true);
-    setMessage("");
-    try {
-      const result = await teamRequest({
+    const result = await mutation.run(
+      {
         operation: "save-join",
         id,
         version,
         revision: receipt?.updatedAt,
         action,
         answers,
-      });
-      setReceipt(result.result);
-      if (action === "submit") setEditing(false);
-      setMessage(
-        action === "draft"
-          ? "草稿已保存，尚未提交审核。"
-          : "申请已提交，请等待本社群管理员人工审核。",
-      );
-    } catch (error) {
-      setMessage((error as Error).message);
-      throw error;
-    } finally {
-      setBusy(false);
-    }
+      },
+      action === "draft"
+        ? "草稿已保存，尚未提交审核。"
+        : "申请已提交，请等待本社群管理员人工审核。",
+    );
+    if (!result.ok) throw result.error;
+    setReceipt(result.result.result);
+    if (action === "submit") setEditing(false);
   }
   return (
-    <section className="panel">
+    <section className="panel" aria-busy={mutation.busy}>
       <h2>我的入队申请</h2>
       <p>
         {state} · {receipt ? labels[receipt.status] : "尚未申请"}
       </p>
       <p>
-        批准入队只产生代表队成员关系。普通入社、骨干招新和代表队招新分别处理；公开简介另行取得授权。
+        录取后可填写队内简介、投稿队伍荣誉。公开简介由本人选择展示字段；入队不会授予社群或平台管理权限。
       </p>
       {receipt?.reviewNote && (
         <p className="preserve">处理意见：{receipt.reviewNote}</p>
@@ -465,7 +577,7 @@ export function TeamCoreApplicant({
               form,
               (receipt?.answers ?? {}) as Answers,
             )}
-            busy={busy}
+            busy={!mutation.ready || mutation.busy}
             onSaveDraft={(answers) => save(answers, "draft")}
             onSubmit={(answers) => save(answers, "submit")}
             submitLabel="提交入队申请"
@@ -482,23 +594,20 @@ export function TeamCoreApplicant({
         ["draft", "pending", "returned"].includes(receipt.status) && (
           <button
             className="button light"
-            disabled={busy}
+            disabled={mutation.blocked}
             onClick={async () => {
-              setBusy(true);
-              setMessage("");
-              try {
-                const result = await teamRequest({
+              if (mutation.blocked) return;
+              const result = await mutation.run(
+                {
                   operation: "withdraw-join",
                   id: receipt.id,
                   revision: receipt.updatedAt,
-                });
-                setReceipt(result.result);
+                },
+                "申请已撤回。开放期可修改重提。",
+              );
+              if (result.ok) {
+                setReceipt(result.result.result);
                 setEditing(false);
-                setMessage("申请已撤回。开放期可修改重提。");
-              } catch (error) {
-                setMessage((error as Error).message);
-              } finally {
-                setBusy(false);
               }
             }}
           >
@@ -514,7 +623,10 @@ export function TeamCoreApplicant({
               : "目前不能修改或重提申请，待审核申请仍可撤回。"}
         </p>
       )}
-      <p role="status">{message}</p>
+      <TeamActionFeedback
+        action={mutation}
+        reviewHref={`/teams/recruitment/${id}`}
+      />
       <Link href="/teams/recruitment">返回招新与我的记录</Link>
     </section>
   );

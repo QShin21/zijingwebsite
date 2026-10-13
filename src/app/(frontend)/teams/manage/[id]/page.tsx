@@ -23,6 +23,9 @@ import {
   teamRecruitmentState,
 } from "@/lib/team-core";
 import { normalizeSignup, type Answers } from "@/lib/signup-schema";
+import { formatDate } from "@/lib/rules";
+import { ClubFrame } from "../../../_club/ClubPage";
+import styles from "../../../_club/ClubPages.module.css";
 export const dynamic = "force-dynamic";
 export default async function ManageTeam({
   params,
@@ -107,114 +110,165 @@ export default async function ManageTeam({
   const edit =
     candidate && positiveID(candidate.team) === id ? candidate : null;
   return (
-    <>
+    <ClubFrame>
       <PageHeading
         title={team.title}
-        eyebrow="TEAM MANAGEMENT"
-        description={`当前状态：${teamLifecycleLabels[team.teamStatus ?? "unestablished"]}。成员关系、社群任职和平台角色分别维护。`}
+        eyebrow="队伍工作台"
+        description={`当前状态：${teamLifecycleLabels[team.teamStatus ?? "unestablished"]}。在这里安排招新、处理选拔并查看本队成员记录。`}
         parent={{ href: "/teams/manage", label: "代表队工作台" }}
       />
       <section className="member-shell">
         <nav className="signup-tools" aria-label="本队管理">
           <Link href={`/teams/${team.slug}`}>查看队伍档案</Link>
+          <Link href="#team-recruitments">招新批次</Link>
           <Link href="#team-applications">人工审核入队</Link>
-          <Link href="#team-members">成员关系</Link>
+          <Link href="#team-members">成员记录</Link>
+          <Link href={`/teams/honors?view=review&team=${id}`}>
+            审核队伍荣誉
+          </Link>
         </nav>
         {team.establishmentApplication && (
-          <div className="signup-tools">
-            {["active", "resting", "archived"]
-              .filter((state) => state !== team.teamStatus)
-              .map((state) => (
-                <TeamCoreOperation
-                  key={state}
-                  operation="lifecycle"
-                  id={id}
-                  revision={team.updatedAt}
-                  status={state}
-                  label={`设为${teamLifecycleLabels[state]}`}
-                />
-              ))}
+          <details className={styles.lifecycle} open>
+            <summary>
+              调整队伍状态 ·{" "}
+              {teamLifecycleLabels[team.teamStatus ?? "unestablished"]}
+            </summary>
+            <p>
+              休整期间可保留队伍档案；归档后停止新的入队申请。成员与任职记录分别保留。
+            </p>
+            <div className="signup-tools">
+              {["active", "resting", "archived"]
+                .filter((state) => state !== team.teamStatus)
+                .map((state) => (
+                  <TeamCoreOperation
+                    key={state}
+                    operation="lifecycle"
+                    id={id}
+                    revision={team.updatedAt}
+                    status={state}
+                    label={`设为${teamLifecycleLabels[state]}`}
+                  />
+                ))}
+            </div>
+          </details>
+        )}
+        <section
+          id="team-recruitments"
+          className={styles.recordSection}
+          aria-labelledby="team-recruitments-title"
+        >
+          <div className={styles.sectionHead}>
+            <h2 id="team-recruitments-title">代表队招新批次</h2>
+            <p>{batches.totalDocs} 个批次</p>
           </div>
-        )}
-        <h2>代表队招新批次</h2>
-        {established ? (
-          <Link className="button" href={`/teams/manage/${id}?create=1`}>
-            建立新招新批次
-          </Link>
-        ) : (
-          <p>
-            代表队尚未完成建队审核或已归档。请先由高权限管理人员处理成立/恢复状态。
-          </p>
-        )}
-        {batches.docs.length ? (
-          batches.docs.map((batch) => (
-            <article className="panel" key={batch.id}>
-              <h3>{batch.title}</h3>
-              <p>
-                {teamRecruitmentLabels[batch.status]} ·{" "}
-                {teamRecruitmentState(batch, normalizeSignup(batch.signupForm))}
-              </p>
-              <div className="signup-tools">
-                <Link href={`/teams/recruitment/${batch.id}`}>
-                  查看申请入口
-                </Link>
-                {established && batch.status !== "archived" && (
-                  <Link href={`/teams/manage/${id}?edit=${batch.id}`}>
-                    编辑表单与窗口
+          {established ? (
+            <Link className="button" href={`/teams/manage/${id}?create=1`}>
+              建立新招新批次
+            </Link>
+          ) : (
+            <p>
+              代表队尚未完成建队审核或已归档。请先由有权限的负责人处理建队或恢复状态。
+            </p>
+          )}
+          {batches.docs.length ? (
+            batches.docs.map((batch) => (
+              <article className="panel" key={batch.id}>
+                <div className={styles.recordHead}>
+                  <h3>{batch.title}</h3>
+                  <span className={styles.status}>
+                    {teamRecruitmentLabels[batch.status]}
+                  </span>
+                </div>
+                <p className={styles.recordDate}>
+                  {teamRecruitmentState(
+                    batch,
+                    normalizeSignup(batch.signupForm),
+                  )}
+                  {" · 更新于 "}
+                  <time dateTime={batch.updatedAt}>
+                    {formatDate(batch.updatedAt)}
+                  </time>
+                </p>
+                <div className="signup-tools">
+                  <Link href={`/teams/recruitment/${batch.id}`}>
+                    查看申请入口
                   </Link>
-                )}
-              </div>
-              {batch.status === "open" && (
-                <TeamCoreOperation
-                  operation="close-recruitment"
-                  id={batch.id}
-                  revision={batch.updatedAt}
-                  status="closed"
-                  label="关闭本轮招新"
-                />
-              )}
-              {batch.status !== "archived" && (
-                <TeamCoreOperation
-                  operation="close-recruitment"
-                  id={batch.id}
-                  revision={batch.updatedAt}
-                  status="archived"
-                  label="归档本批次"
-                />
-              )}
-            </article>
-          ))
-        ) : (
-          <p>暂无招新批次。</p>
-        )}
-        <TeamCorePagination
-          page={teamPage(query.batchesPage)}
-          total={batches.totalPages}
-          path={`/teams/manage/${id}`}
-          parameter="batchesPage"
-          query={query}
-          label="招新批次"
-        />
-        {established && (query.create || edit) && (
-          <TeamCoreRecruitmentEditor
-            key={edit?.updatedAt ?? "new"}
-            teamID={id}
-            defaultForm={defaultTeamForm}
-            initial={
-              edit
-                ? {
-                    id: edit.id,
-                    title: edit.title,
-                    status: edit.status,
-                    revision: edit.updatedAt,
-                    form: normalizeSignup(edit.signupForm),
-                  }
-                : undefined
-            }
+                  {established && batch.status !== "archived" && (
+                    <Link href={`/teams/manage/${id}?edit=${batch.id}`}>
+                      编辑表单与窗口
+                    </Link>
+                  )}
+                </div>
+                <div className="team-core-actions">
+                  {batch.status === "open" && (
+                    <TeamCoreOperation
+                      operation="close-recruitment"
+                      id={batch.id}
+                      revision={batch.updatedAt}
+                      status="closed"
+                      label="关闭本轮招新"
+                    />
+                  )}
+                  {batch.status !== "archived" && (
+                    <TeamCoreOperation
+                      operation="close-recruitment"
+                      id={batch.id}
+                      revision={batch.updatedAt}
+                      status="archived"
+                      label="归档本批次"
+                    />
+                  )}
+                </div>
+              </article>
+            ))
+          ) : (
+            <div className="empty">
+              <h3>暂无招新批次</h3>
+              <p>
+                {established
+                  ? "建立一个批次，准备选拔题目与申请截止时间后开放招新。"
+                  : "建队获批并恢复开放后，可在这里建立招新批次。"}
+              </p>
+            </div>
+          )}
+          <TeamCorePagination
+            page={teamPage(query.batchesPage)}
+            total={batches.totalPages}
+            path={`/teams/manage/${id}`}
+            parameter="batchesPage"
+            query={query}
+            label="招新批次"
           />
-        )}
-        <section id="team-applications">
-          <h2>本队人工审核入队</h2>
+          {established && (query.create || edit) && (
+            <TeamCoreRecruitmentEditor
+              key={edit?.updatedAt ?? "new"}
+              teamID={id}
+              defaultForm={defaultTeamForm}
+              initial={
+                edit
+                  ? {
+                      id: edit.id,
+                      title: edit.title,
+                      status: edit.status,
+                      revision: edit.updatedAt,
+                      form: normalizeSignup(edit.signupForm),
+                    }
+                  : undefined
+              }
+            />
+          )}
+        </section>
+        <section
+          id="team-applications"
+          className={styles.recordSection}
+          aria-labelledby="team-applications-title"
+        >
+          <div className={styles.sectionHead}>
+            <h2 id="team-applications-title">本队人工审核入队</h2>
+            <p>
+              {applications.totalDocs} 份 · {teamApplicationLabels[status]}
+            </p>
+          </div>
           <form className="filters" method="get">
             <label>
               审核状态
@@ -237,15 +291,25 @@ export default async function ManageTeam({
           {applications.docs.length ? (
             applications.docs.map((doc) => (
               <article className="panel" key={doc.id}>
-                <h3>{doc.title}</h3>
-                <p>
-                  {teamApplicationLabels[doc.status]} · 申请编号 {doc.id}
+                <div className={styles.recordHead}>
+                  <h3>{doc.title}</h3>
+                  <span className={styles.status} data-state={doc.status}>
+                    {teamApplicationLabels[doc.status]}
+                  </span>
+                </div>
+                <p className={styles.recordDate}>
+                  申请编号 {doc.id} · 更新于{" "}
+                  <time dateTime={doc.updatedAt}>
+                    {formatDate(doc.updatedAt)}
+                  </time>
                 </p>
                 <TeamCoreAnswers
                   form={normalizeSignup(doc.formSnapshot)}
                   answers={doc.answers as Answers}
                 />
-                <p className="preserve">{doc.reviewNote}</p>
+                {doc.reviewNote && (
+                  <p className="preserve">处理意见：{doc.reviewNote}</p>
+                )}
                 {doc.status === "pending" && (
                   <TeamCoreDecision
                     kind="join"
@@ -256,7 +320,12 @@ export default async function ManageTeam({
               </article>
             ))
           ) : (
-            <p>此状态暂无申请。草稿不进入审核队列。</p>
+            <div className="empty">
+              <h3>此状态暂无申请</h3>
+              <p>
+                可以切换状态查看已处理记录。申请人保存的草稿不进入审核队列。
+              </p>
+            </div>
           )}
           <TeamCorePagination
             page={page}
@@ -267,19 +336,45 @@ export default async function ManageTeam({
             label="申请"
           />
         </section>
-        <section id="team-members">
-          <h2>权威成员关系</h2>
+        <section
+          id="team-members"
+          className={styles.recordSection}
+          aria-labelledby="team-members-title"
+        >
+          <div className={styles.sectionHead}>
+            <h2 id="team-members-title">成员记录</h2>
+            <p>{members.totalDocs} 条记录 · 包含历史成员</p>
+          </div>
+          <p>
+            录取后建立本队成员记录。公开队员简介由本人选择展示，入队不会授予社群或平台管理权限。
+          </p>
           {members.docs.length ? (
             members.docs.map((doc) => (
               <article className="panel" key={doc.id}>
-                <h3>{doc.title}</h3>
-                <p>
-                  成员关系 #{doc.id} ·{" "}
-                  {doc.status === "active"
-                    ? "在队"
-                    : doc.leftAt
-                      ? "已离队"
-                      : "已撤销"}
+                <div className={styles.recordHead}>
+                  <h3>{doc.title}</h3>
+                  <span className={styles.status} data-state={doc.status}>
+                    {doc.status === "active"
+                      ? "在队"
+                      : doc.leftAt
+                        ? "已离队"
+                        : "已撤销"}
+                  </span>
+                </div>
+                <p className={styles.recordDate}>
+                  记录编号 {doc.id} · 入队于{" "}
+                  <time dateTime={doc.joinedAt}>
+                    {formatDate(doc.joinedAt)}
+                  </time>
+                  {doc.leftAt && (
+                    <>
+                      {" "}
+                      · 离队于{" "}
+                      <time dateTime={doc.leftAt}>
+                        {formatDate(doc.leftAt)}
+                      </time>
+                    </>
+                  )}
                 </p>
                 {doc.status === "active" && (
                   <TeamCoreOperation
@@ -293,7 +388,10 @@ export default async function ManageTeam({
               </article>
             ))
           ) : (
-            <p>尚无获批准的成员关系。公开简介与历史阵容不能作为成员资格。</p>
+            <div className="empty">
+              <h3>尚无入队成员记录</h3>
+              <p>入队申请获批后，成员记录会出现在这里。</p>
+            </div>
           )}
           <TeamCorePagination
             page={teamPage(query.membersPage)}
@@ -305,6 +403,6 @@ export default async function ManageTeam({
           />
         </section>
       </section>
-    </>
+    </ClubFrame>
   );
 }

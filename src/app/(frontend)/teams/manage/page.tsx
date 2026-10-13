@@ -6,8 +6,10 @@ import { PageHeading } from "@/components/PageHeading";
 import { TeamCorePagination, teamPage } from "@/components/TeamCorePagination";
 import { TeamCoreDecision } from "@/components/TeamCoreControls";
 import { currentTeamActor } from "@/lib/team-memberships";
-import { canPublish, communityIDs } from "@/lib/rules";
+import { canPublish, communityIDs, formatDate } from "@/lib/rules";
 import { teamLifecycleLabels } from "@/lib/team-core";
+import { ClubFrame } from "../../_club/ClubPage";
+import styles from "../../_club/ClubPages.module.css";
 export const dynamic = "force-dynamic";
 export default async function Manage({
   searchParams,
@@ -59,11 +61,11 @@ export default async function Manage({
       })
     : null;
   return (
-    <>
+    <ClubFrame>
       <PageHeading
         title="代表队工作台"
-        eyebrow="TEAM WORKSPACE"
-        description="按当前社群任职处理队伍、招新与成员。录取不会授予平台或社群角色。"
+        eyebrow="队伍管理"
+        description="处理本社群的队伍招新、人工选拔与成员记录。入队审核与平台、社群任职分别管理。"
       />
       <section className="member-shell">
         <nav className="signup-tools" aria-label="代表队操作">
@@ -87,20 +89,48 @@ export default async function Manage({
           </label>
           <button className="button">切换社群</button>
         </form>
-        <h2>可管理代表队</h2>
+        <div className={styles.sectionHead}>
+          <h2>可管理代表队</h2>
+          <p>
+            {teams.totalDocs} 支 · {game?.title ?? "我的管理社群"}
+          </p>
+        </div>
         {teams.docs.length ? (
-          <ul className="community-list">
+          <ul className={styles.readingList}>
             {teams.docs.map((team) => (
               <li key={team.id}>
-                <Link href={`/teams/manage/${team.id}`}>{team.title}</Link>
-                <span>
-                  {teamLifecycleLabels[team.teamStatus ?? "unestablished"]}
-                </span>
+                <div className={styles.recordHead}>
+                  <h3>
+                    <Link href={`/teams/manage/${team.id}`}>{team.title}</Link>
+                  </h3>
+                  <span className={styles.status} data-state={team.teamStatus}>
+                    {teamLifecycleLabels[team.teamStatus ?? "unestablished"]}
+                  </span>
+                </div>
+                <small>
+                  {games.docs.find(
+                    (g) =>
+                      String(g.id) ===
+                      String(
+                        typeof team.game === "object" && team.game
+                          ? team.game.id
+                          : team.game,
+                      ),
+                  )?.title ?? "历史社群"}{" "}
+                  · 招新批次、入队审核与成员记录
+                </small>
               </li>
             ))}
           </ul>
         ) : (
-          <p>暂无当前可管理的队伍。建立代表队须先完成建队审核。</p>
+          <div className="empty">
+            <h3>暂无当前可管理的队伍</h3>
+            <p>
+              {allowed.length
+                ? "可由本社群管理员发起建队申请，获批后在这里安排招新。"
+                : "这里根据当前社群任职显示队伍。你可以先查看代表队招新或自己的申请记录。"}
+            </p>
+          </div>
         )}
         <TeamCorePagination
           page={page}
@@ -111,19 +141,32 @@ export default async function Manage({
           label="代表队"
         />
         {queue && (
-          <section>
-            <h2>待审核建队申请</h2>
+          <section
+            className={styles.recordSection}
+            aria-labelledby="establishment-review-title"
+          >
+            <div className={styles.sectionHead}>
+              <h2 id="establishment-review-title">待审核建队申请</h2>
+              <p>{queue.totalDocs} 份待处理 · 全部社群</p>
+            </div>
             {queue.docs.length ? (
               queue.docs.map((doc) => (
                 <article className="panel" key={doc.id}>
-                  <h3>{doc.title}</h3>
-                  <p>
+                  <div className={styles.recordHead}>
+                    <h3>{doc.title}</h3>
+                    <span className={styles.status}>待审核</span>
+                  </div>
+                  <p className={styles.recordDate}>
                     社群：
                     {games.docs.find(
                       (g) =>
                         g.id ===
                         (typeof doc.game === "object" ? doc.game.id : doc.game),
-                    )?.title ?? "历史社群"}
+                    )?.title ?? "历史社群"}{" "}
+                    · 提交于{" "}
+                    <time dateTime={doc.createdAt}>
+                      {formatDate(doc.createdAt)}
+                    </time>
                   </p>
                   <p className="preserve">{doc.reason}</p>
                   <TeamCoreDecision
@@ -134,7 +177,10 @@ export default async function Manage({
                 </article>
               ))
             ) : (
-              <p>暂无待审核建队申请。</p>
+              <div className="empty">
+                <h3>暂无待审核建队申请</h3>
+                <p>新的申请提交后，将按提交时间排列在这里。</p>
+              </div>
             )}
             <TeamCorePagination
               page={reviewPage}
@@ -147,6 +193,6 @@ export default async function Manage({
           </section>
         )}
       </section>
-    </>
+    </ClubFrame>
   );
 }

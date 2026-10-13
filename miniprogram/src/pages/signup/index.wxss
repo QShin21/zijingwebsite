@@ -11,9 +11,8 @@
 .progress-count { color: var(--z-brand); font-size: 31rpx; font-weight: 600; }
 .mini-page .receipt-panel { border-top: 3rpx solid var(--z-positive); }
 .receipt-mark { display: inline-block; color: var(--z-positive); background: var(--z-positive-bg); border: 1rpx solid var(--z-positive-border); border-radius: 8rpx; padding: 5rpx 14rpx; margin-bottom: 20rpx; font-size: 22rpx; }
-input, textarea { box-sizing: border-box; width: 100%; color: var(--z-text); background: var(--z-field-bg); border: 1rpx solid var(--z-field-border); border-radius: 12rpx; padding: 20rpx; min-height: 44px; font-size: 28rpx; }
 textarea { height: 220rpx; }
-.label { display: block; margin: 20rpx 0 18rpx; color: var(--z-text); font-size: 28rpx; line-height: 1.7; font-weight: 600; word-break: break-word; }
+.label { margin: 20rpx 0 18rpx; word-break: break-word; }
 .choice { display: flex; align-items: center; gap: 14rpx; padding: 20rpx 18rpx; margin: 14rpx 0; min-height: 44px; border: 1rpx solid var(--z-control-border); border-radius: 12rpx; background: var(--z-control); color: var(--z-body); line-height: 1.65; word-break: break-word; }
 .choice radio, .choice checkbox { flex-shrink: 0; }
 .picker { padding: 24rpx 0; color: var(--z-badge-text); }
@@ -27,7 +26,7 @@ textarea { height: 220rpx; }
 .entry-row, .subquestion { margin-top: 26rpx; border-top: 1rpx solid var(--z-control-border); padding-top: 16rpx; }
 .entry-row .section-title { font-size: 29rpx; }
 .scale-choices { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 16rpx; }
-.scale-choice { display: flex; align-items: center; gap: 8rpx; min-height: 44px; min-width: 88rpx; padding: 12rpx; border: 1rpx solid var(--z-control-border); border-radius: 10rpx; background: var(--z-control); }
+.scale-choice { display: flex; align-items: center; gap: 8rpx; min-height: 44px; min-width: 44px; padding: 12rpx; border: 1rpx solid var(--z-control-border); border-radius: 10rpx; background: var(--z-control); }
 .picker-value { background: var(--z-field-bg); border: 1rpx solid var(--z-field-border); border-radius: 12rpx; padding: 24rpx; word-break: break-word; }
 .row > button { flex: 1; min-width: 0; }
 .branch-notice { border: 1rpx solid var(--z-secondary-border); border-radius: 12rpx; background: var(--z-secondary-bg); padding: 22rpx; color: var(--z-secondary-text); font-size: 26rpx; }
@@ -38,7 +37,6 @@ textarea { height: 220rpx; }
 .question-section.invalid { padding: 26rpx; border-radius: 12rpx; }
 .signup-page .progress-panel { padding: 26rpx; border: 1rpx solid var(--z-line); }
 .signup-page .choice { margin: 0; border: 0; border-bottom: 1rpx solid var(--z-line); border-radius: 0; padding: 24rpx 4rpx; background: transparent; }
-.signup-page .answer-question > .label { font-size: 31rpx; }
 .signup-page .receipt-panel > .section-title { color: var(--z-primary); }
 .signup-page .row > button { flex: 1; min-width: 180rpx; }
 .signup-page .field-note { margin-bottom: 16rpx; }

@@ -28,3 +28,11 @@ it("server feedback exposes public workflow reasons but never unexpected excepti
   expect(workflowFeedback(new Error("SELECT private answer"))).toContain("操作结果");
   expect(workflowFeedback(new Error("SELECT private answer"))).not.toContain("SELECT");
 });
+
+it("treats the legacy staff generic 400 fallback as an uncertain write while preserving actual business rejection", async () => {
+  vi.stubGlobal("fetch", vi.fn()
+    .mockResolvedValueOnce(Response.json({ error: "服务器暂时无法保存申请，请稍后重试；已填写的资料会保留。" }, { status: 400 }))
+    .mockResolvedValueOnce(Response.json({ error: "申请已截止，不可修改" }, { status: 400 })));
+  await expect(activityRequest("/api/staff/batches/11/application", "PATCH", { revision: "synthetic-v1" })).rejects.toThrow("服务器暂时无法确认提交结果");
+  await expect(activityRequest("/api/staff/batches/11/application", "PATCH", { revision: "synthetic-v1" })).rejects.toThrow("申请已截止，不可修改");
+});

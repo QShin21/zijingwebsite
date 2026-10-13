@@ -1,6 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { memberTest } from "./member-layout-fixture";
 import sharp from "sharp";
+import tokens from "../../src/design/tokens.json";
+
+const rgb = (hex: string) =>
+  `rgb(${[1, 3, 5].map((offset) => parseInt(hex.slice(offset, offset + 2), 16)).join(", ")})`;
 
 test("system dark without a preference renders light HTML, metadata and native navigation before JavaScript", async ({
   browser,
@@ -24,11 +28,11 @@ test("system dark without a preference renders light HTML, metadata and native n
     );
     await expect(page.locator("body")).toHaveCSS(
       "background-color",
-      "rgb(244, 241, 234)",
+      rgb(tokens.light.paper),
     );
     await expect(page.locator(".z-header")).toHaveCSS(
       "background-color",
-      "rgb(255, 253, 248)",
+      rgb(tokens.light["header-bg"]),
     );
     await page.getByLabel("打开导航", { exact: true }).click();
     await page
@@ -139,7 +143,7 @@ memberTest(
       expect(await response!.text()).toContain('data-z-theme="dark"');
       await expect(nextPage.locator("body")).toHaveCSS(
         "background-color",
-        "rgb(19, 18, 23)",
+        rgb(tokens.dark.paper),
       );
     } finally {
       await reopened.close();

@@ -18,7 +18,9 @@ resolved.admin.importMap.autoGenerate = false;
 const payload = await getPayload({ config: resolved });
 const password = "Synthetic-Rebuild-Browser-Only-20261013!";
 const users: { id: number; name: string; email: string; role: string; password: string }[] = [];
+const memberOnly = process.argv.includes("--member-only");
 for (const [role, name] of [["member", "合成重构成员"], ["backbone", "合成重构骨干"], ["president", "合成重构社长"]] as const) {
+  if (memberOnly && role !== "member") continue;
   const email = `rebuild-${role}@example.invalid`;
   const found = await payload.find({ collection: "users", overrideAccess: true, where: { email: { equals: email } }, limit: 1 });
   const actor = found.docs[0] || await payload.create({ collection: "users", overrideAccess: true,
@@ -29,5 +31,5 @@ await fs.writeFile(path.join(root, "synthetic-browser-users.json"), JSON.stringi
   syntheticOnly: true, notifications: false, users,
 }, null, 2) + "\n", { mode: 0o600 });
 await payload.destroy();
-console.log("Three synthetic browser roles ready; account fixture saved only under the current QA directory.");
+console.log(`${users.length} synthetic browser roles ready; account fixture saved only under the current QA directory.`);
 process.exit(0);

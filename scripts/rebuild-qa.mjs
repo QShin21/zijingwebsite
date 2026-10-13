@@ -19,6 +19,7 @@ const profiles = {
   visual: { port: 55616, database: "zijing_rebuild_clubqa_synthetic", user: "rebuild_synthetic" },
   contracts: { port: 55617, database: "zijing_rebuild_contracts_synthetic", user: "rebuild_synthetic" },
   browser: { port: 55618, database: "zijing_rebuild_browser_synthetic", user: "rebuild_synthetic" },
+  "prod-browser": { port: 55619, database: "zijing_rebuild_prod_browser_synthetic", user: "rebuild_synthetic" },
 };
 const profile = profiles[profileName];
 if (!profile) throw new Error("Unknown disposable QA profile");
@@ -34,6 +35,8 @@ const serverURL = `http://localhost:${serverPort}`;
 const browserExecutable = process.env.REBUILD_QA_BROWSER || path.join(repo, ".data/visual-direction-browsers-20261013/chromium-1208/chrome-linux64/chrome");
 const runLabel = process.env.REBUILD_QA_RUN_LABEL || `${action}-${Date.now()}`;
 if (!/^[a-zA-Z0-9_-]+$/.test(runLabel)) throw new Error("Use a simple QA run label");
+const visualTheme = process.env.REBUILD_QA_THEME || "light";
+if (!["light", "dark"].includes(visualTheme)) throw new Error("Use light or dark for the synthetic visual run");
 const allowedSource = [
   "src", "public", "tests", "scripts",
   "docs/privacy-page-20261013.json", "docs/PRIVACY_NOTICE_20261013.md",
@@ -61,7 +64,7 @@ const safeEnv = {
   REBUILD_QA_BROWSER: browserExecutable,
   REBUILD_QA_RUN_LABEL: runLabel,
   CLUB_EVIDENCE_DIR: path.join(directory, "evidence"),
-  CLUB_THEME_INTEGRATED: "true", CLUB_STYLE_THEME: "light",
+  CLUB_THEME_INTEGRATED: "true", CLUB_STYLE_THEME: visualTheme,
 };
 
 async function prepare() {
@@ -82,7 +85,7 @@ async function prepare() {
     automaticSchemaPush: false, dotenvPath: empty,
     nextAndPayloadEnvironmentSentinel: path.join(app, ".env"),
     mediaDirectory: safeEnv.MEDIA_DIR, serverURL, browserExecutable,
-    smtp: { seedAndVitest: "disabled", devAndPlaywright: "127.0.0.1:2526", syntheticRecipientsOnly: true },
+    smtp: { seedAndVitest: "disabled", devAndPlaywright: "127.0.0.1:2526", builtBrowser: profileName === "prod-browser" ? "127.0.0.1:2526" : "disabled", syntheticRecipientsOnly: true },
     realS3: false, realAI: false, externalNotifications: false,
     inheritedAppEnvironment: false,
   }, null, 2) + "\n");
@@ -124,18 +127,37 @@ async function child(command, childArgs, extraEnv = {}) {
   await prepare();
   const startedAt = new Date().toISOString();
   const proc = spawn(command, childArgs, { cwd: app, env: { ...safeEnv, ...extraEnv }, stdio: "inherit" });
-  for (const signal of ["SIGTERM", "SIGINT"]) process.once(signal, () => proc.kill(signal));
-  const code = await new Promise((resolve, reject) => {
+  const completion = new Promise((resolve, reject) => {
     proc.once("error", reject); proc.once("close", (value) => resolve(value ?? 1));
   });
+  for (const signal of ["SIGTERM", "SIGINT"]) process.once(signal, () => proc.kill(signal));
+  const processDirectory = path.join(directory, "processes");
+  const processFile = path.join(processDirectory, `${runLabel}.json`);
+  const processRecord = {
+    action, profile: profileName, label: runLabel, startedAt,
+    runnerPID: process.pid, childPID: proc.pid, cwd: app,
+    executable: path.basename(command), status: "running",
+  };
+  const [code] = await Promise.all([
+    completion,
+    (async () => {
+      await fs.mkdir(processDirectory, { recursive: true });
+      await fs.writeFile(processFile, JSON.stringify(processRecord, null, 2) + "\n");
+    })(),
+  ]);
   await fs.appendFile(path.join(directory, "runs.jsonl"), JSON.stringify({
     action, profile: profileName, label: runLabel, startedAt, finishedAt: new Date().toISOString(),
     cwd: app, executable: path.basename(command),
     suites: childArgs.filter((argument) => /^tests\//.test(argument)),
     effectiveServerURL: extraEnv.SERVER_URL || safeEnv.SERVER_URL,
     effectiveSMTPHost: extraEnv.SMTP_HOST ?? safeEnv.SMTP_HOST,
+    effectiveNodeEnvironment: extraEnv.NODE_ENV || safeEnv.NODE_ENV,
+    visualTheme,
     exitCode: code,
   }) + "\n");
+  await fs.writeFile(processFile, JSON.stringify({
+    ...processRecord, status: "finished", finishedAt: new Date().toISOString(), exitCode: code,
+  }, null, 2) + "\n");
   process.exitCode = code;
 }
 
@@ -174,6 +196,32 @@ else if (action === "db") {
 } else if (action === "dev") {
   await portAvailable(Number(serverPort));
   await child(process.execPath, [path.join(repo, "node_modules/next/dist/bin/next"), "dev", "--webpack", "--hostname", "127.0.0.1", "--port", serverPort], { SMTP_HOST: "127.0.0.1" });
+} else if (action === "build") {
+  await child(process.execPath, [path.join(repo, "node_modules/next/dist/bin/next"), "build", "--webpack", ...args], { NODE_ENV: "production" });
+} else if (action === "start") {
+  await portAvailable(Number(serverPort));
+  await child(process.execPath, [path.join(repo, "node_modules/next/dist/bin/next"), "start", "--hostname", "127.0.0.1", "--port", serverPort], {
+    NODE_ENV: "production", SMTP_HOST: profileName === "prod-browser" ? "127.0.0.1" : "",
+  });
+} else if (action === "copy-build") {
+  if (!["prod-browser", "visual", "consent-web"].includes(profileName))
+    throw new Error("Production artifact copies are restricted to dedicated synthetic browser profiles");
+  await portAvailable(Number(serverPort));
+  const buildSource = path.join(root, "contracts/app/.next");
+  const buildID = (await fs.readFile(path.join(buildSource, "BUILD_ID"), "utf8")).trim();
+  if (!buildID) throw new Error("A completed contracts production build is required");
+  await prepare();
+  await fs.rm(path.join(app, ".next"), { recursive: true, force: true });
+  await fs.cp(buildSource, path.join(app, ".next"), {
+    recursive: true,
+    filter: (source) => !["cache", "dev"].includes(path.basename(source)),
+  });
+  await fs.writeFile(path.join(directory, "production-artifact.json"), JSON.stringify({
+    copiedAt: new Date().toISOString(), source: buildSource, buildID,
+    destination: path.join(app, ".next"), appEnvironment: "development",
+    syntheticDatabase: profile.database, deployment: false,
+  }, null, 2) + "\n");
+  console.log(`Copied completed synthetic production artifact to ${profileName}; build ID ${buildID}`);
 } else if (action === "vitest") {
   await child(process.execPath, [path.join(repo, "node_modules/vitest/vitest.mjs"), "run", ...args], { SERVER_URL: "http://localhost:3000", NEXT_PUBLIC_SERVER_URL: "http://localhost:3000" });
 } else if (action === "playwright") {
@@ -182,6 +230,6 @@ else if (action === "db") {
   if (!args.length) throw new Error("Provide an executable and arguments after the profile");
   await child(args[0], args.slice(1));
 } else {
-  console.log(`Usage: node scripts/rebuild-qa.mjs init|sync|environment|db|migrate|seed|dev|vitest|playwright|exec [${Object.keys(profiles).join("|")}] [arguments]`);
+  console.log(`Usage: node scripts/rebuild-qa.mjs init|sync|environment|db|migrate|seed|dev|build|start|copy-build|vitest|playwright|exec [${Object.keys(profiles).join("|")}] [arguments]`);
   console.log("All work is limited to .data/rebuild-qa-20261013. Use REBUILD_QA_SERVER_PORT=3000 only for legacy E2E hardcoded origins; default is 3364.");
 }

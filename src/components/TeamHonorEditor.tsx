@@ -35,24 +35,55 @@ export function TeamHonorEditor({
       form.delete("pictures");
       for (const file of imageFiles.current) form.append("pictures", file);
       if (videoFile.current) form.set("video", videoFile.current);
-      const keptImages = images.filter((_, index) => !checked["removeImage-" + index]).length;
+      const keptImages = images.filter(
+        (_, index) => !checked["removeImage-" + index],
+      ).length;
       if (keptImages + imageFiles.current.length > 6)
-        return { error: "证据图片最多 6 份。请减少新图片，或先勾选移除已有证据。" };
-      if (imageFiles.current.some(file => file.size > 2 * 1024 * 1024 || !["image/png", "image/jpeg", "image/webp"].includes(file.type)))
-        return { error: "每份证据图片须为 2 MB 以内的 PNG、JPEG 或 WebP。附件和已填内容已保留。" };
+        return {
+          error: "证据图片最多 6 份。请减少新图片，或先勾选移除已有证据。",
+        };
+      if (
+        imageFiles.current.some(
+          (file) =>
+            file.size > 2 * 1024 * 1024 ||
+            !["image/png", "image/jpeg", "image/webp"].includes(file.type),
+        )
+      )
+        return {
+          error:
+            "每份证据图片须为 2 MB 以内的 PNG、JPEG 或 WebP。附件和已填内容已保留。",
+        };
       if ((videoFile.current?.size || 0) > 10 * 1024 * 1024)
-        return { error: "视频证据须在 10 MB 以内，请重新选择视频。已填内容已保留。" };
-      if (imageFiles.current.reduce((total, file) => total + file.size, videoFile.current?.size || 0) > 12 * 1024 * 1024)
-        return { error: "本次上传的图片与视频合计须在 12 MB 以内，请减少附件。已填内容已保留。" };
-      try {
-        return await saveTeamHonorAction(previous, form);
-      } catch (error) {
-        unstable_rethrow(error);
+        return {
+          error: "视频证据须在 10 MB 以内，请重新选择视频。已填内容已保留。",
+        };
+      if (
+        imageFiles.current.reduce(
+          (total, file) => total + file.size,
+          videoFile.current?.size || 0,
+        ) >
+        12 * 1024 * 1024
+      )
+        return {
+          error:
+            "本次上传的图片与视频合计须在 12 MB 以内，请减少附件。已填内容已保留。",
+        };
+      const markUnconfirmed = () => {
         setConfirmedMissing(false);
         const submittedTeam = record
-          ? typeof record.team === "number" ? record.team : record.team.id
+          ? typeof record.team === "number"
+            ? record.team
+            : record.team.id
           : form.get("team");
         setUnconfirmedTeam(String(submittedTeam || ""));
+      };
+      try {
+        const result = await saveTeamHonorAction(previous, form);
+        if (result.unconfirmed) markUnconfirmed();
+        return result;
+      } catch (error) {
+        unstable_rethrow(error);
+        markUnconfirmed();
         return {
           error:
             "连接中断，提交结果尚未确认。输入与附件已保留，请先查看本人荣誉记录，核对后再重试。",
@@ -93,7 +124,8 @@ export function TeamHonorEditor({
   const ownRecords = new URLSearchParams(returnQuery);
   ownRecords.set("view", "mine");
   ownRecords.delete("page");
-  if (state.unconfirmed && unconfirmedTeam) ownRecords.set("team", unconfirmedTeam);
+  if (state.unconfirmed && unconfirmedTeam)
+    ownRecords.set("team", unconfirmedTeam);
   else if (!record && fields.team) ownRecords.set("team", fields.team);
   const retryLocked = Boolean(state.unconfirmed && !confirmedMissing);
   return (
@@ -104,7 +136,12 @@ export function TeamHonorEditor({
       aria-busy={!ready || pending}
     >
       <h2>{record ? "修改荣誉记录" : "提交队伍荣誉"}</h2>
-      <p>{record ? "保存修改会撤下当前展示，重新批准后更新同一队伍档案。" : "记录比赛与成绩，提交材料后由本社群管理员核验。"}本人兼任管理员也须由他人审核。</p>
+      <p>
+        {record
+          ? "保存修改会撤下当前展示，重新批准后更新同一队伍档案。"
+          : "记录比赛与成绩，提交材料后由本社群管理员核验。"}
+        本人兼任管理员也须由他人审核。
+      </p>
       {state.error && <p role="alert">{state.error}</p>}
       {state.unconfirmed && (
         <p>
@@ -131,10 +168,7 @@ export function TeamHonorEditor({
         </label>
       )}
       <input type="hidden" name="returnQuery" value={returnQuery} />
-      <fieldset
-        disabled={!ready || pending}
-        aria-label="荣誉投稿表单"
-      >
+      <fieldset disabled={!ready || pending} aria-label="荣誉投稿表单">
         {record ? (
           <>
             <input type="hidden" name="id" value={record.id} />
@@ -171,24 +205,24 @@ export function TeamHonorEditor({
           />
         </label>
         <div className={styles.formColumns}>
-        <label>
-          赛事名称
-          <input
-            name="competition"
-            maxLength={200}
-            value={fields.competition}
-            onChange={fieldChange}
-          />
-        </label>
-        <label>
-          奖项或名次
-          <input
-            name="placing"
-            maxLength={200}
-            value={fields.placing}
-            onChange={fieldChange}
-          />
-        </label>
+          <label>
+            赛事名称
+            <input
+              name="competition"
+              maxLength={200}
+              value={fields.competition}
+              onChange={fieldChange}
+            />
+          </label>
+          <label>
+            奖项或名次
+            <input
+              name="placing"
+              maxLength={200}
+              value={fields.placing}
+              onChange={fieldChange}
+            />
+          </label>
         </div>
         <label>
           赛事日期
@@ -212,43 +246,44 @@ export function TeamHonorEditor({
         <fieldset className={styles.evidenceSection}>
           <legend>审核证据</legend>
           <p>
-            提交时至少一份证据图片或本站 MP4。审核前仅本人和有权限的审核者可见；批准后证据随队伍档案展示，请上传获准公开的成果材料。
+            提交时至少一份证据图片或本站
+            MP4。审核前仅本人和有权限的审核者可见；批准后证据随队伍档案展示，请上传获准公开的成果材料。
           </p>
           <div className={styles.evidenceList}>
-          {images.map((image, index) => (
-            <div className={styles.evidenceItem} key={index}>
-              <img
-                src={image.source}
-                alt={image.caption || "已有证据"}
-                width={240}
-                height={160}
-              />
-              <label>
-                已有证据 {index + 1} 说明
-                <input
-                  name={"caption-" + index}
-                  maxLength={200}
-                  value={fields["caption-" + index] || ""}
-                  onChange={fieldChange}
+            {images.map((image, index) => (
+              <div className={styles.evidenceItem} key={index}>
+                <img
+                  src={image.source}
+                  alt={image.caption || "已有证据"}
+                  width={240}
+                  height={160}
                 />
-              </label>
-              <label className="checkbox-row">
-                <input
-                  type="checkbox"
-                  name={"removeImage-" + index}
-                  checked={checked["removeImage-" + index] || false}
-                  onChange={(event) => {
-                    const { name, checked } = event.currentTarget;
-                    setChecked((previous) => ({
-                      ...previous,
-                      [name]: checked,
-                    }));
-                  }}
-                />
-                移除这份证据
-              </label>
-            </div>
-          ))}
+                <label>
+                  已有证据 {index + 1} 说明
+                  <input
+                    name={"caption-" + index}
+                    maxLength={200}
+                    value={fields["caption-" + index] || ""}
+                    onChange={fieldChange}
+                  />
+                </label>
+                <label className="checkbox-row">
+                  <input
+                    type="checkbox"
+                    name={"removeImage-" + index}
+                    checked={checked["removeImage-" + index] || false}
+                    onChange={(event) => {
+                      const { name, checked } = event.currentTarget;
+                      setChecked((previous) => ({
+                        ...previous,
+                        [name]: checked,
+                      }));
+                    }}
+                  />
+                  移除这份证据
+                </label>
+              </div>
+            ))}
           </div>
           <label>
             添加证据图片（每份 2 MB，最多 6 份）
@@ -263,7 +298,12 @@ export function TeamHonorEditor({
               }}
             />
           </label>
-          {pictures.length > 0 && <p className="field-hint">已选择 {pictures.length} 份新图片。请逐份补充说明，方便审核与档案阅读。</p>}
+          {pictures.length > 0 && (
+            <p className="field-hint">
+              已选择 {pictures.length}{" "}
+              份新图片。请逐份补充说明，方便审核与档案阅读。
+            </p>
+          )}
           {pictures.map((name, index) => (
             <label key={index}>
               新证据 {index + 1} 说明 · {name}
@@ -306,7 +346,10 @@ export function TeamHonorEditor({
             />
           </label>
           {videoName && <p>已选择视频：{videoName}</p>}
-          <p className="field-hint">一次提交的附件总共最多 12 MB。外链视频不能作为荣誉审核证据。上传失败时保留已填内容，请核对反馈后重试。</p>
+          <p className="field-hint">
+            一次提交的附件总共最多 12
+            MB。外链视频不能作为荣誉审核证据。上传失败时保留已填内容，请核对反馈后重试。
+          </p>
         </fieldset>
         <div className="reaction-bar">
           <button

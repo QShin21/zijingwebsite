@@ -54,7 +54,7 @@ export function DesignNavigation({
       }
     };
     const resize = () => {
-      if (window.innerWidth > 1100) close();
+      if (window.innerWidth > 1160) close();
     };
     document.addEventListener("pointerdown", outside);
     document.addEventListener("keydown", escape);
