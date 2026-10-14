@@ -1,0 +1,2274 @@
+{
+  "recordedAt": "2026-10-14T08:00:36.904371+00:00",
+  "stage": "independent Sol full acceptance in progress; full main E2E failed, matrix and isolated site retest continuing",
+  "sourceCommit": "728387059972e6795b0431514ece59dfd3279dc7",
+  "implementationCommit": "2fd2404938ea4c84c274aabc3ec329590e299c18",
+  "sourceEdits": false,
+  "testImplementationOrAssertionEdits": false,
+  "baseline": {
+    "checkedAt": "2026-10-14T07:35:29.236659+00:00",
+    "sourceCommit": "728387059972e6795b0431514ece59dfd3279dc7",
+    "sourceCodeCommit": "2fd2404938ea4c84c274aabc3ec329590e299c18",
+    "sourceFiles": 626,
+    "nonTestFiles": 500,
+    "nonTestHash": "be98b4eeb20534ab3f65f69919fec05482a8520ce23a5c4a0c3c65a0e5f463ea",
+    "buildID": "0V_1ao2PM56qrzXsn8W8G",
+    "app": "/workspace/astra-build2/.data/rebuild-qa-20261013/browser/app",
+    "allInputsMatch": true,
+    "dependenciesChanged": false,
+    "freshRunLabels": true
+  },
+  "vitest": {
+    "recordedAt": "2026-10-14T07:43:55.821977+00:00",
+    "sourceCommit": "728387059972e6795b0431514ece59dfd3279dc7",
+    "runs": [
+      {
+        "name": "unit-full",
+        "profile": "contracts",
+        "files": 83,
+        "total": 1505,
+        "pass": 1505,
+        "fail": 0,
+        "notrun": 0,
+        "report": "/workspace/qa-zijing/sol-final-7283870-20261014/unit-full.json",
+        "sha256": "e58bc839782d42d1736b8cfeb95e894e570a04f9b7cd845b283b79db15972080",
+        "process": {
+          "action": "vitest",
+          "profile": "contracts",
+          "label": "sol-7283870-unit-full",
+          "startedAt": "2026-10-14T07:37:58.010Z",
+          "runnerPID": 64777,
+          "childPID": 64829,
+          "cwd": "/workspace/sol-final-qa/.data/rebuild-qa-20261013/contracts/app",
+          "executable": "node",
+          "status": "finished",
+          "finishedAt": "2026-10-14T07:42:38.984Z",
+          "exitCode": 0
+        }
+      },
+      {
+        "name": "consent-http",
+        "profile": "consent",
+        "files": 1,
+        "total": 27,
+        "pass": 27,
+        "fail": 0,
+        "notrun": 0,
+        "report": "/workspace/qa-zijing/sol-final-7283870-20261014/consent-http.json",
+        "sha256": "fffcd0988fdb3d3e63beedee475339c7a8bf3b0b81cead5af49023c46eb6e69f",
+        "process": {
+          "action": "vitest",
+          "profile": "consent",
+          "label": "sol-7283870-consent-http",
+          "startedAt": "2026-10-14T07:37:57.997Z",
+          "runnerPID": 64778,
+          "childPID": 64817,
+          "cwd": "/workspace/sol-final-qa/.data/rebuild-qa-20261013/consent/app",
+          "executable": "node",
+          "status": "finished",
+          "finishedAt": "2026-10-14T07:38:25.452Z",
+          "exitCode": 0
+        }
+      },
+      {
+        "name": "post-edit-http",
+        "profile": "post-edit",
+        "files": 1,
+        "total": 19,
+        "pass": 19,
+        "fail": 0,
+        "notrun": 0,
+        "report": "/workspace/qa-zijing/sol-final-7283870-20261014/post-edit-http.json",
+        "sha256": "d2feb532a460c8c6cfa8c304700af199496b06a45d5e9ba3713b3b080f2a25ba",
+        "process": {
+          "action": "vitest",
+          "profile": "post-edit",
+          "label": "sol-7283870-post-edit-http",
+          "startedAt": "2026-10-14T07:37:58.007Z",
+          "runnerPID": 64779,
+          "childPID": 64826,
+          "cwd": "/workspace/sol-final-qa/.data/rebuild-qa-20261013/post-edit/app",
+          "executable": "node",
+          "status": "finished",
+          "finishedAt": "2026-10-14T07:38:26.450Z",
+          "exitCode": 0
+        }
+      },
+      {
+        "name": "native-http",
+        "profile": "native",
+        "files": 2,
+        "total": 20,
+        "pass": 20,
+        "fail": 0,
+        "notrun": 0,
+        "report": "/workspace/qa-zijing/sol-final-7283870-20261014/native-http.json",
+        "sha256": "3d81e95ad2bd89e226ea363d1becf6ae4ef74249a0a957da21755ee97f8e4b3d",
+        "process": {
+          "action": "vitest",
+          "profile": "native",
+          "label": "sol-7283870-native-http",
+          "startedAt": "2026-10-14T07:37:57.998Z",
+          "runnerPID": 64780,
+          "childPID": 64818,
+          "cwd": "/workspace/sol-final-qa/.data/rebuild-qa-20261013/native/app",
+          "executable": "node",
+          "status": "finished",
+          "finishedAt": "2026-10-14T07:38:43.602Z",
+          "exitCode": 0
+        }
+      }
+    ],
+    "totalFiles": 87,
+    "totalTests": 1571,
+    "pass": 1571,
+    "fail": 0,
+    "notrun": 0,
+    "original30Cases": [
+      {
+        "file": "tests/miniapp-staff-flows.test.ts",
+        "fullName": "原生骨干审核：授权 GET 与服务端允许的决定 没有 reviewStatuses 的记录只能查看，无法通过按钮事件写入",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 3.46268699999996
+      },
+      {
+        "file": "tests/team-core-controls-component.test.ts",
+        "fullName": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 TeamCoreEstablishmentForm静态SSR渲染明确POST，水合前禁止提交私人表单",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 39.66486900000018
+      },
+      {
+        "file": "tests/team-core-controls-component.test.ts",
+        "fullName": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 TeamCoreDecision静态SSR渲染明确POST，水合前禁止提交私人表单",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 2.520404999999755
+      },
+      {
+        "file": "tests/team-core-controls-component.test.ts",
+        "fullName": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 TeamCoreOperation静态SSR渲染明确POST，水合前禁止提交私人表单",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 7.511537999999746
+      },
+      {
+        "file": "tests/team-core-controls-component.test.ts",
+        "fullName": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 同周期重复提交仅发送一次；业务拒绝保留内容，不刷新或自动重发",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 32.473733000000266
+      },
+      {
+        "file": "tests/team-core-controls-component.test.ts",
+        "fullName": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 网络中断结果不明时锁定重发，核对后由本人显式重试",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 12.395909000000302
+      },
+      {
+        "file": "tests/team-core-controls-component.test.ts",
+        "fullName": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 服务器5xx结果不明时锁定重发，核对后由本人显式重试",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 5.129508999999871
+      },
+      {
+        "file": "tests/team-core-controls-component.test.ts",
+        "fullName": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 非JSON响应结果不明时锁定重发，核对后由本人显式重试",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 4.456060999999863
+      },
+      {
+        "file": "tests/team-core-controls-component.test.ts",
+        "fullName": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 无结果响应结果不明时锁定重发，核对后由本人显式重试",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 26.89774499999976
+      },
+      {
+        "file": "tests/team-core-controls-component.test.ts",
+        "fullName": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 仅成功返回后确认建队提交并刷新记录",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 116.9400770000002
+      },
+      {
+        "file": "tests/team-core-controls-component.test.ts",
+        "fullName": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 returned必须有说明，先聚焦审核意见且不调用接口",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 4.879709000000275
+      },
+      {
+        "file": "tests/team-core-controls-component.test.ts",
+        "fullName": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 rejected必须有说明，先聚焦审核意见且不调用接口",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 2.314966999999797
+      },
+      {
+        "file": "tests/team-core-controls-component.test.ts",
+        "fullName": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 批准可不填说明，仍发送原申请id和revision",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 1.876604000000043
+      },
+      {
+        "file": "tests/team-core-controls-component.test.ts",
+        "fullName": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 入队草稿结构化拒绝继续抛给问卷，保留回执、题目版本与原答案",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 4.467918000000282
+      },
+      {
+        "file": "tests/team-honor-editor-component.test.ts",
+        "fullName": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 已有证据与新图片合计最多六份，勾选移除已有图片才释放名额",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 70.74474099999998
+      },
+      {
+        "file": "tests/team-honor-editor-component.test.ts",
+        "fullName": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 超限图片在调用服务前拒绝，保留标题与文件选择",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 8.732229000000075
+      },
+      {
+        "file": "tests/team-honor-editor-component.test.ts",
+        "fullName": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 错误图片类型在调用服务前拒绝，保留标题与文件选择",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 7.823793000000023
+      },
+      {
+        "file": "tests/team-honor-editor-component.test.ts",
+        "fullName": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 超限视频在调用服务前拒绝，保留标题与文件选择",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 5.891247000000021
+      },
+      {
+        "file": "tests/team-honor-editor-component.test.ts",
+        "fullName": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 合计超限在调用服务前拒绝，保留标题与文件选择",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 7.8200429999999415
+      },
+      {
+        "file": "tests/team-honor-editor-component.test.ts",
+        "fullName": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 结构化拒绝保留完整输入和原 File 对象，修正后原文件仍可重试",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 8.476468999999952
+      },
+      {
+        "file": "tests/team-honor-editor-component.test.ts",
+        "fullName": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 服务返回结果不明时锁定提交，再次未知结果会重新要求核对",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 19.857857999999965
+      },
+      {
+        "file": "tests/team-honor-editor-component.test.ts",
+        "fullName": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 断网结果不明时阻止重发，核对本人记录后才允许显式重试",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 17.748395999999957
+      },
+      {
+        "file": "tests/team-honor-feedback.test.ts",
+        "fullName": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 record真实静态渲染为POST，水合前fieldset禁用",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 92.88366499999984
+      },
+      {
+        "file": "tests/team-honor-feedback.test.ts",
+        "fullName": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 record拒绝后不清空说明、不自动刷新，仅由用户核对刷新",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 51.97487799999999
+      },
+      {
+        "file": "tests/team-honor-feedback.test.ts",
+        "fullName": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 丢失响应保留说明并要求核对，反馈不宣称操作没有保存",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 42.04633599999988
+      },
+      {
+        "file": "tests/team-honor-feedback.test.ts",
+        "fullName": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 没有成功目标页时继续刷新当前记录并展示已保存反馈",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 56.266267999999855
+      },
+      {
+        "file": "tests/team-honor-feedback.test.ts",
+        "fullName": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 失败结果即使带有目标页也不能导航或清空当前说明",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 49.51602099999991
+      },
+      {
+        "file": "tests/team-honor-feedback.test.ts",
+        "fullName": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 legacy真实静态渲染为POST，水合前fieldset禁用",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 42.58400299999994
+      },
+      {
+        "file": "tests/team-honor-feedback.test.ts",
+        "fullName": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 legacy拒绝后不清空说明、不自动刷新，仅由用户核对刷新",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 51.25012000000015
+      },
+      {
+        "file": "tests/team-honor-feedback.test.ts",
+        "fullName": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 成功移出当前列表时导航到服务器给出的回执页，不再刷新失效的原详情",
+        "previousStatus": "fail",
+        "currentStatus": "passed",
+        "durationMs": 73.36834200000021
+      }
+    ],
+    "original30Pass": 30
+  },
+  "fullE2E": {
+    "stats": {
+      "startTime": "2026-10-14T07:36:14.286Z",
+      "duration": 1216723.8849999998,
+      "expected": 104,
+      "skipped": 21,
+      "unexpected": 1,
+      "flaky": 0
+    },
+    "process": {
+      "action": "playwright",
+      "profile": "browser",
+      "label": "sol-7283870-full-e2e",
+      "startedAt": "2026-10-14T07:36:12.611Z",
+      "runnerPID": 64004,
+      "childPID": 64016,
+      "cwd": "/workspace/astra-build2/.data/rebuild-qa-20261013/browser/app",
+      "executable": "node",
+      "status": "finished",
+      "finishedAt": "2026-10-14T07:56:31.732Z",
+      "exitCode": 1
+    },
+    "report": "/workspace/astra-build2/.data/rebuild-qa-20261013/browser/runs/sol-7283870-full-e2e/playwright-results.json",
+    "sha256": "05e6b41c81f96de3131ea193cb9d0e54d606b77bf1e568741f5561b08f8b2d66",
+    "cases": [
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 138,
+        "title": "publisher builds questionnaire, member submits once, organizer reads private answers",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 14002,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 222,
+        "title": "site event management and API token submission share the same questionnaire",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 4854,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 281,
+        "title": "publisher includes questionnaire before publishing and CMS offers editor link",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 8059,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 328,
+        "title": "conditional questionnaire previews, validates, preserves steps and retries without losing answers",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 8037,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 500,
+        "title": "advanced types, account-scoped drafts, statistics, exports and permissions work together",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 10720,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 661,
+        "title": "organizer downloads one-row responses and member details with filters and private access",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 3617,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 855,
+        "title": "editor templates, text import, undo redo and exported JSON preserve editable settings",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 5593,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 930,
+        "title": "manager confirms the saved signup window without replacing local edits or advancing their revision",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 5704,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 999,
+        "title": "complex branches recompute on back navigation and persist only the actual path",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 6655,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 1130,
+        "title": "template library previews real branches and designer manages logic safely",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 7106,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 1220,
+        "title": "AI creation preserves current content on failure and previews editable generated drafts",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 2452,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 1278,
+        "title": "AI streaming, refinement and 5–6 member registration work through save, validation and export",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 9352,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 1481,
+        "title": "saved roster answers prefill edits, survive failed PATCH and adapt to a changed form",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 21415,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 1596,
+        "title": "AI endpoint enforces manager authorization and serves a real generated draft",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 7134,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-integration.spec.ts",
+        "line": 52,
+        "title": "五类问卷入口双轴居中，短屏/滚动/关闭与Escape返回焦点，预览不产生报名",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 41089,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-integration.spec.ts",
+        "line": 109,
+        "title": "骨干录用独立于入队；成立/招新/录取→简介opt-in→荣誉复审→撤权与同ID重录保持门禁",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 17934,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-integration.spec.ts",
+        "line": 245,
+        "title": "荣誉本人分页保留队伍和社群；断网与丢响应保留附件，并先核对已写入结果",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 19489,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-operations.spec.ts",
+        "line": 38,
+        "title": "人工进群完整回执、后台确认、隐私隔离及旧会话撤权",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 19449,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-operations.spec.ts",
+        "line": 89,
+        "title": "预览居中、进群空态、联系兜底及四个响应式断点",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 16873,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-operations.spec.ts",
+        "line": 118,
+        "title": "模板预览返回可继续键盘操作，关闭及Escape恢复制作入口焦点",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 3453,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-recovery.spec.ts",
+        "line": 33,
+        "title": "只读成员可从详情与工作台查看报名，独立导出且不可编辑/越权，撤销后旧会话立即失效",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 13480,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-theme.spec.ts",
+        "line": 254,
+        "title": "负责页面在四个视口无溢出、标题清晰并通过正文无障碍扫描",
+        "status": "notrun",
+        "skipKind": "dedicated-database-guard",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-theme.spec.ts",
+        "line": 335,
+        "title": "微信名片未同意仍阻止提交，提示精确且键盘焦点可见",
+        "status": "notrun",
+        "skipKind": "dedicated-database-guard",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-theme.spec.ts",
+        "line": 382,
+        "title": "队员简介预览、返回、取消与空态沿用原流程",
+        "status": "notrun",
+        "skipKind": "dedicated-database-guard",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-theme.spec.ts",
+        "line": 466,
+        "title": "简介实际请求的加载、网络失败和重试状态可用",
+        "status": "notrun",
+        "skipKind": "dedicated-database-guard",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-theme.spec.ts",
+        "line": 508,
+        "title": "两套局部主题在实际页面即时切换，保留输入与同意状态",
+        "status": "notrun",
+        "skipKind": "dedicated-database-guard",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-theme.spec.ts",
+        "line": 540,
+        "title": "无显式主题属性时，系统深色仍使用局部浅色方案",
+        "status": "notrun",
+        "skipKind": "dedicated-database-guard",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-theme.spec.ts",
+        "line": 555,
+        "title": "真实提交等待与中断状态保持可读，已填资料不丢失",
+        "status": "notrun",
+        "skipKind": "dedicated-database-guard",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-visual.spec.ts",
+        "line": 223,
+        "title": "负责页面在四个视口无溢出、标题清晰并通过正文无障碍扫描",
+        "status": "notrun",
+        "skipKind": "dedicated-database-guard",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-visual.spec.ts",
+        "line": 299,
+        "title": "微信名片未同意仍阻止提交，提示精确且键盘焦点可见",
+        "status": "notrun",
+        "skipKind": "dedicated-database-guard",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-visual.spec.ts",
+        "line": 346,
+        "title": "队员简介预览、返回、取消与空态沿用原流程",
+        "status": "notrun",
+        "skipKind": "dedicated-database-guard",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/club-visual.spec.ts",
+        "line": 430,
+        "title": "简介实际请求的加载、网络失败和重试状态可用",
+        "status": "notrun",
+        "skipKind": "dedicated-database-guard",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/community-application.spec.ts",
+        "line": 45,
+        "title": "完整申请、备案提示、私有二维码、社长查看全部资料后批准",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 59886,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/community-application.spec.ts",
+        "line": 143,
+        "title": "无效二维码被拒绝并保留填写资料",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 5664,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/community-application.spec.ts",
+        "line": 158,
+        "title": "历史false或缺失授权不可批准，退回后本人明确同意再重提同一编号",
+        "status": "notrun",
+        "skipKind": "dedicated-database-guard",
+        "durationMs": 172,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/community-spaces.spec.ts",
+        "line": 43,
+        "title": "多管理员微信、只读活动、网页风采投稿审核及B站预览",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 23873,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/community-spaces.spec.ts",
+        "line": 97,
+        "title": "仅标题投稿与 MP4 审核、播放、拖动和隐藏权限",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 14187,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/community.spec.ts",
+        "line": 55,
+        "title": "社群保留通知、风采和微信入口，已移除论坛与聊天",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 4441,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/community.spec.ts",
+        "line": 75,
+        "title": "旧聊天页面和接口对访客及登录用户都返回404，拒绝发送和修改",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 2191,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/community.spec.ts",
+        "line": 88,
+        "title": "访客仅活动通知可用，直接社群接口与伪造会话被拒绝",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 7245,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/community.spec.ts",
+        "line": 104,
+        "title": "邮箱也可登录同一账号，错误登录统一提示",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 4010,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/community.spec.ts",
+        "line": 122,
+        "title": "注册拒绝已占用昵称且没有数字账户输入",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 1828,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/community.spec.ts",
+        "line": 143,
+        "title": "昵称登录、论坛关闭与社群只读导航",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 23596,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/content-promotions.spec.ts",
+        "line": 49,
+        "title": "活动网页申请/撤回/退回/重提/审核/改稿复审及主动升降级，报名ID与隐私权限保持",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 48674,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/content-promotions.spec.ts",
+        "line": 111,
+        "title": "公告网页申请由宣传部骨干审核，社团首页链接原公告且不出现报名",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 13973,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/content-promotions.spec.ts",
+        "line": 133,
+        "title": "风采本地批准后网页申请升推，隐藏关闭首页且重新公开仍需复审",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 36028,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/content-promotions.spec.ts",
+        "line": 187,
+        "title": "外链风采保留社群展示，在同一风采上传受控视频后才可审核升推",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 28892,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/design-refresh.spec.ts",
+        "line": 7,
+        "title": "member and community reading layouts at 320px",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 7889,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/design-refresh.spec.ts",
+        "line": 7,
+        "title": "member and community reading layouts at 390px",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 11928,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/design-refresh.spec.ts",
+        "line": 7,
+        "title": "member and community reading layouts at 768px",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 6386,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/design-refresh.spec.ts",
+        "line": 7,
+        "title": "member and community reading layouts at 1440px",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 12230,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/design-refresh.spec.ts",
+        "line": 57,
+        "title": "registration guidance, server feedback and unique mobile community navigation",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 5392,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/rebuild-account.spec.ts",
+        "line": 54,
+        "title": "登录错误就地聚焦，密码显隐和主题切换保留输入",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 5654,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/rebuild-account.spec.ts",
+        "line": 83,
+        "title": "注册与恢复校验保留输入，不发送真实邮件",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 8802,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/rebuild-account.spec.ts",
+        "line": 138,
+        "title": "本人事务与权限入口、深链和退出完整导航",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 12912,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/rebuild-account.spec.ts",
+        "line": 201,
+        "title": "长文、旧荣誉链接与管理角色仍走原授权",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 13288,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/rebuild-activity.spec.ts",
+        "line": 44,
+        "title": "activity detail to questionnaire: validation, theme retention, failed write, receipt and one record",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 6247,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/rebuild-activity.spec.ts",
+        "line": 82,
+        "title": "staff batch business refusal preserves fields then saves the same draft record",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 5841,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 16,
+        "title": "rebuild member routes preserve one title and fit 320px",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 9461,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": [
+          {
+            "name": "responsive-route-metrics",
+            "contentType": "application/json"
+          }
+        ]
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 16,
+        "title": "rebuild member routes preserve one title and fit 390px",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 12223,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": [
+          {
+            "name": "responsive-route-metrics",
+            "contentType": "application/json"
+          }
+        ]
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 16,
+        "title": "rebuild member routes preserve one title and fit 768px",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 8854,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": [
+          {
+            "name": "responsive-route-metrics",
+            "contentType": "application/json"
+          }
+        ]
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 16,
+        "title": "rebuild member routes preserve one title and fit 1024px",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 9452,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": [
+          {
+            "name": "responsive-route-metrics",
+            "contentType": "application/json"
+          }
+        ]
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 16,
+        "title": "rebuild member routes preserve one title and fit 1440px",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 11496,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": [
+          {
+            "name": "responsive-route-metrics",
+            "contentType": "application/json"
+          }
+        ]
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 35,
+        "title": "rebuild uses light SSR on a dark system before hydration and keeps native mobile navigation",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 610,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 54,
+        "title": "rebuild theme control preserves text, files, consent and exact error; dark preference reaches fresh SSR",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 7263,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 105,
+        "title": "rebuild keyboard entry, reduced motion and key pages remain accessible in both themes",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 17574,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 124,
+        "title": "rebuild missing content offers a usable return path and expired sessions cannot read member areas",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 1532,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 8,
+        "title": "desktop navigation exposes the current section",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 966,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 17,
+        "title": "mobile menu closes on navigation, Escape and outside interaction",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 1706,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 41,
+        "title": "mobile navigation remains operable without JavaScript",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 801,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 55,
+        "title": "reduced motion and essential interface accessibility",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 2545,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 69,
+        "title": "redesign responsive routes at 320px",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 7429,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 69,
+        "title": "redesign responsive routes at 390px",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 5071,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 69,
+        "title": "redesign responsive routes at 768px",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 7505,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 69,
+        "title": "redesign responsive routes at 1080px",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 4900,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 69,
+        "title": "redesign responsive routes at 1440px",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 6365,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 69,
+        "title": "redesign responsive routes at 1920px",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 5670,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/registration-email.spec.ts",
+        "line": 4,
+        "title": "邮箱只填一次，前后缀同栏，后缀可选择也可直接输入",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 3651,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/registration-flow.spec.ts",
+        "line": 101,
+        "title": "点击注册后弹窗验证，错误验证码不入库，正确验证码才创建用户",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 5547,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/registration-flow.spec.ts",
+        "line": 148,
+        "title": "关闭弹窗保留输入且不创建账号，重发限制在服务端执行",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 3150,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/registration-flow.spec.ts",
+        "line": 163,
+        "title": "发送失败保留资料且不创建账号",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 2240,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/signup-authority.spec.ts",
+        "line": 30,
+        "title": "站点活动A→B：旧范围拒绝列表/单条/导出，本人回执及骨干边界保留",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 7965,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/signup-authority.spec.ts",
+        "line": 30,
+        "title": "站点活动NULL→B：旧范围拒绝列表/单条/导出，本人回执及骨干边界保留",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 8498,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 62,
+        "title": "后台登录、创建活动草稿、预览、发布、访客查看、撤下",
+        "status": "fail",
+        "skipKind": null,
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [
+          "\u001b[31m\"beforeAll\" hook timeout of 90000ms exceeded.\u001b[39m\n\n  18 |   password = randomBytes(24).toString(\"hex\"),\n  19 |   slug = `browser-event-${suffix}`;\n> 20 | test.beforeAll(async () => {\n     |      ^\n  21 |   if (process.env.APP_ENV !== \"development\")\n  22 |     throw new Error(\"Development only\");\n  23 |   p = await getPayload({ config });\n    at /workspace/astra-build2/.data/rebuild-qa-20261013/browser/app/tests/e2e/site.spec.ts:20:6"
+        ],
+        "attachments": [
+          {
+            "name": "trace",
+            "contentType": "application/zip",
+            "path": "/workspace/astra-build2/.data/rebuild-qa-20261013/browser/runs/sol-7283870-full-e2e/test-results/site-后台登录、创建活动草稿、预览、发布、访客查看、撤下/trace.zip"
+          }
+        ]
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 169,
+        "title": "404 HTTP 状态与预览环境不收录",
+        "status": "notrun",
+        "skipKind": "beforeAll-blocked",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 183,
+        "title": "公开 API、预览、首次注册与分部越权拒绝",
+        "status": "notrun",
+        "skipKind": "beforeAll-blocked",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 267,
+        "title": "公开页可访问性、CSP 与实际加载指标",
+        "status": "notrun",
+        "skipKind": "beforeAll-blocked",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 298,
+        "title": "三类招新、历史批次和所有公开栏目",
+        "status": "notrun",
+        "skipKind": "beforeAll-blocked",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 334,
+        "title": "首页配置即时更新、回顾关联、相册分页和长中文标题",
+        "status": "notrun",
+        "skipKind": "beforeAll-blocked",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 533,
+        "title": "布局 360px、导航、键盘焦点与截图",
+        "status": "notrun",
+        "skipKind": "beforeAll-blocked",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 533,
+        "title": "布局 390px、导航、键盘焦点与截图",
+        "status": "notrun",
+        "skipKind": "beforeAll-blocked",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 533,
+        "title": "布局 768px、导航、键盘焦点与截图",
+        "status": "notrun",
+        "skipKind": "beforeAll-blocked",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 533,
+        "title": "布局 1440px、导航、键盘焦点与截图",
+        "status": "notrun",
+        "skipKind": "beforeAll-blocked",
+        "durationMs": 0,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "line": 72,
+        "title": "发布后保存新草稿，本人旧链接及列表回执可读，游客和他人无权，撤下后不可写",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 15889,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "line": 144,
+        "title": "原生同形审核请求缺省保留内部备注，显式清空仍生效，普通申请人读取与审核均隔离",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 6223,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "line": 168,
+        "title": "accepted 最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 17940,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "line": 168,
+        "title": "rejected 最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 17655,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "line": 228,
+        "title": "同版本并发结果更新只有一次生效，失败请求及旧版本不能覆盖反馈、答案或角色",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 7843,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "line": 253,
+        "title": "保存与发布拒绝跳过核心资料的分支，合法扩展分支可提交且撤下历史快照仍可读",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 31061,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/staff-recruitment.spec.ts",
+        "line": 61,
+        "title": "单批次网页草稿/发布、申请/撤回重提、审核回执、私有导出及关闭；现有和新社群共用入口",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 34964,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-core-review.spec.ts",
+        "line": 173,
+        "title": "既有teams REST归档后低权限恢复拒绝，过期revision和并发请求保持失效，高权限明确恢复",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 4740,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-core-review.spec.ts",
+        "line": 282,
+        "title": "超过20条队伍和建队审核时，两套分页独立跨页并互相保留筛选",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 9366,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-core-review.spec.ts",
+        "line": 336,
+        "title": "draft后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 5384,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-core-review.spec.ts",
+        "line": 336,
+        "title": "team-archived后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 4780,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-core.spec.ts",
+        "line": 171,
+        "title": "建队网页退回、修改重提与高权限批准可进入招新工作台",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 11823,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-core.spec.ts",
+        "line": 243,
+        "title": "本人草稿、提交、退回重提、人工录取、撤销与真实REST权限",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 16822,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-core.spec.ts",
+        "line": 439,
+        "title": "招新关闭、跨站拒绝和表单工作台四个视口",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 9882,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-core.spec.ts",
+        "line": 565,
+        "title": "真实API表单版本冲突保留草稿，新批次录取后本人网页离队",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 3840,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-honor-storage.spec.ts",
+        "line": 20,
+        "title": "真实 Media HTTP 保留公开图片，但解码目录/反斜杠/Range 无法旁路私有荣誉和旧视频标记",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 4620,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-honors.spec.ts",
+        "line": 252,
+        "title": "队伍荣誉只有一个置顶档案，普通风采仍为 6+1 分页，稳定详情不含待审材料",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 2802,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-honors.spec.ts",
+        "line": 292,
+        "title": "真实 HTTP JWT 上传及审核；旧共享视频跨集合借用在改稿/退回/隐藏/队伍归档后无法再请求字节",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 6793,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-honors.spec.ts",
+        "line": 655,
+        "title": "私有详情与原始 REST 守住社群边界，网页退回/拒绝需说明并可隐藏公开荣誉",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 8766,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-honors.spec.ts",
+        "line": 741,
+        "title": "真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/改稿复审/离队保留历史",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 19930,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-profiles-period.spec.ts",
+        "line": 56,
+        "title": "旧预览页及重放PUT跨再入队周期均409；刷新后隐藏默认且新明确选择才能展示",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 6359,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-profiles-period.spec.ts",
+        "line": 143,
+        "title": "旧周期异步迟到请求不能把隐藏资料恢复展示或递增版本",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 2743,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-profiles-period.spec.ts",
+        "line": 189,
+        "title": "保存响应迟到后后台读取新周期，不给旧草稿换发凭据或恢复授权",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 2978,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-profiles.spec.ts",
+        "line": 68,
+        "title": "访客沿用登录边界；未入队者无编辑入口且伪造上下文被拒",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 2793,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-profiles.spec.ts",
+        "line": 104,
+        "title": "本人上传头像、预览、单次保存、修改/取消与隐藏；桌面/窄屏可用",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 8564,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-profiles.spec.ts",
+        "line": 211,
+        "title": "加载失败可重试，保存失败保留输入与预览并能实际重试成功",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 5252,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-profiles.spec.ts",
+        "line": 262,
+        "title": "简介预览返回和取消后焦点回到可继续操作的控件，不保存草稿",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 4222,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-profiles.spec.ts",
+        "line": 275,
+        "title": "撤销资格后旧页面拒绝提交，旧会话读取名单也立即隐藏",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 3167,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-profiles.spec.ts",
+        "line": 313,
+        "title": "改队伍重置表单，未加入新队不能写，新队入队后简介独立",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 6125,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/team-profiles.spec.ts",
+        "line": 354,
+        "title": "两个页面旧版本冲突保留输入；真实接口拒绝 XSS、敏感字段、跨站保存",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 8114,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/theme.spec.ts",
+        "line": 10,
+        "title": "system dark without a preference renders light HTML, metadata and native navigation before JavaScript",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 1646,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/theme.spec.ts",
+        "line": 50,
+        "title": "an invalid preference falls back to light even on a dark system",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 1341,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      },
+      {
+        "file": "tests/e2e/theme.spec.ts",
+        "line": 70,
+        "title": "explicit themes preserve form input and consent, persist across routes and reopening, without hydration errors",
+        "status": "pass",
+        "skipKind": null,
+        "durationMs": 6947,
+        "attempts": 1,
+        "errorMessages": [],
+        "attachments": []
+      }
+    ],
+    "counts": {
+      "pass": 104,
+      "fail": 1,
+      "guardSkip": 12,
+      "blocked": 9,
+      "globalErrors": 0
+    }
+  },
+  "original55": {
+    "cases": [
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "originalLine": 119,
+        "title": "publisher builds questionnaire, member submits once, organizer reads private answers",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "originalLine": 197,
+        "title": "site event management and API token submission share the same questionnaire",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "originalLine": 257,
+        "title": "publisher includes questionnaire before publishing and CMS offers editor link",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "originalLine": 302,
+        "title": "conditional questionnaire previews, validates, preserves steps and retries without losing answers",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "originalLine": 476,
+        "title": "advanced types, account-scoped drafts, statistics, exports and permissions work together",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "originalLine": 636,
+        "title": "organizer downloads one-row responses and member details with filters and private access",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "originalLine": 828,
+        "title": "editor templates, text import, undo redo and exported JSON preserve editable settings",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "originalLine": 1034,
+        "title": "template library previews real branches and designer manages logic safely",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "originalLine": 1126,
+        "title": "AI creation preserves current content on failure and previews editable generated drafts",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "originalLine": 1186,
+        "title": "AI streaming, refinement and 5–6 member registration work through save, validation and export",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "originalLine": 1391,
+        "title": "saved roster answers prefill edits, survive failed PATCH and adapt to a changed form",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/club-integration.spec.ts",
+        "originalLine": 51,
+        "title": "五类问卷入口双轴居中，短屏/滚动/关闭与Escape返回焦点，预览不产生报名",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/club-integration.spec.ts",
+        "originalLine": 105,
+        "title": "骨干录用独立于入队；成立/招新/录取→简介opt-in→荣誉复审→撤权与同ID重录保持门禁",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/club-integration.spec.ts",
+        "originalLine": 241,
+        "title": "荣誉本人分页保留队伍和社群；断网与丢响应保留附件，并先核对已写入结果",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/club-operations.spec.ts",
+        "originalLine": 37,
+        "title": "人工进群完整回执、后台确认、隐私隔离及旧会话撤权",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/club-operations.spec.ts",
+        "originalLine": 85,
+        "title": "预览居中、进群空态、联系兜底及四个响应式断点",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/club-operations.spec.ts",
+        "originalLine": 109,
+        "title": "模板预览返回可继续键盘操作，关闭及Escape恢复制作入口焦点",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/club-recovery.spec.ts",
+        "originalLine": 32,
+        "title": "只读成员可从详情与工作台查看报名，独立导出且不可编辑/越权，撤销后旧会话立即失效",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/community-application.spec.ts",
+        "originalLine": 44,
+        "title": "完整申请、备案提示、私有二维码、社长查看全部资料后批准",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/community-spaces.spec.ts",
+        "originalLine": 43,
+        "title": "多管理员微信、只读活动、网页风采投稿审核及B站预览",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/community-spaces.spec.ts",
+        "originalLine": 91,
+        "title": "仅标题投稿与 MP4 审核、播放、拖动和隐藏权限",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/community.spec.ts",
+        "originalLine": 104,
+        "title": "邮箱也可登录同一账号，错误登录统一提示",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/community.spec.ts",
+        "originalLine": 141,
+        "title": "昵称登录、论坛关闭与社群只读导航",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/content-promotions.spec.ts",
+        "originalLine": 132,
+        "title": "风采本地批准后网页申请升推，隐藏关闭首页且重新公开仍需复审",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/design-refresh.spec.ts",
+        "originalLine": 6,
+        "title": "member and community reading layouts at 320px",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/design-refresh.spec.ts",
+        "originalLine": 6,
+        "title": "member and community reading layouts at 390px",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/design-refresh.spec.ts",
+        "originalLine": 6,
+        "title": "member and community reading layouts at 768px",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/design-refresh.spec.ts",
+        "originalLine": 56,
+        "title": "registration guidance, server feedback and unique mobile community navigation",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/rebuild-account.spec.ts",
+        "originalLine": 138,
+        "title": "本人事务与权限入口、深链和退出完整导航",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "originalLine": 124,
+        "title": "rebuild missing content offers a usable return path and expired sessions cannot read member areas",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "originalLine": 16,
+        "title": "mobile menu closes on navigation, Escape and outside interaction",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "originalLine": 40,
+        "title": "mobile navigation remains operable without JavaScript",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/registration-flow.spec.ts",
+        "originalLine": 101,
+        "title": "点击注册后弹窗验证，错误验证码不入库，正确验证码才创建用户",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "originalLine": 61,
+        "title": "后台登录、创建活动草稿、预览、发布、访客查看、撤下",
+        "priorStatus": "fail",
+        "fullRunStatus": "fail"
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "originalLine": 168,
+        "title": "404 HTTP 状态与预览环境不收录",
+        "priorStatus": "fail",
+        "fullRunStatus": "notrun"
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "originalLine": 297,
+        "title": "三类招新、历史批次和所有公开栏目",
+        "priorStatus": "fail",
+        "fullRunStatus": "notrun"
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "originalLine": 330,
+        "title": "首页配置即时更新、回顾关联、相册分页和长中文标题",
+        "priorStatus": "fail",
+        "fullRunStatus": "notrun"
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "originalLine": 66,
+        "title": "发布后保存新草稿，本人旧链接及列表回执可读，游客和他人无权，撤下后不可写",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "originalLine": 160,
+        "title": "accepted 最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "originalLine": 160,
+        "title": "rejected 最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "originalLine": 244,
+        "title": "保存与发布拒绝跳过核心资料的分支，合法扩展分支可提交且撤下历史快照仍可读",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/staff-recruitment.spec.ts",
+        "originalLine": 58,
+        "title": "单批次网页草稿/发布、申请/撤回重提、审核回执、私有导出及关闭；现有和新社群共用入口",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/team-core-review.spec.ts",
+        "originalLine": 168,
+        "title": "既有teams REST归档后低权限恢复拒绝，过期revision和并发请求保持失效，高权限明确恢复",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/team-core-review.spec.ts",
+        "originalLine": 277,
+        "title": "超过20条队伍和建队审核时，两套分页独立跨页并互相保留筛选",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/team-core-review.spec.ts",
+        "originalLine": 330,
+        "title": "draft后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/team-core-review.spec.ts",
+        "originalLine": 330,
+        "title": "team-archived后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/team-core.spec.ts",
+        "originalLine": 166,
+        "title": "建队网页退回、修改重提与高权限批准可进入招新工作台",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/team-core.spec.ts",
+        "originalLine": 237,
+        "title": "本人草稿、提交、退回重提、人工录取、撤销与真实REST权限",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/team-core.spec.ts",
+        "originalLine": 417,
+        "title": "招新关闭、跨站拒绝和表单工作台四个视口",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/team-core.spec.ts",
+        "originalLine": 542,
+        "title": "真实API表单版本冲突保留草稿，新批次录取后本人网页离队",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/team-honors.spec.ts",
+        "originalLine": 633,
+        "title": "私有详情与原始 REST 守住社群边界，网页退回/拒绝需说明并可隐藏公开荣誉",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/team-honors.spec.ts",
+        "originalLine": 715,
+        "title": "真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/改稿复审/离队保留历史",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/team-profiles.spec.ts",
+        "originalLine": 104,
+        "title": "本人上传头像、预览、单次保存、修改/取消与隐藏；桌面/窄屏可用",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/theme.spec.ts",
+        "originalLine": 9,
+        "title": "system dark without a preference renders light HTML, metadata and native navigation before JavaScript",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      },
+      {
+        "file": "tests/e2e/theme.spec.ts",
+        "originalLine": 69,
+        "title": "explicit themes preserve form input and consent, persist across routes and reopening, without hydration errors",
+        "priorStatus": "fail",
+        "fullRunStatus": "pass"
+      }
+    ],
+    "fullRunCounts": {
+      "pass": 51,
+      "fail": 1,
+      "notrun": 3
+    }
+  },
+  "dedicated": {
+    "light": {
+      "stats": {
+        "startTime": "2026-10-14T07:40:46.737Z",
+        "duration": 316786.16500000004,
+        "expected": 11,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "report": "/workspace/sol-final-qa/.data/rebuild-qa-20261013/visual/runs/sol-7283870-theme-light/playwright-results.json",
+      "sha256": "ec93b11e968a918c08135dc03c232022f94d3bcb23166e7f1f18a4620bb5e730"
+    },
+    "dark": {
+      "stats": {
+        "startTime": "2026-10-14T07:48:46.574Z",
+        "duration": 180652.44900000002,
+        "expected": 11,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "report": "/workspace/sol-final-qa/.data/rebuild-qa-20261013/visual/runs/sol-7283870-theme-dark/playwright-results.json",
+      "sha256": "4ff4cf11c325061119f2e6ac6a169f3a0b88fa746e3046cd3e9c6ea8ff843ced"
+    },
+    "historicalConsent": {
+      "stats": {
+        "startTime": "2026-10-14T07:40:46.291Z",
+        "duration": 58079.023,
+        "expected": 1,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "report": "/workspace/sol-final-qa/.data/rebuild-qa-20261013/consent-web/runs/sol-7283870-consent-web/playwright-results.json",
+      "sha256": "2985e9549739697a8c2a0995c520fcbae230c466f4338ee1f1c85c40338d1501"
+    }
+  },
+  "matrix": {
+    "state": "running",
+    "pid": 70659,
+    "source": "existing 32-route matrix, configuration-only paths/origin/commit substitutions",
+    "completedAtCheckpoint": 247,
+    "passAtCheckpoint": 247,
+    "failAtCheckpoint": 0,
+    "path": "/workspace/qa-zijing/sol-final-7283870-20261014/matrix/matrix.json"
+  },
+  "runtimeRecovery": {
+    "observedAt": "2026-10-14T07:58:11.662803+00:00",
+    "environmentAccessible": true,
+    "fullE2EFinishedNaturallyBeforeNotification": true,
+    "matrixOriginalProcessAlive": true,
+    "servicesListening": [
+      3373,
+      3374,
+      3375,
+      3376
+    ],
+    "noTestRestartedAfterNotification": true
+  },
+  "officialWeChat": {
+    "pathCommands": {
+      "wechat-devtools": null,
+      "wechatwebdevtools": null,
+      "wechat-cli": null
+    },
+    "explicitPaths": {
+      "/opt/wechat-devtools/cli": false,
+      "/opt/wechatwebdevtools/cli": false,
+      "/usr/bin/wechat-devtools": false,
+      "/usr/local/bin/wechat-devtools": false,
+      "/Applications/wechatwebdevtools.app/Contents/MacOS/cli": false,
+      "/opt/微信web开发者工具/cli": false,
+      "/workspace/wechat-devtools/cli": false,
+      "/workspace/微信开发者工具/cli": false
+    },
+    "officialCompileRun": false,
+    "deviceRun": false,
+    "checkedAt": "2026-10-14T07:42:09.659472+00:00"
+  },
+  "pending": [
+    "Finish 320-case visual and resource matrix",
+    "Original site suite isolated execution and minimal order reproduction",
+    "Final HTTP GET/HEAD/browser/bot probes",
+    "Final evidence and push"
+  ]
+}
