@@ -1,6 +1,6 @@
 # 紫荆主场 · 网站与原生小程序完整前端重构
 
-最新阶段为文末 **2026-10-14 Sol 独立完整复验终态**。完整Vitest1571/1571、矩阵320/320、专用浅深各11/11和历史授权1/1通过；主126 E2E为104通过、1失败、21跳过。站点独立10项通过，但最小顺序稳定复现前置超时，正式全量验收未通过，交Astra修测试实例生命周期。
+最新阶段为文末 **2026-10-14 Astra 测试实例生命周期修复**。两个E2E套件已隔离Payload缓存键，真实PG单项回归的失败对照及修复后通过均保留；新构建/类型和126项收集通过。下一轮Sol执行两文件顺序与完整126项；前轮主104通过、1失败、21跳过的正式验收结果尚未被新的全量结果替代。
 
 ## 本轮基线与范围
 
@@ -345,3 +345,11 @@ HTTP差异还涉及无权review页404和旧slug重定向308实际200；私有二
 唯一新阻断可用原测试稳定复现：`rebuild-activity.spec.ts` 默认getPayload后destroy，后序`site.spec.ts`复用默认缓存。单独site10/10；两文件按序为2通过、1同样90秒beforeAll超时、9未运行。只读探针也确认destroy后返回同一已不可用实例。交Astra给两个spec独立稳定key，保留cleanup/destroy及全部断言，再交Sol跑最小顺序和完整126。没有为本次测试修改实现、加重试、放宽超时或更改Axe/HTTP条件。
 
 终态、复现命令、资源条件、每轮raw report/trace与hash、进程及未验范围见 [Sol终态报告](FRONTEND_REBUILD_SOL_FINAL_ACCEPTANCE_20261014.md) 和 [机器证据](evidence/frontend-rebuild-sol-final-20261014.json)。环境通知后实际状态可访问，原矩阵继续至320格；不将通知或中断算通过。官方微信/真机、账户解除阻塞后的CI与既有后端能力差异仍单列。仅new文档证据提交，无部署、真实CMS发布、微信上传或付款变更。
+
+## 2026-10-14 Astra 测试实例生命周期修复
+
+基于new@9279d6f，由gpt-6-astra max严格限于site与rebuild-activity的共享Payload生命周期修复。安装实现确认destroy不清缓存，Drizzle适配器结构被清空；新的独立实例通过各自adapter创建各自pg.Pool。两spec经专用helper分别使用e2e-site/e2e-rebuild-activity，原清理、业务断言、权限、超时和重试逐字节保持。
+
+新增真实PG单项回归在同一配置下验证活动销毁→站点可读写→站点销毁后默认实例仍可读，并精确清理合成用户和审计。仅在新隔离app移除key的负面对照1失败，复现reading id TypeError；恢复修复后1/1通过、exit0。定向lint/diff通过，新隔离webpack构建与类型检查exit0（08:36:00–08:37:33 UTC，BUILD_ID 2Z7rxMMAeA16zLPDrP9fg）；构建警告原文保留。E2E仅收集126项/28文件，本轮未执行顺序组合或全量，不覆盖前轮104/1/21。
+
+628输入在根工作区、新root、构建app和回归app一致；500非测试输入与既有3373服务一致。新测试快照/workspace/astra-lifecycle-qa和原合成PG55618/55617、旧服务、旧证据均保留；原合成账号夹具仅逐字节复制，不重seed或入Git。下一步Sol max用新run label依次跑两文件顺序与完整126。详见[中文交接](FRONTEND_REBUILD_PAYLOAD_LIFECYCLE_20261014.md)及[机器证据](evidence/frontend-rebuild-payload-lifecycle-20261014.json)。仅new正常提交推送，无部署、CI付款操作或微信上传；官方微信/真机及既有合同差异继续未验。

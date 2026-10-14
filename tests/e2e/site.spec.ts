@@ -1,7 +1,8 @@
 import { browserTestOrigin } from "./browser-test-origin";
 import "dotenv/config";
 import { test, expect } from "@playwright/test";
-import { getPayload, type Payload } from "payload";
+import type { Payload } from "payload";
+import { getBrowserSuitePayload } from "./payload-fixture";
 import config from "../../src/payload.config";
 import { randomBytes } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
@@ -20,7 +21,7 @@ const suffix = Date.now(),
 test.beforeAll(async () => {
   if (process.env.APP_ENV !== "development")
     throw new Error("Development only");
-  p = await getPayload({ config });
+  p = await getBrowserSuitePayload("site", config);
   adminID = (
     await p.create({
       collection: "users",

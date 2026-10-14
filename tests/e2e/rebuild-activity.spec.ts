@@ -1,7 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFile, mkdir } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
-import { getPayload, type Payload } from "payload";
+import type { Payload } from "payload";
+import { getBrowserSuitePayload } from "./payload-fixture";
 import config from "../../src/payload.config";
 import type { User } from "../../src/payload-types";
 import { normalizeSignup } from "../../src/lib/signup-schema";
@@ -18,7 +19,7 @@ test.beforeAll(async () => {
   if (!root.includes("/.data/rebuild-qa-20261013") || process.env.APP_ENV !== "development" || new URL(process.env.DATABASE_URL!).hostname !== "127.0.0.1") throw new Error("isolated synthetic QA only");
   users = JSON.parse(await readFile(root + "/synthetic-browser-users.json", "utf8")).users;
   const resolved = await config; resolved.typescript.autoGenerate = false; resolved.admin.importMap.autoGenerate = false;
-  p = await getPayload({ config: resolved });
+  p = await getBrowserSuitePayload("rebuild-activity", resolved);
   president = await p.findByID({ collection: "users", id: users.find(user => user.role === "president")!.id, overrideAccess: true });
   const form = normalizeSignup({ enabled: true, pageSize: 1, questions: [
     { id: "name", type: "text", label: "合成报名姓名", required: true },

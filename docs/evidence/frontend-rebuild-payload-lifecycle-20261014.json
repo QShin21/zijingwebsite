@@ -1,0 +1,432 @@
+{
+  "recordedAt": "2026-10-14T08:41:04.782147+00:00",
+  "sourceBaseCommit": "9279d6f1fcd452e0e4e62216d62058bd6ddc1244",
+  "branch": "new",
+  "implementationAgent": {
+    "model": "gpt-6-astra",
+    "reasoningEffort": "max",
+    "scope": "two E2E suite lifecycles and one real-PG regression"
+  },
+  "result": "minimal fixture repair and bounded checks complete; ordered pair and full E2E pending independent Sol",
+  "sourceFiles": [
+    {
+      "path": "tests/e2e/site.spec.ts",
+      "sha256": "e630e0b78e5cd76c24a71cdab7e7f831366357e4fd81689dd2eb5ed7e196cdad",
+      "newRootMatches": true,
+      "contractsAppMatches": true
+    },
+    {
+      "path": "tests/e2e/rebuild-activity.spec.ts",
+      "sha256": "016bc6728288eb8c34bbaed491e8700ec97fb4414369ab1fdb3c7089a0a5baec",
+      "newRootMatches": true,
+      "contractsAppMatches": true
+    },
+    {
+      "path": "tests/e2e/payload-fixture.ts",
+      "sha256": "8828290f6ce3fe8936f5ec6ba7b2146552836d5fb58af98caac58052aec6d89d",
+      "newRootMatches": true,
+      "contractsAppMatches": true
+    },
+    {
+      "path": "tests/e2e-payload-lifecycle.test.ts",
+      "sha256": "7cbf6b403d192639c22f92570c4fdf140638ccbf3687127b16d7241b6041c2b9",
+      "newRootMatches": true,
+      "contractsAppMatches": true
+    }
+  ],
+  "scopeInvariants": [
+    {
+      "path": "tests/e2e/site.spec.ts",
+      "onlyChanges": [
+        "Payload import plus dedicated helper import",
+        "Payload acquisition uses the suite-owned key"
+      ],
+      "remainingBytesEqualHEAD": true,
+      "directTestDeclarations": 6,
+      "widthVariants": [
+        360,
+        390,
+        768,
+        1440
+      ],
+      "originalDeclaredCasesFromSource": 10,
+      "currentDeclaredCasesFromSource": 10,
+      "countMethod": "unchanged direct declarations plus unchanged width loop; no Playwright execution"
+    },
+    {
+      "path": "tests/e2e/rebuild-activity.spec.ts",
+      "onlyChanges": [
+        "Payload import plus dedicated helper import",
+        "Payload acquisition uses the suite-owned key"
+      ],
+      "remainingBytesEqualHEAD": true,
+      "directTestDeclarations": 2,
+      "widthVariants": [],
+      "originalDeclaredCasesFromSource": 2,
+      "currentDeclaredCasesFromSource": 2,
+      "countMethod": "unchanged direct declarations plus unchanged width loop; no Playwright execution"
+    }
+  ],
+  "rootCause": {
+    "payloadVersion": "3.90.1",
+    "cache": "getPayload stores entries under options.key or default; destroy does not evict",
+    "adapterDestroy": "installed drizzle destroy clears schema/tables/drizzle and resets initializing; it does not end the pg pool",
+    "distinctInstances": "each newly initialized BasePayload obtains its own adapter and pg.Pool",
+    "keys": [
+      "e2e-rebuild-activity",
+      "e2e-site"
+    ],
+    "productSourceChanged": false,
+    "timeoutsRetriesACLAssertionsChanged": false,
+    "originalCleanupPreserved": true
+  },
+  "regression": {
+    "baselineHEAD": "9279d6f1fcd452e0e4e62216d62058bd6ddc1244",
+    "database": {
+      "host": "127.0.0.1",
+      "port": 55617,
+      "profile": "contracts",
+      "synthetic": true,
+      "schemaPush": false
+    },
+    "sourceFiles": [
+      {
+        "path": "tests/e2e/site.spec.ts",
+        "sha256": "e630e0b78e5cd76c24a71cdab7e7f831366357e4fd81689dd2eb5ed7e196cdad",
+        "newRootMatches": true,
+        "contractsAppMatches": true
+      },
+      {
+        "path": "tests/e2e/rebuild-activity.spec.ts",
+        "sha256": "016bc6728288eb8c34bbaed491e8700ec97fb4414369ab1fdb3c7089a0a5baec",
+        "newRootMatches": true,
+        "contractsAppMatches": true
+      },
+      {
+        "path": "tests/e2e/payload-fixture.ts",
+        "sha256": "8828290f6ce3fe8936f5ec6ba7b2146552836d5fb58af98caac58052aec6d89d",
+        "newRootMatches": true,
+        "contractsAppMatches": true
+      },
+      {
+        "path": "tests/e2e-payload-lifecycle.test.ts",
+        "sha256": "7cbf6b403d192639c22f92570c4fdf140638ccbf3687127b16d7241b6041c2b9",
+        "newRootMatches": true,
+        "contractsAppMatches": true
+      }
+    ],
+    "unchangedBusinessTests": [
+      {
+        "path": "tests/e2e/site.spec.ts",
+        "onlyChanges": [
+          "Payload import plus dedicated helper import",
+          "Payload acquisition uses the suite-owned key"
+        ],
+        "remainingBytesEqualHEAD": true,
+        "directTestDeclarations": 6,
+        "widthVariants": [
+          360,
+          390,
+          768,
+          1440
+        ],
+        "originalDeclaredCasesFromSource": 10,
+        "currentDeclaredCasesFromSource": 10,
+        "countMethod": "unchanged direct declarations plus unchanged width loop; no Playwright execution"
+      },
+      {
+        "path": "tests/e2e/rebuild-activity.spec.ts",
+        "onlyChanges": [
+          "Payload import plus dedicated helper import",
+          "Payload acquisition uses the suite-owned key"
+        ],
+        "remainingBytesEqualHEAD": true,
+        "directTestDeclarations": 2,
+        "widthVariants": [],
+        "originalDeclaredCasesFromSource": 2,
+        "currentDeclaredCasesFromSource": 2,
+        "countMethod": "unchanged direct declarations plus unchanged width loop; no Playwright execution"
+      }
+    ],
+    "newRegression": {
+      "framework": "Vitest",
+      "testCount": 1,
+      "outsidePlaywrightTestDirectory": true,
+      "mockedPayload": false,
+      "mockedPostgres": false,
+      "cleanup": "finally deletes the generated synthetic user and its audit records, then destroys all remaining owned instances"
+    },
+    "runs": [
+      {
+        "name": "default-cache-negative-control",
+        "report": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/regression-negative-01.json",
+        "reportSHA256": "7459a5a9c9503221e4ab8b1c510b9b2fea327d9422e9256f9a818118aebd1ac7",
+        "log": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/regression-negative-01.log",
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "tests": [
+          {
+            "name": "keeps the site database usable after rebuild-activity destroys its Payload",
+            "status": "failed",
+            "durationMS": 1627.4060689999997
+          }
+        ]
+      },
+      {
+        "name": "fixed-distinct-suite-keys",
+        "report": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/regression-01.json",
+        "reportSHA256": "9f17ca298c3f977813d99b4f4d901922a91d77c8d4a614fa9ddf0f544e456c41",
+        "log": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/regression-01.log",
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "tests": [
+          {
+            "name": "keeps the site database usable after rebuild-activity destroys its Payload",
+            "status": "passed",
+            "durationMS": 1668.187802
+          }
+        ]
+      }
+    ],
+    "checks": {
+      "targetedESLint": "exit 0",
+      "gitDiffCheck": "exit 0"
+    },
+    "e2eExecutedThisTurn": false,
+    "e2eCasesAddedOrRemoved": 0,
+    "rootSourceMutatedForNegativeControl": false,
+    "negativeControlAppRestored": true
+  },
+  "build": {
+    "action": "build",
+    "profile": "browser",
+    "label": "astra-payload-lifecycle-build-01",
+    "startedAt": "2026-10-14T08:36:00.551Z",
+    "runnerPID": 90777,
+    "childPID": 90788,
+    "cwd": "/workspace/astra-lifecycle-qa/.data/rebuild-qa-20261013/browser/app",
+    "executable": "node",
+    "status": "finished",
+    "finishedAt": "2026-10-14T08:37:33.482Z",
+    "exitCode": 0,
+    "buildID": "2Z7rxMMAeA16zLPDrP9fg",
+    "freshBuild": true,
+    "command": "node scripts/rebuild-qa.mjs build browser (Next build --webpack)",
+    "appEnvironment": "development",
+    "nodeEnvironment": "production",
+    "dependencyInstall": false,
+    "typescript": "passed in 17.2s",
+    "warnings": "Compiled with warnings in 60s; no expanded warning body was printed; full log retained",
+    "deployment": false
+  },
+  "e2eCollection": {
+    "startedAt": "2026-10-14T08:36:58.147637+00:00",
+    "finishedAt": "2026-10-14T08:37:06.401753+00:00",
+    "label": "astra-payload-lifecycle-collect-01",
+    "exitCode": 0,
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "scripts/rebuild-qa.mjs",
+      "playwright",
+      "browser",
+      "--list"
+    ],
+    "log": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/collect-01.log",
+    "testsExecuted": false,
+    "total": 126,
+    "files": 28
+  },
+  "inputVerification": {
+    "observedAt": "2026-10-14T08:41:44.307582+00:00",
+    "buildAlreadyFinished": true,
+    "results": [
+      {
+        "location": "repository",
+        "directory": "/workspace/zijingwebsite",
+        "inputCount": 628,
+        "mismatches": []
+      },
+      {
+        "location": "snapshot",
+        "directory": "/workspace/astra-lifecycle-qa",
+        "inputCount": 628,
+        "mismatches": []
+      },
+      {
+        "location": "buildApp",
+        "directory": "/workspace/astra-lifecycle-qa/.data/rebuild-qa-20261013/browser/app",
+        "inputCount": 628,
+        "mismatches": []
+      },
+      {
+        "location": "regressionApp",
+        "directory": "/workspace/astra-lifecycle-qa/.data/rebuild-qa-20261013/contracts/app",
+        "inputCount": 628,
+        "mismatches": []
+      }
+    ]
+  },
+  "nonTestInputCount": 500,
+  "nonTestInputSHA256": "be98b4eeb20534ab3f65f69919fec05482a8520ce23a5c4a0c3c65a0e5f463ea",
+  "runtimeHandoff": {
+    "observedAt": "2026-10-14T08:38:58.092668+00:00",
+    "fixture": {
+      "source": "/workspace/astra-build2/.data/rebuild-qa-20261013/browser/synthetic-browser-users.json",
+      "destination": "/workspace/astra-lifecycle-qa/.data/rebuild-qa-20261013/browser/synthetic-browser-users.json",
+      "bytes": 675,
+      "sha256": "7f428ea3ff241e642cc7b241f8322903cc5b3188bac92d309d00f750b7cb9a47",
+      "copiedExactExistingSyntheticFixture": true,
+      "contentsCommitted": false,
+      "databaseReseeded": false
+    },
+    "reuseExistingService": {
+      "port": 3373,
+      "app": "/workspace/astra-build2/.data/rebuild-qa-20261013/browser/app",
+      "buildID": "0V_1ao2PM56qrzXsn8W8G",
+      "applicationInputCount": 500,
+      "mismatches": [],
+      "newTestSnapshot": "/workspace/astra-lifecycle-qa/.data/rebuild-qa-20261013/browser/app",
+      "serverRestarted": false
+    },
+    "newBuildID": "2Z7rxMMAeA16zLPDrP9fg",
+    "newBuildStartedAsServer": false,
+    "existingServices": [
+      {
+        "port": 3373,
+        "healthReadyStatus": 200
+      },
+      {
+        "port": 3374,
+        "healthReadyStatus": 200
+      },
+      {
+        "port": 3375,
+        "healthReadyStatus": 200
+      },
+      {
+        "port": 3376,
+        "healthReadyStatus": 200
+      }
+    ],
+    "databasePort": 55618,
+    "databasePhysicalPath": "/workspace/astra-qa/.data/rebuild-qa-20261013/browser/pg",
+    "mediaPhysicalPath": "/workspace/astra-qa/.data/rebuild-qa-20261013/browser/media",
+    "processes": [
+      "    PID    PPID STAT     ELAPSED COMMAND",
+      "  12973   12745 S       03:42:42 postgres",
+      "  50949   50921 S       01:58:57 postgres",
+      "  55747   55744 Sl      01:37:55 MainThread",
+      "  55758   55747 Sl      01:37:55 next-server (v1",
+      "  65394       1 Ssl     01:00:03 MainThread",
+      "  65395       1 Ssl     01:00:03 MainThread",
+      "  65412   65394 Sl      01:00:03 next-server (v1",
+      "  65417   65395 Sl      01:00:03 next-server (v1",
+      "  70540       1 Ssl        51:57 MainThread",
+      "  70551   70540 Sl         51:57 next-server (v1"
+    ]
+  },
+  "notRun": [
+    "ordered rebuild-activity + site E2E after this fix",
+    "full 126 E2E after this fix",
+    "full Vitest after this fix",
+    "official WeChat compilation and real devices",
+    "new CI result inspection or billing operations"
+  ],
+  "priorAcceptanceUnchanged": {
+    "commit": "728387059972e6795b0431514ece59dfd3279dc7",
+    "mainE2E": {
+      "passed": 104,
+      "failed": 1,
+      "skipped": 21
+    },
+    "report": "docs/FRONTEND_REBUILD_SOL_FINAL_ACCEPTANCE_20261014.md"
+  },
+  "artifacts": [
+    {
+      "name": "baseline-inputs.json",
+      "path": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/baseline-inputs.json",
+      "bytes": 108523,
+      "sha256": "2499248bc4a3b0e466f8316666fbe18971b0ab23080b50499638e1d958c84629"
+    },
+    {
+      "name": "baseline-environment.json",
+      "path": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/baseline-environment.json",
+      "bytes": 1764,
+      "sha256": "f6240d5264eb19c992b61a7f738070f8e899b80a8f477bda5908cb7a762ab8bb"
+    },
+    {
+      "name": "build-inputs.json",
+      "path": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/build-inputs.json",
+      "bytes": 108897,
+      "sha256": "85b6e7d240b759e5e912748c05d33d73e516fcf96f90daf3628d825dbb65ac25"
+    },
+    {
+      "name": "build-launch.json",
+      "path": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/build-launch.json",
+      "bytes": 593,
+      "sha256": "3fbbccb65893610446ac19a1849d31f4f2ed4e57e256b230f2eb62fbb46cd715"
+    },
+    {
+      "name": "build-01.log",
+      "path": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/build-01.log",
+      "bytes": 2733,
+      "sha256": "add8b040bdeb385350a7ad8608e18b6e97c19740d39c4d7e2101f1c238b5f416"
+    },
+    {
+      "name": "regression-negative-01.log",
+      "path": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/regression-negative-01.log",
+      "bytes": 2393,
+      "sha256": "08dcff1ba81d4f2cdb43a41dbb77798bd65e14393b4582e27e94c95d811614a7"
+    },
+    {
+      "name": "regression-negative-01.json",
+      "path": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/regression-negative-01.json",
+      "bytes": 2081,
+      "sha256": "7459a5a9c9503221e4ab8b1c510b9b2fea327d9422e9256f9a818118aebd1ac7"
+    },
+    {
+      "name": "regression-01.log",
+      "path": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/regression-01.log",
+      "bytes": 655,
+      "sha256": "1441918cc745b5091cb4983128a12ef283e7ba17b0edbefdc06c5bcc5967e12f"
+    },
+    {
+      "name": "regression-01.json",
+      "path": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/regression-01.json",
+      "bytes": 972,
+      "sha256": "9f17ca298c3f977813d99b4f4d901922a91d77c8d4a614fa9ddf0f544e456c41"
+    },
+    {
+      "name": "lifecycle-regression-evidence.json",
+      "path": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/lifecycle-regression-evidence.json",
+      "bytes": 3900,
+      "sha256": "208af4cd56fac6c89095cd5ee299279c69344d69ca293355916f33e20ae95c8b"
+    },
+    {
+      "name": "collect-01.log",
+      "path": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/collect-01.log",
+      "bytes": 14257,
+      "sha256": "1bca8b04620a9c602609e09ce188e091923a5bb3c068bf25b0b1ae1f47d286c4"
+    },
+    {
+      "name": "collection-launch.json",
+      "path": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/collection-launch.json",
+      "bytes": 451,
+      "sha256": "64ae9ac2ad1c8e70050b6007c038172c21f6b1c64f01c422d2973cfd74aae830"
+    },
+    {
+      "name": "final-input-comparison.json",
+      "path": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/final-input-comparison.json",
+      "bytes": 758,
+      "sha256": "f776b40b6a23f49b35b57d286f11a9e7c73336d23a840737e14536d7e75afa04"
+    },
+    {
+      "name": "sol-runtime-handoff.json",
+      "path": "/workspace/qa-zijing/astra-payload-lifecycle-20261014/sol-runtime-handoff.json",
+      "bytes": 2004,
+      "sha256": "f04e32610327122de4fb1d323d1fd4a7e898d8f451513d8e5d75161e2df4752d"
+    }
+  ]
+}
