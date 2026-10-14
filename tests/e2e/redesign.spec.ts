@@ -1,6 +1,7 @@
 import { memberTest } from "./member-layout-fixture";
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { mobileMenu } from "./navigation-helpers";
 
 // Existing site.spec.ts keeps the real CMS publishing, permission, registration,
 // redirect and album regressions. These tests cover the redesigned interface.
@@ -16,7 +17,7 @@ test("desktop navigation exposes the current section", async ({ page }) => {
 test("mobile menu closes on navigation, Escape and outside interaction", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/announcements");
-  const menu = page.locator(".z-mobile-menu");
+  const menu = mobileMenu(page);
   const trigger = menu.locator("summary");
   // Native details works before hydration; Escape/outside dismissal is a client enhancement.
   await expect(menu).toHaveAttribute("data-enhanced", "true");
@@ -37,13 +38,13 @@ test("mobile menu closes on navigation, Escape and outside interaction", async (
   await expect(menu.locator('a[href="/events"]')).toHaveAttribute("aria-current", "page");
 });
 
-test("mobile navigation remains operable without JavaScript", async ({ browser }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+test("mobile navigation remains operable without JavaScript", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ baseURL, javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
   try {
     const page = await context.newPage();
-    await page.goto("http://localhost:3000/");
-    await page.locator(".z-mobile-menu summary").click();
-    await page.locator('.z-mobile-menu a[href="/events"]').click();
+    await page.goto("/");
+    await mobileMenu(page).getByLabel("打开导航", { exact: true }).click();
+    await mobileMenu(page).locator('a[href="/events"]').click();
     await expect(page).toHaveURL(/\/events$/);
     await expect(page.locator("main h1")).toBeVisible();
   } finally {

@@ -1,3 +1,4 @@
+import { browserTestOrigin } from "./browser-test-origin";
 import "dotenv/config";
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
@@ -209,7 +210,7 @@ async function login(page: Page, admin = false) {
       {
         name: "zijing_theme",
         value: theme,
-        url: "http://localhost:3000",
+        url: browserTestOrigin,
         sameSite: "Lax",
       },
     ]);
@@ -444,7 +445,7 @@ test("队员简介预览、返回、取消与空态沿用原流程", async ({ pa
       });
     await navigate(page, "/community");
     await expect(
-      page.getByRole("heading", { name: "还没有公开社群", exact: true }),
+      page.getByRole("heading", { name: "社群正在筹备", exact: true }),
     ).toBeVisible();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
@@ -567,7 +568,7 @@ test("真实提交等待与中断状态保持可读，已填资料不丢失", as
     buffer: image,
   });
   await page
-    .getByRole("combobox", { name: /^已有游戏/ })
+    .getByRole("combobox", { name: "游戏社群（必选）", exact: true })
     .selectOption(String(f.game.id));
   await page
     .getByLabel("申请说明", { exact: false })

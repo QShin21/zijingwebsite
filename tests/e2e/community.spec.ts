@@ -114,7 +114,9 @@ test("邮箱也可登录同一账号，错误登录统一提示", async ({ page 
   await page.getByLabel("密码", { exact: true }).fill(password);
   await page.getByRole("button", { name: "登录", exact: true }).click();
   await expect(page).toHaveURL(/\/account$/);
-  await expect(page.getByRole("complementary", { name: nickname, exact: true }).getByRole("heading", { level: 2 })).toHaveText(nickname);
+  const profile = page.getByRole("region", { name: "账号资料", exact: true });
+  await expect(profile.getByText(nickname, { exact: true })).toBeVisible();
+  await expect(profile.getByText(email, { exact: true })).toBeVisible();
 });
 
 test("注册拒绝已占用昵称且没有数字账户输入", async ({ page }) => {
@@ -144,7 +146,9 @@ test("昵称登录、论坛关闭与社群只读导航", async ({ page }) => {
   await page.getByLabel("密码", { exact: true }).fill(password);
   await page.getByRole("button", { name: "登录", exact: true }).click();
   await expect(page).toHaveURL(/\/account$/);
-  await expect(page.getByRole("complementary", { name: nickname, exact: true }).getByRole("heading", { level: 2 })).toHaveText(nickname);
+  const profile = page.getByRole("region", { name: "账号资料", exact: true });
+  await expect(profile.getByText(nickname, { exact: true })).toBeVisible();
+  await expect(profile.getByText(email, { exact: true })).toBeVisible();
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     for (const route of [

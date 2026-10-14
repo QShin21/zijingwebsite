@@ -299,7 +299,7 @@ export function TeamProfilesPanel({
       )}
       {editing && (editable || locked) && (
         <div className={styles.editor}>
-          <aside className={styles.editorAside}>
+          <div className={styles.editorAside}>
             <h3>{preview ? "确认展示选择" : "只介绍公开身份"}</h3>
             <p>
               使用公开昵称，介绍游戏角色与共同兴趣。无需填写真实姓名、学号、联系方式或报名作答。
@@ -311,7 +311,7 @@ export function TeamProfilesPanel({
               <dd>{draft.visible ? "展示" : "隐藏"}</dd>
             </dl>
             <p>取消展示后保存即可隐藏；离队或资格撤销后，简介会退出名单。</p>
-          </aside>
+          </div>
           <div className={styles.editorMain}>
             <form className="member-form" onSubmit={review} hidden={preview}>
               <fieldset disabled={busy || locked} className={styles.fields}>

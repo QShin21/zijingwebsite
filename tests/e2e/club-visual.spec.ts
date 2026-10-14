@@ -409,7 +409,7 @@ test("队员简介预览、返回、取消与空态沿用原流程", async ({ pa
       });
     await page.goto("/community");
     await expect(
-      page.getByRole("heading", { name: "还没有公开社群", exact: true }),
+      page.getByRole("heading", { name: "社群正在筹备", exact: true }),
     ).toBeVisible();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),

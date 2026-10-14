@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { memberTest } from "./member-layout-fixture";
 import sharp from "sharp";
 import tokens from "../../src/design/tokens.json" with { type: "json" };
+import { mobileMenu } from "./navigation-helpers";
 
 const rgb = (hex: string) =>
   `rgb(${[1, 3, 5].map((offset) => parseInt(hex.slice(offset, offset + 2), 16)).join(", ")})`;
@@ -30,7 +31,7 @@ test("system dark without a preference renders light HTML, metadata and native n
       "background-color",
       rgb(tokens.light.paper),
     );
-    await expect(page.locator(".z-header")).toHaveCSS(
+    await expect(page.getByRole("banner")).toHaveCSS(
       "background-color",
       rgb(tokens.light["header-bg"]),
     );
@@ -74,7 +75,7 @@ memberTest(
     await page.setViewportSize({ width: 390, height: 1000 });
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/community/apply");
-    await expect(page.locator(".z-mobile-menu")).toHaveAttribute(
+    await expect(mobileMenu(page)).toHaveAttribute(
       "data-enhanced",
       "true",
     );
@@ -148,7 +149,7 @@ memberTest(
     } finally {
       await reopened.close();
     }
-    await expect(page.locator(".z-mobile-menu")).toHaveAttribute(
+    await expect(mobileMenu(page)).toHaveAttribute(
       "data-enhanced",
       "true",
     );

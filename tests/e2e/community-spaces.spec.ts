@@ -60,12 +60,17 @@ test("多管理员微信、只读活动、网页风采投稿审核及B站预览"
   expect((await page.request.post('/api/community-showcase', { headers: { Authorization: `JWT ${token}` }, data: {
     game, author: member.id, title: '禁止共享接口投稿', body: '仅网页动作可投稿', context: { webShowcaseWrite: true },
   } })).status()).toBe(403);
-  await page.goto(`/community/${slug}/showcase`); await page.getByText("分享社群风采", { exact: true }).click();
-  await page.getByLabel("标题", { exact: true }).fill("精彩活动图文记录"); await page.getByLabel("精彩记录", { exact: true }).fill("与伙伴们一起留下难忘的瞬间。");
-  await page.getByLabel(/活动照片/).setInputFiles({ name: "activity.png", mimeType: "image/png", buffer: picture });
-  await page.getByLabel("视频链接或 B 站嵌入代码（选填）", { exact: true }).fill("https://www.bilibili.com/video/BV1B7411m7LV/");
-  await page.getByRole("button", { name: "提交审核", exact: true }).click();
-  await expect(page.getByText("投稿已提交，请在“我的投稿”查看审核状态。")).toBeVisible();
+  await page.goto(`/community/${slug}/showcase`);
+  const compose = page.getByRole("region", { name: "分享社群风采", exact: true });
+  await compose.locator("summary").filter({ hasText: /^分享社群风采$/ }).click();
+  await compose.getByRole("textbox", { name: "标题", exact: true }).fill("精彩活动图文记录");
+  await compose.getByRole("textbox", { name: "精彩记录", exact: true }).fill("与伙伴们一起留下难忘的瞬间。");
+  const photos = compose.locator('input[type="file"][name="images"]');
+  await expect(photos).toHaveAccessibleName("活动照片");
+  await photos.setInputFiles({ name: "activity.png", mimeType: "image/png", buffer: picture });
+  await compose.getByRole("textbox", { name: "视频链接或 B 站嵌入代码（选填）", exact: true }).fill("https://www.bilibili.com/video/BV1B7411m7LV/");
+  await compose.getByRole("button", { name: "提交审核", exact: true }).click();
+  await expect(compose.getByRole("status")).toHaveText("投稿已提交，请在“我的投稿”查看审核状态。");
   await page.getByRole("link", { name: "我的投稿", exact: true }).click();
   await expect(page.getByRole("heading", { name: "精彩活动图文记录" })).toBeVisible(); await expect(page.locator(".showcase-card")).toContainText("待审核");
   const other = await browser.newContext(); const managerPage = await other.newPage();
@@ -75,7 +80,8 @@ test("多管理员微信、只读活动、网页风采投稿审核及B站预览"
   await managerPage.goto(`/community/${slug}/showcase?view=review`); await managerPage.getByRole("button", { name: "批准发布" }).click();
   await expect(managerPage.getByRole("status").filter({ hasText: "审核结果已保存。" })).toHaveText("审核结果已保存。");
   await page.goto(`/community/${slug}/showcase`); await expect(page.getByRole("heading", { name: "精彩活动图文记录" })).toBeVisible();
-  await expect(page.locator(".showcase-images img")).toHaveCount(1);
+  const publishedCard = page.getByRole("article").filter({ has: page.getByRole("heading", { name: "精彩活动图文记录", exact: true }) });
+  await expect(publishedCard.getByRole("img")).toHaveCount(1);
   await expect(page.getByRole("button", { name: /站内预览 B 站视频|收起预览/ })).toHaveCount(0);
   await expect(page.getByTitle("B站视频预览")).toBeVisible();
   await expect(page.getByTitle("B站视频预览")).toHaveAttribute("src", bilibiliPlayerURL);
@@ -89,11 +95,16 @@ test("多管理员微信、只读活动、网页风采投稿审核及B站预览"
 
 
 test('仅标题投稿与 MP4 审核、播放、拖动和隐藏权限', async ({ page, browser }) => {
+  // This shared community can also contain the first case's approved Bilibili card.
+  await fixtureBilibiliPlayer(page);
   await page.goto('/login'); await page.getByLabel('昵称或邮箱').fill(member.name); await page.getByLabel('密码', { exact: true }).fill(password); await page.getByRole('button', { name: '登录', exact: true }).click(); await expect(page).toHaveURL(/\/account$/);
-  await page.goto(`/community/${slug}/showcase`); await page.getByText('分享社群风采', { exact: true }).click();
-  await page.getByLabel('标题', { exact: true }).fill('只有标题也能投稿'); await page.getByRole('button', { name: '提交审核', exact: true }).click();
-  await expect(page.getByText('投稿已提交，请在“我的投稿”查看审核状态。')).toBeVisible();
-  await page.getByLabel('标题', { exact: true }).fill('双端预览视频');
+  await page.goto(`/community/${slug}/showcase`);
+  const compose = page.getByRole('region', { name: '分享社群风采', exact: true });
+  await compose.locator('summary').filter({ hasText: /^分享社群风采$/ }).click();
+  await compose.getByRole('textbox', { name: '标题', exact: true }).fill('只有标题也能投稿');
+  await compose.getByRole('button', { name: '提交审核', exact: true }).click();
+  await expect(compose.getByRole('status')).toHaveText('投稿已提交，请在“我的投稿”查看审核状态。');
+  await compose.getByRole('textbox', { name: '标题', exact: true }).fill('双端预览视频');
   // Generate and inspect synthetic media outside the site's media CSP.
   const fixturePage = await browser.newPage();
   const clip = await fixturePage.evaluate(async () => {
@@ -129,9 +140,9 @@ test('仅标题投稿与 MP4 审核、播放、拖动和隐藏权限', async ({ 
   }).finally(() => fixturePage.close());
   expect(Number.isFinite(clip.duration), 'Synthetic MP4 must have a finite duration').toBe(true);
   expect(clip.duration, 'Synthetic MP4 must cover playback and the one-second seek').toBeGreaterThanOrEqual(1.5);
-  await page.getByLabel('上传 MP4 视频', { exact: false }).setInputFiles({ name: 'synthetic.mp4', mimeType: 'video/mp4', buffer: Buffer.from(clip.bytes) });
-  await page.getByRole('button', { name: '提交审核', exact: true }).click();
-  await expect(page.getByLabel('标题', { exact: true })).toHaveValue('');
+  await compose.getByLabel('上传 MP4 视频（选填）', { exact: true }).setInputFiles({ name: 'synthetic.mp4', mimeType: 'video/mp4', buffer: Buffer.from(clip.bytes) });
+  await compose.getByRole('button', { name: '提交审核', exact: true }).click();
+  await expect(compose.getByRole('textbox', { name: '标题', exact: true })).toHaveValue('');
   await page.goto(`/community/${slug}/showcase?view=mine`);
   const card = page.locator('article').filter({ has: page.getByRole('heading', { name: '双端预览视频', exact: true }) });
   await expect(card).toBeVisible(); const player = card.locator('video'); await expect(player).toBeVisible();

@@ -158,8 +158,10 @@ async function signupHarness(response: StaffInfo) {
 const writes = (request: ReturnType<typeof pageHarness>['request']) =>
   request.mock.calls.filter(([, options]) => options?.method && options.method !== 'GET');
 function visibleGuard(path: string, marker: string, data: Record<string, unknown>) {
-  const tags = readFileSync(path, 'utf8').match(/<(?:button|block)\b[^>]*>/g) || [];
-  const tag = tags.find(value => value.includes(marker));
+  const tags = readFileSync(path, 'utf8').match(/<(?:button|block|view)\b[^>]*>/g) || [];
+  const guards = tags.filter(value => value.includes(marker));
+  expect(guards, 'Expected one native template guard for ' + marker).toHaveLength(1);
+  const tag = guards[0];
   expect(tag, 'Missing native template guard for ' + marker).toBeDefined();
   const expression = tag?.match(/wx:if="\{\{(.*?)\}\}"/)?.[1];
   expect(expression, 'Missing native condition for ' + marker).toBeDefined();
@@ -518,6 +520,7 @@ describe('原生骨干审核：授权 GET 与服务端允许的决定', () => {
     expect(options?.method ?? 'GET').toBe('GET');
     expect(options?.required).toBe(true);
     expect(page.data.docs[0].allowed.map(choice => choice.value)).toEqual(['returned', 'accepted']);
+    expect(visibleGuard('miniprogram/src/pages/staff-review/index.wxml', 'item.allowed.length', { item: page.data.docs[0] })).toBe(true);
     expect(page.data.docs[0]).not.toHaveProperty('internalNote');
     expect(page.data.docs[0]).not.toHaveProperty('history');
     expect(page.data.docs[0]).not.toHaveProperty('requestKey');

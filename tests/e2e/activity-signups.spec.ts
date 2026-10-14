@@ -116,6 +116,25 @@ async function login(page: Page, user: User) {
   await expect(page).toHaveURL(/\/account$/);
   await page.context().setExtraHTTPHeaders({ "Sec-Fetch-Site": "same-origin" });
 }
+async function expectQuestionnaireSaved(page: Page) {
+  await expect(
+    page.getByRole("main").getByRole("status").filter({ hasText: /^报名问卷已保存$/ }),
+  ).toBeVisible();
+}
+async function selectQuestionnaireTask(page: Page, name: "报名名单" | "统计与导出") {
+  const task = page.getByRole("navigation", { name: "当前问卷任务", exact: true })
+    .getByRole("button", { name, exact: true });
+  await task.click();
+  await expect(task).toHaveAttribute("aria-pressed", "true");
+}
+async function openCreationTools(page: Page) {
+  const tools = page.getByRole("region", { name: "问卷制作", exact: true })
+    .locator("details.designer-source-tools");
+  const summary = tools.locator(":scope > summary");
+  await expect(summary).toHaveText("模板、AI 与导入工具");
+  if (await tools.getAttribute("open") === null) await summary.click();
+  await expect(tools).toHaveAttribute("open", "");
+}
 test("publisher builds questionnaire, member submits once, organizer reads private answers", async ({
   page,
   browser,
@@ -123,9 +142,9 @@ test("publisher builds questionnaire, member submits once, organizer reads priva
   await login(page, admin);
   await page.goto(`/activities/community-posts/${post}/manage`);
   await page.getByLabel("启用填写问卷报名").check();
-  await page.getByRole("button", { name: "2 · 问卷设置" }).click();
+  await page.getByRole("group", { name: "问卷编辑视图", exact: true }).getByRole("button", { name: "问卷设置", exact: true }).click();
   await page.getByLabel("报名说明").fill("请填写参与信息");
-  await page.getByRole("button", { name: /1 · 编辑题目/ }).click();
+  await page.getByRole("group", { name: "问卷编辑视图", exact: true }).getByRole("button", { name: /^编辑题目 \d+$/ }).click();
   await page.getByRole("button", { name: "添加题目" }).click();
   await page.getByLabel("题目标题").fill("活动称呼");
   await page.getByRole("button", { name: "添加题目" }).click();
@@ -134,9 +153,8 @@ test("publisher builds questionnaire, member submits once, organizer reads priva
   await second.getByLabel("题型").selectOption("single");
   await second.getByLabel("选项（每行一个）").fill("上午场\n下午场");
   await page.getByRole("button", { name: "保存报名问卷" }).click();
-  await expect(
-    page.locator(".signup-management > p[role=status]"),
-  ).toContainText("报名问卷已保存");
+  await expectQuestionnaireSaved(page);
+  await expect(page.getByRole("main").getByText("报名开放", { exact: true })).toBeVisible();
   const other = await browser.newContext();
   const visitor = await other.newPage();
   await login(visitor, member);
@@ -160,7 +178,10 @@ test("publisher builds questionnaire, member submits once, organizer reads priva
   await expect(visitor.getByLabel("上午场", { exact: true })).toBeChecked();
   await visitor.getByLabel("活动称呼", { exact: true }).fill("取消的修改");
   await visitor.getByRole("button", { name: "取消修改", exact: true }).click();
-  await expect(visitor.locator(".activity-signup dd").first()).toHaveText("报名测试");
+  const ownName = visitor.locator(".activity-signup dl > div").filter({
+    has: visitor.locator("dt").filter({ hasText: /^活动称呼$/ }),
+  }).getByRole("definition");
+  await expect(ownName).toHaveText("报名测试");
   await visitor.getByRole("button", { name: "修改作答", exact: true }).click();
   await expect(visitor.getByLabel("活动称呼", { exact: true })).toHaveValue("报名测试");
   await visitor.getByLabel("活动称呼", { exact: true }).fill("修改后的报名");
@@ -168,7 +189,7 @@ test("publisher builds questionnaire, member submits once, organizer reads priva
   await visitor.getByRole("button", { name: "提交修改", exact: true }).click();
   await expect(visitor.getByRole("heading", { name: "已报名", exact: true })).toBeVisible();
   await visitor.reload();
-  await expect(visitor.locator(".activity-signup dd").first()).toHaveText("修改后的报名");
+  await expect(ownName).toHaveText("修改后的报名");
   expect(
     (
       await visitor.request.get(
@@ -177,14 +198,18 @@ test("publisher builds questionnaire, member submits once, organizer reads priva
       )
     ).status(),
   ).toBe(403);
+  await selectQuestionnaireTask(page, "报名名单");
   await page.getByRole("button", { name: "查看 / 刷新报名名单" }).click();
   await expect(
     page.getByRole("heading", { name: "报名名单（1 人）" }),
   ).toBeVisible();
-  await page.locator(".signup-management > section summary").click();
-  await expect(page.locator(".signup-management dd").first()).toHaveText(
-    "修改后的报名",
-  );
+  const entry = page.getByRole("main").locator("details").filter({
+    has: page.locator("summary").filter({ hasText: member.name }),
+  });
+  await entry.locator(":scope > summary").click();
+  await expect(entry.locator("dl > div").filter({
+    has: page.locator("dt").filter({ hasText: /^活动称呼$/ }),
+  }).getByRole("definition")).toHaveText("修改后的报名");
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
     expect(
@@ -203,14 +228,13 @@ test("site event management and API token submission share the same questionnair
   await page.getByRole("button", { name: "添加题目" }).click();
   await page.getByLabel("题目标题").fill("参加理由");
   await page.getByRole("button", { name: "保存报名问卷" }).click();
-  await expect(
-    page.locator(".signup-management > p[role=status]"),
-  ).toContainText("已保存");
+  await expectQuestionnaireSaved(page);
+  await expect(page.getByRole("main").getByText("报名开放", { exact: true })).toBeVisible();
   await page.goto(`/events/signup-ui-${suffix}`);
   await expect(page.getByRole("heading", { name: "暂无报名渠道" })).toHaveCount(
     0,
   );
-  const signupLink = page.getByRole("link", { name: "填写报名问卷 →", exact: true });
+  const signupLink = page.getByRole("link", { name: "填写报名问卷", exact: true });
   await expect(signupLink).toHaveAttribute("href", `/activities/events/${event}/fill`);
   await signupLink.click();
   await expect(page).toHaveURL(new RegExp(`/activities/events/${event}/fill$`));
@@ -258,23 +282,25 @@ test("publisher includes questionnaire before publishing and CMS offers editor l
   page,
 }) => {
   await login(page, admin);
+  // The CMS account avatar is external to this synthetic workflow and can stall load.
+  await page.route("https://www.gravatar.com/avatar/**", (route) => route.abort());
   await page.goto(`/admin/collections/events/${event}`);
   await expect(
     page.getByRole("link", { name: "编辑报名问卷、查看报名名单 ↗" }),
   ).toBeVisible();
   await page.goto(`/community/signup-ui-${suffix}/updates`);
-  await page.getByText("发布活动与通知", { exact: true }).click();
+  await page.locator("#publish-community-update > details > summary").click();
   const form = page
     .locator("form")
     .filter({ has: page.locator('select[name="kind"]') });
   await form
-    .getByLabel("标题", { exact: true })
+    .getByRole("textbox", { name: "标题", exact: true })
     .fill("发布时设置报名" + suffix);
-  await form.getByLabel("内容", { exact: true }).fill("仅本地验收");
+  await form.getByRole("textbox", { name: "内容", exact: true }).fill("仅本地验收");
   await form.getByLabel("启用填写问卷报名").check();
   await form.getByRole("button", { name: "添加题目" }).click();
   await form.getByLabel("题目标题").fill("姓名");
-  await form.getByRole("button", { name: "发布", exact: true }).click();
+  await form.getByRole("button", { name: "发布社群活动", exact: true }).click();
   await expect(
     page.getByRole("link", { name: "发布时设置报名" + suffix, exact: true }),
   ).toBeVisible();
@@ -367,9 +393,7 @@ test("conditional questionnaire previews, validates, preserves steps and retries
   await second.getByText("填写提示与校验", { exact: true }).click();
   await second.getByLabel("最多字数", { exact: true }).fill("100");
   await page.getByRole("button", { name: "保存报名问卷" }).click();
-  await expect(
-    page.locator(".signup-management > p[role=status]"),
-  ).toContainText("已保存");
+  await expectQuestionnaireSaved(page);
   expect(
     (await (await page.request.get(endpoint + "?mode=manage")).json()).form
       .questions[1].maxLength,
@@ -394,7 +418,7 @@ test("conditional questionnaire previews, validates, preserves steps and retries
   await expect(signup.locator(".questionnaire-error")).toContainText(
     "参与方式",
   );
-  await expect(signup.locator("fieldset").first()).toBeFocused();
+  await expect(signup.getByRole("group", { name: "1. 参与方式 *", exact: true })).toBeFocused();
   await signup.getByLabel("参赛", { exact: true }).check();
   await signup.getByRole("button", { name: "下一步" }).click();
   await signup.getByLabel("联系邮箱", { exact: true }).fill("bad-email");
@@ -606,6 +630,7 @@ test("advanced types, account-scoped drafts, statistics, exports and permissions
     ),
   ).toBe(0);
   await page.goto(`/activities/events/${event}/manage`);
+  await selectQuestionnaireTask(page, "统计与导出");
   const results = page.locator(".questionnaire-results");
   await results.getByLabel("填写者姓名", { exact: true }).fill(admin.name);
   await results.getByRole("button", { name: "查看统计图表" }).click();
@@ -745,7 +770,9 @@ test("organizer downloads one-row responses and member details with filters and 
       ).status(),
     ).toBe(200);
     await page.goto(`/activities/events/${target}/manage`);
+    await selectQuestionnaireTask(page, "统计与导出");
     const results = page.locator(".questionnaire-results");
+    await results.locator("summary").filter({ hasText: /^导出筛选答卷$/ }).click();
     await expect(results.getByRole("combobox", { name: "导出格式", exact: true })).toHaveValue(
       "responses",
     );
@@ -847,6 +874,7 @@ test("editor templates, text import, undo redo and exported JSON preserve editab
   await expect(starter.locator(".blueprint-questions > li")).toHaveCount(7);
   await starter.getByRole("button", { name: "替换并进入编辑" }).click();
   await expect(page.locator(".designer-question")).toHaveCount(7);
+  await openCreationTools(page);
   await page.getByRole("button", { name: "导入已有问卷" }).click();
   await starter
     .getByLabel("批量题目文本", { exact: true })
@@ -859,6 +887,7 @@ test("editor templates, text import, undo redo and exported JSON preserve editab
   await expect(page.locator(".designer-question")).toHaveCount(7);
   await page.getByRole("button", { name: "重做编辑" }).click();
   await expect(page.locator(".designer-question")).toHaveCount(8);
+  await openCreationTools(page);
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "导出问卷模板" }).click();
   const file = await download;
@@ -875,9 +904,7 @@ test("editor templates, text import, undo redo and exported JSON preserve editab
   ]);
   expect(new Set(content.questions.map((q: Question) => q.id)).size).toBe(8);
   await page.getByRole("button", { name: "保存报名问卷" }).click();
-  await expect(
-    page.locator(".signup-management > p[role=status]"),
-  ).toContainText("已保存");
+  await expectQuestionnaireSaved(page);
   expect(
     (await (await page.request.get(endpoint + "?mode=manage")).json()).form
       .questions,
@@ -899,6 +926,75 @@ async function questionnaireEvent(form: SignupForm = emptySignup) {
   extraEvents.push(doc.id);
   return doc.id;
 }
+
+test("manager confirms the saved signup window without replacing local edits or advancing their revision", async ({ page }) => {
+  const id = await questionnaireEvent(),
+    endpoint = `/api/activities/events/${id}/signup`,
+    manage = endpoint + "?mode=manage";
+  await login(page, admin);
+  await page.goto(`/activities/events/${id}/manage`);
+  await page.getByLabel("启用填写问卷报名").check();
+  await page.getByRole("button", { name: "添加题目", exact: true }).click();
+  await page.getByLabel("题目标题", { exact: true }).fill("合成状态核对题目");
+  // Only the browser's readback fails; the real PUT must still save exactly once.
+  await page.route("**" + manage, (route) => route.fulfill({
+    status: 503,
+    contentType: "application/json",
+    body: JSON.stringify({ error: "合成状态读取失败" }),
+  }));
+  const writes: string[] = [];
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname === endpoint && request.method() === "PUT")
+      writes.push(request.postData() || "");
+  });
+  const saving = page.waitForResponse((response) =>
+    new URL(response.url()).pathname === endpoint && response.request().method() === "PUT",
+  );
+  const saveButton = page.getByRole("button", { name: "保存报名问卷", exact: true });
+  await saveButton.click();
+  const written = await saving;
+  expect(written.status()).toBe(200);
+  const saved = await written.json();
+  await expect(page.getByRole("main").getByRole("status").filter({ hasText: /^报名问卷已保存。报名状态暂时无法核对/ })).toBeVisible();
+  await expect(page.getByRole("main").getByText("报名状态待核对", { exact: true })).toBeVisible();
+  await expect(saveButton).toBeEnabled();
+  expect(writes).toHaveLength(1);
+  const stored = await page.request.get(manage);
+  expect(stored.status()).toBe(200);
+  expect(await stored.json()).toMatchObject({ version: saved.version, state: "报名开放", form: saved.form });
+
+  await page.unroute("**" + manage);
+  await page.getByRole("group", { name: "问卷编辑视图", exact: true }).getByRole("button", { name: "问卷设置", exact: true }).click();
+  const intro = page.getByRole("textbox", { name: "报名说明", exact: true });
+  await intro.fill("核对时保留的合成本地修改");
+  await page.getByRole("main").locator("summary").filter({ hasText: /^核对已保存问卷$/ }).click();
+  await page.getByRole("button", { name: "核对服务器版本", exact: true }).click();
+  await expect(page.getByRole("main").getByText("报名开放", { exact: true })).toBeVisible();
+  await expect(page.getByRole("main").getByRole("status").filter({ hasText: "与开始编辑时相同。当前编辑保留。" })).toBeVisible();
+  await expect(intro).toHaveValue("核对时保留的合成本地修改");
+
+  const concurrentResponse = await page.request.put(endpoint, {
+    data: { version: saved.version, form: { ...saved.form, closed: true, intro: "另一窗口保存的合成说明" } },
+  });
+  expect(concurrentResponse.status()).toBe(200);
+  const concurrent = await concurrentResponse.json();
+  await page.getByRole("button", { name: "核对服务器版本", exact: true }).click();
+  await expect(page.getByRole("main").getByText("报名已关闭", { exact: true })).toBeVisible();
+  await expect(page.getByRole("main").getByRole("status").filter({ hasText: "已读取到更新后的问卷版本，当前编辑保留。" })).toBeVisible();
+  await expect(intro).toHaveValue("核对时保留的合成本地修改");
+  const rejecting = page.waitForResponse((response) =>
+    new URL(response.url()).pathname === endpoint && response.request().method() === "PUT",
+  );
+  await saveButton.click();
+  const rejected = await rejecting;
+  expect(rejected.status()).toBe(409);
+  expect(rejected.request().postDataJSON()).toMatchObject({ version: saved.version, form: { intro: "核对时保留的合成本地修改", closed: false } });
+  await expect(page.getByRole("main").getByRole("alert")).toHaveText("报名问卷已被更新，请刷新后再编辑");
+  await expect(intro).toHaveValue("核对时保留的合成本地修改");
+  await expect(page.getByRole("main").getByText("报名已关闭", { exact: true })).toBeVisible();
+  expect(writes).toHaveLength(2);
+  expect(await (await page.request.get(manage)).json()).toMatchObject({ version: concurrent.version, form: concurrent.form });
+});
 
 test("complex branches recompute on back navigation and persist only the actual path", async ({
   page,
@@ -1069,12 +1165,12 @@ test("template library previews real branches and designer manages logic safely"
   );
   await starter.getByRole("button", { name: "替换并进入编辑" }).click();
   await expect(page.locator(".designer-question")).toHaveCount(6);
-  await page.getByRole("button", { name: "2 · 问卷设置" }).click();
+  await page.getByRole("group", { name: "问卷编辑视图", exact: true }).getByRole("button", { name: "问卷设置", exact: true }).click();
   await expect(page.getByLabel("问卷标题", { exact: true })).toHaveValue(
     "活动报名",
   );
   await page.getByLabel("报名说明").fill("仅本地模板流程验收");
-  await page.getByRole("button", { name: /1 · 编辑题目/ }).click();
+  await page.getByRole("group", { name: "问卷编辑视图", exact: true }).getByRole("button", { name: /^编辑题目 \d+$/ }).click();
   const second = page.getByRole("group", { name: "第 2 题", exact: true });
   await second.locator(".designer-question-toggle").click();
   await second.getByText(/条件跳转 · 2 个分支/).click();
@@ -1091,8 +1187,8 @@ test("template library previews real branches and designer manages logic safely"
     .locator(".designer-question.is-active")
     .getByRole("button", { name: "上移", exact: true })
     .click();
-  await page.getByRole("button", { name: "2 · 问卷设置" }).click();
-  await page.getByRole("button", { name: /1 · 编辑题目/ }).click();
+  await page.getByRole("group", { name: "问卷编辑视图", exact: true }).getByRole("button", { name: "问卷设置", exact: true }).click();
+  await page.getByRole("group", { name: "问卷编辑视图", exact: true }).getByRole("button", { name: /^编辑题目 \d+$/ }).click();
   const fourth = page.getByRole("group", { name: "第 4 题", exact: true });
   await fourth.locator(".designer-question-toggle").click();
   page.once("dialog", (d) => d.accept());
@@ -1101,9 +1197,7 @@ test("template library previews real branches and designer manages logic safely"
   await page.getByRole("button", { name: "撤销编辑" }).click();
   await expect(page.locator(".designer-question")).toHaveCount(6);
   await page.getByRole("button", { name: "保存报名问卷" }).click();
-  await expect(
-    page.locator(".signup-management > p[role=status]"),
-  ).toContainText("已保存");
+  await expectQuestionnaireSaved(page);
   for (const width of [320, 390, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
     expect(
@@ -1171,9 +1265,7 @@ test("AI creation preserves current content on failure and previews editable gen
   await expect(page.locator(".designer-question")).toHaveCount(5);
   await page.getByLabel("题目标题", { exact: true }).fill("修改后的意向问题");
   await page.getByRole("button", { name: "保存报名问卷" }).click();
-  await expect(
-    page.locator(".signup-management > p[role=status]"),
-  ).toContainText("已保存");
+  await expectQuestionnaireSaved(page);
   const saved = await (
     await page.request.get(`/api/activities/events/${id}/signup?mode=manage`)
   ).json();
@@ -1260,9 +1352,7 @@ test("AI streaming, refinement and 5–6 member registration work through save, 
   await expect(page.getByLabel("最少记录条数")).toHaveValue("5");
   await expect(page.getByLabel("最多记录条数")).toHaveValue("6");
   await page.getByRole("button", { name: "保存报名问卷" }).click();
-  await expect(
-    page.locator(".signup-management > p[role=status]"),
-  ).toContainText("已保存");
+  await expectQuestionnaireSaved(page);
   const endpoint = `/api/activities/events/${id}/signup`;
   const saved = await (
     await page.request.get(endpoint + "?mode=manage")
@@ -1408,7 +1498,7 @@ test("saved roster answers prefill edits, survive failed PATCH and adapt to a ch
   await signup.getByRole('button', { name: '核对并提交' }).click();
   await page.route(`**${endpoint}`, route => route.request().method() === 'PATCH' ? route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: '服务暂时不可用，请重试' }) }) : route.continue());
   await signup.getByRole('button', { name: '提交修改', exact: true }).click();
-  await expect(signup.locator('.questionnaire > p[role=alert]')).toHaveText('服务器暂时无法确认提交结果。填写内容已保留，请先刷新本人回执或已保存记录，再决定是否重试。');
+  await expect(signup.locator('.questionnaire').getByRole('alert')).toHaveText('服务器暂时无法确认提交结果。填写内容已保留，请先刷新本人回执或已保存记录，再决定是否重试。');
   await expect(signup.locator('.questionnaire-review')).toContainText('修改后的演示队长');
   // Follow the recovery action before retrying. Checking the receipt must not discard local edits.
   const verifiedResponse = page.waitForResponse(response => new URL(response.url()).pathname === endpoint && response.request().method() === 'GET');
@@ -1463,9 +1553,10 @@ test("saved roster answers prefill edits, survive failed PATCH and adapt to a ch
   const conflict = await conflictResponse;
   expect(conflict.status()).toBe(409);
   expect(conflict.request().postDataJSON().revision).toBe(updated.updatedAt);
-  await expect(signup.locator('.questionnaire > p[role=alert]')).toHaveText('作答记录已更新，请重新加载上次提交的内容后修改');
+  await expect(signup.locator('.questionnaire').getByRole('alert')).toHaveText('作答记录已更新，请重新加载上次提交的内容后修改');
   await signup.getByRole('button', { name: '返回修改', exact: true }).click();
   await expect(signup.getByLabel('成员名单第 1 条：姓名', { exact: true })).toHaveValue('并发核对后保留的本地队长');
+  await signup.locator("summary").filter({ hasText: /^核对结果或重新载入已提交内容$/ }).click();
   const reload = signup.getByRole('button', { name: '重新加载已提交内容', exact: true });
   await expect(reload).toHaveAccessibleDescription(/会放弃当前未提交的修改/);
   await reload.click();

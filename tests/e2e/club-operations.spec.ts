@@ -1,3 +1,4 @@
+import { browserTestOrigin } from "./browser-test-origin";
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
 import sharp from "sharp";
@@ -10,7 +11,7 @@ import { decideCommunityApplication } from "../../src/lib/community-operations";
 let p: Payload, organizer: User, member: User, leader: User, stranger: User;
 let game: number, post: number, application: number;
 const suffix = randomBytes(6).toString("hex"), password = randomBytes(24).toString("hex"), slug = `join-flow-${suffix}`;
-const sameOrigin = { Origin: "http://localhost:3000" };
+const sameOrigin = { Origin: browserTestOrigin };
 test.beforeAll(async () => {
   if (process.env.APP_ENV !== "development" || !["127.0.0.1", "localhost"].includes(new URL(process.env.DATABASE_URL!).hostname)) throw new Error("Isolated loopback only");
   p = await getPayload({ config, key: "club-operations-browser" });
@@ -41,9 +42,12 @@ test("人工进群完整回执、后台确认、隐私隔离及旧会话撤权",
   await login(page, member);
   await expect(page.getByText("尚未人工确认进群", { exact: true })).toBeVisible();
   await page.goto(`/community/${slug}`);
-  await page.getByRole("button", { name: "添加社群管理员微信", exact: false }).click();
-  await expect(page.getByRole("dialog").getByText("保存或扫描名片不会自动进群。", { exact: false })).toBeVisible();
-  await page.getByRole("button", { name: "关闭弹窗" }).click();
+  await page.getByRole("button", { name: "联系管理员（添加社群管理员微信）", exact: true }).click();
+  const contactDialog = page.getByRole("dialog", { name: "联系管理员，申请加入微信群", exact: true });
+  await expect(contactDialog.getByText("查看、保存或识别名片均不会自动加入微信群。", { exact: true })).toBeVisible();
+  await expect(contactDialog.getByText("保存名片后可在微信中识别，添加好友时备注昵称和社群。请等待管理员回复与人工拉群。", { exact: true })).toBeVisible();
+  await expect(contactDialog.getByRole("link", { name: "记录意向与查看进群进度", exact: true })).toHaveAttribute("href", `/community/${slug}/join`);
+  await contactDialog.getByRole("button", { name: "关闭弹窗", exact: true }).click();
   await page.goto("/account"); await expect(page.getByText("尚未人工确认进群", { exact: true })).toBeVisible();
   await page.goto(`/community/${slug}/join`);
   await page.getByRole("button", { name: "记录加入意向", exact: true }).click();
@@ -54,7 +58,7 @@ test("人工进群完整回执、后台确认、隐私隔离及旧会话撤权",
   const second = await browser.newContext();
   try {
     const managerPage = await second.newPage(); await login(managerPage, organizer);
-    await expect(managerPage.getByText("骨干", { exact: false }).first()).toBeVisible();
+    await expect(managerPage.getByRole("region", { name: "账号资料", exact: true }).getByText("骨干", { exact: true })).toBeVisible();
     await managerPage.goto(`/community/${slug}/members`);
     await managerPage.getByRole("button", { name: "好友已通过，等待拉群" }).click();
     await expect(managerPage.getByText("管理员已确认好友通过 · 等待人工拉群", { exact: true })).toBeVisible();
@@ -66,7 +70,7 @@ test("人工进群完整回执、后台确认、隐私隔离及旧会话撤权",
     const formResponse = await page.request.get(endpoint, { headers: sameOrigin });
     expect(formResponse.status()).toBe(200);
     const current = await formResponse.json();
-    expect((await page.request.post(endpoint, { headers: { Origin: "http://localhost:3000" }, data: { version: current.version, answers: { name: "隔离填写者" } } })).status()).toBe(200);
+    expect((await page.request.post(endpoint, { headers: { Origin: browserTestOrigin }, data: { version: current.version, answers: { name: "隔离填写者" } } })).status()).toBe(200);
     expect((await managerPage.request.get(endpoint + "?mode=manage", { headers: sameOrigin })).status()).toBe(200);
     for (const mode of ["entries", "stats", "export"]) expect((await managerPage.request.get(endpoint + "?mode=" + mode, { headers: sameOrigin })).status()).toBe(403);
     organizer = await p.update({ collection: "users", id: organizer.id, overrideAccess: false, user: leader, data: { communityOffices: organizer.communityOffices!.map(office => ({ ...office, status: "revoked" as const })) } });
@@ -75,11 +79,11 @@ test("人工进群完整回执、后台确认、隐私隔离及旧会话撤权",
     const contacts = await page.request.get(`/community/${slug}/contacts`, { headers: sameOrigin }); expect(await contacts.json()).toEqual([]);
     await page.context().clearCookies(); await login(page, stranger);
     const joins = await page.request.get(`/api/community-joins?where[game][equals]=${game}`, { headers: sameOrigin }); expect((await joins.json()).docs).toEqual([]);
-    const graphql = await page.request.post("/api/graphql", { headers: { Origin: "http://localhost:3000" }, data: { query: `query { CommunityJoins(where: { game: { equals: ${game} } }) { docs { id status } } }` } });
+    const graphql = await page.request.post("/api/graphql", { headers: { Origin: browserTestOrigin }, data: { query: `query { CommunityJoins(where: { game: { equals: ${game} } }) { docs { id status } } }` } });
     // This deployment intentionally exposes REST only; GraphQL remains unavailable.
     expect(graphql.status()).toBe(404);
     expect(JSON.stringify(await graphql.json())).not.toContain("memberName");
-    expect((await page.request.patch(`/api/community-joins/${(await p.find({ collection: "community-joins", overrideAccess: true, where: { game: { equals: game } } })).docs[0].id}`, { headers: { Origin: "http://localhost:3000" }, data: { status: "joined", context: { communityJoinWrite: true, system: true } } })).status()).toBe(403);
+    expect((await page.request.patch(`/api/community-joins/${(await p.find({ collection: "community-joins", overrideAccess: true, where: { game: { equals: game } } })).docs[0].id}`, { headers: { Origin: browserTestOrigin }, data: { status: "joined", context: { communityJoinWrite: true, system: true } } })).status()).toBe(403);
   } finally { await second.close(); }
 });
 test("预览居中、进群空态、联系兜底及四个响应式断点", async ({ page }) => {
@@ -93,13 +97,18 @@ test("预览居中、进群空态、联系兜底及四个响应式断点", async
     expect(Math.abs(box!.y + box!.height / 2 - 450)).toBeLessThan(3);
     await dialog.getByRole("button", { name: "关闭预览", exact: true }).click();
     await expect(page.getByRole("button", { name: "预览填写效果", exact: true })).toBeFocused();
-    await page.getByRole("button", { name: "3 · 预览试填", exact: true }).click(); await expect(dialog).toBeVisible();
+    const tabPreview = page.getByRole("group", { name: "问卷编辑视图", exact: true }).getByRole("button", { name: "预览试填", exact: true });
+    await tabPreview.click(); await expect(dialog).toBeVisible();
     await page.keyboard.press("Escape"); await expect(dialog).not.toBeVisible();
-    await expect(page.getByRole("button", { name: "3 · 预览试填", exact: true })).toBeFocused();
+    await expect(tabPreview).toBeFocused();
     await page.goto(`/community/${slug}/join`); expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await page.goto("/contact"); expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await expect(page.getByRole("link", { name: "申请组织社群", exact: true })).toBeVisible();
-    expect(await page.locator('main a[href="/contact"]').count()).toBe(0);
+    await expect(page.getByRole("link", { name: "申请组织社群", exact: true })).toHaveAttribute("href", "/community/apply");
+    await expect(page.getByRole("link", { name: "查看社群与管理员名片", exact: true })).toHaveAttribute("href", "/community");
+    await expect(page.getByRole("navigation", { name: "关于紫荆", exact: true }).getByRole("link", { name: "联系与合作", exact: true })).toHaveAttribute("aria-current", "page");
+    // The reading navigation marks this page; fallback actions in its content lead elsewhere.
+    await expect(page.locator('main article a[href="/contact"]')).toHaveCount(0);
   }
   expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
   await page.getByRole("link", { name: "查看社群与管理员名片", exact: true }).click(); await expect(page).toHaveURL(/\/community$/);
@@ -108,9 +117,12 @@ test("预览居中、进群空态、联系兜底及四个响应式断点", async
 
 test("模板预览返回可继续键盘操作，关闭及Escape恢复制作入口焦点", async ({ page }) => {
   await login(page, leader); await page.goto(`/activities/community-posts/${post}/manage`);
-  const trigger = page.getByRole("button", { name: /从模板开始/ });
+  const tools = page.locator("details.designer-source-tools");
+  await tools.locator("summary").filter({ hasText: /^模板、AI 与导入工具$/ }).click();
+  await expect(tools).toHaveAttribute("open", "");
+  const trigger = tools.getByRole("button", { name: /^从模板开始/ });
   await trigger.click(); const dialog = page.locator("dialog.questionnaire-starter-dialog"); await expect(dialog).toBeVisible();
-  await dialog.getByRole("button", { name: /^预览「/ }).first().click();
+  await dialog.getByRole("button", { name: "预览「活动报名」", exact: true }).click();
   await dialog.getByRole("button", { name: "返回模板列表", exact: true }).click();
   await expect(dialog.getByRole("button", { name: "模板库", exact: true })).toBeFocused();
   await dialog.getByRole("button", { name: "关闭制作窗口", exact: true }).click(); await expect(trigger).toBeFocused();

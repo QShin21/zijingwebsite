@@ -1,3 +1,4 @@
+import { browserTestOrigin } from "./browser-test-origin";
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
 import sharp from "sharp";
@@ -7,7 +8,7 @@ import config from "../../src/payload.config";
 import type { User } from "../../src/payload-types";
 let p: Payload, leader: User, admin: User, execution: User, publicity: User, member: User, game: number, post: number;
 const suffix = randomBytes(6).toString("hex"), password = randomBytes(24).toString("hex"), slug = "promotion-web-" + suffix;
-const origin = { Origin: "http://localhost:3000" }, postIDs: number[] = [], showcaseIDs: number[] = [], receiptIDs: number[] = [];
+const origin = { Origin: browserTestOrigin }, postIDs: number[] = [], showcaseIDs: number[] = [], receiptIDs: number[] = [];
 test.beforeAll(async () => {
   if (process.env.APP_ENV !== "development" || !["127.0.0.1", "localhost"].includes(new URL(process.env.DATABASE_URL!).hostname)) throw new Error("Synthetic loopback only");
   p = await getPayload({ config, key: "promotions-web-e2e" });
@@ -163,10 +164,13 @@ test("风采本地批准后网页申请升推，隐藏关闭首页且重新公�
     await page.goto("/"); const projected = page.locator('[data-section="promoted-showcase"] [data-promotion-source="community-showcase:' + source.id + '"]');
     await expect(projected.getByRole("link", { name: "合成网页升推风采", exact: true })).toHaveAttribute("href", detail);
     await projected.getByRole("link", { name: "合成网页升推风采", exact: true }).click();
-    await expect(page.getByRole("heading", { name: "合成网页升推风采", level: 2, exact: true })).toBeVisible();
+    await expect(page).toHaveURL(url => url.pathname === detail && url.search === "" && url.hash === "");
+    await expect(page.getByRole("heading", { name: "合成网页升推风采", level: 1, exact: true })).toBeVisible();
     await newerPosts(7); await page.goto(path); await expect(page.locator("#showcase-" + source.id)).toHaveCount(0);
     await page.goto("/"); await projected.getByRole("link", { name: "合成网页升推风采", exact: true }).click();
-    await expect(page.getByRole("heading", { name: "合成网页升推风采", level: 2, exact: true })).toBeVisible();
+    await expect(page).toHaveURL(url => url.pathname === detail && url.search === "" && url.hash === "");
+    await expect(page.getByRole("heading", { name: "合成网页升推风采", level: 1, exact: true })).toBeVisible();
+    await page.locator("#showcase-" + source.id).locator("summary").filter({ hasText: /^管理这条风采$/ }).click();
     await page.locator("#showcase-" + source.id).getByRole("button", { name: "隐藏风采", exact: true }).click();
     await expect(page.getByRole("status").filter({ hasText: "审核结果已保存。" })).toHaveText("审核结果已保存。");
     await expect(page).toHaveURL(url => url.pathname === path && url.searchParams.get("view") === "review");

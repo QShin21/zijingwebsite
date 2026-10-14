@@ -1,3 +1,4 @@
+import { browserTestOrigin } from "./browser-test-origin";
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
 import { test, expect, type Page } from "@playwright/test";
@@ -9,7 +10,7 @@ import { defaultStaffForm } from "../../src/lib/staff-recruitment-model";
 
 let p: Payload, president: User, vice: User, member: User, other: User;
 const suffix = randomBytes(6).toString("hex"), password = randomBytes(24).toString("hex"), actors: User[] = [], batches: number[] = [];
-const origin = { Origin: "http://localhost:3000" };
+const origin = { Origin: browserTestOrigin };
 const answers = { department: "执行部", name: "合成历史申请人", school: "合成院系年级", motivation: "合成申请动机", experience: "合成相关经验", time: "合成每周时段", contact: "own-receipt@example.invalid" };
 const endpoint = (batch: StaffBatch) => "/api/staff/batches/" + batch.id + "/application";
 const path = (batch: StaffBatch) => "/join/staff/batches/" + batch.id;
@@ -62,6 +63,11 @@ async function apply(page: Page, batch: StaffBatch) {
   const response = await page.request.post(endpoint(batch), { headers: origin, data: { version: info.version, answers } });
   expect(response.status()).toBe(200); return (await response.json()).application;
 }
+async function expectOwnReceipt(page: Page, status: string, id: number) {
+  const application = page.locator("#staff-application");
+  await expect(application.getByRole("heading", { name: status, exact: true })).toBeVisible();
+  await expect(application.locator("span").filter({ hasText: new RegExp(`^申请编号 ${id}$`) })).toBeVisible();
+}
 
 test("发布后保存新草稿，本人旧链接及列表回执可读，游客和他人无权，撤下后不可写", async ({ page, browser, request }) => {
   test.setTimeout(180000);
@@ -104,17 +110,19 @@ test("发布后保存新草稿，本人旧链接及列表回执可读，游客�
     expect(ownList.docs).toEqual(expect.arrayContaining([expect.objectContaining({ id: saved.id, batch: batch.id, batchTitle: batch.title })]));
     await page.goto(path(batch)); await page.reload();
     await expect(page.getByRole("heading", { name: batch.title, exact: true })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "选拔处理中 · 申请编号 " + saved.id })).toBeVisible();
-    await expect(page.getByText("处理反馈：合成本人可见反馈", { exact: true })).toBeVisible();
+    await expectOwnReceipt(page, "选拔处理中", saved.id);
+    await expect(page.locator("#staff-application").getByRole("heading", { name: "处理反馈", exact: true })).toBeVisible();
+    await expect(page.locator("#staff-application").getByText("合成本人可见反馈", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "修改申请", exact: true })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "撤回申请", exact: true })).toHaveCount(0);
     await page.getByRole("button", { name: "刷新回执", exact: true }).click();
     await expect(page.getByRole("status").filter({ hasText: "批次已撤下，仅可查看回执" })).toBeVisible();
-    await page.getByRole("link", { name: "查看骨干批次与本人回执", exact: true }).click();
+    await page.locator("#staff-application").getByRole("link", { name: "全部本人回执", exact: true }).click();
+    await expect(page).toHaveURL(/\/join\/staff#my-staff-receipts$/);
     const historical = page.locator('[data-staff-receipt="' + saved.id + '"]');
     await expect(historical.getByRole("link", { name: batch.title, exact: true })).toBeVisible();
     await expect(page.getByText(draftTitle, { exact: true })).toHaveCount(0);
-    await historical.getByRole("link", { name: "查看本人回执 ↗", exact: true }).click(); await expect(page).toHaveURL(new RegExp(path(batch) + "$"));
+    await historical.getByRole("link", { name: "查看本人回执", exact: true }).click(); await expect(page).toHaveURL(new RegExp(path(batch) + "$"));
     for (const action of ["submit", "withdraw"]) expect((await page.request.post(endpoint(batch), { headers: origin, data: { action, revision: saved.updatedAt, version: saved.formVersion, answers } })).status()).toBe(404);
     expect((await page.request.patch(endpoint(batch), { headers: origin, data: { revision: saved.updatedAt, version: saved.formVersion, answers: { ...answers, name: "擅改合成姓名" } } })).status()).toBe(404);
     expect((await page.request.patch("/api/staff-applications/" + saved.id, { headers: origin, data: { answers: { name: "直接擅改" }, context: { system: true, staffApplicationWrite: true } } })).status()).toBe(403);
@@ -195,8 +203,9 @@ for (const finalStatus of ["accepted", "rejected"] as const) test(finalStatus + 
     await row.getByRole("textbox", { name: /^本人可见反馈/ }).fill("请补充合成姓名，并重新提交资料");
     await row.getByRole("button", { name: "退回补充", exact: true }).click();
     await expect(manager.getByRole("status").filter({ hasText: "申请处理结果已保存" })).toBeVisible();
-    await page.reload(); await expect(page.getByRole("heading", { name: "待补充 · 申请编号 " + final.id })).toBeVisible();
-    await expect(page.getByText("处理反馈：请补充合成姓名，并重新提交资料", { exact: true })).toBeVisible();
+    await page.reload(); await expectOwnReceipt(page, "待补充", final.id);
+    await expect(page.locator("#staff-application").getByRole("heading", { name: "处理反馈", exact: true })).toBeVisible();
+    await expect(page.locator("#staff-application").getByText("请补充合成姓名，并重新提交资料", { exact: true })).toBeVisible();
     await expect(page.getByText("合成最终结果私有备注", { exact: true })).toHaveCount(0);
     await page.getByRole("button", { name: "修改申请", exact: true }).click();
     await page.getByLabel("姓名", { exact: true }).fill("合成明确退回后补充姓名");
@@ -211,7 +220,7 @@ for (const finalStatus of ["accepted", "rejected"] as const) test(finalStatus + 
     expect((await p.findByID({ collection: "users", id: member.id, overrideAccess: true })).roles).toEqual(["member"]);
     await manager.reload(); await managementFormReady(manager, final.id); await expect(row.getByRole("button", { name: "进入选拔", exact: true })).toBeEnabled();
     await row.getByRole("button", { name: "进入选拔", exact: true }).click(); await expect(manager.getByRole("status").filter({ hasText: "申请处理结果已保存" })).toBeVisible();
-    await expect(row.getByRole("heading", { name: /选拔处理中/ })).toBeVisible();
+    await expect(row.locator("header").getByText("选拔处理中", { exact: true })).toBeVisible();
     const reviewing = await (await page.request.get(endpoint(batch), { headers: origin })).json(); expect(reviewing.application.status).toBe("reviewing");
   } finally { await managerContext.close(); }
 });
@@ -305,7 +314,7 @@ test("保存与发布拒绝跳过核心资料的分支，合法扩展分支可�
       expect(nativeArchived.status()).toBe(200);
       expect(await nativeArchived.json()).toMatchObject({ form: null, version: receipt.formVersion,
         state: "批次已撤下，仅可查看回执", application: { id: receipt.id, questions: receipt.questions, answers: receipt.answers } });
-      expect((await applicantPage.goto(path(batch)))?.status()).toBe(200); await expect(applicantPage.getByRole("heading", { name: "已提交 · 申请编号 " + receipt.id })).toBeVisible();
+      expect((await applicantPage.goto(path(batch)))?.status()).toBe(200); await expectOwnReceipt(applicantPage, "已提交", receipt.id);
       expect((await applicantPage.request.get("/api/staff-applications/" + (receipt.id === own.id ? otherReceipt.id : own.id), { headers: origin })).status()).toBe(404);
     }
   } finally { await applicantContext.close(); await otherContext.close(); }

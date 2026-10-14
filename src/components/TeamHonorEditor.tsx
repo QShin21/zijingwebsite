@@ -506,7 +506,7 @@ export function TeamHonorEditor({
                 </div>
               </section>
             </div>
-            <aside className={styles.editorGuide}>
+            <div className={styles.editorGuide}>
               <h3>一份完整的荣誉记录</h3>
               <ol>
                 <li>写清赛事、成绩与日期。</li>
@@ -519,7 +519,7 @@ export function TeamHonorEditor({
                   本次修改保存后，当前公开展示会撤下，待重新批准后更新档案。
                 </p>
               )}
-            </aside>
+            </div>
           </div>
         </fieldset>
       </form>

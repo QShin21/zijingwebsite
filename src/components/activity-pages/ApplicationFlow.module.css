@@ -159,6 +159,10 @@
   font-size: var(--z-text-small);
   margin: var(--z-space-4) 0;
 }
+.notice a {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
 .notice summary {
   cursor: pointer;
   color: var(--z-ink);

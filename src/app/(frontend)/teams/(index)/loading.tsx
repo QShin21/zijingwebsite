@@ -1,4 +1,4 @@
-import { ClubFrame } from "../_club/ClubPage";
+import { ClubFrame } from "../../_club/ClubPage";
 import styles from "@/components/team-pages/TeamPages.module.css";
 
 export default function TeamLoading() {

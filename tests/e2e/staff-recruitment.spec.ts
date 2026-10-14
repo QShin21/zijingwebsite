@@ -1,13 +1,16 @@
+import { browserTestOrigin } from "./browser-test-origin";
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
-import { test, expect, type Page } from "@playwright/test";
+import { readFile } from "node:fs/promises";
+import { test, expect, type Page, type Request } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 import { getPayload, type Payload } from "payload";
 import config from "../../src/payload.config";
 import type { User } from "../../src/payload-types";
 
 let p: Payload, president: User, vice: User, member: User, localAdmin: User, batch: number;
 const suffix = randomBytes(6).toString("hex"), password = randomBytes(24).toString("hex"), title = "合成网页骨干批次-" + suffix;
-const games: { id: number; slug: string }[] = [], actors: User[] = [], origin = { Origin: "http://localhost:3000" };
+const games: { id: number; slug: string }[] = [], actors: User[] = [], origin = { Origin: browserTestOrigin };
 test.beforeAll(async () => {
   if (process.env.APP_ENV !== "development" || !["127.0.0.1", "localhost"].includes(new URL(process.env.DATABASE_URL!).hostname)) throw new Error("Synthetic loopback only");
   p = await getPayload({ config, key: "staff-web-e2e" });
@@ -58,6 +61,12 @@ async function complete(page: Page, editing = false) {
 test("单批次网页草稿/发布、申请/撤回重提、审核回执、私有导出及关闭；现有和新社群共用入口", async ({ page, browser, request }) => {
   test.setTimeout(240000);
   const applicantContext = await browser.newContext(), reviewerContext = await browser.newContext(), localContext = await browser.newContext();
+  const browserExports: string[] = [];
+  const recordExport = (request: Request) => {
+    const url = new URL(request.url());
+    if (request.method() === "GET" && /^\/api\/staff\/batches\/\d+\/application$/.test(url.pathname) && url.searchParams.get("mode") === "export") browserExports.push(request.url());
+  };
+  page.on("request", recordExport);
   try {
     await login(page, president); await page.goto("/staff/manage"); await page.getByText("创建骨干招新批次", { exact: true }).click();
     const create = page.locator("details").filter({ has: page.getByText("创建骨干招新批次", { exact: true }) });
@@ -77,6 +86,11 @@ test("单批次网页草稿/发布、申请/撤回重提、审核回执、私有
     expect(formInfo.draftKey).toBe("staff:" + batch + ":" + member.id + ":" + formInfo.version);
     await applicant.setViewportSize({ width: 360, height: 900 });
     expect(await applicant.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+    const application = applicant.locator("#staff-application");
+    await expect(application.getByLabel("宣传部", { exact: true })).toBeVisible();
+    await application.locator("summary").filter({ hasText: /^申请规则与资料使用说明$/ }).click();
+    await expect(application.getByRole("link", { name: "隐私说明", exact: true })).toHaveCSS("text-decoration-line", "underline");
+    expect((await new AxeBuilder({ page: applicant }).include("#staff-application").analyze()).violations).toEqual([]);
     await complete(applicant);
     const saved = (await p.find({ collection: "staff-applications", user: member, overrideAccess: false, where: { batch: { equals: batch } } })).docs[0];
     await applicant.getByRole("button", { name: "撤回申请", exact: true }).click(); await expect(applicant.getByRole("heading", { name: /已撤回/ })).toBeVisible();
@@ -86,12 +100,13 @@ test("单批次网页草稿/发布、申请/撤回重提、审核回执、私有
     expect((await local.request.get("/api/staff/batches/" + batch + "/application?mode=review", { headers: origin })).status()).toBe(403);
     expect((await local.request.get("/api/staff/batches/" + batch + "/application?mode=export", { headers: origin })).status()).toBe(403);
     expect((await local.request.get("/api/staff-applications/" + saved.id, { headers: origin })).status()).toBe(404);
-    const reviewer = await reviewerContext.newPage(); await login(reviewer, vice); await reviewer.goto("/staff/manage?batch=" + batch);
+    const reviewer = await reviewerContext.newPage(); reviewer.on("request", recordExport);
+    await login(reviewer, vice); await reviewer.goto("/staff/manage?batch=" + batch);
     await reviewer.setViewportSize({ width: 390, height: 900 });
     expect(await reviewer.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
     const row = reviewer.locator('[data-staff-application="' + saved.id + '"]');
-    await row.getByLabel("本人可见反馈（退回/未录用必填）", { exact: true }).fill("合成录用反馈");
-    await row.getByLabel("内部备注（仅管理层可见）", { exact: true }).fill("合成仅管理层备注");
+    await row.getByRole("textbox", { name: /^本人可见反馈/ }).fill("合成录用反馈");
+    await row.getByRole("textbox", { name: /^内部备注/ }).fill("合成仅管理层备注");
     await row.getByRole("button", { name: "录用", exact: true }).click(); await expect(reviewer.getByRole("status").filter({ hasText: "申请处理结果已保存" })).toBeVisible();
     await applicant.reload(); await expect(applicant.getByRole("heading", { name: /已录用/ })).toBeVisible();
     await expect(applicant.getByText("合成仅管理层备注", { exact: true })).toHaveCount(0);
@@ -100,7 +115,22 @@ test("单批次网页草稿/发布、申请/撤回重提、审核回执、私有
     expect((await p.findByID({ collection: "users", id: member.id, overrideAccess: true })).roles).toEqual(["member"]);
     await reviewer.getByRole("combobox", { name: /^部门意向/ }).selectOption("publicity"); await reviewer.getByRole("combobox", { name: /^申请状态/ }).selectOption("accepted");
     await reviewer.getByRole("button", { name: "筛选申请", exact: true }).click(); await expect(row).toBeVisible();
-    const exported = await reviewer.request.get("/api/staff/batches/" + batch + "/application?mode=export&department=publicity&status=accepted", { headers: origin });
+    const exportPath = "/api/staff/batches/" + batch + "/application?mode=export&department=publicity&status=accepted";
+    const exportLink = reviewer.getByRole("link", { name: "导出当前筛选答卷 CSV", exact: true });
+    await expect(exportLink).toHaveAttribute("href", exportPath);
+    await exportLink.scrollIntoViewIfNeeded();
+    await expect(exportLink).toBeVisible();
+    // Loading, reviewing and filtering must not prefetch a private CSV or write an export audit.
+    expect(browserExports).toEqual([]);
+    const downloading = reviewer.waitForEvent("download");
+    await exportLink.click();
+    const download = await downloading;
+    expect(download.suggestedFilename()).toBe("staff-applications-" + batch + ".csv");
+    const downloadedPath = await download.path();
+    if (!downloadedPath) throw new Error("合成骨干导出文件未生成");
+    expect(await readFile(downloadedPath, "utf8")).toContain("合成申请人");
+    expect(browserExports).toEqual([new URL(exportPath, browserTestOrigin).href]);
+    const exported = await reviewer.request.get(exportPath, { headers: origin });
     expect(exported.status()).toBe(200); expect(await exported.text()).toContain("合成申请人");
     await p.update({ collection: "users", id: vice.id, user: president, overrideAccess: false, data: { roles: ["member"] } });
     expect((await reviewer.request.get("/api/staff/batches/" + batch + "/application?mode=review", { headers: origin })).status()).toBe(403);
@@ -116,5 +146,6 @@ test("单批次网页草稿/发布、申请/撤回重提、审核回执、私有
     await applicant.goto("/community/" + newGame.slug + "/updates"); await expect(applicant.locator(notice)).toHaveCount(0);
     await applicant.goto(path); await expect(applicant.getByRole("status").filter({ hasText: "申请已关闭" })).toBeVisible();
     await expect(applicant.getByRole("button", { name: "修改申请", exact: true })).toHaveCount(0);
+    expect(browserExports).toEqual([new URL(exportPath, browserTestOrigin).href]);
   } finally { await Promise.allSettled([applicantContext.close(), reviewerContext.close(), localContext.close()]); }
 });

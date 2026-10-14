@@ -587,9 +587,26 @@ export function SignupManager({
                       ...info,
                       form: result.form,
                       version: result.version,
+                      state: "报名状态待核对",
                     });
                     setServerVersion(null);
                     setMessage(result.message);
+                    // The write receipt confirms the saved form and revision only.
+                    // Read the current window without replacing that form or CAS revision.
+                    try {
+                      const latest = await signupRequest(
+                        endpoint + "?mode=manage",
+                      );
+                      setInfo((current) =>
+                        current ? { ...current, state: latest.state } : current,
+                      );
+                      if (latest.version !== result.version)
+                        setServerVersion(latest.version);
+                    } catch {
+                      setMessage(
+                        `${result.message}。报名状态暂时无法核对，请打开下方“核对已保存问卷”重新读取。`,
+                      );
+                    }
                   } catch (cause) {
                     setFailed(true);
                     setMessage((cause as Error).message);
@@ -629,6 +646,9 @@ export function SignupManager({
                       try {
                         const latest = await signupRequest(
                           endpoint + "?mode=manage",
+                        );
+                        setInfo((current) =>
+                          current ? { ...current, state: latest.state } : current,
                         );
                         setServerVersion(latest.version);
                         setFailed(false);

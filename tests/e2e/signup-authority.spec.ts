@@ -1,3 +1,4 @@
+import { browserTestOrigin } from "./browser-test-origin";
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
 import { test, expect, type Page } from "@playwright/test";
@@ -6,7 +7,7 @@ import config from "../../src/payload.config";
 import type { User } from "../../src/payload-types";
 let p: Payload, leader: User, reader: User, member: User, backbone: User, a: number, b: number;
 const events: number[] = [], suffix = randomBytes(6).toString("hex"), password = randomBytes(24).toString("hex");
-const origin = { Origin: "http://localhost:3000" };
+const origin = { Origin: browserTestOrigin };
 test.beforeAll(async () => {
   if (process.env.APP_ENV !== "development" || !["127.0.0.1", "localhost"].includes(new URL(process.env.DATABASE_URL!).hostname)) throw new Error("Synthetic loopback only");
   p = await getPayload({ config, key: "signup-authority-browser" });

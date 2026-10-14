@@ -2,7 +2,7 @@ import Link from "next/link";
 import { list } from "@/lib/content";
 import { CommunityPager, pageNumber } from "@/components/CommunityPager";
 import { CommunityEmpty } from "@/components/community-pages/CommunityPages";
-import { ClubFrame } from "../_club/ClubPage";
+import { ClubFrame } from "../../_club/ClubPage";
 import styles from "@/components/community-pages/CommunityPages.module.css";
 
 export default async function Communities({

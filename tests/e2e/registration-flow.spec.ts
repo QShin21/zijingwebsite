@@ -140,7 +140,9 @@ test("点击注册后弹窗验证，错误验证码不入库，正确验证码�
   await page.getByLabel("密码", { exact: true }).fill(password);
   await page.getByRole("button", { name: "登录", exact: true }).click();
   await expect(page).toHaveURL(/\/account$/);
-  await expect(page.getByRole("complementary", { name: names[0], exact: true }).getByRole("heading", { level: 2 })).toHaveText(names[0]);
+  const profile = page.getByRole("region", { name: "账号资料", exact: true });
+  await expect(profile.getByText(names[0], { exact: true })).toBeVisible();
+  await expect(profile.getByText(`${names[0].toLowerCase()}@mails.tsinghua.edu.cn`, { exact: true })).toBeVisible();
 });
 
 test("关闭弹窗保留输入且不创建账号，重发限制在服务端执行", async ({ page }) => {

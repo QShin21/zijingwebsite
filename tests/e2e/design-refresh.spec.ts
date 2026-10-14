@@ -1,6 +1,7 @@
 import { memberTest } from "./member-layout-fixture";
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { mobileMenu } from "./navigation-helpers";
 
 for (const width of [320, 390, 768, 1440]) {
   memberTest(
@@ -36,7 +37,7 @@ for (const width of [320, 390, 768, 1440]) {
           expect(result.violations, route).toEqual([]);
         }
         if (width < 1050 && route === "/community") {
-          await page.locator(".z-mobile-menu summary").click();
+          await mobileMenu(page).getByLabel("打开导航", { exact: true }).click();
           const navigation = page.getByRole("navigation", { name: "移动导航" });
           await expect(
             navigation.getByRole("link", { name: "游戏社群", exact: true }),
@@ -85,7 +86,7 @@ test("registration guidance, server feedback and unique mobile community navigat
   await page.goto("/community");
   await expect(page).toHaveURL(/\/login\?/);
   expect(new URL(page.url()).searchParams.get("returnTo")).toBe("/community");
-  await page.locator(".z-mobile-menu summary").click();
+  await mobileMenu(page).getByLabel("打开导航", { exact: true }).click();
   const navigation = page.getByRole("navigation", { name: "移动导航" });
   const link = navigation.locator('a[href="/community"]');
   await expect(link).toHaveCount(0);

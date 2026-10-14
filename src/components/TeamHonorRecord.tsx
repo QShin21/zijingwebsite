@@ -136,7 +136,7 @@ export function TeamHonorRecordCard({
             )}
           </div>
           {canAct && (
-            <aside className={styles.reviewAction}>
+            <div className={styles.reviewAction}>
               <SectionHeading>
                 {reviewer && record.state === "pending"
                   ? "审核这项荣誉"
@@ -225,7 +225,7 @@ export function TeamHonorRecordCard({
                     <p>当前记录暂无可执行的审核操作。</p>
                   )}
               </ActionForm>
-            </aside>
+            </div>
           )}
         </div>
       </details>

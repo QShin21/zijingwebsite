@@ -149,11 +149,25 @@ test("本人事务与权限入口、深链和退出完整导航", async ({ page 
   await expect(
     page.getByRole("heading", { name: "管理工作台", exact: true }),
   ).toHaveCount(0);
-  await page.getByRole("link", { name: "查看全部申请", exact: false }).click();
-  await expect(page).toHaveURL(/\/account\?view=history$/);
+  const views = page.getByRole("navigation", { name: "申请记录视图", exact: true });
+  const history = views.getByRole("link", { name: "查看全部申请", exact: true });
+  await expect(history).toHaveAttribute("href", "/account?view=history#applications-title");
+  await history.click();
+  await expect(page).toHaveURL(url => url.pathname === "/account" && url.search === "?view=history" && url.hash === "#applications-title");
+  await expect(history).toHaveAttribute("aria-current", "page");
   await expect(
     page.getByRole("heading", { name: "申请记录", exact: true }),
-  ).toBeVisible();
+  ).toHaveAttribute("id", "applications-title");
+  await expect(page.getByRole("heading", { name: "申请记录", exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "申请记录", exact: true })).toBeVisible();
+  const ongoing = views.getByRole("link", { name: "进行中", exact: true });
+  await expect(ongoing).toHaveAttribute("href", "/account#applications-title");
+  await ongoing.click();
+  await expect(page).toHaveURL(url => url.pathname === "/account" && url.search === "" && url.hash === "#applications-title");
+  await expect(ongoing).toHaveAttribute("aria-current", "page");
+  await page.goBack();
+  await expect(page).toHaveURL(url => url.pathname === "/account" && url.search === "?view=history" && url.hash === "#applications-title");
+  await expect(page.getByRole("region", { name: "申请记录", exact: true })).toBeVisible();
   await accessible(page);
   await page.screenshot({
     path: testInfo.outputPath("account-desktop.png"),

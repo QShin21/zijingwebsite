@@ -1,3 +1,4 @@
+import { browserTestOrigin } from "./browser-test-origin";
 import "dotenv/config";
 import { test, expect } from "@playwright/test";
 import { getPayload, type Payload } from "payload";
@@ -140,7 +141,7 @@ test("后台登录、创建活动草稿、预览、发布、访客查看、撤�
     }),
   ).toBeVisible();
   const renamed = await page.request.patch(`/api/events/${eventID}`, {
-    headers: { Origin: "http://localhost:3000" },
+    headers: { Origin: browserTestOrigin },
     data: { slug: `${slug}-renamed` },
   });
   expect(renamed.ok()).toBeTruthy();
@@ -152,10 +153,10 @@ test("后台登录、创建活动草稿、预览、发布、访客查看、撤�
   await publicPage.goto(`/events/${slug}-renamed`);
   await expect(publicPage.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
-    `http://localhost:3000/events/${slug}-renamed`,
+    `${browserTestOrigin}/events/${slug}-renamed`,
   );
   const withdrawn = await page.request.patch(`/api/events/${eventID}`, {
-    headers: { Origin: "http://localhost:3000" },
+    headers: { Origin: browserTestOrigin },
     data: { _status: "draft" },
   });
   expect(withdrawn.ok()).toBeTruthy();
@@ -230,7 +231,7 @@ test("公开 API、预览、首次注册与分部越权拒绝", async ({ request
   const token = (await login.json()).token;
   const headers = {
     Authorization: `JWT ${token}`,
-    Origin: "http://localhost:3000",
+    Origin: browserTestOrigin,
   };
   const res = await request.patch(`/api/teams/${teamID}`, {
     headers,
@@ -298,7 +299,10 @@ test("三类招新、历史批次和所有公开栏目", async ({ page }) => {
   for (const kind of ["members", "teams", "staff"]) {
     await page.goto(`/join/${kind}`);
     await expect(
-      page.getByRole("heading", { name: "招新批次与历史记录" }),
+      page.getByRole("heading", {
+        name: kind === "staff" ? "历史招新资料" : "招新批次与历史记录",
+        exact: true,
+      }),
     ).toBeVisible();
     await page
       .getByRole("heading", { name: `演示 · ${kind} 招新批次`, exact: true })
@@ -424,7 +428,7 @@ test("首页配置即时更新、回顾关联、相册分页和长中文标题",
       eventSection.getByRole("heading", { name: "活动日程", exact: true }),
     ).toHaveCount(1);
     const moduleHeadings = page.locator(
-      '[data-section="events"] h2, .z-participation h2',
+      '[data-section="events"] h2, [data-section="join"] h2',
     );
     await expect(moduleHeadings).toHaveText([
       "活动日程",
@@ -480,7 +484,7 @@ test("首页配置即时更新、回顾关联、相册分页和长中文标题",
       page.getByRole("link", { name: "演示 · 关联回顾" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "前往外部报名 ↗" }),
+      page.getByRole("link", { name: "前往外部报名", exact: true }),
     ).toHaveAttribute("href", "https://example.com/form");
     await p.update({
       collection: "events",
@@ -491,7 +495,7 @@ test("首页配置即时更新、回顾关联、相册分页和长中文标题",
     });
     await page.reload();
     await expect(
-      page.getByRole("link", { name: "前往外部报名 ↗" }),
+      page.getByRole("link", { name: "前往外部报名", exact: true }),
     ).toHaveCount(0);
     await page.goto(`/news/${news.slug}`);
     await expect(page.getByRole("link", { name: title })).toBeVisible();

@@ -678,7 +678,7 @@ export function TeamCoreApplicant({
             </p>
           )}
         </div>
-        <aside className={styles.receiptAside}>
+        <div className={styles.receiptAside}>
           <h3>录取后的下一步</h3>
           <p>录取后建立本队成员关系，可以填写队内简介、投稿队伍荣誉。</p>
           <p>
@@ -687,7 +687,7 @@ export function TeamCoreApplicant({
           <Link href="/teams/recruitment#my-team-memberships">
             查看我的成员记录
           </Link>
-        </aside>
+        </div>
       </div>
     </section>
   );

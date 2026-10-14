@@ -372,7 +372,7 @@ export default async function ManageTeam({
                         )}
                       </div>
                       {doc.status === "pending" && (
-                        <aside className={styles.reviewAction}>
+                        <div className={styles.reviewAction}>
                           <h4>处理这份申请</h4>
                           <p>核对申请内容后，选择录取、退回补充或未通过。</p>
                           <TeamCoreDecision
@@ -380,7 +380,7 @@ export default async function ManageTeam({
                             id={doc.id}
                             revision={doc.updatedAt}
                           />
-                        </aside>
+                        </div>
                       )}
                     </div>
                   </article>

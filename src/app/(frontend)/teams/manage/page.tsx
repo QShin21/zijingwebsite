@@ -224,14 +224,14 @@ export default async function Manage({
                           <h4>组织与训练计划</h4>
                           <p className="preserve">{doc.reason}</p>
                         </div>
-                        <aside className={styles.reviewAction}>
+                        <div className={styles.reviewAction}>
                           <h4>建队处理意见</h4>
                           <TeamCoreDecision
                             kind="establishment"
                             id={doc.id}
                             revision={doc.updatedAt}
                           />
-                        </aside>
+                        </div>
                       </div>
                     </article>
                   ))

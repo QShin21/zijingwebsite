@@ -168,7 +168,7 @@ function caller(
     "./activity-pages/ActionForm": { ActionForm },
     "./TeamHonorNavigation": { teamHonorQuery },
     "@/app/(frontend)/teams/honors/actions": actions,
-    "@/app/(frontend)/_club/ClubPages.module.css": {},
+    "./team-pages/TeamPages.module.css": {},
   };
   if (kind === "record") {
     const component = evaluate(source("src/components/TeamHonorRecord.tsx"), {

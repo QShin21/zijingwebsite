@@ -1,3 +1,4 @@
+import { browserTestOrigin } from "./browser-test-origin";
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
 import { test, expect, type Page } from "@playwright/test";
@@ -22,7 +23,7 @@ let p: Payload,
 let game: number, otherGame: number, team: number, batch: number;
 const suffix = randomBytes(5).toString("hex"),
   password = randomBytes(24).toString("hex"),
-  origin = { Origin: "http://localhost:3000" };
+  origin = { Origin: browserTestOrigin };
 test.beforeAll(async () => {
   if (
     process.env.APP_ENV !== "development" ||
@@ -160,7 +161,11 @@ async function login(page: Page, user: User) {
   expect(response.status(), await response.text()).toBe(200);
   await page.goto("/account");
   await expect(
-    page.getByRole("heading", { name: user.name, exact: true }),
+    page.getByRole("heading", { name: "我的紫荆", level: 1, exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "账号资料", exact: true })
+      .getByText(user.name, { exact: true }),
   ).toBeVisible();
 }
 test("建队网页退回、修改重提与高权限批准可进入招新工作台", async ({
@@ -182,7 +187,8 @@ test("建队网页退回、修改重提与高权限批准可进入招新工作�
     const review = await context.newPage();
     await login(review, leader);
     await review.goto("/teams/manage");
-    let card = review.locator("article").filter({
+    const reviewQueue = review.getByRole("region", { name: "待审核建队申请", exact: true });
+    let card = reviewQueue.getByRole("article").filter({
       has: review.getByRole("heading", {
         name: `合成网页建队-${suffix}`,
         exact: true,
@@ -216,7 +222,7 @@ test("建队网页退回、修改重提与高权限批准可进入招新工作�
       page.getByRole("heading", { name: "建队申请已提交" }),
     ).toBeVisible();
     await review.reload();
-    card = review.locator("article").filter({
+    card = reviewQueue.getByRole("article").filter({
       has: review.getByRole("heading", {
         name: `合成网页建队-${suffix}`,
         exact: true,
@@ -244,7 +250,11 @@ test("本人草稿、提交、退回重提、人工录取、撤销与真实REST�
   await page.goto(`/teams/recruitment/${batch}`);
   await page.getByLabel(/游戏 ID \/ 游戏昵称/).fill("合成浏览器游戏ID");
   await page.getByRole("button", { name: "保存草稿", exact: true }).click();
-  await expect(page.getByText(/招新开放 · 草稿/)).toBeVisible();
+  const receiptHeader = page.locator("section").filter({
+    has: page.getByRole("heading", { name: "我的入队申请", exact: true, level: 2 }),
+  }).locator(":scope > header");
+  await expect(receiptHeader.getByText(/^招新开放；申请编号 \d+$/)).toBeVisible();
+  await expect(receiptHeader.getByText("草稿（尚未提交）", { exact: true })).toBeVisible();
   const draft = (
     await p.find({
       collection: "team-join-applications",
@@ -267,7 +277,8 @@ test("本人草稿、提交、退回重提、人工录取、撤销与真实REST�
   await page.getByLabel(/一种联系方式/).fill("synthetic@example.invalid");
   await page.getByRole("button", { name: "核对并提交", exact: true }).click();
   await page.getByRole("button", { name: "提交入队申请", exact: true }).click();
-  await expect(page.getByText(/招新开放 · 待人工审核/)).toBeVisible();
+  await expect(receiptHeader.getByText(/^招新开放；申请编号 \d+$/)).toBeVisible();
+  await expect(receiptHeader.getByText("待人工审核", { exact: true })).toBeVisible();
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(360);
@@ -289,7 +300,8 @@ test("本人草稿、提交、退回重提、人工录取、撤销与真实REST�
     await card.getByRole("button", { name: "退回补充" }).click();
     await expect(card).toHaveCount(0);
     await page.reload();
-    await expect(page.getByText(/招新开放 · 退回补充/)).toBeVisible();
+    await expect(receiptHeader.getByText(/^招新开放；申请编号 \d+$/)).toBeVisible();
+    await expect(receiptHeader.getByText("退回补充", { exact: true })).toBeVisible();
     await page
       .getByRole("button", { name: "修改并重新提交", exact: true })
       .click();
@@ -298,7 +310,8 @@ test("本人草稿、提交、退回重提、人工录取、撤销与真实REST�
     await page
       .getByRole("button", { name: "提交入队申请", exact: true })
       .click();
-    await expect(page.getByText(/招新开放 · 待人工审核/)).toBeVisible();
+    await expect(receiptHeader.getByText(/^招新开放；申请编号 \d+$/)).toBeVisible();
+    await expect(receiptHeader.getByText("待人工审核", { exact: true })).toBeVisible();
     await review.reload();
     await card.getByRole("button", { name: "批准入队" }).click();
     await expect(card).toHaveCount(0);
@@ -368,11 +381,16 @@ test("本人草稿、提交、退回重提、人工录取、撤销与真实REST�
         )
       ).status(),
     ).toBe(403);
-    await review.getByLabel("撤销原因").fill("合成撤销审核");
-    await review
+    const memberRecord = review.getByRole("region", { name: "成员记录", exact: true })
+      .getByRole("article").filter({
+        has: review.getByRole("definition").filter({ hasText: new RegExp(`^${membership!.id}$`) }),
+      });
+    await memberRecord.locator("summary").filter({ hasText: /^管理成员关系$/ }).click();
+    await memberRecord.getByLabel("撤销原因").fill("合成撤销审核");
+    await memberRecord
       .getByRole("button", { name: "撤销本队成员关系", exact: true })
       .click();
-    await expect(review.getByText(/已撤销/)).toBeVisible();
+    await expect(memberRecord.getByText("已撤销", { exact: true })).toBeVisible();
     expect(
       await getActiveTeamMembership(p, {
         teamID: team,
@@ -380,7 +398,11 @@ test("本人草稿、提交、退回重提、人工录取、撤销与真实REST�
       }),
     ).toBeNull();
     await page.goto("/teams/recruitment");
-    await expect(page.getByText(/关系编号.*已撤销/)).toBeVisible();
+    const ownMemberRecord = page.getByRole("region", { name: "我的代表队成员记录", exact: true })
+      .getByRole("article").filter({
+        has: page.getByText(`成员关系编号 ${membership!.id}`, { exact: true }),
+      });
+    await expect(ownMemberRecord.getByText("已撤销", { exact: true })).toBeVisible();
     await p.update({
       collection: "users",
       id: manager.id,
@@ -446,13 +468,14 @@ test("招新关闭、跨站拒绝和表单工作台四个视口", async ({ page,
       exact: true,
     }),
   });
+  await recruitmentCard.locator("summary").filter({ hasText: /^结束或归档本批次$/ }).click();
   await recruitmentCard
     .getByRole("button", { name: "关闭本轮招新", exact: true })
     .click();
   await expect(
     recruitmentCard.getByText("已关闭", { exact: true }),
   ).toBeVisible();
-  await expect(recruitmentCard.getByText(/^招新已关闭 · 更新于/)).toBeVisible();
+  await expect(recruitmentCard.getByText(/^招新已关闭；更新于/)).toBeVisible();
   const teamRecord = await p.findByID({
     collection: "teams",
     id: team,
@@ -472,7 +495,7 @@ test("招新关闭、跨站拒绝和表单工作台四个视口", async ({ page,
   const archivedTeam = (await archived.json()).result;
   await page.goto(`/teams/${teamRecord.slug}`);
   await expect(
-    page.getByText("历史归档", { exact: true }).first(),
+    page.locator("main").getByText("历史归档", { exact: true }),
   ).toBeVisible();
   const unauthorizedRestore = await page.request.post("/api/team-core", {
     headers: origin,
@@ -681,11 +704,21 @@ test("真实API表单版本冲突保留草稿，新批次录取后本人网页�
       },
     });
     expect(approved.status(), await approved.text()).toBe(200);
+    const membership = await getActiveTeamMembership(p, {
+      teamID: team,
+      userID: participant.id,
+    });
+    expect(membership).not.toBeNull();
     await page.goto("/teams/recruitment");
-    await page
+    const memberRecord = page.getByRole("region", { name: "我的代表队成员记录", exact: true })
+      .getByRole("article").filter({
+        has: page.getByText(`成员关系编号 ${membership!.id}`, { exact: true }),
+      });
+    await memberRecord.locator("summary").filter({ hasText: /^办理离队$/ }).click();
+    await memberRecord
       .getByRole("button", { name: "办理本人离队", exact: true })
       .click();
-    await expect(page.getByText(/关系编号.*已离队/)).toBeVisible();
+    await expect(memberRecord.getByText("已离队", { exact: true })).toBeVisible();
     expect(
       await getActiveTeamMembership(p, {
         teamID: team,

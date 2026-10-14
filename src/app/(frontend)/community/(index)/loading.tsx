@@ -1,4 +1,4 @@
-import { ClubFrame } from "../_club/ClubPage";
+import { ClubFrame } from "../../_club/ClubPage";
 import styles from "@/components/community-pages/CommunityPages.module.css";
 
 export default function LoadingCommunity() {

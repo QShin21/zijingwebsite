@@ -1,3 +1,4 @@
+import { browserTestOrigin } from "./browser-test-origin";
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
 import { getPayload, type Payload } from "payload";
@@ -27,7 +28,7 @@ let p: Payload,
   mainTeam: number;
 const suffix = randomBytes(5).toString("hex"),
   password = randomBytes(24).toString("hex"),
-  origin = { Origin: "http://localhost:3000" };
+  origin = { Origin: browserTestOrigin };
 const form = {
   ...defaultTeamForm,
   end: new Date(Date.now() + 86400000).toISOString(),
@@ -66,7 +67,11 @@ async function login(page: Page, user: User) {
   expect(response.status(), await response.text()).toBe(200);
   await page.goto("/account");
   await expect(
-    page.getByRole("heading", { name: user.name, exact: true }),
+    page.getByRole("heading", { name: "我的紫荆", level: 1, exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "账号资料", exact: true })
+      .getByText(user.name, { exact: true }),
   ).toBeVisible();
 }
 test.beforeAll(async () => {
@@ -292,7 +297,8 @@ test("超过20条队伍和建队审核时，两套分页独立跨页并互相保
   }
   await login(page, leader);
   await page.goto(`/teams/manage?game=${game}&page=1&reviewPage=1`);
-  const teamLinks = page.locator('main li h3 > a[href^="/teams/manage/"]');
+  const teamLinks = page.getByRole("region", { name: "可管理代表队", exact: true })
+    .locator('h3 > a[href^="/teams/manage/"]');
   const firstTeams = await teamLinks.allTextContents();
   expect(firstTeams).toHaveLength(20);
   await expect(
@@ -394,12 +400,16 @@ for (const mode of ["draft", "team-archived"] as const)
       ).status(),
     ).toBe(404);
     await page.goto("/teams/recruitment");
-    const ownReceipt = page.getByRole("article").filter({
-      has: page.getByRole("heading", { name: application.title, exact: true }),
-    });
-    await ownReceipt
-      .getByRole("link", { name: "查看回执 / 继续修改", exact: true })
-      .click();
+    const ownReceipt = page.getByRole("region", { name: "我的入队申请", exact: true })
+      .getByRole("article").filter({
+        has: page.getByRole("heading", { name: application.title, exact: true }),
+      }).filter({
+        has: page.getByText(`申请编号 ${application.id}`, { exact: true }),
+      });
+    await expect(ownReceipt).toHaveCount(1);
+    const receiptLink = ownReceipt.getByRole("link", { name: "查看回执 / 继续修改", exact: true });
+    await expect(receiptLink).toHaveAttribute("href", `/teams/recruitment/${batch.id}`);
+    await receiptLink.click();
     await expect(
       page.getByText("合成旧草稿答案", { exact: true }),
     ).toBeVisible();

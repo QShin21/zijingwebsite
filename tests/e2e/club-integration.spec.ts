@@ -1,3 +1,4 @@
+import { browserTestOrigin } from "./browser-test-origin";
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
 import sharp from "sharp";
@@ -13,7 +14,7 @@ import { emptyTeamProfile } from "../../src/lib/team-profiles-model";
 
 let p: Payload, high: User, manager: User, member: User, outsider: User, crossReviewer: User, game: number, otherGame: number, staffBatch: number, qaEvent: number, qaPost: number;
 const actors: User[] = [], suffix = randomBytes(5).toString("hex"), password = randomBytes(24).toString("hex");
-const origin = { Origin: "http://localhost:3000" };
+const origin = { Origin: browserTestOrigin };
 test.beforeAll(async () => {
   if (process.env.APP_ENV !== "development" || process.env.DB_PUSH !== "false" || !["127.0.0.1", "localhost"].includes(new URL(process.env.DATABASE_URL!).hostname)) throw new Error("Synthetic loopback only");
   p = await getPayload({ config, key: "club-integration-browser" });
@@ -64,7 +65,7 @@ test("五类问卷入口双轴居中，短屏/滚动/关闭与Escape返回焦点
       scope = page.locator("details").filter({ has: page.getByText("发布活动与通知", { exact: true }) });
       await scope.locator(":scope > summary").click(); await scope.getByLabel("启用填写问卷报名", { exact: true }).check();
       await scope.getByRole("button", { name: /从模板开始/ }).click();
-      const starter = scope.locator("dialog.questionnaire-starter-dialog"); await starter.getByRole("button", { name: /^预览「/ }).first().click();
+      const starter = scope.locator("dialog.questionnaire-starter-dialog"); await starter.getByRole("button", { name: "预览「活动报名」", exact: true }).click();
       await starter.getByRole("button", { name: "替换并进入编辑", exact: true }).click();
     } else if (item.kind === "create" || item.kind === "staff") {
       scope = page.locator("details").filter({ has: page.getByText(item.kind === "create" ? "创建骨干招新批次" : "配置批次：合成独立骨干批次-" + suffix, { exact: true }) });
@@ -79,12 +80,15 @@ test("五类问卷入口双轴居中，短屏/滚动/关闭与Escape返回焦点
       expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width); expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
       await dialog.evaluate(node => { node.scrollTop = 200; }); const scrolled = await dialog.boundingBox(); expect(scrolled!.x).toBe(box!.x); expect(scrolled!.y).toBe(box!.y);
     };
-    for (const [label, escape] of [["预览填写效果", false], ["3 · 预览试填", true]] as const) {
+    for (const [label, escape] of [["预览填写效果", false], ["预览试填", true]] as const) {
       const trigger = builder.getByRole("button", { name: label, exact: true }); await trigger.click(); const dialog = builder.locator("dialog.questionnaire-dialog");
       await centered(dialog); if (escape) await page.keyboard.press("Escape"); else await dialog.getByRole("button", { name: "关闭预览", exact: true }).click();
       await expect(dialog).not.toBeVisible(); await expect(trigger).toBeFocused();
     }
-    const importTrigger = builder.getByRole("button", { name: /导入已有问卷/ }); await importTrigger.click();
+    const sourceTools = builder.locator("details.designer-source-tools");
+    if ((await sourceTools.getAttribute("open")) === null)
+      await sourceTools.locator(":scope > summary").click();
+    const importTrigger = sourceTools.getByRole("button", { name: "导入已有问卷 导入文本或 JSON，检查后应用", exact: true }); await importTrigger.click();
     const importDialog = builder.locator("dialog.questionnaire-starter-dialog"); await centered(importDialog); await page.keyboard.press("Escape"); await expect(importTrigger).toBeFocused();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
   }
@@ -191,8 +195,8 @@ test("骨干录用独立于入队；成立/招新/录取→简介opt-in→荣誉
     await honor(reviewer, "approve", previous, undefined, 409);
     await reviewer.goto("/teams/honors/" + edited.id + "?view=review&team=" + teamID + "&game=" + game);
     await reviewer.getByRole("button", { name: "批准荣誉", exact: true }).click();
-    await expect(reviewer.getByRole("status")).toContainText("荣誉已批准");
-    const reviewBack = new URL((await reviewer.locator("main").getByRole("link", { name: "← 审核本社群荣誉", exact: true }).getAttribute("href"))!, "http://localhost:3000").searchParams;
+    await expect(reviewer.locator(`[data-honor-record="${edited.id}"]`).getByRole("status")).toContainText("荣誉已批准");
+    const reviewBack = new URL((await reviewer.getByRole("navigation", { name: "面包屑", exact: true }).getByRole("link", { name: "审核本社群荣誉", exact: true }).getAttribute("href"))!, browserTestOrigin).searchParams;
     expect(Object.fromEntries(reviewBack)).toEqual({ view: "review", team: String(teamID), game: String(game) });
     edited = (await (await page.request.get("/api/team-honors/" + edited.id)).json()).record;
     expect((await (await request.get(archiveURL)).json()).records).toHaveLength(2);
@@ -231,10 +235,10 @@ test("骨干录用独立于入队；成立/招新/录取→简介opt-in→荣誉
     await page.goto("/account");
     await page
       .getByRole("region", { name: "我的代表队", exact: true })
-      .getByRole("link", { name: "成员记录与入队申请 →", exact: true })
+      .getByRole("link", { name: "成员记录与入队申请", exact: true })
       .click();
     await expect(page).toHaveURL(/\/teams\/recruitment$/);
-    await expect(page.getByRole("navigation", { name: "参与方式", exact: true }).getByRole("link", { name: "骨干招新", exact: true })).toHaveAttribute("href", "/join/staff");
+    await expect(page.locator("main").getByRole("link", { name: "了解骨干招新", exact: true })).toHaveAttribute("href", "/join/staff");
   } finally { await Promise.all([highContext.close(), managerContext.close(), otherContext.close(), crossContext.close()]); }
 });
 
@@ -257,12 +261,12 @@ test("荣誉本人分页保留队伍和社群；断网与丢响应保留附件�
     const scope = `view=mine&team=${teamID}&game=${game}`, url = "/teams/honors?" + scope;
     await page.goto(url); await expect(page.locator("[data-honor-record]")).toHaveCount(8);
     const next = page.getByRole("navigation", { name: "内容分页", exact: true }).getByRole("link", { name: "下一页 →", exact: true });
-    const nextQuery = new URL((await next.getAttribute("href"))!, "http://localhost:3000").searchParams;
+    const nextQuery = new URL((await next.getAttribute("href"))!, browserTestOrigin).searchParams;
     expect(Object.fromEntries(nextQuery)).toEqual({ page: "2", view: "mine", team: String(teamID), game: String(game) });
     await next.click(); await expect(page.locator("[data-honor-record]")).toHaveCount(1);
     await page.locator("[data-honor-record] h3 a").click();
-    const back = page.locator("main").getByRole("link", { name: "← 我的荣誉记录", exact: true });
-    expect(new URL((await back.getAttribute("href"))!, "http://localhost:3000").searchParams.get("page")).toBe("2");
+    const back = page.getByRole("navigation", { name: "面包屑", exact: true }).getByRole("link", { name: "我的荣誉记录", exact: true });
+    expect(Object.fromEntries(new URL((await back.getAttribute("href"))!, browserTestOrigin).searchParams)).toEqual({ page: "2", view: "mine", team: String(teamID), game: String(game) });
     await back.click(); await expect(page.locator("[data-honor-record]")).toHaveCount(1);
     await page.goto(url.replace("game=" + game, "game=" + otherGame));
     await expect(page.locator("[data-honor-record]")).toHaveCount(0); await expect(page.locator("[data-honor-editor]")).toHaveCount(0);
@@ -283,7 +287,7 @@ test("荣誉本人分页保留队伍和社群；断网与丢响应保留附件�
     expect((await (await page.request.get("/api/team-honors?" + scope)).json()).totalDocs).toBe(9);
     await page.unroute("**/teams/honors**", abortBefore);
     await editor.getByLabel("已核对本人记录，确认本次未保存", { exact: true }).check();
-    await editor.getByRole("button", { name: "保存草稿", exact: true }).click(); await expect(page.getByRole("status")).toContainText("草稿已保存");
+    await editor.getByRole("button", { name: "保存草稿", exact: true }).click(); await expect(page.locator("main").getByRole("status").filter({ hasText: /^草稿已保存/ })).toContainText("草稿已保存");
     const savedID = Number(new URL(page.url()).pathname.split("/").pop());
     const saved = await p.findByID({ collection: "team-honor-records", id: savedID, overrideAccess: true, depth: 0 });
     expect(saved.images).toHaveLength(1); expect(saved.images).toMatchObject([{ caption: "合成断网附件保留" }]);
@@ -309,7 +313,7 @@ test("荣誉本人分页保留队伍和社群；断网与丢响应保留附件�
     await expect(editor.getByLabel("荣誉标题", { exact: true })).toHaveValue(uncertainTitle); await expect(editor.getByLabel(/新证据 1 说明/)).toHaveValue("合成丢响应附件保留");
     await page.unroute("**/teams/honors**", loseResponse);
     await editor.getByRole("combobox", { name: "所属有效代表队", exact: true }).selectOption(String(secondTeam));
-    expect(new URL((await editor.getByRole("link", { name: "查看本人荣誉记录", exact: true }).getAttribute("href"))!, "http://localhost:3000").searchParams.get("team")).toBe(String(teamID));
+    expect(new URL((await editor.getByRole("link", { name: "查看本人荣誉记录", exact: true }).getAttribute("href"))!, browserTestOrigin).searchParams.get("team")).toBe(String(teamID));
     const checkPagePromise = page.context().waitForEvent("page"); await editor.getByRole("link", { name: "查看本人荣誉记录", exact: true }).click();
     const checkPage = await checkPagePromise; await expect(checkPage.getByRole("link", { name: uncertainTitle, exact: true })).toBeVisible();
     expect((await (await page.request.get("/api/team-honors?" + scope)).json()).totalDocs).toBe(11); await checkPage.close();

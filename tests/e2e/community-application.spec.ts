@@ -1,3 +1,4 @@
+import { browserTestOrigin } from "./browser-test-origin";
 import "dotenv/config";
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
@@ -72,14 +73,14 @@ test("完整申请、备案提示、私有二维码、社长查看全部资料�
   expect(application.realName).toBe("测试申请人");
   const url = `/community/applications/${application.id}/qr`;
   expect((await request.get(url)).status()).toBe(401);
-  const ownImage = await page.request.get(url, { headers: { Origin: "http://localhost:3000" } });
+  const ownImage = await page.request.get(url, { headers: { Origin: browserTestOrigin } });
   expect(ownImage.status()).toBe(200);
   expect(ownImage.headers()["cache-control"]).toContain("no-store");
   const otherContext = await browser.newContext();
   try {
     const other = await otherContext.newPage();
     await login(other, outsider);
-    expect((await other.request.get(url, { headers: { Origin: "http://localhost:3000" } })).status()).toBe(404);
+    expect((await other.request.get(url, { headers: { Origin: browserTestOrigin } })).status()).toBe(404);
     expect((await other.goto("/community/review"))?.status()).toBe(404);
   } finally { await otherContext.close(); }
   await page.context().clearCookies();
@@ -87,24 +88,36 @@ test("完整申请、备案提示、私有二维码、社长查看全部资料�
   await page.goto("/community/review");
   const card = page.locator("article").filter({ has: page.getByRole("heading", { name: gameName, exact: true }) });
   for (const content of ["测试申请人", "13900000000", applicant.name, applicant.email]) await expect(card.getByText(content, { exact: true })).toBeVisible();
+  await card.locator("summary").filter({ hasText: /^核对微信名片$/ }).click();
   await expect(card.getByRole("img", { name: "申请人的微信名片二维码" })).toBeVisible();
-  expect(await card.locator("img").evaluate((img: HTMLImageElement) => img.naturalWidth > 0)).toBe(true);
+  await expect.poll(() => card.getByRole("img", { name: "申请人的微信名片二维码", exact: true }).evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
   await card.getByLabel("审核意见", { exact: false }).fill("请补充每周可投入的组织时间。");
   await card.getByRole("button", { name: "退回补充", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("审核结果已保存");
   await page.context().clearCookies(); await login(page, applicant);
+  const history = page.getByRole("navigation", { name: "申请记录视图", exact: true }).getByRole("link", { name: "查看全部申请", exact: true });
+  await expect(history).toHaveAttribute("href", "/account?view=history#applications-title");
+  await history.click();
+  await expect(page).toHaveURL(url => url.pathname === "/account" && url.search === "?view=history" && url.hash === "#applications-title");
+  const applicationLink = page.getByRole("region", { name: "申请记录", exact: true }).getByRole("link", { name: gameName, exact: true });
+  await expect(applicationLink).toHaveAttribute("href", `/community/apply?edit=${application.id}`);
+  await applicationLink.click();
+  await expect(page).toHaveURL(url => url.pathname === "/community/apply" && url.search === `?edit=${application.id}` && url.hash === "");
+  await expect(page.getByRole("textbox", { name: "姓名", exact: true })).toHaveValue("测试申请人");
   await page.goto("/community/apply");
-  await expect(page.getByText("处理意见：请补充每周可投入的组织时间。", { exact: true })).toBeVisible();
-  await page.getByRole("link", { name: "修改并重新提交", exact: true }).click();
+  await expect(card.getByRole("heading", { name: "处理意见", exact: true })).toBeVisible();
+  await expect(card.getByText("请补充每周可投入的组织时间。", { exact: true })).toBeVisible();
+  await expect(card.getByRole("link", { name: "修改并重新提交", exact: true })).toHaveAttribute("href", `/community/apply?edit=${application.id}`);
+  await card.getByRole("link", { name: "修改并重新提交", exact: true }).click();
   await expect(page.getByRole("textbox", { name: "姓名", exact: true })).toHaveValue("测试申请人");
   await expect(consent).toBeChecked();
   await page.getByLabel("申请说明", { exact: false }).fill("每周投入三小时，组织游戏交流并人工联系和拉群。");
   await page.getByRole("button", { name: "修改并重新提交", exact: true }).click();
   await expect(page.getByRole("heading", { name: "申请已提交" })).toBeVisible();
   await page.getByRole("button", { name: "撤回网站申请", exact: true }).click();
-  await expect(page.getByRole("status").first()).toContainText("网站申请已撤回");
+  await expect(page.getByRole("status").filter({ hasText: "网站申请已撤回" })).toHaveText("网站申请已撤回，微信联系不受此操作影响。");
   await page.getByRole("link", { name: "修改并重新提交", exact: true }).click();
   await page.getByRole("button", { name: "修改并重新提交", exact: true }).click();
   await expect(page.getByRole("heading", { name: "申请已提交" })).toBeVisible();
@@ -119,11 +132,12 @@ test("完整申请、备案提示、私有二维码、社长查看全部资料�
   expect((await p.findByID({ collection: "users", id: applicant.id, overrideAccess: true })).roles).toEqual(["member"]);
   await page.context().clearCookies(); await login(page, applicant);
   await page.goto("/community/apply");
+  await card.locator("summary").filter({ hasText: /^管理我的联系名片$/ }).click();
   await card.getByRole("checkbox", { name: "我同意展示我的微信名片作为进群联系方式", exact: true }).uncheck();
   await card.getByRole("button", { name: "保存名片与展示设置", exact: true }).click();
-  await expect(page.getByRole("status").first()).toContainText("名片及展示设置已更新");
+  await expect(page.getByRole("status").filter({ hasText: "名片及展示设置已更新" })).toHaveText("名片及展示设置已更新。");
   const created = await p.findByID({ collection: "games", id: game, overrideAccess: true });
-  expect(await (await page.request.get(`/community/${created.slug}/contacts`, { headers: { Origin: "http://localhost:3000" } })).json()).toEqual([]);
+  expect(await (await page.request.get(`/community/${created.slug}/contacts`, { headers: { Origin: browserTestOrigin } })).json()).toEqual([]);
 });
 
 test("无效二维码被拒绝并保留填写资料", async ({ page }) => {
@@ -146,9 +160,9 @@ test("历史false或缺失授权不可批准，退回后本人明确同意再重
   test.skip(database.hostname !== '127.0.0.1' || database.port !== '40071' || database.pathname !== '/community_contact_consent_web_qa_synthetic', 'Legacy SQL fixture is limited to the explicitly authorized fresh synthetic web database.');
   const proposedGame = gameName + '-legacy';
   await login(page, applicant); await page.goto('/community/apply');
-  await page.getByLabel('姓名', { exact: true }).fill('合成历史申请人');
-  await page.getByLabel('手机号', { exact: true }).fill('13900000000');
-  await page.getByLabel('微信名片二维码', { exact: true }).setInputFiles({ name: 'legacy.png', mimeType: 'image/png', buffer: qr });
+  await page.getByRole('textbox', { name: '姓名', exact: true }).fill('合成历史申请人');
+  await page.getByRole('textbox', { name: '手机号', exact: true }).fill('13900000000');
+  await page.getByLabel(/^微信名片二维码（(?:必填|更换时上传)）$/).setInputFiles({ name: 'legacy.png', mimeType: 'image/png', buffer: qr });
   await page.getByLabel('新游戏名称', { exact: false }).fill(proposedGame);
   await page.getByLabel('申请说明', { exact: false }).fill('合成历史申请，验证必须由申请人本人补充同意。');
   const consent = page.locator('form.application-form').getByRole('checkbox', { name: '我同意展示我的微信名片作为进群联系方式', exact: true });
@@ -180,7 +194,7 @@ test("历史false或缺失授权不可批准，退回后本人明确同意再重
     await page.context().clearCookies(); await login(page, applicant);
     await page.goto('/community/apply?edit=' + saved.id);
     await expect(consent).not.toBeChecked();
-    await expect(page.getByLabel('姓名', { exact: true })).toHaveValue('合成历史申请人');
+    await expect(page.getByRole('textbox', { name: '姓名', exact: true })).toHaveValue('合成历史申请人');
     await page.getByRole('button', { name: '修改并重新提交', exact: true }).click();
     await expect(page.locator('form.application-form').getByRole('alert')).toHaveText('由于入社流程规定，必须展示管理联系方式');
     await expect(consent).toHaveAccessibleDescription(/由于入社流程规定，必须展示管理联系方式/);

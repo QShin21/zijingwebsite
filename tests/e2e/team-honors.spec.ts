@@ -1,3 +1,4 @@
+import { browserTestOrigin } from "./browser-test-origin";
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
 import sharp from "sharp";
@@ -181,6 +182,27 @@ test.beforeAll(async () => {
 });
 test.afterAll(async () => {
   if (!p) return;
+  // A server action can create a record before navigation or a receipt assertion
+  // fails. Discover only this run's team and seeded authors before removing its
+  // authority chain, so cleanup also covers an interrupted browser response.
+  if (chain) {
+    const created = await p.find({
+      collection: "team-honor-records",
+      overrideAccess: true,
+      depth: 0,
+      pagination: false,
+      where: {
+        and: [
+          { team: { equals: chain.team.id } },
+          { game: { equals: game } },
+          { author: { in: [...chain.memberships.keys()] } },
+        ],
+      },
+      select: { team: true },
+    });
+    for (const row of created.docs)
+      if (!records.includes(row.id)) records.push(row.id);
+  }
   if (records.length) {
     await p.delete({
       collection: "audit",
@@ -647,7 +669,7 @@ test("私有详情与原始 REST 守住社群边界，网页退回/拒绝需说�
     expect(
       (
         await outsider.request.get("/api/team-honor-records/" + pending.id, {
-          headers: { Origin: "http://localhost:3000" },
+          headers: { Origin: browserTestOrigin },
         })
       ).status(),
     ).toBe(404);
@@ -657,7 +679,7 @@ test("私有详情与原始 REST 守住社群边界，网页退回/拒绝需说�
     expect(
       (
         await page.request.patch("/api/team-honor-records/" + pending.id, {
-          headers: { Origin: "http://localhost:3000" },
+          headers: { Origin: browserTestOrigin },
           data: {
             state: "approved",
             context: { honorWrite: true, teamHonorWriteToken: {} },
@@ -688,13 +710,17 @@ test("私有详情与原始 REST 守住社群边界，网页退回/拒绝需说�
       "荣誉已隐藏",
     );
     await page.goto("/community/" + slug + "/showcase/team-honors/" + team);
-    await page.getByLabel("隐藏历史荣誉说明").fill("合成历史荣誉隐藏说明");
-    await page
+    const legacyRecord = page.getByRole("article").filter({
+      has: page.getByRole("heading", { name: "合成历史荣誉网页", exact: true }),
+    });
+    await legacyRecord.locator("summary").filter({ hasText: /^管理这项历史荣誉$/ }).click();
+    await legacyRecord.getByLabel("隐藏历史荣誉说明").fill("合成历史荣誉隐藏说明");
+    await legacyRecord
       .getByRole("button", { name: "隐藏历史荣誉", exact: true })
       .click();
     await expect(page).toHaveURL(/\/teams\/honors\?/);
     await expect(
-      page.locator('main .community-page > [role="status"]'),
+      page.locator("main").getByRole("status").filter({ hasText: "历史荣誉已撤下" }),
     ).toContainText("历史荣誉已撤下");
     expect(new URL(page.url()).searchParams.get("team")).toBe(String(team));
     expect(new URL(page.url()).searchParams.get("game")).toBe(String(game));
@@ -723,15 +749,33 @@ test("真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/�
     await login(page, player);
     await login(reviewPage, reviewer);
     await page.goto("/teams/honors?view=mine");
-    const receipt = page.locator('main .community-page > [role="status"]');
+    const receipt = page.locator("main").getByRole("status").filter({
+      hasText: /^(草稿已保存|荣誉已提交)/,
+    });
     let editor = page.locator("[data-honor-editor]");
     await editor
       .getByLabel("荣誉标题", { exact: true })
       .fill("合成完整网页荣誉流程");
     await editor.getByRole("button", { name: "保存草稿", exact: true }).click();
-    await expect(receipt).toContainText("草稿已保存");
+    await page.waitForURL((url) => /^\/teams\/honors\/\d+$/.test(url.pathname));
     const id = Number(new URL(page.url()).pathname.split("/").pop());
+    expect(Number.isSafeInteger(id) && id > 0).toBe(true);
     records.push(id);
+    const savedDraft = await p.findByID({
+      collection: "team-honor-records",
+      id,
+      user: player,
+      overrideAccess: false,
+      depth: 0,
+    });
+    expect(savedDraft).toMatchObject({
+      team,
+      game,
+      author: player.id,
+      title: "合成完整网页荣誉流程",
+      state: "draft",
+    });
+    await expect(receipt).toContainText("草稿已保存");
     const detail = "/teams/honors/" + id;
     const record = page.locator(`[data-honor-record="${id}"]`);
     const reviewRecord = reviewPage.locator(`[data-honor-record="${id}"]`);

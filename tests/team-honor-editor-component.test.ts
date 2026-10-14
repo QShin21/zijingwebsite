@@ -3,7 +3,7 @@ import { runInNewContext } from "node:vm";
 import { createRequire } from "node:module";
 import { isValidElement, type ReactElement } from "react";
 import ts from "typescript";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 type Values = Record<string, unknown>;
 type Element = ReactElement<Values>;
@@ -31,14 +31,32 @@ function text(value: unknown): string {
 }
 const picture = (name = "synthetic.png", size = 10, type = "image/png") =>
   new File([new Uint8Array(size)], name, { type });
+const unmounts = new Set<() => void>();
+afterEach(() => {
+  for (const unmount of unmounts) unmount();
+  unmounts.clear();
+});
 
 // Run the shipped TSX action and controlled fields with a synthetic hook boundary.
 // This does not replace browser or backend media-ACL tests.
 function harness(existingImages = 0) {
   const slots: unknown[] = [],
     effects: (() => void)[] = [];
+  const effectSlots = new Map<
+    number,
+    { dependencies: unknown[]; cleanup?: () => void }
+  >();
   let cursor = 0,
-    tree: unknown;
+    tree: unknown,
+    needsRender = false,
+    nextObjectURL = 0;
+  const focus = vi.fn();
+  const objectURLs = {
+    createObjectURL: vi.fn((_file: File) =>
+      `blob:synthetic-team-honor-${++nextObjectURL}`,
+    ),
+    revokeObjectURL: vi.fn(),
+  };
   const save = vi
     .fn<(previous: Values, data: FormData) => Promise<Values>>()
     .mockResolvedValue({ error: "合成服务拒绝" });
@@ -50,20 +68,38 @@ function harness(existingImages = 0) {
     },
     useState(value: unknown) {
       const index = cursor++;
-      if (slots[index] === undefined) slots[index] = value;
+      if (!(index in slots))
+        slots[index] = typeof value === "function" ? value() : value;
       return [
         slots[index],
         (next: unknown) => {
-          slots[index] = typeof next === "function" ? next(slots[index]) : next;
+          const value = typeof next === "function" ? next(slots[index]) : next;
+          if (!Object.is(value, slots[index])) {
+            slots[index] = value;
+            needsRender = true;
+          }
         },
       ];
     },
-    useEffect(callback: () => void, dependencies: unknown[]) {
+    useEffect(callback: () => void | (() => void), dependencies: unknown[]) {
       const index = cursor++,
-        previous = slots[index] as unknown[] | undefined;
-      if (!previous || dependencies.some((value, i) => value !== previous[i]))
-        effects.push(callback);
-      slots[index] = dependencies;
+        previous = effectSlots.get(index);
+      if (
+        !previous ||
+        dependencies.length !== previous.dependencies.length ||
+        dependencies.some(
+          (value, i) => !Object.is(value, previous.dependencies[i]),
+        )
+      ) {
+        effects.push(() => {
+          previous?.cleanup?.();
+          const cleanup = callback();
+          effectSlots.set(index, {
+            dependencies,
+            cleanup: typeof cleanup === "function" ? cleanup : undefined,
+          });
+        });
+      }
     },
     useActionState(
       callback: (state: Values, data: FormData) => Promise<Values>,
@@ -85,13 +121,14 @@ function harness(existingImages = 0) {
     react: hooks,
     "next/navigation": { unstable_rethrow: vi.fn() },
     "@/app/(frontend)/teams/honors/actions": { saveTeamHonorAction: save },
-    "@/app/(frontend)/_club/ClubPages.module.css": {},
+    "./team-pages/TeamPages.module.css": {},
   };
   runInNewContext(compiled, {
     exports,
     require: (name: string) => dependencies[name] ?? require(name),
     FormData,
     File,
+    URL: objectURLs,
     URLSearchParams,
   });
   const component = exports.TeamHonorEditor as (props: Values) => unknown;
@@ -108,24 +145,36 @@ function harness(existingImages = 0) {
       }
     : undefined;
   function find(predicate: (value: Element) => boolean) {
-    const result = elements(tree).find(predicate);
+    const matches = elements(tree).filter(predicate);
+    expect(matches).toHaveLength(1);
+    const result = matches[0];
     expect(result).toBeDefined();
     return result!;
   }
   function render() {
-    cursor = 0;
-    tree = component({
-      record,
-      memberships: [
-        {
-          id: 7,
-          team: 22,
-          teamInfo: { gameTitle: "合成社群", title: "合成代表队" },
-        },
-      ],
-      returnQuery: "team=22&game=24",
-    });
-    effects.splice(0).forEach((effect) => effect());
+    let renders = 0;
+    do {
+      cursor = 0;
+      needsRender = false;
+      tree = component({
+        record,
+        memberships: [
+          {
+            id: 7,
+            team: 22,
+            teamInfo: { gameTitle: "合成社群", title: "合成代表队" },
+          },
+        ],
+        returnQuery: "team=22&game=24",
+      });
+      for (const node of elements(tree)) {
+        const ref = node.props.ref as { current: unknown } | undefined;
+        if (ref && !ref.current) ref.current = { focus, value: "" };
+      }
+      effects.splice(0).forEach((effect) => effect());
+      if (++renders > 20)
+        throw new Error("Honor editor VM render did not settle");
+    } while (needsRender);
   }
   function change(name: string, value: string) {
     (
@@ -173,7 +222,9 @@ function harness(existingImages = 0) {
     )(data);
     render();
   }
-  render();
+  unmounts.add(() => {
+    for (const effect of effectSlots.values()) effect.cleanup?.();
+  });
   render();
   return {
     save,
@@ -183,6 +234,13 @@ function harness(existingImages = 0) {
     select,
     check,
     submit,
+    ownRecordsLink: () =>
+      find(
+        (node) =>
+          node.type === "a" &&
+          node.props.target === "_blank" &&
+          text(node) === "查看本人荣誉记录",
+      ),
     getTree: () => tree,
   };
 }
@@ -286,7 +344,7 @@ describe("荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界"
       h.find((node) => node.type === "button" && node.props.value === "submit")
         .props.disabled,
     ).toBe(true);
-    expect(h.find((node) => node.type === "a").props.href).toContain("team=22");
+    expect(h.ownRecordsLink().props.href).toContain("team=22");
     const confirmation = h.find(
       (node) =>
         node.type === "input" &&
@@ -328,7 +386,7 @@ describe("荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界"
       h.find((node) => node.type === "button" && node.props.value === "submit")
         .props.disabled,
     ).toBe(true);
-    expect(h.find((node) => node.type === "a").props.href).toContain(
+    expect(h.ownRecordsLink().props.href).toContain(
       "view=mine",
     );
     await h.submit();

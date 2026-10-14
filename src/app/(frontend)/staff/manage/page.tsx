@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import type { User } from "@/payload-types";
 import type { Answers, Question } from "@/lib/signup-schema";
 import { cms } from "@/lib/content";
 import { canManageStaffRecruitment, formatDate } from "@/lib/rules";
@@ -18,9 +20,9 @@ import { StaffBatchEditor } from "@/components/StaffBatchEditor";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Pagination } from "@/components/Content";
 import { reviewStaffApplicationAction } from "./actions";
-export default async function Manage({
-  searchParams,
-}: {
+import ManageLoading from "./_loading";
+
+type Props = {
   searchParams: Promise<{
     batch?: string;
     department?: string;
@@ -28,10 +30,25 @@ export default async function Manage({
     page?: string;
     message?: string;
   }>;
-}) {
+};
+
+export default async function Manage({ searchParams }: Props) {
   const p = await cms(),
     { user } = await p.auth({ headers: await headers() });
   if (!canManageStaffRecruitment(user)) notFound();
+  // Resolve access before streaming a fallback so denied requests retain 404.
+  return (
+    <Suspense fallback={<ManageLoading />}>
+      <ManageWorkspace p={p} user={user} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function ManageWorkspace({
+  p,
+  user,
+  searchParams,
+}: Props & { p: Awaited<ReturnType<typeof cms>>; user: User | null }) {
   const query = await searchParams,
     batches = await p.find({
       collection: "staff-batches",
@@ -125,7 +142,7 @@ export default async function Manage({
             管理范围：骨干招新，社长／副社长。本人反馈可供申请者查看，内部备注仅管理层可见。
           </p>
           {id && (
-            <Link
+            <a
               className="button light"
               href={
                 "/api/staff/batches/" +
@@ -135,7 +152,7 @@ export default async function Manage({
               }
             >
               导出当前筛选答卷 CSV
-            </Link>
+            </a>
           )}
         </div>
         {!data?.result.docs.length && (
