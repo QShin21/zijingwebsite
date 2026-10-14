@@ -1,0 +1,34 @@
+{
+  "recordedAt": "2026-10-14T04:43:55.844337+00:00",
+  "sourceCommit": "e9a8daa2ce5750dff1465e4a6b63036fde4af87d",
+  "runID": 38512641163,
+  "runURL": "https://github.com/QShin21/zijingwebsite/actions/runs/38512641163",
+  "jobID": 115684400545,
+  "jobName": "quality",
+  "status": "completed",
+  "conclusion": "failure",
+  "classification": "account billing or spending limit blocked the runner before execution",
+  "annotationExcerpt": "recent account payments have failed or your spending limit needs to be increased",
+  "runnerID": 0,
+  "steps": [],
+  "testsExecuted": false,
+  "buildExecuted": false,
+  "logFailedCommandExitCode": 0,
+  "logFailedOutputBytes": 0,
+  "noBillingChange": true,
+  "noManualRerun": true,
+  "rawEvidence": {
+    "ci-design-checkpoint-20261014.json": {
+      "path": "/workspace/qa-zijing/ci-design-checkpoint-20261014.json",
+      "sha256": "c8753ccaf2dfa0765ee6d9dc3b35498c99298cb36ea87b654a40b39499d867a3"
+    },
+    "ci-design-checkpoint-jobs-20261014.json": {
+      "path": "/workspace/qa-zijing/ci-design-checkpoint-jobs-20261014.json",
+      "sha256": "04ce705afcf3a73842e997ea518d093f2fc64a96bc6b2cf1304a084a42a2d37e"
+    },
+    "ci-design-checkpoint-annotations-20261014.json": {
+      "path": "/workspace/qa-zijing/ci-design-checkpoint-annotations-20261014.json",
+      "sha256": "9994293c90fa7b98b55484c8dfd5263dfbc9c5a4ae4d53782cb53f38a4aaa5fe"
+    }
+  }
+}

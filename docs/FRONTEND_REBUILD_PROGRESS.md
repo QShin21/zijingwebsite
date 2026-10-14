@@ -266,3 +266,12 @@ node /workspace/zijingwebsite/node_modules/next/dist/bin/next start \
 Sol 优先处理：本轮新结构的完整提交/回执/失败保值与稳定导航，荣誉 revision/私媒/退回重审，队伍成员与离队撤权，匿名与多角色直访，默认主题/持久化/登录返回，以及所有旧 UI 定位是否仍对应同一行为。不能用截图代替 ACL，也不能用旧 4733/0a7 的通过或失败推定新版本结果。
 
 当前可交付为 Astra 实施检查点，下一步交 Sol max 正式验收。已知 HTTP 404 响应差异若需源码修复，再给 Astra 明确复现；荣誉永久私有凭证、简介逐字段私密等后端能力差异应单列兼容方案，不自行扩权。保护 `main/littleapp`，仅正常提交推送 `new`，无生产、CMS 或微信发布。
+
+
+### 推送回执与精确提交 CI · 2026-10-14 04:44 UTC
+
+实质源码检查点 **`e9a8daa2ce5750dff1465e4a6b63036fde4af87d`** 已正常推送 `origin/new`。205 文件改动；623 个最终输入逐文件与此 Git 提交比对一致，源码清单仍为 `c954fd88…`，工作区当时干净。远端 `main/littleapp` 均仍为 `e366f3c6538e6c63c9f13fc183e26c32ce58cf11`。
+
+此精确提交的 [CI 38512641163](https://github.com/QShin21/zijingwebsite/actions/runs/38512641163) 已 completed/failure，但 quality job `115684400545` 的 **runner_id=0、steps 为空**。GitHub annotation 明确提示账户付款失败或 spending limit 需要处理，任务未开始。读取失败日志命令退出 0、输出为空，符合没有执行步骤；不能把该结果归因为源码构建/测试失败，也不能把本地检查说成 CI 通过。
+
+[CI 阻塞证据](evidence/frontend-design-ci-blocked-20261014.json) 保存实际 run/job/annotation 摘要与原始证据校验值。未调整账单、购买额度或重复触发工作流；账户负责人处理后再对该源码版本运行质量任务。后续这份纯文档回执使用 `[skip ci]` 提交，业务源码与已验证的最终构建完全相同。Sol 的本地完整验收可继续，不以 CI 账户阻塞代替本地测试。
