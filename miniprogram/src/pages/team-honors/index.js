@@ -6,6 +6,12 @@ const honor = require('../../lib/team-honor');
 const session = require('../../lib/session');
 const navigation = require('../../lib/navigation');
 const identity = () => String((session.user() || {}).id || '');
+function archiveRows(records) {
+  return records.map(record => {
+    const date = /^(\d{4})-(\d{2})-(\d{2})/.exec(record.dateText || '');
+    return { ...record, archiveYear: date ? date[1] : '', archiveDate: date ? date[2] + '.' + date[3] : record.dateText || '日期待补充' };
+  });
+}
 Page(withVisualTheme({
   data: { loading: false, error: '', needsLogin: false, team: null, records: [], previewImages: [], loaded: false },
   onLoad(options = {}) {
@@ -57,13 +63,13 @@ Page(withVisualTheme({
       try {
         const archive = await honor.load(team);
         if (!this.valid(ticket, team, account)) return;
-        this.setData({ loading: false, loaded: true, team: archive.team, records: archive.records.map(record => ({ ...record, images: [] })) });
+        this.setData({ loading: false, loaded: true, team: archive.team, records: archiveRows(archive.records.map(record => ({ ...record, images: [] }))) });
         if (archive.team.title) wx.setNavigationBarTitle({ title: archive.team.title + ' · 荣誉档案' });
         const records = await Promise.all(archive.records.map(record => honor.pictures(record)));
         const paths = records.reduce((all, record) => all.concat(record.localImages.map(image => image.url)), []);
         if (!this.valid(ticket, team, account)) { honor.removePictures(paths); return; }
         this._pictures = paths;
-        this.setData({ records, previewImages: paths });
+        this.setData({ records: archiveRows(records), previewImages: paths });
       } catch (cause) {
         if (!this.valid(ticket, team, account)) return;
         if (cause && cause.status === 404) this.setData({ loading: false, loaded: true, error: '', records: [], team: null, previewImages: [] });

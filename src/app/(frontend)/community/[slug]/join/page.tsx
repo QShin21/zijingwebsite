@@ -4,8 +4,9 @@ import { cms, bySlug } from "@/lib/content";
 import { communityContacts } from "@/lib/community-contacts";
 import { CommunityJoinFlow } from "@/components/CommunityJoinFlow";
 import { canParticipate } from "@/lib/rules";
-import { ClubFrame, ClubSteps } from "../../../_club/ClubPage";
-import styles from "../../../_club/ClubPages.module.css";
+import { ClubFrame } from "../../../_club/ClubPage";
+import { CommunityPageHeader } from "@/components/community-pages/CommunityPages";
+import styles from "@/components/community-pages/CommunityPages.module.css";
 export default async function Join({
   params,
 }: {
@@ -39,23 +40,10 @@ export default async function Join({
       })
     ).docs[0] ?? null;
   return (
-    <ClubFrame className={styles.communityBody}>
-      <ClubSteps
-        label="人工进群流程"
-        steps={[
-          {
-            title: "联系在任管理员",
-            description: "查看微信名片，记录网站加入意向。",
-          },
-          {
-            title: "在微信中加好友",
-            description: "备注昵称和社群，等待管理员回复。",
-          },
-          {
-            title: "人工拉群与确认",
-            description: "由管理员操作并更新网站进度。",
-          },
-        ]}
+    <ClubFrame className={`${styles.page} ${styles.body}`}>
+      <CommunityPageHeader
+        title="我的进群进度"
+        description="联系管理员，在微信中加好友与等待人工拉群。网站记录你的意向和管理员的确认进度。"
       />
       <CommunityJoinFlow
         game={game.id}

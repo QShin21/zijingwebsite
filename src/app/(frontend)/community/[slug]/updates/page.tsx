@@ -6,9 +6,12 @@ import { managesGame, formatDate } from "@/lib/rules";
 import { CommunityPager, pageNumber } from "@/components/CommunityPager";
 import { CommunityActivityComposer } from "@/components/CommunityActivityComposer";
 import { StaffRecruitmentNotice } from "@/components/StaffRecruitmentNotice";
-import { EmptyState } from "@/components/activity-pages/PublicPages";
+import {
+  CommunityEmpty,
+  CommunityPageHeader,
+} from "@/components/community-pages/CommunityPages";
 import { ClubFrame } from "../../../_club/ClubPage";
-import styles from "../../../_club/ClubPages.module.css";
+import styles from "@/components/community-pages/CommunityPages.module.css";
 
 export default async function Updates({
   params,
@@ -42,57 +45,72 @@ export default async function Updates({
     },
   });
   return (
-    <ClubFrame className={styles.communityBody}><section className="community-page">
-      <header className={styles.subHeader}>
-        <div>
-          <p className={styles.kicker}>社群日程</p>
-          <h2>活动与通知</h2>
-          <p>查看本社群的活动安排与参与说明，找到下一次相聚的机会。</p>
-        </div>
-      </header>
+    <ClubFrame className={`${styles.page} ${styles.body}`}>
+      <CommunityPageHeader
+        title="活动与通知"
+        description="社群的近期安排、参与方式与日常通知。"
+        action={
+          managesGame(user, game.id) ? (
+            <a className="button light" href="#publish-community-update">
+              发布活动与通知
+            </a>
+          ) : undefined
+        }
+      />
       <p role="status">{query.message}</p>
       <StaffRecruitmentNotice />
-      <ul className={styles.readingList}>
-        {entries.docs.map((post) => (
-          <li key={post.id}>
-            <div className={styles.recordDate}>
-              {formatDate(post.createdAt)}
-            </div>
-            <div>
-              <span className={styles.status}>
-                {post.category === "event" ? "社群活动" : "社群通知"}
-              </span>
-              <h3>
-                <Link href={`/community/${slug}/updates/${post.id}`}>
-                  {post.title}
-                </Link>
-              </h3>
-              <p className="community-excerpt">{post.body}</p>
-              <Link href={`/community/${slug}/updates/${post.id}`}>
-                阅读全文 ↗
-              </Link>
-            </div>
-          </li>
-        ))}
-      </ul>
-      {!entries.docs.length && (
-        <EmptyState title="暂无活动与通知">
-          <p>
-            社群的活动安排发布后会在这里展示。你也可以查看已公开的社群风采。
-          </p>
-          <Link className="button light" href={`/community/${slug}/showcase`}>
-            查看社群风采
-          </Link>
-        </EmptyState>
-      )}
-      <CommunityPager
-        page={page}
-        pages={entries.totalPages}
-        base={`/community/${slug}/updates`}
-      />
+      <div className={styles.contentWorkspace}>
+        <section aria-label="社群活动与通知列表">
+          <ul className={styles.readingList}>
+            {entries.docs.map((post) => (
+              <li className={styles.readingRow} key={post.id}>
+                <div className={styles.date}>
+                  <time dateTime={post.createdAt}>
+                    {formatDate(post.createdAt)}
+                  </time>
+                  <span>
+                    {post.category === "event" ? "社群活动" : "社群通知"}
+                  </span>
+                </div>
+                <div>
+                  <h2>
+                    <Link href={`/community/${slug}/updates/${post.id}`}>
+                      {post.title}
+                    </Link>
+                  </h2>
+                  <p className={styles.excerpt}>{post.body}</p>
+                  <Link href={`/community/${slug}/updates/${post.id}`}>
+                    {post.category === "event" ? "查看活动与报名" : "阅读通知"}
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+          {!entries.docs.length && (
+            <CommunityEmpty title="暂无活动与通知">
+              <p>
+                社群的活动安排发布后会在这里展示。你也可以查看已公开的社群风采。
+              </p>
+              <Link href={`/community/${slug}/showcase`}>查看社群风采</Link>
+            </CommunityEmpty>
+          )}
+          <CommunityPager
+            page={page}
+            pages={entries.totalPages}
+            base={`/community/${slug}/updates`}
+          />
+        </section>
+        <aside className={styles.publishAside}>
+          <h2>找到一起参与的同学</h2>
+          <p>联系管理员申请加入微信群，在社群里了解日常安排与交流方式。</p>
+          <Link href={`/community/${slug}/join`}>联系与进群进度</Link>
+        </aside>
+      </div>
       {managesGame(user, game.id) && (
-        <CommunityActivityComposer game={game.id} />
+        <section id="publish-community-update" className={styles.section}>
+          <CommunityActivityComposer game={game.id} />
+        </section>
       )}
-    </section></ClubFrame>
+    </ClubFrame>
   );
 }

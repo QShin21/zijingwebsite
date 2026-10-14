@@ -1,7 +1,12 @@
-.profile { display: flex; align-items: center; gap: 24rpx; }
-.avatar { display: flex; align-items: center; justify-content: center; width: 108rpx; height: 108rpx; flex-shrink: 0; border-radius: 14rpx; background: var(--z-secondary-bg); color: var(--z-primary); font-size: 44rpx; font-weight: 600; }
+.account-heading { border-bottom: 2rpx solid var(--z-text); }
+.account-tasks { margin-top: 24rpx; }
+.account-login { padding: 26rpx; background: var(--z-surface); border: 1rpx solid var(--z-line); border-radius: 12rpx; }
+.account-login > .muted { margin-top: 12rpx; }
+.profile { display: flex; align-items: center; gap: 22rpx; padding-top: 22rpx; }
+.avatar { display: flex; align-items: center; justify-content: center; width: 88rpx; height: 88rpx; flex-shrink: 0; border-radius: 12rpx; background: var(--z-secondary-bg); color: var(--z-primary); font-size: 34rpx; font-weight: 600; }
 .profile-main { flex: 1; min-width: 0; }
-.profile-name { display: block; font-size: 33rpx; font-weight: 600; }
+.profile-name { display: block; font-size: 32rpx; font-weight: 600; }
 .profile-email { word-break: break-all; }
-.profile-refresh { display: flex; gap: 16rpx; align-items: center; margin-top: 24rpx; }
-.theme-picker { border-top: 1rpx solid var(--z-line); padding-top: 32rpx; }
+.profile-refresh { display: flex; gap: 16rpx; align-items: center; margin-top: 20rpx; }
+.theme-picker { padding-top: 28rpx; border-top: 1rpx solid var(--z-line); }
+.theme-picker-help { margin-top: 12rpx; }

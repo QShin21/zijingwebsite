@@ -1,1 +1,4 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
+@import "../../templates/business.wxss";
+.team-apply-page .team-application-editor { margin-top: 24rpx; }
+.team-apply-page textarea { min-height: 320rpx; }
+.team-apply-page .form-footer > .primary { margin-top: 20rpx; }

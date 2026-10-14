@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   emptyTeamProfile,
+  safeTeamProfileAvatar,
   type OwnTeamProfile,
   type TeamProfileDraft,
   type TeamProfilesView,
@@ -37,11 +38,17 @@ export function TeamProfilesPanel({
   const fileInput = useRef<HTMLInputElement>(null);
   const editButton = useRef<HTMLButtonElement>(null),
     nicknameInput = useRef<HTMLInputElement>(null),
-    focusTarget = useRef<"entry" | "name" | null>(null);
+    previewTitle = useRef<HTMLHeadingElement>(null),
+    focusTarget = useRef<"entry" | "name" | "preview" | null>(null);
 
   useEffect(() => {
     if (!focusTarget.current) return;
-    const control = focusTarget.current === "entry" ? editButton.current : nicknameInput.current;
+    const control =
+      focusTarget.current === "entry"
+        ? editButton.current
+        : focusTarget.current === "preview"
+          ? previewTitle.current
+          : nicknameInput.current;
     control?.focus();
     focusTarget.current = null;
   }, [editing, preview]);
@@ -205,190 +212,271 @@ export function TeamProfilesPanel({
   function review(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    focusTarget.current = "preview";
     setPreview(true);
   }
   const editable = Boolean(view?.own.eligible) && !locked;
+  const roster = !loading && view && (
+    <section className={styles.roster} aria-label="已选择展示的队员简介">
+      {startEditing && (
+        <div className={styles.heading}>
+          <h2>队伍公开成员</h2>
+          <p className={styles.note}>本人明确选择展示的昵称与介绍</p>
+        </div>
+      )}
+      {view.profiles.length ? (
+        <div className={styles.grid}>
+          {view.profiles.map((profile) => (
+            <TeamProfileCard key={profile.id} profile={profile} />
+          ))}
+        </div>
+      ) : (
+        <p className={styles.empty}>暂无选择展示的队员简介。</p>
+      )}
+      {!view.own.eligible && (
+        <p className={styles.note}>
+          通过入队审核且仍在队后，可以填写自己的队内简介。
+        </p>
+      )}
+    </section>
+  );
   return (
     <section
       id="team-members"
-      className={`panel ${styles.panel}`}
+      className={styles.panel}
       aria-labelledby={`team-profiles-title-${teamID}`}
       aria-busy={loading || busy}
     >
       <div className={styles.heading}>
         <div>
-          <p className="eyebrow">队员档案</p>
-          <h2 id={`team-profiles-title-${teamID}`}>队员简介</h2>
+          <h2 id={`team-profiles-title-${teamID}`}>
+            {startEditing ? "我的队内简介" : "队员简介"}
+          </h2>
+          <p className={styles.note}>
+            {startEditing
+              ? "填写资料、预览内容，再确认本次展示选择。"
+              : "展示仍在队且选择公开的成员资料。昵称与介绍由本人填写。"}
+          </p>
         </div>
         {editable && !editing && (
           <button
             ref={editButton}
             type="button"
             className="button light"
-            onClick={() => { focusTarget.current = "name"; setEditing(true); }}
+            onClick={() => {
+              focusTarget.current = "name";
+              setEditing(true);
+            }}
           >
             编辑我的队内简介
           </button>
         )}
       </div>
-      <p className={styles.note}>
-        展示仍在队且选择公开的成员资料。昵称与介绍由本人填写。
-      </p>
       {loading && <p role="status">正在加载队员简介…</p>}
       {error && (
         <p className={styles.error} role="alert">
           {error}
         </p>
       )}
-      {message && <p role="status">{message}</p>}
-      {!loading && view && (
-        <>
-          {view.profiles.length ? (
-            <div className={styles.grid}>
-              {view.profiles.map((profile) => (
-                <TeamProfileCard key={profile.id} profile={profile} />
-              ))}
-            </div>
-          ) : (
-            <p className={styles.empty}>暂无选择展示的队员简介。</p>
-          )}
-          {!view.own.eligible && (
-            <p className={styles.note}>
-              通过入队审核且仍在队后，可以填写自己的队内简介。
-            </p>
-          )}
-        </>
+      {message && (
+        <div className={styles.saved} role="status">
+          <strong>{message}</strong>
+          <p>当前展示选择已保存，可在下方名单核对。</p>
+        </div>
       )}
+      {!startEditing && roster}
       {!loading && error && (
-        <button
-          type="button"
-          className="button light"
-          disabled={busy}
-          onClick={() => setReloadKey((key) => key + 1)}
-        >
-          重新加载已保存资料
-        </button>
+        <div className={styles.actions}>
+          <button
+            type="button"
+            className="button light"
+            disabled={busy}
+            onClick={() => setReloadKey((key) => key + 1)}
+          >
+            重新加载已保存资料
+          </button>
+        </div>
       )}
       {editing && (editable || locked) && (
         <div className={styles.editor}>
-          <h3>我的队内简介</h3>
-          <p className={styles.note}>
-            请使用公开昵称。无需填写真实姓名、学号、联系方式或报名作答。
-          </p>
-          <form className="member-form" onSubmit={review}>
-            <fieldset disabled={busy || locked} className={styles.fields}>
-              <label>
-                公开昵称
-                <input
-                  ref={nicknameInput}
-                  value={draft.displayName}
-                  onChange={(event) =>
-                    change("displayName", event.target.value)
-                  }
-                  maxLength={40}
-                  required
-                  autoComplete="off"
-                />
-              </label>
-              <label>
-                位置 / 游戏角色（可选）
-                <input
-                  value={draft.position}
-                  onChange={(event) => change("position", event.target.value)}
-                  maxLength={60}
-                  autoComplete="off"
-                />
-              </label>
-              <label>
-                简短介绍（可选）
-                <textarea
-                  value={draft.biography}
-                  onChange={(event) => change("biography", event.target.value)}
-                  aria-describedby={`team-profile-bio-count-${teamID}`}
-                  maxLength={400}
-                  rows={4}
-                />
-              </label>
-              <p id={`team-profile-bio-count-${teamID}`} className={styles.note}>已填写 {draft.biography.length} / 400 字</p>
-              <label>
-                头像（可选）
-                <input
-                  ref={fileInput}
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  onChange={(event) => void avatar(event.target.files?.[0])}
-                />
-              </label>
-              <p className={styles.note}>
-                使用 2 MB 以内的静态 PNG、JPEG 或 WebP。请选择获准展示的头像。
-              </p>
-              {draft.avatar && (
-                <button
-                  type="button"
-                  className="button light"
-                  onClick={() => {
-                    change("avatar", null);
-                    if (fileInput.current) fileInput.current.value = "";
-                  }}
+          <aside className={styles.editorAside}>
+            <h3>{preview ? "确认展示选择" : "只介绍公开身份"}</h3>
+            <p>
+              使用公开昵称，介绍游戏角色与共同兴趣。无需填写真实姓名、学号、联系方式或报名作答。
+            </p>
+            <dl className={styles.visibility}>
+              <dt>当前保存的展示状态</dt>
+              <dd>{original?.visible ? "在队伍页面展示" : "隐藏"}</dd>
+              <dt>这次准备保存为</dt>
+              <dd>{draft.visible ? "展示" : "隐藏"}</dd>
+            </dl>
+            <p>取消展示后保存即可隐藏；离队或资格撤销后，简介会退出名单。</p>
+          </aside>
+          <div className={styles.editorMain}>
+            <form className="member-form" onSubmit={review} hidden={preview}>
+              <fieldset disabled={busy || locked} className={styles.fields}>
+                <h3>填写本人资料</h3>
+                <div className={styles.fieldPair}>
+                  <label>
+                    公开昵称
+                    <input
+                      ref={nicknameInput}
+                      value={draft.displayName}
+                      onChange={(event) =>
+                        change("displayName", event.target.value)
+                      }
+                      maxLength={40}
+                      required
+                      autoComplete="off"
+                    />
+                  </label>
+                  <label>
+                    位置 / 游戏角色（可选）
+                    <input
+                      value={draft.position}
+                      onChange={(event) =>
+                        change("position", event.target.value)
+                      }
+                      maxLength={60}
+                      autoComplete="off"
+                    />
+                  </label>
+                </div>
+                <label>
+                  简短介绍（可选）
+                  <textarea
+                    value={draft.biography}
+                    onChange={(event) =>
+                      change("biography", event.target.value)
+                    }
+                    aria-describedby={`team-profile-bio-count-${teamID}`}
+                    maxLength={400}
+                    rows={5}
+                  />
+                </label>
+                <p
+                  id={`team-profile-bio-count-${teamID}`}
+                  className={styles.note}
                 >
-                  移除头像
-                </button>
-              )}
-              <label className={styles.consent}>
-                <input
-                  type="checkbox"
-                  checked={draft.visible}
-                  onChange={(event) => change("visible", event.target.checked)}
-                />
-                在本代表队页面展示我的简介
-              </label>
-              <p className={styles.note}>
-                取消展示后保存即可隐藏；离队或资格撤销后，简介会退出名单。
-              </p>
-              <div className={styles.actions}>
-                <button className="button" type="submit">
-                  预览简介
-                </button>
-                <button className="button light" type="button" onClick={cancel}>
-                  取消修改
-                </button>
+                  已填写 {draft.biography.length} / 400 字
+                </p>
+                <div className={styles.avatarEditor}>
+                  {safeTeamProfileAvatar(draft.avatar) && (
+                    <img
+                      src={draft.avatar}
+                      alt="待保存头像预览"
+                      width={80}
+                      height={80}
+                    />
+                  )}
+                  <div>
+                    <label>
+                      头像（可选）
+                      <input
+                        ref={fileInput}
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        onChange={(event) =>
+                          void avatar(event.target.files?.[0])
+                        }
+                      />
+                    </label>
+                    <p className={styles.note}>
+                      使用 2 MB 以内的静态 PNG、JPEG 或
+                      WebP。请选择获准展示的头像。
+                    </p>
+                  </div>
+                  {draft.avatar && (
+                    <button
+                      type="button"
+                      className="button light"
+                      onClick={() => {
+                        change("avatar", null);
+                        if (fileInput.current) fileInput.current.value = "";
+                      }}
+                    >
+                      移除头像
+                    </button>
+                  )}
+                </div>
+                <div className={styles.consentSection}>
+                  <h3>选择是否公开</h3>
+                  <label className={styles.consent}>
+                    <input
+                      type="checkbox"
+                      checked={draft.visible}
+                      onChange={(event) =>
+                        change("visible", event.target.checked)
+                      }
+                    />
+                    在本代表队页面展示我的简介
+                  </label>
+                  <p className={styles.note}>
+                    位置、简介与头像均可留空。勾选并保存后，公开昵称与已填写的资料会一起出现在队伍页面。
+                  </p>
+                </div>
+                <div className={styles.actions}>
+                  <button className="button" type="submit">
+                    预览简介
+                  </button>
+                  <button
+                    className="button light"
+                    type="button"
+                    onClick={cancel}
+                  >
+                    取消修改
+                  </button>
+                </div>
+              </fieldset>
+            </form>
+            {preview && (
+              <div className={styles.preview}>
+                <h3 ref={previewTitle} tabIndex={-1}>
+                  展示预览
+                </h3>
+                <TeamProfileCard profile={draft} />
+                <div className={styles.previewDecision}>
+                  <strong>
+                    {draft.visible
+                      ? "本次选择：在代表队名单展示"
+                      : "本次选择：在代表队名单隐藏"}
+                  </strong>
+                  <p>
+                    {draft.visible
+                      ? "确认后，页面会展示上方本人资料。"
+                      : "保存后仅自己可编辑，名单中隐藏。"}
+                  </p>
+                </div>
+                <div className={styles.actions}>
+                  <button
+                    type="button"
+                    className="button"
+                    onClick={() => void save()}
+                    disabled={busy || locked}
+                  >
+                    {busy ? "正在保存…" : "确认保存简介"}
+                  </button>
+                  <button
+                    type="button"
+                    className="button light"
+                    disabled={busy}
+                    onClick={() => {
+                      focusTarget.current = "name";
+                      setPreview(false);
+                    }}
+                  >
+                    返回修改
+                  </button>
+                </div>
               </div>
-            </fieldset>
-          </form>
-          {preview && (
-            <div className={styles.preview}>
-              <h3>展示预览</h3>
-              <TeamProfileCard profile={draft} />
-              <p>
-                {draft.visible
-                  ? "保存后会在本代表队名单展示。"
-                  : "保存后仅自己可编辑，名单中隐藏。"}
-              </p>
-              <div className={styles.actions}>
-                <button
-                  type="button"
-                  className="button"
-                  onClick={() => void save()}
-                  disabled={busy || locked}
-                >
-                  {busy ? "正在保存…" : "确认保存简介"}
-                </button>
-                <button
-                  type="button"
-                  className="button light"
-                  disabled={busy}
-                  onClick={() => { focusTarget.current = "name"; setPreview(false); }}
-                >
-                  返回修改
-                </button>
-              </div>
-            </div>
-          )}
-          {locked && (
-            <p role="status">当前已无法编辑。请重新加载核对入队资格。</p>
-          )}
+            )}
+            {locked && (
+              <p role="status">当前已无法编辑。请重新加载核对入队资格。</p>
+            )}
+          </div>
         </div>
       )}
+      {startEditing && roster}
     </section>
   );
 }

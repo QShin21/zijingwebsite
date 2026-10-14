@@ -22,6 +22,7 @@ export type Content = Window & {
   endAt?: string;
   location?: string;
   date?: string;
+  publishedAt?: string;
   competition?: string;
   division?: string;
   placing?: string;
@@ -64,6 +65,7 @@ const publicSelect = Object.fromEntries(
     "endAt",
     "location",
     "date",
+    "publishedAt",
     "competition",
     "division",
     "placing",

@@ -1,1 +1,10 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
+@import "../../templates/business.wxss";
+.team-honor-edit-page .honor-editor { margin-top: 28rpx; }
+.team-honor-edit-page .evidence-scope { margin: 24rpx 0; padding: 24rpx; border-left: 3rpx solid var(--z-primary); background: var(--z-secondary-bg); }
+.team-honor-edit-page .evidence-edit { margin-top: 28rpx; padding: 24rpx 0; border-top: 1rpx solid var(--z-line); }
+.team-honor-edit-page .evidence-edit .material-title { margin: 0; }
+.team-honor-edit-page .selected-video, .team-honor-edit-page .upload-progress { padding: 24rpx; margin-top: 24rpx; background: var(--z-surface); border: 1rpx solid var(--z-line); border-radius: 12rpx; }
+.team-honor-edit-page .saved-video { padding-top: 16rpx; }
+.team-honor-edit-page .selected-video > .muted { margin-top: 12rpx; }
+.team-honor-edit-page .upload-progress progress { margin-top: 20rpx; }
+.team-honor-edit-page textarea { min-height: 300rpx; }

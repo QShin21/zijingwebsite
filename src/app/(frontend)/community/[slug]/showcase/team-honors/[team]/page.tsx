@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { bySlug, cms } from "@/lib/content";
@@ -6,7 +5,9 @@ import { teamHonorService } from "@/lib/team-honor-service";
 import { TeamHonorArchiveContents } from "@/components/TeamHonorArchives";
 import { teamHonorQuery } from "@/components/TeamHonorNavigation";
 import { ClubFrame } from "../../../../../_club/ClubPage";
-import styles from "../../../../../_club/ClubPages.module.css";
+import styles from "@/components/team-pages/TeamPages.module.css";
+import { PageHeading } from "@/components/PageHeading";
+import { TeamTaskNav } from "@/components/team-pages/TeamPageParts";
 export const dynamic = "force-dynamic";
 export default async function TeamHonorArchive({
   params,
@@ -32,26 +33,26 @@ export default async function TeamHonorArchive({
   )[0];
   if (!archive) notFound();
   return (
-    <ClubFrame className={styles.communityBody}>
-      <section className="community-page">
-        <nav className="signup-tools" aria-label="档案返回">
-          <Link href={"/community/" + slug + "/showcase"}>← 社群风采</Link>
-          <Link
-            href={
+    <ClubFrame className={styles.workspace}>
+      <PageHeading
+        title={archive.team.title + " · 荣誉档案"}
+        eyebrow={game.title}
+        description={`${archive.records.length} 条已批准荣誉，按赛事日期汇总。新增成绩经核验后更新本档案。`}
+        parent={{ href: "/community/" + slug + "/showcase", label: "社群风采" }}
+      />
+      <TeamTaskNav
+        label="档案导航"
+        items={[
+          { href: "/community/" + slug + "/showcase", label: "返回社群风采" },
+          {
+            href:
               "/teams/honors?" +
-              teamHonorQuery({ team: archive.team.id, game: game.id })
-            }
-          >
-            代表队与荣誉
-          </Link>
-        </nav>
-        <header className={styles.archiveHeading}>
-          <p className={styles.kicker}>{game.title} · 队伍年鉴</p>
-          <h2>{archive.team.title + " · 荣誉档案"}</h2>
-          <p>{archive.records.length} 条已批准荣誉，按赛事日期汇总。新增成绩经核验后更新本档案；仅展示当前可见的已批准记录。</p>
-        </header>
-        <TeamHonorArchiveContents archive={archive} user={user} />
-      </section>
+              teamHonorQuery({ team: archive.team.id, game: game.id }),
+            label: "代表队与荣誉",
+          },
+        ]}
+      />
+      <TeamHonorArchiveContents archive={archive} user={user} />
     </ClubFrame>
   );
 }

@@ -1,5 +1,10 @@
 import { ActivitySignup } from "./ActivitySignup";
 import { TeamProfilesPanel } from "./team-profiles/TeamProfilesPanel";
+import { TeamHonorsPanel } from "./TeamHonorsPanel";
+import {
+  publicTeamMeta,
+  publicTeamState,
+} from "./reading-pages/public-reading-meta";
 import { headers } from "next/headers";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -116,7 +121,7 @@ export function Prose({ doc }: { doc: Content }) {
         />
       )}
       {doc.sections?.map((s, i) => (
-        <section key={i}>
+        <section id={`content-${doc.id}-section-${i}`} key={i}>
           <h2>{s.heading}</h2>
           <p className="preserve">{s.text}</p>
         </section>
@@ -163,23 +168,182 @@ export function JoinCards({ selected }: { selected?: string } = {}) {
           key={item.key}
           aria-current={selected === item.key ? "page" : undefined}
         >
-          <Icon name={item.icon} />
           <h3>{item.title}</h3>
           <p>{item.desc}</p>
-          <span>{item.next} ↗</span>
+          <span>{item.next}</span>
         </Link>
       ))}
     </div>
   );
 }
-export function Cards({
+export async function Cards({
   docs,
   collection,
+  games,
+  headingLevel = 3,
 }: {
   docs: Content[];
   collection: string;
+  games?: Content[];
+  headingLevel?: 2 | 3;
 }) {
   if (!docs.length) return <Empty collection={collection} />;
+  const Heading = headingLevel === 2 ? "h2" : "h3";
+  if (collection === "teams") {
+    const metadata = await publicTeamMeta(docs.map((doc) => doc.id));
+    const gameIDs = [
+      ...new Set(docs.flatMap((doc) => (doc.game ? [doc.game] : []))),
+    ];
+    const publicGames =
+      games ||
+      (gameIDs.length
+        ? (await list("games", { id: { in: gameIDs } }, 1, gameIDs.length)).docs
+        : []);
+    const gameByID = new Map(publicGames.map((game) => [game.id, game]));
+    return (
+      <div className={styles.teamDirectory}>
+        {docs.map((doc) => {
+          const game = doc.game ? gameByID.get(doc.game) : undefined;
+          const state = publicTeamState(metadata.get(doc.id), doc.archived);
+          return (
+            <article className={styles.teamEntry} key={doc.id}>
+              <div className={styles.teamEntryIdentity}>
+                {game && (
+                  <Link href={`/community/${game.slug}`}>{game.title}</Link>
+                )}
+                {state && <span className={styles.status}>{state}</span>}
+                {doc.demo && <span>演示资料</span>}
+              </div>
+              <div className={styles.teamEntryBody}>
+                <Heading>
+                  <Link href={`/teams/${doc.slug}`}>{doc.title}</Link>
+                </Heading>
+                {doc.summary && <p>{doc.summary}</p>}
+                <div className={styles.entryActions}>
+                  <Link href={`/teams/${doc.slug}`}>查看队伍</Link>
+                  <Link href={`/teams/honors?team=${doc.id}`}>队伍荣誉</Link>
+                </div>
+              </div>
+              {doc.cover && (
+                <Link
+                  className={styles.teamEntryImage}
+                  href={`/teams/${doc.slug}`}
+                  tabIndex={-1}
+                  aria-label={doc.title}
+                >
+                  <Picture id={doc.cover} />
+                </Link>
+              )}
+            </article>
+          );
+        })}
+      </div>
+    );
+  }
+  if (collection === "news") {
+    const story = (doc: Content, lead = false) => {
+      const publishedAt = doc.publishedAt;
+      return (
+        <article
+          className={lead ? styles.storyLead : styles.storyItem}
+          key={doc.id}
+        >
+          {lead && doc.cover && (
+            <Link
+              className={styles.storyImage}
+              href={`/news/${doc.slug}`}
+              tabIndex={-1}
+              aria-label={doc.title}
+            >
+              <Picture id={doc.cover} />
+            </Link>
+          )}
+          <div className={styles.storyContent}>
+            <div className={styles.cardMeta}>
+              <span>{doc.type || "社团动态"}</span>
+              {publishedAt && (
+                <time dateTime={publishedAt}>{formatDate(publishedAt)}</time>
+              )}
+              {doc.archived && <span>历史归档</span>}
+              {doc.demo && <span>演示资料</span>}
+            </div>
+            <Heading>
+              <Link href={`/news/${doc.slug}`}>{doc.title}</Link>
+            </Heading>
+            {doc.summary && <p>{doc.summary}</p>}
+            <Link
+              className={styles.storyRead}
+              href={`/news/${doc.slug}`}
+              aria-label={`阅读${doc.title}`}
+            >
+              阅读全文
+            </Link>
+          </div>
+        </article>
+      );
+    };
+    return (
+      <div className={styles.newsIndex}>
+        <div
+          className={styles.newsOpening}
+          data-single={docs.length === 1 || undefined}
+        >
+          {story(docs[0], true)}
+          {docs.length > 1 && (
+            <div className={styles.newsSecondary}>
+              {docs.slice(1, 4).map((doc) => story(doc))}
+            </div>
+          )}
+        </div>
+        {docs.length > 4 && (
+          <div className={styles.newsMore}>
+            {docs.slice(4).map((doc) => story(doc))}
+          </div>
+        )}
+      </div>
+    );
+  }
+  if (collection === "honors") {
+    return (
+      <div className={styles.honorIndex}>
+        {docs.map((doc) => (
+          <article className={styles.honorEntry} key={doc.id}>
+            <div className={styles.honorDate}>
+              {doc.date && (
+                <time dateTime={doc.date}>
+                  {new Intl.DateTimeFormat("zh-CN", {
+                    year: "numeric",
+                    timeZone: "Asia/Shanghai",
+                  }).format(new Date(doc.date))}
+                </time>
+              )}
+              {doc.demo && <span>演示资料</span>}
+              {doc.archived && <span>历史归档</span>}
+            </div>
+            <div>
+              {doc.competition && (
+                <p className={styles.honorCompetition}>{doc.competition}</p>
+              )}
+              <Heading>
+                <Link href={`/honors/${doc.slug}`}>{doc.title}</Link>
+              </Heading>
+              {doc.placing && (
+                <p className={styles.placing}>
+                  {[doc.division, doc.placing].filter(Boolean).join(" · ")}
+                </p>
+              )}
+              {doc.summary && (
+                <p className={styles.cardSummary}>{doc.summary}</p>
+              )}
+              <Link className={styles.storyRead} href={`/honors/${doc.slug}`}>
+                查看成果记录
+              </Link>
+            </div>
+          </article>
+        ))}
+      </div>
+    );
+  }
   return (
     <div className={styles.cards} data-collection={collection}>
       {docs.map((doc) => {
@@ -215,9 +379,9 @@ export function Cards({
                   {[doc.division, doc.placing].filter(Boolean).join(" · ")}
                 </p>
               )}
-              <h3>
+              <Heading>
                 <Link href={href}>{doc.title}</Link>
-              </h3>
+              </Heading>
               {doc.summary && (
                 <p className={styles.cardSummary}>{doc.summary}</p>
               )}
@@ -251,51 +415,256 @@ export async function Detail({
   photoPage?: number;
 }) {
   const state = registrationState(doc);
-  let managesTeam = false;
-  if (collection === "teams") {
-    const p = await cms(),
-      { user } = await p.auth({ headers: await headers() });
-    managesTeam = await canManageTeam(p, user, doc.id);
+  const teamContext =
+    collection === "teams"
+      ? await (async () => {
+          const payload = await cms();
+          const { user } = await payload.auth({ headers: await headers() });
+          return { payload, user };
+        })()
+      : null;
+  const managesTeam = teamContext
+    ? await canManageTeam(teamContext.payload, teamContext.user, doc.id)
+    : false;
+  const [
+    linkedTeam,
+    linkedEvent,
+    linkedSeason,
+    related,
+    history,
+    linkedGame,
+    metadata,
+  ] = await Promise.all([
+    doc.team
+      ? list("teams", { id: { equals: doc.team } }, 1, 1).then((r) => r.docs[0])
+      : null,
+    doc.event
+      ? list("events", { id: { equals: doc.event } }, 1, 1).then(
+          (r) => r.docs[0],
+        )
+      : null,
+    doc.season
+      ? list("seasons", { id: { equals: doc.season } }, 1, 1).then(
+          (r) => r.docs[0],
+        )
+      : null,
+    collection === "events"
+      ? Promise.all([
+          list("news", { event: { equals: doc.id } }),
+          list("albums", { event: { equals: doc.id } }),
+        ])
+      : null,
+    collection === "teams"
+      ? Promise.all([
+          list("seasons", { team: { equals: doc.id } }, 1, 100),
+          list("honors", { team: { equals: doc.id } }),
+          list("events", { team: { equals: doc.id } }),
+        ])
+      : null,
+    doc.game
+      ? list("games", { id: { equals: doc.game } }, 1, 1).then(
+          (result) => result.docs[0],
+        )
+      : null,
+    collection === "teams" ? publicTeamMeta([doc.id]) : null,
+  ]);
+  if (collection === "teams" && teamContext && history) {
+    const teamState = publicTeamState(metadata?.get(doc.id), doc.archived);
+    const hasIntroduction = Boolean(doc.body || doc.sections?.length);
+    return (
+      <div className={styles.teamArchive}>
+        <PageHeading
+          title={doc.title}
+          eyebrow={linkedGame?.title || "代表队档案"}
+          description={doc.summary}
+          parent={{ href: "/teams", label: "代表队与荣誉" }}
+        >
+          <div className={styles.metadata}>
+            {linkedGame && (
+              <Link href={`/community/${linkedGame.slug}`}>
+                所属社群：{linkedGame.title}
+              </Link>
+            )}
+            {teamState && <span className={styles.status}>{teamState}</span>}
+            {doc.demo && <span>演示资料 · 非真实社团记录</span>}
+          </div>
+        </PageHeading>
+        <nav className={styles.sectionIndex} aria-label="代表队档案栏目">
+          {hasIntroduction && <a href="#team-introduction">队伍介绍</a>}
+          <a href="#public-members">公开成员</a>
+          <a href="#team-honors">队伍荣誉</a>
+          {history[0].docs.length > 0 && <a href="#team-history">赛季档案</a>}
+        </nav>
+        <div className={styles.teamOverview}>
+          <div className={styles.teamIntroduction}>
+            {doc.cover && (
+              <div className={styles.teamCover}>
+                <Picture id={doc.cover} priority />
+              </div>
+            )}
+            {hasIntroduction ? (
+              <section id="team-introduction">
+                <h2>队伍介绍</h2>
+                <Prose doc={doc} />
+              </section>
+            ) : (
+              <div className={styles.teamBrief}>
+                <h2>认识队伍，了解共同经历</h2>
+                <p>
+                  下方收录成员自选公开的简介与已批准荣誉。入队要求和开放时间请查看招新批次。
+                </p>
+              </div>
+            )}
+            {doc.positions?.map((position, index) => (
+              <section className={styles.position} key={index}>
+                <h3>{position.name}</h3>
+                {[
+                  position.duties,
+                  position.requirements,
+                  position.commitment,
+                  position.arrangement,
+                ]
+                  .filter(Boolean)
+                  .map((text, item) => (
+                    <p key={item}>{text}</p>
+                  ))}
+              </section>
+            ))}
+          </div>
+          <aside
+            className={styles.teamParticipation}
+            aria-labelledby="team-participation-title"
+          >
+            <h2 id="team-participation-title">加入与参与</h2>
+            <p>
+              查看招新要求与时间，提交自己的入队申请，再到回执查看人工选拔结果。
+            </p>
+            <Link className="button" href="/teams/recruitment">
+              查看代表队招新与我的记录
+            </Link>
+            <div className={styles.participationLinks}>
+              <Link href={`/teams/honors?team=${doc.id}`}>
+                队伍荣誉档案与投稿
+              </Link>
+              {linkedGame && (
+                <Link href={`/community/${linkedGame.slug}`}>联系所属社群</Link>
+              )}
+              {managesTeam && (
+                <Link href={`/teams/manage/${doc.id}`}>本队工作台</Link>
+              )}
+            </div>
+            <p className={styles.smallNote}>
+              入队资格以已批准的成员关系为准，公开阵容和简介不授管理权限。
+            </p>
+          </aside>
+        </div>
+        <div id="public-members" className={styles.archiveSection}>
+          <TeamProfilesPanel teamID={doc.id} />
+        </div>
+        {Boolean(doc.members?.length) && (
+          <section
+            className={styles.archiveSection}
+            aria-labelledby="team-roster-title"
+          >
+            <div className={styles.archiveHeading}>
+              <h2 id="team-roster-title">档案中的公开阵容</h2>
+              <p>按队伍档案保存的名单展示，当前在队资格以成员记录为准。</p>
+            </div>
+            <ul className={styles.roster}>
+              {doc.members?.map((member, index) => (
+                <li key={index}>
+                  <strong>{member.displayName}</strong>
+                  {member.position && <span>{member.position}</span>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+        <div id="team-honors" className={styles.archiveSection}>
+          <TeamHonorsPanel
+            payload={teamContext.payload}
+            user={teamContext.user}
+            view="public"
+            team={doc.id}
+          />
+        </div>
+        {history[1].docs.length > 0 && (
+          <section
+            className={styles.archiveSection}
+            aria-labelledby="legacy-honors-title"
+          >
+            <div className={styles.archiveHeading}>
+              <h2 id="legacy-honors-title">历史荣誉记录</h2>
+              <p>继续查阅此前归档的赛事成果。</p>
+            </div>
+            <Cards docs={history[1].docs} collection="honors" />
+          </section>
+        )}
+        {history[0].docs.length > 0 && (
+          <section
+            id="team-history"
+            className={styles.archiveSection}
+            aria-labelledby="season-title"
+          >
+            <div className={styles.archiveHeading}>
+              <h2 id="season-title">赛季档案</h2>
+            </div>
+            <nav className={styles.seasonNav} aria-label="赛季导航">
+              {history[0].docs.map((season) => (
+                <a href={`#season-${season.id}`} key={season.id}>
+                  {season.title}
+                </a>
+              ))}
+            </nav>
+            <div className={styles.seasonList}>
+              {history[0].docs.map((season) => (
+                <article
+                  className={styles.seasonEntry}
+                  id={`season-${season.id}`}
+                  key={season.id}
+                >
+                  <h3>{season.title}</h3>
+                  <div>
+                    <Prose doc={season} />
+                    <ul className={styles.roster}>
+                      {season.members?.map((member, index) => (
+                        <li key={index}>
+                          <strong>{member.displayName}</strong>
+                          {member.position && <span>{member.position}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+        {history[2].docs.length > 0 && (
+          <section
+            className={styles.archiveSection}
+            aria-labelledby="team-events-title"
+          >
+            <div className={styles.archiveHeading}>
+              <h2 id="team-events-title">队伍相关活动</h2>
+            </div>
+            <Cards docs={history[2].docs} collection="events" />
+          </section>
+        )}
+      </div>
+    );
   }
-  const [linkedTeam, linkedEvent, linkedSeason, related, history] =
-    await Promise.all([
-      doc.team
-        ? list("teams", { id: { equals: doc.team } }, 1, 1).then(
-            (r) => r.docs[0],
-          )
-        : null,
-      doc.event
-        ? list("events", { id: { equals: doc.event } }, 1, 1).then(
-            (r) => r.docs[0],
-          )
-        : null,
-      doc.season
-        ? list("seasons", { id: { equals: doc.season } }, 1, 1).then(
-            (r) => r.docs[0],
-          )
-        : null,
-      collection === "events"
-        ? Promise.all([
-            list("news", { event: { equals: doc.id } }),
-            list("albums", { event: { equals: doc.id } }),
-          ])
-        : null,
-      collection === "teams"
-        ? Promise.all([
-            list("seasons", { team: { equals: doc.id } }, 1, 100),
-            list("honors", { team: { equals: doc.id } }),
-            list("events", { team: { equals: doc.id } }),
-          ])
-        : null,
-    ]);
+  const publishedAt = doc.publishedAt;
   return (
-    <>
+    <div className={styles.contentDetail} data-collection={collection}>
       <PageHeading
         title={doc.title}
         eyebrow={
           doc.demo
             ? "演示资料 · 非真实社团记录"
-            : `紫荆档案 · ${names[collection] || "内容预览"}`
+            : collection === "news"
+              ? "社团动态"
+              : names[collection] || "内容预览"
         }
         description={doc.summary}
         parent={{
@@ -305,6 +674,19 @@ export async function Detail({
       >
         {doc.archived && <span className={styles.status}>历史归档</span>}
         <div className={styles.metadata}>
+          {publishedAt && (
+            <time dateTime={publishedAt}>发布于 {formatDate(publishedAt)}</time>
+          )}
+          {linkedGame && (
+            <Link href={`/community/${linkedGame.slug}`}>
+              所属社群：{linkedGame.title}
+            </Link>
+          )}
+          {collection === "news" && (
+            <span>
+              {doc._status === "published" ? "社团公开内容" : "内容预览"}
+            </span>
+          )}
           {(doc.date || doc.startAt) && (
             <span>时间 · {formatDate(doc.date || doc.startAt)}</span>
           )}
@@ -328,35 +710,12 @@ export async function Detail({
       >
         <div className={styles.detailMain}>
           <Prose doc={doc} />
-          {collection === "teams" && <TeamProfilesPanel teamID={doc.id} />}
-          {collection === "teams" && (
-            <section className={styles.panel}>
-              <h2>加入与管理代表队</h2>
-              <div className="signup-tools">
-                <Link className="button" href="/teams/recruitment">
-                  查看代表队招新与我的记录
-                </Link>
-                <Link href={`/teams/honors?team=${doc.id}`}>
-                  队伍荣誉档案与投稿
-                </Link>
-                {managesTeam && (
-                  <Link href={`/teams/manage/${doc.id}`}>本队工作台</Link>
-                )}
-              </div>
-              <p>
-                入队资格以已批准的成员关系为准，公开阵容和简介不授管理权限。
-              </p>
-            </section>
-          )}
           {Boolean(doc.members?.length) && (
             <section>
               <h2>公开阵容</h2>
               <ul className={styles.roster}>
                 {doc.members?.map((m, i) => (
                   <li key={i}>
-                    <span className="number">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
                     <strong>{m.displayName}</strong>
                     <span>{m.position}</span>
                   </li>
@@ -392,48 +751,6 @@ export async function Detail({
                 total={Math.ceil((doc.photos?.length || 0) / 12)}
                 path={`/gallery/${doc.slug}`}
               />
-            </>
-          )}
-          {history && (
-            <>
-              {history[0].docs.length > 0 && (
-                <section>
-                  <h2>赛季档案</h2>
-                  <nav className={styles.seasonNav} aria-label="赛季导航">
-                    {history[0].docs.map((s) => (
-                      <a href={`#season-${s.id}`} key={s.id}>
-                        {s.title}
-                      </a>
-                    ))}
-                  </nav>
-                  {history[0].docs.map((s) => (
-                    <article
-                      className={styles.panel}
-                      id={`season-${s.id}`}
-                      key={s.id}
-                    >
-                      <h3>{s.title}</h3>
-                      <Prose doc={s} />
-                      <ul className={styles.roster}>
-                        {s.members?.map((m, i) => (
-                          <li key={i}>
-                            <strong>{m.displayName}</strong>
-                            <span>{m.position}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </article>
-                  ))}
-                </section>
-              )}
-              <section>
-                <h2>相关荣誉</h2>
-                <Cards docs={history[1].docs} collection="honors" />
-              </section>
-              <section>
-                <h2>相关活动</h2>
-                <Cards docs={history[2].docs} collection="events" />
-              </section>
             </>
           )}
           {related && (
@@ -561,7 +878,7 @@ export async function Detail({
           )}
         </aside>
       </div>
-    </>
+    </div>
   );
 }
 export function Pagination({

@@ -8,6 +8,7 @@ import { dateParts } from "@/lib/presentation";
 import { eventState, formatDate, routeFor } from "@/lib/rules";
 import styles from "./ActivityPages.module.css";
 import { ActivityDetail } from "./ActivityDetail";
+import { registrationSummary } from "./registration-summary";
 
 export type PageCollection = "events" | "announcements" | "albums";
 export type Query = Record<string, string | string[] | undefined>;
@@ -15,35 +16,28 @@ const copy = {
   events: {
     title: "活动",
     headline: "活动日程",
-    label: "一起参与",
     description:
-      "比赛、观赛、交流与训练。找到想参加的活动，也回看那些值得记住的现场。",
-    empty: "下一场精彩，敬请关注",
-    hint: "活动安排确认后会在这里发布。可以先查看通知，了解最新安排。",
+      "比赛、观赛、交流与训练。从时间和项目出发，找到下一场想参加的活动。",
+    empty: "暂无已发布的活动",
+    hint: "新的活动安排会在这里发布。可以先查看社团通知。",
   },
   announcements: {
     title: "通知",
     headline: "社团通知",
-    label: "社团动态",
     description:
-      "查看社团通知、参与安排与最新说明。具体事项以已发布的通知内容为准。",
+      "参与安排、招新与社团事项。查看发布时间和所属社群，了解与你有关的通知。",
     empty: "暂无已发布的通知",
     hint: "新的社团安排发布后会在这里展示。你可以先浏览活动。",
   },
   albums: {
     title: "影像",
     headline: "活动影像",
-    label: "社团档案",
-    description: "从赛场到日常，在影像里重新相遇。",
-    empty: "精彩影像，正在整理",
-    hint: "已获准公开的活动相册会在这里展示。也可以先查看社群风采。",
+    description: "比赛与日常留下的共同记忆，收录在每一本活动相册中。",
+    empty: "暂无公开相册",
+    hint: "获准公开的活动相册会在这里展示。你可以先浏览活动回顾。",
   },
 };
-export function SignalGraphic({
-  label = "紫荆电竞",
-}: {
-  label?: string;
-}) {
+export function SignalGraphic({ label = "紫荆电竞" }: { label?: string }) {
   return (
     <div className={styles.graphic} aria-hidden="true">
       <span>{label}</span>
@@ -121,51 +115,135 @@ export async function PublicDetail({
 }
 function DateLabel({ value }: { value?: string }) {
   const date = dateParts(value);
-  return date ? (
+  return (
     <div className={styles.noticeDate}>
-      <strong>
-        {date.month}.{date.day}
-      </strong>
-      <span>{date.year}</span>
+      {date ? (
+        <>
+          <strong>
+            {date.month}.{date.day}
+          </strong>
+          <span>{date.year}</span>
+        </>
+      ) : (
+        <span>日期待公布</span>
+      )}
     </div>
-  ) : (
-    <div className={styles.noticeDate}>日期待定</div>
   );
 }
 export function EventCard({
   doc,
   collection,
+  game,
 }: {
   doc: Content;
   collection: PageCollection;
+  game?: Content;
 }) {
-  const state = collection === "events" ? eventState(doc) : "活动相册";
   const href = `/${routeFor[collection]}/${doc.slug}`;
+  const registration = registrationSummary(doc);
+  if (collection === "albums")
+    return (
+      <article className={styles.album}>
+        {doc.cover && (
+          <Link
+            href={href}
+            className={styles.albumImage}
+            tabIndex={-1}
+            aria-label={`打开相册：${doc.title}`}
+          >
+            <Picture id={doc.cover} />
+          </Link>
+        )}
+        <div className={styles.albumBody}>
+          <div className={styles.meta}>
+            {doc.date && (
+              <time dateTime={doc.date}>{formatDate(doc.date)}</time>
+            )}
+            {game && <span>{game.title}</span>}
+            {doc.demo && <span className="demo-label">演示资料</span>}
+            {doc.archived && <span>历史归档</span>}
+          </div>
+          <h2>
+            <Link href={href}>{doc.title}</Link>
+          </h2>
+          {doc.summary && <p>{doc.summary}</p>}
+          <Link className={styles.textAction} href={href}>
+            打开相册
+          </Link>
+        </div>
+      </article>
+    );
   return (
     <article className={styles.eventCard} data-kind={collection}>
       <DateLabel value={doc.startAt || doc.date} />
       <div className={styles.cardBody}>
         <div className={styles.meta}>
-          <span className={styles.status} data-open={state === "进行中"}>{state}</span>
+          <span>{eventState(doc)}</span>
           {doc.type && <span>{doc.type}</span>}
+          {game ? (
+            <Link href={`/community/${game.slug}`}>{game.title}</Link>
+          ) : (
+            <span>社团活动</span>
+          )}
           {doc.demo && <span className="demo-label">演示资料</span>}
           {doc.archived && <span>历史归档</span>}
         </div>
-        <h2><Link href={href}>{doc.title}</Link></h2>
+        <h2>
+          <Link href={href}>{doc.title}</Link>
+        </h2>
         {doc.summary && <p>{doc.summary}</p>}
-        <div className={styles.cardFoot}>
-          <div className={styles.meta}>
-            {doc.startAt && <time dateTime={doc.startAt}>{formatDate(doc.startAt)}</time>}
-            {doc.location && <span>{doc.location}</span>}
+        <dl className={styles.eventFacts}>
+          <div>
+            <dt>时间</dt>
+            <dd>
+              {doc.startAt ? (
+                <time dateTime={doc.startAt}>{formatDate(doc.startAt)}</time>
+              ) : (
+                "待公布"
+              )}
+            </dd>
           </div>
-          <Link href={href}>{collection === "events" ? "活动详情与报名" : "打开相册"} <span aria-hidden="true">→</span></Link>
-        </div>
+          <div>
+            <dt>地点</dt>
+            <dd>{doc.location || "待公布"}</dd>
+          </div>
+        </dl>
       </div>
-      {doc.cover && <Link className={styles.eventImage} href={href} aria-label={`查看${doc.title}`} tabIndex={-1}><Picture id={doc.cover} /></Link>}
+      <div className={styles.eventAction}>
+        <span
+          className={styles.status}
+          data-open={registration.state === "报名开放"}
+        >
+          {registration.state}
+        </span>
+        {registration.deadline && (
+          <p>
+            报名截止
+            <br />
+            <time dateTime={registration.deadline}>
+              {formatDate(registration.deadline)}
+            </time>
+          </p>
+        )}
+        <Link className={styles.textAction} href={href}>
+          {registration.state === "报名开放"
+            ? "查看活动与报名"
+            : "查看活动详情"}
+        </Link>
+      </div>
+      {doc.cover && (
+        <Link
+          className={styles.eventImage}
+          href={href}
+          aria-label={`查看${doc.title}`}
+          tabIndex={-1}
+        >
+          <Picture id={doc.cover} />
+        </Link>
+      )}
     </article>
   );
 }
-
 export async function PublicList({
   collection,
   search,
@@ -201,10 +279,12 @@ export async function PublicList({
   }
   const [result, games] = await Promise.all([
     list(collection, and.length ? { and } : {}, page),
-    collection === "events" ? list("games", {}, 1, 100) : null,
+    list("games", {}, 1, 100),
   ]);
   const meta = copy[collection],
     path = `/${routeFor[collection]}`;
+  const gameFor = (doc: Content) =>
+    games.docs.find((game) => game.id === doc.game);
   return (
     <div className={styles.page} data-activity-page={collection}>
       <nav className={styles.breadcrumbs} aria-label="面包屑">
@@ -214,17 +294,36 @@ export async function PublicList({
       </nav>
       <header className={styles.hero}>
         <div>
-          <p className={styles.eyebrow}>{meta.label}</p>
-          <h1 style={{ whiteSpace: "pre-line" }}>{meta.headline}</h1>
+          <h1>{meta.headline}</h1>
           <p>{meta.description}</p>
         </div>
-        <nav className={styles.sectionNav} aria-label="活动与内容栏目">
-          <Link href="/events" aria-current={collection === "events" ? "page" : undefined}>活动</Link>
-          <Link href="/announcements" aria-current={collection === "announcements" ? "page" : undefined}>通知</Link>
-          <Link href="/gallery" aria-current={collection === "albums" ? "page" : undefined}>影像</Link>
-        </nav>
+        {collection === "events" && (
+          <Link className={styles.textAction} href="/account">
+            我的报名
+          </Link>
+        )}
       </header>
-      {games && (
+      <nav className={styles.sectionNav} aria-label="活动与内容栏目">
+        <Link
+          href="/events"
+          aria-current={collection === "events" ? "page" : undefined}
+        >
+          活动日程
+        </Link>
+        <Link
+          href="/announcements"
+          aria-current={collection === "announcements" ? "page" : undefined}
+        >
+          社团通知
+        </Link>
+        <Link
+          href="/gallery"
+          aria-current={collection === "albums" ? "page" : undefined}
+        >
+          活动影像
+        </Link>
+      </nav>
+      {collection === "events" && (
         <form className={styles.filter} method="get" aria-label="筛选内容">
           <label>
             游戏项目
@@ -255,22 +354,24 @@ export async function PublicList({
             </select>
           </label>
           <button className={styles.primary} type="submit">
-            查看结果
+            筛选活动
           </button>
-          <Link href={path}>重置</Link>
+          <Link href={path}>清除筛选</Link>
         </form>
       )}
       <div className={styles.result}>
-        <strong>
+        <h2>
           {collection === "events"
-            ? "活动日程"
+            ? Object.keys(query).length
+              ? "筛选结果"
+              : "全部活动"
             : collection === "announcements"
-              ? "最新通知"
-              : "影像档案"}
-        </strong>
+              ? "已发布通知"
+              : "相册目录"}
+        </h2>
         <span>
           共 {result.totalDocs} 条
-          {result.totalPages > 1 && ` · 第 ${page} / ${result.totalPages} 页`}
+          {result.totalPages > 1 && `，第 ${page} / ${result.totalPages} 页`}
         </span>
       </div>
       {!result.docs.length ? (
@@ -281,7 +382,7 @@ export async function PublicList({
         >
           <p>
             {Object.keys(query).length
-              ? "试试其他游戏项目或时间范围，也可以重置筛选查看全部活动。"
+              ? "试试其他游戏项目或时间范围，也可以清除筛选查看全部活动。"
               : meta.hint}
           </p>
           <Link
@@ -305,10 +406,10 @@ export async function PublicList({
         <div className={styles.noticeList}>
           {result.docs.map((doc) => (
             <article className={styles.notice} key={doc.id}>
-              <DateLabel value={doc.date} />
+              <DateLabel value={doc.publishedAt} />
               <div>
                 <div className={styles.meta}>
-                  <span className={styles.status}>社团通知</span>
+                  <span>{gameFor(doc)?.title || "社团通知"}</span>
                   {doc.demo && <span className="demo-label">演示资料</span>}
                   {doc.archived && <span>历史归档</span>}
                 </div>
@@ -316,26 +417,30 @@ export async function PublicList({
                   <Link href={`/announcements/${doc.slug}`}>{doc.title}</Link>
                 </h2>
                 {doc.summary && <p>{doc.summary}</p>}
-                <Link href={`/announcements/${doc.slug}`}>
-                  阅读全文 <span aria-hidden="true">↗</span>
-                </Link>
               </div>
               <Link
+                className={styles.textAction}
                 href={`/announcements/${doc.slug}`}
-                aria-label={`查看通知：${doc.title}`}
+                aria-label={`阅读全文：${doc.title}`}
               >
-                ↗
+                阅读全文
               </Link>
             </article>
           ))}
         </div>
       ) : (
         <div
-          className={styles.eventGrid}
-          data-count={Math.min(result.docs.length, 4)}
+          className={
+            collection === "albums" ? styles.albumGrid : styles.eventGrid
+          }
         >
           {result.docs.map((doc) => (
-            <EventCard key={doc.id} doc={doc} collection={collection} />
+            <EventCard
+              key={doc.id}
+              doc={doc}
+              collection={collection}
+              game={gameFor(doc)}
+            />
           ))}
         </div>
       )}

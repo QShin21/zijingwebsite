@@ -11,8 +11,13 @@ const identity = () => String((session.user() || {}).id || '');
 const decisions = { approved: '批准', returned: '退回补充', rejected: '拒绝' };
 Page(withVisualTheme({
   data: { needsLogin: false, allowed: false, loading: false, error: '', operationError: '', done: '',
-    docs: [], page: 1, hasMore: false, busy: false, imageBusy: false },
+    docs: [], expandedId: '', page: 1, hasMore: false, busy: false, imageBusy: false },
   ...actions,
+  toggleRecord(event) {
+    if (this.data.busy || this.data.loading || this.data.imageBusy) return;
+    const doc = this.data.docs.find(value => String(value.id) === String(event.currentTarget.dataset.id));
+    if (doc) this.setData({ expandedId: this.data.expandedId === doc.id ? '' : doc.id });
+  },
   onLoad() {
     if (this._unsubscribe) this._unsubscribe();
     this._disposed = false; this._visible = false; this._resumeRead = false; this._context = (this._context || 0) + 1; this.invalidate();
@@ -32,7 +37,7 @@ Page(withVisualTheme({
     this.setData({ busy: false });
     if (this._visible && this._resumeRead) { this._resumeRead = false; await this.load(); }
   },
-  resetPrivate() { this.setData({ needsLogin: !session.user(), allowed: false, loading: false, error: '', operationError: '', done: '', docs: [], page: 1, hasMore: false, busy: Boolean(this._pendingWrite), imageBusy: false }); },
+  resetPrivate() { this.setData({ needsLogin: !session.user(), allowed: false, loading: false, error: '', operationError: '', done: '', docs: [], expandedId: '', page: 1, hasMore: false, busy: Boolean(this._pendingWrite), imageBusy: false }); },
   onShow() {
     this._visible = true;
     if (this._disposed) return;
@@ -55,7 +60,7 @@ Page(withVisualTheme({
     try {
       const workbench = await http.request('/api/miniapp/workbench', { required: true });
       if (!this.valid(scope) || ticket !== this._loadTicket) return;
-      if (!workbench || workbench.reviewCommunity !== true) { this.setData({ allowed: false, loading: false, docs: [], page: 1, hasMore: false }); return; }
+      if (!workbench || workbench.reviewCommunity !== true) { this.setData({ allowed: false, loading: false, docs: [], expandedId: '', page: 1, hasMore: false }); return; }
       this.setData({ allowed: true });
       const result = await http.request(`/api/miniapp/community/applications?mode=review&page=${page}`, { required: true });
       if (!this.valid(scope) || ticket !== this._loadTicket) return;

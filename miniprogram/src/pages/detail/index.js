@@ -32,7 +32,7 @@ Page(withVisualTheme({
   async load() {
     const ticket = this._ticket = (this._ticket || 0) + 1;
     const user = session.user(); this._userId = user && user.id;
-    this.setData({ loading: true, error: '', needsLogin: false, user, signupInfo: null, signupFailed: false, doc: {}, photos: [], nodes: [], links: [], related: [], previewImages: [] });
+    this.setData({ loading: true, error: '', needsLogin: false, user, signupInfo: null, signupFailed: false, signupStartText: '', signupEndText: '', doc: {}, photos: [], nodes: [], links: [], related: [], previewImages: [] });
     try {
       const { collection, id, slug } = this._options;
       const social = socialCollections.includes(collection);
@@ -58,11 +58,13 @@ Page(withVisualTheme({
       this.setData({ loading: false, doc, social, nodes: rendered.nodes, links: rendered.links, photos, qr, coverImage,
         previewImages: photos.map(photo => photo.url), related, dateText: format.date(doc.startAt || doc.date || doc.createdAt),
         endDateText: doc.endAt ? format.date(doc.endAt) : '',
+        registrationStartText: doc.registrationStart ? format.date(doc.registrationStart) : '', registrationEndText: doc.registrationEnd ? format.date(doc.registrationEnd) : '',
         videoSource: video.source(doc.videoURL), videoError: false,
         registration: ['events', 'recruitment'].includes(collection) ? format.registrationState(doc) : '' });
       wx.setNavigationBarTitle({ title: doc.title || '内容详情' });
       if (collection === 'events' || (collection === 'community-posts' && doc.category === 'event')) {
-        try { const signupInfo = await http.request('/api/activities/'+collection+'/'+doc.id+'/signup'); if(ticket===this._ticket)this.setData({signupInfo,registration:signupInfo.form.enabled?'':this.data.registration}); }
+        try { const signupInfo = await http.request('/api/activities/'+collection+'/'+doc.id+'/signup'); if(ticket===this._ticket)this.setData({signupInfo,registration:signupInfo.form.enabled?'':this.data.registration,
+          signupStartText: signupInfo.form.start ? format.date(signupInfo.form.start) : '', signupEndText: signupInfo.form.end ? format.date(signupInfo.form.end) : ''}); }
         catch { if(ticket===this._ticket)this.setData({signupFailed:true}); }
       }
     } catch (cause) { if (ticket === this._ticket) error(this, cause); }

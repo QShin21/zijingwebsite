@@ -1,4 +1,7 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
-.mini-page .managed-activity { padding: 28rpx; border-top: 3rpx solid var(--z-primary); }
-.managed-activity .section-title { margin-top: 16rpx; }
-.managed-activity .muted { display: block; margin-top: 16rpx; }
+@import "../../templates/business.wxss";
+.activity-manage-page .managed-activity { padding: 30rpx 0; border-radius: 0; }
+.activity-manage-page .managed-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20rpx; }
+.activity-manage-page .managed-heading .section-title { flex: 1; min-width: 0; }
+.activity-manage-page .managed-heading .badge { flex-shrink: 0; }
+.activity-manage-page .managed-capability { display: flex; flex-wrap: wrap; gap: 10rpx 24rpx; margin-top: 22rpx; color: var(--z-link); font-size: 28rpx; }
+.activity-manage-page .managed-activity > .muted { margin-top: 12rpx; }

@@ -54,13 +54,13 @@
       },
       {
         "pagePath": "pages/communities/index",
-        "text": "加入我们",
+        "text": "社群",
         "iconPath": "assets/community.png",
         "selectedIconPath": "assets/community-active.png"
       },
       {
         "pagePath": "pages/explore/index",
-        "text": "发现",
+        "text": "档案",
         "iconPath": "assets/explore.png",
         "selectedIconPath": "assets/explore-active.png"
       },

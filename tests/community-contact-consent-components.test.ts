@@ -18,7 +18,7 @@ const initial = (consent?: boolean | null): Initial => ({ id: 81, updatedAt: '20
 function evaluate(text: string, dependencies: Values, extra: Values = {}) {
   const exports: Values = {};
   const output = ts.transpileModule(text, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true } }).outputText;
-  runInNewContext(output, { exports, require: (name: string) => dependencies[name] ?? require(name), ...extra });
+  runInNewContext(output, { exports, require: (name: string) => dependencies[name] ?? (name.endsWith('.module.css') ? {} : name === 'next/link' ? { __esModule: true, default: 'a' } : require(name)), ...extra });
   return exports;
 }
 function elements(value: unknown): Element[] {
@@ -134,6 +134,9 @@ describe('管理员申请网页：实际TSX handler、合成DOM/action边界', (
     expect(text(h.find(value => value.props.role === 'status'))).toContain('填写的资料已保留');
     expect(h.action).toHaveBeenCalledOnce(); expect(h.input.checked).toBe(true); expect(h.values.get('wechatQr')).toBe(file);
     expect(h.values.get('reason')).toBe(formData.get('reason')); expect(h.reset).not.toHaveBeenCalled(); expect(h.router.push).not.toHaveBeenCalled();
+    expect(text(h.find(value => value.props.role === 'status'))).toContain('提交结果尚未确认');
+    const verify = h.find(value => value.props.href === '/community/apply#my-applications');
+    expect(verify.props.target).toBe('_blank');
   });
 
   it('服务器field contactConsent拒绝后释放锁并定位指定提示，不丢原填写或代同意', async () => {
@@ -154,9 +157,11 @@ async function reviewHarness(contactConsent: unknown, complete = true, authorize
   const component = evaluate(sourceReview, {
     'next/image': { __esModule: true, default: 'img' }, 'next/headers': { headers: async () => new Headers() },
     'next/navigation': { notFound: () => { throw new Error('synthetic-notFound'); } },
-    '@/components/SubmitButton': { SubmitButton: 'button' }, '@/components/PageHeading': { PageHeading: 'header' }, '@/components/Content': { Pagination: 'nav' },
+    '@/components/SubmitButton': { SubmitButton: 'button' }, '@/components/Content': { Pagination: 'nav' },
+    '@/components/activity-pages/ActionForm': { ActionForm: 'form' },
+    '@/components/community-pages/CommunityPages': { CommunityPageHeader: 'header', CommunityEmpty: 'section' },
     '@/lib/content': { cms: async () => ({ auth: async () => ({ user }), find }) }, '@/lib/rules': rules, '@/lib/community-status': shared,
-    '../actions': { decideAction: vi.fn() },
+    '../actions': { decideCommunityResultAction: vi.fn() },
     '../../_club/ClubPage': { ClubFrame: 'div' },
   }).default as (value: unknown) => Promise<unknown>;
   const tree = await component({ searchParams: Promise.resolve({}) });

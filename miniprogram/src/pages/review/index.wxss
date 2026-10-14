@@ -1,5 +1,4 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
-.review-entry { border-top: 3rpx solid var(--z-primary); }
-.review-entry .section-title { margin: 18rpx 0 10rpx; }
-.review-entry .muted { display: block; }
-.review-entry .actions { padding-top: 28rpx; border-top: 1rpx solid var(--z-line); }
+@import "../../templates/business.wxss";
+.review-page .task-record > .task-note { padding: 16rpx 0; }
+.review-page .record-detail > .body { margin-top: 10rpx; }
+.review-page .review-actions .primary { flex-basis: 100%; }

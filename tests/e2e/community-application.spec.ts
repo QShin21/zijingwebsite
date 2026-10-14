@@ -44,9 +44,9 @@ async function login(page: Page, user: User) {
 test("完整申请、备案提示、私有二维码、社长查看全部资料后批准", async ({ page, browser, request }) => {
   await login(page, applicant);
   await page.goto("/community/apply");
-  await page.getByLabel("姓名", { exact: true }).fill("测试申请人");
-  await page.getByLabel("手机号", { exact: true }).fill("13900000000");
-  await page.getByLabel("微信名片二维码", { exact: true }).setInputFiles({ name: "card.png", mimeType: "image/png", buffer: qr });
+  await page.getByRole("textbox", { name: "姓名", exact: true }).fill("测试申请人");
+  await page.getByRole("textbox", { name: "手机号", exact: true }).fill("13900000000");
+  await page.getByLabel(/^微信名片二维码（(?:必填|更换时上传)）$/).setInputFiles({ name: "card.png", mimeType: "image/png", buffer: qr });
   await page.getByLabel("新游戏名称", { exact: false }).fill("X");
   await page.getByLabel("申请说明", { exact: false }).fill("希望负责本游戏的日常交流和社群组织工作。");
   await page.setViewportSize({ width: 390, height: 900 });
@@ -58,8 +58,8 @@ test("完整申请、备案提示、私有二维码、社长查看全部资料�
   await expect(consent).toHaveAccessibleDescription(/由于入社流程规定，必须展示管理联系方式/);
   await expect(consent).toBeFocused();
   await expect(consent).toHaveAttribute("aria-invalid", "true");
-  await expect(page.getByLabel("姓名", { exact: true })).toHaveValue("测试申请人");
-  expect(await page.getByLabel("微信名片二维码", { exact: true }).evaluate((input: HTMLInputElement) => input.files?.[0]?.name)).toBe("card.png");
+  await expect(page.getByRole("textbox", { name: "姓名", exact: true })).toHaveValue("测试申请人");
+  expect(await page.getByLabel(/^微信名片二维码（(?:必填|更换时上传)）$/).evaluate((input: HTMLInputElement) => input.files?.[0]?.name)).toBe("card.png");
   expect((await p.find({ collection: "community-applications", overrideAccess: true, where: { applicant: { equals: applicant.id } } })).totalDocs).toBe(0);
   await consent.check();
   await page.getByRole("button", { name: "提交审核", exact: true }).click();
@@ -98,7 +98,7 @@ test("完整申请、备案提示、私有二维码、社长查看全部资料�
   await page.goto("/community/apply");
   await expect(page.getByText("处理意见：请补充每周可投入的组织时间。", { exact: true })).toBeVisible();
   await page.getByRole("link", { name: "修改并重新提交", exact: true }).click();
-  await expect(page.getByLabel("姓名", { exact: true })).toHaveValue("测试申请人");
+  await expect(page.getByRole("textbox", { name: "姓名", exact: true })).toHaveValue("测试申请人");
   await expect(consent).toBeChecked();
   await page.getByLabel("申请说明", { exact: false }).fill("每周投入三小时，组织游戏交流并人工联系和拉群。");
   await page.getByRole("button", { name: "修改并重新提交", exact: true }).click();
@@ -129,15 +129,15 @@ test("完整申请、备案提示、私有二维码、社长查看全部资料�
 test("无效二维码被拒绝并保留填写资料", async ({ page }) => {
   await login(page, applicant);
   await page.goto("/community/apply");
-  await page.getByLabel("姓名", { exact: true }).fill("测试申请人");
-  await page.getByLabel("手机号", { exact: true }).fill("13900000000");
-  await page.getByLabel("微信名片二维码", { exact: true }).setInputFiles({ name: "bad.png", mimeType: "image/png", buffer: Buffer.from("invalid") });
+  await page.getByRole("textbox", { name: "姓名", exact: true }).fill("测试申请人");
+  await page.getByRole("textbox", { name: "手机号", exact: true }).fill("13900000000");
+  await page.getByLabel(/^微信名片二维码（(?:必填|更换时上传)）$/).setInputFiles({ name: "bad.png", mimeType: "image/png", buffer: Buffer.from("invalid") });
   await page.getByLabel("新游戏名称", { exact: false }).fill("失败申请测试");
   await page.getByLabel("申请说明", { exact: false }).fill("这是一条测试错误资料保留的申请说明。");
   await page.locator("form.application-form").getByRole("checkbox", { name: "我同意展示我的微信名片作为进群联系方式", exact: true }).check();
   await page.getByRole("button", { name: "提交审核", exact: true }).click();
   await expect(page.locator("form").getByRole("status")).toContainText("有效微信名片二维码图片");
-  await expect(page.getByLabel("姓名", { exact: true })).toHaveValue("测试申请人");
+  await expect(page.getByRole("textbox", { name: "姓名", exact: true })).toHaveValue("测试申请人");
   expect((await p.find({ collection: "community-applications", overrideAccess: true, where: { proposedGame: { equals: "失败申请测试" } } })).totalDocs).toBe(0);
 });
 

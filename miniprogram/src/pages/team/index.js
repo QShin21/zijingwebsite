@@ -20,7 +20,7 @@ function decorate(doc, section) {
 }
 Page(withVisualTheme({
   data: { needsLogin: false, loading: false, error: '', operationError: '', done: '', busy: false, actions: {},
-    view: 'recruitments', docs: [], page: 1, hasMore: false, total: 0, recruitments: empty(), ownApplications: empty(), memberships: empty(), managedTeams: empty() },
+    view: 'recruitments', docs: [], page: 1, hasMore: false, total: 0, expandedRecord: null, recruitments: empty(), ownApplications: empty(), memberships: empty(), managedTeams: empty() },
   ...actions,
   onLoad(options = {}) {
     if (this._unsubscribe) this._unsubscribe();
@@ -42,7 +42,7 @@ Page(withVisualTheme({
     if (this._visible && this._resumeRead) { this._resumeRead = false; await this.load(); }
   },
   resetPrivate() { this.setData({ needsLogin: !session.user(), loading: false, error: '', operationError: '', done: '', busy: Boolean(this._pendingWrite), actions: {},
-    docs: [], page: 1, hasMore: false, total: 0, recruitments: empty(), ownApplications: empty(), memberships: empty(), managedTeams: empty() }); },
+    docs: [], page: 1, hasMore: false, total: 0, expandedRecord: null, recruitments: empty(), ownApplications: empty(), memberships: empty(), managedTeams: empty() }); },
   onShow() {
     this._visible = true;
     if (this._disposed) return;
@@ -61,7 +61,11 @@ Page(withVisualTheme({
   tab(event) {
     const view = event.currentTarget.dataset.view;
     if (!fields[view] || this.data.busy || view === this.data.view) return;
-    this.setData({ view }); this.project();
+    this.setData({ view, expandedRecord: null }); this.project();
+  },
+  toggleRecord(event) {
+    const record = this.data.docs.find(doc => String(doc.id) === String(event.currentTarget.dataset.id));
+    if (record) this.setData({ expandedRecord: this.data.expandedRecord === record.id ? null : record.id });
   },
   async load(more = false) {
     if (this._disposed || this._visible === false) return;

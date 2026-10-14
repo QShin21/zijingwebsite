@@ -340,7 +340,7 @@ test("微信名片未同意仍阻止提交，提示精确且键盘焦点可见",
     exact: true,
   });
   await expect(consent).not.toBeChecked();
-  const realName = page.getByLabel("姓名", { exact: true });
+  const realName = page.getByRole("textbox", { name: "姓名", exact: true });
   await realName.fill("合成测试申请人");
   await page.getByRole("button", { name: "提交审核", exact: true }).click();
   await expect(page.locator("form.application-form [role=alert]")).toHaveText(
@@ -507,7 +507,7 @@ test("简介实际请求的加载、网络失败和重试状态可用", async ({
 test("两套局部主题在实际页面即时切换，保留输入与同意状态", async ({ page }) => {
   await login(page);
   await navigate(page, "/community/apply");
-  const name = page.getByLabel("姓名", { exact: true });
+  const name = page.getByRole("textbox", { name: "姓名", exact: true });
   const consent = page.getByRole("checkbox", {
     name: "我同意展示我的微信名片作为进群联系方式",
     exact: true,
@@ -554,14 +554,14 @@ test("无显式主题属性时，系统深色仍使用局部浅色方案", async
 test("真实提交等待与中断状态保持可读，已填资料不丢失", async ({ page }) => {
   await login(page);
   await navigate(page, "/community/apply");
-  await page.getByLabel("姓名", { exact: true }).fill("合成主题验证申请人");
-  await page.getByLabel("手机号", { exact: true }).fill("+999000000000");
+  await page.getByRole("textbox", { name: "姓名", exact: true }).fill("合成主题验证申请人");
+  await page.getByRole("textbox", { name: "手机号", exact: true }).fill("+999000000000");
   const image = await sharp({
     create: { width: 80, height: 80, channels: 3, background: "#9575b4" },
   })
     .png()
     .toBuffer();
-  await page.getByLabel("微信名片二维码", { exact: true }).setInputFiles({
+  await page.getByLabel(/^微信名片二维码（(?:必填|更换时上传)）$/).setInputFiles({
     name: "synthetic-card.png",
     mimeType: "image/png",
     buffer: image,
@@ -596,10 +596,10 @@ test("真实提交等待与中断状态保持可读，已填资料不丢失", as
       exact: true,
     });
     await expect(pending).toBeDisabled();
-    await expect(page.getByLabel("姓名", { exact: true })).toBeDisabled();
+    await expect(page.getByRole("textbox", { name: "姓名", exact: true })).toBeDisabled();
     expect(
       await page
-        .getByLabel("姓名", { exact: true })
+        .getByRole("textbox", { name: "姓名", exact: true })
         .evaluate((el) => getComputedStyle(el).backgroundColor),
     ).toBe(rgb(tokens[theme]["disabled-bg"]));
     expect(await pending.evaluate((el) => getComputedStyle(el).opacity)).toBe(
@@ -615,12 +615,15 @@ test("真实提交等待与中断状态保持可读，已填资料不丢失", as
   }
   await expect(
     page.locator("form.application-form [role=status]"),
-  ).toContainText("提交失败");
+  ).toContainText("提交结果尚未确认");
+  await expect(
+    page.getByRole("link", { name: "在新窗口核对我的申请", exact: true }),
+  ).toHaveAttribute("target", "_blank");
   await screenshot(page, "community-submit-interrupted-390");
-  await expect(page.getByLabel("姓名", { exact: true })).toHaveValue(
+  await expect(page.getByRole("textbox", { name: "姓名", exact: true })).toHaveValue(
     "合成主题验证申请人",
   );
-  await expect(page.getByLabel("手机号", { exact: true })).toHaveValue(
+  await expect(page.getByRole("textbox", { name: "手机号", exact: true })).toHaveValue(
     "+999000000000",
   );
   await page.unroute("**/community/apply");

@@ -122,6 +122,122 @@
   padding: 30px;
   min-width: 0;
 }
+.authTask {
+  display: grid;
+  grid-template-columns: minmax(0, 540px) minmax(220px, 280px);
+  justify-content: center;
+  align-items: start;
+  gap: clamp(40px, 7vw, 104px);
+  padding: 40px 0 80px;
+}
+.authMain {
+  min-width: 0;
+}
+.authNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  border-bottom: 1px solid var(--z-line);
+  margin-bottom: 28px;
+}
+.authNav a,
+.authNav > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  margin-bottom: -1px;
+  color: var(--z-muted);
+  font-size: 14px;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+.authNav [aria-current] {
+  color: var(--z-action);
+  border-bottom-color: var(--z-action);
+  font-weight: 600;
+}
+.authHeading h1 {
+  margin: 0;
+  font-size: clamp(30px, 3vw, 40px);
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+}
+.authHeading p {
+  margin: 14px 0 0;
+  color: var(--z-muted);
+  font-size: 16px;
+  line-height: 1.75;
+}
+.authFormArea {
+  margin-top: 30px;
+}
+.authFormArea .formTitle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.authContext {
+  margin-top: 76px;
+  min-width: 0;
+}
+.returnTask {
+  border-left: 3px solid var(--z-action);
+  padding: 4px 0 4px 20px;
+}
+.authContext h2 {
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+.authContext p,
+.authContext li {
+  color: var(--z-muted);
+  font-size: 14px;
+  line-height: 1.8;
+  margin: 0;
+}
+.returnTask > p:first-child {
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.authGuidance {
+  padding-top: 28px;
+  margin-top: 28px;
+  border-top: 1px solid var(--z-line);
+}
+.authGuidance ol {
+  margin: 0;
+  padding-left: 1.3em;
+}
+.authGuidance li + li {
+  margin-top: 10px;
+}
+.authGuidance a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--z-action);
+  margin-top: 8px;
+  font-size: 14px;
+  text-underline-offset: 4px;
+}
+.authPrivacy {
+  font-size: 14px;
+  color: var(--z-muted);
+  line-height: 1.8;
+  margin: 22px 0 0;
+}
+.authPrivacy a {
+  color: var(--z-action);
+  margin-left: 4px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .form {
   display: grid;
   gap: 20px;
@@ -299,6 +415,9 @@
 }
 .formFooter a,
 .textLink {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   color: var(--z-action);
   text-underline-offset: 3px;
 }
@@ -379,36 +498,99 @@
   align-items: center;
   gap: 12px;
 }
+.accountIndex {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 28px;
+  margin: -8px 0 36px;
+  border-bottom: 1px solid var(--z-line);
+}
+.accountIndex a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--z-muted);
+  text-decoration: none;
+  font-size: 14px;
+}
+.accountIndex a:hover {
+  color: var(--z-action);
+}
 .accountLayout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 290px;
-  gap: 44px;
-  align-items: start;
-  margin-bottom: 64px;
+  gap: 48px;
+  max-width: 1120px;
+  margin: 0 auto 64px;
 }
 .section {
-  margin-bottom: 34px;
   min-width: 0;
+  scroll-margin-top: 110px;
 }
 .sectionHeader {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 10px;
-  padding-bottom: 14px;
+  align-items: center;
+  gap: 12px 24px;
+  padding-bottom: 18px;
   border-bottom: 1px solid var(--z-line);
 }
 .sectionHeader h2 {
   margin: 0;
-  font-size: 22px;
+  scroll-margin-top: 110px;
+  font-size: 24px;
   line-height: 1.4;
 }
 .sectionHeader a,
-.sectionHeader p {
-  margin: 0;
-  font-size: 13px;
+.sectionHeader p,
+.sectionHeader > span {
+  font-size: 14px;
   color: var(--z-muted);
+}
+.sectionHeader a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--z-action);
+}
+.sectionHeader p {
+  margin: 8px 0 0;
+  max-width: 52ch;
+  line-height: 1.7;
+}
+.viewSwitch {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.viewSwitch a {
+  padding: 8px 14px;
+  border-radius: 6px;
+  color: var(--z-muted);
+  text-decoration: none;
+}
+.viewSwitch a[aria-current] {
+  background: var(--z-tint);
+  color: var(--z-action);
+  font-weight: 600;
+}
+.attentionSection {
+  border-left: 3px solid var(--z-warning);
+  border-radius: 0 6px 6px 0;
+  padding: 24px 28px 8px;
+  background: var(--z-surface);
+}
+.attentionSection .sectionHeader {
+  border-bottom-color: var(--z-line);
+}
+.attentionSection .record:last-child {
+  border-bottom: 0;
+}
+.queueCount {
+  color: var(--z-muted);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
 }
 .records {
   list-style: none;
@@ -418,15 +600,16 @@
 .record {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 18px;
+  gap: 24px;
   border-bottom: 1px solid var(--z-line);
-  padding: 20px 0;
+  padding: 24px 0;
   align-items: center;
 }
 .record h3 {
-  margin: 5px 0 6px;
-  font-size: 17px;
+  margin: 9px 0 6px;
+  font-size: 19px;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 .record h3 a {
   color: var(--z-ink);
@@ -434,26 +617,48 @@
 }
 .record h3 a:hover {
   color: var(--z-action);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .record p {
   margin: 5px 0 0;
   color: var(--z-muted);
-  font-size: 13px;
-  line-height: 1.7;
-}
-.record > a {
-  color: var(--z-action);
   font-size: 14px;
-  white-space: nowrap;
-  text-decoration: none;
+  line-height: 1.75;
 }
 .recordMeta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  gap: 12px;
+  font-size: 13px;
   color: var(--z-muted);
+}
+.recordEnd {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+.recordEnd time {
+  color: var(--z-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.recordAction {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 0;
+  color: var(--z-action);
+  font-size: 14px;
+  text-underline-offset: 4px;
+}
+.record[data-attention] .recordAction {
+  padding: 8px 16px;
+  color: var(--z-action-ink);
+  background: var(--z-action);
+  border-radius: 6px;
+  text-decoration: none;
 }
 .status {
   display: inline-block;
@@ -461,7 +666,7 @@
   background: var(--z-tint);
   border-radius: 4px;
   color: var(--z-action);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
   font-weight: 600;
 }
@@ -474,60 +679,101 @@
   background: color-mix(in srgb, var(--z-success) 9%, var(--z-surface));
 }
 .empty {
-  border: 1px dashed var(--z-line);
-  border-radius: 6px;
-  padding: 24px;
-  margin-top: 16px;
+  padding: 24px 0;
 }
 .empty h3 {
   margin: 0 0 8px;
-  font-size: 17px;
+  font-size: 18px;
 }
 .empty p {
   margin: 0;
-  font-size: 14px;
+  max-width: 62ch;
+  font-size: 15px;
   color: var(--z-muted);
   line-height: 1.8;
 }
 .empty a {
-  display: inline-block;
-  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 8px;
   color: var(--z-action);
   font-size: 14px;
 }
-.profile {
-  border: 1px solid var(--z-line);
-  background: var(--z-surface);
-  border-radius: 8px;
-  padding: 22px;
+.listNote {
+  margin: 18px 0 0;
+  color: var(--z-muted);
+  font-size: 13px;
+  line-height: 1.8;
 }
-.profile h2 {
-  margin: 0 0 20px;
-  font-size: 20px;
+.applicationLinks,
+.recordPagination {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  padding-top: 12px;
+  font-size: 14px;
+}
+.applicationLinks a,
+.recordPagination a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--z-action);
+}
+.recordPagination {
+  justify-content: space-between;
+  color: var(--z-muted);
+}
+.accountDetails {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 48px;
+}
+.accountDetails .record {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+.accountDetails .recordEnd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.profile {
+  min-width: 0;
+  padding-left: 32px;
+  border-left: 1px solid var(--z-line);
 }
 .profile dl {
-  margin: 0;
+  margin: 6px 0 20px;
 }
 .profile dl div {
-  padding: 12px 0;
+  padding: 14px 0;
   border-bottom: 1px solid var(--z-line);
 }
 .profile dt {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--z-muted);
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 .profile dd {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.7;
   overflow-wrap: anywhere;
 }
-.profile .actions {
+.profileActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  align-items: center;
   margin-top: 20px;
 }
-.profile .hint {
-  margin: 16px 0 0;
+.profileActions > .form {
+  flex-basis: 100%;
+  margin-top: 8px;
+  justify-items: start;
 }
 .workspaceLinks {
   list-style: none;
@@ -535,31 +781,30 @@
   margin: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 24px;
+  column-gap: 40px;
 }
 .workspaceLinks li {
   border-bottom: 1px solid var(--z-line);
 }
 .workspaceLinks a {
   display: block;
-  padding: 18px 0;
+  padding: 22px 0;
   text-decoration: none;
   color: var(--z-ink);
 }
 .workspaceLinks strong {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 15px;
+  font-size: 17px;
 }
 .workspaceLinks p {
-  margin: 5px 0 0;
+  margin: 8px 0 0;
   color: var(--z-muted);
-  font-size: 13px;
-  line-height: 1.7;
+  font-size: 14px;
+  line-height: 1.75;
 }
 .workspaceLinks a:hover strong {
   color: var(--z-action);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .error {
   padding: 50px 0 70px;
@@ -594,6 +839,23 @@
   display: block;
 }
 @media (max-width: 860px) {
+  .authTask {
+    grid-template-columns: minmax(0, 500px);
+    gap: 40px;
+    padding: 24px 0 56px;
+  }
+  .authContext {
+    margin-top: 0;
+  }
+  .accountDetails {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+  .accountDetails .profile {
+    border-left: 0;
+    padding-left: 0;
+    margin-bottom: 0;
+  }
   .authLayout {
     gap: 30px;
     grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1fr);
@@ -603,13 +865,34 @@
   }
   .accountLayout {
     grid-template-columns: minmax(0, 1fr);
-    gap: 10px;
+    gap: 40px;
   }
   .profile {
     margin-bottom: 30px;
   }
 }
 @media (max-width: 640px) {
+  .authTask {
+    padding-top: 8px;
+  }
+  .authNav {
+    margin-bottom: 24px;
+  }
+  .authContext {
+    display: grid;
+    gap: 24px;
+  }
+  .authGuidance {
+    padding-top: 20px;
+    margin-top: 0;
+  }
+  .accountIndex {
+    column-gap: 24px;
+    margin-bottom: 28px;
+  }
+  .attentionSection {
+    padding: 20px 16px 4px;
+  }
   .heading {
     padding: 18px 0 24px;
     margin-bottom: 24px;
@@ -674,10 +957,22 @@
     padding-right: 76px;
   }
   .record {
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
+    padding: 20px 0;
   }
-  .record > a {
-    font-size: 13px;
+  .recordEnd {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+  .record h3 {
+    font-size: 18px;
+  }
+  .applicationLinks {
+    gap: 4px 20px;
   }
   .workspaceLinks {
     grid-template-columns: minmax(0, 1fr);

@@ -9,10 +9,15 @@ const cms = require('../../lib/cms');
 const { actions, protect, error } = require('../../lib/page');
 const identity = () => String((session.user() || {}).id || '');
 Page(withVisualTheme({
-  data: { loading: true, error: '', needsLogin: false, busy: false, docs: [], page: 1, pages: 1, total: 0,
+  data: { expandedId: '', loading: true, error: '', needsLogin: false, busy: false, docs: [], page: 1, pages: 1, total: 0,
     department: '', status: '', message: '', directions: [{ value: '', label: '全部方向' }, { value: 'execution', label: '执行部' }, { value: 'publicity', label: '宣传部' }, { value: 'both', label: '执行/宣传均可' }],
     states: [{ value: '', label: '全部状态' }, ...Object.keys(staff.labels).map(value => ({ value, label: staff.labels[value] }))], departmentIndex: 0, statusIndex: 0 },
   ...actions,
+  toggleRecord(event) {
+    if (this.data.busy || this.data.loading || this.data.imageBusy) return;
+    const doc = this.data.docs.find(value => String(value.id) === String(event.currentTarget.dataset.id));
+    if (doc) this.setData({ expandedId: this.data.expandedId === doc.id ? '' : doc.id });
+  },
   onLoad(options) {
     if (this._unsubscribe) this._unsubscribe();
     this._scope = (this._scope || 0) + 1; this._ticket = (this._ticket || 0) + 1; this._lifetime = (this._lifetime || 0) + 1; this._actorEpoch = (this._actorEpoch || 0) + 1;
@@ -21,14 +26,14 @@ Page(withVisualTheme({
     this._endpoint = '/api/miniapp/staff/' + encodeURIComponent(options.id);
     this._writeEndpoint = '/api/staff/batches/' + encodeURIComponent(options.id) + '/application';
     this._userId = identity(); this._resumeRead = this.locked();
-    this.setData({ loading: false, busy: this.locked(), docs: [], total: 0, error: '', message: '', needsLogin: !session.user() });
+    this.setData({ loading: false, busy: this.locked(), docs: [], expandedId: '', total: 0, error: '', message: '', needsLogin: !session.user() });
     wx.setNavigationBarTitle({ title: '骨干申请审核' });
     this._unsubscribe = session.subscribe(user => {
       if (identity() === String(this._userId)) return;
       this._scope = (this._scope || 0) + 1; this._actorEpoch = (this._actorEpoch || 0) + 1; this._userId = identity(); this._drafts = {}; this._notice = null; this._actionsFresh = false;
       this._ticket = (this._ticket || 0) + 1;
       this._resumeRead = this.locked();
-      this.setData({ loading: false, busy: this.locked(), docs: [], total: 0, needsLogin: !user, error: '', message: '' });
+      this.setData({ loading: false, busy: this.locked(), docs: [], expandedId: '', total: 0, needsLogin: !user, error: '', message: '' });
     });
   },
   locked() { return Boolean(this._pendingWrite || this._modalLock); },
@@ -47,7 +52,7 @@ Page(withVisualTheme({
     this._hidden = true; this._ticket = (this._ticket || 0) + 1; this._scope = (this._scope || 0) + 1;
     this._resumeRead = true; this.disableActions(); this.setData({ loading: false, busy: this.locked() });
   },
-  onUnload() { this.onHide(); this._unloaded = true; this._lifetime = (this._lifetime || 0) + 1; this._drafts = {}; this._notice = null; this.setData({ docs: [], total: 0, message: '' }); if (this._unsubscribe) this._unsubscribe(); },
+  onUnload() { this.onHide(); this._unloaded = true; this._lifetime = (this._lifetime || 0) + 1; this._drafts = {}; this._notice = null; this.setData({ docs: [], expandedId: '', total: 0, message: '' }); if (this._unsubscribe) this._unsubscribe(); },
   onPullDownRefresh() { return this.load().finally(() => wx.stopPullDownRefresh()); },
   retry() { return this.load(); },
   async load(page = 1) {
@@ -55,7 +60,7 @@ Page(withVisualTheme({
     if (this.locked()) { this._resumeRead = true; return; }
     const context = this.capture(); this._actionsFresh = false;
     const ticket = this._ticket = (this._ticket || 0) + 1;
-    if (!protect(this)) { this._drafts = {}; this.setData({ loading: false, docs: [], total: 0 }); return; }
+    if (!protect(this)) { this._drafts = {}; this.setData({ loading: false, docs: [], expandedId: '', total: 0 }); return; }
     const user = session.user(); this._userId = user.id;
     this.setData({ loading: true, error: '', docs: [] });
     try {
@@ -72,7 +77,7 @@ Page(withVisualTheme({
         page: result.page, pages: result.totalPages, total: result.totalDocs });
     } catch (cause) { if (ticket === this._ticket && this.live(context)) {
       this._actionsFresh = false; if (cause.status === 401 || cause.status === 403) this._drafts = {};
-      this.setData({ docs: [], total: 0 }); error(this, cause);
+      this.setData({ docs: [], expandedId: '', total: 0 }); error(this, cause);
     } }
   },
   direction(event) { if (this.locked() || this._hidden || this._unloaded) return; const index = Number(event.detail.value), value = this.data.directions[index]; if (value) { this.setData({ departmentIndex: index, department: value.value }); return this.load(); } },
@@ -110,7 +115,7 @@ Page(withVisualTheme({
       this._notice = { ...context, text: cause.message || '保存未完成，请刷新后核对并重试' };
       if (cause.status === 401 || cause.status === 403) {
         this._drafts = {}; this._actionsFresh = false;
-        this.setData({ docs: [], total: 0 });
+        this.setData({ docs: [], expandedId: '', total: 0 });
       }
       if (!this._hidden) { if (operation.sent) this.disableActions(); this.showNotice(); }
     } }

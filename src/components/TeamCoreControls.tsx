@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import styles from "./team-pages/TeamPages.module.css";
 import { Questionnaire } from "./Questionnaire";
 import { SignupBuilder } from "./SignupBuilder";
 import {
@@ -110,7 +111,7 @@ function TeamActionFeedback({
   reviewHref: string;
 }) {
   return (
-    <div className="team-core-feedback">
+    <div className={`team-core-feedback ${styles.feedback}`}>
       <p role={action.failed ? "alert" : "status"}>{action.message}</p>
       {action.unconfirmed && (
         <>
@@ -299,7 +300,7 @@ export function TeamCoreEstablishmentForm({
     );
   if (saved)
     return (
-      <div role="status">
+      <div className={styles.note} role="status">
         <h2>建队申请已提交</h2>
         <p>请在下方查看状态与处理意见，等待有建队审批权限的负责人审核。</p>
         <Link href="/teams/manage">返回代表队工作台</Link>
@@ -332,47 +333,55 @@ export function TeamCoreEstablishmentForm({
       }}
     >
       <h2>{initial ? "修改并重新提交建队申请" : "申请建立代表队"}</h2>
-      <label>
-        游戏社群
-        <select
-          name="gameID"
-          defaultValue={initial?.gameID ?? games[0].id}
-          disabled={Boolean(initial)}
-        >
-          {games.map((game) => (
-            <option key={game.id} value={game.id}>
-              {game.title}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        拟用队名
-        <input
-          name="title"
-          required
-          minLength={2}
-          maxLength={80}
-          defaultValue={initial?.title}
-        />
-      </label>
-      <label>
-        组织与训练计划
-        <textarea
-          name="reason"
-          required
-          minLength={10}
-          maxLength={3000}
-          rows={6}
-          defaultValue={initial?.reason}
-        />
-      </label>
-      <p>
-        描述组织安排和训练计划即可。批准建队不授予新的管理角色，也不宣称未经核实的学校官方资格。
-      </p>
-      <button className="button" disabled={action.blocked}>
-        {action.busy ? "正在提交…" : "提交建队申请"}
-      </button>
+      <div className={styles.formSection}>
+        <h3>队伍归属与名称</h3>
+        <label>
+          游戏社群
+          <select
+            name="gameID"
+            defaultValue={initial?.gameID ?? games[0].id}
+            disabled={Boolean(initial)}
+          >
+            {games.map((game) => (
+              <option key={game.id} value={game.id}>
+                {game.title}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          拟用队名
+          <input
+            name="title"
+            required
+            minLength={2}
+            maxLength={80}
+            defaultValue={initial?.title}
+          />
+        </label>
+      </div>
+      <div className={styles.formSection}>
+        <h3>组织与训练安排</h3>
+        <label>
+          组织与训练计划
+          <textarea
+            name="reason"
+            required
+            minLength={10}
+            maxLength={3000}
+            rows={6}
+            defaultValue={initial?.reason}
+          />
+        </label>
+        <p>
+          描述组织安排和训练计划即可。批准建队不授予新的管理角色，也不宣称未经核实的学校官方资格。
+        </p>
+      </div>
+      <div className={styles.commit}>
+        <button className="button" disabled={action.blocked}>
+          {action.busy ? "正在提交…" : "提交建队申请"}
+        </button>
+      </div>
       <TeamActionFeedback action={action} reviewHref="/teams/apply" />
     </form>
   );
@@ -399,25 +408,39 @@ export function TeamCoreRecruitmentEditor({
     action = useTeamAction();
   const titleInput = useRef<HTMLInputElement>(null);
   return (
-    <section className="team-core-editor" aria-busy={action.busy}>
-      <h2>{initial ? "编辑招新批次" : "建立招新批次"}</h2>
-      <label className="member-form">
-        批次名称
-        <input
-          ref={titleInput}
-          value={title}
-          required
-          minLength={2}
-          maxLength={120}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-      </label>
-      <p>
-        核心资料为游戏
-        ID、位置、经历、训练时间和一种联系方式。可修改提示和加入选拔题；每位申请人均须填写核心题。开放招新前请设置截止时间。
-      </p>
-      <SignupBuilder value={form} onChange={setForm} />
-      <div className="member-form">
+    <section
+      id="team-recruitment-editor"
+      className={`team-core-editor ${styles.editor}`}
+      aria-busy={action.busy}
+    >
+      <header className={styles.editorHeader}>
+        <h2>{initial ? "编辑招新批次" : "建立招新批次"}</h2>
+        <p>依次准备批次名称、选拔问卷与开放安排，确认后保存。</p>
+      </header>
+      <div className={styles.formSection}>
+        <h3>批次信息</h3>
+        <label className="member-form">
+          批次名称
+          <input
+            ref={titleInput}
+            value={title}
+            required
+            minLength={2}
+            maxLength={120}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </label>
+        <p>
+          核心资料为游戏
+          ID、位置、经历、训练时间和一种联系方式。可修改提示和加入选拔题；每位申请人均须填写核心题。开放招新前请设置截止时间。
+        </p>
+      </div>
+      <div className={styles.formSection}>
+        <h3>选拔问卷与时间窗口</h3>
+        <SignupBuilder value={form} onChange={setForm} />
+      </div>
+      <div className={`member-form ${styles.commit}`}>
+        <h3>确认开放安排</h3>
         <label>
           批次状态
           <select value={status} onChange={(e) => setStatus(e.target.value)}>
@@ -478,7 +501,7 @@ export function TeamCoreAnswers({
   answers: Answers;
 }) {
   return (
-    <dl className="team-core-answers">
+    <dl className={styles.answers}>
       {form.questions
         .filter((q) => Object.hasOwn(answers, q.id))
         .map((q) => (
@@ -539,95 +562,133 @@ export function TeamCoreApplicant({
     setReceipt(result.result.result);
     if (action === "submit") setEditing(false);
   }
+  const nextStep = readOnly
+    ? "该批次或队伍已不再开放，此处保留本人的历史表单与答案。"
+    : receipt?.status === "approved"
+      ? "你已通过入队选拔。前往我的成员记录，填写简介或投稿队伍荣誉。"
+      : receipt?.status === "pending"
+        ? "申请已提交，等待本社群管理员审核。处理意见会保留在这份回执中。"
+        : receipt?.status === "returned"
+          ? "请阅读处理意见，补充申请后重新提交。"
+          : receipt?.status === "rejected"
+            ? "本次申请未通过，请查看处理意见。"
+            : "填写游戏经历与训练安排，可先保存草稿，核对后再提交。";
   return (
-    <section className="panel" aria-busy={mutation.busy}>
-      <h2>我的入队申请</h2>
-      <p>
-        {state} · {receipt ? labels[receipt.status] : "尚未申请"}
-      </p>
-      <p>
-        录取后可填写队内简介、投稿队伍荣誉。公开简介由本人选择展示字段；入队不会授予社群或平台管理权限。
-      </p>
+    <section className={styles.receipt} aria-busy={mutation.busy}>
+      <header className={styles.receiptHeader}>
+        <div>
+          <h2>我的入队申请</h2>
+          <p className={styles.muted}>
+            {state}
+            {receipt ? `；申请编号 ${receipt.id}` : ""}
+          </p>
+        </div>
+        <span className={styles.status} data-state={receipt?.status}>
+          {receipt ? labels[receipt.status] : "尚未申请"}
+        </span>
+      </header>
+      <div className={styles.note}>
+        <p>{nextStep}</p>
+      </div>
       {receipt?.reviewNote && (
-        <p className="preserve">处理意见：{receipt.reviewNote}</p>
-      )}
-      {readOnly && (
-        <p>该批次或队伍已不再开放，此处只展示本人的历史表单和答案。</p>
+        <div className={styles.note}>
+          <h3>处理意见</h3>
+          <p className="preserve">{receipt.reviewNote}</p>
+        </div>
       )}
       {receipt && !readOnly && receipt.formVersion !== version && (
         <p role="status">
           申请表已更新。原提交答案和版本仍保留，修改重提时请核对新题目。
         </p>
       )}
-      {receipt && (!editing || !editable) && (
-        <>
-          <p>申请编号：{receipt.id}</p>
-          <TeamCoreAnswers
-            form={normalizeSignup(receipt.formSnapshot)}
-            answers={receipt.answers as Answers}
+      <div className={styles.receiptBody}>
+        <div className={styles.receiptMain}>
+          {receipt && (!editing || !editable) && (
+            <section aria-label="已保存申请内容">
+              <h3>已保存的申请内容</h3>
+              <TeamCoreAnswers
+                form={normalizeSignup(receipt.formSnapshot)}
+                answers={receipt.answers as Answers}
+              />
+            </section>
+          )}
+          {editable &&
+            (editing ? (
+              <Questionnaire
+                key={version}
+                form={form}
+                initialAnswers={sanitizeDraft(
+                  form,
+                  (receipt?.answers ?? {}) as Answers,
+                )}
+                busy={!mutation.ready || mutation.busy}
+                onSaveDraft={(answers) => save(answers, "draft")}
+                onSubmit={(answers) => save(answers, "submit")}
+                submitLabel="提交入队申请"
+              />
+            ) : (
+              <div className={styles.actions}>
+                <button className="button" onClick={() => setEditing(true)}>
+                  {receipt?.status === "withdrawn" ||
+                  receipt?.status === "returned"
+                    ? "修改并重新提交"
+                    : "修改申请"}
+                </button>
+              </div>
+            ))}
+          <TeamActionFeedback
+            action={mutation}
+            reviewHref={`/teams/recruitment/${id}`}
           />
-        </>
-      )}
-      {editable &&
-        (editing ? (
-          <Questionnaire
-            key={version}
-            form={form}
-            initialAnswers={sanitizeDraft(
-              form,
-              (receipt?.answers ?? {}) as Answers,
-            )}
-            busy={!mutation.ready || mutation.busy}
-            onSaveDraft={(answers) => save(answers, "draft")}
-            onSubmit={(answers) => save(answers, "submit")}
-            submitLabel="提交入队申请"
-          />
-        ) : (
-          <button className="button" onClick={() => setEditing(true)}>
-            {receipt?.status === "withdrawn" || receipt?.status === "returned"
-              ? "修改并重新提交"
-              : "修改申请"}
-          </button>
-        ))}
-      {receipt &&
-        !readOnly &&
-        ["draft", "pending", "returned"].includes(receipt.status) && (
-          <button
-            className="button light"
-            disabled={mutation.blocked}
-            onClick={async () => {
-              if (mutation.blocked) return;
-              const result = await mutation.run(
-                {
-                  operation: "withdraw-join",
-                  id: receipt.id,
-                  revision: receipt.updatedAt,
-                },
-                "申请已撤回。开放期可修改重提。",
-              );
-              if (result.ok) {
-                setReceipt(result.result.result);
-                setEditing(false);
-              }
-            }}
-          >
-            撤回入队申请
-          </button>
-        )}
-      {!editable && (
-        <p>
-          {readOnly
-            ? "历史回执无法继续填写或提交。"
-            : receipt?.status === "approved"
-              ? "请在我的代表队记录查看成员状态或办理离队。"
-              : "目前不能修改或重提申请，待审核申请仍可撤回。"}
-        </p>
-      )}
-      <TeamActionFeedback
-        action={mutation}
-        reviewHref={`/teams/recruitment/${id}`}
-      />
-      <Link href="/teams/recruitment">返回招新与我的记录</Link>
+          <div className={styles.actions}>
+            {receipt &&
+              !readOnly &&
+              ["draft", "pending", "returned"].includes(receipt.status) && (
+                <button
+                  className="button light"
+                  disabled={mutation.blocked}
+                  onClick={async () => {
+                    if (mutation.blocked) return;
+                    const result = await mutation.run(
+                      {
+                        operation: "withdraw-join",
+                        id: receipt.id,
+                        revision: receipt.updatedAt,
+                      },
+                      "申请已撤回。开放期可修改重提。",
+                    );
+                    if (result.ok) {
+                      setReceipt(result.result.result);
+                      setEditing(false);
+                    }
+                  }}
+                >
+                  撤回入队申请
+                </button>
+              )}
+            <Link href="/teams/recruitment">返回招新与我的记录</Link>
+          </div>
+          {!editable && (
+            <p className={styles.muted}>
+              {readOnly
+                ? "历史回执无法继续填写或提交。"
+                : receipt?.status === "approved"
+                  ? "请在我的代表队记录查看成员状态或办理离队。"
+                  : "目前不能修改或重提申请，待审核申请仍可撤回。"}
+            </p>
+          )}
+        </div>
+        <aside className={styles.receiptAside}>
+          <h3>录取后的下一步</h3>
+          <p>录取后建立本队成员关系，可以填写队内简介、投稿队伍荣誉。</p>
+          <p>
+            可留空选填资料或移除头像，再选择是否公开整份简介。社群与平台管理任职由独立流程处理。
+          </p>
+          <Link href="/teams/recruitment#my-team-memberships">
+            查看我的成员记录
+          </Link>
+        </aside>
+      </div>
     </section>
   );
 }

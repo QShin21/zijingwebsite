@@ -158,25 +158,16 @@ export function QuestionnaireTools({
     <>
       <div className="designer-starts" aria-label="选择制作方式">
         <button type="button" onClick={() => open("templates")}>
-          <span className="start-icon" aria-hidden="true">
-            ▦
-          </span>
           <strong>从模板开始</strong>
-          <small>8 个场景 · 先预览再应用</small>
+          <small>先预览完整题目，再选择应用</small>
         </button>
         <button type="button" onClick={() => open("ai")}>
-          <span className="start-icon" aria-hidden="true">
-            ✦
-          </span>
           <strong>AI 制作问卷</strong>
-          <small>描述需求 · 生成可编辑草稿</small>
+          <small>描述需求，生成后检查题目与逻辑</small>
         </button>
         <button type="button" onClick={() => open("import")}>
-          <span className="start-icon" aria-hidden="true">
-            ↥
-          </span>
           <strong>导入已有问卷</strong>
-          <small>文本或 JSON · 检查后应用</small>
+          <small>导入文本或 JSON，检查后应用</small>
         </button>
       </div>
       <div className="designer-export">
@@ -206,7 +197,6 @@ export function QuestionnaireTools({
       >
         <div className="dialog-top">
           <div>
-            <small className="designer-eyebrow">创建问卷内容</small>
             <h2 id={titleId}>
               {candidate
                 ? candidate.label
@@ -221,7 +211,12 @@ export function QuestionnaireTools({
             关闭
           </button>
         </div>
-        <div ref={sourceTabs} className="designer-tabs" role="group" aria-label="内容来源">
+        <div
+          ref={sourceTabs}
+          className="designer-tabs"
+          role="group"
+          aria-label="内容来源"
+        >
           {(
             [
               ["templates", "模板库"],
@@ -403,7 +398,11 @@ export function QuestionnaireTools({
                   onClick={() => {
                     setCandidate(null);
                     setTryFill(false);
-                    sourceTabs.current?.querySelector<HTMLButtonElement>('button[aria-pressed="true"]')?.focus();
+                    sourceTabs.current
+                      ?.querySelector<HTMLButtonElement>(
+                        'button[aria-pressed="true"]',
+                      )
+                      ?.focus();
                   }}
                 >
                   返回

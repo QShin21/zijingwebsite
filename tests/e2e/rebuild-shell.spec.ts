@@ -60,13 +60,13 @@ memberTest("rebuild theme control preserves text, files, consent and exact error
   const form = page.locator("form.application-form");
   await expect(form).toHaveAttribute("aria-busy", "false");
   await expect(page.locator("html")).toHaveAttribute("data-z-theme", "light");
-  await page.getByLabel("姓名", { exact: true }).fill("合成重构申请人");
-  await page.getByLabel("手机号", { exact: true }).fill("00000000000");
+  await page.getByRole("textbox", { name: "姓名", exact: true }).fill("合成重构申请人");
+  await page.getByRole("textbox", { name: "手机号", exact: true }).fill("00000000000");
   await page.getByLabel("新游戏名称", { exact: false }).fill("合成主题社群");
   const reason = page.getByLabel("申请说明", { exact: false });
   const text = "仅用于隔离合成重构验收，保留长文本、文件和本人明确选择。".repeat(20);
   await reason.fill(text);
-  const file = page.getByLabel("微信名片二维码", { exact: true });
+  const file = page.getByLabel(/^微信名片二维码（(?:必填|更换时上传)）$/);
   await file.setInputFiles({ name: "synthetic-rebuild-card.png", mimeType: "image/png", buffer: await sharp({ create: { width: 80, height: 80, channels: 3, background: "#6a398a" } }).png().toBuffer() });
   const consent = page.getByRole("checkbox", { name: consentLabel, exact: true });
   await expect(consent).not.toBeChecked();
@@ -75,7 +75,7 @@ memberTest("rebuild theme control preserves text, files, consent and exact error
   await expect(consent).toBeFocused();
   await page.getByRole("button", { name: "切换到深色主题", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-z-theme", "dark");
-  await expect(page.getByLabel("姓名", { exact: true })).toHaveValue("合成重构申请人");
+  await expect(page.getByRole("textbox", { name: "姓名", exact: true })).toHaveValue("合成重构申请人");
   await expect(reason).toHaveValue(text);
   await expect(consent).not.toBeChecked();
   await expect(form.getByRole("alert")).toHaveText(consentError);

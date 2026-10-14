@@ -1,10 +1,28 @@
-.community-page .page-heading { margin-bottom: 22rpx; }
-.community-page .body:first-child { margin-top: 0; }
-.join-guide { padding: 28rpx 0; border-bottom: 1rpx solid var(--z-line); }
-.contact { padding: 28rpx 0; margin-top: 26rpx; border-top: 1rpx solid var(--z-line); }
-.contact-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20rpx; }
-.contact-qr { width: 312rpx; height: 312rpx; }
-.qr-caption { display: block; text-align: center; font-size: 25rpx; color: var(--z-muted); }
-.status-title { display: block; font-size: 32rpx; line-height: 1.7; font-weight: 600; }
-.honor-pins { border-top: 2rpx solid var(--z-primary); padding-top: 26rpx; margin-bottom: 36rpx; }
-.community-card .body { font-size: 30rpx; }
+.community-page .page-heading { margin-bottom: 16rpx; }
+.community-page .title { font-size: 48rpx; }
+.mini-page .intro-toggle { padding-bottom: 0; font-size: 26rpx; }
+.community-intro { margin-top: 24rpx; padding-top: 20rpx; border-top: 1rpx solid var(--z-line); }
+.join-progress { padding: 18rpx 0 26rpx; border-bottom: 1rpx solid var(--z-line); }
+.join-progress.has-record { padding: 24rpx; background: var(--z-surface); border: 1rpx solid var(--z-line); border-left: 4rpx solid var(--z-primary); border-radius: 0 12rpx 12rpx 0; }
+.join-progress .section-heading { border-bottom: 0; padding-bottom: 6rpx; }
+.status-title { display: block; font-size: 31rpx; font-weight: 600; line-height: 1.6; }
+.contact-panel > .section-heading { align-items: center; }
+.contact-panel > .section-heading .section-title { flex: 1; min-width: 300rpx; font-size: 32rpx; }
+.contact { padding: 28rpx 0; border-bottom: 1rpx solid var(--z-line); }
+.contact-qr { width: 328rpx; height: 328rpx; }
+.contact-heading { text-align: left; }
+.qr-caption { display: block; text-align: center; font-size: 26rpx; color: var(--z-muted); }
+.contact-action { margin-top: 24rpx; width: 100%; }
+.join-guide { margin-top: 32rpx; padding-bottom: 26rpx; border-bottom: 1rpx solid var(--z-line); }
+.join-steps { margin: 22rpx 0; }
+.join-steps > view { display: flex; align-items: center; gap: 20rpx; padding: 10rpx 0; font-size: 29rpx; }
+.join-step-number { width: 36rpx; flex-shrink: 0; color: var(--z-primary); font-variant-numeric: tabular-nums; }
+.community-organize { padding: 26rpx; background: var(--z-surface); border: 1rpx solid var(--z-line); border-radius: 12rpx; }
+.honor-pins { margin: 24rpx 0; padding: 24rpx; border: 1rpx solid var(--z-line); border-radius: 12rpx; background: var(--z-surface); }
+.honor-pins .section-heading { border-bottom: 0; }
+.honor-pins .shortcut:last-child { border-bottom: 0; }
+.community-record { padding: 28rpx 0; border-bottom: 1rpx solid var(--z-line); }
+.community-update .entry-link { display: block; margin-top: 18rpx; font-size: 27rpx; }
+.community-record .card-title { font-size: 33rpx; }
+.community-record .body { margin-top: 16rpx; }
+@media (max-width: 359px) { .qr-caption, .join-steps > view, .community-update .entry-link { font-size: 14px; } }

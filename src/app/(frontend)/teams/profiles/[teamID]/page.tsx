@@ -7,8 +7,8 @@ import { profileTeam } from "@/lib/team-profiles";
 import { teamProfileID } from "@/lib/team-profiles-model";
 import { TeamProfilesPanel } from "@/components/team-profiles/TeamProfilesPanel";
 import { PageHeading } from "@/components/PageHeading";
-import { ClubFrame, ClubSteps } from "../../../_club/ClubPage";
-import styles from "../../../_club/ClubPages.module.css";
+import { ClubFrame } from "../../../_club/ClubPage";
+import styles from "@/components/team-pages/TeamPages.module.css";
 
 export const metadata = {
   title: "我的队内简介",
@@ -30,29 +30,12 @@ export default async function Page({
   if (!canParticipate(user)) redirect("/login");
   const team = await profileTeam(p, teamID).catch(() => notFound());
   return (
-    <ClubFrame className={styles.profileScope}>
+    <ClubFrame className={styles.workspace}>
       <PageHeading
         title={team.title}
         eyebrow="我的队内简介"
-        description="我的队内简介"
+        description="用公开昵称介绍自己，预览后确认是否在本队名单展示。"
         parent={{ href: `/teams/${team.slug}`, label: "返回代表队" }}
-      />
-      <ClubSteps
-        label="队内简介编辑流程"
-        steps={[
-          {
-            title: "填写公开资料",
-            description: "使用公开昵称，介绍你的游戏角色。",
-          },
-          {
-            title: "预览展示内容",
-            description: "确认头像与简介，以及是否选择展示。",
-          },
-          {
-            title: "保存或隐藏",
-            description: "保存后生效；可取消展示并再次保存。",
-          },
-        ]}
       />
       <TeamProfilesPanel teamID={teamID} startEditing />
       <Link className="text-link" href={`/teams/${team.slug}#team-members`}>

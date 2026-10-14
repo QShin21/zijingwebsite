@@ -10,8 +10,13 @@ const identity = () => String((session.user() || {}).id || '');
 const labels = { requested: '已记录意向，待联系管理员', friendReported: '本人已报告好友申请，待核实', awaitingInvite: '好友已人工确认通过，等待拉群', joined: '管理员已人工确认进群', withdrawn: '网站意向已撤回' };
 Page(withVisualTheme({
   data: { title: '', needsLogin: false, allowed: false, loading: false, error: '', operationError: '', done: '',
-    docs: [], page: 1, hasMore: false, busy: false },
+    docs: [], expandedId: '', page: 1, hasMore: false, busy: false },
   ...actions,
+  toggleRecord(event) {
+    if (this.data.busy || this.data.loading || this.data.imageBusy) return;
+    const doc = this.data.docs.find(value => String(value.id) === String(event.currentTarget.dataset.id));
+    if (doc) this.setData({ expandedId: this.data.expandedId === doc.id ? '' : doc.id });
+  },
   onLoad(options = {}) {
     if (this._unsubscribe) this._unsubscribe();
     this._disposed = false; this._visible = false; this._resumeRead = false; this._context = (this._context || 0) + 1; this.invalidate();
@@ -32,7 +37,7 @@ Page(withVisualTheme({
     this.setData({ busy: false });
     if (this._visible && this._resumeRead) { this._resumeRead = false; await this.load(); }
   },
-  resetPrivate() { this.setData({ needsLogin: !session.user(), allowed: false, loading: false, error: '', operationError: '', done: '', docs: [], page: 1, hasMore: false, busy: Boolean(this._pendingWrite) }); },
+  resetPrivate() { this.setData({ needsLogin: !session.user(), allowed: false, loading: false, error: '', operationError: '', done: '', docs: [], expandedId: '', page: 1, hasMore: false, busy: Boolean(this._pendingWrite) }); },
   onShow() {
     this._visible = true;
     if (this._disposed) return;

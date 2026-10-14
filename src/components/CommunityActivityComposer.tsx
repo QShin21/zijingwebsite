@@ -1,5 +1,5 @@
 "use client";
-import styles from "./activity-pages/Workspace.module.css";
+import styles from "./community-pages/CommunityPages.module.css";
 import { useEffect, useState } from "react";
 import { SignupBuilder } from "./SignupBuilder";
 import { emptySignup } from "@/lib/signup-schema";
@@ -12,42 +12,62 @@ export function CommunityActivityComposer({ game }: { game: number }) {
   const [ready, setReady] = useState(false);
   useEffect(() => setReady(true), []);
   return (
-    <details className={styles.batch}>
+    <details className={styles.disclosure}>
       <summary>发布活动与通知</summary>
-      <p>发布范围为当前游戏社群。活动可配置报名问卷，通知用于发布安排与说明。</p>
-      <ActionForm action={publishCommunityResultAction} resetOnSuccess onSuccess={() => setSignup(emptySignup)}>
+      <p>
+        发布范围为当前游戏社群。活动可配置报名问卷，通知用于发布安排与说明。
+      </p>
+      <ActionForm
+        action={publishCommunityResultAction}
+        resetOnSuccess
+        onSuccess={() => setSignup(emptySignup)}
+      >
         <fieldset className="composer-fields" disabled={!ready}>
           <input type="hidden" name="game" value={game} />
-          <label>
-            类型
-            <select
-              name="kind"
-              value={kind}
-              onChange={(e) => setKind(e.target.value)}
-            >
-              <option value="event">社群活动</option>
-              <option value="notice">社群通知</option>
-            </select>
-          </label>
-          <label>
-            标题
-            <input name="title" maxLength={120} required />
-          </label>
-          <label>
-            内容
-            <textarea name="body" rows={8} maxLength={5000} required />
-          </label>
+          <section className={styles.formGroup} aria-label="内容与发布范围">
+            <h3>内容与发布范围</h3>
+            <label>
+              类型
+              <select
+                name="kind"
+                value={kind}
+                onChange={(e) => setKind(e.target.value)}
+              >
+                <option value="event">社群活动</option>
+                <option value="notice">社群通知</option>
+              </select>
+            </label>
+            <label>
+              <span>
+                标题<span aria-hidden="true">（必填）</span>
+              </span>
+              <input name="title" maxLength={120} required />
+            </label>
+            <label>
+              <span>
+                内容<span aria-hidden="true">（必填）</span>
+              </span>
+              <textarea name="body" rows={8} maxLength={5000} required />
+            </label>
+          </section>
           {kind === "event" && (
-            <>
+            <section className={styles.formGroup} aria-label="活动报名配置">
+              <h3>活动报名配置</h3>
+              <p>按活动实际需要启用问卷，报名和统计沿用当前活动。</p>
               <SignupBuilder value={signup} onChange={setSignup} />
               <input
                 type="hidden"
                 name="signupForm"
                 value={JSON.stringify(signup)}
               />
-            </>
+            </section>
           )}
-          <SubmitButton className="button">发布</SubmitButton>
+          <div className={styles.submitRow}>
+            <SubmitButton className="button">
+              {kind === "event" ? "发布社群活动" : "发布社群通知"}
+            </SubmitButton>
+            <p>内容将发布到当前游戏社群。</p>
+          </div>
         </fieldset>
       </ActionForm>
     </details>

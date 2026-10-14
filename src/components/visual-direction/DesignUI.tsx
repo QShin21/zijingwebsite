@@ -5,6 +5,7 @@ import { Picture } from "@/components/Content";
 import type { Content } from "@/lib/content";
 import { formatDate, routeFor, eventState } from "@/lib/rules";
 import type { ThemeName } from "./theme";
+import chrome from "./SiteChrome.module.css";
 
 export const designBase = "/design-preview";
 export function DesignHeader({
@@ -30,9 +31,13 @@ export function DesignHeader({
           </Link>
         </div>
       )}
-      <header className="z-header">
-        <div className="z-header-inner">
-          <Link href={preview ? designBase : "/"} className="z-brand">
+      <header className={chrome.header}>
+        <div className={chrome.headerInner}>
+          <Link
+            href={preview ? designBase : "/"}
+            prefetch={signedIn ? undefined : false}
+            className={chrome.brand}
+          >
             <BrandMark />
             <span>
               {name}
@@ -56,23 +61,42 @@ export function DesignFooter({
   preview = true,
 }: { name?: string; footer?: string | null; preview?: boolean } = {}) {
   return (
-    <footer className="z-footer">
-      <div className="z-footer-top">
-        <div>
+    <footer className={chrome.footer}>
+      <div className={chrome.footerTop}>
+        <div className={chrome.footerIdentity}>
           <strong>{name}</strong>
           <p>{footer || "在校园里，为共同的热爱相遇。"}</p>
         </div>
-        <nav aria-label="页脚">
-          <Link href="/about">关于社团</Link>
-          <Link href="/contact">联系与合作</Link>
-          <Link href="/privacy">隐私说明</Link>
-          <Link href="/account">个人中心</Link>
+        <nav aria-label="页脚" className={chrome.footerNav}>
+          <div>
+            <p>认识紫荆</p>
+            <Link href="/about" prefetch={false}>
+              关于社团
+            </Link>
+            <Link href="/contact" prefetch={false}>
+              联系与合作
+            </Link>
+          </div>
+          <div>
+            <p>参与与帮助</p>
+            <Link href="/account" prefetch={false}>
+              个人中心
+            </Link>
+            <Link href="/privacy" prefetch={false}>
+              隐私说明
+            </Link>
+          </div>
         </nav>
       </div>
-      <p className="z-footer-bottom">
-        © {new Date().getFullYear()} {name}
-        {preview ? " · 隔离设计预览，内容与权限沿用真实业务" : ""}
-      </p>
+      <div className={chrome.footerBottom}>
+        <p>
+          © {new Date().getFullYear()} {name}
+        </p>
+        {preview && <p>隔离设计预览，内容与权限沿用真实业务</p>}
+        <a href={preview ? "#design-main" : "#main"}>
+          回到页首 <Icon name="diagonal" />
+        </a>
+      </div>
     </footer>
   );
 }

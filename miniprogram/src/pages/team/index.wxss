@@ -1,1 +1,14 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
+.team-page .title { font-size: 46rpx; }
+.team-view-intro { padding: 14rpx 0 20rpx; }
+.team-result-heading { margin-bottom: 0; }
+.team-record { padding: 30rpx 0; border-bottom: 1rpx solid var(--z-line); }
+.team-record-title { margin-top: 12rpx; }
+.recruitment-dates { display: flex; flex-wrap: wrap; gap: 16rpx 30rpx; margin-top: 14rpx; font-size: 28rpx; }
+.recruitment-dates > view { flex: 1; min-width: 220rpx; font-variant-numeric: tabular-nums; }
+.team-record-action { margin-top: 24rpx; width: 100%; }
+.review-feedback { padding: 20rpx; margin-top: 20rpx; background: var(--z-surface); border-left: 3rpx solid var(--z-line); font-size: 29rpx; white-space: pre-wrap; word-break: break-word; }
+.review-feedback .field-label { margin-bottom: 8rpx; }
+.mini-page .record-disclosure { display: block; text-align: left; margin-top: 16rpx; font-size: 27rpx; }
+.team-record-links { border-top: 1rpx solid var(--z-line); }
+.team-record-links .plain { display: block; width: 100%; text-align: left; }
+.team-organization .actions { margin-top: 12rpx; }

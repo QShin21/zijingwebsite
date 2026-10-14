@@ -144,9 +144,8 @@ export function SignupBuilder({
     >
       <div className="designer-heading">
         <div>
-          <span className="designer-eyebrow">问卷制作工作区</span>
           <h2>问卷制作</h2>
-          <p>选择起点，完善题目，试填后保存。</p>
+          <p>先编辑收集内容，再设置接收时间。保存前可随时试填。</p>
         </div>
         <div className="signup-tools">
           <button
@@ -183,142 +182,162 @@ export function SignupBuilder({
           </button>
         </div>
       </div>
-      <label className="signup-choice">
-        <input
-          type="checkbox"
-          checked={value.enabled}
-          onChange={(e) => patch({ enabled: e.target.checked })}
+      <div className="designer-enable">
+        <label className="signup-choice">
+          <input
+            type="checkbox"
+            checked={value.enabled}
+            onChange={(e) => patch({ enabled: e.target.checked })}
+          />
+          启用填写问卷报名
+        </label>
+        <span>
+          {value.enabled
+            ? `${value.questions.length} 道题目，修改保存后生效`
+            : "当前不接收问卷报名，已编辑的题目保留"}
+        </span>
+      </div>
+      <details className="designer-source-tools" open={!value.questions.length}>
+        <summary>模板、AI 与导入工具</summary>
+        <QuestionnaireTools
+          value={value}
+          onChange={(next) => {
+            onChange(next);
+            setTab("questions");
+            setSelected(next.questions[0]?.id || "");
+            setMessage("内容已应用到编辑器。请预览后保存问卷。");
+          }}
         />
-        启用填写问卷报名
-      </label>
-      <QuestionnaireTools
-        value={value}
-        onChange={(next) => {
-          onChange(next);
-          setTab("questions");
-          setSelected(next.questions[0]?.id || "");
-          setMessage("内容已应用到编辑器。请预览后保存问卷。");
-        }}
-      />
+      </details>
       {value.enabled && (
         <>
-          <div className="designer-tabs" role="group" aria-label="制作步骤">
+          <div className="designer-tabs" role="group" aria-label="问卷编辑视图">
             <button
               type="button"
               aria-pressed={tab === "questions"}
               onClick={() => setTab("questions")}
             >
-              1 · 编辑题目 <span>{value.questions.length}</span>
+              编辑题目 <span>{value.questions.length}</span>
             </button>
             <button
               type="button"
               aria-pressed={tab === "settings"}
               onClick={() => setTab("settings")}
             >
-              2 · 问卷设置
+              问卷设置
             </button>
             <button
               type="button"
               onClick={openPreview}
               disabled={!value.questions.length}
             >
-              3 · 预览试填
+              预览试填
             </button>
           </div>
           {tab === "settings" ? (
             <div className="designer-form-settings">
-              <h3>问卷内容</h3>
-              <label>
-                问卷标题
-                <input
-                  value={value.title || ""}
-                  maxLength={120}
-                  placeholder="默认使用活动报名"
-                  onChange={(e) => patch({ title: e.target.value }, "title")}
-                />
-              </label>
-              <label>
-                报名说明
-                <textarea
-                  value={value.intro}
-                  maxLength={1000}
-                  rows={4}
-                  onChange={(e) => patch({ intro: e.target.value }, "intro")}
-                />
-              </label>
-              <label>
-                提交成功提示
-                <textarea
-                  value={value.completionMessage || ""}
-                  maxLength={1000}
-                  onChange={(e) =>
-                    patch(
-                      { completionMessage: e.target.value },
-                      "completionMessage",
-                    )
-                  }
-                />
-              </label>
-              <div className="signup-times">
+              <section className="designer-settings-section">
+                <header>
+                  <h3>填写者看到的内容</h3>
+                  <p>说明收集目的，并明确提交后的下一步。</p>
+                </header>
                 <label>
-                  问卷主题
-                  <select
-                    value={value.theme || "purple"}
-                    onChange={(e) =>
-                      patch({ theme: e.target.value as SignupForm["theme"] })
-                    }
-                  >
-                    <option value="purple">紫荆紫</option>
-                    <option value="blue">清爽蓝</option>
-                    <option value="green">自然绿</option>
-                  </select>
+                  问卷标题
+                  <input
+                    value={value.title || ""}
+                    maxLength={120}
+                    placeholder="默认使用活动报名"
+                    onChange={(e) => patch({ title: e.target.value }, "title")}
+                  />
                 </label>
                 <label>
-                  每页题数
-                  <select
-                    value={value.pageSize || 5}
-                    onChange={(e) =>
-                      patch({ pageSize: Number(e.target.value) })
-                    }
-                  >
-                    {[1, 3, 5, 10, 20].map((n) => (
-                      <option key={n} value={n}>
-                        每页 {n} 题
-                      </option>
-                    ))}
-                  </select>
+                  报名说明
+                  <textarea
+                    value={value.intro}
+                    maxLength={1000}
+                    rows={4}
+                    onChange={(e) => patch({ intro: e.target.value }, "intro")}
+                  />
                 </label>
-              </div>
-              <h3>接收与时间</h3>
-              <div className="signup-times">
-                {(["start", "end"] as const).map((key) => (
-                  <label key={key}>
-                    {key === "start" ? "报名开始" : "报名截止"}
-                    <input
-                      type="datetime-local"
-                      value={localDate(value[key])}
+                <label>
+                  提交成功提示
+                  <textarea
+                    value={value.completionMessage || ""}
+                    maxLength={1000}
+                    onChange={(e) =>
+                      patch(
+                        { completionMessage: e.target.value },
+                        "completionMessage",
+                      )
+                    }
+                  />
+                </label>
+                <div className="signup-times">
+                  <label>
+                    问卷主题
+                    <select
+                      value={value.theme || "purple"}
                       onChange={(e) =>
-                        patch({
-                          [key]: e.target.value
-                            ? new Date(e.target.value).toISOString()
-                            : "",
-                        })
+                        patch({ theme: e.target.value as SignupForm["theme"] })
                       }
-                    />
+                    >
+                      <option value="purple">紫荆紫</option>
+                      <option value="blue">清爽蓝</option>
+                      <option value="green">自然绿</option>
+                    </select>
                   </label>
-                ))}
-              </div>
-              <label className="signup-choice">
-                <input
-                  type="checkbox"
-                  checked={value.closed}
-                  onChange={(e) => patch({ closed: e.target.checked })}
-                />
-                暂停接收报名
-              </label>
-              <p className="muted">
-                每个账号保留一份答卷。修改问卷后，已有答卷保留提交时的题目和答案。
-              </p>
+                  <label>
+                    每页题数
+                    <select
+                      value={value.pageSize || 5}
+                      onChange={(e) =>
+                        patch({ pageSize: Number(e.target.value) })
+                      }
+                    >
+                      {[1, 3, 5, 10, 20].map((n) => (
+                        <option key={n} value={n}>
+                          每页 {n} 题
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              </section>
+              <section className="designer-settings-section">
+                <header>
+                  <h3>接收与时间</h3>
+                  <p>开放时间和暂停状态将影响实际报名入口。</p>
+                </header>
+                <div className="signup-times">
+                  {(["start", "end"] as const).map((key) => (
+                    <label key={key}>
+                      {key === "start" ? "报名开始" : "报名截止"}
+                      <input
+                        type="datetime-local"
+                        value={localDate(value[key])}
+                        onChange={(e) =>
+                          patch({
+                            [key]: e.target.value
+                              ? new Date(e.target.value).toISOString()
+                              : "",
+                          })
+                        }
+                      />
+                    </label>
+                  ))}
+                </div>
+                <label className="signup-choice">
+                  <input
+                    type="checkbox"
+                    checked={value.closed}
+                    onChange={(e) => patch({ closed: e.target.checked })}
+                  />
+                  暂停接收报名
+                </label>
+                <p className="muted">
+                  每个账号保留一份答卷。修改问卷后，已有答卷保留提交时的题目和答案。
+                </p>
+              </section>
             </div>
           ) : (
             <div className="designer-workspace">
@@ -472,7 +491,7 @@ export function SignupBuilder({
             </p>
           )}
           <div className="designer-footer">
-            <small>{value.questions.length} 题 · 保存后生效</small>
+            <p>共 {value.questions.length} 题。完成检查后，在下方保存问卷。</p>
             <button
               type="button"
               onClick={openPreview}
@@ -483,7 +502,11 @@ export function SignupBuilder({
           </div>
         </>
       )}
-      <p role="status">{message}</p>
+      {message && (
+        <p className={surface.resultMessage} role="status">
+          {message}
+        </p>
+      )}
       <dialog
         ref={dialog}
         className="questionnaire-dialog"

@@ -17,11 +17,16 @@ const decorate = doc => ({ ...doc, actions: doc.actions || {}, dateText: format.
 const confirm = (title, content) => new Promise((resolve, reject) => wx.showModal({ title, content, success: value => resolve(value.confirm), fail: () => reject(new Error('确认未完成，请重试')) }));
 
 Page(withVisualTheme({
-  data: { user: null, needsLogin: false, loading: false, error: '', docs: [], page: 1, hasMore: false,
+  data: { user: null, needsLogin: false, loading: false, error: '', docs: [], expandedId: '', page: 1, hasMore: false,
     games: [{ id: '', title: '申请新游戏社群' }], gamesLoading: false, gamesError: '', gameIndex: 0,
     apply: false, mode: 'submit', editId: '', revision: '', proposedGame: '', realName: '', phone: '', reason: '',
     qr: '', savedQr: false, contactConsent: false, busy: false, imageBusy: false, formError: '', operationError: '', done: '' },
   ...actions,
+  toggleRecord(event) {
+    if (this.data.busy || this.data.loading || this.data.imageBusy) return;
+    const doc = this.data.docs.find(value => String(value.id) === String(event.currentTarget.dataset.id));
+    if (doc) this.setData({ expandedId: this.data.expandedId === doc.id ? '' : doc.id });
+  },
   onLoad(options = {}) {
     if (this._unsubscribe) this._unsubscribe();
     this._disposed = false; this._visible = false; this._resumeRead = false; this._context = (this._context || 0) + 1; this.invalidate();
@@ -50,7 +55,7 @@ Page(withVisualTheme({
   },
   resetPrivate() {
     this._qr = '';
-    this.setData({ user: session.user(), needsLogin: !session.user(), loading: false, error: '', docs: [], page: 1, hasMore: false,
+    this.setData({ user: session.user(), needsLogin: !session.user(), loading: false, error: '', docs: [], expandedId: '', page: 1, hasMore: false,
       games: [{ id: '', title: '申请新游戏社群' }], gamesLoading: false, gamesError: '', gameIndex: 0,
       apply: false, mode: 'submit', editId: '', revision: '', proposedGame: '', realName: '', phone: '', reason: '',
       qr: '', savedQr: false, contactConsent: false, busy: Boolean(this._pendingWrite), imageBusy: false, formError: '', operationError: '', done: '' });

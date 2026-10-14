@@ -79,14 +79,14 @@ memberTest(
       "true",
     );
     await expect(page.locator("html")).toHaveAttribute("data-z-theme", "light");
-    await page.getByLabel("姓名", { exact: true }).fill("合成主题申请人");
-    await page.getByLabel("手机号", { exact: true }).fill("00000000000");
+    await page.getByRole("textbox", { name: "姓名", exact: true }).fill("合成主题申请人");
+    await page.getByRole("textbox", { name: "手机号", exact: true }).fill("00000000000");
     const buffer = await sharp({
       create: { width: 160, height: 160, channels: 3, background: "#6839ae" },
     })
       .png()
       .toBuffer();
-    const file = page.getByLabel("微信名片二维码", { exact: true });
+    const file = page.getByLabel(/^微信名片二维码（(?:必填|更换时上传)）$/);
     await file.setInputFiles({
       name: "synthetic-theme.png",
       mimeType: "image/png",
@@ -109,7 +109,7 @@ memberTest(
       .getByRole("button", { name: "切换到深色主题", exact: true })
       .click();
     await expect(page.locator("html")).toHaveAttribute("data-z-theme", "dark");
-    await expect(page.getByLabel("姓名", { exact: true })).toHaveValue(
+    await expect(page.getByRole("textbox", { name: "姓名", exact: true })).toHaveValue(
       "合成主题申请人",
     );
     await expect(consent).not.toBeChecked();

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import styles from "./account-pages/AccountPages.module.css";
+import styles from "./PageHeading.module.css";
 export function PageHeading({
   title,
   eyebrow,
@@ -31,14 +31,16 @@ export function PageHeading({
           <span aria-current="page">{title}</span>
         )}
       </nav>
-      <p className={styles.eyebrow}>{eyebrow}</p>
       <div className={styles.headingRow}>
-        <h1>{title}</h1>
-        {action}
+        <div className={styles.copy}>
+          <p className={styles.eyebrow}>{eyebrow}</p>
+          <h1>{title}</h1>
+          {description && (
+            <p className={styles.headingDescription}>{description}</p>
+          )}
+        </div>
+        {action && <div className={styles.action}>{action}</div>}
       </div>
-      {description && (
-        <p className={styles.headingDescription}>{description}</p>
-      )}
       {children && <div className={styles.headingExtra}>{children}</div>}
     </header>
   );

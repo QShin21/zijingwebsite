@@ -1,1 +1,5 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
+@import "../../templates/business.wxss";
+.community-joins-page .join-status { display: block; margin-top: 12rpx; color: var(--z-primary); font-size: 29rpx; font-weight: 500; line-height: 1.75; }
+.community-joins-page .join-next { margin-top: 24rpx; padding-left: 24rpx; border-left: 3rpx solid var(--z-line); }
+.community-joins-page .join-next .material-title { margin-top: 0; }
+.community-joins-page .join-next textarea { min-height: 180rpx; }

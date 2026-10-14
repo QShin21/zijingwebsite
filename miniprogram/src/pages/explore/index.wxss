@@ -1,9 +1,7 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
-.title-accent { display: block; color: var(--z-brand); }
-.group-index { color: var(--z-positive); font-size: 23rpx; letter-spacing: 3rpx; }
-.mini-page .explore-list { padding: 6rpx 26rpx; }
-.mini-page .explore-row { display: flex; gap: 22rpx; align-items: center; justify-content: space-between; padding: 28rpx 0; border: 0; border-bottom: 1rpx solid var(--z-line); border-radius: 0; background: transparent; }
-.explore-row:last-child { border-bottom: 0; }
-.explore-mark { color: var(--z-positive); font-size: 24rpx; letter-spacing: 2rpx; padding-right: 20rpx; border-right: 1rpx solid var(--z-control-border); }
-.explore-main { flex: 1; min-width: 0; }
-.explore-title { display: block; color: var(--z-text); font-weight: 600; font-size: 30rpx; line-height: 1.6; margin-bottom: 6rpx; word-break: break-word; }
+.archive-gateway { border-top: 2rpx solid var(--z-text); border-bottom: 1rpx solid var(--z-line); }
+.mini-page .archive-main { display: block; padding: 30rpx 0; border-bottom: 1rpx solid var(--z-line); }
+.archive-main:last-child { border-bottom: 0; }
+.archive-title { display: block; font-size: 42rpx; font-weight: 700; line-height: 1.4; margin-bottom: 12rpx; }
+.archive-main .entry-link { display: block; margin-top: 16rpx; color: var(--z-link); font-size: 28rpx; }
+.about-links { display: flex; flex-wrap: wrap; column-gap: 32rpx; }
+.about-links > button { flex: 1; min-width: 220rpx; text-align: left; }

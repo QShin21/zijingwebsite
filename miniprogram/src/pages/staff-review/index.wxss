@@ -1,1 +1,3 @@
-/* Shared native styles live in app.wxss. */
+@import "../../templates/business.wxss";
+.staff-review-page .review-entry .record-detail { padding-bottom: 8rpx; }
+.staff-review-page .review-actions > .primary { width: 100%; }

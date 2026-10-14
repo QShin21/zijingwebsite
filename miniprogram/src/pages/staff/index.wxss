@@ -1,1 +1,8 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
+@import "../../templates/business.wxss";
+.staff-page .page-heading .title { max-width: 10em; }
+.staff-page .own-staff { padding: 24rpx; margin: 28rpx 0; border-left: 4rpx solid var(--z-primary); background: var(--z-surface); }
+.staff-page .own-staff .task-record { padding: 24rpx 0; }
+.staff-page .receipt-link { display: block; margin-top: 18rpx; color: var(--z-link); font-size: 28rpx; }
+.staff-page .batch-deadline { display: flex; flex-wrap: wrap; gap: 10rpx 24rpx; margin-bottom: 22rpx; color: var(--z-muted); font-size: 26rpx; }
+.staff-page .deadline-value { color: var(--z-primary); font-variant-numeric: tabular-nums; }
+.staff-page .staff-batch > .badge { margin-top: 14rpx; }

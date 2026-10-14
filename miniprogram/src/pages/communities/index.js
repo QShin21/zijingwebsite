@@ -9,18 +9,18 @@ const navigation = require('../../lib/navigation');
 const { actions, protect } = require('../../lib/page');
 const identity = () => String((session.user() || {}).id || '');
 Page(withVisualTheme({
-  data: { loading: false, error: '', needsLogin: false, user: null, docs: [], page: 1, hasMore: false,
+  data: { loading: false, error: '', needsLogin: false, user: null, docs: [], page: 1, hasMore: false, search: '', appliedSearch: '',
     clubLoading: false, clubError: '', staffBatches: [], promotions: [] },
   ...actions,
   onLoad() {
-    this._visible = true; this._identity = identity(); wx.setNavigationBarTitle({ title: '加入我们' });
+    this._visible = true; this._identity = identity(); wx.setNavigationBarTitle({ title: '游戏社群' });
     this._unsubscribe = session.subscribe(() => {
       if (this._identity !== identity()) { this._identity = identity(); this.invalidate(); this.resetPrivate(); }
     });
   },
   invalidate() { this._scope = (this._scope || 0) + 1; },
   valid(scope, required = true) { return this._visible !== false && scope === (this._scope || 0) && this._identity === identity() && (!required || Boolean(identity())); },
-  resetPrivate() { this.setData({ user: session.user(), needsLogin: !session.user(), docs: [], page: 1, hasMore: false, loading: false, error: '', clubLoading: false }); },
+  resetPrivate() { this.setData({ user: session.user(), needsLogin: !session.user(), docs: [], page: 1, hasMore: false, loading: false, error: '', clubLoading: false, search: '', appliedSearch: '' }); },
   onShow() {
     this._visible = true;
     if (this._identity !== identity()) { this._identity = identity(); this.invalidate(); this.resetPrivate(); }
@@ -29,6 +29,9 @@ Page(withVisualTheme({
   onHide() { this._visible = false; this.invalidate(); this.setData({ loading: false, clubLoading: false }); },
   onUnload() { this.onHide(); if (this._unsubscribe) this._unsubscribe(); },
   retry() { return this.load(); },
+  inputSearch(event) { this.setData({ search: event.detail.value }); },
+  searchGames() { this.setData({ appliedSearch: this.data.search.trim() }); return this.loadGames(); },
+  clearSearch() { this.setData({ search: '', appliedSearch: '' }); return this.loadGames(); },
   onPullDownRefresh() { return this.load().finally(() => wx.stopPullDownRefresh()); },
   onReachBottom() { if (this.data.hasMore && !this.data.loading) return this.load(true); },
   load(more = false) { return more ? this.loadGames(true) : Promise.all([this.loadGames(), this.retryClub()]); },
@@ -38,7 +41,7 @@ Page(withVisualTheme({
     const scope = this._scope || 0, ticket = this._loadTicket = (this._loadTicket || 0) + 1, page = more ? this.data.page + 1 : 1;
     this.setData({ loading: true, error: '' });
     try {
-      const result = await cms.list('games', { page, limit: 24 });
+      const result = await cms.list('games', { page, limit: 24, search: this.data.appliedSearch });
       if (!this.valid(scope) || ticket !== this._loadTicket) return;
       const docs = await cms.decorate(result.docs);
       if (!this.valid(scope) || ticket !== this._loadTicket) return;

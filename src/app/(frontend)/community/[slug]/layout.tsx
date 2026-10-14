@@ -3,11 +3,11 @@ import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { canHandleCommunityJoins } from "@/lib/rules";
 import { cms, bySlug } from "@/lib/content";
-import { PageHeading } from "@/components/PageHeading";
+import Link from "next/link";
 import { CommunityJoin } from "@/components/CommunityJoin";
 import { CommunityNav } from "@/components/CommunityNav";
 import { ClubFrame } from "../../_club/ClubPage";
-import styles from "../../_club/ClubPages.module.css";
+import styles from "@/components/community-pages/CommunityPages.module.css";
 export default async function CommunityLayout({
   params,
   children,
@@ -21,14 +21,17 @@ export default async function CommunityLayout({
   const { user } = await (await cms()).auth({ headers: await headers() });
   return (
     <>
-      <ClubFrame className={styles.communityHeading}>
-        <PageHeading
-          title={game.title}
-          eyebrow="游戏社群"
-          description={game.summary || "查看社群活动、通知与精彩记录。"}
-          parent={{ href: "/community", label: "游戏社群" }}
-          action={<CommunityJoin slug={slug} />}
-        />
+      <ClubFrame className={`${styles.page} ${styles.shellHeader}`}>
+        <div className={styles.identityBar}>
+          <nav className={styles.breadcrumb} aria-label="所属社群">
+            <Link href="/community">游戏社群</Link>
+            <span aria-hidden="true">/</span>
+            <Link href={`/community/${slug}`}>
+              <strong>{game.title}</strong>
+            </Link>
+          </nav>
+          <CommunityJoin slug={slug} />
+        </div>
         <CommunityNav
           slug={slug}
           manageJoins={canHandleCommunityJoins(user, game.id)}

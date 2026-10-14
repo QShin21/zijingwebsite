@@ -7,7 +7,7 @@ import { SubmitButton } from "./SubmitButton";
 import { ActionForm } from "./activity-pages/ActionForm";
 import { teamHonorService, type HonorArchive } from "@/lib/team-honor-service";
 import { teamHonorQuery } from "./TeamHonorNavigation";
-import styles from "@/app/(frontend)/_club/ClubPages.module.css";
+import styles from "./team-pages/TeamPages.module.css";
 
 export function TeamHonorArchiveCards({
   archives,
@@ -19,38 +19,43 @@ export function TeamHonorArchiveCards({
   if (!archives.length) return null;
   return (
     <div
-      className={styles.honorList}
+      className={styles.archiveIndex}
       data-team-honor-archives
       aria-label={pinned ? "置顶代表队荣誉档案" : "代表队荣誉档案"}
     >
-      {archives.map((archive) => (
-        <article
-          className={styles.honorIndex}
-          key={archive.key}
-          data-team-honor-archive={archive.team.id}
-        >
-          <div className={styles.honorCount}>
-            <strong>{archive.records.length}</strong>条已批准荣誉
-          </div>
-          <div>
-            <p className={styles.kicker}>
-              {pinned ? "社群置顶 · " : ""}
-              {archive.team.gameTitle}
-            </p>
-            <h3>
-              <Link href={archive.href}>{archive.team.title} · 荣誉档案</Link>
-            </h3>
-            <p>
-              {archive.records[0].competition || archive.records[0].title} ·{" "}
-              {archive.records[0].placing || "已核验记录"} ·{" "}
-              {archive.records[0].date?.slice(0, 10) || "历史记录"}
-            </p>
-          </div>
-          <Link className={styles.cardLink} href={archive.href}>
-            查看完整档案 <span aria-hidden="true">→</span>
-          </Link>
-        </article>
-      ))}
+      {archives.map((archive) => {
+        const latest = archive.records[0];
+        return (
+          <article
+            className={styles.archiveEntry}
+            key={archive.key}
+            data-team-honor-archive={archive.team.id}
+          >
+            <div className={styles.archiveDate}>
+              {pinned ? "社群置顶档案" : "最近赛事"}
+              {latest.date ? (
+                <time dateTime={latest.date.slice(0, 10)}>
+                  {latest.date.slice(0, 10)}
+                </time>
+              ) : (
+                <p>历史记录</p>
+              )}
+              <p>{archive.records.length} 条已批准荣誉</p>
+            </div>
+            <div>
+              <p className={styles.muted}>{archive.team.gameTitle}</p>
+              <h3>
+                <Link href={archive.href}>{archive.team.title} · 荣誉档案</Link>
+              </h3>
+              <p>{latest.competition || latest.title}</p>
+              {latest.placing && (
+                <p className={styles.archiveAchievement}>{latest.placing}</p>
+              )}
+            </div>
+            <Link href={archive.href}>查看完整档案</Link>
+          </article>
+        );
+      })}
     </div>
   );
 }
@@ -90,7 +95,7 @@ export function TeamHonorArchiveContents({
           key={year}
           aria-label={`${year}荣誉`}
         >
-          <h2 className={styles.yearLabel}>{year}</h2>
+          <h2>{year}</h2>
           <div className={styles.yearRecords}>
             {records.map((record) => (
               <article
@@ -98,38 +103,28 @@ export function TeamHonorArchiveContents({
                 key={record.key}
                 data-public-honor={record.key}
               >
-                <p className={styles.recordMeta}>
-                  {record.legacy ? "历史已核验档案记录" : "已批准"}
-                  {record.authorName ? ` · ${record.authorName}` : ""}
+                <div className={styles.archiveAward}>
+                  <strong>{record.placing || "历史已核验成果"}</strong>
+                  {record.date && (
+                    <time dateTime={record.date.slice(0, 10)}>
+                      {record.date.slice(0, 10)}
+                    </time>
+                  )}
+                </div>
+                <p className={styles.muted}>
+                  {record.competition || "历史档案未记录赛事"}
                 </p>
                 <h3>{record.title}</h3>
-                <dl className={styles.recordMeta}>
-                  <div>
-                    <dt>赛事</dt>
-                    <dd>{record.competition || "历史档案未记录"}</dd>
-                  </div>
-                  <div>
-                    <dt>奖项或名次</dt>
-                    <dd>{record.placing || "历史档案未记录"}</dd>
-                  </div>
-                  <div>
-                    <dt>赛事日期</dt>
-                    <dd>
-                      {record.date ? (
-                        <time dateTime={record.date.slice(0, 10)}>
-                          {record.date.slice(0, 10)}
-                        </time>
-                      ) : (
-                        "历史档案未记录日期"
-                      )}
-                    </dd>
-                  </div>
-                </dl>
+                <p className={styles.recordDate}>
+                  {record.legacy ? "历史已核验档案记录" : "已批准"}
+                  {record.authorName ? `；投稿人：${record.authorName}` : ""}
+                  {!record.date ? "；历史档案未记录日期" : ""}
+                </p>
                 {record.description && (
                   <p className="preserve">{record.description}</p>
                 )}
                 {record.images.length > 0 && (
-                  <div className="showcase-images">
+                  <div className={styles.media} aria-label="已批准的成果材料">
                     {record.images.map((image, index) => (
                       <figure key={index}>
                         <img
@@ -148,53 +143,57 @@ export function TeamHonorArchiveContents({
                 )}
                 {record.videoHref && (
                   <video
+                    className={styles.video}
                     controls
                     playsInline
                     preload="metadata"
                     src={record.videoHref}
                     aria-label="已批准的荣誉视频证据"
-                    style={{ maxWidth: "100%" }}
                   />
                 )}
                 {record.sourceHref && (
-                  <Link className="button light" href={record.sourceHref}>
-                    查看原历史荣誉
-                  </Link>
+                  <div className={styles.actions}>
+                    <Link href={record.sourceHref}>查看原历史荣誉</Link>
+                  </div>
                 )}
                 {record.legacy &&
                   canReviewShowcase(user, archive.team.game) && (
-                    <ActionForm
-                      action={hideLegacyTeamHonorResultAction}
-                      className="member-form"
-                    >
-                      <input
-                        type="hidden"
-                        name="returnQuery"
-                        value={teamHonorQuery({
-                          team: archive.team.id,
-                          game: archive.team.game,
-                        })}
-                      />
-                      <input
-                        type="hidden"
-                        name="id"
-                        value={record.key.split(":")[1]}
-                      />
-                      <input
-                        type="hidden"
-                        name="revision"
-                        value={record.legacyRevision || ""}
-                      />
-                      <label>
-                        隐藏历史荣誉说明
-                        <textarea name="note" maxLength={500} required />
-                      </label>
-                      <div className="reaction-bar">
-                        <SubmitButton name="action" value="hideLegacy">
-                          隐藏历史荣誉
-                        </SubmitButton>
-                      </div>
-                    </ActionForm>
+                    <details className={styles.disclosure}>
+                      <summary>管理这项历史荣誉</summary>
+                      <ActionForm
+                        action={hideLegacyTeamHonorResultAction}
+                        className="member-form"
+                      >
+                        <input
+                          type="hidden"
+                          name="returnQuery"
+                          value={teamHonorQuery({
+                            team: archive.team.id,
+                            game: archive.team.game,
+                          })}
+                        />
+                        <input
+                          type="hidden"
+                          name="id"
+                          value={record.key.split(":")[1]}
+                        />
+                        <input
+                          type="hidden"
+                          name="revision"
+                          value={record.legacyRevision || ""}
+                        />
+                        <p>隐藏后，这项记录会从当前公开档案移除。</p>
+                        <label>
+                          隐藏历史荣誉说明
+                          <textarea name="note" maxLength={500} required />
+                        </label>
+                        <div className={styles.actions}>
+                          <SubmitButton name="action" value="hideLegacy">
+                            隐藏历史荣誉
+                          </SubmitButton>
+                        </div>
+                      </ActionForm>
+                    </details>
                   )}
               </article>
             ))}

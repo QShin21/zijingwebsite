@@ -18,6 +18,7 @@ import {
 import { questionRoute, endTarget } from "@/lib/questionnaire-flow";
 import { QuestionnaireAdvanced } from "./QuestionnaireAdvanced";
 import surface from "./activity-pages/QuestionnaireSurface.module.css";
+import { SubmissionSteps } from "./activity-pages/SubmissionSteps";
 
 export function Questionnaire({
   form,
@@ -39,16 +40,20 @@ export function Questionnaire({
   submitLabel?: string;
 }) {
   const prefix = useId(),
-    root = useRef<HTMLDivElement>(null);
+    root = useRef<HTMLDivElement>(null),
+    submitLock = useRef(false);
   const [seed] = useState(() => String(Math.random()));
   const [answers, setAnswers] = useState<Answers>(() => {
     const clean = sanitizeDraft(form, initialAnswers || {});
     const ids = new Set(visibleQuestions(form, clean).map((q) => q.id));
-    return Object.fromEntries(Object.entries(clean).filter(([id]) => ids.has(id)));
+    return Object.fromEntries(
+      Object.entries(clean).filter(([id]) => ids.has(id)),
+    );
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [step, setStep] = useState(0),
     [review, setReview] = useState(false);
+  const [messageKind, setMessageKind] = useState<"error" | "status">("status");
   const [message, setMessage] = useState(""),
     [sending, setSending] = useState(false);
   const route = questionRoute(form, answers);
@@ -146,11 +151,13 @@ export function Questionnaire({
     return false;
   }
   async function submit() {
-    if (locked || !check(true)) return;
+    if (submitLock.current || locked || !check(true)) return;
     if (preview) {
+      setMessageKind("status");
       setMessage("预览验证通过，未提交报名。");
       return;
     }
+    submitLock.current = true;
     setSending(true);
     setMessage("");
     try {
@@ -163,306 +170,382 @@ export function Questionnaire({
         }
       }
     } catch (e) {
+      setMessageKind("error");
       setMessage((e as Error).message);
     } finally {
+      submitLock.current = false;
       setSending(false);
     }
   }
   return (
     <div
-      className={`${surface.surface} questionnaire member-form questionnaire-theme-${form.theme || "purple"}`}
+      className={`${surface.surface} ${surface.answerLayout} questionnaire member-form questionnaire-theme-${form.theme || "purple"}`}
       ref={root}
       aria-busy={locked}
     >
-      {draftKey && !preview && (
-        <div className="questionnaire-draft">
-          <label className="signup-choice">
-            <input
-              type="checkbox"
-              checked={remember}
-              onChange={(e) => {
-                setRemember(e.target.checked);
-                if (!e.target.checked) {
-                  try {
-                    localStorage.removeItem(draftKey);
-                  } catch {
-                    /* Storage can be disabled by the browser. */
-                  }
-                  setSavedDraft(null);
-                  setDraftMessage("已关闭并清除此浏览器草稿");
-                }
-              }}
-            />
-            在此浏览器保存草稿（公用设备请勿开启）
-          </label>
-          {savedDraft && (
-            <button
-              type="button"
-              onClick={() => {
-                const ids = new Set(
-                  visibleQuestions(form, savedDraft).map((q) => q.id),
-                );
-                setAnswers(
-                  Object.fromEntries(
-                    Object.entries(savedDraft).filter(([id]) => ids.has(id)),
-                  ),
-                );
-                setSavedDraft(null);
-                setRemember(true);
-                setStep(0);
-                setReview(false);
-              }}
-            >
-              恢复未提交的草稿
-            </button>
-          )}
-          <small role="status">{draftMessage}</small>
+      <aside className={surface.answerRail} aria-label="填写进度与草稿">
+        <SubmissionSteps current={review ? "review" : "fill"} />
+        <div className="questionnaire-progress">
+          <strong>{review ? "等待你确认提交" : "填写进度"}</strong>
+          <span>
+            已填写 {completed} / {answerable.length} 题
+          </span>
+          <progress
+            aria-label="填写进度"
+            value={completed}
+            max={Math.max(1, answerable.length)}
+          />
+          <small>带 * 为必填。题目随答案显示，返回上一步会保留内容。</small>
         </div>
-      )}
-      <div className="questionnaire-progress">
-        <span>
-          已填写 {completed} / {answerable.length} 题
-        </span>
-        <progress
-          aria-label="填写进度"
-          value={completed}
-          max={Math.max(1, answerable.length)}
-        />
-        <small>
-          带 * 为必填；根据答案显示相关题目。返回上一步会保留已填内容。
-        </small>
-      </div>
-      <h3 className="questionnaire-step" tabIndex={-1}>
-        {review ? "核对报名信息" : `第 ${current + 1} / ${pages} 页`}
-      </h3>
-      {Object.keys(errors).length > 0 && <div className={surface.errorSummary} role="alert" aria-label="请核对以下题目"><p>有 {Object.keys(errors).length} 题需要核对，已填写内容保留。</p><ul>{visible.filter(q => errors[q.id]).map(q => <li key={q.id}><button type="button" onClick={() => { setReview(false); setStep(grouped.findIndex(page => page.some(item => item.id === q.id))); requestAnimationFrame(() => document.getElementById(`${prefix}-${q.id}`)?.focus()); }}>{q.label}：{errors[q.id]}</button></li>)}</ul></div>}
-      {review ? (
-        <>
-          <p>请核对以下内容，确认后提交保存。</p>
-          <dl className="questionnaire-review">
-            {answerable.map((q) => (
-              <div key={q.id}>
-                <dt>{q.label}</dt>
-                <dd>{formatAnswer(answers[q.id], q)}</dd>
-              </div>
-            ))}
-          </dl>
-        </>
-      ) : (
-        questions.map((original) => {
-          const q = original.randomize
-            ? {
-                ...original,
-                options: randomizedOptions(
-                  original.options,
-                  seed + original.id,
-                ),
-              }
-            : original;
-          const value = answers[q.id],
-            fieldId = `${prefix}-${q.id}`;
-          const hint = [
-            q.help,
-            q.minLength ? `至少 ${q.minLength} 字` : "",
-            q.type === "multiple"
-              ? `可选 ${q.minChoices || 1}–${q.maxChoices || q.options.length} 项${q.required ? "" : "，可留空"}${q.exclusiveOption ? `；“${q.exclusiveOption}”单独选择` : ""}`
-              : "",
-            q.format === "phone"
-              ? "11 位中国大陆手机号"
-              : q.format === "email"
-                ? "请填写完整邮箱地址"
-                : q.format === "number"
-                  ? "填写数字，可含小数或负号"
-                  : "",
-          ]
-            .filter(Boolean)
-            .join(" · ");
-          if (q.type === "description")
-            return (
-              <section className="questionnaire-description" key={q.id}>
-                <h4>{q.label}</h4>
-                <p className="preserve">{q.help}</p>
-              </section>
-            );
-          return (
-            <fieldset
-              key={q.id}
-              id={fieldId}
-              tabIndex={-1}
-              className={`signup-question ${errors[q.id] ? "questionnaire-invalid" : ""}`}
-              disabled={locked}
-              aria-describedby={`${fieldId}-hint${errors[q.id] ? ` ${fieldId}-error` : ""}`}
-            >
-              <legend>
-                {visible.findIndex((v) => v.id === q.id) + 1}. {q.label}
-                {q.required ? " *" : "（选填）"}
-              </legend>
-              <p id={`${fieldId}-hint`} className="muted">
-                {hint}
-              </p>
-              <QuestionnaireAdvanced
-                q={q}
-                value={value}
-                name={fieldId}
-                onChange={(answer) => update(q.id, answer)}
+        {draftKey && !preview && (
+          <div className="questionnaire-draft">
+            <label className="signup-choice">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => {
+                  setRemember(e.target.checked);
+                  if (!e.target.checked) {
+                    try {
+                      localStorage.removeItem(draftKey);
+                    } catch {
+                      /* Storage can be disabled by the browser. */
+                    }
+                    setSavedDraft(null);
+                    setDraftMessage("已关闭并清除此浏览器草稿");
+                  }
+                }}
               />
-              {["text", "textarea"].includes(q.type) && (
-                <>
-                  {q.type === "textarea" ? (
-                    <textarea
-                      aria-label={q.label}
-                      aria-invalid={Boolean(errors[q.id])}
-                      aria-describedby={`${fieldId}-hint ${fieldId}-error`}
-                      value={typeof value === "string" ? value : ""}
-                      placeholder={q.placeholder}
-                      maxLength={q.maxLength || 2000}
-                      rows={4}
-                      onChange={(e) => update(q.id, e.target.value)}
-                    />
-                  ) : (
-                    <input
-                      aria-label={q.label}
-                      aria-invalid={Boolean(errors[q.id])}
-                      aria-describedby={`${fieldId}-hint ${fieldId}-error`}
-                      value={typeof value === "string" ? value : ""}
-                      placeholder={q.placeholder}
-                      maxLength={q.maxLength || 200}
-                      inputMode={
-                        q.format === "email"
-                          ? "email"
-                          : q.format === "phone"
-                            ? "tel"
-                            : q.format === "number"
-                              ? "decimal"
-                              : "text"
-                      }
-                      onChange={(e) => update(q.id, e.target.value)}
-                    />
-                  )}
-                  <small className="questionnaire-counter">
-                    {typeof value === "string" ? value.length : 0} /{" "}
-                    {q.maxLength || (q.type === "textarea" ? 2000 : 200)} 字
-                  </small>
-                </>
-              )}
-              {["single", "multiple"].includes(q.type) &&
-                q.options.map((option) => (
-                  <label
-                    className="signup-choice questionnaire-option"
-                    key={option}
-                  >
-                    <input
-                      type={q.type === "single" ? "radio" : "checkbox"}
-                      name={fieldId}
-                      checked={
-                        q.type === "multiple"
-                          ? Array.isArray(value) &&
-                            value.some((v) => v === option)
-                          : value === option
-                      }
-                      onChange={(e) => {
-                        if (q.type === "single") update(q.id, option);
-                        else {
-                          const previous = Array.isArray(value)
-                            ? value.filter((v) => typeof v === "string")
-                            : [];
-                          update(
-                            q.id,
-                            e.target.checked
-                              ? option === q.exclusiveOption
-                                ? [option]
-                                : [
-                                    ...previous.filter(
-                                      (v) => v !== q.exclusiveOption,
-                                    ),
-                                    option,
-                                  ]
-                              : previous.filter((v) => v !== option),
-                          );
-                        }
-                      }}
-                    />
-                    {option}
-                  </label>
-                ))}
-              {q.type === "single" && !q.required && (
-                <button type="button" onClick={() => update(q.id, "")}>
-                  清除此题选择
-                </button>
-              )}
-              <p
-                id={`${fieldId}-error`}
-                className="questionnaire-error"
-                role={errors[q.id] ? "alert" : undefined}
+              在此浏览器保存草稿（公用设备请勿开启）
+            </label>
+            {savedDraft && (
+              <button
+                type="button"
+                onClick={() => {
+                  const ids = new Set(
+                    visibleQuestions(form, savedDraft).map((q) => q.id),
+                  );
+                  setAnswers(
+                    Object.fromEntries(
+                      Object.entries(savedDraft).filter(([id]) => ids.has(id)),
+                    ),
+                  );
+                  setSavedDraft(null);
+                  setRemember(true);
+                  setStep(0);
+                  setReview(false);
+                }}
               >
-                {errors[q.id]}
-              </p>
-            </fieldset>
-          );
-        })
-      )}
-      {!review &&
-        route.jumps.some((j) => questions.some((q) => q.id === j.from)) && (
-          <p className="questionnaire-branch-notice" role="status">
-            {route.jumps
-              .filter((j) => questions.some((q) => q.id === j.from))
-              .map((j) =>
-                j.target === endTarget
-                  ? "当前答案将提前结束问卷，下一步核对并提交。"
-                  : `当前答案将进入“${form.questions.find((q) => q.id === j.target)?.label || "后续题目"}”，跳过中间 ${j.skipped} 题。`,
-              )
-              .join(" ")}
-          </p>
+                恢复未提交的草稿
+              </button>
+            )}
+            <small role="status">{draftMessage}</small>
+          </div>
         )}
-      <p role="alert">{message}</p>
-      <div className="signup-tools">
-        {onSaveDraft && !preview && (
-          <button type="button" disabled={locked} onClick={async () => {
-            setSending(true);
-            setMessage("");
-            try { await onSaveDraft(answers); setMessage("草稿已保存，尚未提交人工审核。"); }
-            catch (error) { setMessage((error as Error).message); }
-            finally { setSending(false); }
-          }}>保存草稿</button>
-        )}
-        {(review || current > 0) && (
-          <button
-            type="button"
-            disabled={locked}
-            onClick={() => {
-              if (review) setReview(false);
-              else setStep(current - 1);
-              focusHeading();
-            }}
+      </aside>
+      <div className={surface.answerMain}>
+        <h3 className="questionnaire-step" tabIndex={-1}>
+          {review
+            ? "核对填写内容"
+            : pages === 1
+              ? "填写信息"
+              : `填写信息 · 第 ${current + 1} / ${pages} 页`}
+        </h3>
+        {Object.keys(errors).length > 0 && (
+          <div
+            className={surface.errorSummary}
+            role="alert"
+            aria-label="请核对以下题目"
           >
-            {review ? "返回修改" : "上一步"}
-          </button>
+            <p>有 {Object.keys(errors).length} 题需要核对，已填写内容保留。</p>
+            <ul>
+              {visible
+                .filter((q) => errors[q.id])
+                .map((q) => (
+                  <li key={q.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReview(false);
+                        setStep(
+                          grouped.findIndex((page) =>
+                            page.some((item) => item.id === q.id),
+                          ),
+                        );
+                        requestAnimationFrame(() =>
+                          document.getElementById(`${prefix}-${q.id}`)?.focus(),
+                        );
+                      }}
+                    >
+                      {q.label}：{errors[q.id]}
+                    </button>
+                  </li>
+                ))}
+            </ul>
+          </div>
         )}
-        {!review && (
-          <button
-            type="button"
-            className="button"
-            disabled={locked}
-            onClick={() => {
-              if (!check(current === pages - 1)) return;
-              if (current < pages - 1) setStep(current + 1);
-              else setReview(true);
-              focusHeading();
-            }}
-          >
-            {current < pages - 1 ? "下一步" : "核对并提交"}
-          </button>
+        {review ? (
+          <>
+            <p>请核对每项内容。点击下方确认按钮后才会提交。</p>
+            <dl className="questionnaire-review">
+              {answerable.map((q) => (
+                <div key={q.id}>
+                  <dt>{q.label}</dt>
+                  <dd>{formatAnswer(answers[q.id], q) || "未填写"}</dd>
+                </div>
+              ))}
+            </dl>
+          </>
+        ) : (
+          questions.map((original) => {
+            const q = original.randomize
+              ? {
+                  ...original,
+                  options: randomizedOptions(
+                    original.options,
+                    seed + original.id,
+                  ),
+                }
+              : original;
+            const value = answers[q.id],
+              fieldId = `${prefix}-${q.id}`;
+            const hint = [
+              q.help,
+              q.minLength ? `至少 ${q.minLength} 字` : "",
+              q.type === "multiple"
+                ? `可选 ${q.minChoices || 1}–${q.maxChoices || q.options.length} 项${q.required ? "" : "，可留空"}${q.exclusiveOption ? `；“${q.exclusiveOption}”单独选择` : ""}`
+                : "",
+              q.format === "phone"
+                ? "11 位中国大陆手机号"
+                : q.format === "email"
+                  ? "请填写完整邮箱地址"
+                  : q.format === "number"
+                    ? "填写数字，可含小数或负号"
+                    : "",
+            ]
+              .filter(Boolean)
+              .join(" · ");
+            if (q.type === "description")
+              return (
+                <section className="questionnaire-description" key={q.id}>
+                  <h4>{q.label}</h4>
+                  <p className="preserve">{q.help}</p>
+                </section>
+              );
+            return (
+              <fieldset
+                key={q.id}
+                id={fieldId}
+                tabIndex={-1}
+                className={`signup-question ${errors[q.id] ? "questionnaire-invalid" : ""}`}
+                disabled={locked}
+                aria-describedby={`${fieldId}-hint${errors[q.id] ? ` ${fieldId}-error` : ""}`}
+              >
+                <legend>
+                  {visible.findIndex((v) => v.id === q.id) + 1}. {q.label}
+                  {q.required ? " *" : "（选填）"}
+                </legend>
+                <p id={`${fieldId}-hint`} className="muted">
+                  {hint}
+                </p>
+                <QuestionnaireAdvanced
+                  q={q}
+                  value={value}
+                  name={fieldId}
+                  onChange={(answer) => update(q.id, answer)}
+                />
+                {["text", "textarea"].includes(q.type) && (
+                  <>
+                    {q.type === "textarea" ? (
+                      <textarea
+                        aria-label={q.label}
+                        aria-invalid={Boolean(errors[q.id])}
+                        aria-describedby={`${fieldId}-hint ${fieldId}-error`}
+                        value={typeof value === "string" ? value : ""}
+                        placeholder={q.placeholder}
+                        maxLength={q.maxLength || 2000}
+                        rows={4}
+                        onChange={(e) => update(q.id, e.target.value)}
+                      />
+                    ) : (
+                      <input
+                        aria-label={q.label}
+                        aria-invalid={Boolean(errors[q.id])}
+                        aria-describedby={`${fieldId}-hint ${fieldId}-error`}
+                        value={typeof value === "string" ? value : ""}
+                        placeholder={q.placeholder}
+                        maxLength={q.maxLength || 200}
+                        inputMode={
+                          q.format === "email"
+                            ? "email"
+                            : q.format === "phone"
+                              ? "tel"
+                              : q.format === "number"
+                                ? "decimal"
+                                : "text"
+                        }
+                        onChange={(e) => update(q.id, e.target.value)}
+                      />
+                    )}
+                    <small className="questionnaire-counter">
+                      {typeof value === "string" ? value.length : 0} /{" "}
+                      {q.maxLength || (q.type === "textarea" ? 2000 : 200)} 字
+                    </small>
+                  </>
+                )}
+                {["single", "multiple"].includes(q.type) &&
+                  q.options.map((option) => (
+                    <label
+                      className="signup-choice questionnaire-option"
+                      key={option}
+                    >
+                      <input
+                        type={q.type === "single" ? "radio" : "checkbox"}
+                        name={fieldId}
+                        checked={
+                          q.type === "multiple"
+                            ? Array.isArray(value) &&
+                              value.some((v) => v === option)
+                            : value === option
+                        }
+                        onChange={(e) => {
+                          if (q.type === "single") update(q.id, option);
+                          else {
+                            const previous = Array.isArray(value)
+                              ? value.filter((v) => typeof v === "string")
+                              : [];
+                            update(
+                              q.id,
+                              e.target.checked
+                                ? option === q.exclusiveOption
+                                  ? [option]
+                                  : [
+                                      ...previous.filter(
+                                        (v) => v !== q.exclusiveOption,
+                                      ),
+                                      option,
+                                    ]
+                                : previous.filter((v) => v !== option),
+                            );
+                          }
+                        }}
+                      />
+                      {option}
+                    </label>
+                  ))}
+                {q.type === "single" && !q.required && (
+                  <button type="button" onClick={() => update(q.id, "")}>
+                    清除此题选择
+                  </button>
+                )}
+                <p
+                  id={`${fieldId}-error`}
+                  className="questionnaire-error"
+                  role={errors[q.id] ? "alert" : undefined}
+                >
+                  {errors[q.id]}
+                </p>
+              </fieldset>
+            );
+          })
         )}
-        {review && (
-          <button
-            type="button"
-            className="button"
-            disabled={locked}
-            onClick={() => void submit()}
-          >
-            {locked ? "正在提交…" : preview ? "验证预览答案" : submitLabel}
-          </button>
-        )}
+        {!review &&
+          route.jumps.some((j) => questions.some((q) => q.id === j.from)) && (
+            <p className="questionnaire-branch-notice" role="status">
+              {route.jumps
+                .filter((j) => questions.some((q) => q.id === j.from))
+                .map((j) =>
+                  j.target === endTarget
+                    ? "当前答案将提前结束问卷，下一步核对并提交。"
+                    : `当前答案将进入“${form.questions.find((q) => q.id === j.target)?.label || "后续题目"}”，跳过中间 ${j.skipped} 题。`,
+                )
+                .join(" ")}
+            </p>
+          )}
+        <div className={surface.answerFooter}>
+          {message && (
+            <p
+              className={
+                messageKind === "error"
+                  ? surface.errorSummary
+                  : surface.resultMessage
+              }
+              role={messageKind === "error" ? "alert" : "status"}
+            >
+              {message}
+            </p>
+          )}
+          <div className="signup-tools">
+            {onSaveDraft && !preview && (
+              <button
+                type="button"
+                disabled={locked}
+                onClick={async () => {
+                  if (submitLock.current || locked) return;
+                  submitLock.current = true;
+                  setSending(true);
+                  setMessage("");
+                  try {
+                    await onSaveDraft(answers);
+                    setMessageKind("status");
+                    setMessage("草稿已保存，尚未提交人工审核。");
+                  } catch (error) {
+                    setMessageKind("error");
+                    setMessage((error as Error).message);
+                  } finally {
+                    submitLock.current = false;
+                    setSending(false);
+                  }
+                }}
+              >
+                保存草稿
+              </button>
+            )}
+            {(review || current > 0) && (
+              <button
+                type="button"
+                disabled={locked}
+                onClick={() => {
+                  if (review) setReview(false);
+                  else setStep(current - 1);
+                  focusHeading();
+                }}
+              >
+                {review ? "返回修改" : "上一步"}
+              </button>
+            )}
+            {!review && (
+              <button
+                type="button"
+                className="button"
+                disabled={locked}
+                onClick={() => {
+                  if (!check(current === pages - 1)) return;
+                  if (current < pages - 1) setStep(current + 1);
+                  else setReview(true);
+                  focusHeading();
+                }}
+              >
+                {current < pages - 1 ? "下一步" : "核对并提交"}
+              </button>
+            )}
+            {review && (
+              <button
+                type="button"
+                className="button"
+                disabled={locked}
+                onClick={() => void submit()}
+              >
+                {locked ? "正在提交…" : preview ? "验证预览答案" : submitLabel}
+              </button>
+            )}
+          </div>
+          {locked && (
+            <p className={surface.saving} role="status">
+              正在保存，请保持页面打开…
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

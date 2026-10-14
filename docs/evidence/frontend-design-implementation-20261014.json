@@ -1,0 +1,878 @@
+{
+  "recordedAt": "2026-10-14T04:37:34.288329+00:00",
+  "stage": "Astra implementation checkpoint; full Sol validation remains pending",
+  "branch": "new",
+  "baselineCommit": "aa107f62d1d24348cb0a12d6cae4a67a9d5a720c",
+  "protectedBranchesExpected": "e366f3c6538e6c63c9f13fc183e26c32ce58cf11",
+  "inputs": {
+    "libraryFileID": "libfile_b3ed4f8917948191850dc0b87c3b61a2",
+    "promptBytes": 35731,
+    "promptLines": 381,
+    "promptSha256": "1b1cb8e82084a4b1decb4e6a3864f24bd88354665c32cebd18c282da0d3e3e4a",
+    "frontendDesignGitBlob": "a5333457c414d20d625f307df945842c0952ecc3",
+    "frontendDesignSkillSha256": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3"
+  },
+  "environmentRecovery": {
+    "filesystemReadWriteVerified": true,
+    "priorProcessesGoneOnResume": true,
+    "noDuplicateAgentsStarted": true,
+    "existingWorktreeAndDatabasesPreserved": true,
+    "noAccountQuotaChanges": true
+  },
+  "scope": {
+    "changedNativePages": 25,
+    "changedRouteFiles": 52,
+    "implementationDocument": "../FRONTEND_DESIGN_IMPLEMENTATION_20261013.md",
+    "noAPIAccessCollectionMigrationChanges": true,
+    "libChanges": [
+      "content.ts: public publishedAt projection",
+      "staff-recruitment-model.ts: confirmed retention explanation"
+    ],
+    "businessWritesInLimitedUIProbe": 0
+  },
+  "sourceManifest": {
+    "path": "frontend-design-source-manifest-20261014.json",
+    "sourceHash": "c954fd8831f9063b3a70d76ae173352108033c435ce8d26f623b36a782d74e7f",
+    "fileCount": 623,
+    "currentAndFrozenBytesMatch": true,
+    "snapshot": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/browser/app-final-20261014"
+  },
+  "build": {
+    "status": "pass",
+    "exitCode": 0,
+    "buildID": "iAVXxuabA81RV4I4LuoaU",
+    "sourceHash": "c954fd8831f9063b3a70d76ae173352108033c435ce8d26f623b36a782d74e7f",
+    "startedAt": "2026-10-14T04:31:39.928Z",
+    "finishedAt": "2026-10-14T04:33:48.806Z",
+    "durationSeconds": 128.878,
+    "log": "/workspace/qa-zijing/logs/astra-full-design-final-build-20261014.log",
+    "NODE_ENV": "production",
+    "APP_ENV": "development",
+    "deployment": false
+  },
+  "quickChecks": {
+    "typecheck": {
+      "status": "pass",
+      "log": "/workspace/qa-zijing/logs/astra-full-design-checkpoint-typecheck-20261014.log"
+    },
+    "eslint": {
+      "status": "pass",
+      "fullLog": "/workspace/qa-zijing/logs/astra-full-design-resume-lint-20261014.log",
+      "laterE2ELocatorLog": "/workspace/qa-zijing/logs/astra-full-design-e2e-locators-lint-20261014.log"
+    },
+    "tokens": {
+      "status": "pass",
+      "generatedOutputs": 28
+    },
+    "nativeStatic": {
+      "status": "pass",
+      "pages": 25,
+      "files": 162,
+      "bytes": 646934,
+      "officialCompile": false
+    },
+    "selectedVitest": {
+      "status": "pass",
+      "files": 23,
+      "tests": 673,
+      "durationSeconds": 16.31,
+      "sourceHash": "8bd848829987b7e5dbf9c3abb4e0ca8ec6bef54e35b138f5091eed62563a08a6",
+      "finalDelta": "Only honor editor checkbox CSS and five E2E locator/feedback files changed after this run; no covered behavior implementation changed. This is not full Vitest.",
+      "log": "/workspace/qa-zijing/logs/astra-full-design-review-unit-cwd-20261014.log"
+    },
+    "e2eCollection": {
+      "status": "pass",
+      "files": 28,
+      "tests": 125,
+      "executed": false,
+      "log": "/workspace/qa-zijing/logs/astra-full-design-e2e-collect-20261014.log"
+    }
+  },
+  "webMatrices": {
+    "initial": {
+      "status": "fail",
+      "sourceHash": "f3fd037dea2c275b58b068242065dd8640de6f150bc5e64bf341bfe7ecef5ffa",
+      "buildID": "-QSvWzDhiQkWbjqnN3tb0",
+      "startedAt": "2026-10-13T18:31:28.848Z",
+      "finishedAt": "2026-10-13T18:36:53.377Z",
+      "caseCount": 120,
+      "pass": 112,
+      "fail": 8,
+      "widths": [
+        1440,
+        1024,
+        768,
+        390,
+        320
+      ],
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "zeroHorizontalOverflow": false,
+      "singleH1": false,
+      "axeViolationCount": 4,
+      "pageErrorCount": 0,
+      "directory": "/workspace/qa-zijing/full-design-web-20261013",
+      "rawMatrixSha256": "e8e737b77308fb4f4587772babe269dbfab5384f0099cc9eeb2e0acd6bb22cae",
+      "failures": [
+        {
+          "name": "privacy",
+          "route": "/privacy",
+          "role": "anonymous",
+          "width": 390,
+          "theme": "light",
+          "expectedStatus": 200,
+          "result": "fail",
+          "error": "page.goto: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3367/privacy\", waiting until \"networkidle\"\u001b[22m\n",
+          "pageErrors": [],
+          "robots": null
+        },
+        {
+          "name": "login",
+          "route": "/login",
+          "role": "anonymous",
+          "width": 390,
+          "theme": "light",
+          "expectedStatus": 200,
+          "observedLoadMs": 809,
+          "status": 200,
+          "finalPath": "/login",
+          "axeViolations": [
+            {
+              "id": "link-in-text-block",
+              "impact": "serious",
+              "description": "Ensure links are distinguished from surrounding text in a way that does not rely on color",
+              "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/link-in-text-block?application=playwright",
+              "nodes": [
+                {
+                  "target": [
+                    ".AccountPages_authPrivacy__RDQ_S > a[href$=\"privacy\"]"
+                  ],
+                  "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 1.54:1 with the surrounding text. (Minimum contrast is 3:1, link text: #6f2d67, surrounding text: #62626a)\n  The link has no styling (such as underline) to distinguish it from the surrounding text"
+                }
+              ]
+            }
+          ],
+          "pageErrors": [],
+          "screenshot": "login-390-light.png",
+          "result": "fail",
+          "robots": null
+        },
+        {
+          "name": "missing-event",
+          "route": "/events/sol-synthetic-missing-20261013",
+          "role": "anonymous",
+          "width": 390,
+          "theme": "light",
+          "expectedStatus": 404,
+          "observedLoadMs": 967,
+          "status": 200,
+          "finalPath": "/events/sol-synthetic-missing-20261013",
+          "axeViolations": [],
+          "pageErrors": [],
+          "screenshot": "missing-event-390-light.png",
+          "result": "fail",
+          "robots": null
+        },
+        {
+          "name": "privacy",
+          "route": "/privacy",
+          "role": "anonymous",
+          "width": 390,
+          "theme": "dark",
+          "expectedStatus": 200,
+          "result": "fail",
+          "error": "page.goto: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3367/privacy\", waiting until \"networkidle\"\u001b[22m\n",
+          "pageErrors": [],
+          "robots": null
+        },
+        {
+          "name": "login",
+          "route": "/login",
+          "role": "anonymous",
+          "width": 390,
+          "theme": "dark",
+          "expectedStatus": 200,
+          "observedLoadMs": 831,
+          "status": 200,
+          "finalPath": "/login",
+          "axeViolations": [
+            {
+              "id": "link-in-text-block",
+              "impact": "serious",
+              "description": "Ensure links are distinguished from surrounding text in a way that does not rely on color",
+              "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/link-in-text-block?application=playwright",
+              "nodes": [
+                {
+                  "target": [
+                    ".AccountPages_authPrivacy__RDQ_S > a[href$=\"privacy\"]"
+                  ],
+                  "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 1.01:1 with the surrounding text. (Minimum contrast is 3:1, link text: #d2a4cd, surrounding text: #b6afb9)\n  The link has no styling (such as underline) to distinguish it from the surrounding text"
+                }
+              ]
+            }
+          ],
+          "pageErrors": [],
+          "screenshot": "login-390-dark.png",
+          "result": "fail",
+          "robots": null
+        },
+        {
+          "name": "missing-event",
+          "route": "/events/sol-synthetic-missing-20261013",
+          "role": "anonymous",
+          "width": 390,
+          "theme": "dark",
+          "expectedStatus": 404,
+          "observedLoadMs": 856,
+          "status": 200,
+          "finalPath": "/events/sol-synthetic-missing-20261013",
+          "axeViolations": [],
+          "pageErrors": [],
+          "screenshot": "missing-event-390-dark.png",
+          "result": "fail",
+          "robots": null
+        },
+        {
+          "name": "login",
+          "route": "/login",
+          "role": "anonymous",
+          "width": 320,
+          "theme": "light",
+          "expectedStatus": 200,
+          "observedLoadMs": 813,
+          "status": 200,
+          "finalPath": "/login",
+          "axeViolations": [
+            {
+              "id": "link-in-text-block",
+              "impact": "serious",
+              "description": "Ensure links are distinguished from surrounding text in a way that does not rely on color",
+              "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/link-in-text-block?application=playwright",
+              "nodes": [
+                {
+                  "target": [
+                    ".AccountPages_authPrivacy__RDQ_S > a[href$=\"privacy\"]"
+                  ],
+                  "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 1.54:1 with the surrounding text. (Minimum contrast is 3:1, link text: #6f2d67, surrounding text: #62626a)\n  The link has no styling (such as underline) to distinguish it from the surrounding text"
+                }
+              ]
+            }
+          ],
+          "pageErrors": [],
+          "screenshot": "login-320-light.png",
+          "result": "fail",
+          "robots": null
+        },
+        {
+          "name": "login",
+          "route": "/login",
+          "role": "anonymous",
+          "width": 320,
+          "theme": "dark",
+          "expectedStatus": 200,
+          "observedLoadMs": 825,
+          "status": 200,
+          "finalPath": "/login",
+          "axeViolations": [
+            {
+              "id": "link-in-text-block",
+              "impact": "serious",
+              "description": "Ensure links are distinguished from surrounding text in a way that does not rely on color",
+              "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/link-in-text-block?application=playwright",
+              "nodes": [
+                {
+                  "target": [
+                    ".AccountPages_authPrivacy__RDQ_S > a[href$=\"privacy\"]"
+                  ],
+                  "failureSummary": "Fix any of the following:\n  The link has insufficient color contrast of 1.01:1 with the surrounding text. (Minimum contrast is 3:1, link text: #d2a4cd, surrounding text: #b6afb9)\n  The link has no styling (such as underline) to distinguish it from the surrounding text"
+                }
+              ]
+            }
+          ],
+          "pageErrors": [],
+          "screenshot": "login-320-dark.png",
+          "result": "fail",
+          "robots": null
+        }
+      ],
+      "limitations": "Sampled routes/states only. Result covers recorded status, one H1, theme, overflow, Axe and pageerrors; not complete user flows or ACL. Raw input bounds alone are not complete control hit-target bounds."
+    },
+    "review": {
+      "status": "fail",
+      "sourceHash": "8bd848829987b7e5dbf9c3abb4e0ca8ec6bef54e35b138f5091eed62563a08a6",
+      "buildID": "yV-i09_hBXO5VxmiJIMYk",
+      "startedAt": "2026-10-14T04:21:26.588Z",
+      "finishedAt": "2026-10-14T04:26:19.120Z",
+      "caseCount": 120,
+      "pass": 118,
+      "fail": 2,
+      "widths": [
+        1440,
+        1024,
+        768,
+        390,
+        320
+      ],
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "zeroHorizontalOverflow": true,
+      "singleH1": true,
+      "axeViolationCount": 0,
+      "pageErrorCount": 0,
+      "directory": "/workspace/qa-zijing/full-design-web-review-20261014",
+      "rawMatrixSha256": "dd09681dc6fb9ebe59a8266880afc720e0a50b01adacb8aab3302ef511e45463",
+      "failures": [
+        {
+          "name": "missing-event",
+          "route": "/events/sol-synthetic-missing-20261013",
+          "role": "anonymous",
+          "width": 390,
+          "theme": "light",
+          "expectedStatus": 404,
+          "observedLoadMs": 1009,
+          "status": 200,
+          "finalPath": "/events/sol-synthetic-missing-20261013",
+          "axeViolations": [],
+          "pageErrors": [],
+          "screenshot": "missing-event-390-light.png",
+          "result": "fail",
+          "robots": [
+            "noindex, nofollow",
+            "noindex",
+            "noindex",
+            "noindex"
+          ]
+        },
+        {
+          "name": "missing-event",
+          "route": "/events/sol-synthetic-missing-20261013",
+          "role": "anonymous",
+          "width": 390,
+          "theme": "dark",
+          "expectedStatus": 404,
+          "observedLoadMs": 1009,
+          "status": 200,
+          "finalPath": "/events/sol-synthetic-missing-20261013",
+          "axeViolations": [],
+          "pageErrors": [],
+          "screenshot": "missing-event-390-dark.png",
+          "result": "fail",
+          "robots": [
+            "noindex, nofollow",
+            "noindex",
+            "noindex",
+            "noindex"
+          ]
+        }
+      ],
+      "limitations": "Sampled routes/states only. Result covers recorded status, one H1, theme, overflow, Axe and pageerrors; not complete user flows or ACL. Raw input bounds alone are not complete control hit-target bounds."
+    },
+    "final": {
+      "status": "fail",
+      "sourceHash": "c954fd8831f9063b3a70d76ae173352108033c435ce8d26f623b36a782d74e7f",
+      "buildID": "iAVXxuabA81RV4I4LuoaU",
+      "startedAt": "2026-10-14T04:35:03.133Z",
+      "finishedAt": "2026-10-14T04:37:09.631Z",
+      "caseCount": 52,
+      "pass": 50,
+      "fail": 2,
+      "widths": [
+        1440,
+        1024,
+        768,
+        390,
+        320
+      ],
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "zeroHorizontalOverflow": true,
+      "singleH1": true,
+      "axeViolationCount": 0,
+      "pageErrorCount": 0,
+      "directory": "/workspace/qa-zijing/full-design-web-final-20261014",
+      "rawMatrixSha256": "ff0584b08a2375b4ce703d8cc992b75751ff51c6f1d806b74938c1aefe4c0886",
+      "failures": [
+        {
+          "name": "missing-event",
+          "route": "/events/sol-synthetic-missing-20261013",
+          "role": "anonymous",
+          "width": 390,
+          "theme": "light",
+          "expectedStatus": 404,
+          "observedLoadMs": 922,
+          "status": 200,
+          "finalPath": "/events/sol-synthetic-missing-20261013",
+          "axeViolations": [],
+          "pageErrors": [],
+          "screenshot": "missing-event-390-light.png",
+          "result": "fail",
+          "robots": [
+            "noindex, nofollow",
+            "noindex",
+            "noindex",
+            "noindex"
+          ]
+        },
+        {
+          "name": "missing-event",
+          "route": "/events/sol-synthetic-missing-20261013",
+          "role": "anonymous",
+          "width": 390,
+          "theme": "dark",
+          "expectedStatus": 404,
+          "observedLoadMs": 872,
+          "status": 200,
+          "finalPath": "/events/sol-synthetic-missing-20261013",
+          "axeViolations": [],
+          "pageErrors": [],
+          "screenshot": "missing-event-390-dark.png",
+          "result": "fail",
+          "robots": [
+            "noindex, nofollow",
+            "noindex",
+            "noindex",
+            "noindex"
+          ]
+        }
+      ],
+      "limitations": "Sampled routes/states only. Result covers recorded status, one H1, theme, overflow, Axe and pageerrors; not complete user flows or ACL. Raw input bounds alone are not complete control hit-target bounds."
+    }
+  },
+  "limitedBrowserUI": {
+    "status": "pass",
+    "scenarios": [
+      {
+        "name": "login-theme-return",
+        "result": "pass",
+        "cookiePreference": "dark",
+        "checks": [
+          "OS dark defaults to light",
+          "theme change preserves entered identifier and safe return target",
+          "manual cookie is dark",
+          "refresh uses dark"
+        ]
+      },
+      {
+        "name": "community-consent-unknown",
+        "result": "pass",
+        "interceptedWrites": 1,
+        "serverBusinessWrites": 0,
+        "checks": [
+          "consent default false",
+          "exact required message and focus before any request",
+          "503 gives unknown outcome with new-window own-record link",
+          "text and file preserved across error and theme",
+          "no automatic replay observed"
+        ]
+      },
+      {
+        "name": "profile-preview-return",
+        "result": "pass",
+        "serverBusinessWrites": 0,
+        "checks": [
+          "edit to preview focuses preview heading",
+          "explicit hide choice reflected",
+          "theme retains preview",
+          "back retains name and choice and returns focus",
+          "no save requested"
+        ]
+      }
+    ],
+    "sourceHash": "8bd848829987b7e5dbf9c3abb4e0ca8ec6bef54e35b138f5091eed62563a08a6",
+    "scope": "Limited real-browser UI checks. Synthetic account login only; business writes are intercepted or never submitted. No business success, database ACL, or official WeChat claim.",
+    "evidenceDirectories": [
+      "/workspace/qa-zijing/full-design-ui-review-20261014",
+      "/workspace/qa-zijing/full-design-ui-review-final-20261014",
+      "/workspace/qa-zijing/full-design-ui-community-recheck-20261014"
+    ],
+    "finalDelta": "Honor checkbox min-height and E2E files only; these three UI implementations are byte-identical."
+  },
+  "labelTargets": {
+    "origin": "http://localhost:3369",
+    "buildID": "iAVXxuabA81RV4I4LuoaU",
+    "sourceHash": "c954fd8831f9063b3a70d76ae173352108033c435ce8d26f623b36a782d74e7f",
+    "scope": "Measure actual wrapping label hit targets for checkboxes flagged by input-only bounds in the design matrix. This is not exhaustive keyboard/target-size acceptance.",
+    "cases": [
+      {
+        "name": "community-apply",
+        "targets": [
+          {
+            "name": "contactConsent",
+            "disabled": false,
+            "input": {
+              "width": 20,
+              "height": 20
+            },
+            "labels": [
+              {
+                "width": 280,
+                "height": 85,
+                "text": "我同意展示我的微信名片作为进群联系方式"
+              }
+            ]
+          }
+        ],
+        "result": "pass"
+      },
+      {
+        "name": "profile",
+        "targets": [
+          {
+            "name": "",
+            "disabled": false,
+            "input": {
+              "width": 20,
+              "height": 20
+            },
+            "labels": [
+              {
+                "width": 280,
+                "height": 58,
+                "text": "在本代表队页面展示我的简介"
+              }
+            ]
+          }
+        ],
+        "result": "pass"
+      },
+      {
+        "name": "honor-record",
+        "targets": [
+          {
+            "name": "removeImage-0",
+            "disabled": false,
+            "input": {
+              "width": 20,
+              "height": 20
+            },
+            "labels": [
+              {
+                "width": 280,
+                "height": 44,
+                "text": "移除这份证据"
+              }
+            ]
+          }
+        ],
+        "result": "pass"
+      },
+      {
+        "name": "staff-manage",
+        "targets": [
+          {
+            "name": "",
+            "disabled": false,
+            "input": {
+              "width": 13,
+              "height": 48
+            },
+            "labels": [
+              {
+                "width": 142.015625,
+                "height": 48,
+                "text": "启用填写问卷报名"
+              }
+            ]
+          },
+          {
+            "name": "",
+            "disabled": false,
+            "input": {
+              "width": 13,
+              "height": 48
+            },
+            "labels": [
+              {
+                "width": 244,
+                "height": 48,
+                "text": "必填"
+              }
+            ]
+          },
+          {
+            "name": "",
+            "disabled": false,
+            "input": {
+              "width": 13,
+              "height": 48
+            },
+            "labels": [
+              {
+                "width": 210,
+                "height": 48,
+                "text": "从新的一页开始"
+              }
+            ]
+          },
+          {
+            "name": "",
+            "disabled": false,
+            "input": {
+              "width": 13,
+              "height": 48
+            },
+            "labels": [
+              {
+                "width": 210,
+                "height": 48,
+                "text": "随机排列选项"
+              }
+            ]
+          }
+        ],
+        "result": "pass"
+      },
+      {
+        "name": "system",
+        "targets": [
+          {
+            "name": "acknowledged",
+            "disabled": false,
+            "input": {
+              "width": 20,
+              "height": 20
+            },
+            "labels": [
+              {
+                "width": 288,
+                "height": 44,
+                "text": "我了解这是一份交互样张"
+              }
+            ]
+          }
+        ],
+        "result": "pass"
+      }
+    ]
+  },
+  "nativeMapping": {
+    "status": "pass",
+    "count": 32,
+    "sourceFilesMatchedToCurrent": 50,
+    "recordedAt": "2026-10-13T18:31:14.560Z",
+    "metrics": {
+      "overflow": 0,
+      "undersized": 0,
+      "smallFieldText": 0,
+      "smallBodyText": 0,
+      "smallActionText": 0,
+      "smallAuxiliaryText": 0,
+      "clippedText": 0,
+      "blockedRequests": 0,
+      "errors": 0
+    },
+    "label": "WXML 浏览器映射 · 合成数据 · 非官方微信或真机",
+    "scope": "Current WXML/WXSS/JS data layout mapping; no native lifecycle/events/SDK/official compilation/device validation",
+    "mapping": {
+      "rpx": "viewport / 750",
+      "safeAreaBottom": "20px explicitly simulated",
+      "media": "No QR, private evidence, real photos, or identifying user data",
+      "network": "all browser requests blocked; native wx side effects throw",
+      "hostUI": "Native navigation/tab bar/keyboard excluded; this is page content only",
+      "controls": "Browser controls approximate static native appearance; checked/disabled/value/progress colors follow current WXML bindings",
+      "limits": "No custom component rendering, image-mode measurement, native text measurement, input focus/keyboard, gesture, modal, media, auth or business event verification"
+    },
+    "directory": "/workspace/zijingwebsite/.data/rebuild-native-preview",
+    "rawResultsSha256": "b71ebf5c995556902eb919a5aad8fd028405677669177a08fe4cc9864945d95b"
+  },
+  "performanceObservations": {
+    "conditions": "Headless Chrome for Testing, isolated loopback optimized Next server, APP_ENV=development; fresh browser context for each page, warm local server, no network or CPU throttling. Metrics are observations, not scores.",
+    "browser": "145.0.7632.6",
+    "dpr": 1,
+    "observations": [
+      {
+        "name": "home",
+        "viewport": 390,
+        "theme": "light",
+        "observedLoadMsIncludingNetworkIdle": 1389,
+        "navigation": {
+          "responseStart": 123.69999999995343,
+          "domContentLoaded": 159.29999999981374,
+          "loadEventEnd": 580.2999999998137,
+          "transferSize": 10546,
+          "encodedBodySize": 10246,
+          "decodedBodySize": 52151
+        },
+        "jsTransferBytes": 197987,
+        "cssTransferBytes": 54417,
+        "fontRequestCount": 0,
+        "imageCount": 0
+      },
+      {
+        "name": "events",
+        "viewport": 390,
+        "theme": "light",
+        "observedLoadMsIncludingNetworkIdle": 1086,
+        "navigation": {
+          "responseStart": 45.5999999998603,
+          "domContentLoaded": 114.19999999995343,
+          "loadEventEnd": 196.69999999995343,
+          "transferSize": 9113,
+          "encodedBodySize": 8813,
+          "decodedBodySize": 29414
+        },
+        "jsTransferBytes": 195396,
+        "cssTransferBytes": 51469,
+        "fontRequestCount": 0,
+        "imageCount": 0
+      },
+      {
+        "name": "community-apply",
+        "viewport": 390,
+        "theme": "light",
+        "observedLoadMsIncludingNetworkIdle": 1039,
+        "navigation": {
+          "responseStart": 119.5,
+          "domContentLoaded": 184,
+          "loadEventEnd": 263.5,
+          "transferSize": 10679,
+          "encodedBodySize": 10379,
+          "decodedBodySize": 30043
+        },
+        "jsTransferBytes": 200581,
+        "cssTransferBytes": 51469,
+        "fontRequestCount": 0,
+        "imageCount": 0
+      }
+    ],
+    "score": null
+  },
+  "preservedFailures": [
+    {
+      "kind": "initial web capture",
+      "counts": "112 pass, 8 fail",
+      "reason": "4 login link-in-text-block; 2 privacy networkidle; 2 missing-event HTTP status"
+    },
+    {
+      "kind": "unit command cwd",
+      "counts": "658 pass, 15 fail in first resumed command",
+      "reason": "Vitest --root selected new tests but relative readFileSync used the old main/app cwd. Reran from the frozen review app; no assertion changed.",
+      "log": "/workspace/qa-zijing/logs/astra-full-design-review-unit-20261014.log"
+    },
+    {
+      "kind": "limited UI harness first and second attempts",
+      "reason": "First exact getByLabel included hidden required suffix; second unscoped alert also matched Next route announcer. Used exact accessible textbox names and the application form alert. Both failures preserved."
+    },
+    {
+      "kind": "label measurement",
+      "reason": "Honor evidence removal label was 26px tall; scoped min-height 44px, final measurement kept same threshold.",
+      "log": "/workspace/qa-zijing/logs/label-targets-20261014.log"
+    },
+    {
+      "kind": "native mapping",
+      "reason": "Initial module cache fixture error, then six narrow subtitle failures, then stale expected case count 28 after adding an eighth fixture. Source styles and case count fixed; thresholds unchanged.",
+      "directories": [
+        "/workspace/qa-zijing/full-design-native-initial-partial-20261013",
+        "/workspace/qa-zijing/full-design-native-small-text-failure-20261013",
+        "/workspace/qa-zijing/full-design-native-count-check-20261013"
+      ]
+    }
+  ],
+  "notRun": [
+    "Full current-source Vitest and database integration",
+    "Full 125 E2E and dedicated visual/consent profiles",
+    "Current-source honor revision/private media ACL and leave/revoke regression",
+    "Official WeChat developer tool, simulator, device and keyboard/media/share validation",
+    "Production deployment, CMS publication and WeChat upload/publication"
+  ],
+  "remainingIssues": [
+    {
+      "status": "fail",
+      "target": "Missing event route",
+      "description": "Browser and an additional Twitterbot request observed HTTP 200; notFound UI and noindex present. Matrix still expects 404. Sol must verify intended HTTP contract; no threshold or assertion relaxed."
+    },
+    {
+      "status": "capability gap",
+      "target": "Honor evidence",
+      "description": "Selected evidence becomes public when approved; no distinct permanently private reviewer credential channel. UI explains existing contract."
+    },
+    {
+      "status": "capability gap",
+      "target": "Team profile",
+      "description": "Whole-profile visible opt-in; optional fields can be empty, no per-field private storage."
+    },
+    {
+      "status": "preserved permission difference",
+      "target": "Anonymous browsing / staff recruitment management",
+      "description": "Existing page gate and P/VP authority retained, not broadened."
+    },
+    {
+      "status": "unverified",
+      "target": "CI",
+      "description": "New checkpoint CI not yet inspected. Old exact 0a7d4b7 run 38441230936 failed and logs returned 404; no attribution to the new source."
+    }
+  ],
+  "runtime": {
+    "latestOrigin": "http://localhost:3369",
+    "buildDirectory": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/browser/app-final-20261014/.next",
+    "database": {
+      "host": "127.0.0.1",
+      "port": 55613,
+      "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/pg",
+      "syntheticOnly": true,
+      "newBusinessFixtureCreationOnResume": false
+    },
+    "processes": [
+      {
+        "action": "exec",
+        "profile": "main",
+        "label": "astra-full-design-resume-server",
+        "startedAt": "2026-10-14T04:14:58.862Z",
+        "runnerPID": 688,
+        "childPID": 699,
+        "cwd": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/app",
+        "executable": "env",
+        "status": "finished",
+        "finishedAt": "2026-10-14T04:35:01.756Z",
+        "exitCode": 143,
+        "runnerAliveAtEvidence": false,
+        "childAliveAtEvidence": false
+      },
+      {
+        "action": "exec",
+        "profile": "main",
+        "label": "astra-full-design-review-server",
+        "startedAt": "2026-10-14T04:21:20.760Z",
+        "runnerPID": 1969,
+        "childPID": 1980,
+        "cwd": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/app",
+        "executable": "env",
+        "status": "finished",
+        "finishedAt": "2026-10-14T04:35:01.791Z",
+        "exitCode": 143,
+        "runnerAliveAtEvidence": false,
+        "childAliveAtEvidence": false
+      },
+      {
+        "action": "exec",
+        "profile": "main",
+        "label": "astra-full-design-final-server",
+        "startedAt": "2026-10-14T04:34:57.748Z",
+        "runnerPID": 7450,
+        "childPID": 7461,
+        "cwd": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/app",
+        "executable": "env",
+        "status": "running",
+        "runnerAliveAtEvidence": true,
+        "childAliveAtEvidence": true
+      }
+    ],
+    "logs": "/workspace/qa-zijing/logs",
+    "externalNotifications": false,
+    "SMTP": "Disabled for resumed build and design sampling; formal E2E must use existing loopback SMTP scripts."
+  },
+  "authorization": {
+    "commitPushOnly": "new",
+    "forceReset": false,
+    "productionDeploy": false,
+    "cmsPublish": false,
+    "wechatUpload": false,
+    "realPrivateData": false
+  }
+}

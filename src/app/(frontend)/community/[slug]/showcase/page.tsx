@@ -13,9 +13,12 @@ import { CommunityPager, pageNumber } from "@/components/CommunityPager";
 import { ShowcaseForm } from "@/components/ShowcaseForm";
 import { ShowcaseCard } from "@/components/ShowcaseCard";
 import { TeamHonorPins } from "@/components/TeamHonorArchives";
-import { EmptyState } from "@/components/activity-pages/PublicPages";
+import {
+  CommunityEmpty,
+  CommunityPageHeader,
+} from "@/components/community-pages/CommunityPages";
 import { ClubFrame } from "../../../_club/ClubPage";
-import styles from "../../../_club/ClubPages.module.css";
+import styles from "@/components/community-pages/CommunityPages.module.css";
 export default async function Showcase({
   params,
   searchParams,
@@ -64,15 +67,31 @@ export default async function Showcase({
   });
   const base = `/community/${slug}/showcase`;
   return (
-    <ClubFrame className={styles.communityBody}><section className="community-page">
-      <header className={styles.subHeader}>
-        <div>
-          <p className={styles.kicker}>社群记录</p>
-          <h2>社群风采</h2>
-          <p>把共同经历的精彩留在这里。</p>
-        </div>
-      </header>
-      <nav className="community-tabs" aria-label="风采筛选">
+    <ClubFrame className={`${styles.page} ${styles.body}`}>
+      <CommunityPageHeader
+        title={
+          view === "review"
+            ? "风采投稿审核"
+            : view === "mine"
+              ? "我的风采投稿"
+              : "社群风采"
+        }
+        description={
+          view === "review"
+            ? "核对社群经历与媒体内容，为投稿留下明确的处理意见。"
+            : view === "mine"
+              ? "查看你分享的活动记录与审核状态。"
+              : "照片、视频和代表队荣誉，记录一起参与的校园生活。"
+        }
+        action={
+          canParticipate(user) ? (
+            <a className="button light" href="#share-community-showcase">
+              分享社群风采
+            </a>
+          ) : undefined
+        }
+      />
+      <nav className={styles.tabs} aria-label="风采筛选">
         <Link href={base} aria-current={view === "public" ? "page" : undefined}>
           公开风采
         </Link>
@@ -97,56 +116,79 @@ export default async function Showcase({
       {view === "public" && page === 1 && (
         <TeamHonorPins payload={p} game={game.id} />
       )}
-      <div className="showcase-feed">
-        {posts.docs.map((post) => (
-          <ShowcaseCard
-            key={post.id}
-            post={post}
-            manager={manager}
-            privateView={view !== "public"}
-            returnQuery={new URLSearchParams({ view, ...(query.page ? { page: String(page) } : {}) }).toString()}
-            promotionHref={
-              post.status === "visible" &&
-              (managesGame(user, game.id) || canReviewPromotion(user))
-                ? "/community/promotions?source=community-showcase&id=" +
-                  post.id
-                : undefined
-            }
+      <div className={view === "review" ? undefined : styles.contentWorkspace}>
+        <section aria-label={view === "public" ? "公开风采记录" : "投稿记录"}>
+          <div className={styles.feed}>
+            {posts.docs.map((post) => (
+              <ShowcaseCard
+                key={post.id}
+                post={post}
+                manager={manager}
+                privateView={view !== "public"}
+                href={
+                  post.status === "visible" ? `${base}/${post.id}` : undefined
+                }
+                returnQuery={new URLSearchParams({
+                  view,
+                  ...(query.page ? { page: String(page) } : {}),
+                }).toString()}
+                promotionHref={
+                  post.status === "visible" &&
+                  (managesGame(user, game.id) || canReviewPromotion(user))
+                    ? "/community/promotions?source=community-showcase&id=" +
+                      post.id
+                    : undefined
+                }
+              />
+            ))}
+          </div>
+          {!posts.docs.length && (
+            <CommunityEmpty
+              title={
+                view === "public"
+                  ? "暂无已发布的风采"
+                  : view === "mine"
+                    ? "你还没有风采投稿"
+                    : "当前没有待处理的投稿"
+              }
+            >
+              <p>
+                {view === "public"
+                  ? "欢迎分享活动记录，投稿审核通过后会在这里公开。"
+                  : view === "mine"
+                    ? "通过下方分享入口记录活动，再从这里查看审核状态。"
+                    : "新的投稿会按现有权限在此展示。"}
+              </p>
+            </CommunityEmpty>
+          )}
+          <CommunityPager
+            page={page}
+            pages={posts.totalPages}
+            base={base}
+            query={view !== "public" ? `&view=${view}` : ""}
           />
-        ))}
+        </section>
+        {view !== "review" && (
+          <aside className={styles.publishAside}>
+            <h2>记录一次共同经历</h2>
+            <p>分享你有权发布的活动照片与视频；社群管理员审核后展示。</p>
+            <a href="#share-community-showcase">前往分享入口</a>
+          </aside>
+        )}
       </div>
-      {!posts.docs.length && (
-        <EmptyState
-          title={
-            view === "public"
-              ? "暂无已发布的风采"
-              : view === "mine"
-                ? "你还没有风采投稿"
-                : "当前没有待处理的投稿"
-          }
-        >
-          <p>
-            {view === "public"
-              ? "欢迎分享活动记录，投稿审核通过后会在这里公开。"
-              : view === "mine"
-                ? "可以通过下方分享入口记录活动，再从这里查看审核状态。"
-                : "新的投稿会按现有权限在此展示。"}
-          </p>
-        </EmptyState>
-      )}
-      <CommunityPager
-        page={page}
-        pages={posts.totalPages}
-        base={base}
-        query={view !== "public" ? `&view=${view}` : ""}
-      />
-      {canParticipate(user) ? (
-        <ShowcaseForm game={game.id} manager={manager} />
-      ) : (
-        <Link className="button" href="/login">
-          登录后分享社群风采
-        </Link>
-      )}
-    </section></ClubFrame>
+      <section
+        id="share-community-showcase"
+        className={styles.section}
+        aria-label="分享社群风采"
+      >
+        {canParticipate(user) ? (
+          <ShowcaseForm game={game.id} manager={manager} />
+        ) : (
+          <Link className="button" href="/login">
+            登录后分享社群风采
+          </Link>
+        )}
+      </section>
+    </ClubFrame>
   );
 }

@@ -1,1 +1,6 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
+@import "../../templates/business.wxss";
+.team-members-page .membership-dates { display: flex; flex-wrap: wrap; gap: 20rpx 44rpx; margin-top: 24rpx; font-size: 29rpx; font-variant-numeric: tabular-nums; }
+.team-members-page .membership-dates > view { flex: 1; min-width: 180rpx; }
+.team-members-page .membership-dates .muted { margin-bottom: 6rpx; }
+.team-members-page .membership-revoke { border-left: 3rpx solid var(--z-danger-border); }
+.team-members-page .membership-revoke > .danger { width: 100%; }

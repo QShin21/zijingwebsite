@@ -9,6 +9,7 @@ import {
   updatePasswordAction,
 } from "@/app/(frontend)/account/actions";
 import { FormFeedback, PasswordField } from "./AuthFields";
+import { safeReturnPath } from "./auth-return";
 import styles from "./AccountPages.module.css";
 
 const subscribe = () => () => {};
@@ -96,10 +97,17 @@ export function LoginForm({
 export function PasswordResetForm({
   message = "",
   sent = false,
+  returnTo = "/account",
 }: {
   message?: string;
   sent?: boolean;
+  returnTo?: string;
 }) {
+  const destination = safeReturnPath(returnTo);
+  const onward =
+    destination === "/account"
+      ? ""
+      : `&returnTo=${encodeURIComponent(destination)}`;
   const ready = useReady();
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState<"code" | "password" | null>(null);
@@ -150,6 +158,8 @@ export function PasswordResetForm({
               type="email"
               required
               autoComplete="email"
+              autoCapitalize="none"
+              spellCheck={false}
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
@@ -180,7 +190,7 @@ export function PasswordResetForm({
             } else {
               form.reset();
               setEmail("");
-              window.location.assign("/login?reset=1");
+              window.location.assign(`/login?reset=1${onward}`);
             }
           } catch {
             setFailed(true);
@@ -233,7 +243,14 @@ export function PasswordResetForm({
           使用上方注册邮箱完成验证；更新成功后将返回登录页。
         </p>
       </form>
-      <Link className={styles.textLink} href="/login">
+      <Link
+        className={styles.textLink}
+        href={
+          destination === "/account"
+            ? "/login"
+            : `/login?returnTo=${encodeURIComponent(destination)}`
+        }
+      >
         返回登录
       </Link>
       <noscript>请启用 JavaScript 后重设密码。</noscript>

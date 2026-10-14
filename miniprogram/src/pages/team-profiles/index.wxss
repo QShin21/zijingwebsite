@@ -1,1 +1,15 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
+@import "../../templates/business.wxss";
+.team-profiles-page .profile-editor { margin-top: 28rpx; }
+.team-profiles-page .avatar-editor { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 24rpx; }
+.team-profiles-page .avatar-editor > view { flex: 1; min-width: 220rpx; }
+.team-profiles-page .avatar-editor .secondary { width: 100%; }
+.team-profiles-page .preview-avatar { width: 120rpx; height: 120rpx; flex-shrink: 0; border-radius: 12rpx; margin: 0; }
+.team-profiles-page .profile-consent > view { min-width: 0; flex: 1; }
+.team-profiles-page .profile-consent { align-items: flex-start; }
+.team-profiles-page .profile-preview { margin: 28rpx 0; padding: 28rpx; border: 1rpx solid var(--z-line); background: var(--z-surface); border-radius: 12rpx; }
+.team-profiles-page .profile-preview-header, .team-profiles-page .profile-roster-header { display: flex; gap: 24rpx; align-items: center; }
+.team-profiles-page .profile-preview-header > view, .team-profiles-page .profile-roster-header > view { min-width: 0; flex: 1; }
+.team-profiles-page .profile-display-name { font-size: 40rpx; font-weight: 600; word-break: break-word; line-height: 1.45; }
+.team-profiles-page .preview-selection { margin-top: 28rpx; padding-top: 20rpx; border-top: 1rpx solid var(--z-line); }
+.team-profiles-page .profile-card .avatar { width: 96rpx; height: 96rpx; margin: 0; border-radius: 12rpx; flex-shrink: 0; }
+.team-profiles-page .biography { white-space: pre-wrap; word-break: break-word; }

@@ -9,6 +9,7 @@ import {
   Empty,
   JoinCards,
   Pagination,
+  Picture,
   Prose,
 } from "@/components/Content";
 import { PageHeading } from "@/components/PageHeading";
@@ -86,7 +87,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? titles[path[1] || "join"]
       : c === "teams" && path.length === 1
         ? "代表队与荣誉"
-        : names[c] || titles[path[0]]) ||
+        : c === "news" && path.length === 1
+          ? "社团动态"
+          : names[c] || titles[path[0]]) ||
     "页面未找到";
   return {
     title,
@@ -130,6 +133,96 @@ export default async function Page({ params, searchParams }: Props) {
       >
         <Detail collection={c} doc={doc} photoPage={page} />
       </ClubFrame>
+    );
+  }
+  if (c === "news" && path.length === 1) {
+    const [stories, notices, albums] = await Promise.all([
+      list("news", {}, page),
+      list("announcements", {}, 1, 3),
+      list("albums", {}, 1, 2),
+    ]);
+    return (
+      <div className={styles.pageBody}>
+        <PageHeading
+          title="社团动态"
+          eyebrow="紫荆的共同经历"
+          description="阅读社团近况、活动回顾与人物故事，也可以在这里找到通知和影像。"
+        />
+        <nav className={styles.tabs} aria-label="社团动态栏目">
+          <Link href="/news" aria-current="page">
+            社团动态
+          </Link>
+          <Link href="/announcements">通知</Link>
+          <Link href="/gallery">影像</Link>
+        </nav>
+        <div className={styles.newsroom}>
+          <section className={styles.stories} aria-labelledby="stories-title">
+            <div className={styles.sectionHeading}>
+              <h2 id="stories-title">{page > 1 ? "更多动态" : "最新动态"}</h2>
+              <span>{stories.totalDocs} 篇公开记录</span>
+            </div>
+            <Cards docs={stories.docs} collection="news" />
+            <Pagination page={page} total={stories.totalPages} path="/news" />
+          </section>
+          <aside className={styles.newsDesk} aria-label="通知与影像">
+            <section aria-labelledby="news-notices-title">
+              <div className={styles.sectionHeading}>
+                <h2 id="news-notices-title">近期通知</h2>
+                <Link href="/announcements">全部通知</Link>
+              </div>
+              {notices.docs.length ? (
+                <ul className={styles.noticeIndex}>
+                  {notices.docs.map((notice) => (
+                    <li key={notice.id}>
+                      <h3>
+                        <Link href={`/announcements/${notice.slug}`}>
+                          {notice.title}
+                        </Link>
+                      </h3>
+                      {notice.summary && <p>{notice.summary}</p>}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className={styles.smallNote}>新通知将在确认后发布。</p>
+              )}
+            </section>
+            {albums.docs.length > 0 && (
+              <section aria-labelledby="news-albums-title">
+                <div className={styles.sectionHeading}>
+                  <h2 id="news-albums-title">社团影像</h2>
+                  <Link href="/gallery">全部影像</Link>
+                </div>
+                <div className={styles.albumIndex}>
+                  {albums.docs.map((album) => (
+                    <article key={album.id}>
+                      {album.cover && (
+                        <Link
+                          href={`/gallery/${album.slug}`}
+                          tabIndex={-1}
+                          aria-label={album.title}
+                        >
+                          <Picture id={album.cover} />
+                        </Link>
+                      )}
+                      <h3>
+                        <Link href={`/gallery/${album.slug}`}>
+                          {album.title}
+                        </Link>
+                      </h3>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            )}
+            <div className={styles.newsParticipation}>
+              <h2>参与下一次活动</h2>
+              <p>查看近期安排、参与条件与报名入口。</p>
+              <Link href="/events">浏览社团活动</Link>
+            </div>
+          </aside>
+        </div>
+      </div>
     );
   }
   if (c && path.length === 1) {
@@ -195,6 +288,13 @@ export default async function Page({ params, searchParams }: Props) {
               ? "了解代表队、查看队员简介与已批准荣誉，找到适合自己的选拔入口。"
               : sectionMeta[c]?.description
           }
+          action={
+            c === "teams" ? (
+              <Link className="button" href="/teams/recruitment">
+                查看代表队招新
+              </Link>
+            ) : undefined
+          }
         />
         {c === "teams" && (
           <nav className={styles.tabs} aria-label="代表队与荣誉">
@@ -208,103 +308,125 @@ export default async function Page({ params, searchParams }: Props) {
             </Link>
           </nav>
         )}
-        {c === "teams" && (
-          <nav className={styles.toolbar} aria-label="代表队入口">
-            <Link className="button" href="/teams/recruitment">
-              代表队招新与我的记录
-            </Link>
-            <Link href="/teams/manage">代表队工作台</Link>
-            <Link href="/teams/apply">申请建立代表队</Link>
-          </nav>
-        )}
-        {games && (
-          <form className={styles.filters} method="get" aria-label="筛选内容">
-            <label>
-              游戏项目
-              <select name="game" defaultValue={query.game || ""}>
-                <option value="">全部项目</option>
-                {games.docs.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {c === "events" && (
-              <>
+        <div className={c === "teams" ? styles.directoryLayout : undefined}>
+          <div>
+            {games && (
+              <form
+                className={styles.filters}
+                method="get"
+                aria-label="筛选内容"
+              >
                 <label>
-                  活动类型
-                  <select name="type" defaultValue={query.type || ""}>
-                    <option value="">全部类型</option>
-                    {["比赛", "观赛", "交流", "训练", "其他"].map((t) => (
-                      <option key={t}>{t}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  时间
-                  <select name="time" defaultValue={query.time || ""}>
-                    <option value="">全部时间</option>
-                    <option value="upcoming">即将开始</option>
-                    <option value="past">历史活动</option>
-                  </select>
-                </label>
-              </>
-            )}
-            {teams && (
-              <>
-                <label>
-                  代表队
-                  <select name="team" defaultValue={query.team || ""}>
-                    <option value="">全部代表队</option>
-                    {teams.docs.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.title}
+                  {c === "teams" ? "所属游戏社群" : "游戏项目"}
+                  <select name="game" defaultValue={query.game || ""}>
+                    <option value="">全部项目</option>
+                    {games.docs.map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {g.title}
                       </option>
                     ))}
                   </select>
                 </label>
-                <label>
-                  年份
-                  <input
-                    name="year"
-                    type="number"
-                    min="1900"
-                    max="2200"
-                    placeholder="全部年份"
-                    defaultValue={query.year}
-                  />
-                </label>
-              </>
+                {c === "events" && (
+                  <>
+                    <label>
+                      活动类型
+                      <select name="type" defaultValue={query.type || ""}>
+                        <option value="">全部类型</option>
+                        {["比赛", "观赛", "交流", "训练", "其他"].map((t) => (
+                          <option key={t}>{t}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      时间
+                      <select name="time" defaultValue={query.time || ""}>
+                        <option value="">全部时间</option>
+                        <option value="upcoming">即将开始</option>
+                        <option value="past">历史活动</option>
+                      </select>
+                    </label>
+                  </>
+                )}
+                {teams && (
+                  <>
+                    <label>
+                      代表队
+                      <select name="team" defaultValue={query.team || ""}>
+                        <option value="">全部代表队</option>
+                        {teams.docs.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.title}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      年份
+                      <input
+                        name="year"
+                        type="number"
+                        min="1900"
+                        max="2200"
+                        placeholder="全部年份"
+                        defaultValue={query.year}
+                      />
+                    </label>
+                  </>
+                )}
+                <button className="button" type="submit">
+                  筛选 <Icon name="arrow" />
+                </button>
+                <Link href={`/${path[0]}`}>重置</Link>
+              </form>
             )}
-            <button className="button" type="submit">
-              筛选 <Icon name="arrow" />
-            </button>
-            <Link href={`/${path[0]}`}>重置</Link>
-          </form>
-        )}
-        <div className={styles.resultMeta}>
-          <span>
-            {Object.keys(query).length ? "筛选结果" : "公开档案"} ·{" "}
-            {result.totalDocs} 条
-          </span>
-          {Object.keys(query).length > 0 && (
-            <Link href={`/${path[0]}`}>清除筛选</Link>
+            <div className={styles.resultMeta}>
+              <span>
+                {Object.keys(query).length ? "筛选结果" : "公开档案"} ·{" "}
+                {result.totalDocs} 条
+              </span>
+              {Object.keys(query).length > 0 && (
+                <Link href={`/${path[0]}`}>清除筛选</Link>
+              )}
+            </div>
+            {result.docs.length ? (
+              <Cards
+                docs={result.docs}
+                collection={c}
+                games={games?.docs}
+                headingLevel={2}
+              />
+            ) : Object.keys(query).length ? (
+              <Empty text="没有符合当前筛选条件的内容，请调整条件或清除筛选。" />
+            ) : (
+              <Empty collection={c} />
+            )}
+            <Pagination
+              page={page}
+              total={result.totalPages}
+              path={`/${path[0]}`}
+              query={query}
+            />
+          </div>
+          {c === "teams" && (
+            <aside
+              className={styles.directoryAside}
+              aria-labelledby="team-directory-next-title"
+            >
+              <h2 id="team-directory-next-title">从了解队伍开始</h2>
+              <p>
+                查看所属社群、公开成员与比赛经历，再了解适合自己的选拔批次。
+              </p>
+              <Link href="/teams/recruitment">代表队招新与我的记录</Link>
+              <div>
+                <h3>组织与管理</h3>
+                <p>建队申请与队伍事务，按当前社群任职和授权处理。</p>
+                <Link href="/teams/apply">申请建立代表队</Link>
+                <Link href="/teams/manage">代表队工作台</Link>
+              </div>
+            </aside>
           )}
         </div>
-        {result.docs.length ? (
-          <Cards docs={result.docs} collection={c} />
-        ) : Object.keys(query).length ? (
-          <Empty text="没有符合当前筛选条件的内容，请调整条件或清除筛选。" />
-        ) : (
-          <Empty collection={c} />
-        )}
-        <Pagination
-          page={page}
-          total={result.totalPages}
-          path={`/${path[0]}`}
-          query={query}
-        />
       </ClubFrame>
     );
   }
@@ -321,38 +443,52 @@ export default async function Page({ params, searchParams }: Props) {
       <ClubFrame active={path[1] === "teams"}>
         <PageHeading
           title={titles[path[1] || "join"]}
-          eyebrow="加入紫荆 · 找到你的参与方式"
+          eyebrow="参与社团"
           description={descriptions[path[1] || "join"]}
           parent={path[1] ? { href: "/join", label: "加入紫荆" } : undefined}
         />
         {doc && (
-          <div className={styles.readingLayout}>
+          <div className={styles.joinIntro}>
             <Prose doc={doc} />
           </div>
         )}
-        <JoinCards selected={path[1]} />
         {(!path[1] || path[1] === "members") && (
-          <section className={styles.panel}>
-            <h2>联系管理员，人工加入微信群</h2>
-            <p>
-              网站账号用于报名与记录。选择游戏社群后，查看在任管理员名片，在微信中添加好友，再由管理员人工邀请进群。
-            </p>
+          <section className={styles.participationCallout}>
+            <div>
+              <h2>联系管理员，人工加入微信群</h2>
+              <p>
+                网站账号用于报名与记录。选择游戏社群后，查看在任管理员名片，在微信中添加好友，再由管理员人工邀请进群。
+              </p>
+            </div>
             <Link className="button" href="/community">
               选择游戏社群
             </Link>
           </section>
         )}
         {path[1] === "teams" && (
-          <section className={styles.panel}>
-            <h2>站内代表队申请</h2>
-            <p>
-              普通入社、骨干招新和入队申请分别处理。由本社群管理员人工审核，录取不授予管理角色。
-            </p>
+          <section className={styles.participationCallout}>
+            <div>
+              <h2>站内代表队申请</h2>
+              <p>
+                普通入社、骨干招新和入队申请分别处理。由本社群管理员人工审核，录取不授予管理角色。
+              </p>
+            </div>
             <Link className="button" href="/teams/recruitment">
               查看代表队招新与我的记录
             </Link>
           </section>
         )}
+        <section
+          className={styles.contentSection}
+          aria-labelledby="join-paths-title"
+        >
+          <div className={styles.sectionHeading}>
+            <h2 id="join-paths-title">
+              {path[1] ? "了解不同参与方式" : "找到适合你的参与方式"}
+            </h2>
+          </div>
+          <JoinCards selected={path[1]} />
+        </section>
         {batches && (
           <section className={styles.contentSection}>
             <p className={styles.eyebrow}>已发布招新与历史归档</p>
@@ -373,7 +509,7 @@ export default async function Page({ params, searchParams }: Props) {
     const privacy = path[0] === "privacy";
     const contact = path[0] === "contact";
     return (
-      <>
+      <div className={styles.fixedPage}>
         <PageHeading
           title={doc?.title || titles[path[0]]}
           eyebrow={
@@ -385,8 +521,48 @@ export default async function Page({ params, searchParams }: Props) {
           }
           description={descriptions[path[0]]}
         />
+        <nav className={styles.sectionIndex} aria-label="关于紫荆">
+          <Link
+            href="/about"
+            prefetch={false}
+            aria-current={path[0] === "about" ? "page" : undefined}
+          >
+            关于我们
+          </Link>
+          <Link
+            href="/contact"
+            prefetch={false}
+            aria-current={contact ? "page" : undefined}
+          >
+            联系与合作
+          </Link>
+          <Link href="/privacy" aria-current={privacy ? "page" : undefined}>
+            隐私说明
+          </Link>
+        </nav>
         <div className={styles.readingLayout}>
-          <div>
+          <article className={styles.fixedArticle}>
+            {privacy && (
+              <section
+                className={styles.retentionSummary}
+                aria-label="已确认的资料保留安排"
+              >
+                <dl>
+                  <div>
+                    <dt>报名资料保留</dt>
+                    <dd>1 年</dd>
+                  </div>
+                  <div>
+                    <dt>成员关系记录</dt>
+                    <dd>长期保留</dd>
+                  </div>
+                  <div>
+                    <dt>资料删除申请</dt>
+                    <dd>联系负责人，人工处理</dd>
+                  </div>
+                </dl>
+              </section>
+            )}
             {doc ? (
               <Prose doc={doc} />
             ) : privacy ? (
@@ -454,8 +630,18 @@ export default async function Page({ params, searchParams }: Props) {
                 </article>
               </div>
             )}
-          </div>
-          <aside>
+          </article>
+          <aside className={styles.readingAside}>
+            {Boolean(doc?.sections?.length) && (
+              <nav className={styles.readingContents} aria-label="本页目录">
+                <h2>本页内容</h2>
+                {doc?.sections?.map((section, index) => (
+                  <a href={`#content-${doc.id}-section-${index}`} key={index}>
+                    {section.heading}
+                  </a>
+                ))}
+              </nav>
+            )}
             {privacy ? (
               <>
                 <h2>资料处理与联系</h2>
@@ -490,7 +676,7 @@ export default async function Page({ params, searchParams }: Props) {
             )}
           </aside>
         </div>
-      </>
+      </div>
     );
   }
   notFound();

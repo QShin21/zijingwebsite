@@ -1,4 +1,3 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
-.mini-page .mode-tabs { margin-bottom: 12rpx; }
-.result-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 20rpx; margin: 34rpx 0 22rpx; }
-.result-heading .eyebrow { margin: 0; }
+.result-heading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 12rpx 20rpx; margin-top: 30rpx; }
+.events-page .filter-group { margin-bottom: 20rpx; }
+.events-page .content-record-announcements .card-title { font-size: 33rpx; }

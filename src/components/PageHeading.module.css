@@ -1,0 +1,78 @@
+.heading {
+  padding: 0 0 28px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--z-line);
+}
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  color: var(--z-muted);
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+.breadcrumbs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.headingRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px 40px;
+}
+.copy {
+  min-width: 0;
+  max-width: var(--z-reading);
+}
+.heading .eyebrow {
+  margin: 0 0 12px;
+  color: var(--z-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+.heading h1 {
+  margin: 0;
+  font-size: var(--z-text-object);
+  line-height: 1.25;
+  text-wrap: balance;
+}
+.heading .headingDescription {
+  max-width: 44em;
+  margin: 18px 0 0;
+  color: var(--z-muted);
+  font-size: 16px;
+  line-height: 1.8;
+}
+.action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  max-width: 100%;
+}
+.headingExtra {
+  margin-top: 24px;
+}
+@media (max-width: 700px) {
+  .heading {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+  }
+  .breadcrumbs {
+    margin-bottom: 12px;
+  }
+  .headingRow {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .heading h1 {
+    font-size: clamp(28px, 7.5vw, 36px);
+  }
+}

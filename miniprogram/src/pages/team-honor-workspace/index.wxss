@@ -1,1 +1,11 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
+@import "../../templates/business.wxss";
+.team-honor-workspace-page .honor-create { margin: 28rpx 0; }
+.team-honor-workspace-page .honor-create > .primary { width: 100%; }
+.team-honor-workspace-page .honor-work-record { border-left: 0; }
+.team-honor-workspace-page .honor-work-record.is-open { border-bottom: 2rpx solid var(--z-primary); }
+.team-honor-workspace-page .honor-result { display: flex; flex-wrap: wrap; gap: 10rpx 24rpx; margin-top: 18rpx; font-size: 30rpx; }
+.team-honor-workspace-page .honor-result text:last-child { color: var(--z-primary); font-weight: 600; }
+.team-honor-workspace-page .task-record > .secondary { margin-top: 24rpx; }
+.team-honor-workspace-page .evidence-detail { margin-top: 28rpx; border-top: 1rpx solid var(--z-line); padding-top: 24rpx; }
+.team-honor-workspace-page .honor-evidence { margin-top: 20rpx; }
+.team-honor-workspace-page .review-actions .primary { flex-basis: 100%; }

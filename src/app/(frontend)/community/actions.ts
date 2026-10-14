@@ -218,3 +218,72 @@ export async function reviewShowcaseResultAction(form: FormData) {
     return { ok: true, message, successHref: path + "?" + query.toString() };
   } catch (error) { return { ok: false, message: workflowFeedback(error) }; }
 }
+
+/** Presentation adapters keep legacy deep links and business services intact. */
+function resultPage(form: FormData) {
+  const page = value(form, "returnPage");
+  return /^\d+$/.test(page) && Number(page) > 1 && Number(page) <= 100000 ? `&page=${page}` : "";
+}
+export async function decideCommunityResultAction(form: FormData) {
+  const p = await cms(), { user } = await p.auth({ headers: await headers() });
+  if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再审核，已填写的意见保留。" };
+  if (!canPublish(user)) return { ok: false, message: "当前账号无权审核社群管理员申请。" };
+  const decision = value(form, "decision");
+  if (!["approved", "returned", "rejected"].includes(decision)) return { ok: false, message: "审核决定无效，请重新选择。" };
+  try {
+    await decideCommunityApplication(p, user, numeric(form, "id"), decision, value(form, "reviewNote"), value(form, "revision"));
+  } catch (error) { return { ok: false, message: workflowFeedback(error) }; }
+  revalidatePath("/community/review");
+  revalidatePath("/community/apply");
+  return { ok: true, message: "审核结果已保存。", successHref: "/community/review?done=1" + resultPage(form) };
+}
+export async function handleJoinResultAction(form: FormData) {
+  // Authentication redirects from the existing action remain outside a catch.
+  const result = await joinAction(form);
+  if (result.error) return { ok: false, message: result.error };
+  const path = `${await gamePath(numeric(form, "game"))}/members`;
+  const message = "人工处理结果已保存。";
+  revalidatePath(path);
+  return { ok: true, message, successHref: `${path}?message=${encodeURIComponent(message)}${resultPage(form)}` };
+}
+export async function updateCommunityCardResultAction(form: FormData) {
+  const p = await cms(), { user } = await p.auth({ headers: await headers() });
+  if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再保存，已选择的名片与展示设置保留。" };
+  const file = form.get("wechatQr");
+  if (file instanceof File && file.size > 2 * 1024 * 1024) return { ok: false, message: "名片最大 2 MB，请重新选择。" };
+  try {
+    await updateCommunityCard(p, user, numeric(form, "id"), value(form, "revision"), {
+      contactConsent: form.get("contactConsent") === "on",
+      ...(file instanceof File && file.size ? { wechatQr: `data:${file.type};base64,${Buffer.from(await file.arrayBuffer()).toString("base64")}` } : {}),
+    });
+  } catch (error) { return { ok: false, message: workflowFeedback(error) }; }
+  const message = "名片及展示设置已更新。";
+  revalidatePath("/community/apply");
+  return { ok: true, message, successHref: "/community/apply?message=" + encodeURIComponent(message) + "#my-applications" };
+}
+export async function replaceShowcaseVideoResultAction(form: FormData) {
+  const p = await cms(), { user } = await p.auth({ headers: await headers() });
+  if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再保存，已选择的视频保留。" };
+  const id = numeric(form, "id");
+  let uploaded = "", game = 0;
+  try {
+    await workflowTransaction(p, user, { webShowcaseWrite: true }, async req => {
+      const post = await p.findByID({ collection: "community-showcase", id, req, overrideAccess: false, depth: 0 });
+      game = Number(post.game);
+      if (!canReviewShowcase(req.user, post.game)) throw new APIError("无权修改此社群风采视频", 403);
+      if (value(form, "revision") !== post.updatedAt) throw new APIError("风采已更新，请刷新后再上传", 409);
+      const file = form.get("video");
+      if (!(file instanceof File) || !file.size) throw new APIError("请选择 10 MB 以内的 MP4 视频", 400);
+      uploaded = await saveVideo(file);
+      await p.update({ collection: "community-showcase", id, req, overrideAccess: false, data: { videoURL: uploaded } });
+    });
+  } catch (error) {
+    if (uploaded) await discardVideo(uploaded);
+    return { ok: false, message: workflowFeedback(error) };
+  }
+  const path = `${await gamePath(game)}/showcase/${id}`;
+  const message = "本站视频已更新，社团级展示需重新申请复审。";
+  revalidatePath(path);
+  revalidatePath(`${await gamePath(game)}/showcase`);
+  return { ok: true, message, successHref: path + "?message=" + encodeURIComponent(message) };
+}

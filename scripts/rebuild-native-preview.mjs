@@ -28,7 +28,7 @@ fs.mkdirSync(output, { recursive: true });
 // Evaluate actual native JS modules only to obtain Page data and pure projection functions.
 // No lifecycle, business event, real storage, network, media or permission API is executed.
 function runtime(theme) {
-  const modules = new Map(); let definition;
+  const modules = new Map(), pages = new Map(); let definition;
   const blocked = operation => () => { throw new Error('Browser mapping forbids wx.' + operation); };
   const wx = new Proxy({ getStorageSync: key => key === 'zijing_theme' ? theme : undefined }, {
     get(target, property) { return property in target ? target[property] : blocked(String(property)); },
@@ -44,7 +44,7 @@ function runtime(theme) {
     }, { filename: file, timeout: 2000 });
     return module.exports;
   }
-  return { load, page(name) { definition = undefined; load(native('pages/' + name + '/index.js')); if (!definition) throw new Error('Page not found: ' + name); return clone(definition.data); } };
+  return { load, page(name) { if (pages.has(name)) return clone(pages.get(name)); definition = undefined; load(native('pages/' + name + '/index.js')); if (!definition) throw new Error('Page not found: ' + name); pages.set(name, clone(definition.data)); return clone(definition.data); } };
 }
 
 function fixtureSet(rt) {
@@ -83,8 +83,11 @@ function fixtureSet(rt) {
     { name: 'honor-review', page: 'team-honor-workspace', state: '当前授权范围审核清单，证据区关闭且无证据图片', data: {
       loading: false, needsLogin: false, ready: true, view: 'review', actions: { create: false, review: true }, teams: [], docs: [entry], totalDocs: 1, page: 1, hasMore: false, detail: null,
     } },
+    { name: 'honor-review-expanded', page: 'team-honor-workspace', state: '已展开同一合成投稿的文字与处理区，无证据图片或视频', data: {
+      loading: false, needsLogin: false, ready: true, view: 'review', actions: { create: false, review: true }, teams: [], docs: [entry], totalDocs: 1, page: 1, hasMore: false, detail: entry, detailImages: [],
+    } },
     { name: 'honor-archive', page: 'team-honors', state: '公开档案，合成文本记录；无图片/视频', data: {
-      loading: false, needsLogin: false, loaded: true, team: { id: 900052, title: '合成代表队荣誉档案', gameTitle: '合成游戏社群' }, records: [{ key: 'team-honor-records:900031', title: '合成赛事成果', competition: '本地合成赛事', placing: '示例成果（合成）', dateText: '2026-10-12', description: '这是一条合成的公开档案，用于检查年鉴式日期、结果和说明。', authorName: '合成投稿者', localImages: [], mediaLoading: false, mediaError: '', videoSource: '', videoError: '', legacy: false, sourceHref: '' }],
+      loading: false, needsLogin: false, loaded: true, team: { id: 900052, title: '合成代表队荣誉档案', gameTitle: '合成游戏社群' }, records: [{ key: 'team-honor-records:900031', title: '合成赛事成果', competition: '本地合成赛事', placing: '示例成果（合成）', dateText: '2026-10-12', archiveYear: '2026', archiveDate: '10.12', description: '这是一条合成的公开档案，用于检查年鉴式日期、结果和说明。', authorName: '合成投稿者', localImages: [], mediaLoading: false, mediaError: '', videoSource: '', videoError: '', legacy: false, sourceHref: '' }],
     } },
     { name: 'questionnaire', page: 'signup', state: '活动问卷第1页，使用实际questionnaire.presentation投影', data: {
       loading: false, needsLogin: false, error: '', edit: false, team: false, staff: false, applicationMode: false, receipt: null, info: { title: '合成活动报名', state: '报名开放', canManage: false, canViewSignups: false }, form, answers, ...questionnaire.presentation(form, answers, 0, 'rebuild-native-preview'), review: false,
@@ -194,6 +197,14 @@ checkbox input,radio input,switch input{width:22px!important;height:22px!importa
 progress{display:block;width:100%;border:0;appearance:none}progress::-webkit-progress-bar{background:var(--mapping-progress-background)}progress::-webkit-progress-value{background:var(--mapping-progress-active)}img{object-fit:cover}.mapping-label{box-sizing:border-box;display:block;width:100%;padding:9px 12px;font:12px/1.55 sans-serif;background:#30262e;color:#fffdf9;border-bottom:1px solid #a987a3;overflow-wrap:anywhere}.mapping-label strong{display:block}
 `;
 function sheet(css, width) { return css.replace(/(-?[\d.]+)rpx\b/g, (_match, number) => (Number(number) * width / 750) + 'px').replaceAll('env(safe-area-inset-bottom)', '20px'); }
+// Native WXSS imports participate in the rendered layout and source manifest.
+// Only local files within the native source tree can be included.
+function styles(file, ancestors = []) {
+  const resolved = path.resolve(file);
+  if (!resolved.startsWith(sourceRoot + path.sep) || !resolved.endsWith('.wxss')) throw new Error('Refusing non-native stylesheet: ' + resolved);
+  if (ancestors.includes(resolved)) throw new Error('Circular native stylesheet import: ' + resolved);
+  return read(resolved).replace(/@import\s+(['"])([^'"]+)\1\s*;/g, (_match, _quote, imported) => styles(path.resolve(path.dirname(resolved), imported), [...ancestors, resolved]));
+}
 const rows = [], fixtures = {}, manifests = [];
 const browser = await chromium.launch({ executablePath: browserPath, args: ['--no-sandbox'] });
 const browserVersion = browser.version();
@@ -209,7 +220,7 @@ try {
         const requests = [];
         await context.route('**/*', route => { requests.push(route.request().url()); return route.abort(); });
         const page = await context.newPage(), errors = []; page.on('pageerror', error => errors.push(error.message));
-        const css = sheet(read(native('app.wxss')) + '\n' + read(native('pages/' + fixture.page + '/index.wxss')), width);
+        const css = sheet(styles(native('app.wxss')) + '\n' + styles(native('pages/' + fixture.page + '/index.wxss')), width);
         const key = fixture.name + '-' + theme + '-' + width;
         const html = '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + htmlEscape(label + ' · ' + fixture.name) + '</title><style>' + intrinsicMapping + '\n' + css + '</style></head><body style="' + htmlEscape(data.themePageStyle) + '"><aside class="mapping-label"><strong>' + label + '</strong>' + htmlEscape(fixture.state) + ' · ' + width + 'px · ' + theme + '</aside><page style="' + htmlEscape(data.themePageStyle) + '">' + render(fixture.page, data) + '</page></body></html>';
         fs.writeFileSync(path.join(output, key + '.html'), html);
@@ -258,6 +269,6 @@ for (const [file, source] of [...sourceFiles].sort(([a], [b]) => a.localeCompare
 fs.writeFileSync(path.join(output, 'fixtures.json'), JSON.stringify({ syntheticOnly: true, source: 'authored in scripts/rebuild-native-preview.mjs; actual JS initial state/pure projections; no API calls', fixtures }, null, 2));
 fs.writeFileSync(path.join(output, 'results.json'), JSON.stringify({ label, recordedAt: new Date().toISOString(), playwright: playwrightVersion, browser: browserVersion, scope: 'Current WXML/WXSS/JS data layout mapping; no native lifecycle/events/SDK/official compilation/device validation', mapping: { rpx: 'viewport / 750', safeAreaBottom: '20px explicitly simulated', media: 'No QR, private evidence, real photos, or identifying user data', network: 'all browser requests blocked; native wx side effects throw', hostUI: 'Native navigation/tab bar/keyboard excluded; this is page content only', controls: 'Browser controls approximate static native appearance; checked/disabled/value/progress colors follow current WXML bindings', limits: 'No custom component rendering, image-mode measurement, native text measurement, input focus/keyboard, gesture, modal, media, auth or business event verification' }, sourceFiles: manifests, rows }, null, 2));
 const cells = rows.map(row => '<article><h2>' + htmlEscape(row.fixture + ' · ' + row.theme + ' · ' + row.width + 'px') + '</h2><p>' + htmlEscape(row.state) + '</p><a href="' + row.screenshot + '"><img loading="lazy" src="' + row.viewportScreenshot + '" alt="' + htmlEscape(row.fixture) + '"></a><p><a href="' + row.html + '">原结构映射</a> · <a href="' + row.screenshot + '">全页截图</a></p></article>').join('');
-fs.writeFileSync(path.join(output, 'index.html'), '<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + label + '</title><style>body{background:#f7f5f0;color:#202124;font:16px/1.7 sans-serif;margin:24px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}article{border-top:1px solid #dfddd8;padding-top:20px}img{max-width:100%;width:320px;border:1px solid #dfddd8}h2{font-size:18px}a{color:#6f2d67}</style><h1>' + label + '</h1><p>当前原生源码的28个合成布局状态。图片不含真实二维码、证据或个人资料；未执行微信能力或生产请求。</p><main>' + cells + '</main></html>');
+fs.writeFileSync(path.join(output, 'index.html'), '<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + label + '</title><style>body{background:#f7f5f0;color:#202124;font:16px/1.7 sans-serif;margin:24px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}article{border-top:1px solid #dfddd8;padding-top:20px}img{max-width:100%;width:320px;border:1px solid #dfddd8}h2{font-size:18px}a{color:#6f2d67}</style><h1>' + label + '</h1><p>当前原生源码的32个合成布局状态。图片不含真实二维码、证据或个人资料；未执行微信能力或生产请求。</p><main>' + cells + '</main></html>');
 console.log('Saved ' + rows.length + ' mapped layout cases to ' + path.relative(repository, output));
-if (rows.length !== 28 || rows.some(row => row.errors.length || row.blockedRequests.length || row.overflow.length || row.undersized.length || row.smallFieldText.length || row.smallBodyText.length || row.smallActionText.length || row.smallAuxiliaryText.length || row.clippedText.length)) process.exitCode = 1;
+if (rows.length !== 32 || rows.some(row => row.errors.length || row.blockedRequests.length || row.overflow.length || row.undersized.length || row.smallFieldText.length || row.smallBodyText.length || row.smallActionText.length || row.smallAuxiliaryText.length || row.clippedText.length)) process.exitCode = 1;

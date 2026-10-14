@@ -1,3 +1,8 @@
-.archive-filters { align-items: flex-start; }
-.filter-field { flex: 1; min-width: 240rpx; }
-.filter-field .field-note { margin: 0 0 12rpx; }
+.archive-filters { align-items: flex-start; margin-top: 22rpx; gap: 16rpx; }
+.filter-field { flex: 1; min-width: 220rpx; }
+.filter-field .picker-value { font-size: 28rpx; }
+.list-context { margin: 0 0 28rpx; }
+.list-page-honors .page-heading { border-bottom: 2rpx solid var(--z-text); }
+.list-page-honors .content-record-date { color: var(--z-text); }
+.list-page-honors .content-record { padding: 30rpx 0; }
+.list-page-albums .content-record-image { height: 360rpx; }

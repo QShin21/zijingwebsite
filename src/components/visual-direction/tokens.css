@@ -47,6 +47,9 @@
   --z-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --z-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --z-max: 1280px;
+  --z-reading: 760px;
+  --z-form: 880px;
+  --z-workspace: 1160px;
   --z-gutter: clamp(20px, 4vw, 64px);
   --z-radius: 8px;
   --z-radius-small: 6px;
@@ -63,6 +66,9 @@
   --z-text-small: 14px;
   --z-text-caption: 13px;
   --z-text-title: clamp(28px, 3.4vw, 44px);
+  --z-text-section: clamp(24px, 2.3vw, 32px);
+  --z-text-object: clamp(30px, 4vw, 52px);
+  --z-text-record: clamp(18px, 1.8vw, 22px);
   --z-text-display: clamp(40px, 5.6vw, 76px);
   --z-leading-body: 1.7;
   --z-leading-title: 1.25;

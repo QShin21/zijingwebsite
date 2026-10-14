@@ -1,1 +1,4 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
+@import "../../templates/business.wxss";
+.team-review-page .business-summary .plain { padding-bottom: 0; }
+.team-review-page .review-actions .primary { flex-basis: 100%; }
+.team-review-page .record-detail > .body { margin-top: 12rpx; }

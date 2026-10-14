@@ -15,14 +15,18 @@ export default async function Page({
   )
     notFound();
   return (
-    <div className={`${styles.page} ${styles.staff}`} style={{ maxWidth: 840 }}>
+    <div className={`${styles.page} ${styles.staff} ${styles.taskPage}`}>
       <nav className={styles.breadcrumbs} aria-label="报名页面导航">
         <Link href="/events">浏览活动</Link>
         <span aria-hidden="true">/</span>
         <span>填写问卷</span>
       </nav>
-      <p className={styles.eyebrow}>活动报名</p>
-      <h1>填写问卷</h1>
+      <header className={styles.hero}>
+        <div>
+          <h1>活动报名与本人回执</h1>
+          <p>填写后核对提交，已报名同学可在这里查看记录并按开放规则修改。</p>
+        </div>
+      </header>
       <ActivitySignup kind={kind} id={Number(id)} />
     </div>
   );

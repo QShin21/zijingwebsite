@@ -1,30 +1,33 @@
 "use client";
 import Link from "next/link";
-import styles from "@/components/account-pages/AccountPages.module.css";
+import { PageState } from "@/components/PageState";
 export default function ErrorPage({
-  reset,
+  retry,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  retry: () => void;
 }) {
   return (
-    <section className={styles.error}>
-      <p className={styles.eyebrow}>页面暂时无法显示</p>
-      <h1>内容未能载入</h1>
-      <p>
-        请重试，或先查看社团活动。如果刚刚提交过报名或申请，请到本人记录中核对实际结果。
-      </p>
-      <div className={styles.actions}>
-        <button type="button" className={styles.primary} onClick={reset}>
-          重新加载
-        </button>
-        <Link className={styles.secondary} href="/account">
-          查看本人记录
-        </Link>
-        <Link className={styles.textLink} href="/events">
-          浏览活动
-        </Link>
-      </div>
-    </section>
+    <PageState
+      label="页面暂时无法显示"
+      title="内容未能载入"
+      description="请检查网络后重新加载。如果刚刚提交过报名或申请，请先在本人记录中核对实际结果。"
+      alert
+      help={
+        <>
+          <p>
+            重新加载会读取页面内容。提交结果暂时不明时，请先核对记录，避免重复提交。
+          </p>
+          <Link href="/events">浏览社团活动</Link>
+        </>
+      }
+    >
+      <button type="button" className="z-button" onClick={retry}>
+        重新加载
+      </button>
+      <Link className="z-button z-outline" href="/account">
+        查看本人记录
+      </Link>
+    </PageState>
   );
 }

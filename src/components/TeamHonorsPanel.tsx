@@ -14,7 +14,8 @@ import { TeamHonorRecordCard } from "./TeamHonorRecord";
 import { TeamHonorEditor } from "./TeamHonorEditor";
 import { CommunityPager } from "./CommunityPager";
 import { teamHonorQuery } from "./TeamHonorNavigation";
-import styles from "@/app/(frontend)/_club/ClubPages.module.css";
+import styles from "./team-pages/TeamPages.module.css";
+import { TeamSectionHeading } from "./team-pages/TeamPageParts";
 
 // Parent's unified Teams & Honors route can embed this component without rebuilding teams.
 export async function TeamHonorsPanel({
@@ -66,8 +67,8 @@ export async function TeamHonorsPanel({
   };
   const returnQuery = teamHonorQuery({ view, page, team, game });
   return (
-    <section aria-label="代表队荣誉">
-      <nav className="community-tabs" aria-label="代表队与荣誉筛选">
+    <section className={styles.workspace} aria-label="代表队荣誉">
+      <nav className={styles.taskNav} aria-label="代表队与荣誉筛选">
         <Link href={"/teams" + (game ? "?game=" + game : "")}>
           代表队与荣誉
         </Link>
@@ -95,34 +96,52 @@ export async function TeamHonorsPanel({
         )}
       </nav>
       {membershipError && <p role="status">{membershipError}</p>}
-      <div className={styles.sectionHead}>
-        <h2>
-          {records
-            ? view === "review"
-              ? "待核验与处理记录"
-              : "我的荣誉记录"
-            : "队伍荣誉档案"}
-        </h2>
-        <p>
-          {records
-            ? `${records.totalDocs} 条记录`
-            : `${archives.length} 支队伍有已批准荣誉`}
-        </p>
+      <div className={styles.summary}>
+        <div>
+          <TeamSectionHeading
+            title={
+              records
+                ? view === "review"
+                  ? "待核验与处理记录"
+                  : "我的荣誉记录"
+                : "队伍荣誉档案"
+            }
+          >
+            {records
+              ? `${records.totalDocs} 条记录`
+              : `${archives.length} 支队伍有已批准荣誉`}
+          </TeamSectionHeading>
+          <p>
+            {view === "review"
+              ? "仅显示当前授权社群的材料。打开记录，核对成果与证据后处理。"
+              : view === "mine"
+                ? "在这里继续投稿、补充材料，查看本人记录与审核意见。"
+                : "循着赛事与成绩，查阅各队共同留下的记录。档案仅展示当前可见的已批准成果。"}
+          </p>
+        </div>
+        {canParticipate(user) &&
+          view !== "review" &&
+          writableMemberships.length > 0 && (
+            <Link
+              className="button"
+              href={
+                view === "mine"
+                  ? "#honor-editor"
+                  : href("mine") + "#honor-editor"
+              }
+            >
+              提交队伍荣誉
+            </Link>
+          )}
       </div>
-      <p className="field-hint">
-        {view === "review"
-          ? "仅显示当前授权社群的材料。退回或拒绝时，请给出可执行的说明。"
-          : view === "mine"
-            ? "本人投稿、审核结果与改稿记录保存在这里。待审材料须经他人核验后展示。"
-            : "按队伍汇总已批准成绩；点击档案，可按赛事年份查阅完整记录。"}
-      </p>
       {records ? (
         <>
-          <div className="showcase-feed">
+          <div className={styles.honorQueue}>
             {records.docs.map((record) => (
               <TeamHonorRecordCard
                 key={record.id}
                 record={record}
+                compact
                 reviewer={honorReviewerOf(user, record)}
                 owner={user?.id === Number(record.author)}
                 returnQuery={returnQuery}
@@ -167,7 +186,7 @@ export async function TeamHonorsPanel({
         </>
       )}
       {canParticipate(user) &&
-        view !== "review" &&
+        view === "mine" &&
         (writableMemberships.length ? (
           <TeamHonorEditor
             key={scopeQuery}
@@ -176,11 +195,11 @@ export async function TeamHonorsPanel({
           />
         ) : (
           !membershipError && (
-            <div className={styles.nextStep}>
+            <div className={styles.note}>
               <h3>投稿需要当前有效队员身份</h3>
               <p>当前没有可投稿的有效代表队。已批准历史荣誉会继续保留。</p>
-              <Link className={styles.cardLink} href="/teams/recruitment">
-                查看代表队招新与本人记录 →
+              <Link className="text-link" href="/teams/recruitment">
+                查看代表队招新与本人记录
               </Link>
             </div>
           )

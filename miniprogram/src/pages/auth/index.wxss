@@ -1,8 +1,14 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
-.auth-page > .title { margin-bottom: 18rpx; }
-.auth-page > .panel { border-top: 3rpx solid var(--z-primary); }
-.email-domain { color: var(--z-badge-text); padding: 20rpx 0 0; font-size: 26rpx; word-break: break-word; }
-.code-row { display: flex; gap: 12rpx; align-items: stretch; }
-.code-row input { flex: 1; min-width: 0; }
-.code-row button { flex-shrink: 0; white-space: nowrap; padding: 18rpx 18rpx; font-size: 24rpx; }
-.auth-page .actions { border-bottom: 1rpx solid var(--z-line); padding-bottom: 24rpx; }
+.auth-page .title { font-size: 48rpx; }
+.auth-form { padding-top: 2rpx; }
+.auth-fields > .field:first-child { margin-top: 12rpx; }
+.password-heading { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; margin-bottom: 8rpx; }
+.password-heading .field-label { margin-bottom: 0; }
+.mini-page .password-toggle { padding: 8rpx 12rpx; font-size: 26rpx; }
+.email-domain { display: block; padding: 20rpx; margin-top: 12rpx; color: var(--z-text); font-size: 27rpx; border: 1rpx solid var(--z-field-border); background: var(--z-field-bg); border-radius: 12rpx; word-break: break-word; }
+.code-row { display: flex; flex-wrap: wrap; gap: 12rpx; align-items: stretch; }
+.code-row input { flex: 1; min-width: 200rpx; }
+.code-row button { flex-shrink: 0; }
+.auth-submit { padding-top: 12rpx; }
+.auth-submit .primary { width: 100%; }
+.auth-options { padding-bottom: 18rpx; border-bottom: 1rpx solid var(--z-line); }
+.auth-options .plain { min-width: 180rpx; }

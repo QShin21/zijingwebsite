@@ -36,11 +36,21 @@ type AccountRecord = {
   next: string;
   tone?: string;
 };
-function RecordList({ rows }: { rows: AccountRecord[] }) {
+function RecordList({
+  rows,
+  attention = false,
+}: {
+  rows: AccountRecord[];
+  attention?: boolean;
+}) {
   return (
     <ul className={styles.records}>
       {rows.map((row) => (
-        <li className={styles.record} key={row.key}>
+        <li
+          className={styles.record}
+          key={row.key}
+          data-attention={attention || undefined}
+        >
           <div>
             <div className={styles.recordMeta}>
               <span>{row.category}</span>
@@ -52,11 +62,19 @@ function RecordList({ rows }: { rows: AccountRecord[] }) {
               <Link href={row.href}>{row.title}</Link>
             </h3>
             <p>{row.next}</p>
-            <p>更新于 {formatDate(row.updatedAt)}</p>
           </div>
-          <Link href={row.href} aria-label={`查看${row.title}`}>
-            查看记录 ↗
-          </Link>
+          <div className={styles.recordEnd}>
+            <time dateTime={row.updatedAt}>
+              更新于 {formatDate(row.updatedAt)}
+            </time>
+            <Link
+              className={styles.recordAction}
+              href={row.href}
+              aria-label={`${attention ? "继续处理" : "查看"}${row.title}`}
+            >
+              {attention ? "继续处理" : "查看记录"}
+            </Link>
+          </div>
         </li>
       ))}
     </ul>
@@ -273,6 +291,19 @@ export default async function Account({
       tone: row.status === "returned" ? "warning" : undefined,
     })),
   ].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const attentionRows = rows.filter((row) => row.tone === "warning");
+  const progressRows = history
+    ? rows
+    : rows.filter((row) => row.tone !== "warning");
+  const accountURL = (changes: { page?: number; joinsPage?: number }) => {
+    const params = new URLSearchParams();
+    if (history) params.set("view", "history");
+    const signupPage = changes.page ?? page;
+    const joinPage = changes.joinsPage ?? joinsPage;
+    if (signupPage > 1) params.set("page", String(signupPage));
+    if (joinPage > 1) params.set("joinsPage", String(joinPage));
+    return `/account${params.size ? `?${params}` : ""}#joins-title`;
+  };
   const roleLabels: Record<string, string> = {
     president: "社长",
     vicePresident: "副社长",
@@ -327,160 +358,228 @@ export default async function Account({
     <>
       <PageHeading
         title="我的紫荆"
-        eyebrow="账号 · 报名 · 申请"
-        description={`${actor.name || "你好"}，在这里继续处理报名与申请，查看自己的回执和进群记录。`}
+        eyebrow="我的事务"
+        description={`${actor.name || "你好"}，先继续手上的申请，再查看报名回执与处理结果。`}
+        action={
+          <Link className={styles.secondary} href="/events">
+            查看活动
+          </Link>
+        }
       />
+      <nav className={styles.accountIndex} aria-label="我的事务栏目">
+        <a href="#applications-title">申请进度</a>
+        <a href="#signups-title">活动回执</a>
+        <a href="#joins-title">进群记录</a>
+        <a href="#teams-title">代表队</a>
+        <a href="#profile-title">账号资料</a>
+        {tools.length > 0 && <a href="#work-title">管理工作台</a>}
+      </nav>
       <div className={styles.accountLayout}>
-        <div>
+        {!history && attentionRows.length > 0 && (
           <section
-            className={styles.section}
-            aria-labelledby="applications-title"
+            className={styles.attentionSection}
+            aria-labelledby="continue-title"
           >
             <div className={styles.sectionHeader}>
+              <div>
+                <h2 id="continue-title">需要继续处理</h2>
+                <p>未完成的草稿与退回的申请，补充后可继续提交。</p>
+              </div>
+              <span className={styles.queueCount}>
+                当前展示 {attentionRows.length} 项
+              </span>
+            </div>
+            <RecordList rows={attentionRows} attention />
+          </section>
+        )}
+        <section
+          className={styles.section}
+          aria-labelledby="applications-title"
+        >
+          <div className={styles.sectionHeader}>
+            <div>
               <h2 id="applications-title">
                 {history ? "申请记录" : "进行中的申请"}
               </h2>
-              <Link href={history ? "/account" : "/account?view=history"}>
-                {history ? "查看进行中" : "查看全部申请"} →
+              <p>
+                {history
+                  ? "查阅每类最近的申请、处理意见与结果。"
+                  : "已提交的申请和处理进度在这里更新。"}
+              </p>
+            </div>
+            <nav className={styles.viewSwitch} aria-label="申请记录视图">
+              <Link
+                href="/account#applications-title"
+                aria-current={!history ? "page" : undefined}
+              >
+                进行中
               </Link>
-            </div>
-            {rows.length ? (
-              <>
-                <RecordList rows={rows} />
-                <p className={styles.hint} style={{ marginTop: 16 }}>
-                  按更新时间展示每类最近 8 条。更多记录可进入对应申请页面查看。
-                </p>
-              </>
-            ) : (
-              <div className={styles.empty}>
-                <h3>{history ? "还没有申请记录" : "暂无进行中的申请"}</h3>
-                <p>
-                  {history
-                    ? "可以从骨干招新、代表队选拔或社群组织入口开始。"
-                    : "已处理的申请保留在全部申请中；新的安排可到活动与招新页查看。"}
-                </p>
-                <Link href="/teams/recruitment">查看代表队选拔 →</Link>
-              </div>
-            )}
-            <nav className={styles.formFooter} aria-label="全部申请入口">
-              <Link href="/join/staff">骨干申请</Link>
-              <Link href="/teams/recruitment">入队申请</Link>
-              <Link href="/teams/apply">建队申请</Link>
-              <Link href="/community/apply">社群管理员申请</Link>
+              <Link
+                href="/account?view=history#applications-title"
+                aria-current={history ? "page" : undefined}
+              >
+                查看全部申请
+              </Link>
             </nav>
-          </section>
-          <section className={styles.section} aria-labelledby="signups-title">
-            <div className={styles.sectionHeader}>
-              <h2 id="signups-title">我的活动报名</h2>
-              <p>{signups.totalDocs} 条本人回执</p>
+          </div>
+          {progressRows.length ? (
+            <RecordList rows={progressRows} />
+          ) : (
+            <div className={styles.empty}>
+              <h3>
+                {history
+                  ? "还没有申请记录"
+                  : attentionRows.length
+                    ? "待补充的申请见上方"
+                    : "暂无进行中的申请"}
+              </h3>
+              <p>
+                {history
+                  ? "从游戏社群、代表队选拔或骨干工作中，选择适合自己的参与方式。"
+                  : "已处理的结果保留在全部申请中；活动与招新页面会发布新的安排。"}
+              </p>
+              <Link href="/join">了解参与方式</Link>
             </div>
-            {signups.docs.length ? (
-              <ul className={styles.records}>
-                {signups.docs.map((row) => (
-                  <li className={styles.record} key={row.id}>
-                    <div>
-                      <div className={styles.recordMeta}>
-                        <span>
-                          {row.activityType === "community-posts"
-                            ? "社群活动"
-                            : "社团活动"}
-                        </span>
-                        <span className={styles.status}>已提交</span>
-                      </div>
-                      <h3>{row.eventTitle}</h3>
-                      <p>
-                        报名编号 {row.id} · {formatDate(row.updatedAt)}
-                      </p>
-                      <p>可否修改以对应问卷当前状态为准。</p>
+          )}
+          {rows.length > 0 && (
+            <p className={styles.listNote}>
+              每类按更新时间展示最近 8 条，更多记录可进入对应申请页面查看。
+            </p>
+          )}
+          <nav className={styles.applicationLinks} aria-label="全部申请入口">
+            <Link href="/join/staff">骨干申请</Link>
+            <Link href="/teams/recruitment">入队申请</Link>
+            <Link href="/teams/apply">建队申请</Link>
+            <Link href="/community/apply">社群管理员申请</Link>
+          </nav>
+        </section>
+        <section className={styles.section} aria-labelledby="signups-title">
+          <div className={styles.sectionHeader}>
+            <div>
+              <h2 id="signups-title">我的活动报名</h2>
+              <p>提交后查看回执；能否修改以当前问卷状态为准。</p>
+            </div>
+            <span className={styles.queueCount}>
+              {signups.totalDocs} 条本人回执
+            </span>
+          </div>
+          {signups.docs.length ? (
+            <ul className={styles.records}>
+              {signups.docs.map((row) => (
+                <li className={styles.record} key={row.id}>
+                  <div>
+                    <div className={styles.recordMeta}>
+                      <span>
+                        {row.activityType === "community-posts"
+                          ? "社群活动"
+                          : "社团活动"}
+                      </span>
+                      <span className={styles.status}>已提交</span>
                     </div>
+                    <h3>{row.eventTitle}</h3>
+                    <p>报名编号 {row.id}</p>
+                  </div>
+                  <div className={styles.recordEnd}>
+                    <time dateTime={row.updatedAt}>
+                      {formatDate(row.updatedAt)}
+                    </time>
                     {["events", "community-posts"].includes(
                       row.activityType,
                     ) && (
                       <Link
+                        className={styles.recordAction}
                         href={`/activities/${row.activityType}/${row.activityID}/fill`}
                       >
-                        查看回执 ↗
+                        查看回执
                       </Link>
                     )}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className={styles.empty}>
-                <h3>还没有活动报名</h3>
-                <p>
-                  提交站内活动问卷后，回执会显示在这里。外部平台受理的报名请到原平台查看。
-                </p>
-                <Link href="/events">浏览社团活动 →</Link>
-              </div>
-            )}
-            <Pagination
-              page={page}
-              total={signups.totalPages}
-              path="/account"
-              query={history ? { view: "history" } : {}}
-            />
-          </section>
-          <section className={styles.section} aria-labelledby="joins-title">
-            <div className={styles.sectionHeader}>
-              <h2 id="joins-title">我的进群记录</h2>
-              <Link href="/community">查看游戏社群 →</Link>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className={styles.empty}>
+              <h3>还没有活动报名</h3>
+              <p>
+                提交站内活动问卷后，回执会显示在这里。外部平台受理的报名请到原平台查看。
+              </p>
+              <Link href="/events">浏览社团活动</Link>
             </div>
-            {joins.docs.length ? (
-              <RecordList
-                rows={joins.docs.map((row) => {
-                  const game = gameByID.get(Number(relationID(row.game)));
-                  return {
-                    key: `join-${row.id}`,
-                    title: game?.title || "历史社群",
-                    category: "人工入社",
-                    status: joinLabels[row.status],
-                    updatedAt: row.updatedAt,
-                    href: game ? `/community/${game.slug}/join` : "/community",
-                    next:
-                      row.status === "requested"
-                        ? "打开社群联系入口，在微信中添加管理员好友。"
-                        : row.status === "joined"
-                          ? "管理员已人工确认你的进群记录。"
-                          : "网站状态用于记录进度，好友与拉群仍需人工完成。",
-                    tone: row.status === "joined" ? "success" : undefined,
-                  };
-                })}
-              />
-            ) : (
-              <div className={styles.empty}>
-                <h3>暂无进群记录</h3>
-                <p>
-                  选择感兴趣的游戏社群，联系管理员。网站注册、扫码和申请批准均不代表已进入微信群。
-                </p>
-              </div>
-            )}
-            {joins.totalPages > 1 && (
-              <nav className={styles.formFooter} aria-label="进群记录分页">
-                {joinsPage > 1 && (
-                  <Link
-                    href={`/account?joinsPage=${joinsPage - 1}${history ? "&view=history" : ""}`}
-                  >
-                    上一页
-                  </Link>
-                )}
-                <span>
-                  {joinsPage} / {joins.totalPages}
-                </span>
-                {joinsPage < joins.totalPages && (
-                  <Link
-                    href={`/account?joinsPage=${joinsPage + 1}${history ? "&view=history" : ""}`}
-                  >
-                    下一页
-                  </Link>
-                )}
-              </nav>
-            )}
-          </section>
+          )}
+          <Pagination
+            page={page}
+            total={signups.totalPages}
+            path="/account"
+            query={{
+              ...(history ? { view: "history" } : {}),
+              ...(joinsPage > 1 ? { joinsPage: String(joinsPage) } : {}),
+            }}
+          />
+        </section>
+        <section className={styles.section} aria-labelledby="joins-title">
+          <div className={styles.sectionHeader}>
+            <div>
+              <h2 id="joins-title">我的进群记录</h2>
+              <p>在微信中添加好友与接受邀请后，由管理员人工确认进群。</p>
+            </div>
+            <Link href="/community">查看游戏社群</Link>
+          </div>
+          {joins.docs.length ? (
+            <RecordList
+              rows={joins.docs.map((row) => {
+                const game = gameByID.get(Number(relationID(row.game)));
+                return {
+                  key: `join-${row.id}`,
+                  title: game?.title || "历史社群",
+                  category: "人工入社",
+                  status: joinLabels[row.status],
+                  updatedAt: row.updatedAt,
+                  href: game ? `/community/${game.slug}/join` : "/community",
+                  next:
+                    row.status === "requested"
+                      ? "打开社群联系入口，在微信中添加管理员好友。"
+                      : row.status === "joined"
+                        ? "管理员已人工确认你的进群记录。"
+                        : "网站状态用于记录进度，好友与拉群仍需人工完成。",
+                  tone: row.status === "joined" ? "success" : undefined,
+                };
+              })}
+            />
+          ) : (
+            <div className={styles.empty}>
+              <h3>暂无进群记录</h3>
+              <p>
+                选择感兴趣的游戏社群，联系管理员。网站注册、扫码和申请批准均不代表已进入微信群。
+              </p>
+              <Link href="/community">寻找游戏社群</Link>
+            </div>
+          )}
+          {joins.totalPages > 1 && (
+            <nav className={styles.recordPagination} aria-label="进群记录分页">
+              {joinsPage > 1 && (
+                <Link href={accountURL({ joinsPage: joinsPage - 1 })}>
+                  上一页
+                </Link>
+              )}
+              <span>
+                第 {joinsPage} / {joins.totalPages} 页
+              </span>
+              {joinsPage < joins.totalPages && (
+                <Link href={accountURL({ joinsPage: joinsPage + 1 })}>
+                  下一页
+                </Link>
+              )}
+            </nav>
+          )}
+        </section>
+        <div className={styles.accountDetails}>
           <section className={styles.section} aria-labelledby="teams-title">
             <div className={styles.sectionHeader}>
-              <h2 id="teams-title">我的代表队</h2>
-              <Link href="/teams/recruitment">成员记录与入队申请 →</Link>
+              <div>
+                <h2 id="teams-title">我的代表队</h2>
+                <p>成员记录与本人选择公开的队员简介。</p>
+              </div>
+              <Link href="/teams/recruitment">成员记录与入队申请</Link>
             </div>
             {memberships.docs.length ? (
               <RecordList
@@ -501,7 +600,7 @@ export default async function Account({
                       : "/teams/recruitment",
                   next:
                     row.status === "active"
-                      ? "可编辑本人队员简介，并独立选择是否展示。"
+                      ? "编辑本人队员简介，独立选择是否展示。"
                       : "历史成员记录保留，可前往成员页查看。",
                   tone: row.status === "active" ? "success" : undefined,
                 }))}
@@ -511,79 +610,84 @@ export default async function Account({
                 <p>
                   暂无代表队成员记录。入队申请由社群管理员人工选拔，录取不授予平台或社群管理权限。
                 </p>
+                <Link href="/teams/recruitment">了解代表队选拔</Link>
               </div>
             )}
           </section>
-          {tools.length > 0 && (
-            <section className={styles.section} aria-labelledby="work-title">
-              <div className={styles.sectionHeader}>
-                <h2 id="work-title">管理工作台</h2>
-                <p>按当前授权显示</p>
+          <section className={styles.profile} aria-labelledby="profile-title">
+            <div className={styles.sectionHeader}>
+              <h2 id="profile-title">账号资料</h2>
+              <span>{actor.name || "我的账号"}</span>
+            </div>
+            <dl>
+              <div>
+                <dt>已验证邮箱</dt>
+                <dd>{actor.email}</dd>
               </div>
-              <ul className={styles.workspaceLinks}>
-                {tools.map((item) => (
-                  <li key={item.href}>
-                    <Link href={item.href}>
-                      <strong>
-                        {item.title}
-                        <span aria-hidden="true">↗</span>
-                      </strong>
-                      <p>{item.description}</p>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
+              <div>
+                <dt>平台身份</dt>
+                <dd>
+                  {(actor.roles?.length ? actor.roles : ["member"])
+                    .map((role) => roleLabels[role] || role)
+                    .join("、")}
+                  {actor.department
+                    ? `（${departments[actor.department]}）`
+                    : ""}
+                </dd>
+              </div>
+              <div>
+                <dt>网站入社记录</dt>
+                <dd>
+                  {confirmedJoins.totalDocs > 0
+                    ? "已有管理员人工确认进群"
+                    : "尚未人工确认进群"}
+                </dd>
+              </div>
+              <div>
+                <dt>社群管理任职</dt>
+                <dd>
+                  {hasCommunityOffice(actor)
+                    ? "已有独立社群任职，能力按社群授权"
+                    : "暂无在任社群"}
+                </dd>
+              </div>
+            </dl>
+            <p className={styles.hint}>
+              平台角色、社群任职与队伍成员关系分别维护。骨干或代表队录用结果不会自动授予管理角色。
+            </p>
+            <div className={styles.profileActions}>
+              <Link className={styles.textLink} href="/account/reset">
+                修改登录密码
+              </Link>
+              <Link className={styles.textLink} href="/privacy">
+                隐私说明
+              </Link>
+              <LogoutButton />
+            </div>
+          </section>
         </div>
-        <aside className={styles.profile} aria-labelledby="profile-title">
-          <h2 id="profile-title">{actor.name || "我的账号"}</h2>
-          <dl>
-            <div>
-              <dt>已验证邮箱</dt>
-              <dd>{actor.email}</dd>
+        {tools.length > 0 && (
+          <section className={styles.section} aria-labelledby="work-title">
+            <div className={styles.sectionHeader}>
+              <div>
+                <h2 id="work-title">管理工作台</h2>
+                <p>
+                  按当前授权显示，进入后继续按对象与所属社群判断可处理范围。
+                </p>
+              </div>
             </div>
-            <div>
-              <dt>平台身份</dt>
-              <dd>
-                {(actor.roles?.length ? actor.roles : ["member"])
-                  .map((role) => roleLabels[role] || role)
-                  .join(" · ")}
-                {actor.department ? ` · ${departments[actor.department]}` : ""}
-              </dd>
-            </div>
-            <div>
-              <dt>网站入社记录</dt>
-              <dd>
-                {confirmedJoins.totalDocs > 0
-                  ? "已有管理员人工确认进群"
-                  : "尚未人工确认进群"}
-              </dd>
-            </div>
-            <div>
-              <dt>社群管理任职</dt>
-              <dd>
-                {hasCommunityOffice(actor)
-                  ? "已有独立社群任职，能力按社群授权"
-                  : "暂无在任社群"}
-              </dd>
-            </div>
-          </dl>
-          <p className={styles.hint}>
-            平台角色、社群任职与队伍成员关系分别维护。骨干或代表队录用结果不会自动授予管理角色。
-          </p>
-          <div className={styles.actions}>
-            <Link className={styles.textLink} href="/account/reset">
-              修改登录密码
-            </Link>
-            <Link className={styles.textLink} href="/privacy">
-              隐私说明
-            </Link>
-          </div>
-          <div style={{ marginTop: 24 }}>
-            <LogoutButton />
-          </div>
-        </aside>
+            <ul className={styles.workspaceLinks}>
+              {tools.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href}>
+                    <strong>{item.title}</strong>
+                    <p>{item.description}</p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     </>
   );

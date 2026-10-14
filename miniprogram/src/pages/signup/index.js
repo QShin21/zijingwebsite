@@ -15,8 +15,13 @@ const types = ['text', 'textarea', 'single', 'multiple'];
 const receipt = questionnaire.receipt;
 function localParts(value) { if (!value) return { date: '', time: '' }; const d = new Date(value), pad = v => String(v).padStart(2,'0'); return { date: d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()), time: pad(d.getHours())+':'+pad(d.getMinutes()) }; }
 Page(withVisualTheme({
-  data: { loading: true, error: '', needsLogin: false, busy: false, message: '', info: null, form: {}, answers: {}, questions: [], receipt: null, responseEditing: false, review: false, reviewRows: [], recoveryRows: [], answerErrors: {}, step: 0, answerPages: 1, completed: 0, answerTotal: 0, progress: 0, branchNotice: '', advancedEditing: false, edit: false, tab: 'edit', entries: [], page: 1, pages: 0, total: 0, typeLabels: ['单行文本','多行文本','单选','多选'] },
+  data: { expandedEntryId: '', loading: true, error: '', needsLogin: false, busy: false, message: '', info: null, form: {}, answers: {}, questions: [], receipt: null, responseEditing: false, review: false, reviewRows: [], recoveryRows: [], answerErrors: {}, step: 0, answerPages: 1, completed: 0, answerTotal: 0, progress: 0, branchNotice: '', advancedEditing: false, edit: false, tab: 'edit', entries: [], page: 1, pages: 0, total: 0, typeLabels: ['单行文本','多行文本','单选','多选'] },
   ...actions,
+  toggleEntry(event) {
+    if (this.data.busy || this.data.loading) return;
+    const row = this.data.entries.find(value => String(value.id) === String(event.currentTarget.dataset.id));
+    if (row) this.setData({ expandedEntryId: this.data.expandedEntryId === row.id ? '' : row.id });
+  },
   onLoad(options) {
     if(this._unsubscribe)this._unsubscribe();
     this._ticket=(this._ticket||0)+1;this._context=(this._context||0)+1;this._loaded=false;this._hidden=false;this._disposed=false;this._resumeRead=false;this._recoveryDraft=null;this._teamConfirmation=null;

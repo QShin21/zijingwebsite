@@ -9,7 +9,7 @@ export function canReviewStaffTransition(current: string, target: string) {
   if (!["reviewing", "returned", "accepted", "rejected"].includes(target) || current === "withdrawn") return false;
   return !["accepted", "rejected"].includes(current) || target === current || target === "returned";
 }
-export const staffPrivacy = "资料仅用于本批次执行部/宣传部选拔及联系，仅本人和社长/副社长可查看；社群管理员不会因展示入口获得答卷权限。录用不自动授予平台角色，任命另行处理。资料保存安排由社团另行说明。";
+export const staffPrivacy = "资料仅用于本批次执行部/宣传部选拔及联系，仅本人和社长/副社长可查看；社群管理员不会因展示入口获得答卷权限。录用不自动授予平台角色，任命另行处理。报名资料保留 1 年，删除申请由社长叶佳鑫人工处理，联系微信 yejx2003。";
 export const staffDeadlinePolicy = "开放期间可修改、撤回并重提；截止或关闭后只可查看回执。录用/未录用结果锁定本人修改，管理层可明确退回补充；补充仍需批次开放。";
 export const defaultStaffForm: SignupForm = normalizeSignup({ enabled: true, title: "执行部 / 宣传部骨干申请", intro: staffPrivacy, pageSize: 4,
   questions: [

@@ -12,7 +12,7 @@ function profile(user) {
     role: user ? { president: '社长', vicePresident: '副社长', backbone: '社团骨干', communityAdmin: '社群管理员', member: '社团成员' }[user.roles[0]] || '社团成员' : '' };
 }
 Page(withVisualTheme({
-  data: { user: null, initial: 'Z', role: '', reviewCommunity: false, reviewStaff: false, version: config.version, error: '', refreshing: false },
+  data: { user: null, initial: 'Z', role: '', reviewCommunity: false, reviewStaff: false, version: config.version, error: '', refreshing: false, teamApplicationParams: { view: 'ownApplications' }, membershipParams: { view: 'memberships' }, managedTeamParams: { view: 'managedTeams' } },
   ...actions,
   onShow() { this.refresh(); },
   onHide() { this._ticket = (this._ticket || 0) + 1; this.setData({ refreshing: false }); },

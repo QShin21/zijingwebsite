@@ -12,9 +12,14 @@ const identity = () => String((session.user() || {}).id || '');
 const decorate = doc => ({ ...doc, actions: doc.actions || {}, statusText: team.labels[doc.status] || '状态待核对', dateText: format.date(doc.updatedAt) });
 Page(withVisualTheme({
   data: { needsLogin: false, loading: false, error: '', formError: '', operationError: '', done: '', busy: false,
-    docs: [], page: 1, hasMore: false, games: [], actions: {}, apply: false, editId: '', revision: '', formGameID: '', gameIndex: 0,
+    docs: [], expandedId: '', page: 1, hasMore: false, games: [], actions: {}, apply: false, editId: '', revision: '', formGameID: '', gameIndex: 0,
     gameTitle: '', title: '', reason: '', canSubmit: false, pendingEdit: '' },
   ...actions,
+  toggleRecord(event) {
+    if (this.data.busy || this.data.loading || this.data.imageBusy) return;
+    const doc = this.data.docs.find(value => String(value.id) === String(event.currentTarget.dataset.id));
+    if (doc) this.setData({ expandedId: this.data.expandedId === doc.id ? '' : doc.id });
+  },
   onLoad(options = {}) {
     if (this._unsubscribe) this._unsubscribe();
     this._disposed = false; this._visible = false; this._resumeRead = false; this._context = (this._context || 0) + 1; this.invalidate();
@@ -39,7 +44,7 @@ Page(withVisualTheme({
   resetPrivate() {
     this._initialEdit = ''; this._initialGame = '';
     this.setData({ needsLogin: !session.user(), loading: false, error: '', formError: '', operationError: '', done: '', busy: Boolean(this._pendingWrite),
-      docs: [], page: 1, hasMore: false, games: [], actions: {}, apply: false, editId: '', revision: '', formGameID: '', gameIndex: 0, gameTitle: '', title: '', reason: '', canSubmit: false, pendingEdit: '' });
+      docs: [], expandedId: '', page: 1, hasMore: false, games: [], actions: {}, apply: false, editId: '', revision: '', formGameID: '', gameIndex: 0, gameTitle: '', title: '', reason: '', canSubmit: false, pendingEdit: '' });
   },
   onShow() {
     this._visible = true;

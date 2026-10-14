@@ -1,7 +1,8 @@
 .prose {
   color: var(--z-ink);
+  max-width: 48rem;
   font-size: 16px;
-  line-height: 1.85;
+  line-height: 1.8;
   overflow-wrap: anywhere;
 }
 .prose > :first-child,
@@ -108,43 +109,41 @@
   font-size: 14px;
 }
 .joinGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-  margin: 28px 0;
+  margin: 0 0 40px;
 }
 .joinCard {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(0, 1.5fr) auto;
+  gap: 24px;
+  align-items: center;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--z-line);
   color: var(--z-ink);
   text-decoration: none;
-  border: 1px solid var(--z-line);
-  border-radius: 8px;
-  background: var(--z-surface);
-  padding: 26px;
-  display: flex;
-  flex-direction: column;
 }
-.joinCard[aria-current],
-.joinCard:hover {
-  border-color: var(--z-action);
-}
-.joinCard > svg {
-  color: var(--z-action);
-  width: 26px;
-  height: 26px;
+.joinCard[aria-current] {
+  border-left: 3px solid var(--z-action);
+  padding-left: 20px;
 }
 .joinCard h3 {
   font-size: 22px;
-  margin: 22px 0 10px;
+  line-height: 1.5;
+  margin: 0;
 }
 .joinCard p {
-  margin: 0 0 24px;
-  font-size: 14px;
+  margin: 0;
+  font-size: 15px;
   line-height: 1.8;
   color: var(--z-muted);
 }
 .joinCard > span {
-  margin-top: auto;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
   font-size: 14px;
+  color: var(--z-action);
+}
+.joinCard:hover h3 {
   color: var(--z-action);
 }
 .cards {
@@ -183,17 +182,17 @@
   color: var(--z-action);
   font-weight: 600;
 }
-.card h3 {
+.card :is(h2, h3) {
   font-size: 23px;
   line-height: 1.4;
   letter-spacing: -0.02em;
   margin: 10px 0;
 }
-.card h3 a {
+.card :is(h2, h3) a {
   color: var(--z-ink);
   text-decoration: none;
 }
-.card h3 a:hover {
+.card :is(h2, h3) a:hover {
   color: var(--z-action);
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -291,7 +290,7 @@
 .detailMain .cards {
   grid-template-columns: minmax(0, 1fr);
 }
-.detailMain .card h3 {
+.detailMain .card :is(h2, h3) {
   font-size: 21px;
 }
 .sidebar {
@@ -463,8 +462,10 @@
 }
 .readingLayout {
   display: grid;
-  grid-template-columns: minmax(0, 760px) 260px;
-  gap: 64px;
+  grid-template-columns: minmax(0, 720px) minmax(220px, 260px);
+  gap: clamp(32px, 6vw, 80px);
+  max-width: 1080px;
+  margin: 0 auto;
   justify-content: space-between;
   padding-bottom: 56px;
 }
@@ -612,15 +613,16 @@
   }
 }
 @media (max-width: 700px) {
-  .joinGrid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
-  }
   .joinCard {
-    padding: 22px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 22px 0;
+  }
+  .joinCard[aria-current] {
+    padding-left: 16px;
   }
   .joinCard h3 {
-    margin-top: 15px;
+    font-size: 21px;
   }
   .detailLayout,
   .readingLayout {
@@ -651,7 +653,7 @@
     grid-template-columns: minmax(0, 1fr);
     gap: 22px;
   }
-  .card h3 {
+  .card :is(h2, h3) {
     font-size: 22px;
   }
   .cards[data-collection="news"] .card,
@@ -686,5 +688,752 @@
   }
   .contentSection {
     margin-top: 32px;
+  }
+}
+
+/* Public reading, team archives and participation each follow their own content order. */
+.sectionHeading,
+.archiveHeading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px 24px;
+  border-bottom: 1px solid var(--z-line);
+  padding-bottom: 18px;
+  margin-bottom: 24px;
+}
+.sectionHeading h2,
+.archiveHeading h2 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.5;
+}
+.sectionHeading > span,
+.sectionHeading > a,
+.archiveHeading > p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--z-muted);
+}
+.sectionHeading > a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--z-action);
+}
+.sectionIndex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 28px;
+  margin: -10px 0 32px;
+  border-bottom: 1px solid var(--z-line);
+}
+.sectionIndex a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--z-muted);
+  font-size: 14px;
+  text-decoration: none;
+}
+.sectionIndex a[aria-current] {
+  color: var(--z-action);
+  border-bottom: 2px solid var(--z-action);
+  font-weight: 600;
+}
+.sectionIndex a:hover {
+  color: var(--z-action);
+}
+.newsroom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 280px);
+  gap: 48px;
+  align-items: start;
+}
+.stories,
+.newsIndex,
+.storyContent,
+.fixedArticle {
+  min-width: 0;
+}
+.newsOpening {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 32px;
+}
+.newsOpening[data-single] {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 760px;
+}
+.storyLead,
+.storyItem {
+  min-width: 0;
+}
+.storyLead :is(h2, h3),
+.storyItem :is(h2, h3) {
+  margin: 12px 0;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.storyLead :is(h2, h3) {
+  font-size: clamp(24px, 2.2vw, 32px);
+  letter-spacing: -0.02em;
+}
+.storyItem :is(h2, h3) {
+  font-size: 20px;
+}
+.storyLead :is(h2, h3) a,
+.storyItem :is(h2, h3) a {
+  color: var(--z-ink);
+  text-decoration: none;
+}
+.storyLead :is(h2, h3) a:hover,
+.storyItem :is(h2, h3) a:hover {
+  color: var(--z-action);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.storyLead p,
+.storyItem p {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--z-muted);
+  overflow-wrap: anywhere;
+}
+.storyImage {
+  display: block;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+.storyImage :global(.picture) {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 380px;
+  object-fit: cover;
+}
+.storyRead {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--z-action);
+  font-size: 14px;
+  text-underline-offset: 4px;
+  margin-top: 8px;
+}
+.newsSecondary {
+  border-left: 1px solid var(--z-line);
+  padding-left: 28px;
+}
+.newsSecondary .storyItem {
+  padding-bottom: 20px;
+}
+.newsSecondary .storyItem + .storyItem {
+  border-top: 1px solid var(--z-line);
+  padding-top: 20px;
+}
+.newsSecondary .storyItem p {
+  font-size: 14px;
+}
+.newsMore {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 32px;
+  border-top: 1px solid var(--z-line);
+  margin-top: 32px;
+}
+.newsMore .storyItem {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--z-line);
+}
+.newsDesk {
+  min-width: 0;
+  padding-left: 28px;
+  border-left: 1px solid var(--z-line);
+}
+.newsDesk .sectionHeading {
+  gap: 8px 16px;
+  padding-bottom: 12px;
+  margin-bottom: 0;
+}
+.newsDesk .sectionHeading h2,
+.newsParticipation h2 {
+  font-size: 20px;
+}
+.newsDesk > section + section,
+.newsParticipation {
+  margin-top: 36px;
+}
+.noticeIndex {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.noticeIndex li {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--z-line);
+}
+.noticeIndex h3,
+.albumIndex h3 {
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 0;
+}
+.noticeIndex h3 a,
+.albumIndex h3 a {
+  color: var(--z-ink);
+  text-decoration: none;
+}
+.noticeIndex h3 a:hover,
+.albumIndex h3 a:hover {
+  color: var(--z-action);
+  text-decoration: underline;
+}
+.noticeIndex p,
+.newsParticipation p,
+.smallNote {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--z-muted);
+  overflow-wrap: anywhere;
+}
+.noticeIndex p {
+  margin: 8px 0 0;
+}
+.albumIndex article {
+  margin-top: 20px;
+}
+.albumIndex :global(.picture) {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+.newsParticipation a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--z-action);
+  font-size: 14px;
+}
+.directoryLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  align-items: start;
+  gap: 48px;
+}
+.directoryLayout > div {
+  min-width: 0;
+}
+.directoryAside {
+  padding-top: 20px;
+  border-top: 2px solid var(--z-ink);
+}
+.directoryAside h2,
+.directoryAside h3 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  line-height: 1.5;
+}
+.directoryAside h3 {
+  font-size: 17px;
+}
+.directoryAside p {
+  color: var(--z-muted);
+  font-size: 14px;
+  line-height: 1.8;
+  margin: 0 0 12px;
+}
+.directoryAside a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--z-action);
+  font-size: 14px;
+}
+.directoryAside > div {
+  border-top: 1px solid var(--z-line);
+  padding-top: 24px;
+  margin-top: 24px;
+}
+.teamDirectory {
+  border-top: 1px solid var(--z-line);
+}
+.teamArchive {
+  padding-bottom: 56px;
+}
+.honorIndex,
+.seasonList {
+  min-width: 0;
+}
+.teamEntry {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.4fr) minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: start;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--z-line);
+}
+.teamEntryIdentity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--z-muted);
+  overflow-wrap: anywhere;
+}
+.teamEntryIdentity > a {
+  color: var(--z-muted);
+  font-size: 14px;
+}
+.teamEntryBody :is(h2, h3) {
+  margin: 0 0 12px;
+  font-size: 26px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.teamEntryBody :is(h2, h3) a {
+  color: var(--z-ink);
+  text-decoration: none;
+}
+.teamEntryBody :is(h2, h3) a:hover {
+  color: var(--z-action);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.teamEntryBody p {
+  margin: 0;
+  color: var(--z-muted);
+  font-size: 15px;
+  line-height: 1.8;
+}
+.entryActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin-top: 12px;
+}
+.entryActions a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--z-action);
+  font-size: 14px;
+}
+.teamEntryImage {
+  width: 88px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.teamEntryImage :global(.picture) {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.teamOverview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  align-items: start;
+  gap: 56px;
+}
+.teamIntroduction {
+  min-width: 0;
+}
+.teamIntroduction h2 {
+  font-size: 24px;
+  line-height: 1.5;
+  margin: 0 0 20px;
+}
+.teamCover {
+  margin-bottom: 28px;
+  max-width: 680px;
+}
+.teamCover :global(.picture) {
+  display: block;
+  max-height: 360px;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 6px;
+}
+.teamBrief p {
+  max-width: 48ch;
+  line-height: 1.8;
+  color: var(--z-muted);
+  margin: 0;
+}
+.teamParticipation {
+  padding: 24px;
+  background: var(--z-surface);
+  border: 1px solid var(--z-line);
+  border-top: 3px solid var(--z-action);
+  border-radius: 6px;
+}
+.teamParticipation h2 {
+  font-size: 20px;
+  line-height: 1.5;
+  margin: 0 0 12px;
+}
+.teamParticipation p {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--z-muted);
+  margin: 0 0 20px;
+}
+.teamParticipation :global(.button) {
+  width: 100%;
+  text-align: center;
+}
+.participationLinks {
+  display: grid;
+  margin: 12px 0;
+}
+.participationLinks a {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--z-action);
+  font-size: 14px;
+}
+.teamParticipation .smallNote {
+  border-top: 1px solid var(--z-line);
+  padding-top: 16px;
+  margin-bottom: 0;
+  font-size: 13px;
+}
+.archiveSection {
+  margin-top: 48px;
+  scroll-margin-top: 110px;
+}
+.seasonEntry {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.3fr) minmax(0, 1fr);
+  gap: 36px;
+  border-top: 1px solid var(--z-line);
+  padding: 28px 0;
+  scroll-margin-top: 110px;
+}
+.seasonEntry h3 {
+  font-size: 22px;
+  line-height: 1.5;
+  margin: 0;
+}
+.seasonEntry > div {
+  min-width: 0;
+}
+.honorEntry {
+  display: grid;
+  grid-template-columns: minmax(80px, 0.2fr) minmax(0, 1fr);
+  gap: 28px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--z-line);
+}
+.honorDate {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  color: var(--z-muted);
+  font-size: 13px;
+}
+.honorDate time {
+  color: var(--z-ink);
+  font-size: 23px;
+  line-height: 1.5;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.honorEntry :is(h2, h3) {
+  margin: 0 0 10px;
+  font-size: 22px;
+  line-height: 1.5;
+}
+.honorEntry :is(h2, h3) a {
+  color: var(--z-ink);
+  text-decoration: none;
+}
+.honorCompetition {
+  margin: 0 0 8px;
+  color: var(--z-muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+.honorEntry .placing {
+  margin: 8px 0;
+}
+.contentDetail[data-collection="news"] > header,
+.contentDetail[data-collection="news"] > .cover {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.contentDetail[data-collection="news"] .detailLayout {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.contentDetail[data-collection="news"] .detailLayout[data-sidebar="false"] {
+  max-width: 760px;
+}
+.contentDetail[data-collection="news"] .sidebar {
+  order: 0;
+}
+.contentDetail[data-collection="news"] .sidebar .panel {
+  border: 0;
+  border-top: 1px solid var(--z-line);
+  border-radius: 0;
+  background: transparent;
+  padding: 20px 0;
+}
+.metadata a {
+  color: var(--z-action);
+}
+.metadata time {
+  font-variant-numeric: tabular-nums;
+}
+.joinIntro {
+  max-width: 760px;
+  margin: 0 0 32px;
+}
+.participationCallout {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px 40px;
+  padding: 28px 32px;
+  background: var(--z-surface);
+  border-left: 3px solid var(--z-action);
+  border-radius: 0 6px 6px 0;
+}
+.participationCallout > div {
+  max-width: 680px;
+}
+.participationCallout h2 {
+  font-size: 24px;
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+.participationCallout p {
+  color: var(--z-muted);
+  font-size: 15px;
+  line-height: 1.8;
+  margin: 0;
+}
+.participationCallout :global(.button) {
+  flex-shrink: 0;
+}
+.fixedPage > header,
+.fixedPage > .sectionIndex {
+  max-width: 1080px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.fixedArticle {
+  width: 100%;
+}
+.retentionSummary {
+  padding: 20px 0 24px;
+  border-top: 2px solid var(--z-ink);
+  border-bottom: 1px solid var(--z-line);
+  margin-bottom: 32px;
+}
+.retentionSummary dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin: 0;
+}
+.retentionSummary dl > div:last-child {
+  grid-column: 1 / -1;
+}
+.retentionSummary dt {
+  color: var(--z-muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.retentionSummary dd {
+  font-size: 22px;
+  line-height: 1.6;
+  margin: 6px 0 0;
+}
+.retentionSummary dl > div:last-child dd {
+  font-size: 16px;
+}
+.readingAside a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.readingContents {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--z-line);
+}
+.readingContents a {
+  font-size: 14px;
+  color: var(--z-muted);
+}
+.prose section,
+.teamIntroduction > section {
+  scroll-margin-top: 110px;
+}
+.position {
+  border-top: 1px solid var(--z-line);
+  padding-top: 24px;
+  margin-top: 24px;
+}
+.position p {
+  font-size: 15px;
+  line-height: 1.8;
+}
+.pagination a,
+.seasonNav a,
+.tabs a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+@media (max-width: 1080px) {
+  .newsroom {
+    grid-template-columns: minmax(0, 1fr) 230px;
+    gap: 32px;
+  }
+  .newsOpening {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+  .newsSecondary {
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--z-line);
+  }
+  .newsSecondary .storyItem:first-child {
+    padding-top: 24px;
+  }
+  .directoryLayout {
+    gap: 32px;
+    grid-template-columns: minmax(0, 1fr) 220px;
+  }
+  .teamEntry {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .teamEntryIdentity {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .teamOverview {
+    gap: 32px;
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
+  .joinCard {
+    grid-template-columns: minmax(170px, 0.7fr) minmax(0, 1fr);
+    gap: 12px 24px;
+  }
+  .joinCard > span {
+    grid-column: 2;
+  }
+}
+@media (max-width: 760px) {
+  .newsroom,
+  .directoryLayout,
+  .teamOverview {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+  .newsDesk {
+    border-left: 0;
+    padding-left: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+  }
+  .newsDesk > section + section,
+  .newsParticipation {
+    margin-top: 0;
+  }
+  .newsParticipation {
+    grid-column: 1 / -1;
+  }
+  .directoryAside {
+    max-width: 600px;
+  }
+  .teamParticipation {
+    order: -1;
+  }
+  .archiveSection {
+    margin-top: 36px;
+  }
+  .seasonEntry {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .participationCallout {
+    display: grid;
+    justify-items: start;
+    padding: 24px;
+  }
+  .participationCallout :global(.button) {
+    max-width: 100%;
+  }
+}
+@media (max-width: 540px) {
+  .newsMore,
+  .newsDesk {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .newsDesk > section + section,
+  .newsParticipation {
+    margin-top: 12px;
+  }
+  .storyLead :is(h2, h3) {
+    font-size: 26px;
+  }
+  .teamEntry {
+    gap: 16px;
+    padding: 24px 0;
+  }
+  .teamEntryImage {
+    width: 64px;
+  }
+  .teamEntryBody :is(h2, h3) {
+    font-size: 23px;
+  }
+  .teamParticipation {
+    padding: 20px;
+  }
+  .honorEntry {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .honorDate {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .honorDate time {
+    font-size: 19px;
+  }
+  .joinCard {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .joinCard > span {
+    grid-column: auto;
+  }
+  .sectionHeading h2,
+  .archiveHeading h2,
+  .participationCallout h2 {
+    font-size: 22px;
   }
 }

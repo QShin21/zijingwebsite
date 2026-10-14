@@ -1,6 +1,8 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
-.title-accent { color: var(--z-brand); }
-.community-title { display: block; margin-top: 18rpx; font-size: 36rpx; font-weight: 650; color: var(--z-text); line-height: 1.5; word-break: break-word; }
-.community-hint { display: block; margin-top: 26rpx; padding-top: 20rpx; border-top: 1rpx solid var(--z-line); font-size: 23rpx; line-height: 1.8; color: var(--z-muted); }
-.community-apply { border-top: 3rpx solid var(--z-positive); }
-.mini-page .community-entry { margin-top: 26rpx; }
+.mini-page .community-entry { padding: 26rpx 0; border-bottom: 1rpx solid var(--z-line); }
+.community-entry-main { display: flex; align-items: flex-start; gap: 24rpx; }
+.community-thumb { width: 120rpx; height: 120rpx; flex-shrink: 0; border-radius: 12rpx; background: var(--z-media); }
+.community-entry-foot { display: flex; align-items: center; justify-content: space-between; gap: 24rpx; color: var(--z-link); font-size: 26rpx; margin-top: 18rpx; }
+.community-entry-foot > text:last-child { font-size: 34rpx; }
+.community-organize { padding: 26rpx; background: var(--z-surface); border: 1rpx solid var(--z-line); border-radius: 12rpx; }
+.community-organize > .muted { margin-top: 12rpx; }
+@media (max-width: 359px) { .community-entry-foot { font-size: 14px; } }

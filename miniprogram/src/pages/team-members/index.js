@@ -10,8 +10,13 @@ const { actions, protect } = require('../../lib/page');
 const identity = () => String((session.user() || {}).id || '');
 Page(withVisualTheme({
   data: { needsLogin: false, loading: false, error: '', operationError: '', done: '', allowed: false, busy: false,
-    teamDoc: null, docs: [], page: 1, hasMore: false },
+    teamDoc: null, docs: [], expandedId: '', page: 1, hasMore: false },
   ...actions,
+  toggleRecord(event) {
+    if (this.data.busy || this.data.loading || this.data.imageBusy) return;
+    const doc = this.data.docs.find(value => String(value.id) === String(event.currentTarget.dataset.id));
+    if (doc) this.setData({ expandedId: this.data.expandedId === doc.id ? '' : doc.id });
+  },
   onLoad(options = {}) {
     if (this._unsubscribe) this._unsubscribe();
     this._disposed = false; this._visible = false; this._resumeRead = false; this._context = (this._context || 0) + 1; this.invalidate();
@@ -31,7 +36,7 @@ Page(withVisualTheme({
     this.setData({ busy: false });
     if (this._visible && this._resumeRead) { this._resumeRead = false; await this.load(); }
   },
-  resetPrivate() { this.setData({ needsLogin: !session.user(), loading: false, error: '', operationError: '', done: '', allowed: false, busy: Boolean(this._pendingWrite), teamDoc: null, docs: [], page: 1, hasMore: false }); },
+  resetPrivate() { this.setData({ needsLogin: !session.user(), loading: false, error: '', operationError: '', done: '', allowed: false, busy: Boolean(this._pendingWrite), teamDoc: null, docs: [], expandedId: '', page: 1, hasMore: false }); },
   onShow() {
     this._visible = true;
     if (this._disposed) return;

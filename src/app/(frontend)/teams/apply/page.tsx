@@ -14,8 +14,13 @@ import {
   positiveID,
 } from "@/lib/team-memberships";
 import { teamApplicationLabels } from "@/lib/team-core";
-import { ClubFrame, ClubSteps } from "../../_club/ClubPage";
-import styles from "../../_club/ClubPages.module.css";
+import { ClubFrame } from "../../_club/ClubPage";
+import styles from "@/components/team-pages/TeamPages.module.css";
+import {
+  TeamTaskNav,
+  TeamSectionHeading,
+  TeamEmpty,
+} from "@/components/team-pages/TeamPageParts";
 export const dynamic = "force-dynamic";
 export default async function Apply({
   searchParams,
@@ -66,32 +71,41 @@ export default async function Apply({
       : null;
 
   return (
-    <ClubFrame>
+    <ClubFrame className={styles.workspace}>
       <PageHeading
         title="申请建立代表队"
-        eyebrow="发起建队"
-        description="本社群管理员提交组织与训练计划，由有建队审批权限的负责人审核批准后成立。"
+        eyebrow="建队申请"
+        description="把组织、选拔与训练安排写成计划，交由有建队审批权限的负责人审核。"
+        parent={{ href: "/teams/manage", label: "代表队工作台" }}
       />
-      <ClubSteps
-        label="建队申请流程"
-        steps={[
+      <TeamTaskNav
+        items={[
           {
-            title: "准备建队计划",
-            description: "由有资格的本社群管理员提出申请。",
+            href: "#establishment-form",
+            label: edit ? "补充建队计划" : "填写建队计划",
           },
-          {
-            title: "提交负责人审核",
-            description: "查看意见，按需要补充和重提。",
-          },
-          {
-            title: "获批后开启招新",
-            description: "进入本队工作台，安排选拔与训练。",
-          },
+          { href: "#my-establishment-applications", label: "我的申请与意见" },
+          { href: "/teams/recruitment", label: "现有代表队招新" },
         ]}
       />
-      <section className="member-shell">
-        <div className={styles.split}>
-          <div className={styles.formSurface}>
+      <div className={styles.workspaceGrid}>
+        <aside className={styles.taskAside}>
+          <h2>准备一份建队计划</h2>
+          <p>介绍队伍定位、如何选拔队员，以及日常训练安排。</p>
+          <h3>提交后的进度</h3>
+          <p>
+            申请提交后等待审核。收到退回意见时，可补充计划后重新提交；批准后进入队伍工作台。
+          </p>
+          <p>可申请的社群以当前任职为准。队员公开简介由本人另行选择展示。</p>
+        </aside>
+        <div>
+          <section id="establishment-form" className={styles.section}>
+            {edit?.reviewNote && (
+              <div className={styles.note}>
+                <h2>本次需要补充</h2>
+                <p className="preserve">{edit.reviewNote}</p>
+              </div>
+            )}
             <TeamCoreEstablishmentForm
               key={query.edit ?? "new"}
               games={allowed.map((g) => ({ id: g.id, title: g.title }))}
@@ -107,78 +121,84 @@ export default async function Apply({
                   : undefined
               }
             />
-          </div>
-          <aside className={styles.aside}>
-            <h2>从一个计划开始</h2>
-            <p>说明你希望如何组织队伍、安排训练，以及开展选拔。</p>
-            <h3>谁可以发起</h3>
-            <p>
-              申请入口仅列出你当前有资格组织的游戏社群。最终建队由有审批权限的负责人批准。
-            </p>
-            <h3>申请与任职</h3>
-            <p>
-              建队、录取与平台管理角色分别处理。公开队员简介仍须由本人授权。
-            </p>
-            <Link href="/teams/recruitment">查看代表队招新 ↗</Link>
-          </aside>
-        </div>
-        <section
-          className={styles.recordSection}
-          aria-labelledby="team-applications-title"
-        >
-          <div className={styles.sectionHead}>
-            <h2 id="team-applications-title">我的建队申请</h2>
-            <p>状态与处理意见</p>
-          </div>
-          {applications.docs.length ? (
-            applications.docs.map((doc) => (
-              <article className="panel" key={doc.id}>
-                <div className={styles.recordHead}>
-                  <h3>{doc.title}</h3>
-                  <span className={styles.status} data-state={doc.status}>
-                    {teamApplicationLabels[doc.status]}
-                  </span>
-                </div>
-                <p className="preserve">{doc.reviewNote}</p>
-                {["returned", "withdrawn"].includes(doc.status) && (
-                  <Link href={`/teams/apply?edit=${doc.id}`}>
-                    修改并重新提交
-                  </Link>
-                )}
-                {["pending", "returned"].includes(doc.status) && (
-                  <TeamCoreOperation
-                    operation="withdraw-establishment"
-                    id={doc.id}
-                    revision={doc.updatedAt}
-                    label="撤回建队申请"
-                  />
-                )}
-                {doc.status === "approved" && (
-                  <Link href={`/teams/manage/${positiveID(doc.team)}`}>
-                    进入代表队工作台
-                  </Link>
-                )}
-              </article>
-            ))
-          ) : (
-            <div className="empty">
-              <div>
-                <h3>暂无建队申请。</h3>
-                <p>申请提交后，在这里查看审核进度。</p>
-              </div>
+          </section>
+          <section
+            id="my-establishment-applications"
+            className={styles.section}
+            aria-labelledby="team-applications-title"
+          >
+            <TeamSectionHeading
+              id="team-applications-title"
+              title="我的建队申请"
+            >
+              {applications.totalDocs} 份记录
+            </TeamSectionHeading>
+            <div className={styles.records}>
+              {applications.docs.length ? (
+                applications.docs.map((doc) => (
+                  <article className={styles.record} key={doc.id}>
+                    <div className={styles.recordHead}>
+                      <h3>{doc.title}</h3>
+                      <span className={styles.status} data-state={doc.status}>
+                        {teamApplicationLabels[doc.status]}
+                      </span>
+                    </div>
+                    <p className={styles.recordDate}>申请编号 {doc.id}</p>
+                    {doc.reviewNote && (
+                      <div className={styles.note}>
+                        <h4>处理意见</h4>
+                        <p className="preserve">{doc.reviewNote}</p>
+                      </div>
+                    )}
+                    <details className={styles.disclosure}>
+                      <summary>查看已提交的建队计划</summary>
+                      <p className="preserve">{doc.reason}</p>
+                    </details>
+                    <div className={styles.actions}>
+                      {["returned", "withdrawn"].includes(doc.status) && (
+                        <Link
+                          className="button"
+                          href={`/teams/apply?edit=${doc.id}#establishment-form`}
+                        >
+                          修改并重新提交
+                        </Link>
+                      )}
+                      {doc.status === "approved" && (
+                        <Link
+                          className="button"
+                          href={`/teams/manage/${positiveID(doc.team)}`}
+                        >
+                          进入代表队工作台
+                        </Link>
+                      )}
+                      {["pending", "returned"].includes(doc.status) && (
+                        <TeamCoreOperation
+                          operation="withdraw-establishment"
+                          id={doc.id}
+                          revision={doc.updatedAt}
+                          label="撤回建队申请"
+                        />
+                      )}
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <TeamEmpty title="暂无建队申请">
+                  申请提交后，在这里查看审核进度与处理意见。
+                </TeamEmpty>
+              )}
             </div>
-          )}
-          <TeamCorePagination
-            page={teamPage(query.page)}
-            total={applications.totalPages}
-            path="/teams/apply"
-            parameter="page"
-            query={query}
-            label="我的建队申请"
-          />
-        </section>
-        <Link href="/teams/manage">返回代表队工作台</Link>
-      </section>
+            <TeamCorePagination
+              page={teamPage(query.page)}
+              total={applications.totalPages}
+              path="/teams/apply"
+              parameter="page"
+              query={query}
+              label="我的建队申请"
+            />
+          </section>
+        </div>
+      </div>
     </ClubFrame>
   );
 }

@@ -6,8 +6,8 @@ const { actions, protect } = require('../../lib/page');
 const navigation = require('../../lib/navigation');
 Page(withVisualTheme({
   data: { user: null, needsLogin: false, groups: [
-    { title: '赛场与记录', items: [{ title: '代表队', subtitle: '队伍与赛季阵容', collection: 'teams', mark: '01' }, { title: '荣誉档案', subtitle: '经核验的赛事与成绩', collection: 'honors', mark: '02' }] },
-    { title: '社团生活', items: [{ title: '社团动态', subtitle: '公告、回顾与故事', collection: 'news', mark: '03' }, { title: '影像', subtitle: '那些值得记住的现场', collection: 'albums', mark: '04' }, { title: '招新批次', subtitle: '查看当期参与条件与安排', collection: 'recruitment', mark: '05' }, { title: '社群风采 · 社团展示', subtitle: '查看已审批的社群记录', collection: 'club-showcase', mark: '06' }] },
+    { title: '社团日常', items: [{ title: '社团动态', subtitle: '回顾、故事与已发布消息', collection: 'news' }, { title: '影像记录', subtitle: '活动相册与照片说明', collection: 'albums' }, { title: '社群风采', subtitle: '来自各游戏社群的已审批记录', collection: 'club-showcase' }] },
+    { title: '更多参与方式', items: [{ title: '招新资料', subtitle: '现有招新批次与参与条件', collection: 'recruitment' }] },
   ] },
   ...actions,
   onShow() { protect(this); },

@@ -47,9 +47,9 @@ test("activity detail to questionnaire: validation, theme retention, failed writ
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/events/" + slug);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
-  await expect(page.getByRole("link", { name: "填写报名问卷 →" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "填写报名问卷", exact: true })).toBeVisible();
   await page.screenshot({ path: shots + "/detail-desktop.png", fullPage: true });
-  await page.getByRole("link", { name: "填写报名问卷 →" }).click();
+  await page.getByRole("link", { name: "填写报名问卷", exact: true }).click();
   await page.setViewportSize({ width: 360, height: 960 });
   await page.getByRole("button", { name: "下一步", exact: true }).click();
   await expect(page.getByRole("alert", { name: "请核对以下题目" })).toContainText("合成报名姓名");

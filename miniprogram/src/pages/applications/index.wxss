@@ -1,2 +1,5 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
-.applications-page .panel .muted { display: block; margin-top: 12rpx; }
+@import "../../templates/business.wxss";
+.applications-page .application-editor { margin-top: 24rpx; }
+.applications-page .qr { margin: 24rpx auto; width: 320rpx; height: 320rpx; }
+.applications-page .consent { margin-bottom: 12rpx; }
+.applications-page .form-footer > .primary { margin-top: 18rpx; }

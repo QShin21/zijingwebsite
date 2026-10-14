@@ -6,6 +6,7 @@ import { Icon } from "@/components/Identity";
 import { Pending } from "@/components/Pending";
 import { ThemeSwitch } from "./ThemeSwitch";
 import type { ThemeName } from "./theme";
+import styles from "./SiteChrome.module.css";
 type NavItem = { path: string; label: string };
 export function DesignNavigation({
   signedIn,
@@ -78,7 +79,7 @@ export function DesignNavigation({
       pathname?.startsWith(path + "/"));
   return (
     <>
-      <nav className="z-desktop-nav" aria-label="主导航">
+      <nav className={styles.desktopNav} aria-label="主导航">
         {items.map((item) => (
           <Link
             key={item.path}
@@ -90,26 +91,35 @@ export function DesignNavigation({
           </Link>
         ))}
       </nav>
-      <div className="z-header-end">
+      <div className={styles.headerEnd}>
         <ThemeSwitch initialTheme={theme} />
         <Link
-          className="z-user"
+          className={styles.user}
           href={signedIn ? "/account" : "/login"}
           onClick={close}
         >
           {signedIn ? "个人中心" : "登录"}
         </Link>
         {!signedIn && (
-          <Link className="z-button z-small" href="/register" onClick={close}>
+          <Link
+            className={`z-button z-small ${styles.register}`}
+            href="/register"
+            onClick={close}
+          >
             注册
             <Icon name="diagonal" />
           </Link>
         )}
-        <details className="z-mobile-menu" ref={menu} suppressHydrationWarning>
+        <details
+          className={styles.mobileMenu}
+          ref={menu}
+          suppressHydrationWarning
+        >
           <summary aria-label="打开导航">
             菜单 <Icon name="plus" />
           </summary>
           <nav aria-label="移动导航">
+            <p className={styles.menuLabel}>浏览紫荆</p>
             {items.map((item) => (
               <Link
                 key={item.path}
@@ -121,6 +131,7 @@ export function DesignNavigation({
                 <Pending />
               </Link>
             ))}
+            <p className={styles.menuLabel}>我的参与</p>
             {signedIn && (
               <Link href="/join" onClick={close}>
                 参与与招新

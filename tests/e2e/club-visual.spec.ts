@@ -305,7 +305,7 @@ test("微信名片未同意仍阻止提交，提示精确且键盘焦点可见",
     exact: true,
   });
   await expect(consent).not.toBeChecked();
-  const realName = page.getByLabel("姓名", { exact: true });
+  const realName = page.getByRole("textbox", { name: "姓名", exact: true });
   await realName.fill("合成测试申请人");
   await page.getByRole("button", { name: "提交审核", exact: true }).click();
   await expect(page.locator("form.application-form [role=alert]")).toHaveText(

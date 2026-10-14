@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { list } from "@/lib/content";
 import {
-  EventCard,
   SectionHeading,
   EmptyState,
 } from "@/components/visual-direction/DesignUI";
 import { SystemControls } from "@/components/visual-direction/SystemControls";
+import { HomeEntries } from "@/components/visual-direction/HomeSections";
+import { PageHeading } from "@/components/PageHeading";
 
 export default async function SystemPage() {
   const [events, games] = await Promise.all([
@@ -14,17 +15,24 @@ export default async function SystemPage() {
   ]);
   return (
     <div className="z-system">
-      <header>
-        <p className="z-kicker">紫荆主场 · 可运行样张</p>
-        <h1>共同的热爱，清楚的日常。</h1>
-        <p className="z-muted">
-          暖色阅读底、中文编辑式标题与真实栏目元信息。下面的活动来自当前可公开内容；示例控件和审核状态均有明确标记。
-        </p>
-        <Link className="z-text-link" href="/">
-          查看真实首页
-        </Link>
-      </header>
-      <section className="z-system-section">
+      <PageHeading
+        eyebrow="紫荆主场 · 可运行样张"
+        title="共同的热爱，清楚的日常。"
+        description="暖色阅读底、中文编辑式标题与真实栏目元信息。活动条目使用当前可公开内容；控件与审核状态为标明用途的交互样例。"
+        action={
+          <Link className="z-button z-outline" href="/">
+            查看真实首页
+          </Link>
+        }
+      >
+        <nav className="z-system-index" aria-label="样张目录">
+          <a href="#system-reading">颜色与阅读</a>
+          <a href="#system-events">活动条目</a>
+          <a href="#system-fields">字段与反馈</a>
+          <a href="#system-status">审核状态</a>
+        </nav>
+      </PageHeading>
+      <section className="z-system-section" id="system-reading">
         <SectionHeading title="颜色与阅读层级" />
         <div className="z-swatches">
           <div
@@ -60,12 +68,15 @@ export default async function SystemPage() {
           </div>
         </div>
       </section>
-      <section className="z-system-section">
+      <section className="z-system-section" id="system-events">
         <SectionHeading title="活动条目" href="/events" action="全部活动" />
         <div className="z-editorial-list">
-          {events.docs.map((doc) => (
-            <EventCard key={doc.id} doc={doc} preview={false} />
-          ))}
+          <HomeEntries
+            docs={events.docs}
+            kind="events"
+            games={games.docs}
+            preview={false}
+          />
           {!events.docs.length && (
             <EmptyState
               title="暂无已公开活动"
@@ -74,7 +85,7 @@ export default async function SystemPage() {
           )}
         </div>
       </section>
-      <section className="z-system-section">
+      <section className="z-system-section" id="system-fields">
         <div className="z-sample-layout">
           <div>
             <SectionHeading title="字段与失败反馈" />
@@ -106,7 +117,7 @@ export default async function SystemPage() {
           </aside>
         </div>
       </section>
-      <section className="z-system-section">
+      <section className="z-system-section" id="system-status">
         <SectionHeading title="审核状态样例" />
         <p className="z-muted">
           以下仅展示状态视觉。真实申请状态由服务端返回，并在对应对象页解释下一步。

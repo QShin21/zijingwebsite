@@ -207,7 +207,12 @@ describe("骨干审核生命周期修复", () => {
       const attributes = Object.fromEntries([...match[0].matchAll(/([\w:-]+)="([^"]*)"/g)].map(item => [item[1], item[2]]));
       return Object.fromEntries(Object.entries(attributes).filter(([key]) => /^(?:bind|data-)/.test(key) || ["disabled", "loading", "value", "range", "range-key", "maxlength", "wx:if", "wx:else"].includes(key)));
     });
-    expect(interactiveContract(current)).toEqual(interactiveContract(frozenWXML));
+    const currentContract = interactiveContract(current);
+    expect(currentContract.filter(control => control.bindtap === "toggleRecord")).toEqual([
+      { bindtap: "toggleRecord", "data-id": "{{item.id}}", disabled: "{{busy}}" },
+    ]);
+    expect(currentContract.filter(control => control.bindtap !== "toggleRecord")).toEqual(interactiveContract(frozenWXML));
+    expect(current).toContain('<view wx:if="{{expandedId === item.id}}" class="record-detail">');
     for (const binding of ['data="{{loading,error,needsLogin}}"', 'wx:if="{{!loading && !error && !needsLogin}}"', 'wx:for="{{docs}}"', 'wx:for="{{item.rows}}"', 'wx:if="{{item.allowed.length}}"', 'range="{{item.allowed}}"', 'value="{{item.feedbackDraft}}"', '{{answer.answer}}', 'wx:if="{{pages > 1}}"', 'disabled="{{busy || page <= 1}}"', 'disabled="{{busy || page >= pages}}"']) expect(current).toContain(binding);
   });
 });

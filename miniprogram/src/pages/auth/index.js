@@ -9,7 +9,7 @@ const { actions } = require('../../lib/page');
 Page(withVisualTheme({
   data: { mode: 'login', identifier: '', password: '', name: '', emailPrefix: '', emailDomain: 'mails.tsinghua.edu.cn',
     domains: ['mails.tsinghua.edu.cn', 'tsinghua.org.cn', 'tsinghua.edu.cn', 'mail.tsinghua.edu.cn', 'mail.tsinghua.org.cn'],
-    email: '', confirm: '', code: '', error: '', busy: false, sent: false, countdown: 0, bridge: true },
+    email: '', confirm: '', code: '', error: '', busy: false, sent: false, countdown: 0, bridge: true, showPassword: false },
   ...actions,
   onLoad(options) {
     this.setMode(['register', 'reset'].includes(options.mode) ? options.mode : 'login');
@@ -22,8 +22,9 @@ Page(withVisualTheme({
     }).catch(() => { if (ticket === this._bridgeTicket) this.setData({ bridge: false }); });
   },
   onUnload() { this._bridgeTicket = (this._bridgeTicket || 0) + 1; clearInterval(this._countdown); this.setData({ password: '', confirm: '', code: '' }); },
-  setMode(mode) { this.setData({ mode, error: '', sent: false, password: '', confirm: '', code: '' }); wx.setNavigationBarTitle({ title: { login: '登录紫荆', register: '注册账号', reset: '重设密码' }[mode] }); },
+  setMode(mode) { this.setData({ mode, error: '', sent: false, password: '', confirm: '', code: '', showPassword: false }); wx.setNavigationBarTitle({ title: { login: '登录紫荆', register: '注册账号', reset: '重设密码' }[mode] }); },
   switchMode(event) { this.setMode(event.currentTarget.dataset.mode); },
+  togglePassword() { this.setData({ showPassword: !this.data.showPassword }); },
   input(event) { this.setData({ [event.currentTarget.dataset.field]: event.detail.value, error: '' }); },
   domain(event) { this.setData({ emailDomain: this.data.domains[Number(event.detail.value)] }); },
   values() { return { identifier: this.data.identifier.trim(), password: this.data.password, confirm: this.data.confirm,

@@ -9,7 +9,7 @@ const media = require('../../lib/honor-media');
 Page(withVisualTheme({
   data: { needsLogin: false, loading: false, ready: false, busy: false, error: '', operationError: '', message: '', record: null,
     teams: [], teamIndex: 0, teamTitle: '', fields: flow.fields(flow.empty()), images: [], imageError: '', editable: false, canSave: false, canSubmit: false,
-    conflict: false, uncertainCreate: false, recentDocs: [], hasSelectedVideo: false, selectedVideoSize: '', canUploadVideo: false, videoSource: '', videoError: '' },
+    conflict: false, uncertainCreate: false, recentDocs: [], hasSelectedVideo: false, selectedVideoSize: '', videoUploading: false, videoProgress: 0, canUploadVideo: false, videoSource: '', videoError: '' },
   back: navigation.back,
   login: navigation.login,
   onLoad(options = {}) {
@@ -23,7 +23,7 @@ Page(withVisualTheme({
     this._dirty = false; this._fresh = false; this._create = false; this._conflict = false; this._uncertainCreate = false; this._loading = null;
     this.setData({ needsLogin: !flow.actor(), loading: false, ready: false, busy: flow.pending(this), error: '', operationError: '', message: '', record: null,
       teams: [], teamIndex: 0, teamTitle: '', fields: flow.fields(this._draft), images: [], imageError: '', editable: false, canSave: false, canSubmit: false,
-      conflict: false, uncertainCreate: false, recentDocs: [], hasSelectedVideo: false, selectedVideoSize: '', canUploadVideo: false, videoSource: '', videoError: '' });
+      conflict: false, uncertainCreate: false, recentDocs: [], hasSelectedVideo: false, selectedVideoSize: '', videoUploading: false, videoProgress: 0, canUploadVideo: false, videoSource: '', videoError: '' });
   },
   clearPictures() { this._mediaTurn = (this._mediaTurn || 0) + 1; flow.removePictures(this._paths || []); this._paths = []; this.setData({ images: [], imageError: '' }); },
   clearMedia() {
@@ -31,7 +31,7 @@ Page(withVisualTheme({
     if (this._videoReadTask && typeof this._videoReadTask.abort === 'function') this._videoReadTask.abort(); this._videoReadTask = null;
     try { if (typeof wx.createVideoContext === 'function') wx.createVideoContext('honor-own-video', this).stop(); } catch { /* Return navigation stays available. */ }
     media.removeMedia([this._videoSource, this._video && this._video.filePath].filter(Boolean)); this._videoSource = ''; this._video = null; this._videoRecord = null;
-    this.setData({ hasSelectedVideo: false, selectedVideoSize: '', canUploadVideo: false, videoSource: '', videoError: '' });
+    this.setData({ hasSelectedVideo: false, selectedVideoSize: '', videoUploading: false, videoProgress: 0, canUploadVideo: false, videoSource: '', videoError: '' });
   },
   onShow() { return flow.show(this); },
   onHide() { flow.hide(this); this.setData({ canSave: false, canSubmit: false, canUploadVideo: false, editable: false }); },
@@ -155,6 +155,14 @@ Page(withVisualTheme({
     } catch (cause) { if (flow.visible(this, token)) this.setData({ operationError: cause.message || '视频选择失败，可重试' }); }
     finally { await flow.finish(this, token); }
   },
+  discardVideo() {
+    if (!this._visible || this._disposed || flow.pending(this) || this.data.loading || !this._video) return;
+    const selected = this._video;
+    this._video = null;
+    media.removeMedia([selected.filePath]);
+    this.setData({ hasSelectedVideo: false, selectedVideoSize: '', videoUploading: false, videoProgress: 0 });
+    this.project();
+  },
   async uploadVideo() {
     if (!this._visible || this._disposed || flow.pending(this) || this.data.loading || !this.data.canUploadVideo || !this._record || !this._video) return;
     let input;
@@ -166,7 +174,15 @@ Page(withVisualTheme({
       if (!await flow.confirm('上传视频并保存草稿', '本次上传会保存当前文字与保留的证据图片，并撤下原展示。上传后仍须明确提交审核。新增图片请先保存草稿。')) return;
       if (!flow.visible(this, token)) return;
       const response = await media.uploadVideo(current, input, video, { isCurrent: () => flow.visible(this, token), sameContext: () => flow.same(this, token),
-        onTask: task => { dispatched = true; this._uploadTask = task; } });
+        onTask: task => {
+          dispatched = true; this._uploadTask = task;
+          if (flow.visible(this, token)) this.setData({ videoUploading: true, videoProgress: 0 });
+        },
+        onProgress: progress => {
+          if (!flow.visible(this, token)) return;
+          const value = Number(progress && progress.progress);
+          if (Number.isFinite(value)) this.setData({ videoProgress: Math.max(0, Math.min(100, Math.round(value))) });
+        } });
       if (!flow.same(this, token)) return;
       const saved = flow.record(response.record, false);
       this._record = saved; this._draft = flow.draft(saved); this._baseRevision = saved.revision; this._dirty = false; this._fresh = false; this._conflict = false;
@@ -175,7 +191,7 @@ Page(withVisualTheme({
       if (!flow.same(this, token)) return;
       if (dispatched) { this._fresh = false; this.project(); }
       this.setData({ operationError: cause.message || '视频保存结果尚未确认，原输入已保留，请先重新读取回执' });
-    } finally { media.removeMedia([video.filePath]); if (this._video === video) this._video = null; this._uploadTask = null; if (flow.same(this, token)) this.setData({ hasSelectedVideo: false, selectedVideoSize: '', canUploadVideo: false }); await flow.finish(this, token); }
+    } finally { media.removeMedia([video.filePath]); if (this._video === video) this._video = null; this._uploadTask = null; if (flow.same(this, token)) this.setData({ hasSelectedVideo: false, selectedVideoSize: '', videoUploading: false, videoProgress: 0, canUploadVideo: false }); await flow.finish(this, token); }
   },
   async viewVideo() {
     if (!this._visible || this.data.loading || flow.pending(this) || !this._record || !this._record.videoHref) return;
@@ -237,6 +253,9 @@ Page(withVisualTheme({
     catch (cause) { if (flow.visible(this, token)) this.setData({ operationError: cause.message }); }
     finally { await flow.finish(this, token); }
     if (reset && flow.visible(this, token)) return this.load(true);
+  },
+  archive() {
+    if (this._visible && !flow.pending(this) && !this.data.loading && this._record && this._record.state === 'approved') navigation.go('team-honors', { team: this._record.team });
   },
   mine() { if (this._visible && !flow.pending(this)) navigation.go('team-honor-workspace', { view: 'mine' }); },
   openRecent(event) { const id = flow.id(event.currentTarget.dataset.id); if (this._visible && !flow.pending(this) && this.data.recentDocs.some(doc => doc.id === id)) navigation.go('team-honor-edit', { id }); },

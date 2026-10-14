@@ -12,6 +12,7 @@ import {
   teamHonorQuery,
   teamHonorScopeID,
 } from "@/components/TeamHonorNavigation";
+import styles from "@/components/team-pages/TeamPages.module.css";
 import { ClubFrame } from "../../../_club/ClubPage";
 export const dynamic = "force-dynamic";
 export default async function HonorRecord({
@@ -87,40 +88,44 @@ export default async function HonorRecord({
       .catch(() => null),
   ]);
   return (
-    <ClubFrame>
-      <section className="community-page">
-        <Link href={"/teams/honors?" + returnQuery}>
-          {!owner && reviewer ? "← 审核本社群荣誉" : "← 我的荣誉记录"}
-        </Link>
-        <PageHeading
-          title={record.title}
-          eyebrow="荣誉记录与审核"
-          description={
-            (team?.title || "已归档代表队") +
-            " · " +
-            (game?.title || "已归档游戏社群")
-          }
-        />
-        <p role="status">
-          {typeof query.message === "string" ? query.message || error : error}
-        </p>
-        <TeamHonorRecordCard
+    <ClubFrame className={styles.workspace}>
+      <PageHeading
+        title={record.title}
+        eyebrow={!owner && reviewer ? "荣誉材料审核" : "本人荣誉回执"}
+        parent={{
+          href: "/teams/honors?" + returnQuery,
+          label: !owner && reviewer ? "审核本社群荣誉" : "我的荣誉记录",
+        }}
+        description={
+          (team?.title || "已归档代表队") +
+          " · " +
+          (game?.title || "已归档游戏社群")
+        }
+      />
+      <p role="status">
+        {typeof query.message === "string" ? query.message || error : error}
+      </p>
+      {editable && (
+        <div className={styles.actions}>
+          <Link href="#honor-editor">修改荣誉内容与材料</Link>
+        </div>
+      )}
+      <TeamHonorRecordCard
+        record={record}
+        headingLevel="h2"
+        reviewer={reviewer}
+        owner={owner}
+        editable={editable}
+        returnQuery={returnQuery}
+      />
+      {editable && (
+        <TeamHonorEditor
+          key={record.id + ":" + record.revision}
           record={record}
-          headingLevel="h2"
-          reviewer={reviewer}
-          owner={owner}
-          editable={editable}
+          memberships={memberships}
           returnQuery={returnQuery}
         />
-        {editable && (
-          <TeamHonorEditor
-            key={record.id + ":" + record.revision}
-            record={record}
-            memberships={memberships}
-            returnQuery={returnQuery}
-          />
-        )}
-      </section>
+      )}
     </ClubFrame>
   );
 }

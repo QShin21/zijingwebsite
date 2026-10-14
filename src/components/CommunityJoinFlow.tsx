@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { joinAction } from "@/app/(frontend)/community/actions";
 import { joinLabels } from "@/lib/community-status";
 import { CommunityContactCards } from "./CommunityJoin";
-import styles from "@/app/(frontend)/_club/ClubPages.module.css";
+import styles from "./community-pages/CommunityPages.module.css";
 
 type Receipt = {
   id: number;
@@ -41,10 +41,10 @@ export function CommunityJoinFlow({
   const [result, setResult] = useState("");
   const state = receipt?.status || "none";
   return (
-    <div className={styles.split}>
+    <div className={styles.flowGrid}>
       <section aria-labelledby="my-join-progress">
-        <h2 id="my-join-progress">我的进群进度</h2>
-        <div className={styles.flowStatus} role="status">
+        <h2 id="my-join-progress">当前记录</h2>
+        <div className={styles.receipt} role="status" data-state={state}>
           <h3>
             {receipt
               ? joinLabels[receipt.status] || "进度已更新"
@@ -55,7 +55,7 @@ export function CommunityJoinFlow({
               "先选择一位在任管理员，记录网站加入意向，再到微信中添加好友。"}
           </p>
           {receipt && (
-            <dl className={styles.flowMeta}>
+            <dl className={styles.facts}>
               <div>
                 <dt>最近更新</dt>
                 <dd>
@@ -78,7 +78,7 @@ export function CommunityJoinFlow({
           )}
         </div>
         {receipt?.note && (
-          <div className={styles.nextStep}>
+          <div className={styles.note}>
             <h3>管理员说明</h3>
             <p className="preserve">{receipt.note}</p>
           </div>
@@ -183,12 +183,35 @@ export function CommunityJoinFlow({
             </div>
           )}
         </form>
+        <ol className={styles.steps} aria-label="人工进群流程">
+          <li>
+            <div>
+              <strong>添加管理员微信</strong>
+              <p>备注昵称和希望加入的游戏社群。</p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>等待好友确认与拉群</strong>
+              <p>网站上的自报进度由管理员在微信核实。</p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>查看人工确认</strong>
+              <p>管理员完成拉群后更新网站记录。</p>
+            </div>
+          </li>
+        </ol>
         <p className="field-hint">
           微信好友申请和进群由你与管理员在微信中完成。查看、保存或扫描名片、网站注册及提交意向均不会自动进群。撤回网站意向不会删除微信好友或退出微信群。
         </p>
       </section>
-      <aside className={styles.aside} aria-labelledby="join-contact-title">
-        <h2 id="join-contact-title">联系管理员</h2>
+      <aside
+        className={styles.contactAside}
+        aria-labelledby="join-contact-title"
+      >
+        <h2 id="join-contact-title">联系管理员，申请加入微信群</h2>
         <p>
           保存个人名片，在微信中识别并加好友；备注昵称和希望加入的游戏社群，等待管理员回复与拉群。
         </p>

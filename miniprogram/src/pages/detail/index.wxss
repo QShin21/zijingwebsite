@@ -1,16 +1,19 @@
-/* Page-specific structure; shared native primitives live in app.wxss. */
-.detail-heading { padding: 8rpx 0 30rpx; border-bottom: 1rpx solid var(--z-control-border); }
-.mini-page .detail-title { font-size: 48rpx; margin-top: 26rpx; }
-.detail-meta { margin-top: 26rpx; }
-.article-body { padding: 30rpx; background: var(--z-surface); border: 1rpx solid var(--z-line); border-radius: 16rpx; }
-.signup-callout { border-top: 3rpx solid var(--z-primary); }
-.signup-callout .primary { width: 100%; margin-top: 26rpx; }
-.honor-record { border-top: 3rpx solid var(--z-positive); }
-.honor-placing { display: block; color: var(--z-positive); font-size: 56rpx; font-weight: 650; line-height: 1.35; margin-top: 28rpx; word-break: break-word; }
-.qr-image { display: block; width: 380rpx; max-width: 100%; height: 380rpx; margin: 28rpx auto; padding: 14rpx; background: #fff; border-radius: 12rpx; }
-.roster-row { display: flex; align-items: center; gap: 18rpx; padding: 26rpx 0; border-bottom: 1rpx solid var(--z-line); }
-.roster-row:last-child { border-bottom: 0; padding-bottom: 0; }
-.roster-index { color: var(--z-positive); font-size: 23rpx; flex-shrink: 0; }
-.roster-name { flex: 1; min-width: 0; word-break: break-word; }
+.detail-heading { padding-bottom: 8rpx; border-bottom: 1rpx solid var(--z-line); }
+.mini-page .detail-title { font-size: 48rpx; margin-top: 18rpx; }
+.detail-heading .object-facts { margin-bottom: 16rpx; }
+.signup-callout { margin-top: 28rpx; padding: 26rpx; border-left: 4rpx solid var(--z-primary); border-radius: 0 12rpx 12rpx 0; background: var(--z-surface); }
+.signup-callout .section-heading { border-bottom: 0; padding-bottom: 0; }
+.signup-callout .primary { width: 100%; margin-top: 24rpx; }
+.signup-callout .body { margin-top: 16rpx; }
+.participation-section { padding: 28rpx 0; border-bottom: 1rpx solid var(--z-line); }
+.competition-record { padding: 30rpx 0; border-bottom: 1rpx solid var(--z-line); }
+.honor-placing { margin-top: 14rpx; }
+.detail-cover { margin-top: 32rpx; }
+.team-quick-links { padding-bottom: 20rpx; border-bottom: 1rpx solid var(--z-line); }
+.qr-image { width: 352rpx; height: 352rpx; }
+.roster-row { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 16rpx; padding: 22rpx 0; border-bottom: 1rpx solid var(--z-line); }
+.roster-name { flex: 1; min-width: 180rpx; word-break: break-word; }
+.position-record { padding-top: 24rpx; border-top: 1rpx solid var(--z-line); }
 .photo-record { margin-top: 30rpx; }
-@media (min-width: 600px) { .mini-page .detail-title { font-size: 30px; } .honor-placing { font-size: 36px; } }
+.content-links { padding-top: 24rpx; }
+@media (min-width: 600px) { .mini-page .detail-title { font-size: 30px; } }

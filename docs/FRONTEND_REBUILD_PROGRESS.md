@@ -1,5 +1,7 @@
 # 紫荆主场 · 网站与原生小程序完整前端重构
 
+最新阶段为文末 **2026-10-14 全面设计实施检查点**。本轮完成全量结构与交互重做并交付可测试源码；正式全量验收仍待 Sol。历史构建、测试与进程状态保留各自日期，不可视作当前结果。
+
 ## 本轮基线与范围
 
 - 2026-10-13 核验本地及远端 `main` / `littleapp` 均为 `e366f3c6538e6c63c9f13fc183e26c32ce58cf11`，工作区干净；从该提交创建唯一分支 `new`。
@@ -184,3 +186,83 @@ Astra 最小处理目标：
 17:51 再核验三组旧服务均存活且健康 200：3000 runner/child `3834/3845`，3364 `3864/3875`，3365 `16627/16638`；三者 BUILD_ID 均仍为 `1LQXl0KVPMjo-UFXJdO9l`，尚未轮换至当前修复源码。没有停止、覆盖这些服务、旧快照、数据库或证据。原生官方工具/真机仍未执行。
 
 交接机器记录见 [Sol 安全检查点](evidence/frontend-rebuild-sol-handoff-0a7d4b7-20261013.json)。Astra 可直接读取全文 `/workspace/qa-zijing/library-source/zijing_frontend_rebuild_prompt.md` 与 `/workspace/qa-zijing/skills/frontend-design/SKILL.md`（已核验官方 blob `a5333457c414d20d625f307df945842c0952ecc3`），结合当前真实源码和既有业务合同开始全面设计/实现。用户的暖浅默认、紫色、中文无衬线、权限与功能范围继续有效。仅 `new`；不部署、发布 CMS、上传微信或读取真实用户资料。
+
+
+## 全面设计实施检查点 · 2026-10-14
+
+本轮从 `new@aa107f62d1d24348cb0a12d6cae4a67a9d5a720c` 接续用户纠正后的完整设计目标。完整任务书 381 行、35,731 字节已输入 frontend-design 流程，先完成构图、色板、字级计划与自审，再分领域实施并实际截图。恢复时确认环境可读写、全量未提交源码与截图都在；原服务及并行代理已停止，没有重建仓库、丢弃改动或重复启动代理。
+
+本阶段交付网站各领域与全部 25 个原生页的结构和交互重做，详见 [全面设计实施](FRONTEND_DESIGN_IMPLEMENTATION_20261013.md) 与 [双端合同](FRONTEND_REBUILD_CONTRACTS.md)。网站改动覆盖 52 个路由文件和相应组件，原生 25 页均实改 WXML/WXSS。首页是实际 CMS 内容构成的封面与日程；目录、新闻阅读、成果年鉴、我的事务和审核工作台各有对应结构。可靠业务服务、精确联系方式同意、角色/对象归属、修订号和媒体权限继续保持。资料公开能力差异与素材缺口明确留在合同中。
+
+### 精确来源与构建
+
+最终输入为 623 文件，清单 SHA-256 `c954fd8831f9063b3a70d76ae173352108033c435ce8d26f623b36a782d74e7f`，逐文件与工作区一致。[源码清单](evidence/frontend-design-source-manifest-20261014.json) 与 [机器证据](evidence/frontend-design-implementation-20261014.json) 随检查点保存。所有业务源码已冻结，后续只追加证据和交接文档。
+
+最终隔离优化构建在 `04:31:39–04:33:48 UTC` 退出 0，耗时 **128.878 秒**，BUILD_ID **`iAVXxuabA81RV4I4LuoaU`**。构建路径为 `.data/rebuild-qa-20261013/browser/app-final-20261014`，日志 `/workspace/qa-zijing/logs/astra-full-design-final-build-20261014.log`。`NODE_ENV=production` 仅用于本地优化运行，`APP_ENV=development`、合成环回数据库、空环境 sentinel 和关闭外部通知保持；没有部署生产。
+
+前两次成功构建也保留：10 月 13 日约 98 秒的 `-QSvWzDhiQkWbjqnN3tb0`，以及恢复后 126.214 秒的 `yV-i09_hBXO5VxmiJIMYk`。它们分别绑定旧样张清单，不能替代最终构建。
+
+### 本轮实际结果
+
+| 检查 | 状态 | 已执行范围及限制 |
+| --- | --- | --- |
+| 最终优化 build / TypeScript | 通过 | 最终 623 文件快照真实构建退出 0；另一次 `tsc --noEmit --incremental false` 通过 |
+| ESLint / tokens / diff | 通过 | 全仓 lint；后加 5 个 E2E 定位文件单独 lint；28 份生成输出一致；最终 diff 无空白错误 |
+| 定向 Vitest | 通过 | 23 文件、673 项，16.31 秒；包括 16 个原生套件 579 项、活动 63、社群 26、tokens 5。此后仅改荣誉 checkbox CSS 和 5 个 E2E 文件，未改这些用例覆盖的行为；不是完整 Vitest |
+| 初次全面网页取样 | 失败 | 120 格：112 通过、8 失败；绑定 `f3fd037d…`。四项登录链接、两项隐私页 networkidle、两项 HTTP 状态 |
+| 截图修复后网页矩阵 | 失败 | 120 格：118 通过、2 失败；绑定 `8bd84882…`。32 个路由在 390 两主题取样，关键页补 1440/1024/768/320 |
+| 最终源码定点复测 | 失败 | 52 格：50 通过、2 失败；绑定最终 `c954fd88…`。五宽度/双主题，覆盖首页、社群、申请、荣誉、工作台、账号、登录、隐私等 |
+| 网页布局 / Axe / 脚本 | 通过（所测页面） | 修复后 120 格及最终 52 格均单 H1、无横向溢出、无 Axe 违规、无 pageerror；不等于完整键盘/所有动态状态验收 |
+| 实际 checkbox 标签热区 | 通过（5 页取样） | 初测荣誉移除证据标签 26px；修后最终构建实测 44px。其余取样标签 44–85px；未降低阈值 |
+| 有限真实浏览器交互 | 通过（分别取证） | 默认浅色/手选持久化/输入保值；社群未同意零请求、503 未知结果保留文字与文件、无自动重发；简介预览/隐藏选择/返回保值与焦点。没有写入新的业务记录；不证明服务端成功链路或 ACL |
+| 原生静态 | 通过 | 25 页、162 文件、646,934 字节；域名检查开启、无未解析原生依赖 |
+| 原生 WXML 浏览器映射 | 通过 | 8 个合成状态×390/320×浅深共 32 格；溢出、小字、热区、裁切、页面错误和外部请求均为 0。50 个来源文件与当前源码一致；非官方编译/模拟器/真机 |
+| E2E 收集 | 通过 | 28 文件、125 项成功收集，未把收集算作测试执行 |
+| 完整当前版本回归 / CI | 未运行 | 全 Vitest、全部 E2E、专用主题/历史授权、当前荣誉私媒与离队 ACL、当前精确 SHA CI 交 Sol |
+| 官方微信 / 真机 / 发布 | 未运行 | 未进行官方编译、SDK现场、iOS/Android真机、CMS发布、生产部署或微信上传 |
+
+最终两格失败均为 `/events/sol-synthetic-missing-20261013` 的浅/深色：HTTP 实际 **200**，断言仍期待 **404**。真实页面已经显示未找到状态，并包含 `noindex`；额外 Twitterbot 请求也实测为 200。当前 Next 文档说明流式 `notFound` 可返回 200，但这仍与合同中的 HTTP 404 要求存在差异。没有调低断言或改成 200 来标绿；Sol 应确定期望并复现，必要时交 Astra 做最小路由响应修复。
+
+### 截图迭代与失败保留
+
+修复了登录页内嵌隐私链接仅靠颜色区分、队伍新建按钮/说明贴着首条记录、首页只有一条动态仍出现空次栏分隔、原生 320px 说明字号与边距，以及荣誉移除材料热区。隐私页的 45 秒超时经实际请求追踪定位为关于/联系链接预取后进入登录响应，正文一直正常；辅助链接改为点击加载后按原 45 秒预算通过。没有扩大匿名浏览权限。
+
+骨干默认/接口说明统一为用户已确认的报名资料保留 1 年和人工删除渠道，未重写历史表单、答案、修订或实际删除机制。活动填写链接的精确名称与社群表单的精确可访问名称已同步到相应 E2E；未知提交断言核对“结果尚未确认”和本人记录入口。唯一性、权限、保值、CAS、颜色与原业务结果断言保留，正式流程仍待完整运行。
+
+首次恢复快检误将新测试与旧执行目录混用，得到 658 通过/15 失败；原因是 `--root` 不改变相对文件读取的 cwd。已保留日志，并从冻结副本内执行同样 23 个套件，673 项通过，未改断言。有限 UI 探针前两轮社群项分别因隐藏必填文本影响 `getByLabel`、未限定的 alert 命中 Next route-announcer 而停止；改成精确可访问名称与所属 form 的 alert 后，该场景实际通过。原生初次的 fixture 模块缓存错误、六处小字失败、增加第八状态后未更新总数检查的失败也都保留。
+
+证据目录：
+
+- 初次网页 `/workspace/qa-zijing/full-design-web-20261013`；修复后完整矩阵 `/workspace/qa-zijing/full-design-web-review-20261014`；最终取样 `/workspace/qa-zijing/full-design-web-final-20261014`。每份 `matrix.json` 内有时间、浏览器、源码清单、状态、Axe、资源和图片对应。
+- 交互 `/workspace/qa-zijing/full-design-ui-review-20261014`、`full-design-ui-review-final-20261014`、`full-design-ui-community-recheck-20261014`；标签尺寸 `/workspace/qa-zijing/label-targets-final-20261014.json`。
+- 原生最终 `.data/rebuild-native-preview/{results.json,index.html}`，每张图注明“WXML 浏览器映射 · 合成数据 · 非官方微信或真机”。失败目录位于 `/workspace/qa-zijing/full-design-native-{initial-partial,small-text-failure,count-check}-20261013`。
+- 六份领域交接 `/workspace/qa-zijing/redesign-*-handoff.md`；原生补充 253 项合成行为断言、167 处公共事件绑定与 3 项活动组件保值探针有独立结果，均不代替真实 SDK 或 HTTP 权限验收。
+
+实际资源测量使用 Chrome for Testing 145.0.7632.6、DPR 1、全新 context、预热 loopback 服务、无网络/CPU 限速。最终 390px 浅色首页/活动/社群申请 JS 传输分别约 **198/195/201 KB**，CSS 约 **54/51/51 KB**，字体请求均为 0；观测导航至 networkidle 分别 **1389/1086/1039ms**。这是本次合成内容条件下的观察，含等待及工具开销，不是性能评分或真实用户数据。图片和每项资源的实际记录保存在矩阵，不用无图样例推断真实影像页面性能。
+
+### 当前运行与交回 Sol
+
+最终服务为 **http://localhost:3369**，runner/child PID **7450/7461**，精确 build 如上；`/health/ready` 200、schema `club-operations-1`。合成 PostgreSQL 当前 PID **664**，端口 **55613**，路径 `.data/rebuild-qa-20261013/pg`。恢复后的诊断服务 3367、3368 已正常停止，构建与日志保留；更早的 3000/3364/3365 及其数据库在恢复时已不活跃，勿复用历史 PID 当作当前状态。每次接续仍须读 `processes/*.json` 并核对实际 `/proc`。
+
+当前有效的服务器工作目录由 Next 参数及 `PAYLOAD_CONFIG_PATH` 指向 `browser/app-final-20261014`；runner 元数据中的 cwd 仍显示旧主 profile 的 `app`。运行相对文件读取的测试时必须明确进入对应冻结副本，不能只给 Vitest `--root`。
+
+若当前服务确已停止，可按原 runner 恢复；先核验端口和当前源文件清单，不要覆盖现存快照：
+
+```bash
+# 仅当本任务的合成 PostgreSQL 已停止且 55613 空闲时启动；不会重新 seed。
+node scripts/rebuild-qa.mjs db main
+
+# 仅当 3369 空闲时复用已完成的最终构建；不重新 build。
+REBUILD_QA_SERVER_PORT=3369 REBUILD_QA_RUN_LABEL=sol-resume-final-server \
+node scripts/rebuild-qa.mjs exec main env NODE_ENV=production \
+PAYLOAD_CONFIG_PATH=/workspace/zijingwebsite/.data/rebuild-qa-20261013/browser/app-final-20261014/src/payload.config.ts \
+node /workspace/zijingwebsite/node_modules/next/dist/bin/next start \
+/workspace/zijingwebsite/.data/rebuild-qa-20261013/browser/app-final-20261014 \
+--hostname 127.0.0.1 --port 3369
+```
+
+正式完整 E2E 有硬编码 3000 Origin 与各专用 profile 守卫，不能直接把全部旧脚本指到 3369。Sol 先阅读既有 `scripts/rebuild-qa.mjs`、各 spec 守卫与 fixture 脚本，使用相应合成 DB/SMTP、精确当前源码及优化运行；在有证据可复用构建时复用，环境配置要求不同则独立冻结，不覆盖旧产物。当前主合成活动 fixture 未启用问卷，活动多页填写与未知回执浏览器回归仍须按已有脚本建立有界 fixture。
+
+Sol 优先处理：本轮新结构的完整提交/回执/失败保值与稳定导航，荣誉 revision/私媒/退回重审，队伍成员与离队撤权，匿名与多角色直访，默认主题/持久化/登录返回，以及所有旧 UI 定位是否仍对应同一行为。不能用截图代替 ACL，也不能用旧 4733/0a7 的通过或失败推定新版本结果。
+
+当前可交付为 Astra 实施检查点，下一步交 Sol max 正式验收。已知 HTTP 404 响应差异若需源码修复，再给 Astra 明确复现；荣誉永久私有凭证、简介逐字段私密等后端能力差异应单列兼容方案，不自行扩权。保护 `main/littleapp`，仅正常提交推送 `new`，无生产、CMS 或微信发布。

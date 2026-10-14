@@ -16,10 +16,15 @@ const statuses = ['pending', 'returned', 'approved', 'rejected', 'withdrawn'];
 const unique = docs => docs.filter((doc, index) => docs.findIndex(value => String(value.id) === String(doc.id)) === index);
 Page(withVisualTheme({
   data: { needsLogin: false, loading: false, error: '', operationError: '', done: '', allowed: false, busy: false,
-    mode: 'establishment', teamID: '', teamDoc: null, teamActions: {}, lifecycleChoices: [], docs: [], page: 1, hasMore: false,
+    mode: 'establishment', teamID: '', teamDoc: null, teamActions: {}, lifecycleChoices: [], docs: [], expandedId: '', page: 1, hasMore: false,
     status: 'pending', statusIndex: 0, statusLabels: ['待人工审核', '退回补充', '已批准', '未通过', '已撤回'],
     recruitments: [], batchesPage: 1, batchesMore: false },
   ...actions,
+  toggleRecord(event) {
+    if (this.data.busy || this.data.loading || this.data.imageBusy) return;
+    const doc = this.data.docs.find(value => String(value.id) === String(event.currentTarget.dataset.id));
+    if (doc) this.setData({ expandedId: this.data.expandedId === doc.id ? '' : doc.id });
+  },
   onLoad(options = {}) {
     if (this._unsubscribe) this._unsubscribe();
     this._disposed = false; this._visible = false; this._resumeRead = false; this._context = (this._context || 0) + 1; this.invalidate();
@@ -42,7 +47,7 @@ Page(withVisualTheme({
     if (this._visible && this._resumeRead) { this._resumeRead = false; await this.load(); }
   },
   resetPrivate() { this.setData({ needsLogin: !session.user(), loading: false, error: '', operationError: '', done: '', allowed: false, busy: Boolean(this._pendingWrite),
-    teamDoc: null, teamActions: {}, lifecycleChoices: [], docs: [], page: 1, hasMore: false, recruitments: [], batchesPage: 1, batchesMore: false }); },
+    teamDoc: null, teamActions: {}, lifecycleChoices: [], docs: [], expandedId: '', page: 1, hasMore: false, recruitments: [], batchesPage: 1, batchesMore: false }); },
   onShow() {
     this._visible = true;
     if (this._disposed) return;
@@ -104,7 +109,7 @@ Page(withVisualTheme({
   status(event) {
     const index = Number(event.detail.value);
     if (this.data.busy || !statuses[index] || statuses[index] === this.data.status) return;
-    this.setData({ status: statuses[index], statusIndex: index, docs: [], page: 1, hasMore: false }); return this.load();
+    this.setData({ status: statuses[index], statusIndex: index, docs: [], expandedId: '', page: 1, hasMore: false }); return this.load();
   },
   note(event) {
     if (this.data.busy) return;

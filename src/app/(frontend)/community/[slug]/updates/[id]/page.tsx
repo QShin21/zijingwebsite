@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import { bySlug, cms } from "@/lib/content";
 import { canReviewPromotion, managesGame, formatDate } from "@/lib/rules";
 import { ClubFrame } from "../../../../_club/ClubPage";
-import styles from "../../../../_club/ClubPages.module.css";
+import styles from "@/components/community-pages/CommunityPages.module.css";
 export default async function Update({
   params,
   searchParams,
@@ -37,30 +37,65 @@ export default async function Update({
     .catch(() => null);
   if (!post || Number(post.game) !== game.id) notFound();
   return (
-    <ClubFrame className={styles.communityBody}><article className={styles.article}>
-      <nav className="signup-tools" aria-label="社群活动导航">
-        <Link href={`/community/${slug}/updates`}>← 活动与通知</Link>
+    <ClubFrame className={`${styles.page} ${styles.body}`}>
+      <nav className={styles.breadcrumb} aria-label="社群活动导航">
+        <Link href={`/community/${slug}/updates`}>活动与通知</Link>
+        <span aria-hidden="true">/</span>
+        <span>{post.category === "event" ? "社群活动" : "社群通知"}</span>
       </nav>
-      <p className={styles.kicker}>
-        {post.category === "event" ? "社群活动" : "社群通知"}
-      </p>
-      <h2>{post.title}</h2>
-      <p className={styles.recordMeta}>
-        {post.authorName} · {formatDate(post.createdAt)}
-      </p>
-      <p className="preserve thread-body">{post.body}</p>
+      <header className={styles.articleHeader}>
+        <h1>{post.title}</h1>
+        <div className={styles.articleMeta}>
+          <span>{game.title}</span>
+          <span>{post.authorName}</span>
+          <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
+          <span>社群发布</span>
+        </div>
+      </header>
       <p role="status">{(await searchParams).message}</p>
+      <div className={styles.articleGrid}>
+        <article className={styles.article} aria-label="正文">
+          <p className={styles.articleBody}>{post.body}</p>
+        </article>
+        <aside className={styles.articleAside}>
+          {post.category === "event" ? (
+            <>
+              <h2>参与这场活动</h2>
+              <p>先查看报名条件与截止信息，再填写本活动的报名问卷。</p>
+              <a className="button" href="#activity-registration">
+                查看活动报名
+              </a>
+            </>
+          ) : (
+            <>
+              <h2>社群日常</h2>
+              <p>对通知有疑问时，可联系本社群管理员。</p>
+              <Link href={`/community/${slug}#community-contacts`}>
+                查看联系名片
+              </Link>
+            </>
+          )}
+          {(managesGame(user, game.id) || canReviewPromotion(user)) && (
+            <section className={styles.section}>
+              <h2>管理展示范围</h2>
+              <p>将当前内容申请展示到社团首页，报名继续使用同一活动记录。</p>
+              <Link
+                className="button light"
+                href={
+                  "/community/promotions?source=community-posts&id=" + post.id
+                }
+              >
+                申请社团级展示
+              </Link>
+            </section>
+          )}
+        </aside>
+      </div>
       {post.category === "event" && (
-        <ActivitySignup kind="community-posts" id={post.id} />
+        <section id="activity-registration" className={styles.section}>
+          <ActivitySignup kind="community-posts" id={post.id} />
+        </section>
       )}
-      {(managesGame(user, game.id) || canReviewPromotion(user)) && (
-        <Link
-          className="button light"
-          href={"/community/promotions?source=community-posts&id=" + post.id}
-        >
-          申请社团级展示
-        </Link>
-      )}
-    </article></ClubFrame>
+    </ClubFrame>
   );
 }

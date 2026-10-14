@@ -17,7 +17,7 @@ const joinLabels = { requested: '已记录加入意向，请联系管理员', fr
   awaitingInvite: '管理员已确认好友通过，等待人工拉群', joined: '管理员已人工确认进群', withdrawn: '网站意向已撤回' };
 const receipt = record => record ? { ...record, statusText: joinLabels[record.status] || '进度待核对', confirmedText: format.date(record.confirmedAt) } : null;
 Page(withVisualTheme({
-  data: { loading: true, error: '', needsLogin: false, game: {}, area: 'contacts', docs: [], page: 1,
+  data: { loading: true, error: '', needsLogin: false, game: {}, area: 'contacts', introOpen: false, docs: [], page: 1,
     hasMore: false, loadingMore: false, nodes: [], contentError: '', contacts: [], contactsLoading: false, contactsError: '',
     join: null, joinActions: {}, joinLoading: false, joinError: '', joinBusy: false, joinDone: '', canHandle: false,
     clubLoading: false, clubError: '', staffBatches: [], promotions: [], honorPins: [], honorsLoading: false, honorsError: '' },
@@ -42,7 +42,7 @@ Page(withVisualTheme({
     this.setData({ joinBusy: false });
     if (this._visible && this._resumeRead) { this._resumeRead = false; await this.load(); }
   },
-  resetPrivate() { this.setData({ needsLogin: !session.user(), loading: false, error: '', game: {}, docs: [], nodes: [], page: 1,
+  resetPrivate() { this.setData({ needsLogin: !session.user(), loading: false, error: '', game: {}, introOpen: false, docs: [], nodes: [], page: 1,
     hasMore: false, loadingMore: false, contentError: '', contacts: [], contactsLoading: false, contactsError: '',
     join: null, joinActions: {}, joinLoading: false, joinError: '', joinBusy: Boolean(this._pendingWrite), joinDone: '', canHandle: false,
     clubLoading: false, clubError: '', staffBatches: [], promotions: [], honorPins: [], honorsLoading: false, honorsError: '' }); },
@@ -162,6 +162,7 @@ Page(withVisualTheme({
     if (this._visible && !this._disposed && this.data.honorPins.some(pin => String(pin.id) === String(id))) navigation.go('team-honors', { team: id });
   },
   retryContent() { return this.loadArea(); },
+  toggleIntro() { this.setData({ introOpen: !this.data.introOpen }); },
   honorWorkspace() {
     if (this._visible && !this._disposed && !this._pendingWrite && !this.data.loading && this.data.game.id)
       navigation.go('team-honor-workspace', { game: this.data.game.id });

@@ -1,0 +1,70 @@
+/* Only the thirteen native task pages import this sheet. */
+.business-page .page-heading { margin-bottom: 28rpx; padding-bottom: 28rpx; }
+.business-page .page-heading .title { font-size: 44rpx; line-height: 1.35; letter-spacing: 0; }
+.business-page .page-heading .subtitle { margin-top: 14rpx; }
+.business-page .task-context { display: block; margin-bottom: 12rpx; color: var(--z-muted); font-size: 26rpx; line-height: 1.6; }
+.business-page .business-summary { margin: 28rpx 0; padding: 26rpx; border-left: 4rpx solid var(--z-primary); background: var(--z-surface); }
+.business-page .business-summary .body { margin-top: 12rpx; }
+.business-page .business-summary .meta { margin-top: 12rpx; }
+.business-page .task-section { margin-top: 40rpx; padding-top: 28rpx; border-top: 1rpx solid var(--z-line); }
+.business-page .task-section > .muted { margin-top: 10rpx; }
+.business-page .task-section:first-child { margin-top: 0; }
+.business-page .task-section-title { display: block; font-size: 34rpx; font-weight: 600; line-height: 1.5; }
+.business-page .task-note { display: block; padding: 22rpx 0; color: var(--z-subtitle); font-size: 28rpx; line-height: 1.8; white-space: pre-wrap; word-break: break-word; }
+.business-page .task-feedback { padding: 24rpx; margin: 24rpx 0; border-left: 4rpx solid var(--z-primary); background: var(--z-secondary-bg); color: var(--z-secondary-text); }
+.business-page .task-feedback .body { margin-top: 12rpx; }
+.business-page .task-feedback-label { display: block; font-size: 26rpx; font-weight: 600; }
+.business-page .record-list { margin-top: 16rpx; }
+.business-page .task-record { padding: 28rpx 0; border-bottom: 1rpx solid var(--z-line); }
+.business-page .task-record:first-child { border-top: 1rpx solid var(--z-line); }
+.business-page .record-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16rpx; }
+.business-page .record-heading > view { min-width: 0; flex: 1; }
+.business-page .record-heading .section-title { margin: 0; }
+.business-page .record-heading .badge { flex-shrink: 0; max-width: 45%; }
+.business-page .record-meta { display: flex; flex-wrap: wrap; gap: 6rpx 22rpx; margin-top: 12rpx; color: var(--z-muted); font-size: 26rpx; line-height: 1.7; }
+.business-page .record-meta text { word-break: break-word; }
+.business-page .record-detail { padding-top: 12rpx; }
+.business-page .record-facts { margin: 24rpx 0; }
+.business-page .record-fact { display: flex; align-items: flex-start; gap: 24rpx; padding: 12rpx 0; line-height: 1.75; }
+.business-page .fact-label { flex: 0 0 132rpx; color: var(--z-muted); font-size: 27rpx; }
+.business-page .fact-value { flex: 1; min-width: 0; font-size: 30rpx; white-space: pre-wrap; word-break: break-word; }
+.business-page .material-title { display: block; margin: 24rpx 0 12rpx; font-weight: 600; font-size: 29rpx; }
+.business-page .review-actions { margin-top: 28rpx; padding: 24rpx; background: var(--z-surface); border: 1rpx solid var(--z-line); border-radius: 12rpx; }
+.business-page .review-actions .field { margin: 20rpx 0; }
+.business-page .review-actions .actions { margin-top: 20rpx; }
+.business-page .disclosure { display: flex; justify-content: space-between; align-items: center; gap: 16rpx; width: 100%; text-align: left; }
+.business-page .disclosure-mark { flex-shrink: 0; }
+.business-page .form-footer { margin-top: 32rpx; padding-top: 24rpx; border-top: 1rpx solid var(--z-line); }
+.business-page .form-footer > .primary { width: 100%; }
+.business-page .form-footer .action-bar { margin-top: 20rpx; padding-top: 0; border: 0; }
+.business-page .compact-actions { margin-top: 16rpx; display: flex; flex-wrap: wrap; gap: 12rpx; }
+.business-page .compact-actions > button { min-width: 44px; flex: 1; }
+.business-page .selection-label { display: flex; align-items: flex-start; gap: 20rpx; padding: 24rpx 0; border-bottom: 1rpx solid var(--z-line); min-height: 44px; }
+.business-page .selection-label > view { flex: 1; min-width: 0; }
+.business-page .selection-label switch { flex-shrink: 0; }
+.business-page .result-message { display: block; margin: 24rpx 0; padding: 24rpx; background: var(--z-secondary-bg); color: var(--z-secondary-text); border-left: 4rpx solid var(--z-primary); font-size: 29rpx; line-height: 1.8; word-break: break-word; }
+.business-page .pagination { margin: 28rpx 0; display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
+.business-page .pagination > text { color: var(--z-muted); font-size: 26rpx; text-align: center; }
+.business-page .task-section .field:first-child { margin-top: 18rpx; }
+.business-page .scope-filters { display: flex; align-items: stretch; gap: 20rpx; margin: 28rpx 0; }
+.business-page .scope-filters .field { flex: 1; min-width: 0; margin: 0; }
+.business-page .scope-filters .field-label { color: var(--z-muted); font-size: 26rpx; font-weight: 400; }
+.business-page .scope-filters picker { height: 100%; }
+.business-page .privacy-links { display: flex; flex-wrap: wrap; gap: 8rpx 24rpx; }
+@media (max-width: 359px) {
+  .mini-page.business-page { padding-left: 16px; padding-right: 16px; }
+  .business-page .task-context, .business-page .record-meta, .business-page .fact-label { font-size: 13px; }
+  .business-page .task-note, .business-page .fact-value, .business-page .result-message { font-size: 15px; }
+  .business-page .scope-filters { flex-direction: column; }
+  .business-page .record-heading { flex-wrap: wrap; }
+  .business-page .record-heading .badge { max-width: 100%; }
+}
+@media (min-width: 600px) {
+  .business-page .page-heading .title { font-size: 30px; }
+  .business-page .task-section-title { font-size: 22px; }
+  .business-page .task-context, .business-page .record-meta, .business-page .fact-label { font-size: 14px; }
+}
+
+.business-page .scope-switch { display: flex; gap: 0; margin: 28rpx 0; border-bottom: 1rpx solid var(--z-line); }
+.business-page .scope-tab { flex: 1; min-width: 0; padding: 20rpx 12rpx; border: 0; border-bottom: 4rpx solid transparent; border-radius: 0; color: var(--z-muted); background: transparent; }
+.business-page .scope-tab.selected { border-bottom-color: var(--z-primary); color: var(--z-primary); font-weight: 600; }
