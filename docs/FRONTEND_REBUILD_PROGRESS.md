@@ -315,10 +315,12 @@ HTTP差异还涉及无权review页404和旧slug重定向308实际200；私有二
 | 当前完整 Vitest / 126 E2E | 未运行 | 本修复阶段留给 Sol max 独立执行，旧 Sol 1541/30 与 58/55/12 不改写 |
 | 专用双主题 / 历史 false-null / 完整五宽矩阵与资源 | 未运行 | 本阶段未做完整独立复验；局部主题、保值、私媒和 ACL 结果逐案列出 |
 | 官方微信编译 / 真机 | 未运行 | VM 和浏览器映射不能替代官方证据 |
-| 本次新 SHA CI | 待查询 | 旧账户阻塞不能推定新提交结果，不改账单或额度 |
+| 本次源码 SHA CI | 未运行（账户阻塞） | 精确 `2fd2404` 的 run 38528595757 已终止；付款或支出额度阻止启动，runner 0、steps 0 |
 
 后续失败均保留原 trace：第三方 Gravatar/B站加载、包含说明的按钮/标签、同名对象选择、正文联系兜底作用域，以及新测试目录缺少同库 seed 用户清单。只按真实 DOM、对象编号或既有夹具修正；原像素、焦点、唯一性、无报名副作用、媒体 Range、私有导出、撤权、CAS 和 Axe 继续执行。原 55+30 的逐项诊断和结果见 [机器证据](evidence/frontend-rebuild-astra-repair-20261014.json)，源文件清单见 [冻结输入](evidence/frontend-rebuild-astra-inputs-20261014.json)。
 
 最终 626 个输入已核对根工作区和新 app 相同，500 个非测试输入与 build02 相同，清单摘要 `be98b4eeb20534ab3f65f69919fec05482a8520ce23a5c4a0c3c65a0e5f463ea`。运行目录 `/workspace/astra-build2/.data/rebuild-qa-20261013/browser/app`、服务 3373（runner/child 55747/55758），合成 PG 55618 的实际目录 `/workspace/astra-qa/.data/rebuild-qa-20261013/browser/pg`（postmaster 50949）。全部新日志、快照与探针在 `/workspace/qa-zijing/astra-repair-20261014`；最终快照 `source-snapshot-05.json`。同源码可复用优化产物，接续先查 PID/BUILD_ID 和清单；不覆盖旧 Sol/3369 目录或数据库。
 
 完整修复解释、每轮范围、合成环境/SMTP 和接续步骤见 [Astra 交接](FRONTEND_REBUILD_ASTRA_REPAIR_20261014.md)。当前无未修复的定向失败要求立即继续 Astra；下一步切回 Sol max 全量独立复测。仅正常提交推送 `new`；`main/littleapp` 仍为 `e366f3c6538e6c63c9f13fc183e26c32ce58cf11`。不部署、不发布真实 CMS、不上传微信。
+
+实质修复已正常推送 `2fd2404938ea4c84c274aabc3ec329590e299c18`，远端三个分支已核对。[精确 CI](https://github.com/QShin21/zijingwebsite/actions/runs/38528595757) 的 quality job `115734765667` 未启动；GitHub annotation 明确为账户付款或支出额度条件，runner 0、steps 0，没有代码测试或构建执行。日志下载目标返回 403，未获取日志正文；run/job/check/annotation 原证据校验值见 [CI 记录](evidence/frontend-rebuild-astra-ci-blocked-20261014.json)。没有改账单、额度或发起重跑。后续纯文档回执使用 `[skip ci]`，626 个已验证输入保持相同。

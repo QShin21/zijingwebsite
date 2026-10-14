@@ -6331,7 +6331,7 @@
     "Historical false/null consent dedicated database",
     "32 routes x 5 widths x 2 themes and resource measurements",
     "Official WeChat compile/simulator/real device",
-    "Exact pushed SHA CI"
+    "CI execution after account billing/spending blocker is resolved"
   ],
   "failureArtifactsPreserved": true,
   "limitations": [
@@ -6340,5 +6340,13 @@
     "Both build logs contain Compiled with warnings without expanded warning details; original logs retained.",
     "HTTP/screenshot evidence cannot substitute for object/role/media ACL.",
     "No role, schema, migration or dependency changes; anonymous and recruitment permission conflicts remain unchanged."
-  ]
+  ],
+  "ci": {
+    "status": "notrun",
+    "reason": "Account payment or spending limit blocked job startup",
+    "sourceCommit": "2fd2404938ea4c84c274aabc3ec329590e299c18",
+    "runID": 38528595757,
+    "jobID": 115734765667,
+    "evidence": "docs/evidence/frontend-rebuild-astra-ci-blocked-20261014.json"
+  }
 }

@@ -8,6 +8,8 @@
 
 当前完整 Vitest/126 E2E、专用双主题、历史同意、32 路由×五宽×双主题及资源测量交 Sol max 独立复测；官方微信/真机未验。保留 3373 优化服务、本轮 55618 合成库及全部旧目录；PID/日志/输入清单在交接文档。只提交推送 `new`，`main/littleapp` 保持 `e366f3c`，无部署、真实 CMS 发布或微信上传。
 
+源码修复已推送 `2fd2404938ea4c84c274aabc3ec329590e299c18`。其 [CI 38528595757](https://github.com/QShin21/zijingwebsite/actions/runs/38528595757) 因账户付款或支出额度未启动，runner 0、steps 0；[精确证据](evidence/frontend-rebuild-astra-ci-blocked-20261014.json)。本地验收继续有效；文档回执不改变 626 个测试输入。
+
 ## 完整前端重构实施检查点 · 2026-10-14
 
 已在保存环境恢复原 `new@aa107f62` 工作区，保留全部未提交源码、数据库、截图与中断记录，完成网站各领域及 25 个原生页面的结构、排版和交互整合。六个领域的实现交接均在盘；恢复后没有重复启动并行任务。实施清单见 [全面设计](FRONTEND_DESIGN_IMPLEMENTATION_20261013.md)，当前证据与后续执行见 [重构进度](FRONTEND_REBUILD_PROGRESS.md)。

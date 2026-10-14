@@ -1,0 +1,76 @@
+{
+  "checkedAt": "2026-10-14T07:31:24.542050+00:00",
+  "sourceCommit": "2fd2404938ea4c84c274aabc3ec329590e299c18",
+  "branch": "new",
+  "run": {
+    "id": 38528595757,
+    "name": "V1 checks",
+    "event": "push",
+    "status": "completed",
+    "conclusion": "failure",
+    "html_url": "https://github.com/QShin21/zijingwebsite/actions/runs/38528595757",
+    "created_at": "2026-10-14T07:28:56Z",
+    "updated_at": "2026-10-14T07:29:00Z"
+  },
+  "job": {
+    "id": 115734765667,
+    "name": "quality",
+    "status": "completed",
+    "conclusion": "failure",
+    "started_at": "2026-10-14T07:28:57Z",
+    "completed_at": "2026-10-14T07:28:59Z",
+    "runner_id": 0,
+    "runner_name": "",
+    "steps": [],
+    "html_url": "https://github.com/QShin21/zijingwebsite/actions/runs/38528595757/job/115734765667"
+  },
+  "annotations": [
+    {
+      "annotation_level": "failure",
+      "title": "",
+      "message": "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings",
+      "path": ".github",
+      "start_line": 1,
+      "end_line": 1
+    },
+    {
+      "annotation_level": "notice",
+      "title": "",
+      "message": "\"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748\"",
+      "path": ".github",
+      "start_line": 1,
+      "end_line": 1
+    }
+  ],
+  "interpretation": "Account payment or spending limit prevented job startup; no code checks or build executed. Local results remain separate.",
+  "logDownload": {
+    "attempted": true,
+    "exitCode": 1,
+    "result": "GitHub temporary log redirect destination returned HTTP 403; no job log text retrieved; signed URL omitted"
+  },
+  "rawEvidence": [
+    {
+      "path": "/workspace/qa-zijing/astra-repair-20261014/ci-runs-2fd2404.json",
+      "bytes": 12206,
+      "sha256": "b5fd3562d7f5fc37bd691003c17dae5ca8677288320a70367d0d3f36aa14e3d0"
+    },
+    {
+      "path": "/workspace/qa-zijing/astra-repair-20261014/ci-jobs-38528595757.json",
+      "bytes": 868,
+      "sha256": "a827a5bfca9d4cc1ee9b228b8fb494af3b0e7823eb8ab357240743a3726f52e5"
+    },
+    {
+      "path": "/workspace/qa-zijing/astra-repair-20261014/ci-checks-2fd2404.json",
+      "bytes": 3094,
+      "sha256": "c7179b8e0bc6989548e72db5470cb7c35efadfb6e6b390270dd3d1b46190b75c"
+    },
+    {
+      "path": "/workspace/qa-zijing/astra-repair-20261014/ci-annotations-115734765667.json",
+      "bytes": 862,
+      "sha256": "553751703e27860c78305f821278964cb81190a2998a7461d1a4be448b41c1c0"
+    }
+  ],
+  "billingChanged": false,
+  "workflowRerunRequested": false,
+  "followup": "Account owner resolves billing/spending condition; Sol can continue independent local acceptance. Documentation-only receipt uses [skip ci]; 626 tested inputs unchanged."
+}
