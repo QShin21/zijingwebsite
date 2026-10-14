@@ -1,0 +1,2122 @@
+{
+  "recordedAt": "2026-10-14T06:15:25.572268+00:00",
+  "stage": "Sol max independent acceptance; failed, handoff to Astra",
+  "sourceCommit": "ee753edb913e30004aef201929a4b280a164ef75",
+  "implementationCommit": "e9a8daa2ce5750dff1465e4a6b63036fde4af87d",
+  "sourceManifestHash": "c954fd8831f9063b3a70d76ae173352108033c435ce8d26f623b36a782d74e7f",
+  "fileCount": 623,
+  "sourceMatchedBeforeAndAfter": true,
+  "sourceEdits": false,
+  "testImplementationOrAssertionEdits": false,
+  "libraryBundle": {
+    "library_file_id": "libfile_077d29dc3db08191b649b8d89791af9e",
+    "file_id": "file_00000000a26882308d4a6d552f0ddcb0",
+    "version": 0,
+    "bytes": 3314137,
+    "sha256": "5e26488fd94c229dd26e0754383f3877609413816e27927bb300a0efc365b221",
+    "entries": 29,
+    "screenshots": 17,
+    "duplicateUpload": false
+  },
+  "build": {
+    "copiedAt": "2026-10-14T04:57:15.136347+00:00",
+    "source": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/browser/app-final-20261014/.next",
+    "destination": "/workspace/qa-zijing/sol-ee753ed-20261014/zijingwebsite/.data/rebuild-qa-20261013/contracts/app/.next",
+    "buildID": "iAVXxuabA81RV4I4LuoaU",
+    "byteVerifiedArtifactFiles": 691,
+    "sourceManifestHash": "c954fd8831f9063b3a70d76ae173352108033c435ce8d26f623b36a782d74e7f",
+    "sourceCommit": "ee753edb913e30004aef201929a4b280a164ef75",
+    "runtimeServerURLToBeVerified": "http://localhost:3000",
+    "newBuildRun": false
+  },
+  "buildRuntimeCheck": {
+    "url": "http://localhost:3000/register",
+    "httpStatus": 200,
+    "localhost3000InMetadata": false,
+    "localhost3369InMetadata": false,
+    "buildID": "iAVXxuabA81RV4I4LuoaU",
+    "eventRoute": {
+      "httpStatus": 200,
+      "canonicalHref": [
+        "http://localhost:3000/events/demo-club-meetup"
+      ],
+      "openGraphURL": [
+        "http://localhost:3000/events/demo-club-meetup"
+      ],
+      "containsOldOriginLiteral": false
+    }
+  },
+  "typecheck": {
+    "status": "pass",
+    "exitCode": 0,
+    "log": "/workspace/qa-zijing/logs/sol-ee753ed-typecheck-20261014.log"
+  },
+  "lint": {
+    "status": "pass",
+    "exitCode": 0,
+    "log": "/workspace/qa-zijing/logs/sol-ee753ed-lint-20261014.log"
+  },
+  "vitest": {
+    "status": "fail",
+    "files": 87,
+    "tests": 1571,
+    "pass": 1541,
+    "fail": 30,
+    "ordinaryRun": {
+      "files": 83,
+      "tests": 1505,
+      "pass": 1475,
+      "fail": 30,
+      "durationSeconds": 194.5,
+      "log": "/workspace/qa-zijing/logs/sol-ee753ed-unit-20261014.log"
+    },
+    "specialHTTP": {
+      "files": 4,
+      "tests": 66,
+      "pass": 66,
+      "profiles": [
+        "consent",
+        "post-edit",
+        "native"
+      ],
+      "logs": [
+        "/workspace/qa-zijing/logs/sol-ee753ed-consent-http-20261014.log",
+        "/workspace/qa-zijing/logs/sol-ee753ed-post-edit-http-20261014.log",
+        "/workspace/qa-zijing/logs/sol-ee753ed-native-http-20261014.log"
+      ]
+    }
+  },
+  "fullE2E": {
+    "status": "fail",
+    "collected": 125,
+    "pass": 58,
+    "fail": 55,
+    "skipped": 12,
+    "flaky": 0,
+    "notFinished": 0,
+    "durationSeconds": 3017.4188260000005,
+    "globalErrors": [],
+    "exitCode": 1,
+    "report": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/prod-browser/runs/sol-ee753ed-full-e2e/playwright-results.json",
+    "log": "/workspace/qa-zijing/logs/sol-ee753ed-full-e2e-20261014.log",
+    "failureCatalog": "frontend-rebuild-sol-e2e-failures-20261014.json",
+    "diagnosticGroups": {
+      "locator or visibility block; behavior beyond failure unverified": 48,
+      "confirmed inline link accessibility defect": 1,
+      "confirmed HTTP status contract difference": 4,
+      "URL or attribute difference needs DOM/API comparison": 1,
+      "confirmed nested landmark semantic defect": 1
+    },
+    "caseStatuses": [
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 119,
+        "title": "publisher builds questionnaire, member submits once, organizer reads private answers",
+        "resultStatus": "timedOut",
+        "durationMs": 90307,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 197,
+        "title": "site event management and API token submission share the same questionnaire",
+        "resultStatus": "failed",
+        "durationMs": 18348,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 257,
+        "title": "publisher includes questionnaire before publishing and CMS offers editor link",
+        "resultStatus": "failed",
+        "durationMs": 8278,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 302,
+        "title": "conditional questionnaire previews, validates, preserves steps and retries without losing answers",
+        "resultStatus": "failed",
+        "durationMs": 18467,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 476,
+        "title": "advanced types, account-scoped drafts, statistics, exports and permissions work together",
+        "resultStatus": "failed",
+        "durationMs": 6749,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 636,
+        "title": "organizer downloads one-row responses and member details with filters and private access",
+        "resultStatus": "failed",
+        "durationMs": 19401,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 828,
+        "title": "editor templates, text import, undo redo and exported JSON preserve editable settings",
+        "resultStatus": "timedOut",
+        "durationMs": 90297,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 903,
+        "title": "complex branches recompute on back navigation and persist only the actual path",
+        "resultStatus": "passed",
+        "durationMs": 6582,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 1034,
+        "title": "template library previews real branches and designer manages logic safely",
+        "resultStatus": "timedOut",
+        "durationMs": 90435,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 1126,
+        "title": "AI creation preserves current content on failure and previews editable generated drafts",
+        "resultStatus": "failed",
+        "durationMs": 19578,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 1186,
+        "title": "AI streaming, refinement and 5–6 member registration work through save, validation and export",
+        "resultStatus": "failed",
+        "durationMs": 21637,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 1391,
+        "title": "saved roster answers prefill edits, survive failed PATCH and adapt to a changed form",
+        "resultStatus": "failed",
+        "durationMs": 20198,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/activity-signups.spec.ts",
+        "line": 1505,
+        "title": "AI endpoint enforces manager authorization and serves a real generated draft",
+        "resultStatus": "passed",
+        "durationMs": 3398,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-integration.spec.ts",
+        "line": 51,
+        "title": "五类问卷入口双轴居中，短屏/滚动/关闭与Escape返回焦点，预览不产生报名",
+        "resultStatus": "timedOut",
+        "durationMs": 240220,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-integration.spec.ts",
+        "line": 105,
+        "title": "骨干录用独立于入队；成立/招新/录取→简介opt-in→荣誉复审→撤权与同ID重录保持门禁",
+        "resultStatus": "timedOut",
+        "durationMs": 240360,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-integration.spec.ts",
+        "line": 241,
+        "title": "荣誉本人分页保留队伍和社群；断网与丢响应保留附件，并先核对已写入结果",
+        "resultStatus": "timedOut",
+        "durationMs": 180347,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-operations.spec.ts",
+        "line": 37,
+        "title": "人工进群完整回执、后台确认、隐私隔离及旧会话撤权",
+        "resultStatus": "failed",
+        "durationMs": 18632,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-operations.spec.ts",
+        "line": 85,
+        "title": "预览居中、进群空态、联系兜底及四个响应式断点",
+        "resultStatus": "timedOut",
+        "durationMs": 90237,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-operations.spec.ts",
+        "line": 109,
+        "title": "模板预览返回可继续键盘操作，关闭及Escape恢复制作入口焦点",
+        "resultStatus": "timedOut",
+        "durationMs": 90325,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-recovery.spec.ts",
+        "line": 32,
+        "title": "只读成员可从详情与工作台查看报名，独立导出且不可编辑/越权，撤销后旧会话立即失效",
+        "resultStatus": "failed",
+        "durationMs": 21937,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-theme.spec.ts",
+        "line": 253,
+        "title": "负责页面在四个视口无溢出、标题清晰并通过正文无障碍扫描",
+        "resultStatus": "skipped",
+        "durationMs": 0,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-theme.spec.ts",
+        "line": 334,
+        "title": "微信名片未同意仍阻止提交，提示精确且键盘焦点可见",
+        "resultStatus": "skipped",
+        "durationMs": 0,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-theme.spec.ts",
+        "line": 381,
+        "title": "队员简介预览、返回、取消与空态沿用原流程",
+        "resultStatus": "skipped",
+        "durationMs": 0,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-theme.spec.ts",
+        "line": 465,
+        "title": "简介实际请求的加载、网络失败和重试状态可用",
+        "resultStatus": "skipped",
+        "durationMs": 0,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-theme.spec.ts",
+        "line": 507,
+        "title": "两套局部主题在实际页面即时切换，保留输入与同意状态",
+        "resultStatus": "skipped",
+        "durationMs": 0,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-theme.spec.ts",
+        "line": 539,
+        "title": "无显式主题属性时，系统深色仍使用局部浅色方案",
+        "resultStatus": "skipped",
+        "durationMs": 0,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-theme.spec.ts",
+        "line": 554,
+        "title": "真实提交等待与中断状态保持可读，已填资料不丢失",
+        "resultStatus": "skipped",
+        "durationMs": 0,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-visual.spec.ts",
+        "line": 223,
+        "title": "负责页面在四个视口无溢出、标题清晰并通过正文无障碍扫描",
+        "resultStatus": "skipped",
+        "durationMs": 0,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-visual.spec.ts",
+        "line": 299,
+        "title": "微信名片未同意仍阻止提交，提示精确且键盘焦点可见",
+        "resultStatus": "skipped",
+        "durationMs": 0,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-visual.spec.ts",
+        "line": 346,
+        "title": "队员简介预览、返回、取消与空态沿用原流程",
+        "resultStatus": "skipped",
+        "durationMs": 0,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/club-visual.spec.ts",
+        "line": 430,
+        "title": "简介实际请求的加载、网络失败和重试状态可用",
+        "resultStatus": "skipped",
+        "durationMs": 0,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/community-application.spec.ts",
+        "line": 44,
+        "title": "完整申请、备案提示、私有二维码、社长查看全部资料后批准",
+        "resultStatus": "failed",
+        "durationMs": 9573,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/community-application.spec.ts",
+        "line": 129,
+        "title": "无效二维码被拒绝并保留填写资料",
+        "resultStatus": "passed",
+        "durationMs": 5149,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/community-application.spec.ts",
+        "line": 144,
+        "title": "历史false或缺失授权不可批准，退回后本人明确同意再重提同一编号",
+        "resultStatus": "skipped",
+        "durationMs": 196,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/community-spaces.spec.ts",
+        "line": 43,
+        "title": "多管理员微信、只读活动、网页风采投稿审核及B站预览",
+        "resultStatus": "failed",
+        "durationMs": 7365,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/community-spaces.spec.ts",
+        "line": 91,
+        "title": "仅标题投稿与 MP4 审核、播放、拖动和隐藏权限",
+        "resultStatus": "failed",
+        "durationMs": 1990,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/community.spec.ts",
+        "line": 55,
+        "title": "社群保留通知、风采和微信入口，已移除论坛与聊天",
+        "resultStatus": "passed",
+        "durationMs": 3328,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/community.spec.ts",
+        "line": 75,
+        "title": "旧聊天页面和接口对访客及登录用户都返回404，拒绝发送和修改",
+        "resultStatus": "passed",
+        "durationMs": 1928,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/community.spec.ts",
+        "line": 88,
+        "title": "访客仅活动通知可用，直接社群接口与伪造会话被拒绝",
+        "resultStatus": "passed",
+        "durationMs": 6145,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/community.spec.ts",
+        "line": 104,
+        "title": "邮箱也可登录同一账号，错误登录统一提示",
+        "resultStatus": "failed",
+        "durationMs": 18412,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/community.spec.ts",
+        "line": 120,
+        "title": "注册拒绝已占用昵称且没有数字账户输入",
+        "resultStatus": "passed",
+        "durationMs": 1956,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/community.spec.ts",
+        "line": 141,
+        "title": "昵称登录、论坛关闭与社群只读导航",
+        "resultStatus": "failed",
+        "durationMs": 16524,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/content-promotions.spec.ts",
+        "line": 48,
+        "title": "活动网页申请/撤回/退回/重提/审核/改稿复审及主动升降级，报名ID与隐私权限保持",
+        "resultStatus": "passed",
+        "durationMs": 20995,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/content-promotions.spec.ts",
+        "line": 110,
+        "title": "公告网页申请由宣传部骨干审核，社团首页链接原公告且不出现报名",
+        "resultStatus": "passed",
+        "durationMs": 5768,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/content-promotions.spec.ts",
+        "line": 132,
+        "title": "风采本地批准后网页申请升推，隐藏关闭首页且重新公开仍需复审",
+        "resultStatus": "failed",
+        "durationMs": 22524,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/content-promotions.spec.ts",
+        "line": 183,
+        "title": "外链风采保留社群展示，在同一风采上传受控视频后才可审核升推",
+        "resultStatus": "passed",
+        "durationMs": 10610,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/design-refresh.spec.ts",
+        "line": 6,
+        "title": "member and community reading layouts at 320px",
+        "resultStatus": "timedOut",
+        "durationMs": 90383,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/design-refresh.spec.ts",
+        "line": 6,
+        "title": "member and community reading layouts at 390px",
+        "resultStatus": "timedOut",
+        "durationMs": 90704,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/design-refresh.spec.ts",
+        "line": 6,
+        "title": "member and community reading layouts at 768px",
+        "resultStatus": "timedOut",
+        "durationMs": 90323,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/design-refresh.spec.ts",
+        "line": 6,
+        "title": "member and community reading layouts at 1440px",
+        "resultStatus": "passed",
+        "durationMs": 10137,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/design-refresh.spec.ts",
+        "line": 56,
+        "title": "registration guidance, server feedback and unique mobile community navigation",
+        "resultStatus": "timedOut",
+        "durationMs": 90176,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/rebuild-account.spec.ts",
+        "line": 54,
+        "title": "登录错误就地聚焦，密码显隐和主题切换保留输入",
+        "resultStatus": "passed",
+        "durationMs": 1781,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/rebuild-account.spec.ts",
+        "line": 83,
+        "title": "注册与恢复校验保留输入，不发送真实邮件",
+        "resultStatus": "passed",
+        "durationMs": 3444,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/rebuild-account.spec.ts",
+        "line": 138,
+        "title": "本人事务与权限入口、深链和退出完整导航",
+        "resultStatus": "failed",
+        "durationMs": 16288,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/rebuild-account.spec.ts",
+        "line": 187,
+        "title": "长文、旧荣誉链接与管理角色仍走原授权",
+        "resultStatus": "passed",
+        "durationMs": 5618,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/rebuild-activity.spec.ts",
+        "line": 44,
+        "title": "activity detail to questionnaire: validation, theme retention, failed write, receipt and one record",
+        "resultStatus": "passed",
+        "durationMs": 4307,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/rebuild-activity.spec.ts",
+        "line": 82,
+        "title": "staff batch business refusal preserves fields then saves the same draft record",
+        "resultStatus": "passed",
+        "durationMs": 4497,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 16,
+        "title": "rebuild member routes preserve one title and fit 320px",
+        "resultStatus": "passed",
+        "durationMs": 7024,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 16,
+        "title": "rebuild member routes preserve one title and fit 390px",
+        "resultStatus": "passed",
+        "durationMs": 7950,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 16,
+        "title": "rebuild member routes preserve one title and fit 768px",
+        "resultStatus": "passed",
+        "durationMs": 7973,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 16,
+        "title": "rebuild member routes preserve one title and fit 1024px",
+        "resultStatus": "passed",
+        "durationMs": 6580,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 16,
+        "title": "rebuild member routes preserve one title and fit 1440px",
+        "resultStatus": "passed",
+        "durationMs": 8551,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 35,
+        "title": "rebuild uses light SSR on a dark system before hydration and keeps native mobile navigation",
+        "resultStatus": "passed",
+        "durationMs": 535,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 54,
+        "title": "rebuild theme control preserves text, files, consent and exact error; dark preference reaches fresh SSR",
+        "resultStatus": "passed",
+        "durationMs": 4841,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 105,
+        "title": "rebuild keyboard entry, reduced motion and key pages remain accessible in both themes",
+        "resultStatus": "passed",
+        "durationMs": 14072,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/rebuild-shell.spec.ts",
+        "line": 124,
+        "title": "rebuild missing content offers a usable return path and expired sessions cannot read member areas",
+        "resultStatus": "failed",
+        "durationMs": 1286,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 7,
+        "title": "desktop navigation exposes the current section",
+        "resultStatus": "passed",
+        "durationMs": 592,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 16,
+        "title": "mobile menu closes on navigation, Escape and outside interaction",
+        "resultStatus": "failed",
+        "durationMs": 15390,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 40,
+        "title": "mobile navigation remains operable without JavaScript",
+        "resultStatus": "timedOut",
+        "durationMs": 90039,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 54,
+        "title": "reduced motion and essential interface accessibility",
+        "resultStatus": "passed",
+        "durationMs": 2023,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 68,
+        "title": "redesign responsive routes at 320px",
+        "resultStatus": "passed",
+        "durationMs": 7977,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 68,
+        "title": "redesign responsive routes at 390px",
+        "resultStatus": "passed",
+        "durationMs": 4003,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 68,
+        "title": "redesign responsive routes at 768px",
+        "resultStatus": "passed",
+        "durationMs": 5779,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 68,
+        "title": "redesign responsive routes at 1080px",
+        "resultStatus": "passed",
+        "durationMs": 4289,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 68,
+        "title": "redesign responsive routes at 1440px",
+        "resultStatus": "passed",
+        "durationMs": 3800,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/redesign.spec.ts",
+        "line": 68,
+        "title": "redesign responsive routes at 1920px",
+        "resultStatus": "passed",
+        "durationMs": 5490,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/registration-email.spec.ts",
+        "line": 4,
+        "title": "邮箱只填一次，前后缀同栏，后缀可选择也可直接输入",
+        "resultStatus": "passed",
+        "durationMs": 3160,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/registration-flow.spec.ts",
+        "line": 101,
+        "title": "点击注册后弹窗验证，错误验证码不入库，正确验证码才创建用户",
+        "resultStatus": "failed",
+        "durationMs": 20664,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/registration-flow.spec.ts",
+        "line": 146,
+        "title": "关闭弹窗保留输入且不创建账号，重发限制在服务端执行",
+        "resultStatus": "passed",
+        "durationMs": 2758,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/registration-flow.spec.ts",
+        "line": 161,
+        "title": "发送失败保留资料且不创建账号",
+        "resultStatus": "passed",
+        "durationMs": 2997,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/signup-authority.spec.ts",
+        "line": 29,
+        "title": "站点活动A→B：旧范围拒绝列表/单条/导出，本人回执及骨干边界保留",
+        "resultStatus": "passed",
+        "durationMs": 7473,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/signup-authority.spec.ts",
+        "line": 29,
+        "title": "站点活动NULL→B：旧范围拒绝列表/单条/导出，本人回执及骨干边界保留",
+        "resultStatus": "passed",
+        "durationMs": 8089,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 61,
+        "title": "后台登录、创建活动草稿、预览、发布、访客查看、撤下",
+        "resultStatus": "failed",
+        "durationMs": 11458,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 168,
+        "title": "404 HTTP 状态与预览环境不收录",
+        "resultStatus": "failed",
+        "durationMs": 834,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 182,
+        "title": "公开 API、预览、首次注册与分部越权拒绝",
+        "resultStatus": "passed",
+        "durationMs": 1010,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 266,
+        "title": "公开页可访问性、CSP 与实际加载指标",
+        "resultStatus": "passed",
+        "durationMs": 6230,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 297,
+        "title": "三类招新、历史批次和所有公开栏目",
+        "resultStatus": "failed",
+        "durationMs": 18954,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 330,
+        "title": "首页配置即时更新、回顾关联、相册分页和长中文标题",
+        "resultStatus": "failed",
+        "durationMs": 17297,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 529,
+        "title": "布局 360px、导航、键盘焦点与截图",
+        "resultStatus": "passed",
+        "durationMs": 4595,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 529,
+        "title": "布局 390px、导航、键盘焦点与截图",
+        "resultStatus": "passed",
+        "durationMs": 4166,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 529,
+        "title": "布局 768px、导航、键盘焦点与截图",
+        "resultStatus": "passed",
+        "durationMs": 4074,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/site.spec.ts",
+        "line": 529,
+        "title": "布局 1440px、导航、键盘焦点与截图",
+        "resultStatus": "passed",
+        "durationMs": 3176,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "line": 66,
+        "title": "发布后保存新草稿，本人旧链接及列表回执可读，游客和他人无权，撤下后不可写",
+        "resultStatus": "failed",
+        "durationMs": 27305,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "line": 136,
+        "title": "原生同形审核请求缺省保留内部备注，显式清空仍生效，普通申请人读取与审核均隔离",
+        "resultStatus": "passed",
+        "durationMs": 6453,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "line": 160,
+        "title": "accepted 最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充",
+        "resultStatus": "failed",
+        "durationMs": 22719,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "line": 160,
+        "title": "rejected 最终结果拒绝静默进入选拔，明确退回与反馈后本人才能补充",
+        "resultStatus": "failed",
+        "durationMs": 26549,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "line": 219,
+        "title": "同版本并发结果更新只有一次生效，失败请求及旧版本不能覆盖反馈、答案或角色",
+        "resultStatus": "passed",
+        "durationMs": 5594,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/staff-recruitment-boundaries.spec.ts",
+        "line": 244,
+        "title": "保存与发布拒绝跳过核心资料的分支，合法扩展分支可提交且撤下历史快照仍可读",
+        "resultStatus": "failed",
+        "durationMs": 36530,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/staff-recruitment.spec.ts",
+        "line": 58,
+        "title": "单批次网页草稿/发布、申请/撤回重提、审核回执、私有导出及关闭；现有和新社群共用入口",
+        "resultStatus": "failed",
+        "durationMs": 30988,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-core-review.spec.ts",
+        "line": 168,
+        "title": "既有teams REST归档后低权限恢复拒绝，过期revision和并发请求保持失效，高权限明确恢复",
+        "resultStatus": "failed",
+        "durationMs": 16323,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-core-review.spec.ts",
+        "line": 277,
+        "title": "超过20条队伍和建队审核时，两套分页独立跨页并互相保留筛选",
+        "resultStatus": "failed",
+        "durationMs": 17272,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-core-review.spec.ts",
+        "line": 330,
+        "title": "draft后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝",
+        "resultStatus": "failed",
+        "durationMs": 16497,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-core-review.spec.ts",
+        "line": 330,
+        "title": "team-archived后本人网页和API读取旧snapshot且只读，隐藏当前配置及旁人均拒绝",
+        "resultStatus": "failed",
+        "durationMs": 16518,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-core.spec.ts",
+        "line": 166,
+        "title": "建队网页退回、修改重提与高权限批准可进入招新工作台",
+        "resultStatus": "failed",
+        "durationMs": 16343,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-core.spec.ts",
+        "line": 237,
+        "title": "本人草稿、提交、退回重提、人工录取、撤销与真实REST权限",
+        "resultStatus": "failed",
+        "durationMs": 16238,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-core.spec.ts",
+        "line": 417,
+        "title": "招新关闭、跨站拒绝和表单工作台四个视口",
+        "resultStatus": "failed",
+        "durationMs": 16522,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-core.spec.ts",
+        "line": 542,
+        "title": "真实API表单版本冲突保留草稿，新批次录取后本人网页离队",
+        "resultStatus": "failed",
+        "durationMs": 16397,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-honor-storage.spec.ts",
+        "line": 20,
+        "title": "真实 Media HTTP 保留公开图片，但解码目录/反斜杠/Range 无法旁路私有荣誉和旧视频标记",
+        "resultStatus": "passed",
+        "durationMs": 4919,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-honors.spec.ts",
+        "line": 230,
+        "title": "队伍荣誉只有一个置顶档案，普通风采仍为 6+1 分页，稳定详情不含待审材料",
+        "resultStatus": "passed",
+        "durationMs": 2382,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-honors.spec.ts",
+        "line": 270,
+        "title": "真实 HTTP JWT 上传及审核；旧共享视频跨集合借用在改稿/退回/隐藏/队伍归档后无法再请求字节",
+        "resultStatus": "passed",
+        "durationMs": 5018,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-honors.spec.ts",
+        "line": 633,
+        "title": "私有详情与原始 REST 守住社群边界，网页退回/拒绝需说明并可隐藏公开荣誉",
+        "resultStatus": "timedOut",
+        "durationMs": 90613,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-honors.spec.ts",
+        "line": 715,
+        "title": "真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/改稿复审/离队保留历史",
+        "resultStatus": "failed",
+        "durationMs": 20002,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-profiles-period.spec.ts",
+        "line": 56,
+        "title": "旧预览页及重放PUT跨再入队周期均409；刷新后隐藏默认且新明确选择才能展示",
+        "resultStatus": "passed",
+        "durationMs": 9048,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-profiles-period.spec.ts",
+        "line": 143,
+        "title": "旧周期异步迟到请求不能把隐藏资料恢复展示或递增版本",
+        "resultStatus": "passed",
+        "durationMs": 3927,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-profiles-period.spec.ts",
+        "line": 189,
+        "title": "保存响应迟到后后台读取新周期，不给旧草稿换发凭据或恢复授权",
+        "resultStatus": "passed",
+        "durationMs": 4291,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-profiles.spec.ts",
+        "line": 68,
+        "title": "访客沿用登录边界；未入队者无编辑入口且伪造上下文被拒",
+        "resultStatus": "passed",
+        "durationMs": 4310,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-profiles.spec.ts",
+        "line": 104,
+        "title": "本人上传头像、预览、单次保存、修改/取消与隐藏；桌面/窄屏可用",
+        "resultStatus": "failed",
+        "durationMs": 6648,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-profiles.spec.ts",
+        "line": 211,
+        "title": "加载失败可重试，保存失败保留输入与预览并能实际重试成功",
+        "resultStatus": "passed",
+        "durationMs": 10240,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-profiles.spec.ts",
+        "line": 262,
+        "title": "简介预览返回和取消后焦点回到可继续操作的控件，不保存草稿",
+        "resultStatus": "passed",
+        "durationMs": 4634,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-profiles.spec.ts",
+        "line": 275,
+        "title": "撤销资格后旧页面拒绝提交，旧会话读取名单也立即隐藏",
+        "resultStatus": "passed",
+        "durationMs": 5229,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-profiles.spec.ts",
+        "line": 313,
+        "title": "改队伍重置表单，未加入新队不能写，新队入队后简介独立",
+        "resultStatus": "passed",
+        "durationMs": 7377,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/team-profiles.spec.ts",
+        "line": 354,
+        "title": "两个页面旧版本冲突保留输入；真实接口拒绝 XSS、敏感字段、跨站保存",
+        "resultStatus": "passed",
+        "durationMs": 6612,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/theme.spec.ts",
+        "line": 9,
+        "title": "system dark without a preference renders light HTML, metadata and native navigation before JavaScript",
+        "resultStatus": "failed",
+        "durationMs": 15456,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/theme.spec.ts",
+        "line": 49,
+        "title": "an invalid preference falls back to light even on a dark system",
+        "resultStatus": "passed",
+        "durationMs": 1702,
+        "retry": 0
+      },
+      {
+        "file": "tests/e2e/theme.spec.ts",
+        "line": 69,
+        "title": "explicit themes preserve form input and consent, persist across routes and reopening, without hydration errors",
+        "resultStatus": "failed",
+        "durationMs": 16084,
+        "retry": 0
+      }
+    ],
+    "rawReportSha256": "4fe42917dba2a88550c7994374a3183e3338de08166144c47176fbf77b3e79e2"
+  },
+  "dedicatedThemes": {
+    "light": {
+      "pass": 8,
+      "fail": 3,
+      "path": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/visual/runs/sol-ee753ed-visual-light/playwright-results.json"
+    },
+    "dark": {
+      "pass": 8,
+      "fail": 3,
+      "durationMs": 267944.06799999997,
+      "path": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/visual/runs/sol-ee753ed-visual-dark/playwright-results.json"
+    },
+    "overall": "8 pass/3 fail for each theme; all existing assertions unchanged"
+  },
+  "historicalConsentWeb": {
+    "fail": 1,
+    "beforeBusinessStage": "Unchanged single-quoted exact name locator includes required suffix; stopped at name field before preparing historical false/null record",
+    "path": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/consent-web/runs/sol-ee753ed-consent-web/playwright-results.json"
+  },
+  "visualMatrix": {
+    "sourceCommit": "ee753edb913e30004aef201929a4b280a164ef75",
+    "buildID": "iAVXxuabA81RV4I4LuoaU",
+    "sourceHash": "c954fd8831f9063b3a70d76ae173352108033c435ce8d26f623b36a782d74e7f",
+    "startedAt": "2026-10-14T05:00:15.617Z",
+    "finishedAt": "2026-10-14T05:11:37.887Z",
+    "widths": [
+      1440,
+      1024,
+      768,
+      390,
+      320
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "cases": 320,
+    "pass": 310,
+    "fail": 10,
+    "h1Counts": [
+      1
+    ],
+    "maxHorizontalOverflow": 0,
+    "axeViolations": 0,
+    "pageErrors": 0,
+    "failureCases": [
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "width": 1440,
+        "theme": "light",
+        "expectedStatus": 404,
+        "status": 200,
+        "screenshot": "missing-event-1440-light.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "width": 1440,
+        "theme": "dark",
+        "expectedStatus": 404,
+        "status": 200,
+        "screenshot": "missing-event-1440-dark.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "width": 1024,
+        "theme": "light",
+        "expectedStatus": 404,
+        "status": 200,
+        "screenshot": "missing-event-1024-light.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "width": 1024,
+        "theme": "dark",
+        "expectedStatus": 404,
+        "status": 200,
+        "screenshot": "missing-event-1024-dark.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "width": 768,
+        "theme": "light",
+        "expectedStatus": 404,
+        "status": 200,
+        "screenshot": "missing-event-768-light.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "width": 768,
+        "theme": "dark",
+        "expectedStatus": 404,
+        "status": 200,
+        "screenshot": "missing-event-768-dark.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "width": 390,
+        "theme": "light",
+        "expectedStatus": 404,
+        "status": 200,
+        "screenshot": "missing-event-390-light.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "width": 390,
+        "theme": "dark",
+        "expectedStatus": 404,
+        "status": 200,
+        "screenshot": "missing-event-390-dark.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "width": 320,
+        "theme": "light",
+        "expectedStatus": 404,
+        "status": 200,
+        "screenshot": "missing-event-320-light.png"
+      },
+      {
+        "name": "missing-event",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "width": 320,
+        "theme": "dark",
+        "expectedStatus": 404,
+        "status": 200,
+        "screenshot": "missing-event-320-dark.png"
+      }
+    ],
+    "rawMatrix": "/workspace/qa-zijing/sol-ee753ed-web-matrix-20261014/matrix.json",
+    "scope": "All listed 32 routes at five widths/two themes; does not include all editor/questionnaire/error states or replace ACL evidence.",
+    "manualScreenshotReview": [
+      "home-1440-light.png",
+      "community-320-dark.png",
+      "profile-390-light.png"
+    ]
+  },
+  "visualConfiguration": {
+    "baseScript": "capture-full-design-review-20261014.mjs",
+    "changes": [
+      "current origin",
+      "unique output path",
+      "source/commit metadata",
+      "all five widths selected"
+    ],
+    "assertionsUnchanged": true,
+    "expectedCases": 320
+  },
+  "honorProbe": {
+    "sourceCommit": "ee753edb913e30004aef201929a4b280a164ef75",
+    "origin": "http://localhost:3369",
+    "startedAt": "2026-10-14T05:09:54.236Z",
+    "checks": [
+      {
+        "name": "pending honor private DTO",
+        "role": "anonymous",
+        "expectedStatus": 401,
+        "status": 401,
+        "cacheControl": "private, no-store",
+        "result": "pass"
+      },
+      {
+        "name": "pending honor private DTO",
+        "role": "member",
+        "expectedStatus": 200,
+        "status": 200,
+        "cacheControl": "private, no-store",
+        "result": "pass"
+      },
+      {
+        "name": "pending honor private DTO",
+        "role": "communityReviewer",
+        "expectedStatus": 200,
+        "status": 200,
+        "cacheControl": "private, no-store",
+        "result": "pass"
+      },
+      {
+        "name": "pending honor private DTO",
+        "role": "president",
+        "expectedStatus": 200,
+        "status": 200,
+        "cacheControl": "private, no-store",
+        "result": "pass"
+      },
+      {
+        "name": "pending honor private DTO",
+        "role": "backbone",
+        "expectedStatus": 404,
+        "status": 404,
+        "cacheControl": "private, no-store",
+        "result": "pass"
+      },
+      {
+        "name": "browser honor stale revision rejection preserves note, stale CAS and server record",
+        "realRevision": "1",
+        "rejectedRevision": "100001",
+        "notePreserved": true,
+        "alert": "荣誉记录已更新，请刷新后核对",
+        "serverRecordUnchanged": true,
+        "serverRecordDigest": "905b884c1e71fb48b9582ca3d524500de352fa8a01aa2352fa3c5f191fe13729",
+        "result": "pass"
+      },
+      {
+        "name": "explicit refresh restores actual revision",
+        "actualRevision": "1",
+        "result": "pass"
+      },
+      {
+        "name": "anonymous raw REST pending honor denied",
+        "status": 403,
+        "expectedStatus": 403,
+        "result": "pass"
+      },
+      {
+        "name": "unrelated backbone raw REST pending honor hidden",
+        "status": 404,
+        "expectedStatus": 404,
+        "result": "pass"
+      },
+      {
+        "name": "anonymous public archive includes approved record and excludes pending record",
+        "status": 200,
+        "approvedPresent": true,
+        "pendingPresent": false,
+        "result": "pass"
+      },
+      {
+        "name": "anonymous existing page gate retained",
+        "route": "/",
+        "status": 307,
+        "location": "/events",
+        "result": "pass"
+      },
+      {
+        "name": "anonymous existing page gate retained",
+        "route": "/community",
+        "status": 307,
+        "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fcommunity",
+        "result": "pass"
+      },
+      {
+        "name": "anonymous existing page gate retained",
+        "route": "/teams",
+        "status": 307,
+        "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fteams",
+        "result": "pass"
+      }
+    ],
+    "finishedAt": "2026-10-14T05:09:58.095Z"
+  },
+  "native": {
+    "static": {
+      "status": "pass",
+      "pages": 25,
+      "files": 162,
+      "bytes": 646934
+    },
+    "tokens": {
+      "status": "pass",
+      "outputs": 28
+    },
+    "mapping": {
+      "status": "pass",
+      "cases": 32,
+      "sourceFiles": 50,
+      "sourceMatched": true,
+      "resultPath": "/workspace/sol-zijing-qa/.data/rebuild-native-preview/results.json",
+      "scope": "Current WXML/WXSS/JS data layout mapping; no native lifecycle/events/SDK/official compilation/device validation",
+      "label": "WXML 浏览器映射 · 合成数据 · 非官方微信或真机"
+    },
+    "officialTools": {
+      "pathCommands": {
+        "wechat-devtools": null,
+        "wechatwebdevtools": null,
+        "wechat-cli": null
+      },
+      "explicitPaths": {
+        "/opt/wechat-devtools/cli": false,
+        "/opt/wechatwebdevtools/cli": false,
+        "/usr/bin/wechat-devtools": false,
+        "/usr/local/bin/wechat-devtools": false,
+        "/Applications/wechatwebdevtools.app/Contents/MacOS/cli": false,
+        "/opt/微信web开发者工具/cli": false,
+        "/workspace/wechat-devtools/cli": false,
+        "/workspace/微信开发者工具/cli": false
+      },
+      "officialCompileRun": false,
+      "deviceRun": false
+    }
+  },
+  "ci": {
+    "recordedAt": "2026-10-14T04:43:55.844337+00:00",
+    "sourceCommit": "e9a8daa2ce5750dff1465e4a6b63036fde4af87d",
+    "runID": 38512641163,
+    "runURL": "https://github.com/QShin21/zijingwebsite/actions/runs/38512641163",
+    "jobID": 115684400545,
+    "jobName": "quality",
+    "status": "completed",
+    "conclusion": "failure",
+    "classification": "account billing or spending limit blocked the runner before execution",
+    "annotationExcerpt": "recent account payments have failed or your spending limit needs to be increased",
+    "runnerID": 0,
+    "steps": [],
+    "testsExecuted": false,
+    "buildExecuted": false,
+    "logFailedCommandExitCode": 0,
+    "logFailedOutputBytes": 0,
+    "noBillingChange": true,
+    "noManualRerun": true,
+    "rawEvidence": {
+      "ci-design-checkpoint-20261014.json": {
+        "path": "/workspace/qa-zijing/ci-design-checkpoint-20261014.json",
+        "sha256": "c8753ccaf2dfa0765ee6d9dc3b35498c99298cb36ea87b654a40b39499d867a3"
+      },
+      "ci-design-checkpoint-jobs-20261014.json": {
+        "path": "/workspace/qa-zijing/ci-design-checkpoint-jobs-20261014.json",
+        "sha256": "04ce705afcf3a73842e997ea518d093f2fc64a96bc6b2cf1304a084a42a2d37e"
+      },
+      "ci-design-checkpoint-annotations-20261014.json": {
+        "path": "/workspace/qa-zijing/ci-design-checkpoint-annotations-20261014.json",
+        "sha256": "9994293c90fa7b98b55484c8dfd5263dfbc9c5a4ae4d53782cb53f38a4aaa5fe"
+      }
+    },
+    "independentSolVerified": true,
+    "observedRunnerIDs": [
+      0
+    ],
+    "observedStepCounts": [
+      0
+    ],
+    "billingAnnotationObserved": true,
+    "independentSolRawEvidence": {
+      "sol-ee753ed-ci-jobs-20261014.json": {
+        "path": "/workspace/qa-zijing/sol-ee753ed-ci-jobs-20261014.json",
+        "sha256": "04ce705afcf3a73842e997ea518d093f2fc64a96bc6b2cf1304a084a42a2d37e"
+      },
+      "sol-ee753ed-ci-annotations-20261014.json": {
+        "path": "/workspace/qa-zijing/sol-ee753ed-ci-annotations-20261014.json",
+        "sha256": "9994293c90fa7b98b55484c8dfd5263dfbc9c5a4ae4d53782cb53f38a4aaa5fe"
+      }
+    }
+  },
+  "httpResponseDiagnosis": {
+    "sourceCommit": "ee753edb913e30004aef201929a4b280a164ef75",
+    "buildID": "iAVXxuabA81RV4I4LuoaU",
+    "results": [
+      {
+        "label": "browser",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "method": "GET",
+        "curlExitCode": 0,
+        "observedStatusAndSeconds": "200 0.195532 0.196013",
+        "headers": "HTTP/1.1 200 OK\nX-Content-Type-Options: nosniff\nReferrer-Policy: strict-origin-when-cross-origin\nX-Frame-Options: SAMEORIGIN\nPermissions-Policy: camera=(), microphone=(), geolocation=()\nAccept-CH: Sec-CH-Prefers-Color-Scheme\nVary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding\nCritical-CH: Sec-CH-Prefers-Color-Scheme\ncontent-security-policy: default-src 'self'; script-src 'self' 'nonce-ZmFmNjA0YjEtMmVkZi00OGRmLWE2MWItZTAyYThhMGI5ZjJl' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; frame-src 'self' https://player.bilibili.com; media-src 'self' https:;  connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self';\nLink: </_next/static/css/1ec32287774477e4.css>; rel=preload; as=\"style\"; nonce=\"ZmFmNjA0YjEtMmVkZi00OGRmLWE2MWItZTAyYThhMGI5ZjJl\", </_next/static/css/2121ad3374500537.css>; rel=preload; as=\"style\"; nonce=\"ZmFmNjA0YjEtMmVkZi00OGRmLWE2MWItZTAyYThhMGI5ZjJl\", </_next/static/css/5dc0e6c4df293e6a.css>; rel=preload; as=\"style\"; nonce=\"ZmFmNjA0YjEtMmVkZi00OGRmLWE2MWItZTAyYThhMGI5ZjJl\", </_next/static/css/96a1e4e9b6bf49f1.css>; rel=preload; as=\"style\"; nonce=\"ZmFmNjA0YjEtMmVkZi00OGRmLWE2MWItZTAyYThhMGI5ZjJl\", </_next/static/css/26f0df0ca4afc6a8.css>; rel=preload; as=\"style\"; nonce=\"ZmFmNjA0YjEtMmVkZi00OGRmLWE2MWItZTAyYThhMGI5ZjJl\", </_next/static/css/79ca22107f6ff883.css>; rel=preload; as=\"style\"; nonce=\"ZmFmNjA0YjEtMmVkZi00OGRmLWE2MWItZTAyYThhMGI5ZjJl\", </_next/static/css/65e357b680b53896.css>; rel=preload; as=\"style\"; nonce=\"ZmFmNjA0YjEtMmVkZi00OGRmLWE2MWItZTAyYThhMGI5ZjJl\"\nCache-Control: private, no-cache, no-store, max-age=0, must-revalidate\nContent-Type: text/html; charset=utf-8\nDate: Wed, 14 Oct 2026 05:01:20 GMT\nConnection: keep-alive\nKeep-Alive: timeout=5\nTransfer-Encoding: chunked\n\n",
+        "notFoundDigest": true,
+        "hasNoindex": true,
+        "chunked": true,
+        "bodySha256": "ec24b348baa562051a9011762289323a2b87ad0b8aaec74b4b42e3e939f30cbe",
+        "rawBody": "/workspace/qa-zijing/sol-ee753ed-20261014/missing-http/browser.html",
+        "rawHTMLContainsNotFoundCopy": true,
+        "rawSubstringIsNotADOMHeadingCheck": true
+      },
+      {
+        "label": "bot",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "method": "GET",
+        "curlExitCode": 0,
+        "observedStatusAndSeconds": "200 0.037564 0.037815",
+        "headers": "HTTP/1.1 200 OK\nX-Content-Type-Options: nosniff\nReferrer-Policy: strict-origin-when-cross-origin\nX-Frame-Options: SAMEORIGIN\nPermissions-Policy: camera=(), microphone=(), geolocation=()\nAccept-CH: Sec-CH-Prefers-Color-Scheme\nVary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding\nCritical-CH: Sec-CH-Prefers-Color-Scheme\ncontent-security-policy: default-src 'self'; script-src 'self' 'nonce-YWRjMDFjMjQtOTYyYy00ODI2LWFhZDctNjRkMzU5MjkyOTA2' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; frame-src 'self' https://player.bilibili.com; media-src 'self' https:;  connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self';\nLink: </_next/static/css/1ec32287774477e4.css>; rel=preload; as=\"style\"; nonce=\"YWRjMDFjMjQtOTYyYy00ODI2LWFhZDctNjRkMzU5MjkyOTA2\", </_next/static/css/2121ad3374500537.css>; rel=preload; as=\"style\"; nonce=\"YWRjMDFjMjQtOTYyYy00ODI2LWFhZDctNjRkMzU5MjkyOTA2\", </_next/static/css/5dc0e6c4df293e6a.css>; rel=preload; as=\"style\"; nonce=\"YWRjMDFjMjQtOTYyYy00ODI2LWFhZDctNjRkMzU5MjkyOTA2\", </_next/static/css/96a1e4e9b6bf49f1.css>; rel=preload; as=\"style\"; nonce=\"YWRjMDFjMjQtOTYyYy00ODI2LWFhZDctNjRkMzU5MjkyOTA2\", </_next/static/css/26f0df0ca4afc6a8.css>; rel=preload; as=\"style\"; nonce=\"YWRjMDFjMjQtOTYyYy00ODI2LWFhZDctNjRkMzU5MjkyOTA2\", </_next/static/css/79ca22107f6ff883.css>; rel=preload; as=\"style\"; nonce=\"YWRjMDFjMjQtOTYyYy00ODI2LWFhZDctNjRkMzU5MjkyOTA2\", </_next/static/css/65e357b680b53896.css>; rel=preload; as=\"style\"; nonce=\"YWRjMDFjMjQtOTYyYy00ODI2LWFhZDctNjRkMzU5MjkyOTA2\"\nCache-Control: private, no-cache, no-store, max-age=0, must-revalidate\nContent-Type: text/html; charset=utf-8\nDate: Wed, 14 Oct 2026 05:01:20 GMT\nConnection: keep-alive\nKeep-Alive: timeout=5\nTransfer-Encoding: chunked\n\n",
+        "notFoundDigest": true,
+        "hasNoindex": true,
+        "chunked": true,
+        "bodySha256": "e7c737fbad31b0ce4a5a7c4d63d33225c75759bacc21f7e6092d8e7e5fa68907",
+        "rawBody": "/workspace/qa-zijing/sol-ee753ed-20261014/missing-http/bot.html",
+        "rawHTMLContainsNotFoundCopy": true,
+        "rawSubstringIsNotADOMHeadingCheck": true
+      },
+      {
+        "label": "head",
+        "route": "/events/sol-synthetic-missing-20261013",
+        "method": "HEAD",
+        "curlExitCode": 0,
+        "observedStatusAndSeconds": "200 0.197251 0.197552",
+        "headers": "HTTP/1.1 200 OK\nX-Content-Type-Options: nosniff\nReferrer-Policy: strict-origin-when-cross-origin\nX-Frame-Options: SAMEORIGIN\nPermissions-Policy: camera=(), microphone=(), geolocation=()\nAccept-CH: Sec-CH-Prefers-Color-Scheme\nVary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding\nCritical-CH: Sec-CH-Prefers-Color-Scheme\ncontent-security-policy: default-src 'self'; script-src 'self' 'nonce-ZjUzMmQ0OGMtZDg0Yy00Yjc2LTkyNTAtZDcyNDE3YzQ4ZTI5' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; frame-src 'self' https://player.bilibili.com; media-src 'self' https:;  connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self';\nLink: </_next/static/css/1ec32287774477e4.css>; rel=preload; as=\"style\"; nonce=\"ZjUzMmQ0OGMtZDg0Yy00Yjc2LTkyNTAtZDcyNDE3YzQ4ZTI5\", </_next/static/css/2121ad3374500537.css>; rel=preload; as=\"style\"; nonce=\"ZjUzMmQ0OGMtZDg0Yy00Yjc2LTkyNTAtZDcyNDE3YzQ4ZTI5\", </_next/static/css/5dc0e6c4df293e6a.css>; rel=preload; as=\"style\"; nonce=\"ZjUzMmQ0OGMtZDg0Yy00Yjc2LTkyNTAtZDcyNDE3YzQ4ZTI5\", </_next/static/css/96a1e4e9b6bf49f1.css>; rel=preload; as=\"style\"; nonce=\"ZjUzMmQ0OGMtZDg0Yy00Yjc2LTkyNTAtZDcyNDE3YzQ4ZTI5\", </_next/static/css/26f0df0ca4afc6a8.css>; rel=preload; as=\"style\"; nonce=\"ZjUzMmQ0OGMtZDg0Yy00Yjc2LTkyNTAtZDcyNDE3YzQ4ZTI5\", </_next/static/css/79ca22107f6ff883.css>; rel=preload; as=\"style\"; nonce=\"ZjUzMmQ0OGMtZDg0Yy00Yjc2LTkyNTAtZDcyNDE3YzQ4ZTI5\", </_next/static/css/65e357b680b53896.css>; rel=preload; as=\"style\"; nonce=\"ZjUzMmQ0OGMtZDg0Yy00Yjc2LTkyNTAtZDcyNDE3YzQ4ZTI5\"\nCache-Control: private, no-cache, no-store, max-age=0, must-revalidate\nContent-Type: text/html; charset=utf-8\nDate: Wed, 14 Oct 2026 05:01:20 GMT\nConnection: keep-alive\nKeep-Alive: timeout=5\n\n",
+        "notFoundDigest": false,
+        "hasNoindex": false,
+        "chunked": false,
+        "bodySha256": "ec4ef13c309d0ab5a0bd996163e652dc5bc637ce1fd4239471cf4719cb13ac43",
+        "rawBody": "/workspace/qa-zijing/sol-ee753ed-20261014/missing-http/head.html",
+        "rawHTMLContainsNotFoundCopy": false,
+        "rawSubstringIsNotADOMHeadingCheck": true
+      },
+      {
+        "label": "existing",
+        "route": "/events/demo-club-meetup",
+        "method": "GET",
+        "curlExitCode": 0,
+        "observedStatusAndSeconds": "200 0.184268 0.184791",
+        "headers": "HTTP/1.1 200 OK\nX-Content-Type-Options: nosniff\nReferrer-Policy: strict-origin-when-cross-origin\nX-Frame-Options: SAMEORIGIN\nPermissions-Policy: camera=(), microphone=(), geolocation=()\nAccept-CH: Sec-CH-Prefers-Color-Scheme\nVary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding\nCritical-CH: Sec-CH-Prefers-Color-Scheme\ncontent-security-policy: default-src 'self'; script-src 'self' 'nonce-OGFlNzc0M2YtNzA4YS00OTZkLWI1ODctMGQwOTUyMzA5M2E1' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; frame-src 'self' https://player.bilibili.com; media-src 'self' https:;  connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self';\nLink: </_next/static/css/1ec32287774477e4.css>; rel=preload; as=\"style\"; nonce=\"OGFlNzc0M2YtNzA4YS00OTZkLWI1ODctMGQwOTUyMzA5M2E1\", </_next/static/css/2121ad3374500537.css>; rel=preload; as=\"style\"; nonce=\"OGFlNzc0M2YtNzA4YS00OTZkLWI1ODctMGQwOTUyMzA5M2E1\", </_next/static/css/5dc0e6c4df293e6a.css>; rel=preload; as=\"style\"; nonce=\"OGFlNzc0M2YtNzA4YS00OTZkLWI1ODctMGQwOTUyMzA5M2E1\", </_next/static/css/96a1e4e9b6bf49f1.css>; rel=preload; as=\"style\"; nonce=\"OGFlNzc0M2YtNzA4YS00OTZkLWI1ODctMGQwOTUyMzA5M2E1\", </_next/static/css/26f0df0ca4afc6a8.css>; rel=preload; as=\"style\"; nonce=\"OGFlNzc0M2YtNzA4YS00OTZkLWI1ODctMGQwOTUyMzA5M2E1\", </_next/static/css/79ca22107f6ff883.css>; rel=preload; as=\"style\"; nonce=\"OGFlNzc0M2YtNzA4YS00OTZkLWI1ODctMGQwOTUyMzA5M2E1\", </_next/static/css/65e357b680b53896.css>; rel=preload; as=\"style\"; nonce=\"OGFlNzc0M2YtNzA4YS00OTZkLWI1ODctMGQwOTUyMzA5M2E1\"\nCache-Control: private, no-cache, no-store, max-age=0, must-revalidate\nContent-Type: text/html; charset=utf-8\nDate: Wed, 14 Oct 2026 05:01:20 GMT\nConnection: keep-alive\nKeep-Alive: timeout=5\nTransfer-Encoding: chunked\n\n",
+        "notFoundDigest": false,
+        "hasNoindex": true,
+        "chunked": true,
+        "bodySha256": "b0274f20624a6d95ec031aa0f2b41eb2e9050ab7827dd49f5302eb675350ac5c",
+        "rawBody": "/workspace/qa-zijing/sol-ee753ed-20261014/missing-http/existing.html",
+        "rawHTMLContainsNotFoundCopy": true,
+        "rawSubstringIsNotADOMHeadingCheck": true
+      }
+    ]
+  },
+  "astraRepairTargets": {
+    "sourceCommit": "ee753edb913e30004aef201929a4b280a164ef75",
+    "sourceManifestHash": "c954fd8831f9063b3a70d76ae173352108033c435ce8d26f623b36a782d74e7f",
+    "unitResults": {
+      "files": 87,
+      "tests": 1571,
+      "pass": 1541,
+      "fail": 30,
+      "failCases": [
+        {
+          "file": "tests/miniapp-staff-flows.test.ts",
+          "case": "原生骨干审核：授权 GET 与服务端允许的决定 > 没有 reviewStatuses 的记录只能查看，无法通过按钮事件写入"
+        },
+        {
+          "file": "tests/team-core-controls-component.test.ts",
+          "case": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 > TeamCoreEstablishmentForm静态SSR渲染明确POST，水合前禁止提交私人表单"
+        },
+        {
+          "file": "tests/team-core-controls-component.test.ts",
+          "case": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 > TeamCoreDecision静态SSR渲染明确POST，水合前禁止提交私人表单"
+        },
+        {
+          "file": "tests/team-core-controls-component.test.ts",
+          "case": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 > TeamCoreOperation静态SSR渲染明确POST，水合前禁止提交私人表单"
+        },
+        {
+          "file": "tests/team-core-controls-component.test.ts",
+          "case": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 > 同周期重复提交仅发送一次；业务拒绝保留内容，不刷新或自动重发"
+        },
+        {
+          "file": "tests/team-core-controls-component.test.ts",
+          "case": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 > 网络中断结果不明时锁定重发，核对后由本人显式重试"
+        },
+        {
+          "file": "tests/team-core-controls-component.test.ts",
+          "case": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 > 服务器5xx结果不明时锁定重发，核对后由本人显式重试"
+        },
+        {
+          "file": "tests/team-core-controls-component.test.ts",
+          "case": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 > 非JSON响应结果不明时锁定重发，核对后由本人显式重试"
+        },
+        {
+          "file": "tests/team-core-controls-component.test.ts",
+          "case": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 > 无结果响应结果不明时锁定重发，核对后由本人显式重试"
+        },
+        {
+          "file": "tests/team-core-controls-component.test.ts",
+          "case": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 > 仅成功返回后确认建队提交并刷新记录"
+        },
+        {
+          "file": "tests/team-core-controls-component.test.ts",
+          "case": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 > returned必须有说明，先聚焦审核意见且不调用接口"
+        },
+        {
+          "file": "tests/team-core-controls-component.test.ts",
+          "case": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 > rejected必须有说明，先聚焦审核意见且不调用接口"
+        },
+        {
+          "file": "tests/team-core-controls-component.test.ts",
+          "case": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 > 批准可不填说明，仍发送原申请id和revision"
+        },
+        {
+          "file": "tests/team-core-controls-component.test.ts",
+          "case": "队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界 > 入队草稿结构化拒绝继续抛给问卷，保留回执、题目版本与原答案"
+        },
+        {
+          "file": "tests/team-honor-editor-component.test.ts",
+          "case": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 > 已有证据与新图片合计最多六份，勾选移除已有图片才释放名额"
+        },
+        {
+          "file": "tests/team-honor-editor-component.test.ts",
+          "case": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 > 超限图片在调用服务前拒绝，保留标题与文件选择"
+        },
+        {
+          "file": "tests/team-honor-editor-component.test.ts",
+          "case": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 > 错误图片类型在调用服务前拒绝，保留标题与文件选择"
+        },
+        {
+          "file": "tests/team-honor-editor-component.test.ts",
+          "case": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 > 超限视频在调用服务前拒绝，保留标题与文件选择"
+        },
+        {
+          "file": "tests/team-honor-editor-component.test.ts",
+          "case": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 > 合计超限在调用服务前拒绝，保留标题与文件选择"
+        },
+        {
+          "file": "tests/team-honor-editor-component.test.ts",
+          "case": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 > 结构化拒绝保留完整输入和原 File 对象，修正后原文件仍可重试"
+        },
+        {
+          "file": "tests/team-honor-editor-component.test.ts",
+          "case": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 > 服务返回结果不明时锁定提交，再次未知结果会重新要求核对"
+        },
+        {
+          "file": "tests/team-honor-editor-component.test.ts",
+          "case": "荣誉投稿附件与失败恢复：实际 TSX，合成 action 边界 > 断网结果不明时阻止重发，核对本人记录后才允许显式重试"
+        },
+        {
+          "file": "tests/team-honor-feedback.test.ts",
+          "case": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 > record真实静态渲染为POST，水合前fieldset禁用"
+        },
+        {
+          "file": "tests/team-honor-feedback.test.ts",
+          "case": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 > record拒绝后不清空说明、不自动刷新，仅由用户核对刷新"
+        },
+        {
+          "file": "tests/team-honor-feedback.test.ts",
+          "case": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 > 丢失响应保留说明并要求核对，反馈不宣称操作没有保存"
+        },
+        {
+          "file": "tests/team-honor-feedback.test.ts",
+          "case": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 > 没有成功目标页时继续刷新当前记录并展示已保存反馈"
+        },
+        {
+          "file": "tests/team-honor-feedback.test.ts",
+          "case": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 > 失败结果即使带有目标页也不能导航或清空当前说明"
+        },
+        {
+          "file": "tests/team-honor-feedback.test.ts",
+          "case": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 > legacy真实静态渲染为POST，水合前fieldset禁用"
+        },
+        {
+          "file": "tests/team-honor-feedback.test.ts",
+          "case": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 > legacy拒绝后不清空说明、不自动刷新，仅由用户核对刷新"
+        },
+        {
+          "file": "tests/team-honor-feedback.test.ts",
+          "case": "荣誉和历史隐藏实际调用ActionForm，SSR与拒绝保值 > 成功移出当前列表时导航到服务器给出的回执页，不再刷新失效的原详情"
+        }
+      ]
+    },
+    "knownIssues": [
+      {
+        "kind": "unit test loader",
+        "files": [
+          "tests/team-core-controls-component.test.ts",
+          "tests/team-honor-editor-component.test.ts",
+          "tests/team-honor-feedback.test.ts"
+        ],
+        "count": 29,
+        "reason": "VM require fallback resolves newly imported ./team-pages/TeamPages.module.css relative to the test module, without a style dependency stub. Behavior checks stop before execution.",
+        "minimumSuggestion": "Astra should adapt the exact imported CSS Module/child dependencies and required hook model, then rerun all existing prevention/value/CAS assertions; do not drop assertions."
+      },
+      {
+        "kind": "native template test parser",
+        "file": "tests/miniapp-staff-flows.test.ts",
+        "line": 161,
+        "count": 1,
+        "implementationFile": "miniprogram/src/pages/staff-review/index.wxml",
+        "implementationLine": 13,
+        "reason": "visibleGuard recognizes button/block only; current authorization guard is a view with the same item.allowed.length condition.",
+        "minimumSuggestion": "Astra should parse the actual view guard and keep both visibility and raw event write-denial checks."
+      },
+      {
+        "kind": "actual accessibility",
+        "implementationFile": "src/components/ActivitySignup.tsx",
+        "implementationLine": 335,
+        "styleFile": "src/components/activity-pages/ApplicationFlow.module.css",
+        "styleLine": 154,
+        "firstReproducer": "tests/e2e/activity-signups.spec.ts:476",
+        "reason": "Enabled signup notice contains privacy link with no underline; purple/muted adjacency contrast 1.54:1 triggers serious link-in-text-block.",
+        "minimumSuggestion": "Astra should distinguish inline notice links visibly in light and dark themes, while preserving action/navigation styles and Axe threshold."
+      },
+      {
+        "kind": "HTTP contract",
+        "implementationFiles": [
+          "src/app/(frontend)/[...path]/page.tsx",
+          "src/app/(frontend)/layout.tsx"
+        ],
+        "reason": "Current missing event GET is chunked HTTP 200 with NEXT_HTTP_ERROR_FALLBACK;404 and noindex; HEAD is also 200. Historical 4733 matrix observed status 404. This is a routing/streaming response difference, not absence of the notFound UI.",
+        "minimumSuggestion": "Astra should investigate both notFound and permanentRedirect response boundaries. Keep real 404/308 HTTP contracts and private field denial; do not simply accept 200 or only patch the one missing-event sample.",
+        "additionalObservedCases": [
+          "tests/e2e/community-application.spec.ts:83 unauthorized review page expected404 actual200 (private QR denial still passed)",
+          "tests/e2e/site.spec.ts:150 renamed slug expected308 actual200",
+          "tests/e2e/rebuild-shell.spec.ts:126 missing event expected404 actual200"
+        ]
+      },
+      {
+        "kind": "actual semantic accessibility",
+        "file": "src/components/team-profiles/TeamProfilesPanel.tsx",
+        "area": "editorAside",
+        "reproducer": "tests/e2e/team-profiles.spec.ts:104",
+        "rule": "landmark-complementary-is-top-level",
+        "impact": "moderate",
+        "reason": "Editor guidance aside is contained in a named section/main landmark. Full Axe detects it; WCAG-tag filtered matrix does not include this best-practice rule.",
+        "minimumSuggestion": "Astra should use semantics suitable for guidance within the form or restructure landmarks; preserve headings, DOM reading order, preview/back controls and all Axe assertions."
+      }
+    ],
+    "e2eLiveFailures": "e2e-failures-live.json",
+    "sourceAndTestImplementationsModifiedBySol": false,
+    "fullE2ETerminalFailureCatalog": "frontend-rebuild-sol-e2e-failures-20261014.json",
+    "fullE2EPassFailSkip": [
+      58,
+      55,
+      12
+    ]
+  },
+  "runtime": {
+    "recordedAt": "2026-10-14T05:58:51.546796+00:00",
+    "databases": [
+      {
+        "profile": "contracts",
+        "postgresPID": 12973,
+        "alive": true,
+        "databasePath": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/contracts/pg"
+      },
+      {
+        "profile": "prod-browser",
+        "postgresPID": 14252,
+        "alive": true,
+        "databasePath": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/prod-browser/pg"
+      },
+      {
+        "profile": "consent",
+        "postgresPID": 12985,
+        "alive": true,
+        "databasePath": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/consent/pg"
+      },
+      {
+        "profile": "post-edit",
+        "postgresPID": 13006,
+        "alive": true,
+        "databasePath": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/post-edit/pg"
+      },
+      {
+        "profile": "native",
+        "postgresPID": 12986,
+        "alive": true,
+        "databasePath": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/native/pg"
+      },
+      {
+        "profile": "visual",
+        "postgresPID": 27104,
+        "alive": true,
+        "databasePath": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/visual/pg"
+      },
+      {
+        "profile": "consent-web",
+        "postgresPID": 27094,
+        "alive": true,
+        "databasePath": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/consent-web/pg"
+      }
+    ],
+    "servers": [
+      {
+        "profile": "prod-browser",
+        "port": 3000,
+        "record": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/prod-browser/processes/sol-ee753ed-prod-server.json",
+        "runnerPID": 17540,
+        "childPID": 17551,
+        "alive": true,
+        "sourceBuildID": "iAVXxuabA81RV4I4LuoaU"
+      },
+      {
+        "profile": "visual",
+        "port": 3370,
+        "record": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/visual/processes/sol-ee753ed-visual-server.json",
+        "runnerPID": 29553,
+        "childPID": 29564,
+        "alive": true,
+        "sourceBuildID": "iAVXxuabA81RV4I4LuoaU"
+      },
+      {
+        "profile": "consent-web",
+        "port": 3371,
+        "record": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/consent-web/processes/sol-ee753ed-consent-web-server.json",
+        "runnerPID": 29594,
+        "childPID": 29605,
+        "alive": true,
+        "sourceBuildID": "iAVXxuabA81RV4I4LuoaU"
+      }
+    ],
+    "originalFinalServer": {
+      "port": 3369,
+      "runnerPID": 7450,
+      "childPID": 7461,
+      "alive": true
+    },
+    "originalMainDatabase": {
+      "port": 55613,
+      "postgresPID": 664,
+      "alive": true
+    },
+    "fullE2EProcess": {
+      "action": "playwright",
+      "profile": "prod-browser",
+      "label": "sol-ee753ed-full-e2e",
+      "startedAt": "2026-10-14T05:03:50.916Z",
+      "runnerPID": 18738,
+      "childPID": 18749,
+      "cwd": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/prod-browser/app",
+      "executable": "node",
+      "status": "finished",
+      "finishedAt": "2026-10-14T05:54:11.033Z",
+      "exitCode": 1
+    }
+  },
+  "preparationIncidents": [
+    "Five old QA input copies were overwritten by a misdirected sync; 594 historical files each recovered from exact Git 4733 and all newly written files preserved. Original DB/build/logs not changed.",
+    "Old probe ignored --help and replaced summary after connection refused at stopped3364; 13 original records restored from matching Git/ZIP evidence, new failed call preserved.",
+    "New prod DB Unix socket path109bytes exceeded limit; same unmodified runner uses short alias with preserve-symlinks-main, socket78bytes.",
+    "Native browser mapping first lacked existing Chromium path; shared cached official Chrome directory linked, script unchanged; first failure retained.",
+    "Unix socket length failure confirmed independently by AF_UNIX bind: {'length': 109, 'bindError': 'AF_UNIX path too long', 'shortAliasPostgresStarted': True}"
+  ],
+  "recoveryRecords": [
+    "/workspace/qa-zijing/sol-sync-recovery-20261014/recovery.json",
+    "/workspace/qa-zijing/sol-ee753ed-20261014/probe-result-recovery.json",
+    "/workspace/qa-zijing/sol-ee753ed-20261014/unix-socket-path-diagnostic.json"
+  ],
+  "notVerified": [
+    "Complete behavior beyond all failed E2E blockers",
+    "History false/null consent browser approval chain (stopped before fixture step)",
+    "Private upload/weak-network/keyboard/share behavior on official WeChat or physical devices",
+    "CI quality checks (runner never started)",
+    "Production deployment, real CMS publication, WeChat upload/publication"
+  ],
+  "limitations": "The 320-route layout matrix uses WCAG-tag-filtered Axe. Full Axe includes additional best-practice checks; separate E2E exposed a nested aside landmark. Screenshots and ACL results remain separate.",
+  "resourceMeasurements": {
+    "browser": "145.0.7632.6",
+    "dpr": 1,
+    "origin": "http://localhost:3369",
+    "conditions": "Headless Chrome for Testing, isolated loopback optimized Next server, APP_ENV=development; fresh browser context for each page, warm local server, no network or CPU throttling. Metrics are observations, not scores.",
+    "rawMatrix": "/workspace/qa-zijing/sol-ee753ed-web-matrix-20261014/matrix.json",
+    "rawMatrixSha256": "cfb90e14bad7a184e2f91531b21e4be03297077aa7a3e7e8a239b73fad92a2a7",
+    "observations": [
+      {
+        "name": "event-detail",
+        "route": "/events/demo-club-meetup",
+        "role": "anonymous",
+        "width": 390,
+        "theme": "light",
+        "observedNavigationToNetworkIdleMs": 964,
+        "status": 200,
+        "navigation": {
+          "responseStart": 49.1999999997206,
+          "domContentLoaded": 122.10000000009313,
+          "loadEventEnd": 209.5,
+          "transferSize": 10197,
+          "encodedBodySize": 9897,
+          "decodedBodySize": 32340
+        },
+        "paintEntries": [
+          {
+            "name": "first-paint",
+            "startTime": 132
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 132
+          }
+        ],
+        "resources": {
+          "js": {
+            "requests": 15,
+            "transferBytes": 193608,
+            "encodedBytes": 189108,
+            "decodedBytes": 603386,
+            "paths": []
+          },
+          "css": {
+            "requests": 8,
+            "transferBytes": 51469,
+            "encodedBytes": 49069,
+            "decodedBytes": 263284,
+            "paths": []
+          },
+          "font": {
+            "requests": 0,
+            "transferBytes": 0,
+            "encodedBytes": 0,
+            "decodedBytes": 0,
+            "paths": []
+          },
+          "image": {
+            "requests": 1,
+            "transferBytes": 528,
+            "encodedBytes": 228,
+            "decodedBytes": 228,
+            "paths": [
+              "/icon.svg"
+            ]
+          }
+        },
+        "images": []
+      },
+      {
+        "name": "home",
+        "route": "/",
+        "role": "member",
+        "width": 390,
+        "theme": "light",
+        "observedNavigationToNetworkIdleMs": 967,
+        "status": 200,
+        "navigation": {
+          "responseStart": 112.20000000018626,
+          "domContentLoaded": 302.10000000009313,
+          "loadEventEnd": 328.39999999990687,
+          "transferSize": 10562,
+          "encodedBodySize": 10262,
+          "decodedBodySize": 52174
+        },
+        "paintEntries": [
+          {
+            "name": "first-paint",
+            "startTime": 260
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 260
+          }
+        ],
+        "resources": {
+          "js": {
+            "requests": 16,
+            "transferBytes": 197987,
+            "encodedBytes": 193187,
+            "decodedBytes": 613624,
+            "paths": []
+          },
+          "css": {
+            "requests": 9,
+            "transferBytes": 54417,
+            "encodedBytes": 51717,
+            "decodedBytes": 274947,
+            "paths": []
+          },
+          "font": {
+            "requests": 0,
+            "transferBytes": 0,
+            "encodedBytes": 0,
+            "decodedBytes": 0,
+            "paths": []
+          },
+          "image": {
+            "requests": 1,
+            "transferBytes": 528,
+            "encodedBytes": 228,
+            "decodedBytes": 228,
+            "paths": [
+              "/icon.svg"
+            ]
+          }
+        },
+        "images": []
+      },
+      {
+        "name": "community-apply",
+        "route": "/community/apply",
+        "role": "member",
+        "width": 390,
+        "theme": "light",
+        "observedNavigationToNetworkIdleMs": 1006,
+        "status": 200,
+        "navigation": {
+          "responseStart": 130.10000000009313,
+          "domContentLoaded": 159.5,
+          "loadEventEnd": 412.89999999990687,
+          "transferSize": 10242,
+          "encodedBodySize": 9942,
+          "decodedBodySize": 30043
+        },
+        "paintEntries": [
+          {
+            "name": "first-paint",
+            "startTime": 248
+          },
+          {
+            "name": "first-contentful-paint",
+            "startTime": 248
+          }
+        ],
+        "resources": {
+          "js": {
+            "requests": 15,
+            "transferBytes": 200581,
+            "encodedBytes": 196081,
+            "decodedBytes": 621644,
+            "paths": []
+          },
+          "css": {
+            "requests": 8,
+            "transferBytes": 51469,
+            "encodedBytes": 49069,
+            "decodedBytes": 263284,
+            "paths": []
+          },
+          "font": {
+            "requests": 0,
+            "transferBytes": 0,
+            "encodedBytes": 0,
+            "decodedBytes": 0,
+            "paths": []
+          },
+          "image": {
+            "requests": 1,
+            "transferBytes": 528,
+            "encodedBytes": 228,
+            "decodedBytes": 228,
+            "paths": [
+              "/icon.svg"
+            ]
+          }
+        },
+        "images": []
+      }
+    ],
+    "limitations": "One measurement each at 390px light; resource entries include prefetch and icon.svg, not only initial page dependencies. No photo content in these three fixtures; no font request. These observations do not predict real photo/video performance or user percentiles."
+  },
+  "themeInteractionMeasurements": {
+    "sourceCommit": "ee753edb913e30004aef201929a4b280a164ef75",
+    "buildID": "iAVXxuabA81RV4I4LuoaU",
+    "origin": "http://localhost:3000",
+    "recordedAt": "2026-10-14T06:14:14.892Z",
+    "browser": "145.0.7632.6",
+    "viewport": {
+      "width": 390,
+      "height": 960
+    },
+    "dpr": 1,
+    "conditions": "Fresh anonymous context; warm owned loopback optimized service; no CPU/network throttling; two observations include Playwright click, attribute wait and two animation frames; not a score or user percentile.",
+    "measurements": [
+      {
+        "theme": "dark",
+        "observedMs": 103.5,
+        "rootTheme": "dark"
+      },
+      {
+        "theme": "light",
+        "observedMs": 78.8,
+        "rootTheme": "light"
+      }
+    ],
+    "blockedNonReadRequests": [],
+    "errors": [],
+    "httpStatus": 200,
+    "themeCookie": [
+      {
+        "name": "zijing_theme",
+        "value": "light",
+        "path": "/",
+        "sameSite": "Lax"
+      }
+    ],
+    "status": "pass",
+    "preparationError": {
+      "missingFile": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/prod-browser/fixtures.json",
+      "error": "ENOENT",
+      "browserStarted": false,
+      "requestsSent": 0,
+      "resolution": "Use preserved owned runtime-terminal.json to verify fixed loopback server instead; anonymous context aborts all non-read requests. No source or existing test changes."
+    }
+  },
+  "terminalVerification": {
+    "sourceChecks": [
+      {
+        "path": "/workspace/zijingwebsite",
+        "files": 623,
+        "mismatches": []
+      },
+      {
+        "path": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/browser/app-final-20261014",
+        "files": 623,
+        "mismatches": []
+      },
+      {
+        "path": "/workspace/sol-zijing-qa/.data/rebuild-qa-20261013/prod-browser/app",
+        "files": 623,
+        "mismatches": []
+      }
+    ],
+    "fullE2ERawShaMatches": true,
+    "rawStats": {
+      "startTime": "2026-10-14T05:03:52.314Z",
+      "duration": 3017418.8260000004,
+      "expected": 58,
+      "skipped": 12,
+      "unexpected": 55,
+      "flaky": 0
+    },
+    "savedCaseCount": 125,
+    "savedCaseResultCounts": {
+      "timedOut": 14,
+      "failed": 41,
+      "passed": 58,
+      "skipped": 12
+    },
+    "catalogCaseCount": 55,
+    "groupTotal": 55,
+    "missingAttachments": [],
+    "catalogUnsafeLiteralPatternsPresent": false
+  }
+}
