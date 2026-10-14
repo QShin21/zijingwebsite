@@ -1,5 +1,11 @@
 # 当前状态
 
+## Sol 生命周期修复独立验收通过 · 2026-10-14
+
+受测new@db6a21d的原两文件顺序12/12通过，同一worker真实执行；完整126项自然exit0，114通过、0失败、12专库条件跳过，无flaky、全局错误或前置未触达。12条逐案由本轮浅深各11/11、历史false/null授权1/1实际通过覆盖。受影响真实PG单测1/1、独立类型检查exit0；500产品输入与旧精确版本矩阵一致，320截图及原报告hash已重新核对。详见 [完整中文验收与边界](FRONTEND_REBUILD_SOL_LIFECYCLE_ACCEPTANCE_20261014.md)。
+
+本轮只测试并提交Markdown证据，628输入在运行后六处仍一致，无源码/断言/ACL修改。当前无需Astra继续修复；官方微信/真机和真实部署未验，精确db6a21d的CI38537020168仍因账户付款/支出额度未启动（runner0、steps0），没有操作付款或重跑。旧失败、数据、日志及现有服务保留，只推new。
+
 ## Astra 生命周期修复完成，等待 Sol 顺序与全量复验 · 2026-10-14
 
 基于new@9279d6f，site/rebuild-activity改用各自固定Payload缓存键，保留原断言、权限、超时、重试与cleanup。新增真实PG单项回归：临时恢复默认缓存时复现相同TypeError，修复后1/1通过；定向lint、全新优化构建及类型检查通过，126项E2E成功收集。新BUILD_ID为`2Z7rxMMAeA16zLPDrP9fg`，产品500输入保持。详见 [中文修复与运行交接](FRONTEND_REBUILD_PAYLOAD_LIFECYCLE_20261014.md)。
