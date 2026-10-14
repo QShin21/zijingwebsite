@@ -3,6 +3,7 @@ export default withPayload({
   experimental: {
     serverActions: { bodySizeLimit: "14mb" },
     webpackMemoryOptimizations: true,
+    webpackBuildWorker: true,
   },
   // Resolve status/redirect metadata before streaming an HTML response.
   htmlLimitedBots: /.*/,
