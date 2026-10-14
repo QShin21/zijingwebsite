@@ -1,0 +1,954 @@
+{
+  "date": "2026-10-15",
+  "timezone": "Asia/Shanghai",
+  "requestedBranch": "new",
+  "syncedRevision": "dcbae1c8a2ed0571d55c417913fb5765cd9a7bee",
+  "applicationRevision": "c737d9c1ddeb63e42df6b84cc4384669f9518697",
+  "localPreservation": {
+    "originalFiles": 27,
+    "hashesUnchanged": true,
+    "originalCheckout": "D:/Users/16701/Documents/ChatGPT/zijingwebsite",
+    "releaseCheckout": "C:\\Users\\Administrator\\.codex\\worktrees\\new-release-20261014\\zijingwebsite",
+    "mainAndLittleappChanged": false
+  },
+  "checks": {
+    "typecheck": {
+      "exitCode": 0
+    },
+    "lint": {
+      "exitCode": 0
+    },
+    "localProductionBuild": {
+      "exitCode": 0,
+      "sourceRevision": "c737d9c1ddeb63e42df6b84cc4384669f9518697",
+      "buildID": "amVNH2KnU_U8LHDG0SPci",
+      "sha256": "3fb7abe17fcd99f83de5320671d749080398389fd776db679bf0da4966d0d937",
+      "bytes": 5751142,
+      "buildHost": "Windows",
+      "origin": "https://home.thuzijing.top"
+    },
+    "initialWindowsVitest": {
+      "exitCode": 1,
+      "files": 88,
+      "passedFiles": 77,
+      "failedFiles": 11,
+      "passed": 1478,
+      "failed": 4,
+      "skipped": 90,
+      "suiteGuards": 7,
+      "fullyPassed": false
+    },
+    "targetedLinuxVitest": {
+      "files": 3,
+      "passed": 78,
+      "failed": 0,
+      "exitCode": 0,
+      "realBusinessDatabaseUsed": false
+    },
+    "localLifecycleRetest": {
+      "passed": 1,
+      "failed": 0,
+      "exitCode": 0,
+      "database": "isolated loopback synthetic"
+    },
+    "fullSuiteRerunAfterEnvironmentRepair": false,
+    "liveBrowser": {
+      "at": "2026-10-14T17:13:44.470Z",
+      "origin": "https://home.thuzijing.top",
+      "pages": [
+        {
+          "width": 1440,
+          "route": "/",
+          "finalURL": "https://home.thuzijing.top/events",
+          "status": 200,
+          "title": "活动 | 清华大学学生紫荆电竞社",
+          "h1": [
+            "活动日程"
+          ],
+          "overflow": false
+        },
+        {
+          "width": 1440,
+          "route": "/events",
+          "finalURL": "https://home.thuzijing.top/events",
+          "status": 200,
+          "title": "活动 | 清华大学学生紫荆电竞社",
+          "h1": [
+            "活动日程"
+          ],
+          "overflow": false
+        },
+        {
+          "width": 1440,
+          "route": "/announcements",
+          "finalURL": "https://home.thuzijing.top/announcements",
+          "status": 200,
+          "title": "通知 | 清华大学学生紫荆电竞社",
+          "h1": [
+            "社团通知"
+          ],
+          "overflow": false
+        },
+        {
+          "width": 1440,
+          "route": "/login",
+          "finalURL": "https://home.thuzijing.top/login",
+          "status": 200,
+          "title": "登录 | 清华大学学生紫荆电竞社",
+          "h1": [
+            "登录"
+          ],
+          "overflow": false
+        },
+        {
+          "width": 1440,
+          "route": "/register",
+          "finalURL": "https://home.thuzijing.top/register",
+          "status": 200,
+          "title": "注册社团账号 | 清华大学学生紫荆电竞社",
+          "h1": [
+            "注册社团账号"
+          ],
+          "overflow": false
+        },
+        {
+          "width": 390,
+          "route": "/",
+          "finalURL": "https://home.thuzijing.top/events",
+          "status": 200,
+          "title": "活动 | 清华大学学生紫荆电竞社",
+          "h1": [
+            "活动日程"
+          ],
+          "overflow": false
+        },
+        {
+          "width": 390,
+          "route": "/events",
+          "finalURL": "https://home.thuzijing.top/events",
+          "status": 200,
+          "title": "活动 | 清华大学学生紫荆电竞社",
+          "h1": [
+            "活动日程"
+          ],
+          "overflow": false
+        },
+        {
+          "width": 390,
+          "route": "/announcements",
+          "finalURL": "https://home.thuzijing.top/announcements",
+          "status": 200,
+          "title": "通知 | 清华大学学生紫荆电竞社",
+          "h1": [
+            "社团通知"
+          ],
+          "overflow": false
+        },
+        {
+          "width": 390,
+          "route": "/login",
+          "finalURL": "https://home.thuzijing.top/login",
+          "status": 200,
+          "title": "登录 | 清华大学学生紫荆电竞社",
+          "h1": [
+            "登录"
+          ],
+          "overflow": false
+        },
+        {
+          "width": 390,
+          "route": "/register",
+          "finalURL": "https://home.thuzijing.top/register",
+          "status": 200,
+          "title": "注册社团账号 | 清华大学学生紫荆电竞社",
+          "h1": [
+            "注册社团账号"
+          ],
+          "overflow": false
+        }
+      ],
+      "errors": []
+    }
+  },
+  "server": {
+    "at": "2026-10-14T17:16:29.419Z",
+    "revision": "c737d9c1ddeb63e42df6b84cc4384669f9518697",
+    "buildID": "amVNH2KnU_U8LHDG0SPci",
+    "build": {
+      "sourceRevision": "c737d9c1ddeb63e42df6b84cc4384669f9518697",
+      "buildID": "amVNH2KnU_U8LHDG0SPci",
+      "sha256": "3fb7abe17fcd99f83de5320671d749080398389fd776db679bf0da4966d0d937",
+      "bytes": 5751142,
+      "buildHost": "Windows",
+      "origin": "https://home.thuzijing.top"
+    },
+    "release": "/srv/zijingwebsite/releases/new-20261015-dcbae1c",
+    "previousRevision": "6f862c7bb876db658ab7c961bf55979cfa276482",
+    "sourceFilesVerified": 817,
+    "sourceMismatches": [],
+    "database": {
+      "tables": 69,
+      "records": 192,
+      "businessTablesUnchanged": true,
+      "changedFrameworkTables": []
+    },
+    "backup": {
+      "path": "/srv/zijingwebsite/backups/new-20261015-dcbae1c",
+      "dump": "/srv/zijingwebsite/backups/new-20261015-dcbae1c/database/zijing-2026-10-14T16-44-45.238Z",
+      "restore": {
+        "verifiedAt": "2026-10-14T16:44:47.921Z",
+        "database": "zijing_restore_1791996285986",
+        "tables": 69,
+        "records": 192,
+        "mediaFiles": 0,
+        "mediaDirectory": "/srv/zijingwebsite/releases/new-20261015-dcbae1c/.data/zijing_restore_1791996285986/media",
+        "localVideoFiles": 0,
+        "localHonorVideoFiles": 0,
+        "honorVideoReservations": 0,
+        "honorStorageVerified": true,
+        "result": "PASS",
+        "sourceUntouched": true
+      },
+      "rollbackPrepared": true,
+      "rollbackExecuted": false,
+      "offsiteConfigured": false
+    },
+    "service": {
+      "state": "active",
+      "workingDirectory": "/srv/zijingwebsite/releases/new-20261015-dcbae1c",
+      "databaseState": "active",
+      "databasePID": "241884"
+    },
+    "swappiness": "0",
+    "http": {
+      "base": "https://home.thuzijing.top",
+      "checks": [
+        {
+          "path": "/",
+          "status": 307,
+          "expected": [
+            307
+          ],
+          "bytes": 7,
+          "cacheControl": "private, no-store",
+          "location": "/events"
+        },
+        {
+          "path": "/events",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 28387,
+          "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+          "location": null
+        },
+        {
+          "path": "/announcements",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 25564,
+          "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+          "location": null
+        },
+        {
+          "path": "/community",
+          "status": 307,
+          "expected": [
+            307
+          ],
+          "bytes": 118,
+          "cacheControl": "private, no-store",
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fcommunity"
+        },
+        {
+          "path": "/teams",
+          "status": 307,
+          "expected": [
+            307
+          ],
+          "bytes": 114,
+          "cacheControl": "private, no-store",
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fteams"
+        },
+        {
+          "path": "/teams/recruitment",
+          "status": 307,
+          "expected": [
+            307
+          ],
+          "bytes": 128,
+          "cacheControl": "private, no-store",
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fteams%2Frecruitment"
+        },
+        {
+          "path": "/join/staff",
+          "status": 307,
+          "expected": [
+            307
+          ],
+          "bytes": 121,
+          "cacheControl": "private, no-store",
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fjoin%2Fstaff"
+        },
+        {
+          "path": "/gallery",
+          "status": 307,
+          "expected": [
+            307
+          ],
+          "bytes": 116,
+          "cacheControl": "private, no-store",
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fgallery"
+        },
+        {
+          "path": "/login",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 24672,
+          "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+          "location": null
+        },
+        {
+          "path": "/register",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 26851,
+          "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+          "location": null
+        },
+        {
+          "path": "/account",
+          "status": 307,
+          "expected": [
+            307
+          ],
+          "bytes": 116,
+          "cacheControl": "private, no-store",
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Faccount"
+        },
+        {
+          "path": "/health/live",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 18,
+          "cacheControl": "",
+          "location": null
+        },
+        {
+          "path": "/health/ready",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 47,
+          "cacheControl": "",
+          "location": null
+        },
+        {
+          "path": "/api/miniapp/status",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 255,
+          "cacheControl": "private, no-store",
+          "location": null
+        },
+        {
+          "path": "/api/globals/site?depth=0",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 87,
+          "cacheControl": "",
+          "location": null
+        },
+        {
+          "path": "/api/events?limit=1&depth=0",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 149,
+          "cacheControl": "",
+          "location": null
+        },
+        {
+          "path": "/api/community-messages",
+          "status": 404,
+          "expected": [
+            404
+          ],
+          "bytes": 42,
+          "cacheControl": "private, no-store",
+          "location": null
+        },
+        {
+          "path": "/api/forum-posts",
+          "status": 404,
+          "expected": [
+            404
+          ],
+          "bytes": 42,
+          "cacheControl": "private, no-store",
+          "location": null
+        },
+        {
+          "path": "/api/comments",
+          "status": 404,
+          "expected": [
+            404
+          ],
+          "bytes": 42,
+          "cacheControl": "private, no-store",
+          "location": null
+        },
+        {
+          "path": "/api/community-reactions",
+          "status": 404,
+          "expected": [
+            404
+          ],
+          "bytes": 42,
+          "cacheControl": "private, no-store",
+          "location": null
+        },
+        {
+          "path": "/api/games",
+          "status": 401,
+          "expected": [
+            401
+          ],
+          "bytes": 24,
+          "cacheControl": "private, no-store",
+          "location": null
+        },
+        {
+          "path": "/api/teams",
+          "status": 401,
+          "expected": [
+            401
+          ],
+          "bytes": 24,
+          "cacheControl": "private, no-store",
+          "location": null
+        },
+        {
+          "path": "/api/news",
+          "status": 401,
+          "expected": [
+            401
+          ],
+          "bytes": 24,
+          "cacheControl": "private, no-store",
+          "location": null
+        }
+      ],
+      "assets": [
+        {
+          "path": "/_next/static/chunks/1634bf79-b5e1a6e7026b25a4.js",
+          "status": 200,
+          "bytes": 201058
+        },
+        {
+          "path": "/_next/static/chunks/3544-d9ce4c72c067f84f.js",
+          "status": 200,
+          "bytes": 8661
+        },
+        {
+          "path": "/_next/static/chunks/3914-f1d044432667bbb0.js",
+          "status": 200,
+          "bytes": 241314
+        },
+        {
+          "path": "/_next/static/chunks/836-7d55306f1dd60cdb.js",
+          "status": 200,
+          "bytes": 10085
+        },
+        {
+          "path": "/_next/static/chunks/app/(frontend)/announcements/error-6dc5c48b154394a7.js",
+          "status": 200,
+          "bytes": 3325
+        },
+        {
+          "path": "/_next/static/chunks/app/(frontend)/events/error-a754ba68da157498.js",
+          "status": 200,
+          "bytes": 3327
+        },
+        {
+          "path": "/_next/static/chunks/app/(frontend)/login/page-b28f9482d8b2028f.js",
+          "status": 200,
+          "bytes": 282
+        },
+        {
+          "path": "/_next/static/chunks/app/(frontend)/register/page-5f73e44bcf130100.js",
+          "status": 200,
+          "bytes": 11498
+        },
+        {
+          "path": "/_next/static/chunks/main-app-c759023030681578.js",
+          "status": 200,
+          "bytes": 528
+        },
+        {
+          "path": "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+          "status": 200,
+          "bytes": 112594
+        },
+        {
+          "path": "/_next/static/chunks/webpack-a75aec9804c797d0.js",
+          "status": 200,
+          "bytes": 5990
+        },
+        {
+          "path": "/_next/static/css/1df4408fb962661a.css",
+          "status": 200,
+          "bytes": 9895
+        },
+        {
+          "path": "/_next/static/css/1ec32287774477e4.css",
+          "status": 200,
+          "bytes": 89010
+        },
+        {
+          "path": "/_next/static/css/65e357b680b53896.css",
+          "status": 200,
+          "bytes": 6690
+        },
+        {
+          "path": "/_next/static/css/6d335a942f5b6d39.css",
+          "status": 200,
+          "bytes": 22843
+        },
+        {
+          "path": "/_next/static/css/79ca22107f6ff883.css",
+          "status": 200,
+          "bytes": 3648
+        },
+        {
+          "path": "/_next/static/css/88664a86ca66661d.css",
+          "status": 200,
+          "bytes": 5194
+        },
+        {
+          "path": "/_next/static/css/96a1e4e9b6bf49f1.css",
+          "status": 200,
+          "bytes": 41186
+        },
+        {
+          "path": "/_next/static/css/a7e049497ed7f748.css",
+          "status": 200,
+          "bytes": 18854
+        },
+        {
+          "path": "/_next/static/css/a917e36a6937d1b8.css",
+          "status": 200,
+          "bytes": 68947
+        },
+        {
+          "path": "/_next/static/css/e86ea0da21b74106.css",
+          "status": 200,
+          "bytes": 14967
+        }
+      ],
+      "result": "PASS"
+    },
+    "candidateHttp": {
+      "base": "http://127.0.0.1:3101",
+      "checks": [
+        {
+          "path": "/",
+          "status": 307,
+          "expected": [
+            307
+          ],
+          "bytes": 7,
+          "cacheControl": "private, no-store",
+          "location": "/events"
+        },
+        {
+          "path": "/events",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 26431,
+          "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+          "location": null
+        },
+        {
+          "path": "/announcements",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 25564,
+          "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+          "location": null
+        },
+        {
+          "path": "/community",
+          "status": 307,
+          "expected": [
+            307
+          ],
+          "bytes": 118,
+          "cacheControl": "private, no-store",
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fcommunity"
+        },
+        {
+          "path": "/teams",
+          "status": 307,
+          "expected": [
+            307
+          ],
+          "bytes": 114,
+          "cacheControl": "private, no-store",
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fteams"
+        },
+        {
+          "path": "/teams/recruitment",
+          "status": 307,
+          "expected": [
+            307
+          ],
+          "bytes": 128,
+          "cacheControl": "private, no-store",
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fteams%2Frecruitment"
+        },
+        {
+          "path": "/join/staff",
+          "status": 307,
+          "expected": [
+            307
+          ],
+          "bytes": 121,
+          "cacheControl": "private, no-store",
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fjoin%2Fstaff"
+        },
+        {
+          "path": "/gallery",
+          "status": 307,
+          "expected": [
+            307
+          ],
+          "bytes": 116,
+          "cacheControl": "private, no-store",
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fgallery"
+        },
+        {
+          "path": "/login",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 24672,
+          "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+          "location": null
+        },
+        {
+          "path": "/register",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 26851,
+          "cacheControl": "private, no-cache, no-store, max-age=0, must-revalidate",
+          "location": null
+        },
+        {
+          "path": "/account",
+          "status": 307,
+          "expected": [
+            307
+          ],
+          "bytes": 116,
+          "cacheControl": "private, no-store",
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Faccount"
+        },
+        {
+          "path": "/health/live",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 18,
+          "cacheControl": "",
+          "location": null
+        },
+        {
+          "path": "/health/ready",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 47,
+          "cacheControl": "",
+          "location": null
+        },
+        {
+          "path": "/api/miniapp/status",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 255,
+          "cacheControl": "private, no-store",
+          "location": null
+        },
+        {
+          "path": "/api/globals/site?depth=0",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 87,
+          "cacheControl": "",
+          "location": null
+        },
+        {
+          "path": "/api/events?limit=1&depth=0",
+          "status": 200,
+          "expected": [
+            200
+          ],
+          "bytes": 149,
+          "cacheControl": "",
+          "location": null
+        },
+        {
+          "path": "/api/community-messages",
+          "status": 404,
+          "expected": [
+            404
+          ],
+          "bytes": 42,
+          "cacheControl": "private, no-store",
+          "location": null
+        },
+        {
+          "path": "/api/forum-posts",
+          "status": 404,
+          "expected": [
+            404
+          ],
+          "bytes": 42,
+          "cacheControl": "private, no-store",
+          "location": null
+        },
+        {
+          "path": "/api/comments",
+          "status": 404,
+          "expected": [
+            404
+          ],
+          "bytes": 42,
+          "cacheControl": "private, no-store",
+          "location": null
+        },
+        {
+          "path": "/api/community-reactions",
+          "status": 404,
+          "expected": [
+            404
+          ],
+          "bytes": 42,
+          "cacheControl": "private, no-store",
+          "location": null
+        },
+        {
+          "path": "/api/games",
+          "status": 401,
+          "expected": [
+            401
+          ],
+          "bytes": 24,
+          "cacheControl": "private, no-store",
+          "location": null
+        },
+        {
+          "path": "/api/teams",
+          "status": 401,
+          "expected": [
+            401
+          ],
+          "bytes": 24,
+          "cacheControl": "private, no-store",
+          "location": null
+        },
+        {
+          "path": "/api/news",
+          "status": 401,
+          "expected": [
+            401
+          ],
+          "bytes": 24,
+          "cacheControl": "private, no-store",
+          "location": null
+        }
+      ],
+      "assets": [
+        {
+          "path": "/_next/static/chunks/1634bf79-b5e1a6e7026b25a4.js",
+          "status": 200,
+          "bytes": 201058
+        },
+        {
+          "path": "/_next/static/chunks/3544-d9ce4c72c067f84f.js",
+          "status": 200,
+          "bytes": 8661
+        },
+        {
+          "path": "/_next/static/chunks/3914-f1d044432667bbb0.js",
+          "status": 200,
+          "bytes": 241314
+        },
+        {
+          "path": "/_next/static/chunks/836-7d55306f1dd60cdb.js",
+          "status": 200,
+          "bytes": 10085
+        },
+        {
+          "path": "/_next/static/chunks/app/(frontend)/announcements/error-6dc5c48b154394a7.js",
+          "status": 200,
+          "bytes": 3325
+        },
+        {
+          "path": "/_next/static/chunks/app/(frontend)/events/error-a754ba68da157498.js",
+          "status": 200,
+          "bytes": 3327
+        },
+        {
+          "path": "/_next/static/chunks/app/(frontend)/login/page-b28f9482d8b2028f.js",
+          "status": 200,
+          "bytes": 282
+        },
+        {
+          "path": "/_next/static/chunks/app/(frontend)/register/page-5f73e44bcf130100.js",
+          "status": 200,
+          "bytes": 11498
+        },
+        {
+          "path": "/_next/static/chunks/main-app-c759023030681578.js",
+          "status": 200,
+          "bytes": 528
+        },
+        {
+          "path": "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+          "status": 200,
+          "bytes": 112594
+        },
+        {
+          "path": "/_next/static/chunks/webpack-a75aec9804c797d0.js",
+          "status": 200,
+          "bytes": 5990
+        },
+        {
+          "path": "/_next/static/css/1df4408fb962661a.css",
+          "status": 200,
+          "bytes": 9895
+        },
+        {
+          "path": "/_next/static/css/1ec32287774477e4.css",
+          "status": 200,
+          "bytes": 89010
+        },
+        {
+          "path": "/_next/static/css/65e357b680b53896.css",
+          "status": 200,
+          "bytes": 6690
+        },
+        {
+          "path": "/_next/static/css/6d335a942f5b6d39.css",
+          "status": 200,
+          "bytes": 22843
+        },
+        {
+          "path": "/_next/static/css/79ca22107f6ff883.css",
+          "status": 200,
+          "bytes": 3648
+        },
+        {
+          "path": "/_next/static/css/88664a86ca66661d.css",
+          "status": 200,
+          "bytes": 5194
+        },
+        {
+          "path": "/_next/static/css/96a1e4e9b6bf49f1.css",
+          "status": 200,
+          "bytes": 41186
+        },
+        {
+          "path": "/_next/static/css/a7e049497ed7f748.css",
+          "status": 200,
+          "bytes": 18854
+        },
+        {
+          "path": "/_next/static/css/a917e36a6937d1b8.css",
+          "status": 200,
+          "bytes": 68947
+        },
+        {
+          "path": "/_next/static/css/e86ea0da21b74106.css",
+          "status": 200,
+          "bytes": 14967
+        }
+      ],
+      "result": "PASS"
+    }
+  },
+  "miniapp": {
+    "appid": "wxccf9f8fc9515ebd5",
+    "version": "0.4.0",
+    "pages": 25,
+    "files": 162,
+    "sourceBytes": 646934,
+    "domainChecking": true,
+    "officialUpload": {
+      "success": true,
+      "bytes": 553523
+    },
+    "officialPreview": {
+      "success": true,
+      "bytes": 553525,
+      "qrSHA256": "85be7d078fb427d9e7aea19a130d303c546bb423bbee40371050f6a413e1047a"
+    },
+    "officialSimulator": "UNVERIFIED: automation endpoint did not connect; no simulator flow was accepted as passed",
+    "phoneVerified": false,
+    "wechatReviewSubmitted": false,
+    "wechatPublicRelease": false
+  },
+  "freekill": {
+    "https": 200,
+    "websocket": 101,
+    "certificateVerified": true,
+    "gameplayVerified": false
+  },
+  "ci": {
+    "run": "https://github.com/QShin21/zijingwebsite/actions/runs/38602807911",
+    "headSha": "c737d9c1ddeb63e42df6b84cc4384669f9518697",
+    "conclusion": "failure",
+    "runner": "",
+    "steps": 0,
+    "codeTestsExecuted": false,
+    "reason": "GitHub reports failed recent payments or a spending limit preventing the job from starting; no billing settings changed"
+  },
+  "unverified": [
+    "authenticated production business workflows",
+    "phone scan and native interaction",
+    "email delivery",
+    "official WeChat review and public release",
+    "post-deployment rollback execution",
+    "offsite backup"
+  ]
+}
