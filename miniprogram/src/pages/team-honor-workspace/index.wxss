@@ -1,11 +1,32 @@
 @import "../../templates/business.wxss";
-.team-honor-workspace-page .honor-create { margin: 28rpx 0; }
-.team-honor-workspace-page .honor-create > .primary { width: 100%; }
-.team-honor-workspace-page .honor-work-record { border-left: 0; }
-.team-honor-workspace-page .honor-work-record.is-open { border-bottom: 2rpx solid var(--z-primary); }
-.team-honor-workspace-page .honor-result { display: flex; flex-wrap: wrap; gap: 10rpx 24rpx; margin-top: 18rpx; font-size: 30rpx; }
-.team-honor-workspace-page .honor-result text:last-child { color: var(--z-primary); font-weight: 600; }
-.team-honor-workspace-page .task-record > .secondary { margin-top: 24rpx; }
-.team-honor-workspace-page .evidence-detail { margin-top: 28rpx; border-top: 1rpx solid var(--z-line); padding-top: 24rpx; }
-.team-honor-workspace-page .honor-evidence { margin-top: 20rpx; }
-.team-honor-workspace-page .review-actions .primary { flex-basis: 100%; }
+@import "../../styles/native-forms.wxss";
+.mini-page.team-honor-workspace-page .honor-create { margin: 24px 0 32px; }
+.mini-page.team-honor-workspace-page .honor-create > .primary { width: 100%; }
+.mini-page.team-honor-workspace-page .honor-create .field-note { margin-top: 12px; }
+.mini-page.team-honor-workspace-page .receipt-heading { align-items: flex-start; margin-bottom: 0; }
+.mini-page.team-honor-workspace-page .receipt-heading > view { padding-top: 8px; }
+.mini-page.team-honor-workspace-page .receipt-heading > button { flex-shrink: 0; }
+.mini-page.team-honor-workspace-page .receipt-heading .muted { margin-top: 4px; font-size: 14px; }
+.mini-page.team-honor-workspace-page .honor-work-record { border-left: 0; }
+.mini-page.team-honor-workspace-page .honor-work-record.is-open { border-bottom: 2px solid var(--z-primary); }
+.mini-page.team-honor-workspace-page .record-heading .section-title { font-size: 20px; line-height: 1.45; }
+.mini-page.team-honor-workspace-page .record-heading .badge { margin-top: 3px; }
+.mini-page.team-honor-workspace-page .honor-result { margin-top: 12px; }
+.mini-page.team-honor-workspace-page .honor-result text { display: block; font-size: 15px; line-height: 1.7; overflow-wrap: anywhere; }
+.mini-page.team-honor-workspace-page .honor-result text:last-child { margin-top: 4px; color: var(--z-primary); font-size: 18px; line-height: 1.5; font-weight: 600; }
+.mini-page.team-honor-workspace-page .record-meta { margin-top: 16px; }
+.mini-page.team-honor-workspace-page .honor-author { margin-top: 4px; font-size: 14px; }
+.mini-page.team-honor-workspace-page .task-record > .disclosure { margin-top: 20px; padding: 12px; }
+.mini-page.team-honor-workspace-page .evidence-detail { margin-top: 24px; border-top: 1px solid var(--z-line); padding-top: 20px; }
+.mini-page.team-honor-workspace-page .evidence-detail > .section-head { margin-bottom: 8px; }
+.mini-page.team-honor-workspace-page .evidence-detail > .section-head .section-title { flex: 1; }
+.mini-page.team-honor-workspace-page .honor-evidence { margin-top: 20px; }
+.mini-page.team-honor-workspace-page .honor-evidence .photo { margin-top: 0; }
+.mini-page.team-honor-workspace-page .honor-evidence > .muted { font-size: 14px; }
+.mini-page.team-honor-workspace-page .evidence-video { height: 184px; margin-top: 16px; border-radius: 8px; }
+.mini-page.team-honor-workspace-page .review-actions { margin-top: 28px; padding: 20px 16px; border-top: 3px solid var(--z-primary); border-radius: 0 0 8px 8px; }
+.mini-page.team-honor-workspace-page .review-actions > .muted { margin-top: 12px; }
+.mini-page.team-honor-workspace-page .review-actions .primary { flex-basis: 100%; }
+.mini-page.team-honor-workspace-page .review-actions .actions > button { min-width: 104px; }
+.mini-page.team-honor-workspace-page .record-owner-actions { margin-top: 20px; }
+@media (max-width: 359px) { .mini-page.team-honor-workspace-page .record-heading { display: block; } .mini-page.team-honor-workspace-page .record-heading .badge { margin-top: 12px; } .mini-page.team-honor-workspace-page .evidence-video { height: 162px; } }

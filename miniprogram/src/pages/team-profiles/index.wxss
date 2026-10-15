@@ -1,15 +1,34 @@
 @import "../../templates/business.wxss";
-.team-profiles-page .profile-editor { margin-top: 28rpx; }
-.team-profiles-page .avatar-editor { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 24rpx; }
-.team-profiles-page .avatar-editor > view { flex: 1; min-width: 220rpx; }
-.team-profiles-page .avatar-editor .secondary { width: 100%; }
-.team-profiles-page .preview-avatar { width: 120rpx; height: 120rpx; flex-shrink: 0; border-radius: 12rpx; margin: 0; }
-.team-profiles-page .profile-consent > view { min-width: 0; flex: 1; }
-.team-profiles-page .profile-consent { align-items: flex-start; }
-.team-profiles-page .profile-preview { margin: 28rpx 0; padding: 28rpx; border: 1rpx solid var(--z-line); background: var(--z-surface); border-radius: 12rpx; }
-.team-profiles-page .profile-preview-header, .team-profiles-page .profile-roster-header { display: flex; gap: 24rpx; align-items: center; }
-.team-profiles-page .profile-preview-header > view, .team-profiles-page .profile-roster-header > view { min-width: 0; flex: 1; }
-.team-profiles-page .profile-display-name { font-size: 40rpx; font-weight: 600; word-break: break-word; line-height: 1.45; }
-.team-profiles-page .preview-selection { margin-top: 28rpx; padding-top: 20rpx; border-top: 1rpx solid var(--z-line); }
-.team-profiles-page .profile-card .avatar { width: 96rpx; height: 96rpx; margin: 0; border-radius: 12rpx; flex-shrink: 0; }
-.team-profiles-page .biography { white-space: pre-wrap; word-break: break-word; }
+@import "../../styles/native-forms.wxss";
+.mini-page.team-profiles-page .profile-own { padding: 20px 16px; }
+.mini-page.team-profiles-page .profile-own .muted { margin-top: 8px; }
+.mini-page.team-profiles-page .profile-own > .primary { margin-top: 20px; width: 100%; }
+.mini-page.team-profiles-page .profile-editor { margin-top: 24px; }
+.mini-page.team-profiles-page .profile-editor-intro { padding: 0 0 24px; margin: 0; border: 0; background: transparent; }
+.mini-page.team-profiles-page .profile-editor-intro .muted { margin-top: 12px; }
+.mini-page.team-profiles-page .profile-editor .task-section { margin-top: 28px; }
+.mini-page.team-profiles-page .profile-feedback { margin: 20px 0; }
+.mini-page.team-profiles-page .profile-feedback > button { width: 100%; margin-top: 8px; }
+.mini-page.team-profiles-page .avatar-editor { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
+.mini-page.team-profiles-page .avatar-editor > view { flex: 1; min-width: 144px; }
+.mini-page.team-profiles-page .avatar-editor .secondary { width: 100%; }
+.mini-page.team-profiles-page .preview-avatar { width: 64px; height: 64px; flex-shrink: 0; border-radius: 8px; margin: 0; background: var(--z-media); }
+.mini-page.team-profiles-page .profile-consent { align-items: flex-start; margin-bottom: 12px; }
+.mini-page.team-profiles-page .profile-consent > view { min-width: 0; flex: 1; }
+.mini-page.team-profiles-page .profile-consent .field-note { margin-top: 8px; font-size: 13px; }
+.mini-page.team-profiles-page .profile-preview { margin: 0 0 24px; padding: 20px 16px; border: 1px solid var(--z-line); border-top: 3px solid var(--z-primary); background: var(--z-surface); border-radius: 0 0 8px 8px; }
+.mini-page.team-profiles-page .profile-preview-header, .mini-page.team-profiles-page .profile-roster-header { display: flex; gap: 16px; align-items: center; }
+.mini-page.team-profiles-page .profile-preview-header > view, .mini-page.team-profiles-page .profile-roster-header > view { min-width: 0; flex: 1; }
+.mini-page.team-profiles-page .profile-display-name { display: block; font-size: 22px; font-weight: 600; overflow-wrap: anywhere; line-height: 1.4; }
+.mini-page.team-profiles-page .profile-preview-header .muted, .mini-page.team-profiles-page .profile-roster-header .muted { margin-top: 4px; }
+.mini-page.team-profiles-page .preview-selection { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--z-line); }
+.mini-page.team-profiles-page .preview-selection .material-title { margin-top: 0; }
+.mini-page.team-profiles-page .profile-preview .action-bar > button { flex-basis: 100%; }
+.mini-page.team-profiles-page .profile-preview .task-note { padding-bottom: 0; }
+.mini-page.team-profiles-page .profile-card .avatar { width: 52px; height: 52px; margin: 0; border-radius: 8px; flex-shrink: 0; background: var(--z-media); }
+.mini-page.team-profiles-page .profile-card .section-title { font-size: 18px; }
+.mini-page.team-profiles-page .biography { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+.mini-page.team-profiles-page .profile-roster { margin-top: 40px; }
+.mini-page.team-profiles-page .profile-roster .section-head { align-items: flex-start; margin-bottom: 8px; }
+.mini-page.team-profiles-page .profile-roster .section-head > .section-title { flex: 1; padding-top: 8px; }
+.mini-page.team-profiles-page .profile-roster .section-head > button { flex-shrink: 0; }

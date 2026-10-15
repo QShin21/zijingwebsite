@@ -196,3 +196,56 @@ node node_modules/vitest/vitest.mjs run tests/miniapp-content-flows.test.ts test
 完整C布局复现：`node scripts/rebuild-native-preview.mjs --suite stage-c --browser <本机Chromium路径>`。审查入口`.data/miniapp-050-stage-c-review/index.html`提供67状态切换、四宽浅深及8个375px样板与B源码相同合成内容对照。对照使用B原生源码归档，其历史字号失败单独保留，不混入当前通过统计。
 
 本阶段28个文件包含19个原生产品文件、5个截图脚本、1个测试和3份协作文档；源码差异、准确SHA、远端默认/完整分支列表、测试日志和全部最终截图随审查包保存。C本地实现与自审完成，待主助手独立QA；D补丁仍在detached工作区，C提交不混入D。官方微信、真机键盘/安全区/隐私/媒体交互未验证，E/F继续待执行。本阶段未使用GitHub CI、未部署服务器、未上传微信。
+
+
+## D阶段实现与本地核验（2026-10-15）
+
+C检查点已普通推送`be0eedec4a77a0309f20c7307d2bc4e6bc75aecb`，远端核对仍为默认且唯一`main`；C完整审查包109147895字节、SHA-256 `ec1523ba5109a29bfb6e7915b62b1ad6a5c6a539c87eee02b4fbc529009938a7`已交付。D基于该检查点整合，两个Astra max分工从B的detached检出按24个精确路径复制进主工作区，root只合并截图入口及文档，未覆盖C源码或复制依赖目录，没有新建开发分支。
+
+### 页面与合同
+
+- `team`划分招新批次、本人申请、本人队伍和实际管理范围；`team-apply`组织建队计划与同编号改稿/回执；`team-review`分离建队申请、招新答卷和招新运营。完整16题型、五人成员组和审核反馈仍使用原投影。
+- `team-members`按当前关系与历史关系阅读，保留撤销原因、显式确认和服务端能力；公开简介与历史阵容不当作当前资格。`team-honors`按实际赛事日期与年度归档，保留历史记录说明与原受控图片/视频。
+- `team-profiles`保留本人整份visible选择、保存前预览、离队/周期变化锁定、重载默认隐藏与未知保存待核对；不增加逐字段私密承诺。`team-honor-workspace`按本人投稿/审核证据/处理决定分区；`team-honor-edit`分成果信息、证据公开范围、图片、独立MP4与保存/正式送审，100%文件传送不当作业务成功。
+- 八页中五页JS逐字节未改。除下面两类已复现问题，业务引擎、原API、actions、权限、对象归属、CAS、隐私组件、媒体版本与清理合同保持。网站`src/`、共享tokens、native公共基础及C表单样式、问卷模板/引擎、依赖和锁文件均无本阶段diff。
+
+### 两类实际缺陷与修复证据
+
+1. **荣誉确认回执回退：**root在B源码用真实Page及HTTP合成夹具独立复现：保存/撤回已确认revision4，随后成功GET返回revision3时，编辑输入或工作台回执被旧内容替换且恢复写权限。两页新增当前账号/路由范围内的最低已确认修订记录：旧或缺失确认后的读取保留已确认文字并锁写，只允许当前或更高版本的成功读取恢复服务端实际能力；看到更高版本后提升下限。JSON保存、送审/审核操作与独立MP4确认均涵盖；隐藏后旧scope无效，换号/换路由清空下限，401/403仍清理私有内容。工作台只保留id/修订元数据，不新增原证据字节缓存。review列表合同含已批准/退回/拒绝/隐藏记录，按updatedAt倒序；正常审批不会因出队被误判。分页中已核对记录不强求再次出现，但出现旧版本仍拒绝。
+2. **成员结束日期误显示：**截图发现active且无leftAt/revokedAt也显示“关系结束 / 待公布”，原因是空值进入原format.date。只在真实结束时间存在时投影endText，首次读取与成功POST后回执一致。测试夹具换用真实format而非空值特判stub；补实际Page无/有时间和POST成功后GET失败的4例，修前2例失败，修后通过。建队表单错误旁增加原retry操作以便立即核对，沿用保稿与loading/busy锁。
+
+荣誉新增18项回归，修前80项中9失败、71通过，修后80项全通过；成员新增4项。两类共22项使整合套件从C的905增为927，重叠分工数字不重复相加。首轮375两组108截图全0后，按自审修正上述成员显示、提示间隔和重复分隔，两个确认后读取失败fixture的消息改为真实Page的成功文案。
+
+### 实际执行结果
+
+| 检查 | 已执行结果 | 证据 |
+| --- | --- | --- |
+| 整合后Vitest | 28文件927项通过，退出0 | `/workspace/scratch/miniapp-050-stage-d-tests-accepted.log` |
+| 荣誉ACK红/绿回归 | 修前9失败/71通过；修后80项通过，后者为927子集 | `miniapp-050-stage-d-ack-red.log`、`miniapp-050-stage-d-ack-green.log` |
+| 成员/队伍相关 | 170项通过，为927子集；新增4例修前验证失败 | `/tmp/miniapp-050-stage-d-team-final-vitest.log` |
+| 全量ESLint、TypeScript | 均退出0 | `/workspace/scratch/miniapp-050-stage-d-lint-accepted.log`、`miniapp-050-stage-d-typecheck-accepted.log` |
+| 原生源码检查 | 25页、169文件、791806字节；域名检查开启、外部依赖0，退出0 | `/workspace/scratch/miniapp-050-stage-d-native-final.log` |
+| tokens与原生配置 | 退出0 | `/workspace/scratch/miniapp-050-stage-d-tokens.log` |
+| D完整四宽双主题 | 54状态432组合，全部指标0 | `.data/miniapp-050-stage-d/results.json` |
+| 最后两条提示定向复查 | 15状态120组合，全部0；替换432中的受影响子集 | `.data/miniapp-050-stage-d-honor-width-{320,375,390,430}/results.json` |
+| 既有样例回归 | 最后提示修改后重跑32组合，全部0 | `.data/miniapp-050-stage-d-regression-final/results.json` |
+| 审查入口 | 1296个最终图/HTML文件齐全，32次切换通过；错误/外部请求0 | `.data/miniapp-050-stage-d-review/gallery-check.json` |
+
+实际完整命令写入测试日志：全部非数据库`miniapp*.test.ts`加design-tokens/rebuild-native，排除四个数据库HTTP集成套件。D分工额外选择的team-honor-http/team-profile-confirmation-http在导入时缺少`PAYLOAD_SECRET`未启动；未配置凭据或连接数据库，不计为通过。一次tokens命令引用了不存在的脚本，已改为仓库实际`build-design-tokens.mjs --check --native-config`并通过，错误日志保留。新命令入口曾短暂断开，随后pwd、测试完成回执和全部日志读取均实际恢复；没有因此跳过验证。
+
+人工逐组查看375浅深代表图、320浅/430深长问卷、周期锁、荣誉材料和视频等待确认状态。将审核说明占位文案缩短为“退回、拒绝或隐藏须说明原因”，避免320px最后一字单独一行；视频等待提示明确“确认前不会重复上传”。这两条最终静态文案仅改两个WXML，源码比较证明其余页面不变；定向重捕两页全部15状态四宽双主题并替换120行，原432测量存iteration-2，各捕获时间与变更哈希在selectiveRefresh/captureRuns保留，不把120项累计为新增覆盖。动态长队名/奖项允许自然换行，未截断或缩小正文。
+
+最终D矩阵时间2026-10-15T11:03:37.709Z，58个源文件哈希与提交前工作树一致；Playwright1.58.2、Chromium154.0.8037.57。全部最终布局/回归中横向溢出、过小命中区、低于阈值字号、裁切、运行错误及浏览器网络请求均为0。图片全部合成，视频只呈现静态尺寸/控件，没有读取私人证据或播放真实视频。
+
+### 复测和剩余阶段
+
+复现两个修复可运行：
+
+```sh
+node node_modules/vitest/vitest.mjs run tests/miniapp-team-honor-workspaces.test.ts tests/miniapp-team-workspaces.test.ts
+node scripts/rebuild-native-preview.mjs --suite stage-d --browser <本机Chromium路径>
+```
+
+`.data/miniapp-050-stage-d-review/index.html`提供54状态四宽浅深与8个375px样板前后对照；准确提交SHA、默认/完整远端分支列表、28个源文件差异、哈希、日志及全部最终截图交付审查包。D共有19个原生产品文件、4个截图脚本、2个测试和3份协作文档。
+
+C/D开发与本地自审完成，尚待独立QA签署。E的完整适用状态核对、官方微信/真机键盘、安全区、授权和媒体交互未完成；F发布条件尚未具备。此前B的Windows独立通过和官方open/preview结果不替代C/D新核验。本阶段没有使用GitHub CI、部署紫荆服务或上传微信，也没有操作FreeKill。

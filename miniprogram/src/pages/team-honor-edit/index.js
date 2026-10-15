@@ -20,7 +20,7 @@ Page(withVisualTheme({
   },
   resetPrivate() {
     this.clearMedia(); this._record = null; this._draft = flow.empty(); this._teams = []; this._team = null; this._baseRevision = null;
-    this._dirty = false; this._fresh = false; this._create = false; this._conflict = false; this._uncertainCreate = false; this._loading = null;
+    this._dirty = false; this._fresh = false; this._create = false; this._conflict = false; this._uncertainCreate = false; this._loading = null; this._acknowledged = null;
     this.setData({ needsLogin: !flow.actor(), loading: false, ready: false, busy: flow.pending(this), error: '', operationError: '', message: '', record: null,
       teams: [], teamIndex: 0, teamTitle: '', fields: flow.fields(this._draft), images: [], imageError: '', editable: false, canSave: false, canSubmit: false,
       conflict: false, uncertainCreate: false, recentDocs: [], hasSelectedVideo: false, selectedVideoSize: '', videoUploading: false, videoProgress: 0, canUploadVideo: false, videoSource: '', videoError: '' });
@@ -59,6 +59,10 @@ Page(withVisualTheme({
         if (this._id) {
           const value = await flow.detail(this._id);
           if (!flow.visible(this, token)) return;
+          if (this._acknowledged && this._acknowledged.id === value.id) {
+            if (value.revision < this._acknowledged.minimum) throw new Error('保存已确认，读取结果尚未更新，请重新读取回执核对。');
+            this._acknowledged.minimum = Math.max(this._acknowledged.minimum, value.revision);
+          }
           this._record = value; this._team = value.team;
           if (reset || !this._dirty) { this._draft = flow.draft(value); this._baseRevision = value.revision; this._dirty = false; this._conflict = false; }
           else if (this._baseRevision !== value.revision) {
@@ -185,6 +189,7 @@ Page(withVisualTheme({
         } });
       if (!flow.same(this, token)) return;
       const saved = flow.record(response.record, false);
+      this._acknowledged = { id: saved.id, minimum: saved.revision };
       this._record = saved; this._draft = flow.draft(saved); this._baseRevision = saved.revision; this._dirty = false; this._fresh = false; this._conflict = false;
       this.clearMedia(); this.project(); this.setData({ message: '视频已上传并保存草稿；请核对后明确提交审核。' }); await this.load();
     } catch (cause) {
@@ -230,6 +235,7 @@ Page(withVisualTheme({
       dispatched = true;
       const saved = await flow.change(current, action, { draft: prepared, team: this._team });
       if (!flow.same(this, token)) return;
+      this._acknowledged = { id: saved.id, minimum: saved.revision };
       this._id = saved.id; this._record = saved; this._draft = flow.draft(saved); this._baseRevision = saved.revision;
       this._dirty = false; this._fresh = false; this._conflict = false; this._uncertainCreate = false; this.clearMedia(); this.project();
       this.setData({ message: action === 'save' ? '草稿已保存；仍须提交并由他人审核后展示。' : '荣誉已提交，请查看本人回执与处理反馈。',

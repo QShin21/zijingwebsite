@@ -1,6 +1,22 @@
 @import "../../templates/business.wxss";
-.team-members-page .membership-dates { display: flex; flex-wrap: wrap; gap: 20rpx 44rpx; margin-top: 24rpx; font-size: 29rpx; font-variant-numeric: tabular-nums; }
-.team-members-page .membership-dates > view { flex: 1; min-width: 180rpx; }
-.team-members-page .membership-dates .muted { margin-bottom: 6rpx; }
-.team-members-page .membership-revoke { border-left: 3rpx solid var(--z-danger-border); }
-.team-members-page .membership-revoke > .danger { width: 100%; }
+@import "../../styles/native-forms.wxss";
+.membership-loading { padding: 12px 0 24px; }
+.membership-read-error { margin-bottom: 24px; }
+.mini-page.native-form-page.team-members-page > .native-receipt { margin-bottom: 16px; }
+.membership-scope { padding: 16px; margin: 0 0 24px; background: var(--z-surface); border-left: 3px solid var(--z-secondary-border); }
+.scope-title { display: block; font-size: 15px; line-height: 1.65; font-weight: 600; margin-bottom: 8px; }
+.mini-page.native-form-page.team-members-page .membership-heading { flex-wrap: wrap; gap: 8px 16px; margin-bottom: 0; }
+.mini-page.native-form-page.team-members-page .membership-list { margin-top: 8px; }
+.mini-page.native-form-page.team-members-page .membership-record:first-child { border-top: 0; }
+.mini-page.native-form-page.team-members-page .membership-record > .record-meta { align-items: center; margin-top: 0; }
+.membership-name { display: block; margin-top: 12px; font-size: 18px; line-height: 1.5; font-weight: 600; overflow-wrap: anywhere; word-break: break-word; }
+.membership-dates { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 16px; }
+.membership-dates > view { flex: 1; min-width: 112px; }
+.date-label { display: block; color: var(--z-muted); font-size: 12px; line-height: 1.6; }
+.date-value { display: block; margin-top: 4px; font-size: 15px; line-height: 1.6; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.mini-page.native-form-page.team-members-page .membership-record > .disclosure { margin-top: 12px; }
+.mini-page.native-form-page.team-members-page .membership-revoke { margin-top: 12px; border-left: 3px solid var(--z-danger-border); }
+.revoke-guidance { display: block; margin-top: 8px; color: var(--z-muted); font-size: 14px; line-height: 1.75; }
+.mini-page.native-form-page.team-members-page textarea { min-height: 160px; height: 160px; }
+.mini-page.native-form-page.team-members-page .membership-revoke > .danger { width: 100%; }
+.mini-page.native-form-page.team-members-page .membership-load-more { width: 100%; margin-top: 24px; }

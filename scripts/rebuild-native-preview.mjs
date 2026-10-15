@@ -16,13 +16,13 @@ const options = {};
 for (let index = 2; index < process.argv.length; index += 2) {
   const key = process.argv[index], value = process.argv[index + 1];
   if (!['--source-root', '--output', '--browser', '--suite', '--widths', '--fixtures'].includes(key) || !value || value.startsWith('--')) {
-    throw new Error('Usage: node scripts/rebuild-native-preview.mjs [--suite regression|stage-a|stage-b|stage-c] [--widths 320,375,390,430] [--fixtures name,name] [--source-root path] [--output path] [--browser path]');
+    throw new Error('Usage: node scripts/rebuild-native-preview.mjs [--suite regression|stage-a|stage-b|stage-c|stage-d] [--widths 320,375,390,430] [--fixtures name,name] [--source-root path] [--output path] [--browser path]');
   }
   if (key in options) throw new Error('Repeated argument: ' + key);
   options[key] = value;
 }
 const suite = options['--suite'] || 'regression';
-if (!['regression', 'stage-a', 'stage-b', 'stage-c'].includes(suite)) throw new Error('Unknown fixture suite: ' + suite);
+if (!['regression', 'stage-a', 'stage-b', 'stage-c', 'stage-d'].includes(suite)) throw new Error('Unknown fixture suite: ' + suite);
 const widths = (options['--widths'] || (suite.startsWith('stage-') ? '320,375,390,430' : '390,320')).split(',').map(Number);
 if (!widths.length || new Set(widths).size !== widths.length || widths.some(width => !Number.isInteger(width) || width < 280 || width > 768)) throw new Error('Widths must be unique integer phone widths between 280 and 768');
 const selectedFixtures = options['--fixtures'] ? options['--fixtures'].split(',') : null;
@@ -45,6 +45,10 @@ let additionalFixtures;
 if (suite === 'stage-c') {
   for (const name of ['fixtures', 'signup-fixtures', 'community-fixtures', 'staff-fixtures']) read(path.join(repository, 'scripts/miniapp-050-stage-c-' + name + '.mjs'));
   additionalFixtures = (await import('./miniapp-050-stage-c-fixtures.mjs')).stageCFixtures;
+}
+if (suite === 'stage-d') {
+  for (const name of ['fixtures', 'team-fixtures', 'honor-fixtures']) read(path.join(repository, 'scripts/miniapp-050-stage-d-' + name + '.mjs'));
+  additionalFixtures = (await import('./miniapp-050-stage-d-fixtures.mjs')).stageDFixtures;
 }
 const playwrightVersion = JSON.parse(fs.readFileSync(path.join(repository, 'node_modules/@playwright/test/package.json'), 'utf8')).version;
 const native = name => path.join(sourceRoot, name);

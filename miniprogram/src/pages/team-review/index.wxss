@@ -1,4 +1,34 @@
 @import "../../templates/business.wxss";
-.team-review-page .business-summary .plain { padding-bottom: 0; }
-.team-review-page .review-actions .primary { flex-basis: 100%; }
-.team-review-page .record-detail > .body { margin-top: 12rpx; }
+@import "../../styles/native-forms.wxss";
+.workspace-loading { padding: 12px 0 24px; }
+.workspace-read-error { margin-bottom: 24px; }
+.workspace-scope { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin: 0 0 24px; padding: 12px 0; border-bottom: 1px solid var(--z-line); }
+.scope-status, .operation-state { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.mini-page.native-form-page.team-review-page .queue-heading { flex-wrap: wrap; gap: 8px 16px; margin-bottom: 12px; }
+.mini-page.native-form-page.team-review-page .queue-filter { margin: 0 0 20px; }
+.mini-page.native-form-page.team-review-page .queue-filter .field-label { font-size: 14px; font-weight: 400; color: var(--z-muted); }
+.queue-picker { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.picker-sign { flex-shrink: 0; color: var(--z-muted); }
+.mini-page.native-form-page.team-review-page .application-queue { margin-top: 0; }
+.mini-page.native-form-page.team-review-page .review-record:first-child { border-top: 0; padding-top: 12px; }
+.mini-page.native-form-page.team-review-page .review-record:last-child, .mini-page.native-form-page.team-review-page .batch-record:last-child { border-bottom: 0; }
+.mini-page.native-form-page.team-review-page .review-record > .record-meta { align-items: center; margin-top: 0; }
+.review-record-title { display: block; margin-top: 12px; font-size: 18px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; word-break: break-word; }
+.record-update { display: block; color: var(--z-muted); font-size: 13px; line-height: 1.7; margin-top: 8px; }
+.mini-page.native-form-page.team-review-page .review-record > .disclosure { margin-top: 12px; }
+.mini-page.native-form-page.team-review-page .submitted-material > .material-title { margin-top: 8px; }
+.mini-page.native-form-page.team-review-page .submitted-material > .body { margin-top: 12px; }
+.mini-page.native-form-page.team-review-page .answer { overflow-wrap: anywhere; }
+.review-guidance { display: block; margin-top: 8px; color: var(--z-muted); font-size: 14px; line-height: 1.75; }
+.mini-page.native-form-page.team-review-page textarea { min-height: 160px; height: 160px; }
+.mini-page.native-form-page.team-review-page .review-actions .actions { flex-direction: column; }
+.mini-page.native-form-page.team-review-page .review-actions .actions > button { width: 100%; }
+.mini-page.native-form-page.team-review-page .workspace-load-more { width: 100%; margin-top: 24px; }
+.mini-page.native-form-page.team-review-page .website-create { text-align: left; margin-top: 8px; }
+.mini-page.native-form-page.team-review-page .batch-record:first-child { border-top: 0; }
+.batch-dates { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 16px; }
+.batch-dates > view { flex: 1; min-width: 112px; }
+.date-label { display: block; color: var(--z-muted); font-size: 12px; line-height: 1.6; }
+.date-value { display: block; margin-top: 4px; color: var(--z-body); font-size: 15px; line-height: 1.6; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.operation-state { margin: 16px 0; }
+.mini-page.native-form-page.team-review-page .website-workbench { margin-top: 12px; text-align: left; }

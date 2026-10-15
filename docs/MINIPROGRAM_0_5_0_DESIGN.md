@@ -98,8 +98,8 @@
 | --- | --- | --- |
 | A | 原生基础样式/组件呈现；home、events、community三个样板；先自评再推广 | P1/P2随B修复，Windows独立复测确认通过；官方模拟器截图/交互仍待完成 |
 | B | 完成五tab一致性；新增完成 communities、explore、account、list、detail、fixed，覆盖各collection与富文本/媒体 | `95a4a0d`；Windows独立复测210项、520个B布局/184个A回归/32个既有回归及静态检查通过，无新增P0/P1/P2；原生交互未验 |
-| C | auth、applications、review、signup、activity-manage、staff、staff-review、community-joins；长表单、反馈、名片同意、审核与人工进群 | 本地28文件905项测试、67状态536个布局与32既有回归通过；待独立QA及官方原生交互 |
-| D | team、team-apply、team-review、team-members、team-honors、team-profiles、team-honor-workspace、team-honor-edit | 独立detached检出中准备补丁；C检查点后整合主工作区并另行验证 |
+| C | auth、applications、review、signup、activity-manage、staff、staff-review、community-joins；长表单、反馈、名片同意、审核与人工进群 | `be0eede`；本地28文件905项测试、67状态536个布局与32既有回归通过；待独立QA及官方原生交互 |
+| D | team、team-apply、team-review、team-members、team-honors、team-profiles、team-honor-workspace、team-honor-edit | 本地整合28文件927项测试、54状态432个布局与32既有回归通过；修复荣誉ACK回退和成员日期显示；待独立QA及官方原生交互 |
 | E | 全25页×适用角色/模式/状态、四宽双主题、功能与官方平台验证；独立QA与修复 | 待实施 |
 | F | 关键问题修复及独立QA到位后，正常推main、核对SHA、紫荆服务部署、微信0.5.0上传及体验二维码回执 | 待验收 |
 

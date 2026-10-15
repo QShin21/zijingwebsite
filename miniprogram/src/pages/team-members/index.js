@@ -63,7 +63,7 @@ Page(withVisualTheme({
       const mapped = result.members.docs.map(doc => {
         const previous = this.data.docs.find(value => String(value.id) === String(doc.id) && value.updatedAt === doc.updatedAt);
         return { ...doc, actions: doc.actions || {}, statusText: doc.status === 'active' ? '成员关系未撤销' : doc.leftAt ? '已离队' : '已撤销',
-          joinedText: format.date(doc.joinedAt), endText: format.date(doc.leftAt || doc.revokedAt), noteDraft: previous ? previous.noteDraft || '' : '' };
+          joinedText: format.date(doc.joinedAt), endText: doc.leftAt || doc.revokedAt ? format.date(doc.leftAt || doc.revokedAt) : '', noteDraft: previous ? previous.noteDraft || '' : '' };
       });
       const docs = (more ? this.data.docs : []).concat(mapped);
       this.setData({ allowed: true, loading: false, teamDoc: result.team,
@@ -99,7 +99,7 @@ Page(withVisualTheme({
       if (!response || !response.result) throw new Error('撤销结果暂不可用，请刷新记录核对');
       const saved = { ...doc, actions: {}, noteDraft: '' };
       for (const key of ['status', 'updatedAt', 'joinedAt', 'revokedAt', 'leftAt']) if (response.result[key] !== undefined) saved[key] = response.result[key];
-      saved.statusText = saved.status === 'active' ? '成员关系未撤销' : saved.leftAt ? '已离队' : '已撤销'; saved.endText = format.date(saved.leftAt || saved.revokedAt);
+      saved.statusText = saved.status === 'active' ? '成员关系未撤销' : saved.leftAt ? '已离队' : '已撤销'; saved.endText = saved.leftAt || saved.revokedAt ? format.date(saved.leftAt || saved.revokedAt) : '';
       this.setData({ docs: this.data.docs.map(value => String(value.id) === String(doc.id) ? saved : value), done: '成员关系撤销已保存' });
       await this.load();
     } catch (cause) { if (this.writeValid(context, actor, writeID)) this.setData({ operationError: cause.message }); }

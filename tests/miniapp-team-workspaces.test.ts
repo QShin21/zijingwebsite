@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 const require = createRequire(import.meta.url);
 const questionnaire = require('../miniprogram/src/lib/questionnaire.js');
+const format = require('../miniprogram/src/lib/format.js');
 const source = (path: string) => readFileSync('miniprogram/src/' + path, 'utf8');
 type Actions = Record<string, boolean | string[]>;
 type Row = { id: number; title: string; status: string; updatedAt: string; actions: Actions; [key: string]: unknown };
@@ -70,7 +71,6 @@ function harness(name: string, options: HarnessOptions = {}) {
   const wx = { stopPullDownRefresh: vi.fn(), previewImage: vi.fn(), showModal: vi.fn((value: ModalOptions) => {
     modals.push(value); if (options.modalAuto !== false) value.success({ confirm: true });
   }) };
-  const format = { date: (value: string) => value || '' };
   const teamModule = { exports: {} };
   runInNewContext(source('lib/team.js'), { module: teamModule, require: (path: string) => ({ './http': http, './questionnaire': questionnaire, './format': format })[path] });
   const pageModule = { exports: {} };
@@ -264,6 +264,38 @@ describe('Native authorized team workspaces — synthetic VM', () => {
     expect(h.page.data.docs[0].noteDraft).toContain('主动结束训练');
     const denied = harness('team-members', { request: () => workspace({ members: paged([membership({ actions: { revoke: false } })]) }) });
     await denied.page.onShow(); denied.page.note(event({ id: 23 }, '合成说明')); await denied.page.revoke(event({ id: 23 })); expect(writes(denied)).toHaveLength(0);
+  });
+
+  it('shows membership end dates only when the loaded relationship includes a real end timestamp', async () => {
+    const records = [membership({ joinedAt: '2026-09-10T08:00:00.000Z' }),
+      membership({ id: 24, status: 'revoked', leftAt: '2026-10-01T08:00:00.000Z', actions: {} }),
+      membership({ id: 25, status: 'revoked', revokedAt: '2026-10-02T08:30:00.000Z', actions: {} }),
+      membership({ id: 26, status: 'revoked', actions: {} })];
+    const h = harness('team-members', { request: () => workspace({ members: paged(records) }) });
+    await h.page.onShow();
+    expect(h.page.data.docs.map(doc => doc.endText)).toEqual(['', '2026.10.01 16:00', '2026.10.02 16:30', '']);
+    expect(h.page.data.docs[0]).toMatchObject({ status: 'active', statusText: '成员关系未撤销', joinedText: '2026.09.10 16:00', leftAt: null, revokedAt: null });
+    expect(h.page.data.docs[1]).toMatchObject({ statusText: '已离队', leftAt: records[1].leftAt });
+    expect(h.page.data.docs[2]).toMatchObject({ statusText: '已撤销', revokedAt: records[2].revokedAt });
+    expect(writes(h)).toHaveLength(0);
+  });
+
+  it.each([
+    { label: 'without an end timestamp', leftAt: null, revokedAt: null, expected: '' },
+    { label: 'with a leave timestamp', leftAt: '2026-10-01T08:00:00.000Z', revokedAt: null, expected: '2026.10.01 16:00' },
+    { label: 'with a revoke timestamp', leftAt: null, revokedAt: '2026-10-02T08:30:00.000Z', expected: '2026.10.02 16:30' },
+  ])('retains a confirmed membership result $label when the following read fails', async ({ leftAt, revokedAt, expected }) => {
+    let reads = 0;
+    const saved = membership({ status: 'revoked', updatedAt: '2026-10-15T08:30:00.000Z', leftAt, revokedAt });
+    const h = harness('team-members', { request: (path, options) => {
+      if (options.method === 'POST') return { result: saved };
+      if (++reads > 1) throw new Error('合成写后读取断网');
+      return response(path, options);
+    } });
+    await h.page.onShow(); h.page.note(event({ id: 23 }, '合成测试：已核对关系结束安排')); await h.page.revoke(event({ id: 23 }));
+    expect(h.page.data.docs[0]).toMatchObject({ id: 23, status: 'revoked', leftAt, revokedAt, endText: expected, actions: {} });
+    expect(h.page.data.done).toBe('成员关系撤销已保存'); expect(h.page.data.error).toBe('合成写后读取断网');
+    expect(writes(h)).toHaveLength(1); expect(reads).toBe(2);
   });
 
   it('paginates membership records independently and does not store unrelated private answers', async () => {

@@ -1,12 +1,24 @@
-.team-honors-page .page-heading { border-bottom: 2rpx solid var(--z-text); }
-.archive-year { display: block; font-size: 60rpx; line-height: 1.2; font-weight: 700; font-variant-numeric: tabular-nums; margin: 40rpx 0 16rpx; }
-.archive-record { padding: 30rpx 0; border-bottom: 1rpx solid var(--z-line); }
-.archive-record-head { display: flex; align-items: flex-start; gap: 24rpx; }
-.archive-date-rail { flex-shrink: 0; width: 132rpx; color: var(--z-muted); font-size: 28rpx; font-variant-numeric: tabular-nums; word-break: break-word; }
-.archive-date-rail .field-note { margin-top: 8rpx; font-size: 23rpx; }
+.mini-page.team-honors-page .page-heading { padding: 8px 0 24px; margin-bottom: 24px; border-bottom: 2px solid var(--z-primary); }
+.mini-page.team-honors-page .eyebrow { margin-bottom: 12px; font-size: 13px; line-height: 1.6; }
+.archive-year-line { display: flex; align-items: baseline; gap: 12px; margin: 32px 0 4px; }
+.archive-year { display: block; font-size: 36px; line-height: 1.2; letter-spacing: -1px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.archive-year-label { color: var(--z-muted); font-size: 12px; line-height: 1.6; }
+.archive-record { padding: 24px 0 28px; border-bottom: 1px solid var(--z-line); }
+.archive-record-head { display: flex; align-items: flex-start; gap: 16px; }
+.archive-date-rail { flex-shrink: 0; width: 60px; padding-top: 4px; color: var(--z-muted); font-size: 14px; line-height: 1.6; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.mini-page.team-honors-page .archive-date-rail .field-note { margin-top: 4px; font-size: 12px; }
 .archive-record-main { flex: 1; min-width: 0; }
-.honor-title { margin: 10rpx 0; font-size: 34rpx; }
-.honor-placing { font-size: 42rpx; line-height: 1.4; margin: 12rpx 0; }
-.archive-record-body { margin-top: 12rpx; }
-.archive-record-body .body { margin-top: 18rpx; }
-@media (max-width: 359px) { .archive-date-rail { width: 124rpx; font-size: 13px; } .archive-date-rail .field-note { font-size: 12px; } .honor-title { font-size: 17px; } }
+.mini-page.team-honors-page .honor-title { margin: 8px 0; font-size: 20px; line-height: 1.45; }
+.mini-page.team-honors-page .honor-placing { margin: 12px 0 0; font-size: 24px; line-height: 1.4; word-break: break-word; }
+.archive-record-main .badge { margin-top: 12px; }
+.archive-record-body { margin-top: 16px; }
+.mini-page.team-honors-page .archive-record-body .body { margin-top: 0; }
+.mini-page.team-honors-page .archive-author { margin-top: 12px; font-size: 12px; }
+.archive-record-body .evidence { margin-top: 20px; }
+.mini-page.team-honors-page .photo { margin-top: 0; }
+.mini-page.team-honors-page .honor-video { height: 184px; margin-top: 20px; border-radius: 8px; }
+.mini-page.team-honors-page .archive-retry { margin-top: 16px; width: 100%; }
+.mini-page.team-honors-page .archive-source { margin-top: 12px; text-align: left; }
+.mini-page.team-honors-page .archive-footer { border-top: 0; padding-top: 0; }
+.mini-page.team-honors-page .archive-footer > button { flex-basis: 100%; }
+@media (max-width: 359px) { .archive-record-head { gap: 12px; } .archive-date-rail { width: 56px; } .mini-page.team-honors-page .honor-title { font-size: 19px; } .mini-page.team-honors-page .honor-video { height: 162px; } }

@@ -1,20 +1,39 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
-<view class="page mini-page team-honors-page">
-  <button class="plain back" bindtap="back">返回</button>
-  <view class="page-heading"><text wx:if="{{team.gameTitle}}" class="eyebrow">{{team.gameTitle}}</text><text class="title">{{team.title || '队伍荣誉档案'}}</text><text class="subtitle">已核验成果，按赛事日期归档。</text></view>
+<view class="page mini-page native-page team-honors-page">
+  <button class="plain back" bindtap="back">返回队伍</button>
+  <view class="page-heading">
+    <text class="eyebrow">{{team.gameTitle || '队伍档案'}} / 荣誉</text>
+    <text class="title">{{team.title || '队伍荣誉档案'}}</text>
+    <text class="subtitle">共同走过的赛场，值得留存的成果。已核验记录按赛事日期归档。</text>
+  </view>
   <template is="feedback" data="{{loading,error,needsLogin:false}}" />
-  <view wx:if="{{loaded && !records.length && !loading && !error}}" class="state"><text class="state-title">暂无已公开的荣誉档案</text><text class="muted">队伍的荣誉记录核验并发布后会出现在这里。</text><button class="secondary" bindtap="retry">重新加载</button></view>
+  <view wx:if="{{loaded && !records.length && !loading && !error}}" class="state archive-empty">
+    <text class="state-title">暂无已公开的荣誉档案</text><text class="muted">队伍的荣誉记录核验并发布后会出现在这里。</text>
+    <button class="secondary" bindtap="retry">重新加载</button>
+  </view>
   <view class="honor-archive">
     <block wx:for="{{records}}" wx:key="key">
-      <text wx:if="{{item.archiveYear && (index === 0 || item.archiveYear !== records[index - 1].archiveYear)}}" class="archive-year">{{item.archiveYear}}</text>
-      <view class="archive-record"><view class="archive-record-head"><view class="archive-date-rail"><text>{{item.archiveDate || item.dateText}}</text><text class="field-note">赛事日期</text></view><view class="archive-record-main"><text wx:if="{{item.competition}}" class="meta-line">{{item.competition}}</text><text class="section-title honor-title">{{item.title}}</text><text wx:if="{{item.placing}}" class="honor-placing">{{item.placing}}</text><text wx:if="{{item.legacy}}" class="badge">历史荣誉档案</text></view></view>
-        <view class="archive-record-body"><text wx:if="{{item.description}}" class="body" selectable>{{item.description}}</text><text wx:if="{{item.authorName}}" class="field-note">{{item.authorName}}</text>
-          <text wx:if="{{item.mediaLoading}}" class="result-caption">正在加载公开图片…</text><view wx:for="{{item.localImages}}" wx:for-item="picture" wx:key="url" class="evidence"><button class="image-button" hover-class="pressed" bindtap="preview" data-url="{{picture.url}}" aria-label="{{picture.caption || '预览荣誉图片'}}"><image class="photo" src="{{picture.url}}" mode="widthFix" aria-label="{{picture.caption}}" /></button><text class="field-note">{{picture.caption}}</text></view>
-          <text wx:if="{{item.mediaError}}" class="error">{{item.mediaError}}</text><video wx:if="{{item.videoSource}}" id="honor-video-{{index}}" class="honor-video" src="{{item.videoSource}}" controls="{{true}}" autoplay="{{false}}" object-fit="contain" binderror="videoError" data-key="{{item.key}}" data-source="{{item.videoSource}}" /><text wx:if="{{item.videoError}}" class="error">{{item.videoError}}</text><button wx:if="{{item.mediaError || item.videoError}}" class="secondary" bindtap="retry" disabled="{{loading}}">重新加载档案</button><button wx:if="{{item.sourceHref}}" class="plain" bindtap="source" data-key="{{item.key}}">查看历史荣誉原文</button>
+      <view wx:if="{{item.archiveYear && (index === 0 || item.archiveYear !== records[index - 1].archiveYear)}}" class="archive-year-line"><text class="archive-year">{{item.archiveYear}}</text><text class="archive-year-label">赛场记录</text></view>
+      <view class="archive-record">
+        <view class="archive-record-head">
+          <view class="archive-date-rail"><text>{{item.archiveDate || item.dateText}}</text><text class="field-note">赛事日期</text></view>
+          <view class="archive-record-main">
+            <text wx:if="{{item.competition}}" class="meta-line">{{item.competition}}</text><text class="section-title honor-title">{{item.title}}</text>
+            <text wx:if="{{item.placing}}" class="honor-placing">{{item.placing}}</text><text wx:if="{{item.legacy}}" class="badge">历史荣誉档案</text>
+          </view>
+        </view>
+        <view class="archive-record-body">
+          <text wx:if="{{item.description}}" class="body" selectable>{{item.description}}</text><text wx:if="{{item.authorName}}" class="field-note archive-author">记录：{{item.authorName}}</text>
+          <text wx:if="{{item.mediaLoading}}" class="result-caption">正在加载公开图片…</text>
+          <view wx:for="{{item.localImages}}" wx:for-item="picture" wx:key="url" class="evidence"><button class="image-button" hover-class="pressed" bindtap="preview" data-url="{{picture.url}}" aria-label="{{picture.caption || '预览荣誉图片'}}"><image class="photo" src="{{picture.url}}" mode="widthFix" aria-label="{{picture.caption}}" /></button><text class="field-note">{{picture.caption}}</text></view>
+          <text wx:if="{{item.mediaError}}" class="error">{{item.mediaError}}</text>
+          <video wx:if="{{item.videoSource}}" id="honor-video-{{index}}" class="honor-video" src="{{item.videoSource}}" controls="{{true}}" autoplay="{{false}}" object-fit="contain" binderror="videoError" data-key="{{item.key}}" data-source="{{item.videoSource}}" />
+          <text wx:if="{{item.videoError}}" class="error">{{item.videoError}}</text><button wx:if="{{item.mediaError || item.videoError}}" class="secondary archive-retry" bindtap="retry" disabled="{{loading}}">重新加载档案</button>
+          <button wx:if="{{item.sourceHref}}" class="plain archive-source" bindtap="source" data-key="{{item.key}}">查看历史荣誉原文</button>
         </view>
       </view>
     </block>
   </view>
-  <view class="action-bar"><button wx:if="{{loaded && records.length}}" class="secondary" bindtap="retry" disabled="{{loading}}">刷新档案</button><button class="plain" bindtap="workspace" disabled="{{loading}}">我的荣誉投稿与工作台</button></view>
+  <view class="action-bar archive-footer"><button wx:if="{{loaded && records.length}}" class="secondary" bindtap="retry" disabled="{{loading}}">刷新档案</button><button class="plain" bindtap="workspace" disabled="{{loading}}">我的荣誉投稿与工作台</button></view>
 </view>

@@ -1,10 +1,26 @@
 @import "../../templates/business.wxss";
-.team-honor-edit-page .honor-editor { margin-top: 28rpx; }
-.team-honor-edit-page .evidence-scope { margin: 24rpx 0; padding: 24rpx; border-left: 3rpx solid var(--z-primary); background: var(--z-secondary-bg); }
-.team-honor-edit-page .evidence-edit { margin-top: 28rpx; padding: 24rpx 0; border-top: 1rpx solid var(--z-line); }
-.team-honor-edit-page .evidence-edit .material-title { margin: 0; }
-.team-honor-edit-page .selected-video, .team-honor-edit-page .upload-progress { padding: 24rpx; margin-top: 24rpx; background: var(--z-surface); border: 1rpx solid var(--z-line); border-radius: 12rpx; }
-.team-honor-edit-page .saved-video { padding-top: 16rpx; }
-.team-honor-edit-page .selected-video > .muted { margin-top: 12rpx; }
-.team-honor-edit-page .upload-progress progress { margin-top: 20rpx; }
-.team-honor-edit-page textarea { min-height: 300rpx; }
+@import "../../styles/native-forms.wxss";
+.mini-page.team-honor-edit-page .honor-editor { margin-top: 32px; }
+.mini-page.team-honor-edit-page .honor-receipt { padding: 20px 16px; }
+.mini-page.team-honor-edit-page .honor-receipt .section-title { color: var(--z-primary); font-size: 22px; }
+.mini-page.team-honor-edit-page .honor-receipt .record-id { flex-shrink: 0; margin: 4px 0 0; }
+.mini-page.team-honor-edit-page .honor-receipt .task-note { padding-bottom: 0; }
+.mini-page.team-honor-edit-page .uncertain-receipt > .muted { margin-top: 12px; }
+.mini-page.team-honor-edit-page .evidence-scope { margin: 20px 0 24px; padding: 16px; border-left: 3px solid var(--z-primary); background: var(--z-secondary-bg); }
+.mini-page.team-honor-edit-page .evidence-scope .field-label { margin-bottom: 8px; }
+.mini-page.team-honor-edit-page .evidence-edit { margin-top: 24px; padding: 20px 0 0; border-top: 1px solid var(--z-line); }
+.mini-page.team-honor-edit-page .evidence-edit .section-head { margin-bottom: 8px; }
+.mini-page.team-honor-edit-page .evidence-edit .material-title { margin: 0; }
+.mini-page.team-honor-edit-page .evidence-edit .photo { margin-top: 0; }
+.mini-page.team-honor-edit-page .selected-video, .mini-page.team-honor-edit-page .upload-progress { padding: 20px 16px; margin-top: 20px; background: var(--z-surface); border: 1px solid var(--z-line); border-radius: 8px; }
+.mini-page.team-honor-edit-page .saved-video { padding-top: 8px; }
+.mini-page.team-honor-edit-page .saved-video .material-title { margin-top: 16px; }
+.mini-page.team-honor-edit-page .selected-video > .muted { margin-top: 8px; }
+.mini-page.team-honor-edit-page .selected-video .actions > button { flex-basis: 100%; }
+.mini-page.team-honor-edit-page .upload-progress progress { margin-top: 16px; }
+.mini-page.team-honor-edit-page .evidence-video { height: 184px; margin-top: 16px; border-radius: 8px; }
+.mini-page.team-honor-edit-page textarea { min-height: 176px; }
+.mini-page.team-honor-edit-page .submission-actions > button { flex-basis: 100%; }
+.mini-page.team-honor-edit-page .receipt-links > button { text-align: left; }
+.mini-page.team-honor-edit-page .date-field > .plain { display: block; margin-left: auto; }
+@media (max-width: 359px) { .mini-page.team-honor-edit-page .evidence-video { height: 162px; } }

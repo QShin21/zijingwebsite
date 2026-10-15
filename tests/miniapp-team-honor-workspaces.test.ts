@@ -404,3 +404,70 @@ describe('Native honor successful-read then denied-detail regression', () => {
     expect(writes(h)).toHaveLength(0);
   });
 });
+
+describe('Native honor confirmed revision floor — actual Page and HTTP', () => {
+  const confirmed = (name: 'workspace' | 'edit', revision = 4) => record({ revision,
+    state: name === 'workspace' ? 'withdrawn' : 'draft', title: '合成服务端已确认荣誉', description: '合成已确认保存的新说明' });
+  const displayed = (h: Harness) => h.name === 'workspace' ? h.page.data.docs[0] : h.page.data.record;
+  const readBody = (h: Harness, value: RecordDTO) => h.name === 'workspace' ? list([value]) : { record: value };
+
+  it.each((['workspace', 'edit'] as const).flatMap(name => ['older', 'missing'].map(snapshot => ({ name, snapshot }))))('$name keeps ACK4 and closes writes after a successful $snapshot GET, then a current GET alone restores actions', async ({ name, snapshot }) => {
+    const h = await ready(name); if (name === 'edit') fill(h);
+    const saving = act(h); await flush(); h.reply(1, { record: confirmed(name) }); await flush();
+    h.reply(2, snapshot === 'older' ? readBody(h, record()) : name === 'workspace' ? list([]) : { record: null }); await saving;
+    expect(displayed(h)).toMatchObject({ revision: 4, title: '合成服务端已确认荣誉' });
+    expect(h.page.data.ready).toBe(false); expect(h.page.data.error).not.toBe('');
+    if (name === 'edit') { expect(h.page.data.fields.description).toBe('合成已确认保存的新说明'); expect(h.page.data.canSave).toBe(false); }
+    await act(h); expect(writes(h)).toHaveLength(1);
+    const retrying = h.page.retry(); h.reply(3, readBody(h, confirmed(name))); await retrying;
+    expect(h.page.data.ready).toBe(true); expect(displayed(h)?.revision).toBe(4); expect(writes(h)).toHaveLength(1);
+  });
+
+  it.each((['workspace', 'edit'] as const).flatMap(name => [4, 5].map(revision => ({ name, revision }))))('$name accepts current revision $revision and remembers that floor across later reads', async ({ name, revision }) => {
+    const h = await ready(name); if (name === 'edit') fill(h);
+    const saving = act(h); await flush(); h.reply(1, { record: confirmed(name) }); await flush(); h.reply(2, readBody(h, confirmed(name, revision))); await saving;
+    expect(h.page.data.ready).toBe(true); expect(displayed(h)?.revision).toBe(revision);
+    const reading = name === 'edit' ? h.page.reload() : h.page.retry(); h.reply(3, readBody(h, record({ revision: revision - 1 }))); await reading;
+    expect(h.page.data.ready).toBe(false); expect(displayed(h)?.revision).toBe(revision); await act(h); expect(writes(h)).toHaveLength(1);
+    const fresh = h.page.retry(); h.reply(4, readBody(h, confirmed(name, revision))); await fresh;
+    expect(h.page.data.ready).toBe(true); expect(displayed(h)?.revision).toBe(revision);
+  });
+
+  it('does not let an older inspection replace the confirmed workspace record or read its evidence', async () => {
+    const h = await ready('workspace'); const saving = act(h); await flush();
+    h.reply(1, { record: confirmed('workspace') }); await flush(); h.reply(2, list([confirmed('workspace')])); await saving;
+    const inspecting = h.page.inspect(event({ id: 31 })); h.reply(3, { record: record() }); await inspecting;
+    expect(h.fileWrites).toHaveLength(0); expect(h.page.data.detail).toBeNull(); expect(displayed(h)?.revision).toBe(4);
+    expect(h.page.data.ready).toBe(false); await act(h); expect(writes(h)).toHaveLength(1);
+  });
+
+  it.each((['workspace', 'edit'] as const).flatMap(name => [401, 403].map(status => ({ name, status }))))('$name clears private ACK content and capabilities after GET $status', async ({ name, status }) => {
+    const h = await ready(name); if (name === 'edit') fill(h);
+    const saving = act(h); await flush(); h.reply(1, { record: confirmed(name) }); await flush(); h.reply(2, { error: '合成当前权限已失效' }, status); await saving;
+    noPrivate(h); expect(h.page.data.ready).toBe(false); await act(h); expect(writes(h)).toHaveLength(1);
+    if (status === 401) expect(h.page.data.needsLogin).toBe(true);
+  });
+
+  it.each((['workspace', 'edit'] as const).flatMap(name => ['actor', 'route'].map(scope => ({ name, scope }))))('$name discards the confirmed floor on a new $scope without blocking its own lower revision', async ({ name, scope }) => {
+    const h = await ready(name); if (name === 'edit') fill(h);
+    const saving = act(h); await flush(); h.reply(1, { record: confirmed(name) }); await flush(); h.requests[2].fail(); await saving;
+    if (scope === 'actor') { h.changeActor(8); h.changeActor(7, 'synthetic-honor-new-scope'); }
+    else h.page.onLoad(name === 'workspace' ? { view: 'mine', team: '52' } : { id: '32' });
+    noPrivate(h);
+    const showing = h.page.onShow(), requestIndex = h.requests.length - 1;
+    const current = record({ id: scope === 'route' ? 32 : 31, team: scope === 'route' ? 52 : 51, revision: 1, title: '合成当前范围的一版' });
+    h.reply(requestIndex, readBody(h, current)); await showing;
+    if (scope === 'actor') { h.reply(3, readBody(h, confirmed(name))); await flush(); }
+    expect(displayed(h)).toMatchObject({ revision: 1, title: '合成当前范围的一版' }); expect(h.page.data.ready).toBe(true); expect(writes(h)).toHaveLength(1);
+  });
+
+  it('keeps a multipart ACK and its saved video when the follow-up JSON GET is older', async () => {
+    const h = await ready('edit'); await h.page.chooseVideo(); const uploading = h.page.uploadVideo(); await flush();
+    const saved = confirmed('edit'); saved.videoHref = '/api/team-honor-evidence/31/video?revision=4';
+    h.uploads[0].success({ statusCode: 200, data: JSON.stringify({ record: saved }) }); await flush(); h.reply(1, { record: record() }); await uploading;
+    expect(h.page.data.record).toMatchObject({ revision: 4, hasVideo: true }); expect(h.page.data.fields.description).toBe(saved.description);
+    expect(h.page.data.canSave).toBe(false); expect(h.page.data.canSubmit).toBe(false); expect(h.page.data.message).toContain('已上传并保存草稿');
+    await h.page.uploadVideo(); await h.page.save(); expect(h.uploads).toHaveLength(1); expect(writes(h)).toHaveLength(0);
+    const retrying = h.page.retry(); h.reply(2, { record: saved }); await retrying; expect(h.page.data.canSave).toBe(true);
+  });
+});

@@ -17,7 +17,7 @@ Page(withVisualTheme({
     wx.setNavigationBarTitle({ title: this._query.view === 'review' ? '荣誉审核工作台' : '我的荣誉投稿' });
   },
   resetPrivate() {
-    this.clearMedia(); this._records = new Map(); this._loading = null; this._fresh = false;
+    this.clearMedia(); this._records = new Map(); this._acknowledged = new Map(); this._loading = null; this._fresh = false;
     this.setData({ needsLogin: !flow.actor(), loading: false, ready: false, busy: flow.pending(this), error: '', operationError: '', message: '',
       actions: {}, teams: [], docs: [], page: 1, totalPages: 0, totalDocs: 0, hasMore: false, detail: null, detailImages: [], imageError: '', videoSource: '', videoError: '' });
   },
@@ -34,6 +34,17 @@ Page(withVisualTheme({
   retry() { return this.load(); },
   onPullDownRefresh() { return this.load().finally(() => wx.stopPullDownRefresh()); },
   onReachBottom() { if (this.data.hasMore && !this.data.loading && !this.data.busy && this.data.ready) return this.load(true); },
+  checkConfirmed(records, more = true) {
+    for (const [id, acknowledgement] of this._acknowledged) {
+      const value = records.find(record => record.id === id);
+      if (value ? value.revision < acknowledgement.minimum : !more && acknowledgement.pending)
+        throw new Error('操作已确认，读取结果尚未更新，请重新加载核对已保存回执。');
+    }
+    for (const value of records) {
+      const acknowledgement = this._acknowledged.get(value.id);
+      if (acknowledgement) { acknowledgement.minimum = Math.max(acknowledgement.minimum, value.revision); acknowledgement.pending = false; }
+    }
+  },
   async load(more = false) {
     if (this._disposed || !this._visible) return;
     if (flow.pending(this)) { this._resumeRead = true; return; }
@@ -49,6 +60,7 @@ Page(withVisualTheme({
         if (this._query.view === 'review' && !result.actions.review) {
           this.resetPrivate(); this.setData({ error: '当前暂无荣誉审核入口，请返回本人记录或重新核对权限' }); return;
         }
+        this.checkConfirmed(result.docs, more);
         const records = more ? new Map(this._records) : new Map();
         for (const value of result.docs) records.set(value.id, flow.metadata(value));
         const docs = (more ? previous.filter(doc => !result.docs.some(value => value.id === doc.id)) : []).concat(result.docs.map(value => flow.row(value, previous.find(doc => doc.id === value.id))));
@@ -101,6 +113,7 @@ Page(withVisualTheme({
     try {
       const value = await flow.detail(id);
       if (!flow.visible(this, token)) return;
+      this.checkConfirmed([value]);
       this._records.set(id, flow.metadata(value)); this._detail = value;
       this.setData({ detail: flow.row(value), docs: this.data.docs.map(doc => doc.id === id ? flow.row(value, doc) : doc) });
       for (const item of value.images) {
@@ -153,6 +166,7 @@ Page(withVisualTheme({
       dispatched = true;
       const saved = await flow.change(value, action, { note });
       if (!flow.same(this, token)) return;
+      this._acknowledged.set(saved.id, { minimum: saved.revision, pending: true });
       this._records.set(saved.id, flow.metadata(saved)); this._fresh = false;
       this.setData({ ready: false, actions: {}, docs: this.data.docs.map(doc => doc.id === saved.id ? flow.row(saved) : { ...doc, actions: {}, decisions: [] }),
         message: '荣誉操作已保存，请核对最新回执', ...(this._detail && this._detail.id === saved.id ? { detail: flow.row(saved) } : {}) });

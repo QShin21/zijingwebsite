@@ -1,23 +1,47 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
-<view class="page mini-page business-page team-apply-page">
-  <button class="plain back" bindtap="back">返回</button><view class="page-heading"><text class="title">申请建立代表队</text><text class="subtitle">由有建队权限的社群管理员提交组织与训练计划，负责人批准后成立。</text></view><template is="feedback" data="{{needsLogin}}" />
+<view class="page mini-page native-page native-form-page business-page team-apply-page">
+  <button class="plain back" bindtap="back">返回</button>
+  <view class="page-heading"><text class="title">建队申请</text><text class="subtitle">由有建队权限的社群管理员提交组织与训练计划，负责人批准后成立。</text></view>
+  <template is="feedback" data="{{needsLogin}}" />
   <block wx:if="{{!needsLogin}}">
-    <text wx:if="{{busy}}" class="task-note">本次确认或保存尚未完成，完成后会核对最新记录。</text><text wx:if="{{done}}" class="result-message" aria-role="status">{{done}}</text><text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text>
-    <view class="compact-actions"><button wx:if="{{actions.establish && !apply && !title && !reason}}" class="primary" bindtap="newApplication" disabled="{{loading || busy}}">填写建队申请</button><button wx:if="{{!apply && (title || reason)}}" class="primary" bindtap="toggle" disabled="{{loading || busy}}">继续填写建队申请</button><button wx:if="{{apply}}" class="plain" bindtap="toggle" disabled="{{busy}}">收起填写内容</button><button wx:if="{{actions.reviewEstablishments}}" class="plain" bindtap="review" disabled="{{loading || busy}}">建队申请审核</button></view>
+    <text wx:if="{{busy}}" class="native-receipt" aria-role="status">本次确认或保存尚未完成，完成后会核对最新记录。</text>
+    <text wx:if="{{done}}" class="result-message" aria-role="status">{{done}}</text><text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text>
+    <view wx:if="{{loading}}" class="application-loading" aria-role="status"><text class="muted">正在核对权限与回执…</text><view wx:if="{{!docs.length && !apply}}" class="loading-lines" aria-hidden="true"><view class="loading-line" /><view class="loading-line short" /></view></view>
+    <view wx:if="{{error}}" class="application-read-error"><text class="error" aria-role="alert">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{loading || busy}}">重试读取</button></view>
+    <view class="compact-actions application-tools">
+      <button wx:if="{{actions.establish && !apply && !title && !reason}}" class="primary" bindtap="newApplication" disabled="{{loading || busy}}">填写建队申请</button>
+      <button wx:if="{{!apply && (title || reason)}}" class="primary" bindtap="toggle" disabled="{{loading || busy}}">继续填写建队申请</button>
+      <button wx:if="{{apply}}" class="plain" bindtap="toggle" disabled="{{busy}}">收起填写内容</button>
+      <button wx:if="{{actions.reviewEstablishments}}" class="plain" bindtap="review" disabled="{{loading || busy}}">建队申请审核</button>
+    </view>
     <view wx:if="{{apply}}" id="team-application-editor" class="team-application-editor">
-      <view class="business-summary"><text class="task-context">{{editId ? '原申请补充资料' : '本人建队申请'}}</text><text class="section-title">{{pendingEdit ? '查找本人申请' : editId ? '修改并重新提交' : '组织一支代表队'}}</text><text wx:if="{{editId}}" class="muted">申请 {{editId}}，保留原社群与申请编号。</text><text wx:if="{{pendingEdit}}" class="muted">正在查找申请 {{pendingEdit}}。可继续加载下方本人记录，找到可编辑的回执后带入改稿。</text></view>
-      <text wx:if="{{formError}}" class="error" aria-role="alert">{{formError}}</text>
+      <view class="application-context"><text class="task-context">{{editId ? '申请 ' + editId : '本人建队计划'}}</text><text class="section-title">{{pendingEdit ? '查找本人申请' : editId ? '补充计划，重新提交' : '组织一支代表队'}}</text><text wx:if="{{editId}}" class="muted">沿用原社群与申请编号，补充内容后重新交给负责人审核。</text><text wx:if="{{pendingEdit}}" class="muted">正在查找申请 {{pendingEdit}}。可继续加载下方本人记录，找到可编辑的回执后带入改稿。</text></view>
+      <view wx:if="{{formError}}" class="application-form-error"><text class="error" aria-role="alert">{{formError}}</text><button class="secondary" bindtap="retry" disabled="{{loading || busy}}">刷新回执核对</button></view>
       <block wx:if="{{!pendingEdit}}">
-        <view class="task-section"><text class="task-section-title">队伍身份</text><view class="field"><text class="field-label">所属游戏社群 · 必选</text><picker range="{{games}}" range-key="title" value="{{gameIndex}}" bindchange="game" disabled="{{editId || loading || busy}}"><view>{{gameTitle || '请选择可申请的社群'}} ▾</view></picker><text wx:if="{{editId}}" class="field-note">修改时沿用原申请所属社群。</text></view><view class="field"><text class="field-label">拟用队名 · 必填</text><input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{title}}" bindinput="input" data-field="title" maxlength="80" placeholder="2–80 字" disabled="{{busy}}" /></view></view>
-        <view class="task-section"><text class="task-section-title">组织与训练计划</text><text class="muted">说明组队目的、队员组织方式与日常训练安排，供负责人审核。</text><view class="field"><text class="field-label">计划说明 · 必填</text><textarea cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{reason}}" bindinput="input" data-field="reason" maxlength="3000" placeholder="10–3000 字" disabled="{{busy}}" /></view></view>
-        <view class="form-footer"><text class="muted">提交内容仅供本人及有权限的审批负责人查看。批准后可安排招新与人工选拔。</text><button class="plain" bindtap="openPage" data-page="fixed" data-params="{{ {key: 'privacy'} }}">阅读社团隐私说明</button><text wx:if="{{!canSubmit && !loading}}" class="task-note">当前暂无可提交权限，请刷新回执及社群选项；已填内容会保留。</text><button class="primary" bindtap="submit" loading="{{busy}}" disabled="{{busy || loading || !canSubmit}}">{{editId ? '保存并重新提交' : '提交建队申请'}}</button></view>
+        <view class="application-fields">
+          <view class="field"><text class="field-label">所属游戏社群 · 必选</text><picker range="{{games}}" range-key="title" value="{{gameIndex}}" bindchange="game" disabled="{{editId || loading || busy}}"><view class="application-picker"><text>{{gameTitle || '请选择可申请的社群'}}</text><text class="picker-sign">▾</text></view></picker><text wx:if="{{editId}}" class="field-note">修改时沿用原申请所属社群。</text></view>
+          <view class="field"><text class="field-label">拟用队名 · 必填</text><input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{title}}" bindinput="input" data-field="title" maxlength="80" placeholder="填写拟用队名" disabled="{{busy}}" /><text class="field-note">2–80 字，便于负责人识别这支队伍。</text></view>
+          <view class="field plan-field"><text class="field-label">组织与训练计划 · 必填</text><text class="plan-guidance">说明组队目的、队员组织方式与日常训练安排。</text><textarea cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{reason}}" bindinput="input" data-field="reason" maxlength="3000" placeholder="填写计划说明，10–3000 字" disabled="{{busy}}" /></view>
+        </view>
+        <view class="form-footer"><text class="muted">提交内容仅供本人及有权限的审批负责人查看。批准后可安排招新与人工选拔。</text><button class="plain privacy-link" bindtap="openPage" data-page="fixed" data-params="{{ {key: 'privacy'} }}">阅读社团隐私说明</button><text wx:if="{{!canSubmit && !loading}}" class="task-note">当前暂无可提交权限，请刷新回执及社群选项；已填内容会保留。</text><button class="primary" bindtap="submit" loading="{{busy}}" disabled="{{busy || loading || !canSubmit}}">{{editId ? '保存并重新提交' : '提交建队申请'}}</button></view>
       </block>
     </view>
-    <text wx:if="{{!apply && formError}}" class="error">{{formError}}</text>
-    <view class="task-section"><view class="section-head"><text class="section-title">我的建队申请</text><button class="plain" bindtap="retry" disabled="{{loading || busy}}">刷新核对</button></view><text wx:if="{{loading}}" class="muted">正在核对权限与回执…</text><view wx:if="{{error}}"><text class="error">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{loading || busy}}">重试读取</button></view><text wx:if="{{!games.length && !loading && !error}}" class="muted">暂无可申请建队的社群，本人历史回执仍可查看。</text>
-      <view class="record-list"><view wx:for="{{docs}}" wx:key="id" class="task-record"><view class="record-heading"><view><text class="section-title">{{item.title}}</text><view class="record-meta"><text>申请 {{item.id}}</text><text>{{item.dateText}}</text></view></view><text class="badge">{{item.statusText}}</text></view><view wx:if="{{item.reviewNote}}" class="task-feedback"><text class="task-feedback-label">负责人反馈</text><text class="body">{{item.reviewNote}}</text></view><button class="plain disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy}}" aria-expanded="{{expandedId === item.id}}"><text>{{expandedId === item.id ? '收起组织与训练计划' : '查看已提交计划'}}</text><text>{{expandedId === item.id ? '−' : '＋'}}</text></button><text wx:if="{{expandedId === item.id}}" class="body" selectable>{{item.reason}}</text><view class="actions"><button wx:if="{{item.actions.edit}}" class="secondary" bindtap="openForm" data-id="{{item.id}}" disabled="{{loading || busy}}">修改并重新提交</button><button wx:if="{{item.actions.withdraw}}" class="plain" bindtap="withdraw" data-id="{{item.id}}" disabled="{{loading || busy}}">撤回建队申请</button></view></view></view>
-      <view wx:if="{{!docs.length && !loading && !error}}" class="empty"><text class="state-title">暂无本人建队申请</text><text class="muted">申请提交后，可在这里查看处理进度。</text></view><button wx:if="{{hasMore}}" class="plain" bindtap="onReachBottom" disabled="{{loading || busy}}" loading="{{loading}}">加载更多回执</button>
+    <view wx:if="{{!apply && formError}}" class="application-form-error"><text class="error" aria-role="alert">{{formError}}</text><button class="secondary" bindtap="retry" disabled="{{loading || busy}}">刷新回执核对</button></view>
+    <view class="task-section application-history">
+      <view class="section-head"><text class="section-title">我的建队申请</text><button class="plain" bindtap="retry" disabled="{{loading || busy}}">刷新核对</button></view>
+      <text wx:if="{{!games.length && !loading && !error}}" class="muted">暂无可申请建队的社群，本人历史回执仍可查看。</text>
+      <view class="record-list">
+        <view wx:for="{{docs}}" wx:key="id" class="task-record application-record">
+          <view class="record-meta"><text class="badge">{{item.statusText}}</text><text>申请 {{item.id}}</text></view><text class="application-record-title">{{item.title}}</text><text wx:if="{{item.dateText}}" class="record-update">更新于 {{item.dateText}}</text>
+          <view wx:if="{{item.reviewNote}}" class="task-feedback"><text class="task-feedback-label">负责人反馈</text><text class="body" selectable>{{item.reviewNote}}</text></view>
+          <button class="plain disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy}}" aria-expanded="{{expandedId === item.id}}"><text>{{expandedId === item.id ? '收起组织与训练计划' : '查看已提交计划'}}</text><text class="disclosure-mark">{{expandedId === item.id ? '−' : '＋'}}</text></button>
+          <text wx:if="{{expandedId === item.id}}" class="body submitted-plan" selectable>{{item.reason}}</text>
+          <view class="actions"><button wx:if="{{item.actions.edit}}" class="secondary" bindtap="openForm" data-id="{{item.id}}" disabled="{{loading || busy}}">修改并重新提交</button><button wx:if="{{item.actions.withdraw}}" class="plain" bindtap="withdraw" data-id="{{item.id}}" disabled="{{loading || busy}}">撤回建队申请</button></view>
+        </view>
+      </view>
+      <view wx:if="{{!docs.length && !loading && !error}}" class="empty"><text class="state-title">暂无本人建队申请</text><text class="muted">申请提交后，可在这里查看处理进度。</text></view>
+      <button wx:if="{{hasMore}}" class="secondary application-load-more" bindtap="onReachBottom" disabled="{{loading || busy}}" loading="{{loading}}">加载更多回执</button>
     </view>
   </block>
 </view>
