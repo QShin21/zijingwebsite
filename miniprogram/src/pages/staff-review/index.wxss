@@ -1,3 +1,55 @@
 @import "../../templates/business.wxss";
-.staff-review-page .review-entry .record-detail { padding-bottom: 8rpx; }
-.staff-review-page .review-actions > .primary { width: 100%; }
+@import "../../styles/native-forms.wxss";
+
+.native-form-page.staff-review-page .page-heading { margin-bottom: 24px; padding-bottom: 0; border: 0; }
+.native-form-page.staff-review-page .staff-result { margin: 16px 0 24px; }
+.staff-review-page .staff-result text { display: block; }
+.staff-review-page .staff-result-label { margin-bottom: 4px; font-size: 13px; font-weight: 600; }
+.native-form-page.staff-review-page .staff-review-filters { margin: 24px 0 32px; padding: 20px 16px; border-radius: 8px; background: var(--z-surface); }
+.native-form-page.staff-review-page .staff-review-filters .task-section-title { font-size: 17px; }
+.native-form-page.staff-review-page .scope-filters { margin: 16px 0 0; gap: 12px; }
+.native-form-page.staff-review-page .scope-filters .field { margin: 0; }
+.native-form-page.staff-review-page .scope-filters .field-label { color: var(--z-muted); font-size: 14px; font-weight: 400; }
+.native-form-page.staff-review-page .scope-filters picker { height: auto; }
+.staff-review-page .staff-picker-value { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.staff-review-page .staff-picker-value > text:first-child { min-width: 0; flex: 1; word-break: break-word; }
+.staff-review-page .staff-picker-mark { flex-shrink: 0; color: var(--z-muted); font-size: 12px; }
+.native-form-page.staff-review-page .staff-record-heading { gap: 12px; margin: 0 0 16px; }
+.staff-review-page .staff-result-count { color: var(--z-muted); font-size: 13px; line-height: 1.6; }
+.native-form-page.staff-review-page .record-list { margin-top: 0; }
+.native-form-page.staff-review-page .review-entry { padding: 24px 0; }
+.native-form-page.staff-review-page .record-heading { gap: 12px; }
+.native-form-page.staff-review-page .record-heading .section-title { font-size: 19px; }
+.native-form-page.staff-review-page .record-meta { margin-top: 8px; gap: 4px 12px; font-size: 12px; line-height: 1.65; }
+.staff-review-page .staff-batch-title { display: block; margin-top: 12px; color: var(--z-muted); font-size: 14px; line-height: 1.7; word-break: break-word; }
+.native-form-page.staff-review-page .disclosure { margin-top: 12px; gap: 12px; padding: 12px 0; border: 0; }
+.staff-review-page .disclosure-mark { font-size: 20px; line-height: 1.2; }
+.native-form-page.staff-review-page .review-entry .record-detail { padding: 12px 0 0; }
+.staff-review-page .staff-material-heading { margin: 0 0 20px; }
+.native-form-page.staff-review-page .staff-material-heading .material-title { margin: 0 0 4px; font-size: 17px; line-height: 1.6; }
+.staff-review-page .staff-answer-sheet { padding-left: 16px; border-left: 2px solid var(--z-line); }
+.native-form-page.staff-review-page .answer { padding: 16px 0; border: 0; }
+.native-form-page.staff-review-page .answer:first-child { padding-top: 0; }
+.native-form-page.staff-review-page .answer:last-child { padding-bottom: 0; }
+.native-form-page.staff-review-page .answer-label { margin-bottom: 8px; color: var(--z-muted); font-size: 14px; font-weight: 400; line-height: 1.65; }
+.staff-review-page .staff-answer-value { display: block; color: var(--z-text); font-size: 16px; line-height: 1.8; white-space: pre-wrap; word-break: break-word; }
+.native-form-page.staff-review-page .staff-previous-feedback { margin: 24px 0; padding: 16px; }
+.native-form-page.staff-review-page .staff-previous-feedback .body { margin-top: 8px; }
+.native-form-page.staff-review-page .review-actions { margin-top: 28px; padding: 20px 16px; border: 1px solid var(--z-line); border-radius: 8px; background: var(--z-surface); }
+.native-form-page.staff-review-page .review-actions > .muted { margin-top: 8px; }
+.native-form-page.staff-review-page .review-actions .field { margin: 24px 0; }
+.staff-review-page .staff-feedback-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.staff-review-page .staff-required { color: var(--z-primary); font-size: 12px; line-height: 1.6; }
+.mini-page.native-form-page.staff-review-page .review-actions textarea { height: 176px; min-height: 176px; font-size: 16px; line-height: 1.75; }
+.staff-review-page .staff-decision-check { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-bottom: 12px; color: var(--z-text); font-size: 16px; line-height: 1.6; }
+.staff-review-page .staff-decision-label { color: var(--z-muted); font-size: 13px; }
+.native-form-page.staff-review-page .review-actions > .primary { width: 100%; }
+.native-form-page.staff-review-page .staff-readonly { margin: 24px 0 0; padding: 16px; }
+.native-form-page.staff-review-page .staff-readonly .muted { margin-top: 4px; }
+.native-form-page.staff-review-page .pagination { margin: 24px 0 0; gap: 12px; }
+.native-form-page.staff-review-page .pagination > text { font-size: 13px; }
+@media (max-width: 359px) {
+  .native-form-page.staff-review-page .scope-filters { flex-direction: column; gap: 16px; }
+  .native-form-page.staff-review-page .record-heading { flex-wrap: wrap; }
+  .native-form-page.staff-review-page .record-heading > view { flex-basis: 100%; }
+}

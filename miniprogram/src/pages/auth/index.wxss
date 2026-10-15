@@ -1,14 +1,35 @@
-.auth-page .title { font-size: 48rpx; }
-.auth-form { padding-top: 2rpx; }
-.auth-fields > .field:first-child { margin-top: 12rpx; }
-.password-heading { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; margin-bottom: 8rpx; }
-.password-heading .field-label { margin-bottom: 0; }
-.mini-page .password-toggle { padding: 8rpx 12rpx; font-size: 26rpx; }
-.email-domain { display: block; padding: 20rpx; margin-top: 12rpx; color: var(--z-text); font-size: 27rpx; border: 1rpx solid var(--z-field-border); background: var(--z-field-bg); border-radius: 12rpx; word-break: break-word; }
-.code-row { display: flex; flex-wrap: wrap; gap: 12rpx; align-items: stretch; }
-.code-row input { flex: 1; min-width: 200rpx; }
-.code-row button { flex-shrink: 0; }
-.auth-submit { padding-top: 12rpx; }
-.auth-submit .primary { width: 100%; }
-.auth-options { padding-bottom: 18rpx; border-bottom: 1rpx solid var(--z-line); }
-.auth-options .plain { min-width: 180rpx; }
+@import "../../styles/native-forms.wxss";
+
+.mini-page.auth-page .auth-heading { padding: 8px 0 24px; margin: 0 0 24px; border: 0; }
+.mini-page.auth-page .auth-heading .title { font-size: 28px; }
+.auth-page .auth-form { min-width: 0; }
+.auth-page .auth-required { margin-top: 8px; }
+.auth-page .auth-fields > .field:first-of-type { margin-top: 16px; }
+.auth-page .password-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
+.auth-page .password-heading .field-label { margin-bottom: 0; }
+.mini-page.auth-page .password-toggle { min-width: 44px; padding: 8px; font-size: 15px; }
+.mini-page.auth-page .email-domain-picker { margin-top: 8px; }
+.auth-page .email-domain { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; min-width: 0; color: var(--z-text); font-size: 15px; line-height: 1.6; word-break: break-word; }
+.auth-page .email-domain-action { color: var(--z-link); font-size: 12px; }
+.auth-page .auth-verification { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--z-line); }
+.auth-page .code-row { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; }
+.auth-page .code-row input { flex: 1 1 120px; min-width: 0; width: 0; }
+.mini-page.auth-page .code-row button { flex: 0 0 auto; padding: 12px; }
+.auth-page .auth-code-sent { margin-top: 12px; padding: 12px 16px; border-left: 3px solid var(--z-primary); background: var(--z-secondary-bg); }
+.auth-page .auth-code-title { display: block; color: var(--z-secondary-text); font-size: 15px; font-weight: 600; line-height: 1.6; }
+.auth-page .auth-code-sent .field-note { margin-top: 4px; }
+.auth-page .auth-service { margin: 0 0 24px; padding: 16px; background: var(--z-surface); border: 1px solid var(--z-line); border-radius: 8px; }
+.mini-page.auth-page .auth-service .section-title { font-size: 17px; }
+.auth-page .auth-service .muted { margin-top: 8px; }
+.auth-page .auth-service button { margin-top: 16px; }
+.auth-page .auth-submit { padding-top: 4px; }
+.auth-page .auth-submit .primary { width: 100%; }
+.auth-page .auth-busy { margin: 0 0 12px; }
+.auth-page .auth-options { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; margin-top: 16px; }
+.mini-page.auth-page .auth-options > button { flex: 0 1 auto; }
+.auth-page .auth-privacy { margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--z-line); }
+.mini-page.auth-page .auth-privacy > button { font-size: 15px; }
+@media (max-width: 359px) {
+  .auth-page .code-row input { flex-basis: 104px; }
+  .mini-page.auth-page .code-row button { padding-left: 10px; padding-right: 10px; }
+}

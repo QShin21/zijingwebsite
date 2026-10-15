@@ -9,6 +9,8 @@ const format = require('../../lib/format');
 const { actions, protect } = require('../../lib/page');
 const identity = () => String((session.user() || {}).id || '');
 const decisions = { approved: '批准', returned: '退回补充', rejected: '拒绝' };
+const statusLabels = { pending: '待审核', approved: '已批准', returned: '已退回补充', rejected: '已拒绝', withdrawn: '已撤回' };
+const decorate = doc => ({ ...doc, dateText: format.date(doc.createdAt), statusText: statusLabels[doc.status] || '状态待核对' });
 Page(withVisualTheme({
   data: { needsLogin: false, allowed: false, loading: false, error: '', operationError: '', done: '',
     docs: [], expandedId: '', page: 1, hasMore: false, busy: false, imageBusy: false },
@@ -67,7 +69,7 @@ Page(withVisualTheme({
       if (!result || !Array.isArray(result.docs)) throw new Error('审核列表暂不可用，请重试');
       const mapped = result.docs.map(doc => {
         const previous = this.data.docs.find(value => String(value.id) === String(doc.id) && value.updatedAt === doc.updatedAt);
-        return { ...doc, actions: doc.actions || {}, dateText: format.date(doc.createdAt), reviewDraft: previous ? previous.reviewDraft || '' : '' };
+        return decorate({ ...doc, actions: doc.actions || {}, reviewDraft: previous ? previous.reviewDraft || '' : '' });
       });
       const docs = (more ? this.data.docs : []).concat(mapped);
       this.setData({ docs: docs.filter((doc, index) => docs.findIndex(value => String(value.id) === String(doc.id)) === index),
@@ -120,7 +122,7 @@ Page(withVisualTheme({
         data: { action: 'review', id: doc.id, revision: doc.updatedAt, decision, reviewNote: doc.reviewDraft || '' } });
       if (!this.writeValid(context, actor, writeID)) return;
       if (!result || !result.application) throw new Error('处理结果暂不可用，请刷新后核对');
-      const saved = { ...result.application, actions: {}, reviewDraft: '', dateText: format.date(result.application.createdAt) };
+      const saved = decorate({ ...result.application, actions: {}, reviewDraft: '' });
       this.setData({ docs: this.data.docs.map(value => String(value.id) === String(doc.id) ? saved : value), done: `已${decisions[result.application.status] || '处理'}该申请` });
       await this.load();
     } catch (cause) { if (this.writeValid(context, actor, writeID)) this.setData({ operationError: cause.message }); }

@@ -1,4 +1,26 @@
 @import "../../templates/business.wxss";
-.review-page .task-record > .task-note { padding: 16rpx 0; }
-.review-page .record-detail > .body { margin-top: 10rpx; }
-.review-page .review-actions .primary { flex-basis: 100%; }
+@import "../../styles/native-forms.wxss";
+
+.review-page .review-loading { padding: 12px 0 20px; }
+.native-form-page.review-page .review-queue-heading { margin-top: 24px; }
+.review-page .review-record-status { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-bottom: 12px; }
+.review-page .review-date { color: var(--z-muted); font-size: 12px; line-height: 1.6; }
+.review-page .review-consent-summary { display: block; margin: 12px 0 4px; color: var(--z-subtitle); font-size: 14px; line-height: 1.75; }
+.native-form-page.review-page .review-materials { padding-top: 12px; }
+.review-page .review-material-section { padding: 0 0 20px; }
+.native-form-page.review-page .review-material-section > .material-title { margin-top: 0; font-size: 16px; }
+.native-form-page.review-page .review-material-section > .body { margin-top: 8px; }
+.native-form-page.review-page .review-material-section .record-facts { margin-bottom: 0; }
+.review-page .review-contact { padding-top: 20px; border-top: 1px solid var(--z-line); }
+.native-form-page.review-page .review-qr-action { margin-top: 12px; width: 100%; }
+.native-form-page.review-page .review-actions { margin-top: 4px; padding: 20px 16px; border: 1px solid var(--z-line); border-radius: 8px; background: var(--z-surface); }
+.native-form-page.review-page .review-actions > .muted { margin-top: 8px; }
+.native-form-page.review-page .review-actions .field { margin: 20px 0; }
+.native-form-page.review-page .review-actions textarea { height: 144px; }
+.mini-page.native-form-page.review-page .review-actions .actions { gap: 12px; }
+.mini-page.native-form-page.review-page .review-actions .actions > button { flex: 1; min-width: 0; }
+.mini-page.native-form-page.review-page .review-actions .actions > .primary { flex-basis: 100%; }
+.review-page .review-receipt-title { display: block; font-weight: 600; }
+.review-page .review-receipt-note { display: block; margin-top: 4px; font-size: 14px; line-height: 1.75; }
+.review-page .review-busy { display: block; margin: 12px 0; padding-left: 12px; border-left: 2px solid var(--z-primary); color: var(--z-muted); font-size: 14px; line-height: 1.75; }
+.review-page .review-more { width: 100%; margin-top: 16px; }

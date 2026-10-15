@@ -1,5 +1,39 @@
 @import "../../templates/business.wxss";
-.applications-page .application-editor { margin-top: 24rpx; }
-.applications-page .qr { margin: 24rpx auto; width: 320rpx; height: 320rpx; }
-.applications-page .consent { margin-bottom: 12rpx; }
-.applications-page .form-footer > .primary { margin-top: 18rpx; }
+@import "../../styles/native-forms.wxss";
+
+.native-form-page.applications-page .application-entry { margin: 16px 0 0; }
+.native-form-page.applications-page .application-editor { margin-top: 24px; }
+.applications-page .application-form-heading { padding: 0 0 20px; }
+.applications-page .application-form-heading > .muted { margin-top: 8px; }
+.native-form-page.applications-page .application-plan { margin-top: 0; }
+.applications-page .application-receipt-id { display: block; margin-top: 8px; color: var(--z-muted); font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.applications-page .field-required { margin-left: 6px; color: var(--z-muted); font-size: 12px; font-weight: 400; }
+.applications-page .application-picker { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.applications-page .application-picker > text:first-child { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.applications-page .picker-indicator { flex-shrink: 0; color: var(--z-muted); }
+.mini-page.applications-page textarea.application-reason { height: 168px; }
+.mini-page.applications-page .application-qr-preview { margin: 16px 0; }
+.applications-page .qr-preview-feedback { padding: 12px 16px; margin: 12px 0; border: 1px solid var(--z-line); border-radius: 8px; background: var(--z-surface); }
+.native-form-page.applications-page .qr { width: 176px; height: 176px; margin: 0 auto; padding: 8px; border-radius: 8px; }
+.applications-page .saved-card-note { display: block; margin-bottom: 12px; color: var(--z-muted); font-size: 14px; line-height: 1.75; }
+.applications-page .qr-actions { display: flex; align-items: stretch; flex-wrap: wrap; gap: 8px 12px; }
+.applications-page .qr-actions > button { flex: 1; min-width: 160px; }
+.applications-page .contact-consent-section { margin-top: 24px; }
+.native-form-page.applications-page .contact-consent-section .material-title { margin: 0 0 8px; }
+.native-form-page.applications-page .consent { margin: 8px 0; }
+.native-form-page.applications-page .consent > text { flex: 1; min-width: 0; }
+.native-form-page.applications-page .form-footer > .primary { margin-top: 16px; }
+.applications-page .receipt-title { display: block; font-weight: 600; }
+.applications-page .receipt-note { display: block; margin-top: 4px; font-size: 14px; line-height: 1.75; }
+.native-form-page.applications-page .application-receipts { margin-top: 32px; }
+.applications-page .receipt-loading { padding: 12px 0 16px; }
+.applications-page .application-record-status { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-bottom: 12px; }
+.applications-page .record-date { color: var(--z-muted); font-size: 12px; line-height: 1.6; }
+.applications-page .application-next { display: block; margin-top: 12px; color: var(--z-subtitle); font-size: 15px; line-height: 1.75; }
+.applications-page .application-review-note { padding: 0 0 0 12px; margin: 16px 0; border-left: 2px solid var(--z-primary); }
+.native-form-page.applications-page .application-review-note .material-title { margin: 0 0 6px; color: var(--z-muted); font-size: 14px; }
+.native-form-page.applications-page .application-review-note .body { margin: 0; }
+.native-form-page.applications-page .application-record > .disclosure { margin-top: 8px; }
+.native-form-page.applications-page .application-record .record-detail { padding: 4px 0 12px; }
+.native-form-page.applications-page .application-record .record-detail > .body { margin-top: 8px; }
+.applications-page .receipt-more { width: 100%; margin-top: 16px; }

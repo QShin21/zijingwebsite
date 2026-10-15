@@ -150,3 +150,49 @@ node node_modules/vitest/vitest.mjs run tests/miniapp-content-flows.test.ts test
 截图复现使用`node scripts/rebuild-native-preview.mjs --suite stage-b --browser <本机Chromium路径>`；默认四宽320/375/390/430、浅深双主题。交互审查入口`.data/miniapp-050-stage-b-review/index.html`，附375px的8样板与A检查点同数据对照。所有截图属于浏览器布局映射，不能据此声称微信编译、真机键盘/安全区、媒体下载或授权交互通过。
 
 阶段B开发、本地检查与截图自审完成。本阶段共有42个变更/新增文件：30个原生产品文件、4个脚本、6个测试文件、2份文档；实际提交SHA、正常推送后的默认分支/完整远端分支列表及各文件SHA-256由审查包`GIT_RECEIPT.txt`和`manifest.json`保存，交付时另附Library回执。独立QA可按上方命令复测A的P1/P2及关联边界；A/B尚未由独立QA签署通过。主助手最新转达Windows官方工具已编译/加载成功，官方测试preview退出0；真实模拟器截图与交互等待Codex授权提示处理，且当前B提交仍需独立复测。C–F继续待执行。本云端阶段不部署服务器、不上传微信，不使用GitHub CI。
+
+## 2026-10-15：B独立复测通过，继续C/D
+
+- B已普通推送`95a4a0d847667f62cc4f21f09d103f61281a18cc`，远端默认及唯一分支为`main`。主助手转达Windows独立复测：210项测试、B的520/A的184/既有32个布局、lint、TypeScript、原生静态及JS检查全部通过，无新P0/P1/P2；确认分页保留内容、图片失败反馈、生命周期与账号保护修复。此处记录外部回执，不重复累计为云端新增测试。
+- Windows官方工具open/preview成功；真实模拟器截图和点击仍等待授权，不能写成全原生验证通过。云端不因此跳过C/D新回归。
+- 环境中断后命令已实际恢复：读取AGENTS/设计、核对HEAD及远端，工作树起点干净。C采用三个Astra max文件分工（auth/signup/activity-manage；applications/review/community-joins；staff/staff-review），root维护共享原生表单样式、截图工具、文档与唯一Git整合。D先只读核对八页业务合同，C检查点后再修改D页面。
+- C保留原16题型引擎及shared questionnaire模板；staff与team申请仍由原signup按kind处理，不复制新引擎。权限、CAS、名片展示主动同意、隐私组件、未知写入与已确认回执合同保持。新状态截图继续仅使用合成数据，四宽/双主题及业务回归将单独记录。
+- D只读核对后，在`/workspace/scratch/miniapp-050-stage-d-worktree`的detached检出并行准备两个页面组补丁；没有新增分支。C源码提交不包含D改动。D准备发现荣誉编辑/工作台既有确认回执被旧成功GET从revision4回退到3的问题，root使用真实Page/HTTP合成夹具独立复现；D将最小修复并补回归，证据位于`/workspace/scratch/miniapp-050-stage-d-preparation.md`和同目录ACK复现脚本/日志。
+
+
+## C阶段实现与本地核验（2026-10-15）
+
+本阶段基于B检查点`95a4a0d847667f62cc4f21f09d103f61281a18cc`，完成八页auth/applications/review/signup/activity-manage/staff/staff-review/community-joins。以分段填写、提交前核对、本人回执、材料审核与人工进群为任务结构，使用原生专属`native-forms.wxss`；默认暖浅色与深色均沿用共享tokens。骨干招新目录与审核页不复制问卷引擎，申请仍进入原signup的staff模式。
+
+### 合同与局部行为
+
+- 六页JS逐字节未改。`review`仅为原记录和成功回执补真实状态中文投影；`applications`补原生名片图片失败反馈与显式预览重试。坏图保留上传材料、未提交字段和主动同意；只处理当前URL、scope及可见页面，隐藏、换号、卸载和旧图片回调均忽略。新申请/新选图/新保存内容清除相应失败状态。
+- 名片展示勾选与微信图片隐私授权分别说明。未主动同意时原提交阻挡和业务文案保留；取消展示仍走原已批准名片操作。审核与人工进群沿用服务端actions、原操作参数、CAS和单次写入锁，不把意向或好友核实渲染为已经进群。
+- signup完整覆盖原16题型、真实分支/跳转后的就近错误、六人成员组、核对、草稿、长只读回执、仅名单权限、高级问卷原网站入口、POST确认后GET失败与未知写入。未改shared questionnaire模板、问卷引擎、API/集合/数据库、网站`src/`、共享tokens、依赖或锁文件。
+
+### 实际执行结果
+
+| 检查 | 结果 | 证据 |
+| --- | --- | --- |
+| 原生相关Vitest | 28文件、905项通过，退出0 | `/workspace/scratch/miniapp-050-stage-c-tests-accepted.log` |
+| 名片原生失败与生命周期 | 37项通过，为905项子集；新增3项实际Page延迟/账号回归 | `/workspace/scratch/miniapp-050-stage-c-qr-regression.log` |
+| 最后文案/布局小修相关回归 | 64项通过，为已有测试子集 | `/tmp/zijing-stage-c-signup/vitest-final.log` |
+| 全量ESLint、TypeScript | 均退出0；最终CSS/fixture修正后再次lint，TS文件未变 | `/workspace/scratch/miniapp-050-stage-c-lint-final.log`、`miniapp-050-stage-c-typecheck-accepted.log` |
+| 原生源码检查 | 25页、169文件、769855字节；域名检查开启、外部依赖0，退出0 | `/workspace/scratch/miniapp-050-stage-c-native-final.log` |
+| tokens/原生配置校验 | 退出0 | `/workspace/scratch/miniapp-050-stage-c-tokens.log` |
+| C最终四宽双主题 | 67状态、536组合，全部测量为0 | `.data/miniapp-050-stage-c/results.json` |
+| 既有样例回归 | 32组合，全部测量为0，退出0 | `.data/miniapp-050-stage-c-regression-final/results.json` |
+| 320px步骤标签定向复查 | staff全7状态×四宽×双主题=56组合，退出0；为536组合中的替换子集 | `.data/miniapp-050-stage-c-staff-final/results.json` |
+| 审查入口检查 | 1608个最终图/HTML文件齐全，32次状态/宽度/主题切换通过；错误及外部请求0 | `.data/miniapp-050-stage-c-review/gallery-check.json` |
+
+905项选择全部`miniapp*.test.ts`中的非数据库套件，加design-tokens和rebuild-native；四个实际数据库HTTP集成套件未运行。staff分工曾额外选择后端staff-recruitment套件，在导入时因缺少`PAYLOAD_SECRET`未启动，日志保留；未读取/补充凭据、未连真实数据库，不把该项写成通过。分工的256/94/105等数字与905项有重叠，不相加。
+
+首轮375px的134组合中有16个字号失败，均来自signup进度计数与activity-manage页码12px；修为14px，并把320px辅助动作调整到15px，没有降低门禁。分支错误fixture改用真实第二页投影，保留跳题行为；审核成功回执标题和独立隐私提示也按实际状态修正。重新捕获完整四宽后，536组合均为0。人工检查随后发现staff首步“岗位与批次”在320px下末字单独换行，缩为同义“岗位批次”，可见标签与aria说明同步；只重捕该页全部56组合。合并器验证唯一源码差异为staff/index.wxml、其他页面源码逐字节不变，替换全部staff组合，记录原始四宽运行及定向运行，不把56项额外累计。原536测量存于iteration-2，首轮失败测量存于iteration-1，原PNG与日志保留。
+
+最终矩阵时间2026-10-15T10:51:33.853Z，58个源文件SHA-256均与C提交前工作树一致。截图使用Playwright1.58.2/Chromium154.0.8037.57，320/375/390/430px浅深两主题；横向溢出、过小命中区、低于阈值字号、文字裁切、浏览器错误和外部请求均为0。人工查看各组375代表图、320注册/必填/长答卷与430深色材料/回执，未见剩余阻塞布局问题。
+
+### 复测与交接
+
+完整C布局复现：`node scripts/rebuild-native-preview.mjs --suite stage-c --browser <本机Chromium路径>`。审查入口`.data/miniapp-050-stage-c-review/index.html`提供67状态切换、四宽浅深及8个375px样板与B源码相同合成内容对照。对照使用B原生源码归档，其历史字号失败单独保留，不混入当前通过统计。
+
+本阶段28个文件包含19个原生产品文件、5个截图脚本、1个测试和3份协作文档；源码差异、准确SHA、远端默认/完整分支列表、测试日志和全部最终截图随审查包保存。C本地实现与自审完成，待主助手独立QA；D补丁仍在detached工作区，C提交不混入D。官方微信、真机键盘/安全区/隐私/媒体交互未验证，E/F继续待执行。本阶段未使用GitHub CI、未部署服务器、未上传微信。

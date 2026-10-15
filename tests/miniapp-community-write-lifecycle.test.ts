@@ -12,7 +12,8 @@ type Event = { currentTarget: { dataset: Record<string, unknown> }; detail: { va
 type NativePage = { data: Data; _qr: string; setData(value: Record<string, unknown>): void; onLoad(options?: Record<string, string>): void;
   onShow(): Promise<unknown>; onHide(): void; onUnload(): void; retry(): Promise<unknown>; submit(): Promise<void>; withdraw(event: Event): Promise<void>;
   openForm(event: Event): Promise<void>; note(event: Event): void; decide(event: Event): Promise<void>; joinAction(event: Event): Promise<void>;
-  handle(event: Event): Promise<void>; chooseQr(): Promise<void>; inspect(event: Event): Promise<void>; retryJoin(): Promise<void>; consent(event: Event): void };
+  handle(event: Event): Promise<void>; chooseQr(): Promise<void>; inspect(event: Event): Promise<void>; retryJoin(): Promise<void>; consent(event: Event): void;
+  qrImageError(event: Event): void; retryQrPreview(event: Event): void; newApplication(): void };
 type RequestOptions = { method?: string; required?: boolean; data?: Record<string, unknown> };
 type Modal = { success(value: { confirm: boolean }): void };
 type FileWrite = { filePath: string; success(): void };
@@ -172,5 +173,43 @@ describe('Community real deferred POST lock regression — synthetic VM', () => 
     const flow = flows[0], h = harness(flow, { deferFile: true }); await prepare(h, flow); const inspecting = h.page.inspect(event({ id: 17 })); await flush();
     expect(h.fileWrites).toHaveLength(1); h.changeUser(2); h.fileWrites[0].success(); await inspecting;
     expect(h.fs.unlink).toHaveBeenCalledWith(expect.objectContaining({ filePath: h.fileWrites[0].filePath })); expect(h.wx.previewImage).not.toHaveBeenCalled(); expect(h.page.data.docs).toHaveLength(0);
+  });
+
+  it('原生名片预览失败保留上传材料、主动同意和未提交字段，重试只恢复预览', async () => {
+    const h = harness(flows[0]); await prepare(h, flows[0]); await h.page.chooseQr();
+    const current = event({ url: h.page.data.qr, scope: h.page.data.qrPreviewScope });
+    const selected = h.page.data.qr, material = h.page._qr, reason = h.page.data.reason;
+    h.page.qrImageError(event({ url: 'wxfile://old-selection.png', scope: h.page.data.qrPreviewScope }));
+    expect(h.page.data.qrFailed).toBe(false);
+    h.page.qrImageError(current);
+    expect(h.page.data.qrFailed).toBe(true); expect(h.page.data.qr).toBe(selected); expect(h.page._qr).toBe(material);
+    expect(h.page.data.reason).toBe(reason); expect(h.page.data.contactConsent).toBe(true); expect(writes(h)).toHaveLength(0);
+    h.page.retryQrPreview(current); expect(h.page.data.qrFailed).toBe(false);
+    expect(h.wx.chooseMedia).toHaveBeenCalledTimes(1); expect(writes(h)).toHaveLength(0);
+    h.page.qrImageError(current); await h.page.chooseQr(); expect(h.page.data.qrFailed).toBe(false);
+    expect(h.page.data.contactConsent).toBe(true); expect(writes(h)).toHaveLength(0);
+  });
+
+  it('原生名片预览忽略隐藏、重新显示前旧scope和卸载后的错误回调', async () => {
+    const h = harness(flows[0]); await prepare(h, flows[0]); await h.page.chooseQr();
+    const old = event({ url: h.page.data.qr, scope: h.page.data.qrPreviewScope });
+    h.page.onHide(); h.page.qrImageError(old); expect(h.page.data.qrFailed).toBe(false);
+    await h.page.onShow(); h.page.qrImageError(old); expect(h.page.data.qrFailed).toBe(false);
+    const current = event({ url: h.page.data.qr, scope: h.page.data.qrPreviewScope });
+    h.page.qrImageError(current); expect(h.page.data.qrFailed).toBe(true);
+    h.page.retryQrPreview(current); h.page.onUnload(); h.page.qrImageError(current);
+    expect(h.page.data.qrFailed).toBe(false); expect(writes(h)).toHaveLength(0);
+  });
+
+  it('原生名片预览换号后同URL的旧回调无效，新申请清空失败标志和同意', async () => {
+    const h = harness(flows[0]); await prepare(h, flows[0]); await h.page.chooseQr();
+    const old = event({ url: h.page.data.qr, scope: h.page.data.qrPreviewScope });
+    h.changeUser(2); expect(h.page.data.qr).toBe(''); expect(h.page._qr).toBe(''); expect(h.page.data.contactConsent).toBe(false);
+    await h.page.onShow(); h.page.newApplication(); await h.page.chooseQr();
+    expect(h.page.data.qr).toBe(old.currentTarget.dataset.url);
+    h.page.qrImageError(old); expect(h.page.data.qrFailed).toBe(false);
+    h.page.qrImageError(event({ url: h.page.data.qr, scope: h.page.data.qrPreviewScope })); expect(h.page.data.qrFailed).toBe(true);
+    h.page.newApplication(); expect(h.page.data.qrFailed).toBe(false); expect(h.page.data.qr).toBe(''); expect(h.page.data.contactConsent).toBe(false);
+    expect(writes(h)).toHaveLength(0);
   });
 });

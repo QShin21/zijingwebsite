@@ -1,20 +1,70 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
-<view class="page mini-page business-page staff-page">
-  <button class="plain back" bindtap="back">返回</button><view class="page-heading"><text class="title">一起做好社团的事</text><text class="subtitle">执行部与宣传部骨干招新。了解这次的工作与安排，再选择合适的方向报名。</text></view>
-  <view wx:if="{{user && (own.length || ownLoading || ownError)}}" class="own-staff">
-    <view class="section-head"><text class="section-title">我的骨干申请</text><button class="plain" bindtap="retryOwn" disabled="{{ownLoading}}">刷新回执</button></view>
-    <text wx:if="{{ownLoading}}" class="muted">正在读取本人回执…</text><text wx:if="{{ownError}}" class="error">{{ownError}}</text>
-    <view class="record-list"><button wx:for="{{own}}" wx:key="id" class="content-link task-record own-receipt" bindtap="openBatch" data-id="{{item.batch}}"><view class="record-heading"><view><text class="section-title">{{item.batchTitle}}</text><view class="record-meta"><text>申请 {{item.id}}</text><text>{{item.updatedText}}</text></view></view><text class="badge">{{item.statusText}}</text></view><text class="receipt-link">查看进度与反馈</text></button></view>
-    <button wx:if="{{ownHasMore}}" class="plain" disabled="{{ownLoading}}" bindtap="moreOwn">加载更多本人申请</button>
+<view class="page mini-page business-page native-page native-form-page staff-page">
+  <button class="plain back" bindtap="back">返回</button>
+  <view class="page-heading">
+    <text class="title">一起做好社团的事</text>
+    <text class="subtitle">执行部与宣传部骨干招新。先了解这次的工作与安排，再选择合适的方向。</text>
+    <view class="staff-process" aria-label="申请顺序：岗位批次、填写申请、核对提交、查看回执">
+      <view class="staff-process-step"><text class="staff-step-number">1</text><text>岗位批次</text></view>
+      <view class="staff-process-step"><text class="staff-step-number">2</text><text>填写申请</text></view>
+      <view class="staff-process-step"><text class="staff-step-number">3</text><text>核对提交</text></view>
+      <view class="staff-process-step"><text class="staff-step-number">4</text><text>查看回执</text></view>
+    </view>
   </view>
+
+  <view wx:if="{{user && (own.length || ownLoading || ownError)}}" class="own-staff">
+    <view class="section-head">
+      <view><text class="section-title">我的骨干申请</text><text class="muted">继续查看进度与处理反馈。</text></view>
+      <button class="plain" bindtap="retryOwn" disabled="{{ownLoading}}">刷新回执</button>
+    </view>
+    <text wx:if="{{ownLoading}}" class="muted" aria-role="status">正在读取本人回执…</text>
+    <text wx:if="{{ownError}}" class="error" aria-role="alert">{{ownError}}</text>
+    <view class="record-list">
+      <button wx:for="{{own}}" wx:key="id" class="content-link task-record own-receipt" bindtap="openBatch" data-id="{{item.batch}}">
+        <view class="own-receipt-meta"><text>申请 {{item.id}}</text><text class="badge">{{item.statusText}}</text></view>
+        <text class="own-receipt-title">{{item.batchTitle}}</text>
+        <text class="own-receipt-updated">最近更新 {{item.updatedText}}</text>
+        <text class="receipt-link">查看进度与反馈</text>
+      </button>
+    </view>
+    <button wx:if="{{ownHasMore}}" class="plain staff-more" disabled="{{ownLoading}}" bindtap="moreOwn">加载更多本人申请</button>
+  </view>
+
   <template is="feedback" data="{{loading,error,needsLogin}}" />
   <block wx:if="{{!loading && !error}}">
-    <view class="task-section"><text class="task-section-title">骨干招新批次</text><text class="muted">各处招新入口共用同一份申请与回执。</text>
-      <view class="record-list"><view wx:for="{{docs}}" wx:key="id" class="task-record staff-batch"><view class="batch-deadline"><text>报名截止</text><text class="deadline-value">{{item.deadlineText || '以批次说明为准'}}</text></view><text class="section-title">{{item.title}}</text><text class="badge">{{item.state}}</text><text wx:if="{{item.description}}" class="body">{{item.description}}</text><view class="actions"><button class="primary" bindtap="openBatch" data-id="{{item.id}}">查看批次与本人申请</button></view><button wx:if="{{reviewStaff}}" class="plain" bindtap="reviewBatch" data-id="{{item.id}}">审核该批次申请</button></view></view>
-      <view wx:if="{{!docs.length}}" class="empty"><text class="state-title">暂无已发布骨干批次</text><text class="muted">新一轮招新发布后会出现在这里。</text><button class="secondary" bindtap="openPage" data-page="communities">寻找游戏社群</button></view><button wx:if="{{hasMore}}" class="plain" loading="{{loading}}" disabled="{{loading}}" bindtap="more">加载更多批次</button>
+    <view class="task-section staff-batches">
+      <text class="task-section-title">选择招新批次</text>
+      <text class="muted">查看岗位说明与截止时间。各处入口共用同一份申请与回执。</text>
+      <view class="record-list">
+        <view wx:for="{{docs}}" wx:key="id" class="task-record staff-batch">
+          <view class="batch-deadline"><text>报名截止</text><text class="deadline-value">{{item.deadlineText || '以批次说明为准'}}</text></view>
+          <text class="section-title">{{item.title}}</text>
+          <text class="badge">{{item.state}}</text>
+          <text wx:if="{{item.description}}" class="body">{{item.description}}</text>
+          <view class="actions"><button class="primary" bindtap="openBatch" data-id="{{item.id}}">查看批次与本人申请</button></view>
+          <button wx:if="{{reviewStaff}}" class="plain staff-review-link" bindtap="reviewBatch" data-id="{{item.id}}">审核该批次申请</button>
+        </view>
+      </view>
+      <view wx:if="{{!docs.length}}" class="empty">
+        <text class="state-title">暂无已发布骨干批次</text>
+        <text class="muted">新一轮招新发布后会出现在这里。</text>
+        <button class="secondary" bindtap="openPage" data-page="communities">寻找游戏社群</button>
+      </view>
+      <button wx:if="{{hasMore}}" class="plain staff-more" loading="{{loading}}" disabled="{{loading}}" bindtap="more">加载更多批次</button>
     </view>
   </block>
-  <view wx:if="{{!user || (!own.length && !ownLoading && !ownError)}}" class="task-section"><text class="task-section-title">我的骨干申请</text><text class="task-note">{{user ? '尚无骨干申请。选择一个已发布批次，填写后可在这里继续查看。' : '登录后查看本人申请、处理反馈与历史回执。'}}</text><button wx:if="{{!user}}" class="secondary" bindtap="login">登录查看我的申请</button></view>
-  <view wx:if="{{legacy.length || legacyError}}" class="task-section"><text class="task-section-title">外部招新与历史资料</text><text class="muted">保留既有批次的报名详情。</text><text wx:if="{{legacyError}}" class="error">{{legacyError}}</text><template is="cards" data="{{docs:legacy,label:'历史骨干招新'}}" /></view>
+
+  <view wx:if="{{!user || (!own.length && !ownLoading && !ownError)}}" class="task-section staff-own-empty">
+    <text class="task-section-title">我的骨干申请</text>
+    <text class="task-note">{{user ? '尚无骨干申请。选择一个已发布批次，填写后可在这里继续查看。' : '登录后查看本人申请、处理反馈与历史回执。'}}</text>
+    <button wx:if="{{!user}}" class="secondary" bindtap="login">登录查看我的申请</button>
+  </view>
+
+  <view wx:if="{{legacy.length || legacyError}}" class="task-section staff-history">
+    <text class="task-section-title">外部招新与历史资料</text>
+    <text class="muted">保留既有批次的报名详情。</text>
+    <text wx:if="{{legacyError}}" class="error">{{legacyError}}</text>
+    <template is="cards" data="{{docs:legacy,label:'历史骨干招新'}}" />
+  </view>
 </view>

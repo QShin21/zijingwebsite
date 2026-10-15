@@ -16,13 +16,13 @@ const options = {};
 for (let index = 2; index < process.argv.length; index += 2) {
   const key = process.argv[index], value = process.argv[index + 1];
   if (!['--source-root', '--output', '--browser', '--suite', '--widths', '--fixtures'].includes(key) || !value || value.startsWith('--')) {
-    throw new Error('Usage: node scripts/rebuild-native-preview.mjs [--suite regression|stage-a|stage-b] [--widths 320,375,390,430] [--fixtures name,name] [--source-root path] [--output path] [--browser path]');
+    throw new Error('Usage: node scripts/rebuild-native-preview.mjs [--suite regression|stage-a|stage-b|stage-c] [--widths 320,375,390,430] [--fixtures name,name] [--source-root path] [--output path] [--browser path]');
   }
   if (key in options) throw new Error('Repeated argument: ' + key);
   options[key] = value;
 }
 const suite = options['--suite'] || 'regression';
-if (!['regression', 'stage-a', 'stage-b'].includes(suite)) throw new Error('Unknown fixture suite: ' + suite);
+if (!['regression', 'stage-a', 'stage-b', 'stage-c'].includes(suite)) throw new Error('Unknown fixture suite: ' + suite);
 const widths = (options['--widths'] || (suite.startsWith('stage-') ? '320,375,390,430' : '390,320')).split(',').map(Number);
 if (!widths.length || new Set(widths).size !== widths.length || widths.some(width => !Number.isInteger(width) || width < 280 || width > 768)) throw new Error('Widths must be unique integer phone widths between 280 and 768');
 const selectedFixtures = options['--fixtures'] ? options['--fixtures'].split(',') : null;
@@ -41,6 +41,11 @@ const read = file => {
   return source;
 };
 for (const file of ['scripts/rebuild-native-preview.mjs', 'scripts/miniapp-050-fixtures.mjs', 'scripts/miniapp-050-stage-b-fixtures.mjs', 'scripts/wxml-preview-expression.mjs', 'scripts/wxml-preview-richtext.mjs']) read(path.join(repository, file));
+let additionalFixtures;
+if (suite === 'stage-c') {
+  for (const name of ['fixtures', 'signup-fixtures', 'community-fixtures', 'staff-fixtures']) read(path.join(repository, 'scripts/miniapp-050-stage-c-' + name + '.mjs'));
+  additionalFixtures = (await import('./miniapp-050-stage-c-fixtures.mjs')).stageCFixtures;
+}
 const playwrightVersion = JSON.parse(fs.readFileSync(path.join(repository, 'node_modules/@playwright/test/package.json'), 'utf8')).version;
 const native = name => path.join(sourceRoot, name);
 const htmlEscape = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
@@ -234,7 +239,8 @@ const browserVersion = browser.version();
 try {
   for (const theme of ['light', 'dark']) {
     const rt = runtime(theme), shared = rt.load(native('lib/design-tokens.js'));
-    const candidates = suite === 'stage-a' ? stageAFixtures(rt, native, file => fs.existsSync(file)) : suite === 'stage-b' ? stageBFixtures(rt, native, file => fs.existsSync(file)) : fixtureSet(rt);
+    const candidates = additionalFixtures ? additionalFixtures(rt, native, file => fs.existsSync(file)) : suite === 'stage-a' ? stageAFixtures(rt, native, file => fs.existsSync(file)) : suite === 'stage-b' ? stageBFixtures(rt, native, file => fs.existsSync(file)) : fixtureSet(rt);
+    if (new Set(candidates.map(fixture => fixture.name)).size !== candidates.length) throw new Error('Duplicate fixture names in suite: ' + suite);
     if (selectedFixtures && selectedFixtures.some(name => !candidates.some(fixture => fixture.name === name))) throw new Error('Unknown selected fixture');
     const cases = selectedFixtures ? candidates.filter(fixture => selectedFixtures.includes(fixture.name)) : candidates;
     expectedCases += cases.length * widths.length;

@@ -1,48 +1,133 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
-<view class="page mini-page business-page applications-page">
+<view class="page mini-page native-page business-page native-form-page applications-page">
   <button class="plain back" bindtap="back">返回</button>
-  <view class="page-heading"><text class="title">社群管理员申请</text><text class="subtitle">组织一个游戏社群，或参与已有社群的日常管理。</text></view>
+  <view class="page-heading">
+    <text class="title">社群管理员申请</text>
+    <text class="subtitle">组织一个游戏社群，或参与已有社群的日常管理。申请进度和负责人反馈会保留在本页。</text>
+  </view>
   <template is="feedback" data="{{needsLogin}}" />
   <block wx:if="{{!needsLogin}}">
-    <view wx:if="{{done}}" class="task-feedback" aria-role="status"><text class="task-feedback-label">{{done}}</text><text class="muted">微信群仍由管理员人工建立与拉群。</text></view>
-    <view class="compact-actions"><button class="{{apply ? 'plain' : 'primary'}}" bindtap="toggle" disabled="{{busy || imageBusy}}">{{apply ? '收起填写内容' : (realName || reason ? '继续填写申请' : '填写管理员申请')}}</button><button wx:if="{{mode !== 'submit'}}" class="plain" bindtap="newApplication" disabled="{{busy || imageBusy}}">填写另一份申请</button></view>
+    <view wx:if="{{done}}" class="native-receipt" aria-role="status">
+      <text class="receipt-title">{{done}}</text>
+      <text class="receipt-note">微信群仍由管理员人工建立与拉群。</text>
+    </view>
+    <view class="compact-actions application-entry">
+      <button class="{{apply ? 'plain' : 'primary'}}" bindtap="toggle" disabled="{{busy || imageBusy}}">{{apply ? '收起填写内容' : mode === 'card' ? '继续调整名片与展示' : (realName || reason ? '继续填写申请' : '填写管理员申请')}}</button>
+      <button wx:if="{{mode !== 'submit'}}" class="plain" bindtap="newApplication" disabled="{{busy || imageBusy}}">填写另一份申请</button>
+    </view>
+
     <view wx:if="{{apply}}" id="application-editor" class="application-editor">
-      <view class="business-summary"><text class="task-context">{{mode === 'card' ? '已批准申请 / 联系方式展示' : mode === 'edit' ? '补充资料 / 原申请重提' : '本人申请 / 等待负责人审核'}}</text><text class="section-title">{{mode === 'card' ? '名片与展示设置' : mode === 'edit' ? '修改并重新提交' : '填写申请资料'}}</text><text wx:if="{{editId}}" class="muted">回执 {{editId}}，保存沿用这份申请。</text></view>
-      <text wx:if="{{formError}}" class="error" aria-role="alert">{{formError}}</text>
+      <view class="application-form-heading">
+        <text class="section-title">{{mode === 'card' ? '名片与展示设置' : mode === 'edit' ? '修改并重新提交' : '填写申请资料'}}</text>
+        <text class="muted">{{mode === 'card' ? '管理已批准申请的进群联系方式。' : mode === 'edit' ? '根据处理意见补充资料，提交后重新进入审核。' : '请填写本人资料，并说明希望承担的社群工作。'}}</text>
+        <text wx:if="{{editId}}" class="application-receipt-id">回执 {{editId}}，本次保存沿用这份申请。</text>
+      </view>
+
       <block wx:if="{{mode !== 'card'}}">
-        <view class="task-section"><text class="task-section-title">社群与组织计划</text><text class="muted">说明你希望组织的游戏社群，以及能够投入的日常工作。</text>
-          <view class="field"><text class="field-label">游戏社群 · 必选</text><picker range="{{games}}" range-key="title" value="{{gameIndex}}" bindchange="game" disabled="{{busy || gamesLoading}}"><view>{{games[gameIndex].title}} ▾</view></picker></view>
-          <view wx:if="{{gamesError}}"><text class="error">社群选项加载失败：{{gamesError}}</text><button class="plain" bindtap="loadGames" disabled="{{gamesLoading || busy}}">重试社群选项</button></view>
-          <view wx:if="{{!games[gameIndex].id}}" class="field"><text class="field-label">新游戏名称 · 必填</text><input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{proposedGame}}" bindinput="input" data-field="proposedGame" maxlength="80" placeholder="2–80 字" disabled="{{busy}}" /></view>
-          <view class="field"><text class="field-label">申请说明 · 必填</text><textarea cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{reason}}" bindinput="input" data-field="reason" placeholder="介绍组织计划、管理经验与可投入时间" maxlength="3000" disabled="{{busy}}" /><text class="field-note">10–3000 字。请写清具体计划，方便负责人评估。</text></view>
+        <view class="task-section application-plan">
+          <text class="task-section-title">社群与组织计划</text>
+          <view class="field">
+            <text class="field-label">游戏社群 <text class="field-required">必选</text></text>
+            <picker range="{{games}}" range-key="title" value="{{gameIndex}}" bindchange="game" disabled="{{busy || gamesLoading}}">
+              <view class="application-picker"><text>{{games[gameIndex].title}}</text><text class="picker-indicator" aria-hidden="true">⌄</text></view>
+            </picker>
+            <text wx:if="{{gamesLoading}}" class="field-note" aria-role="status">正在读取社群选项…</text>
+            <view wx:if="{{gamesError}}">
+              <text class="error" aria-role="alert">社群选项加载失败：{{gamesError}}</text>
+              <button class="plain" bindtap="loadGames" disabled="{{gamesLoading || busy}}">重试社群选项</button>
+            </view>
+          </view>
+          <view wx:if="{{!games[gameIndex].id}}" class="field">
+            <text class="field-label">新游戏名称 <text class="field-required">必填</text></text>
+            <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{proposedGame}}" bindinput="input" data-field="proposedGame" maxlength="80" placeholder="2–80 字" disabled="{{busy}}" />
+          </view>
+          <view class="field">
+            <text class="field-label">申请说明 <text class="field-required">必填</text></text>
+            <textarea class="application-reason" cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{reason}}" bindinput="input" data-field="reason" placeholder="介绍组织计划、管理经验与可投入时间" maxlength="3000" disabled="{{busy}}" />
+            <text class="field-note">10–3000 字。写清活动安排和日常管理计划，方便负责人评估。</text>
+          </view>
         </view>
-        <view class="task-section"><text class="task-section-title">审核联系资料</text><text class="muted">姓名与手机号仅供本人及有权限的负责人审核使用。</text>
-          <view class="field"><text class="field-label">姓名 · 必填</text><input cursor-spacing="24" value="{{realName}}" bindinput="input" data-field="realName" maxlength="80" disabled="{{busy}}" /></view>
-          <view class="field"><text class="field-label">手机号 · 必填</text><input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{phone}}" bindinput="input" data-field="phone" maxlength="21" placeholder="可含 + 国际区号" disabled="{{busy}}" /></view>
+
+        <view class="task-section">
+          <text class="task-section-title">审核联系资料</text>
+          <text class="muted">姓名与手机号仅供本人及有权限的负责人审核使用。</text>
+          <view class="field">
+            <text class="field-label">姓名 <text class="field-required">必填</text></text>
+            <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{realName}}" bindinput="input" data-field="realName" maxlength="80" placeholder="填写本人姓名" disabled="{{busy}}" />
+          </view>
+          <view class="field">
+            <text class="field-label">手机号 <text class="field-required">必填</text></text>
+            <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{phone}}" bindinput="input" data-field="phone" maxlength="21" placeholder="可含 + 国际区号" disabled="{{busy}}" />
+          </view>
         </view>
       </block>
-      <view class="task-section"><text class="task-section-title">进群联系方式</text><text class="muted">获批并在任期间，已授权名片用于同学联系你申请加入微信群。</text>
-        <view class="field"><text class="field-label">微信个人名片二维码{{mode === 'card' ? '' : ' · 必填'}}</text>
-          <button class="image-button" hover-class="pressed" wx:if="{{qr}}" bindtap="previewImage" data-url="{{qr}}" aria-label="预览微信名片"><image class="qr" src="{{qr}}" mode="aspectFit" /></button>
-          <text wx:if="{{savedQr && !qr}}" class="muted">当前保留已保存的名片。</text>
-          <button class="secondary" bindtap="chooseQr" disabled="{{busy || imageBusy}}" loading="{{imageBusy}}">{{qr || savedQr ? '选择新二维码图片' : '选择二维码图片'}}</button>
-          <button wx:if="{{savedQr}}" class="plain" bindtap="inspectSaved" disabled="{{busy || imageBusy}}">查看已保存名片</button>
+
+      <view class="task-section contact-section">
+        <text class="task-section-title">进群联系方式</text>
+        <text class="muted">获批并在任期间，已授权名片用于同学联系你申请加入微信群。</text>
+        <view class="field">
+          <text class="field-label">微信个人名片二维码 <text wx:if="{{mode !== 'card'}}" class="field-required">必填</text></text>
+          <button wx:if="{{qr && !qrFailed}}" class="image-button application-qr-preview" hover-class="pressed" bindtap="previewImage" data-url="{{qr}}" aria-label="预览微信名片"><image class="qr" src="{{qr}}" mode="aspectFit" binderror="qrImageError" data-url="{{qr}}" data-scope="{{qrPreviewScope}}" /></button>
+          <view wx:if="{{qr && qrFailed}}" class="qr-preview-feedback"><text class="muted" aria-role="alert">名片预览暂时无法显示。原图片与已填资料已保留，可重试预览或重新选择图片。</text><button class="plain" bindtap="retryQrPreview" data-url="{{qr}}" data-scope="{{qrPreviewScope}}" disabled="{{busy || imageBusy}}">重试名片预览</button></view>
+          <text wx:if="{{savedQr && !qr}}" class="saved-card-note">已保存的名片会继续保留，可主动查看或更换。</text>
+          <view class="qr-actions">
+            <button class="secondary" bindtap="chooseQr" disabled="{{busy || imageBusy}}" loading="{{imageBusy}}">{{imageBusy ? '正在读取名片…' : qr || savedQr ? '选择新二维码图片' : '选择二维码图片'}}</button>
+            <button wx:if="{{savedQr}}" class="plain" bindtap="inspectSaved" disabled="{{busy || imageBusy}}">查看已保存名片</button>
+          </view>
           <text class="field-note">PNG、JPEG 或 WebP，2 MB 以内。取消选择或拒绝授权后，已填内容保留，可再次主动选择。</text>
         </view>
-        <view id="contact-consent"><checkbox-group bindchange="consent"><label class="consent"><checkbox color="{{themePrimary}}" value="contact" checked="{{contactConsent}}" disabled="{{busy}}" aria-label="我同意展示我的微信名片作为进群联系方式" /><text>我同意展示我的微信名片作为进群联系方式</text></label></checkbox-group><text class="field-note">{{mode === 'card' ? '取消勾选并保存，即关闭名片展示。' : '由本人主动勾选；获批后可在本回执关闭展示。'}}</text></view>
+        <view id="contact-consent" class="contact-consent-section">
+          <text class="material-title">名片展示同意</text>
+          <checkbox-group bindchange="consent">
+            <label class="consent"><checkbox color="{{themePrimary}}" value="contact" checked="{{contactConsent}}" disabled="{{busy}}" aria-label="我同意展示我的微信名片作为进群联系方式" /><text>我同意展示我的微信名片作为进群联系方式</text></label>
+          </checkbox-group>
+          <text class="field-note">{{mode === 'card' ? '取消勾选并保存，即关闭名片展示。' : '由本人主动勾选；获批后可在本回执关闭展示。'}}</text>
+          <text wx:if="{{formError === '由于入社流程规定，必须展示管理联系方式'}}" class="error" aria-role="alert">{{formError}}</text>
+          <text class="field-note">选择图片需另行完成微信隐私授权；完成该授权后，仍需在此主动确认名片展示。</text>
+        </view>
       </view>
-      <view class="form-footer"><text class="muted">申请资料用于审核。提交后可在本页查看进度与处理意见；提交和批准均不会自动加入微信群。</text><view class="privacy-links"><button class="plain" bindtap="openContract">微信隐私指引</button><button class="plain" bindtap="openPage" data-page="fixed" data-params="{{ {key: 'privacy'} }}">社团隐私说明</button></view><button class="primary" bindtap="submit" loading="{{busy}}" disabled="{{busy || imageBusy || (mode !== 'card' && gamesLoading)}}">{{mode === 'card' ? '保存名片与展示设置' : mode === 'edit' ? '保存并重新提交' : '提交申请'}}</button></view>
+
+      <view class="form-footer">
+        <text class="muted">{{mode === 'card' ? '保存后，按本次勾选更新名片展示设置。' : '申请资料用于审核。提交和批准均不会自动加入微信群。'}}</text>
+        <view class="privacy-links"><button class="plain" bindtap="openContract">微信隐私指引</button><button class="plain" bindtap="openPage" data-page="fixed" data-params="{{ {key: 'privacy'} }}">社团隐私说明</button></view>
+        <block wx:if="{{formError !== '由于入社流程规定，必须展示管理联系方式'}}"><text wx:if="{{formError}}" class="error" aria-role="alert">{{formError}}</text></block>
+        <button class="primary" bindtap="submit" loading="{{busy}}" disabled="{{busy || imageBusy || loading || (mode !== 'card' && gamesLoading)}}">{{busy ? '正在保存…' : mode === 'card' ? '保存名片与展示设置' : mode === 'edit' ? '保存并重新提交' : '提交申请'}}</button>
+      </view>
     </view>
+
     <text wx:if="{{operationError || (!apply && formError)}}" class="error" aria-role="alert">{{operationError || formError}}</text>
-    <view class="task-section"><view class="section-head"><text class="section-title">我的申请回执</text><button class="plain" bindtap="retry" disabled="{{loading || busy}}">刷新核对</button></view><text wx:if="{{error}}" class="error">{{error}}</text><text wx:if="{{loading}}" class="muted">正在读取回执…</text>
-      <view class="record-list"><view wx:for="{{docs}}" wx:key="id" class="task-record"><view class="record-heading"><view><text class="section-title">{{item.proposedGame || '游戏社群申请'}}</text><view class="record-meta"><text>回执 {{item.id}}</text><text>{{item.dateText}}</text></view></view><text class="badge">{{item.statusText}}</text></view>
-        <view wx:if="{{item.reviewNote}}" class="task-feedback"><text class="task-feedback-label">负责人反馈</text><text class="body">{{item.reviewNote}}</text></view>
-        <button class="plain disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy || imageBusy}}" aria-expanded="{{expandedId === item.id}}"><text>{{expandedId === item.id ? '收起申请资料' : '查看已提交资料'}}</text><text class="disclosure-mark">{{expandedId === item.id ? '−' : '＋'}}</text></button>
-        <view wx:if="{{expandedId === item.id}}" class="record-detail"><text class="material-title">组织计划</text><text class="body">{{item.reason}}</text><view class="record-facts"><view class="record-fact"><text class="fact-label">姓名</text><text class="fact-value" selectable>{{item.realName}}</text></view><view class="record-fact"><text class="fact-label">手机号</text><text class="fact-value" selectable>{{item.phone}}</text></view><view class="record-fact"><text class="fact-label">名片展示</text><text class="fact-value">{{item.contactConsent ? '已授权在任期间展示' : '未授权展示'}}</text></view></view><button class="plain" bindtap="inspect" data-id="{{item.id}}" disabled="{{busy || imageBusy}}">查看已提交二维码</button></view>
-        <view class="actions"><button wx:if="{{item.actions.edit}}" class="secondary" bindtap="openForm" data-id="{{item.id}}" data-action="edit" disabled="{{busy || imageBusy}}">修改并重新提交</button><button wx:if="{{item.actions.card}}" class="secondary" bindtap="openForm" data-id="{{item.id}}" data-action="card" disabled="{{busy || imageBusy}}">更新名片与授权</button><button wx:if="{{item.actions.withdraw}}" class="plain" bindtap="withdraw" data-id="{{item.id}}" disabled="{{busy || imageBusy}}">撤回网站申请</button></view>
-      </view></view>
-      <view wx:if="{{!docs.length && !loading && !error}}" class="empty"><text class="state-title">尚未提交申请</text><text class="muted">填写社群与组织计划后，回执会保留在这里。</text></view><button wx:if="{{hasMore}}" class="plain" bindtap="onReachBottom" disabled="{{loading || busy}}" loading="{{loading}}">加载更多回执</button>
+    <view class="task-section application-receipts">
+      <view class="section-head"><view><text class="section-title">我的申请回执</text><text class="muted">查看处理意见，或继续原申请。</text></view><button class="plain" bindtap="retry" disabled="{{loading || busy}}">刷新核对</button></view>
+      <text wx:if="{{error}}" class="error" aria-role="alert">{{error}}</text>
+      <text wx:if="{{done && error}}" class="muted">已确认保存的回执仍保留在下方，刷新后再核对最新可用操作。</text>
+      <view wx:if="{{loading}}" class="receipt-loading" aria-role="status"><text class="muted">正在读取回执…</text><view wx:if="{{!docs.length}}" class="loading-lines" aria-hidden="true"><view class="loading-line"></view><view class="loading-line short"></view></view></view>
+      <view class="record-list">
+        <view wx:for="{{docs}}" wx:key="id" class="task-record application-record">
+          <view class="application-record-status"><text class="badge">{{item.statusText}}</text><text class="record-date">{{item.dateText}}</text></view>
+          <text class="section-title">{{item.proposedGame || item.game.title || '游戏社群申请'}}</text>
+          <text class="application-receipt-id">回执 {{item.id}}</text>
+          <text class="application-next">{{item.status === 'pending' ? '等待负责人审核，处理意见会显示在这份回执中。' : item.status === 'approved' ? '申请已获批。微信群的建立和成员邀请仍需人工完成。' : item.status === 'returned' ? '请按反馈补充资料，再从这份回执重新提交。' : item.status === 'withdrawn' ? '网站申请已撤回，可按可用操作修改并重新提交。' : item.status === 'rejected' ? '负责人已完成审核，请查看处理意见。' : '请刷新回执，核对最新申请状态。'}}</text>
+          <view wx:if="{{item.reviewNote}}" class="application-review-note"><text class="material-title">负责人反馈</text><text class="body" selectable>{{item.reviewNote}}</text></view>
+          <button class="plain disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy || imageBusy}}" aria-expanded="{{expandedId === item.id}}"><text>{{expandedId === item.id ? '收起申请资料' : '查看已提交资料'}}</text><text class="disclosure-mark" aria-hidden="true">{{expandedId === item.id ? '−' : '＋'}}</text></button>
+          <view wx:if="{{expandedId === item.id}}" class="record-detail">
+            <text class="material-title">组织计划</text><text class="body" selectable>{{item.reason}}</text>
+            <view class="record-facts">
+              <view class="record-fact"><text class="fact-label">姓名</text><text class="fact-value" selectable>{{item.realName}}</text></view>
+              <view class="record-fact"><text class="fact-label">手机号</text><text class="fact-value" selectable>{{item.phone}}</text></view>
+              <view class="record-fact"><text class="fact-label">名片展示</text><text class="fact-value">{{item.contactConsent === true ? '已授权在任期间展示' : '未授权展示'}}</text></view>
+            </view>
+            <button class="plain" bindtap="inspect" data-id="{{item.id}}" disabled="{{busy || imageBusy}}">查看已提交二维码</button>
+          </view>
+          <view wx:if="{{item.actions.edit || item.actions.card || item.actions.withdraw}}" class="actions">
+            <button wx:if="{{item.actions.edit}}" class="secondary" bindtap="openForm" data-id="{{item.id}}" data-action="edit" disabled="{{busy || imageBusy}}">修改并重新提交</button>
+            <button wx:if="{{item.actions.card}}" class="secondary" bindtap="openForm" data-id="{{item.id}}" data-action="card" disabled="{{busy || imageBusy}}">更新名片与授权</button>
+            <button wx:if="{{item.actions.withdraw}}" class="plain" bindtap="withdraw" data-id="{{item.id}}" disabled="{{busy || imageBusy}}">撤回网站申请</button>
+          </view>
+        </view>
+      </view>
+      <view wx:if="{{!docs.length && !loading && !error}}" class="empty"><text class="state-title">尚未提交申请</text><text class="muted">填写社群与组织计划后，回执会保留在这里。</text></view>
+      <button wx:if="{{hasMore}}" class="plain receipt-more" bindtap="onReachBottom" disabled="{{loading || busy}}" loading="{{loading}}">加载更多回执</button>
     </view>
   </block>
 </view>

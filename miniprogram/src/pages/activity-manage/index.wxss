@@ -1,7 +1,14 @@
 @import "../../templates/business.wxss";
-.activity-manage-page .managed-activity { padding: 30rpx 0; border-radius: 0; }
-.activity-manage-page .managed-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20rpx; }
-.activity-manage-page .managed-heading .section-title { flex: 1; min-width: 0; }
-.activity-manage-page .managed-heading .badge { flex-shrink: 0; }
-.activity-manage-page .managed-capability { display: flex; flex-wrap: wrap; gap: 10rpx 24rpx; margin-top: 22rpx; color: var(--z-link); font-size: 28rpx; }
-.activity-manage-page .managed-activity > .muted { margin-top: 12rpx; }
+@import "../../styles/native-forms.wxss";
+
+.activity-manage-page .managed-scope-note { margin: 8px 0 24px; }
+.activity-manage-page .managed-list-head { align-items: baseline; gap: 12px; margin: 24px 0 8px; }
+.activity-manage-page .managed-list-head > .muted { flex-shrink: 0; font-size: 14px; }
+.mini-page.activity-manage-page .managed-activity { display: block; padding: 20px 0; border-bottom: 1px solid var(--z-line); border-radius: 0; }
+.activity-manage-page .managed-state { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.activity-manage-page .managed-title { display: block; margin-top: 10px; color: var(--z-text); font-size: 18px; line-height: 1.55; font-weight: 600; word-break: break-word; }
+.activity-manage-page .managed-capability { display: block; margin-top: 12px; color: var(--z-link); font-size: 15px; line-height: 1.6; }
+.activity-manage-page .managed-activity > .muted { margin-top: 8px; font-size: 14px; }
+.mini-page.activity-manage-page .managed-activity[disabled] { background: transparent; border-color: var(--z-line); }
+.activity-manage-page .managed-activity[disabled] .managed-capability { color: var(--z-muted); }
+.activity-manage-page .managed-empty { padding-top: 16px; }

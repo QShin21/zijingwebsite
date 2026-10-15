@@ -1,19 +1,85 @@
 <page-meta page-style="{{themePageStyle}}" />
-<view class="page mini-page auth-page">
+<view class="page mini-page native-page native-form-page auth-page">
   <button class="plain back" bindtap="back">返回</button>
-  <view class="page-heading"><text class="title">{{mode === 'login' ? '登录紫荆' : mode === 'register' ? '注册账号' : '重设密码'}}</text><text class="subtitle">{{mode === 'login' ? '继续刚才的报名、申请或社群浏览。' : mode === 'register' ? '用清华师生或校友邮箱验证，建立你的紫荆账号。' : '验证注册邮箱，为账号设置新的密码。'}}</text></view>
-  <view class="auth-form">
-    <text wx:if="{{error}}" class="error" aria-role="alert">{{error}}</text>
-    <view class="auth-fields">
-      <view wx:if="{{mode === 'login'}}" class="field"><text class="field-label">{{bridge ? '昵称或邮箱' : '完整邮箱'}}</text><input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{identifier}}" bindinput="input" data-field="identifier" aria-label="昵称或完整邮箱" placeholder="{{bridge ? '输入昵称或完整邮箱' : '输入网站账号邮箱'}}" maxlength="254" /></view>
-      <block wx:if="{{mode === 'register'}}"><view class="field"><text class="field-label">昵称</text><input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{name}}" bindinput="input" data-field="name" aria-label="昵称" placeholder="输入昵称" maxlength="40" /><text class="field-note">2–40 字，昵称不区分大小写。</text></view><view class="field"><text class="field-label">清华邮箱</text><input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{emailPrefix}}" bindinput="input" data-field="emailPrefix" aria-label="邮箱前缀" placeholder="输入 @ 前的邮箱名" maxlength="64" /><picker range="{{domains}}" bindchange="domain"><view class="email-domain">@{{emailDomain}} ▾</view></picker><text class="field-note">邮箱用于账号验证与密码恢复。</text></view></block>
-      <view wx:if="{{mode === 'reset'}}" class="field"><text class="field-label">完整清华邮箱</text><input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{email}}" bindinput="input" data-field="email" aria-label="完整清华邮箱" placeholder="输入注册使用的邮箱" maxlength="254" /></view>
-      <view class="field"><view class="password-heading"><text class="field-label">{{mode === 'reset' ? '新密码' : '密码'}}</text><button class="plain password-toggle" bindtap="togglePassword" aria-label="{{showPassword ? '隐藏密码' : '显示密码'}}">{{showPassword ? '隐藏' : '显示'}}</button></view><input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{password}}" password="{{!showPassword}}" confirm-type="done" bindconfirm="submit" bindinput="input" data-field="password" aria-label="密码" placeholder="{{mode === 'login' ? '输入密码' : '至少 8 位'}}" maxlength="-1" /></view>
-      <view wx:if="{{mode !== 'login'}}" class="field"><text class="field-label">确认密码</text><input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{confirm}}" password="{{!showPassword}}" bindinput="input" data-field="confirm" aria-label="确认密码" placeholder="再次输入密码" maxlength="-1" /></view>
-    </view>
-    <view wx:if="{{mode !== 'login'}}" class="form-section auth-verification"><text class="section-title">邮箱验证</text><text class="field-note">获取验证码后，在这里完成{{mode === 'register' ? '注册' : '密码重设'}}。</text><view class="field"><text class="field-label">六位验证码</text><view class="code-row"><input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{code}}" type="number" bindinput="input" data-field="code" aria-label="邮箱验证码" maxlength="6" placeholder="输入验证码" /><button class="secondary" bindtap="sendCode" disabled="{{busy || countdown > 0}}">{{countdown > 0 ? countdown + ' 秒' : '获取验证码'}}</button></view><text wx:if="{{sent}}" class="field-note" aria-role="status">请检查收件箱与垃圾邮件。验证码十分钟内有效。</text></view></view>
-    <button wx:if="{{!bridge}}" class="plain" disabled="{{busy}}" bindtap="retryBridge">重新检查账号服务</button>
-    <view class="auth-submit"><button class="primary" bindtap="submit" loading="{{busy}}" disabled="{{busy}}">{{mode === 'login' ? '登录并继续' : mode === 'register' ? '验证并注册' : '重设密码'}}</button></view>
+  <view class="page-heading auth-heading">
+    <text class="title">{{mode === 'login' ? '登录紫荆' : mode === 'register' ? '注册账号' : '重设密码'}}</text>
+    <text class="subtitle">{{mode === 'login' ? '继续刚才的报名、申请或社群浏览。' : mode === 'register' ? '用清华师生或校友邮箱验证，建立你的紫荆账号。' : '验证注册邮箱，为账号设置新的密码。'}}</text>
   </view>
-  <view class="actions auth-options"><button wx:if="{{mode !== 'login'}}" class="plain" bindtap="switchMode" data-mode="login" disabled="{{busy}}">返回登录</button><button wx:if="{{mode === 'login'}}" class="plain" bindtap="switchMode" data-mode="register" disabled="{{busy}}">注册账号</button><button wx:if="{{mode === 'login'}}" class="plain" bindtap="switchMode" data-mode="reset" disabled="{{busy}}">忘记密码</button></view><button class="plain" bindtap="openWebsite" data-url="/privacy">阅读隐私说明</button>
+
+  <view wx:if="{{!bridge}}" class="auth-service">
+    <text class="section-title">请重新检查账号服务</text>
+    <text class="muted">{{mode === 'login' ? '目前可尝试使用完整邮箱登录。昵称登录需重新检查服务后继续。' : '服务连接确认后，可继续获取验证码并完成验证。'}}</text>
+    <button class="secondary" disabled="{{busy}}" bindtap="retryBridge">重新检查账号服务</button>
+  </view>
+
+  <view class="auth-form">
+    <view class="auth-fields">
+      <text wx:if="{{mode !== 'login'}}" class="section-title">账号资料</text>
+      <text class="field-note auth-required">带 * 的项目均需填写。</text>
+      <view wx:if="{{mode === 'login'}}" class="field">
+        <text class="field-label">{{bridge ? '昵称或邮箱' : '完整邮箱'}} *</text>
+        <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{identifier}}" bindinput="input" data-field="identifier" aria-label="昵称或完整邮箱" placeholder="{{bridge ? '输入昵称或完整邮箱' : '输入网站账号邮箱'}}" maxlength="254" />
+      </view>
+      <block wx:if="{{mode === 'register'}}">
+        <view class="field">
+          <text class="field-label">昵称 *</text>
+          <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{name}}" bindinput="input" data-field="name" aria-label="昵称" placeholder="输入昵称" maxlength="40" />
+          <text class="field-note">2–40 字，昵称不区分大小写。</text>
+        </view>
+        <view class="field">
+          <text class="field-label">清华邮箱 *</text>
+          <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{emailPrefix}}" bindinput="input" data-field="emailPrefix" aria-label="邮箱前缀" placeholder="输入 @ 前的邮箱名" maxlength="64" />
+          <picker class="email-domain-picker" range="{{domains}}" bindchange="domain" aria-label="选择清华邮箱后缀">
+            <view class="email-domain"><text>@{{emailDomain}}</text><text class="email-domain-action">更换</text></view>
+          </picker>
+          <text class="field-note">确认邮箱后缀。此邮箱用于账号验证与密码恢复。</text>
+        </view>
+      </block>
+      <view wx:if="{{mode === 'reset'}}" class="field">
+        <text class="field-label">完整清华邮箱 *</text>
+        <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{email}}" bindinput="input" data-field="email" aria-label="完整清华邮箱" placeholder="输入注册使用的邮箱" maxlength="254" />
+      </view>
+      <view class="field">
+        <view class="password-heading">
+          <text class="field-label">{{mode === 'reset' ? '新密码' : '密码'}} *</text>
+          <button class="plain password-toggle" bindtap="togglePassword" aria-label="{{showPassword ? '隐藏密码' : '显示密码'}}">{{showPassword ? '隐藏' : '显示'}}</button>
+        </view>
+        <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{password}}" password="{{!showPassword}}" confirm-type="done" bindconfirm="submit" bindinput="input" data-field="password" aria-label="密码" placeholder="{{mode === 'login' ? '输入密码' : '至少 8 位'}}" maxlength="-1" />
+        <text wx:if="{{mode !== 'login'}}" class="field-note">至少 8 位，两次输入需一致。</text>
+      </view>
+      <view wx:if="{{mode !== 'login'}}" class="field">
+        <text class="field-label">确认密码 *</text>
+        <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{confirm}}" password="{{!showPassword}}" bindinput="input" data-field="confirm" aria-label="确认密码" placeholder="再次输入密码" maxlength="-1" />
+      </view>
+    </view>
+
+    <view wx:if="{{mode !== 'login'}}" class="form-section auth-verification">
+      <text class="section-title">邮箱验证</text>
+      <text class="field-note">{{mode === 'register' ? '填写好账号资料，再获取验证码。验证完成后返回登录。' : '获取注册邮箱的验证码，验证后保存新密码。'}}</text>
+      <view class="field">
+        <text class="field-label">六位验证码 *</text>
+        <view class="code-row">
+          <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{code}}" type="number" bindinput="input" data-field="code" aria-label="邮箱验证码" maxlength="6" placeholder="输入验证码" />
+          <button class="secondary" bindtap="sendCode" disabled="{{busy || countdown > 0}}">{{countdown > 0 ? countdown + ' 秒后重发' : '获取验证码'}}</button>
+        </view>
+        <view wx:if="{{sent}}" class="auth-code-sent" aria-role="status">
+          <text class="auth-code-title">验证码已发送</text>
+          <text class="field-note">请检查收件箱与垃圾邮件。验证码十分钟内有效。</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="auth-submit">
+      <text wx:if="{{error}}" class="error" aria-role="alert">{{error}}</text>
+      <text wx:if="{{busy}}" class="field-note auth-busy" aria-role="status">正在处理，请稍候。</text>
+      <button class="primary" bindtap="submit" loading="{{busy}}" disabled="{{busy}}">{{mode === 'login' ? '登录并继续' : mode === 'register' ? '验证并注册' : '重设密码'}}</button>
+    </view>
+  </view>
+
+  <view class="auth-options">
+    <button wx:if="{{mode !== 'login'}}" class="plain" bindtap="switchMode" data-mode="login" disabled="{{busy}}">返回登录</button>
+    <button wx:if="{{mode === 'login'}}" class="plain" bindtap="switchMode" data-mode="register" disabled="{{busy}}">注册账号</button>
+    <button wx:if="{{mode === 'login'}}" class="plain" bindtap="switchMode" data-mode="reset" disabled="{{busy}}">忘记密码</button>
+  </view>
+  <view class="auth-privacy"><button class="plain" bindtap="openWebsite" data-url="/privacy">阅读隐私说明</button></view>
 </view>

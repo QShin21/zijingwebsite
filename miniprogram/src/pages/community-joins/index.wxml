@@ -1,20 +1,47 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
-<view class="page mini-page business-page community-joins-page">
-  <button class="plain back" bindtap="back">返回社群</button><view class="page-heading"><text class="task-context">{{title}}</text><text class="title">人工进群管理</text><text class="subtitle">在微信完成好友核实与拉群后，在这里记录实际进度。</text></view>
+<view class="page mini-page native-page business-page native-form-page community-joins-page">
+  <button class="plain back" bindtap="back">返回社群</button>
+  <view class="page-heading"><text class="join-community-name">{{title}}</text><text class="title">人工进群管理</text><text class="subtitle">在微信完成好友核实与拉群后，在这里记录实际进度。</text></view>
   <template is="feedback" data="{{needsLogin}}" />
-  <text wx:if="{{loading}}" class="muted">正在核对管理权限与进群意向…</text><view wx:if="{{!needsLogin && !allowed && !loading && !error}}" class="empty"><text class="state-title">当前账号没有此社群的进群管理权限</text><button class="secondary" bindtap="retry">重新核对权限</button></view>
-  <view wx:if="{{error}}"><text class="error">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{loading || busy}}">重新加载</button></view><text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text><text wx:if="{{done}}" class="result-message" aria-role="status">{{done}}</text>
+  <view wx:if="{{loading}}" class="join-loading" aria-role="status"><text class="muted">正在核对管理权限与进群意向…</text><view wx:if="{{!docs.length}}" class="loading-lines" aria-hidden="true"><view class="loading-line"></view><view class="loading-line short"></view></view></view>
+  <view wx:if="{{!needsLogin && !allowed && !loading && !error}}" class="empty"><text class="state-title">当前账号没有此社群的进群管理权限</text><text class="muted">进群处理权限按当前社群的实际授权开放。</text><button class="secondary" bindtap="retry">重新核对权限</button></view>
+  <view wx:if="{{error}}"><text class="error" aria-role="alert">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{loading || busy}}">重新加载</button></view>
+  <text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text>
+  <view wx:if="{{done}}" class="native-receipt" aria-role="status"><text class="join-receipt-title">{{done}}</text><text wx:if="{{error}}" class="join-receipt-note">已确认保存的进度保留在下方，刷新后再核对后续操作。</text></view>
+
   <block wx:if="{{allowed && !needsLogin}}">
-    <view class="section-head"><text class="section-title">进群意向与进度</text><button class="plain" bindtap="retry" disabled="{{loading || busy}}">刷新核对</button></view>
-    <view class="record-list"><view wx:for="{{docs}}" wx:key="id" class="task-record">
-      <text class="section-title">{{item.memberName}}</text><text class="join-status">{{item.statusText}}</text><view class="record-meta"><text>回执 {{item.id}}</text><text>{{item.dateText}}</text></view>
-      <view wx:if="{{item.note}}" class="task-feedback"><text class="task-feedback-label">上次处理说明</text><text class="body">{{item.note}}</text></view>
-      <view wx:if="{{item.actions.confirmFriend || item.actions.confirmJoined}}" class="join-next"><text class="material-title">{{item.actions.confirmFriend ? '下一步：到微信核实好友已通过' : '下一步：在微信完成拉群'}}</text><text class="muted">{{item.actions.confirmFriend ? '确认好友已添加后，记录为等待拉群。' : '核实对方实际进入微信群后，再确认进群。'}}</text>
-        <button class="plain disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy}}" aria-expanded="{{expandedId === item.id}}"><text>{{expandedId === item.id ? '收起处理说明' : '添加处理说明（可选）'}}</text><text>{{expandedId === item.id ? '−' : '＋'}}</text></button><view wx:if="{{expandedId === item.id}}" class="field"><text class="field-label">本人可见的处理说明</text><textarea cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{item.noteDraft}}" bindinput="note" data-id="{{item.id}}" maxlength="500" placeholder="最多 500 字" disabled="{{busy}}" /></view>
-        <view class="actions"><button wx:if="{{item.actions.confirmFriend}}" class="primary" bindtap="handle" data-id="{{item.id}}" data-action="confirmFriend" disabled="{{busy || loading}}">好友已通过，等待拉群</button><button wx:if="{{item.actions.confirmJoined}}" class="primary" bindtap="handle" data-id="{{item.id}}" data-action="confirmJoined" disabled="{{busy || loading}}">已人工拉群，确认进群</button></view>
-      </view><text wx:else class="task-note">暂无可执行操作，请刷新核对最新进度。</text>
-    </view></view>
-    <view wx:if="{{!docs.length && !loading && !error}}" class="empty"><text class="state-title">暂无待处理进群意向</text><text class="muted">同学在本社群留下的意向会显示在这里。</text></view><button wx:if="{{hasMore}}" class="plain" bindtap="onReachBottom" disabled="{{loading || busy}}" loading="{{loading}}">加载更多记录</button>
+    <view class="join-workflow">
+      <text class="join-workflow-title">只记录已经完成的微信操作</text>
+      <text class="muted">先核实好友已通过，再邀请加入微信群。保存确认后，成员可在自己的进群回执中查看进度。</text>
+    </view>
+    <view class="section-head"><view><text class="section-title">进群意向与进度</text><text class="muted">每次确认对应一名成员。</text></view><button class="plain" bindtap="retry" disabled="{{loading || busy}}">刷新核对</button></view>
+    <text wx:if="{{busy}}" class="join-busy" aria-role="status">正在确认或保存人工处理结果，请稍候。</text>
+    <view class="record-list">
+      <view wx:for="{{docs}}" wx:key="id" class="task-record join-record">
+        <text class="section-title">{{item.memberName}}</text>
+        <view class="record-meta"><text>回执 {{item.id}}</text><text>{{item.dateText}}</text></view>
+        <view class="join-progress"><text class="join-status-label">当前进度</text><text class="join-status">{{item.statusText}}</text></view>
+        <view wx:if="{{item.note}}" class="join-previous-note"><text class="material-title">上次处理说明</text><text class="body" selectable>{{item.note}}</text></view>
+
+        <view wx:if="{{item.actions.confirmFriend || item.actions.confirmJoined}}" class="join-next">
+          <text class="join-next-title">{{item.actions.confirmFriend ? '到微信核实好友已通过' : '在微信完成拉群'}}</text>
+          <text class="muted">{{item.actions.confirmFriend ? '核实好友已经添加后，保存为等待拉群。成员自行报告好友申请后，仍需要管理员核实。' : '实际发出邀请，并核实对方已经进入微信群后，再保存进群确认。'}}</text>
+          <button class="plain disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy}}" aria-expanded="{{expandedId === item.id}}"><text>{{expandedId === item.id ? '收起处理说明' : '添加处理说明（可选）'}}</text><text class="disclosure-mark" aria-hidden="true">{{expandedId === item.id ? '−' : '＋'}}</text></button>
+          <view wx:if="{{expandedId === item.id}}" class="field">
+            <text class="field-label">成员可见的处理说明</text>
+            <textarea cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{item.noteDraft}}" bindinput="note" data-id="{{item.id}}" maxlength="500" placeholder="填写已核实的情况，最多 500 字" disabled="{{busy}}" />
+            <text class="field-note">保存确认时一起记录，成员可在自己的回执中查看。</text>
+          </view>
+          <view class="actions">
+            <button wx:if="{{item.actions.confirmFriend}}" class="primary" bindtap="handle" data-id="{{item.id}}" data-action="confirmFriend" disabled="{{busy || loading}}">好友已通过，等待拉群</button>
+            <button wx:if="{{item.actions.confirmJoined}}" class="primary" bindtap="handle" data-id="{{item.id}}" data-action="confirmJoined" disabled="{{busy || loading}}">已人工拉群，确认进群</button>
+          </view>
+        </view>
+        <text wx:else class="join-readonly-note">{{item.status === 'joined' ? '管理员已记录实际进群结果，本次进群流程已完成。' : item.status === 'withdrawn' ? '成员已撤回本站意向，保留这份历史回执。' : '当前暂无可执行操作，请刷新核对最新进度。'}}</text>
+      </view>
+    </view>
+    <view wx:if="{{!docs.length && !loading && !error}}" class="empty"><text class="state-title">暂无待处理进群意向</text><text class="muted">同学在本社群留下的意向会显示在这里。</text></view>
+    <button wx:if="{{hasMore}}" class="plain join-more" bindtap="onReachBottom" disabled="{{loading || busy}}" loading="{{loading}}">加载更多记录</button>
   </block>
 </view>

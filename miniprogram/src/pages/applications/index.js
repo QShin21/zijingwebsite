@@ -20,7 +20,7 @@ Page(withVisualTheme({
   data: { user: null, needsLogin: false, loading: false, error: '', docs: [], expandedId: '', page: 1, hasMore: false,
     games: [{ id: '', title: '申请新游戏社群' }], gamesLoading: false, gamesError: '', gameIndex: 0,
     apply: false, mode: 'submit', editId: '', revision: '', proposedGame: '', realName: '', phone: '', reason: '',
-    qr: '', savedQr: false, contactConsent: false, busy: false, imageBusy: false, formError: '', operationError: '', done: '' },
+    qr: '', qrFailed: false, qrPreviewScope: 0, savedQr: false, contactConsent: false, busy: false, imageBusy: false, formError: '', operationError: '', done: '' },
   ...actions,
   toggleRecord(event) {
     if (this.data.busy || this.data.loading || this.data.imageBusy) return;
@@ -40,6 +40,7 @@ Page(withVisualTheme({
     this._visible = true;
     if (this._disposed) return;
     if (this._identity !== identity()) { this._identity = identity(); this._context = (this._context || 0) + 1; this.invalidate(); this.resetPrivate(); }
+    this.setData({ qrPreviewScope: this._scope || 0 });
     return this.load();
   },
   invalidate() { this._scope = (this._scope || 0) + 1; this._operation = (this._operation || 0) + 1; this._imageTicket = (this._imageTicket || 0) + 1; },
@@ -58,7 +59,7 @@ Page(withVisualTheme({
     this.setData({ user: session.user(), needsLogin: !session.user(), loading: false, error: '', docs: [], expandedId: '', page: 1, hasMore: false,
       games: [{ id: '', title: '申请新游戏社群' }], gamesLoading: false, gamesError: '', gameIndex: 0,
       apply: false, mode: 'submit', editId: '', revision: '', proposedGame: '', realName: '', phone: '', reason: '',
-      qr: '', savedQr: false, contactConsent: false, busy: Boolean(this._pendingWrite), imageBusy: false, formError: '', operationError: '', done: '' });
+      qr: '', qrFailed: false, qrPreviewScope: this._scope || 0, savedQr: false, contactConsent: false, busy: Boolean(this._pendingWrite), imageBusy: false, formError: '', operationError: '', done: '' });
   },
   onHide() { this._visible = false; this._resumeRead = false; this.invalidate(); this.setData({ loading: false, gamesLoading: false, busy: Boolean(this._pendingWrite), imageBusy: false }); },
   onUnload() { this.onHide(); this._disposed = true; this._qr = ''; if (this._unsubscribe) this._unsubscribe(); },
@@ -115,7 +116,7 @@ Page(withVisualTheme({
     if (this.data.busy || this.data.imageBusy) return;
     this._qr = ''; this._initialGame = '';
     this.setData({ apply: true, mode: 'submit', editId: '', revision: '', gameIndex: 0, proposedGame: '', realName: '', phone: '', reason: '',
-      qr: '', savedQr: false, contactConsent: false, formError: '', operationError: '', done: '' });
+      qr: '', qrFailed: false, savedQr: false, contactConsent: false, formError: '', operationError: '', done: '' });
   },
   input(event) {
     const field = event.currentTarget.dataset.field;
@@ -135,6 +136,16 @@ Page(withVisualTheme({
     try { await privacy.openContract(); }
     catch (cause) { if (this.valid(scope)) this.setData({ formError: cause.message }); }
   },
+  qrImageError(event) {
+    const { url, scope } = event.currentTarget.dataset;
+    if (!url || url !== this.data.qr || !this.data.apply || !this.valid(Number(scope))) return;
+    this.setData({ qrFailed: true });
+  },
+  retryQrPreview(event) {
+    const { url, scope } = event.currentTarget.dataset;
+    if (this.data.busy || this.data.imageBusy || !url || url !== this.data.qr || !this.data.apply || !this.valid(Number(scope))) return;
+    this.setData({ qrFailed: false });
+  },
   async chooseQr() {
     if (this._disposed || this._visible === false || this._pendingWrite || this.data.busy || this.data.imageBusy || !identity()) return;
     const scope = this._scope || 0, ticket = this._imageTicket = (this._imageTicket || 0) + 1;
@@ -146,7 +157,7 @@ Page(withVisualTheme({
       if (!this.valid(scope) || ticket !== this._imageTicket) return;
       const qr = await files.readImage(paths[0]);
       if (!this.valid(scope) || ticket !== this._imageTicket) return;
-      this._qr = qr; this.setData({ qr: paths[0], formError: '' });
+      this._qr = qr; this.setData({ qr: paths[0], qrFailed: false, qrPreviewScope: scope, formError: '' });
     } catch (cause) { if (this.valid(scope) && ticket === this._imageTicket) this.setData({ formError: cause.message }); }
     finally { if (this.valid(scope) && ticket === this._imageTicket) this.setData({ imageBusy: false }); }
   },
@@ -162,7 +173,7 @@ Page(withVisualTheme({
     if (gameIndex < 0) { games.push({ id: gameID, title: doc.proposedGame || '已申请的游戏社群' }); gameIndex = games.length - 1; }
     this.setData({ apply: true, mode: action, editId: doc.id, revision: doc.updatedAt, games, gameIndex,
       proposedGame: doc.proposedGame || '', realName: doc.realName || '', phone: doc.phone || '', reason: doc.reason || '',
-      qr: '', savedQr: true, contactConsent: doc.contactConsent === true, formError: '', operationError: '', done: '' });
+      qr: '', qrFailed: false, savedQr: true, contactConsent: doc.contactConsent === true, formError: '', operationError: '', done: '' });
     if (action === 'edit') await this.loadSavedQr(doc.id, true);
   },
   async loadSavedQr(id, forEdit = false) {
@@ -175,7 +186,7 @@ Page(withVisualTheme({
       const image = await files.localImage(doc.wechatQr);
       if (!this.valid(scope) || ticket !== this._imageTicket) return;
       if (!image) throw new Error('已保存名片暂时无法显示，可重试或选择新图片');
-      if (forEdit && String(this.data.editId) === String(id)) { this._qr = doc.wechatQr; this.setData({ qr: image }); }
+      if (forEdit && String(this.data.editId) === String(id)) { this._qr = doc.wechatQr; this.setData({ qr: image, qrFailed: false, qrPreviewScope: scope }); }
       else wx.previewImage({ current: image, urls: [image] });
     } catch (cause) {
       if (this.valid(scope) && ticket === this._imageTicket) this.setData(forEdit ? { formError: cause.message } : { operationError: cause.message });
@@ -221,7 +232,7 @@ Page(withVisualTheme({
       const saved = decorate({ ...result.application, actions: {} });
       this.setData({ docs: [saved, ...this.data.docs.filter(doc => String(doc.id) !== String(saved.id))] });
       this._qr = '';
-      this.setData({ apply: false, mode: 'submit', editId: '', revision: '', proposedGame: '', realName: '', phone: '', reason: '', qr: '',
+      this.setData({ apply: false, mode: 'submit', editId: '', revision: '', proposedGame: '', realName: '', phone: '', reason: '', qr: '', qrFailed: false,
         savedQr: false, contactConsent: false, done: mode === 'card' ? '名片与展示设置已保存' : '申请已提交，请在回执中查看状态和处理意见' });
       await this.load();
     } catch (cause) { if (this.writeValid(context, actor, writeID)) this.setData({ formError: cause.message }); }

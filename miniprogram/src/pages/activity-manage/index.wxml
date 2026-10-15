@@ -1,13 +1,40 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
-<view class="page mini-page business-page activity-manage-page">
-  <button class="plain back" bindtap="back">返回</button><view class="page-heading"><text class="title">问卷与报名工作台</text><text class="subtitle">选择有权管理的活动，编辑问卷或查看报名资料。</text></view>
-  <view class="scope-switch"><button class="scope-tab {{kind === 'community-posts' ? 'selected' : ''}}" bindtap="area" data-kind="community-posts" hover-class="pressed" disabled="{{loading}}">社群活动</button><button class="scope-tab {{kind === 'events' ? 'selected' : ''}}" bindtap="area" data-kind="events" hover-class="pressed" disabled="{{loading}}">站点活动与草稿</button></view>
+<view class="page mini-page business-page native-page native-form-page activity-manage-page">
+  <button class="plain back" bindtap="back">返回</button>
+  <view class="page-heading">
+    <text class="title">问卷与报名</text>
+    <text class="subtitle">选择活动，处理报名问卷与已提交资料。</text>
+  </view>
+
+  <view class="scope-switch">
+    <button class="scope-tab {{kind === 'community-posts' ? 'selected' : ''}}" bindtap="area" data-kind="community-posts" hover-class="pressed" disabled="{{loading}}">社群活动</button>
+    <button class="scope-tab {{kind === 'events' ? 'selected' : ''}}" bindtap="area" data-kind="events" hover-class="pressed" disabled="{{loading}}">站点活动与草稿</button>
+  </view>
+  <text class="field-note managed-scope-note">{{kind === 'community-posts' ? '当前社群范围内的活动，按活动授权开放问卷与名单。' : '包含当前账号有权访问的站点活动与草稿。'}}</text>
   <template is="feedback" data="{{loading,error,needsLogin}}" />
+
   <block wx:if="{{!loading && !error && !needsLogin}}">
-    <view class="section-head"><text class="section-title">{{kind === 'community-posts' ? '社群活动' : '站点活动'}}</text><text class="muted">第 {{page}} 页</text></view>
-    <view class="record-list"><button wx:for="{{docs}}" wx:key="id" class="content-link task-record managed-activity" bindtap="open" data-id="{{item.id}}" hover-class="pressed" disabled="{{!item.canManage && !item.canViewSignups}}"><view class="managed-heading"><text class="section-title">{{item.title}}</text><text class="badge">{{item._status === 'draft' ? '草稿' : item.status === 'hidden' ? '已隐藏' : '已公开'}}</text></view><text wx:if="{{item._status === 'draft'}}" class="muted">发布前需完成审核</text><view class="managed-capability"><text>{{item.canManage ? '编辑问卷' : item.canViewSignups ? '查看名单' : '当前只读'}}</text><text wx:if="{{item.canManage && item.canViewSignups}}">查看名单</text></view></button></view>
-    <view wx:if="{{!docs.length}}" class="empty"><text class="state-title">此范围暂无可管理活动</text><text class="muted">已有活动授权后会显示在这里。可先在网站创建活动或保存草稿。</text></view>
-    <view wx:if="{{page > 1 || hasNextPage}}" class="pagination"><button bindtap="previous" disabled="{{page <= 1 || loading}}">上一页</button><text>第 {{page}} 页</text><button bindtap="next" disabled="{{!hasNextPage || loading}}">下一页</button></view>
+    <view class="section-head managed-list-head">
+      <text class="section-title">{{kind === 'community-posts' ? '社群活动' : '站点活动'}}</text>
+      <text class="muted">第 {{page}} 页</text>
+    </view>
+    <view class="record-list">
+      <button wx:for="{{docs}}" wx:key="id" class="content-link task-record managed-activity" bindtap="open" data-id="{{item.id}}" hover-class="pressed" disabled="{{!item.canManage && !item.canViewSignups}}">
+        <view class="managed-state"><text class="badge">{{item._status === 'draft' ? '草稿' : item.status === 'hidden' ? '已隐藏' : '已公开'}}</text></view>
+        <text class="managed-title">{{item.title}}</text>
+        <text wx:if="{{item._status === 'draft'}}" class="muted">发布前需完成审核</text>
+        <text class="managed-capability">{{item.canManage ? item.canViewSignups ? '管理问卷与报名' : '编辑报名问卷' : item.canViewSignups ? '查看报名名单' : '当前只读'}}</text>
+      </button>
+    </view>
+    <view wx:if="{{!docs.length}}" class="empty managed-empty">
+      <text class="state-title">此范围暂无可管理活动</text>
+      <text class="muted">已有活动授权后会显示在这里。可切换活动范围；创建活动或保存草稿请前往网站。</text>
+    </view>
+    <view wx:if="{{page > 1 || hasNextPage}}" class="pagination">
+      <button bindtap="previous" disabled="{{page <= 1 || loading}}">上一页</button>
+      <text>第 {{page}} 页</text>
+      <button bindtap="next" disabled="{{!hasNextPage || loading}}">下一页</button>
+    </view>
   </block>
 </view>
