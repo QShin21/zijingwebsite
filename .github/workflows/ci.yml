@@ -1,5 +1,7 @@
 name: V1 checks
-on: [push, pull_request]
+# Automatic CI is disabled for this repository by the user's 2026-10-15 request.
+# Verification is executed and recorded in the development environment.
+on: workflow_dispatch
 jobs:
   quality:
     runs-on: ubuntu-latest
