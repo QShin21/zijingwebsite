@@ -37,7 +37,7 @@ if (!extra.includes('--port') && process.env.WECHAT_DEVTOOLS_PORT) args.push('--
 args.push(...extra);
 const output = path.join(project, 'preview'); fs.mkdirSync(output, { recursive: true });
 if (command === 'preview') args.push('--qr-format', 'image', '--qr-output', path.join(output, 'preview.png'), '--info-output', path.join(output, 'preview-info.json'));
-if (command === 'upload') args.push('--version', process.env.MINIAPP_VERSION || '0.3.1', '--desc', process.env.MINIAPP_DESCRIPTION || '竞在紫荆：精简问卷修改页，保留答案预填和重新提交', '--info-output', path.join(output, 'upload-info.json'));
+if (command === 'upload') args.push('--version', process.env.MINIAPP_VERSION || '0.5.0', '--desc', process.env.MINIAPP_DESCRIPTION || '原生小程序0.5.0界面更新与流程修复', '--info-output', path.join(output, 'upload-info.json'));
 if (command === 'auto') args.push('--auto-port', process.env.MINIAPP_AUTO_PORT || '9420', '--trust-project');
 const started = Date.now();
 const result = spawnSync(process.execPath, ['-e', bootstrap, ...args], { stdio: 'inherit', env: process.env, windowsHide: true });

@@ -1,5 +1,11 @@
 # 部署、迁移与恢复
 
+## 2026-10-15 原生0.5.0候选交付
+
+用户最新要求停止后续验收，直接部署紫荆服务并上传微信0.5.0。源码在唯一默认`main`整合；现有隔离构建已完成，剩余测试已停止，未验证项继续保留。微信由主助手的Windows官方工具上传开发版，不提交正式审核或上线。
+
+当前云端仅有已授权GitHub连接；`/home/agent/.ssh`和`/workspace/.ssh`均不存在，没有SSH代理环境，`/workspace/.aws`为空且无AWS CLI，也没有服务器管理连接工具。未猜主机、读取私钥或创建凭据，因此尚未从本环境部署服务器。现有Next产物来自隔离QA配置，不能直接当作生产发布包；接续方应使用最终main提交和既有部署配置执行必要构建及存活检查。不要再次扩大验收，保留数据库、媒体、环境与其他服务。详见[0.5.0进度](MINIPROGRAM_0_5_0_PROGRESS.md)与[发布入口](MINIPROGRAM_0_5_0_RELEASE_PREPARATION.md)。
+
 ## 2026-10-15 new 分支实际发布
 
 网站已按本次授权运行应用提交 `c737d9c1ddeb63e42df6b84cc4384669f9518697`，运行目录 `/srv/zijingwebsite/releases/new-20261015-dcbae1c`，Build ID `amVNH2KnU_U8LHDG0SPci`。使用本机 Windows 生产构建，在 Linux 候选和线上验证后切换；服务器完整编译未通过。原 `app` 的来源标记属于旧部署，后续盘点先核实 systemd 实际工作目录。

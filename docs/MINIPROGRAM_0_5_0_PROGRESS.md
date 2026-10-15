@@ -249,3 +249,61 @@ node scripts/rebuild-native-preview.mjs --suite stage-d --browser <本机Chromiu
 `.data/miniapp-050-stage-d-review/index.html`提供54状态四宽浅深与8个375px样板前后对照；准确提交SHA、默认/完整远端分支列表、28个源文件差异、哈希、日志及全部最终截图交付审查包。D共有19个原生产品文件、4个截图脚本、2个测试和3份协作文档。
 
 C/D开发与本地自审完成，尚待独立QA签署。E的完整适用状态核对、官方微信/真机键盘、安全区、授权和媒体交互未完成；F发布条件尚未具备。此前B的Windows独立通过和官方open/preview结果不替代C/D新核验。本阶段没有使用GitHub CI、部署紫荆服务或上传微信，也没有操作FreeKill。
+
+## 2026-10-15：阶段 E 集成与发布准备
+
+基线为D检查点`4548d43b5929eac39a3f0d2e90cfa1662ef11fde`。主助手要求补齐隔离合成DB/HTTP权限、报名、队伍、荣誉回归，完成生产构建及网站不退化检查，统一客户端0.5.0并梳理现有发布入口；当前仅准备，不部署或上传，等待其汇总独立QA。本阶段仍只有一个Git整合者，正常提交`main`且消息带`[skip ci]`；没有调用GitHub CI或改变分支/安全设置。
+
+### 源码与测试夹具
+
+- `miniprogram/package.json`、`miniprogram/src/config.js`、`scripts/wechat.mjs`统一为0.5.0，默认上传说明更新为“原生小程序0.5.0界面更新与流程修复”。AppID、域名校验、基础库、生产origin、会话键、网站版本和协议版本均保留。
+- `tests/miniapp-team-honors.test.ts`将`path.endsWith("/navigation.js")`改为`basename(path) === "navigation.js"`。Windows的`resolve()`产生反斜杠时，旧夹具未向navigation VM注入`getCurrentPages`，导致返回路径误走首页；没有改动产品导航或业务断言。
+- Linux环境中的原测试夹具回放使用`path.posix`和`path.win32`，修前分别为`navigateBack=1/switchTab=0`与`navigateBack=0/switchTab=1`；修后两者均为`1/0`。这是跨路径语义回放，未冒称在Windows执行。主助手所述D独立候选926/927的精确失败堆栈尚未收到，不能据此宣布该独立项已关闭。
+- 预览脚本新增`stage-e`入口和来源清单；保留A–D的209个fixture对象，追加186个，共395状态、25页。四宽双主题3160组合沿用原44px命中区、字号、裁切及网络/运行错误门禁，没有删减断言。逐页mode/kind/collection及不适用原因见[状态矩阵](MINIPROGRAM_0_5_0_STATE_MATRIX.md)。
+- 网站`src/`、`public/`、共享tokens、API、集合、迁移、依赖及锁文件没有改动。
+
+### 隔离数据与完整测试
+
+实际使用仓库`rebuild-qa.mjs`的全新`native-integration`、`consent`、`post-edit`目录和三个合成PostgreSQL，端口分别55439、55614、55615，初始化前均不存在且端口空闲。runner只传递环境白名单，在快照设置空`.env` sentinel阻止向上加载真实环境，DB_PUSH=false，SMTP/S3/AI关闭，数据库和HTTP均在loopback。每个库实际执行17个迁移，测试自行创建所需合成记录；未复制生产库或读取凭据。
+
+| 实际检查 | 结果 | 证据 |
+| --- | --- | --- |
+| 主Vitest，排除两个要求专用数据库的HTTP文件 | 88文件1580/1580，退出0，204.04秒 | `miniapp-050-stage-e-all-vitest.{json,log}` |
+| 名片同意HTTP专库 | 1文件27/27，退出0 | `miniapp-050-stage-e-consent-http.{json,log}` |
+| 原生POST改稿HTTP专库 | 1文件19/19，退出0 | `miniapp-050-stage-e-post-edit-http.{json,log}` |
+| 全库文件覆盖核对 | 90文件1626项，无缺失、重复、失败、跳过或todo | `miniapp-050-stage-e-unit-summary.json` |
+| 路径修复后定向复测 | 12/12，退出0；为上述1626的已变更文件复跑，不累加 | `miniapp-050-stage-e-path-fix-vitest.{json,log}` |
+| 最终源码快照ESLint、TypeScript | 均退出0 | `miniapp-050-stage-e-lint.log`、`miniapp-050-stage-e-typecheck.log` |
+| 原生源码及tokens检查 | 均退出0；25页、169文件、791806字节、外部依赖0、urlCheck开启 | `miniapp-050-stage-e-native-check.log`、`miniapp-050-stage-e-tokens.log` |
+
+以上90个文件包含实际SQL权限、报名/回执与队伍/简介/荣誉合同。六个HTTP命名套件共78项，其中名片同意27和POST改稿19经过loopback HTTP服务器，其余32项使用真实Request/路由处理器、认证及SQL；不将全部78项描述为真实TCP请求。既有会话、迟到回调、未知写入、CAS、16题型、受控媒体和隐私测试均在1626内。网站代理额外147项是其独立构建快照的子集复核，不叠加总数。
+
+三个root合成数据库已按持有记录优雅关闭；端口关闭、runner及PostgreSQL退出均有`miniapp-050-stage-e-root-processes.json`。原始失败/警告保留：schema保护负例的拒绝消息、PostgreSQL弃用警告均与测试失败区分。任何导出证据中的合成认证连接片段另行移除并记录，不提交数据库、登录态或环境文件。
+
+### 网站构建、布局与发布范围
+
+网站构建使用独立新快照和合成数据库，`next build --webpack`退出0，时间11:29:17.634–11:31:55.696 UTC，BUILD_ID为`ImVCLpxhwekhVNrOibJiz`。697个产物文件共27287132字节复制核对0差异。302个网站构建输入在root和三个快照一致，清单摘要为`e5597fde41c425a09bf2e52a1298388ef9cf2b5f848fe338283670f8c16e9299`。编译日志的`Compiled with warnings`提示保留，日志无具体警告正文。
+
+本地`/health/live`、`/health/ready`、`/api/miniapp/status`均200且符合原合同。20路由×五宽×浅深共200个浏览组合通过，单main/H1、主题及meta正确，无横向溢出、运行异常或外部资源来源。完整网站业务、主题E2E和原生3160布局的最终结果仍待本轮汇总。
+
+网站完整浏览器首轮使用系统Chromium154.0.8037.57，2失败、1中断、123未执行，退出130。原测试设置`Sec-Fetch-Site:same-origin`后，HTML仍200但同站JS/CSS出现`net::ERR_INVALID_ARGUMENT`；匿名只读对照确认默认头和普通测试头没有该错误。未替换Origin、扩大信任或删除安全断言，改用Playwright1.58.2锁定的Chromium145.0.7632.6/rev1208；短探针记录请求失败0、pageerror0，之后真实交互测试单独证明JS可执行。第一轮下载因隔离环境未继承网络代理而连接拒绝，第二轮仅为工具下载器传递既有代理/CA配置白名单后成功，没有输出配置值、安装系统依赖或改锁文件。
+
+网站浅色专项首轮11项为8通过、3失败，退出1。其中主题矩阵达到原300秒上限；另外两项的社群空态被本轮新合成库中额外的`demo-game`演示记录干扰。原trace、35份截图/指标保留在本地，按实际原始轮次记录，不覆盖失败。已仅将自己播下的该演示游戏从published改为draft；后续保持原测试与超时参数复查。网站业务主轮另有在axe扫描/最后回执读取时达到原90秒上限的用例，等待低负载定点复查；不根据流程走到末尾就记为通过。
+
+主题覆盖按代码区分：`club-theme`的7项实际读取主题参数，后续浅深分别记录；`club-visual`的4项使用默认浅色，不因轮次名称含dark而称为深色覆盖。200格浏览矩阵另有真实浅深各100格。截图交付保留首页、社群、代表队、活动的16张公共页面图；其余4张账号与4张含既有公开联系人文本的隐私页截图仅留本地，原24张生成记录不改写。
+
+发布入口、AppID、版本覆盖、精确Git导入包、现有代码发布器的Node24.12/glibc2.36要求、preflight及健康/备份/恢复合同见[发布准备](MINIPROGRAM_0_5_0_RELEASE_PREPARATION.md)。本地Node24.19的合成构建不冒充代码发布器要求的生产构建证据。官方微信编译/原生点击、键盘/设备安全区、隐私SDK、媒体播放、真机、独立QA和生产发布均按各自实际证据记录，`releaseReady:false`。
+
+### 最新指令：停止剩余验收，直接发布
+
+用户明确要求“别管后面的验证与测试了，直接部署并上传微信0.5.0”。该指令覆盖前述等待独立QA/Windows/模拟器的发布门槛。收到后立即取消后续低负载复查、深色专项、历史同意网页专项及画廊检查，停止仍在运行的网站主轮并关闭自有测试服务；未继续扩大验收。
+
+四个原生宽度进程在停止指令前已自然完成，均退出0：320px于12:17:33.507、375px于12:17:57.748、390px于12:18:05.852、430px于12:18:03.829 UTC完成。每宽790个，合计395状态×4宽×双主题3160组合；原报告的横溢出、过小热区、各类字号、裁切、运行异常和网络请求均0。仅汇总既有报告，没有追加布局、画廊或交互测试。原HTML与截图保留在`.data/miniapp-050-stage-e-width-{320,375,390,430}`。
+
+网站Chromium145主轮按用户要求中断，实际为51通过、2超时失败、12条件跳过、1中断、60未运行，退出130；专项浅色维持8通过/3失败、退出1。原失败和剩余用例未复测，不将它们改为通过。200个独立网站浏览组合、1626项单元/SQL/HTTP、静态检查与完整构建保留各自已有范围。机器证据见[阶段E记录](evidence/miniapp-050-stage-e-20261015.json)。
+
+客户端0.5.0源码与上传默认值已经齐备，按最新授权普通提交推送唯一默认`main`，不调用GitHub CI。微信上传由主助手安排Windows官方开发者工具执行，本环境没有调用微信工具，避免重复上传；正式审核和上线未请求。
+
+服务器部署存在明确环境阻碍：当前云端没有`/home/agent/.ssh`或`/workspace/.ssh`配置，没有SSH代理环境，`/workspace/.aws`为空且未安装AWS CLI，已提供工具中没有服务器管理连接。GitHub既有认证可用，但不能代替服务器认证。未猜主机、读取私钥、生成凭据或改变任何生产服务。现有`.data/rebuild-qa-20261013/contracts/app/.next`是隔离QA配置的成功构建，BUILD_ID为`ImVCLpxhwekhVNrOibJiz`，不能直接冒充生产发布包；具备已有部署连接的执行方从最终main提交继续必要生产构建及存活检查。
+
+原验证就绪字段仍为false，含义是检查清单未全完成；用户已明确授权直接发布，无需再次确认。后续只记录实际部署与0.5.0官方上传回执，不能把未执行的平台或生产操作写成成功。

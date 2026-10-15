@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { resolve, dirname } from "node:path";
+import { resolve, dirname, basename } from "node:path";
 import { runInNewContext } from "node:vm";
 import { describe, expect, it, vi } from "vitest";
 
@@ -51,7 +51,7 @@ function harness() {
   runInNewContext(readFileSync(filename, "utf8"), { wx, Page: (value: Page) => { page = value; },
     getCurrentPages: () => [{}, {}], require: (name: string) => {
       const path = resolve(dirname(filename), name + ".js");
-      if (path.endsWith("/navigation.js")) {
+      if (basename(path) === "navigation.js") {
         const module = { exports: {} as unknown };
         runInNewContext(readFileSync(path, "utf8"), { module, wx, getCurrentPages: () => [{}, {}], require: (name: string) => load(resolve(dirname(path), name + ".js")) });
         return module.exports;

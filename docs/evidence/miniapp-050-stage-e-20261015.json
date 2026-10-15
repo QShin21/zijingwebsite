@@ -1,0 +1,350 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-15T12:21:24.258116+00:00",
+  "baseCommit": "4548d43b5929eac39a3f0d2e90cfa1662ef11fde",
+  "clientVersion": "0.5.0",
+  "appId": "wxccf9f8fc9515ebd5",
+  "userDirectedRelease": true,
+  "remainingValidationStoppedByUser": true,
+  "releaseReady": false,
+  "releaseReadyMeaning": "Original validation checklist is incomplete; user explicitly authorized release without waiting. This does not request further confirmation.",
+  "unitTests": {
+    "files": 90,
+    "passed": 1626,
+    "failed": 0,
+    "skipped": 0,
+    "targetedPathFixRerun": 12,
+    "targetedRerunIncludedInTotal": true
+  },
+  "staticChecks": {
+    "eslint": 0,
+    "typescript": 0,
+    "nativeCheck": 0,
+    "tokens": 0,
+    "pages": 25,
+    "files": 169,
+    "bytes": 791806,
+    "urlCheck": true
+  },
+  "nativeLayout": {
+    "fixtures": 395,
+    "cases": 3160,
+    "completedBeforeStop": true,
+    "captureRuns": [
+      {
+        "width": 320,
+        "cases": 790,
+        "recordedAt": "2026-10-15T12:17:33.507Z",
+        "exitCode": 0,
+        "report": ".data/miniapp-050-stage-e-width-320/results.json",
+        "sha256": "a92bfa37130d1a3cd477a11cfb030fca28edc7c80bd56eded78240b0aa29ba21",
+        "metricTotals": {
+          "overflow": 0,
+          "undersized": 0,
+          "smallFieldText": 0,
+          "smallBodyText": 0,
+          "smallActionText": 0,
+          "smallAuxiliaryText": 0,
+          "clippedText": 0,
+          "errors": 0,
+          "blockedRequests": 0
+        }
+      },
+      {
+        "width": 375,
+        "cases": 790,
+        "recordedAt": "2026-10-15T12:17:57.748Z",
+        "exitCode": 0,
+        "report": ".data/miniapp-050-stage-e-width-375/results.json",
+        "sha256": "c3d92523c94d92d6e5f84a098fa3a67a354ad416db31a5a91ba0037804a9d329",
+        "metricTotals": {
+          "overflow": 0,
+          "undersized": 0,
+          "smallFieldText": 0,
+          "smallBodyText": 0,
+          "smallActionText": 0,
+          "smallAuxiliaryText": 0,
+          "clippedText": 0,
+          "errors": 0,
+          "blockedRequests": 0
+        }
+      },
+      {
+        "width": 390,
+        "cases": 790,
+        "recordedAt": "2026-10-15T12:18:05.852Z",
+        "exitCode": 0,
+        "report": ".data/miniapp-050-stage-e-width-390/results.json",
+        "sha256": "4e7e5c6fcaf148287e7396104ba98ae014e7c848eeb2e434f5cc355c029b2f03",
+        "metricTotals": {
+          "overflow": 0,
+          "undersized": 0,
+          "smallFieldText": 0,
+          "smallBodyText": 0,
+          "smallActionText": 0,
+          "smallAuxiliaryText": 0,
+          "clippedText": 0,
+          "errors": 0,
+          "blockedRequests": 0
+        }
+      },
+      {
+        "width": 430,
+        "cases": 790,
+        "recordedAt": "2026-10-15T12:18:03.829Z",
+        "exitCode": 0,
+        "report": ".data/miniapp-050-stage-e-width-430/results.json",
+        "sha256": "3e8d42a94f97e2dc354b2fca44c7748e9b23ba0a959c4116408024de7e4bab19",
+        "metricTotals": {
+          "overflow": 0,
+          "undersized": 0,
+          "smallFieldText": 0,
+          "smallBodyText": 0,
+          "smallActionText": 0,
+          "smallAuxiliaryText": 0,
+          "clippedText": 0,
+          "errors": 0,
+          "blockedRequests": 0
+        }
+      }
+    ],
+    "metricTotals": {
+      "overflow": 0,
+      "undersized": 0,
+      "smallFieldText": 0,
+      "smallBodyText": 0,
+      "smallActionText": 0,
+      "smallAuxiliaryText": 0,
+      "clippedText": 0,
+      "errors": 0,
+      "blockedRequests": 0
+    },
+    "galleryVerificationRun": false
+  },
+  "website": {
+    "buildExitCode": 0,
+    "buildId": "ImVCLpxhwekhVNrOibJiz",
+    "buildEnvironment": "Isolated synthetic QA; not a production deployment package",
+    "buildDirectory": ".data/rebuild-qa-20261013/contracts/app/.next",
+    "websiteInputHash": "e5597fde41c425a09bf2e52a1298388ef9cf2b5f848fe338283670f8c16e9299",
+    "inputFiles": 302,
+    "visualMatrixPassed": 200,
+    "remainingE2E": "Stopped at explicit user request; no further retests or dark/history runs.",
+    "browserRuns": [
+      {
+        "label": "stage-e-web-contracts",
+        "planned": 147,
+        "passed": 147,
+        "failed": 0,
+        "skipped": 0,
+        "interrupted": 0,
+        "notRun": 0,
+        "exitCode": 0,
+        "resultPath": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/contracts/evidence-sanitized/stage-e-web-contracts.json",
+        "status": "finished"
+      },
+      {
+        "label": "stage-e-prod-e2e-all",
+        "planned": 126,
+        "passed": 0,
+        "failed": 2,
+        "skipped": 0,
+        "interrupted": 1,
+        "notRun": 123,
+        "exitCode": 130,
+        "resultPath": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/contracts/evidence-sanitized/stage-e-prod-e2e-all.json",
+        "status": "interrupted-environment-failure",
+        "browserVersion": "154.0.8037.57"
+      },
+      {
+        "label": "stage-e-prod-e2e-chromium145",
+        "planned": 126,
+        "passed": 51,
+        "failed": 2,
+        "skipped": 12,
+        "interrupted": 1,
+        "notRun": 60,
+        "exitCode": 130,
+        "resultPath": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/contracts/evidence-sanitized/stage-e-prod-e2e-chromium145.json",
+        "status": "stopped-by-user",
+        "stoppedByUser": true,
+        "browserVersion": "145.0.7632.6"
+      },
+      {
+        "label": "stage-e-visual-light",
+        "planned": 11,
+        "passed": 8,
+        "failed": 3,
+        "skipped": 0,
+        "interrupted": 0,
+        "notRun": 0,
+        "exitCode": 1,
+        "resultPath": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/contracts/evidence-sanitized/stage-e-visual-light.json",
+        "status": "finished",
+        "browserVersion": "145.0.7632.6"
+      },
+      {
+        "label": "stage-e-visual-dark",
+        "planned": 7,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "interrupted": 0,
+        "notRun": 7,
+        "exitCode": null,
+        "resultPath": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/contracts/evidence-sanitized/stage-e-visual-dark.json",
+        "status": "not-started-user-stopped"
+      },
+      {
+        "label": "stage-e-consent-history",
+        "planned": 1,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "interrupted": 0,
+        "notRun": 1,
+        "exitCode": null,
+        "resultPath": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/contracts/evidence-sanitized/stage-e-consent-history.json",
+        "status": "not-started-user-stopped"
+      },
+      {
+        "label": "stage-e-visual-light-recheck",
+        "planned": 3,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "interrupted": 0,
+        "notRun": 3,
+        "exitCode": null,
+        "resultPath": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/contracts/evidence-sanitized/stage-e-visual-light-recheck.json",
+        "status": "not-started-user-stopped"
+      },
+      {
+        "label": "stage-e-prod-e2e-recheck",
+        "planned": 2,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "interrupted": 0,
+        "notRun": 2,
+        "exitCode": null,
+        "resultPath": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/contracts/evidence-sanitized/stage-e-prod-e2e-recheck.json",
+        "status": "not-started-user-stopped"
+      },
+      {
+        "label": "stage-e-web-matrix",
+        "planned": 200,
+        "passed": 200,
+        "failed": 0,
+        "skipped": 0,
+        "interrupted": 0,
+        "notRun": 0,
+        "exitCode": 0,
+        "status": "finished",
+        "browserVersion": "154.0.8037.57",
+        "resultPath": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/contracts/evidence-sanitized/stage-e-public-matrix.json",
+        "screenshots": 24,
+        "deliverableScreenshots": 16,
+        "excludedScreenshots": 8
+      }
+    ],
+    "verificationPassed": false,
+    "cleanup": {
+      "at": "2026-10-15T12:18:49.287166+00:00",
+      "completed": true,
+      "reason": "User requested immediate stop of remaining verification.",
+      "records": [
+        {
+          "profile": "contracts",
+          "kind": "database",
+          "runnerPID": 346778,
+          "postgresPID": 346826,
+          "signal": "SIGTERM",
+          "ownershipVerified": true
+        },
+        {
+          "profile": "visual",
+          "kind": "paused-next-server",
+          "runnerPID": 428363,
+          "childPID": 428398,
+          "signal": "SIGTERM",
+          "ownershipVerified": true
+        },
+        {
+          "profile": "visual",
+          "kind": "database",
+          "runnerPID": 347513,
+          "postgresPID": 347573,
+          "signal": "SIGTERM",
+          "ownershipVerified": true
+        },
+        {
+          "profile": "consent-web",
+          "kind": "database",
+          "runnerPID": 435236,
+          "postgresPID": 435995,
+          "signal": "SIGTERM",
+          "ownershipVerified": true
+        },
+        {
+          "profile": "prod-browser",
+          "kind": "next-server",
+          "runnerPID": 349376,
+          "childPID": 349388,
+          "signal": "SIGTERM",
+          "ownershipVerified": true
+        },
+        {
+          "profile": "prod-browser",
+          "kind": "database",
+          "runnerPID": 346811,
+          "postgresPID": 346849,
+          "signal": "SIGTERM",
+          "ownershipVerified": true
+        },
+        {
+          "at": "2026-10-15T12:10:13.449305+00:00",
+          "runnerPID": 538580,
+          "signal": "SIGTERM",
+          "ownershipVerified": true,
+          "reason": "Mutation was committed and recorded; the standalone helper remained idle with open runtime handles. Graceful stop of the owned helper only.",
+          "mutationRecord": "/workspace/zijingwebsite/.data/rebuild-qa-20261013/visual/stage-e-visual-baseline-adjustment.json"
+        }
+      ],
+      "verifiedAt": "2026-10-15T12:20:08.832053+00:00",
+      "ports": {
+        "3364": "free",
+        "3365": "free",
+        "3366": "free",
+        "55617": "free",
+        "55619": "free",
+        "55616": "free",
+        "40071": "free",
+        "2526": "free"
+      },
+      "remainingProcessesInOwnedApps": [],
+      "remainingDedicatedBrowserProcesses": [],
+      "smtp": "No SMTP listener remains on the exclusive synthetic sink port.",
+      "noUnknownProcessesStopped": true
+    }
+  },
+  "deployment": {
+    "executed": false,
+    "blocker": "No existing SSH configuration or agent session, empty AWS configuration, no AWS CLI or server management connector in this execution environment.",
+    "productionActions": [],
+    "credentialsReadOrGenerated": false
+  },
+  "wechat": {
+    "executedHere": false,
+    "owner": "Parent task Windows official developer tools",
+    "version": "0.5.0",
+    "officialReviewOrPublicReleaseRequested": false
+  },
+  "githubCiExecuted": false,
+  "unverified": [
+    "Unfinished website browser tests and original failed cases without rerun",
+    "Final Windows portability confirmation",
+    "Official WeChat/native simulator and real-device interactions",
+    "Production deployment and new official 0.5.0 upload receipt"
+  ]
+}
