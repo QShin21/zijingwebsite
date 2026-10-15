@@ -1,0 +1,146 @@
+{
+  "deployedAt": "2026-10-15T12:32:47.065183+00:00",
+  "revision": "fb841c23c3689fb62d047a5dc7c4e119b51b0c02",
+  "release": "/srv/zijingwebsite/releases/miniapp-050-20261015-fb841c2",
+  "backup": "/srv/zijingwebsite/backups/miniapp-050-20261015-fb841c2",
+  "buildID": "0YnkbmfoFEhb1VP-S-9Vm",
+  "reusedBuildFrom": "05ffe64cd84263847cc0776e36a73cfb220c8517",
+  "identicalBuildInputs": 300,
+  "verifiedSourceFiles": 847,
+  "configHashesUnchanged": true,
+  "mediaHashesUnchanged": true,
+  "databaseProcessUnchanged": true,
+  "migrationsExecuted": false,
+  "rollbackPrepared": true,
+  "rollbackExecuted": false,
+  "candidate": {
+    "origin": "http://127.0.0.1:3101",
+    "checks": [
+      {
+        "route": "/events",
+        "status": 200,
+        "exactFilings": true,
+        "officialLinks": true,
+        "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+        "iconStatus": 200
+      },
+      {
+        "route": "/announcements",
+        "status": 200,
+        "exactFilings": true,
+        "officialLinks": true,
+        "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+        "iconStatus": 200
+      },
+      {
+        "route": "/login",
+        "status": 200,
+        "exactFilings": true,
+        "officialLinks": true,
+        "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+        "iconStatus": 200
+      },
+      {
+        "route": "/privacy",
+        "status": 200,
+        "exactFilings": true,
+        "officialLinks": true,
+        "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+        "iconStatus": 200
+      },
+      {
+        "route": "/health/live",
+        "status": 200
+      },
+      {
+        "route": "/health/ready",
+        "status": 200
+      }
+    ]
+  },
+  "live": {
+    "origin": "https://home.thuzijing.top",
+    "checks": [
+      {
+        "route": "/events",
+        "status": 200,
+        "exactFilings": true,
+        "officialLinks": true,
+        "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+        "iconStatus": 200
+      },
+      {
+        "route": "/announcements",
+        "status": 200,
+        "exactFilings": true,
+        "officialLinks": true,
+        "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+        "iconStatus": 200
+      },
+      {
+        "route": "/login",
+        "status": 200,
+        "exactFilings": true,
+        "officialLinks": true,
+        "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+        "iconStatus": 200
+      },
+      {
+        "route": "/privacy",
+        "status": 200,
+        "exactFilings": true,
+        "officialLinks": true,
+        "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+        "iconStatus": 200
+      },
+      {
+        "route": "/health/live",
+        "status": 200
+      },
+      {
+        "route": "/health/ready",
+        "status": 200
+      }
+    ]
+  },
+  "miniappAPI": {
+    "version": 2,
+    "authentication": [
+      "email",
+      "nickname"
+    ],
+    "registration": true,
+    "questionnaireVersion": 3,
+    "responseEditing": true,
+    "operationsVersion": 1,
+    "platformRoles": [
+      "member",
+      "backbone",
+      "vicePresident",
+      "president"
+    ],
+    "communityOffices": true,
+    "manualWechatJoin": true
+  },
+  "wechatUploadRepeated": false,
+  "wechatPlatformVersionConfirmedByUser": "0.5.0",
+  "freekill": {
+    "https": 200,
+    "websocket": 101,
+    "certificateVerified": true,
+    "gameplayVerified": false
+  },
+  "nativeStaticCheck": {
+    "pages": 25,
+    "files": 169,
+    "bytes": 791806,
+    "domainChecking": true,
+    "nativeDependencies": 0
+  },
+  "limitations": [
+    "No repeated WeChat upload; user confirmed 0.5.0 visible on platform",
+    "No WeChat review or publication performed",
+    "No real-phone or authenticated business-flow verification",
+    "No rollback execution; no full test suite rerun"
+  ]
+}
