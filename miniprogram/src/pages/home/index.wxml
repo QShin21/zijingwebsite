@@ -1,27 +1,34 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
 <import src="../../templates/club.wxml" />
-<view class="page mini-page home-page">
-  <view class="masthead"><text class="brand-name">竞在紫荆</text><text class="brand-sub">ZIJING ESPORTS</text></view>
+<import src="../../templates/native.wxml" />
+<view class="page mini-page native-page home-page">
+  <view class="home-masthead"><text class="home-brand">竞在紫荆</text><text class="home-identity">{{user ? '欢迎回到主场' : '校园电竞社团'}}</text></view>
   <view class="home-cover">
-    <text class="hero-title">{{site.heroTitle || '找到队友，一起上场'}}</text>
-    <text class="hero-description">{{site.heroSubtitle || '寻找游戏同好，参加社团活动，记录一起比赛的日常。'}}</text>
-    <view class="cover-actions"><button class="primary" bindtap="openPage" data-page="communities">寻找游戏社群</button><button class="secondary" bindtap="openPage" data-page="events">近期活动</button></view>
-    <text wx:if="{{!user}}" class="field-note">活动与通知可直接浏览，进入社群时登录。</text>
-    <view wx:if="{{hero}}" class="home-image"><image class="hero-image" src="{{hero.url}}" mode="aspectFill" aria-label="{{hero.alt || site.heroTitle}}" /><text wx:if="{{hero.alt || hero.credit}}" class="field-note">{{hero.alt}}<text wx:if="{{hero.credit}}"> / {{hero.credit}}</text></text></view>
+    <text class="home-title">{{site.heroTitle || '找到队友，一起上场'}}</text>
+    <text class="home-description">{{site.heroSubtitle || '寻找游戏同好，参加社团活动。'}}</text>
+    <view class="home-cover-actions"><button class="primary" bindtap="openPage" data-page="communities">进入游戏社群</button><button class="plain" bindtap="openPage" data-page="events">查看活动</button></view>
+    <text wx:if="{{!user}}" class="home-login-hint">活动与通知可直接浏览，进入社群时登录。</text>
   </view>
   <template is="feedback" data="{{loading, error}}" />
   <block wx:if="{{!loading && !error}}">
-    <view wx:if="{{announcements.length}}" class="home-notices"><view class="section-heading"><text class="section-title">通知</text><button class="more" bindtap="openModule" data-kind="announcements">全部通知</button></view><button wx:for="{{announcements}}" wx:key="id" class="content-link notice-row" bindtap="openContent" data-doc="{{item}}"><text class="notice-title">{{item.title}}</text><text class="notice-date">{{item.dateText}}</text></button></view>
+    <block wx:for="{{modules}}" wx:for-item="module" wx:for-index="moduleIndex" wx:key="kind">
+      <view class="native-section home-module home-module-{{module.kind}}">
+        <view class="native-section-head"><text class="section-title">{{module.title}}</text><button class="more" bindtap="openModule" data-kind="{{module.kind}}">{{module.kind === 'events' ? '全部日程' : '查看全部'}}</button></view>
+        <view wx:if="{{module.error}}" class="native-feedback"><text class="state-title">{{module.title}}暂未读取</text><text class="muted">{{module.error}}</text><button class="secondary" bindtap="retry">重新加载</button></view>
+        <template wx:elif="{{module.kind === 'events'}}" is="native-events" data="{{docs:module.docs, featured:true, compact:true, showNotices:moduleIndex === 0, announcements, emptyTitle:'活动日程正在准备', emptyHint:'新活动发布后会出现在这里，也可先去寻找游戏社群。'}}" />
+        <template wx:else is="native-index" data="{{docs:module.docs, compact:true, emptyTitle:'暂无已发布内容', emptyHint:'新内容发布后会出现在这里，可稍后下拉刷新。'}}" />
+      </view>
+      <template wx:if="{{moduleIndex === 0 && (module.kind !== 'events' || module.error || !module.docs.length)}}" is="home-notices" data="{{announcements}}" />
+    </block>
+    <template wx:if="{{!modules.length}}" is="home-notices" data="{{announcements}}" />
+    <view wx:if="{{showJoin}}" class="native-section home-participate"><view class="native-section-head"><text class="section-title">一起参与</text></view><view class="home-participate-actions"><button class="secondary" bindtap="openWebsite" data-url="/join/members">游戏社群</button><button class="secondary" bindtap="openWebsite" data-url="/join/teams">代表队选拔</button><button class="secondary" bindtap="openWebsite" data-url="/join/staff">社团骨干</button></view></view>
     <template is="staff-batches" data="{{batches:staffBatches}}" />
-    <view wx:for="{{modules}}" wx:key="kind" class="section home-module home-module-{{item.kind}}"><view class="section-heading"><text class="section-title">{{item.title}}</text><button class="more" bindtap="openModule" data-kind="{{item.kind}}">查看全部</button></view><view wx:if="{{item.error}}" class="error">{{item.error}}</view><template wx:else is="cards" data="{{docs:item.docs, label:item.title}}" /></view>
-    <view wx:if="{{showJoin}}" class="section home-participate"><view class="section-heading"><text class="section-title">一起参与</text></view><button class="content-link shortcut" bindtap="openWebsite" data-url="/join/members"><view class="shortcut-main"><text class="shortcut-title">加入游戏社群</text><text class="muted">联系管理员，申请加入微信群。</text></view><text class="shortcut-sign" aria-hidden="true">›</text></button><button class="content-link shortcut" bindtap="openWebsite" data-url="/join/teams"><view class="shortcut-main"><text class="shortcut-title">参加代表队选拔</text><text class="muted">查看招新批次与参与条件。</text></view><text class="shortcut-sign" aria-hidden="true">›</text></button><button class="content-link shortcut" bindtap="openWebsite" data-url="/join/staff"><view class="shortcut-main"><text class="shortcut-title">成为社团骨干</text><text class="muted">一起组织活动、记录社团故事。</text></view><text class="shortcut-sign" aria-hidden="true">›</text></button></view>
-    <view wx:if="{{clubError}}" class="section"><text class="error">{{clubError}}</text><button class="secondary" bindtap="retryClub">重试招新与社群推荐</button></view>
-    <view wx:if="{{promotions.event.length}}" class="section"><view class="section-heading"><text class="section-title">社群活动推荐</text></view><template is="promotion-cards" data="{{docs:promotions.event}}" /></view>
-    <view wx:if="{{promotions.notice.length}}" class="section"><view class="section-heading"><text class="section-title">社群通知</text></view><template is="promotion-cards" data="{{docs:promotions.notice}}" /></view>
-    <view wx:if="{{promotions.showcase.length}}" class="section"><view class="section-heading"><text class="section-title">社群风采</text></view><template is="promotion-cards" data="{{docs:promotions.showcase}}" /></view>
-    <view wx:if="{{showAbout}}" class="section about-brief"><text class="section-title">{{site.name}}</text><text wx:if="{{site.description}}" class="body">{{site.description}}</text><button class="plain" bindtap="openWebsite" data-url="/about">了解社团</button></view>
-    <view wx:if="{{site.navigation.length}}" class="section"><button wx:for="{{site.navigation}}" wx:key="path" class="content-link shortcut" bindtap="openWebsite" data-url="{{item.path}}"><text class="shortcut-main">{{item.label}}</text><text class="shortcut-sign" aria-hidden="true">›</text></button></view>
+    <view wx:if="{{clubError}}" class="native-section native-feedback"><text class="state-title">招新与社群推荐暂未读取</text><text class="error">{{clubError}}</text><button class="secondary" bindtap="retryClub">重新加载推荐</button></view>
+    <view wx:if="{{promotions.event.length || promotions.notice.length || promotions.showcase.length}}" class="native-section home-promotions"><view class="native-section-head"><text class="section-title">来自游戏社群</text></view><view wx:if="{{promotions.event.length}}" class="home-promotion-group"><text class="home-group-label">社群活动</text><template is="native-promotions" data="{{docs:promotions.event, compact:true}}" /></view><view wx:if="{{promotions.notice.length}}" class="home-promotion-group"><text class="home-group-label">社群通知</text><template is="native-promotions" data="{{docs:promotions.notice, compact:true}}" /></view><view wx:if="{{promotions.showcase.length}}" class="home-promotion-group"><text class="home-group-label">社群风采</text><template is="native-promotions" data="{{docs:promotions.showcase, compact:true}}" /></view></view>
+    <view wx:if="{{showAbout}}" class="native-section home-about"><text class="section-title">{{site.name}}</text><text wx:if="{{site.description}}" class="native-summary">{{site.description}}</text><button class="plain" bindtap="openWebsite" data-url="/about">了解社团</button></view>
+    <view wx:if="{{hero}}" class="home-photo"><image class="home-photo-image" src="{{hero.url}}" mode="aspectFill" aria-label="{{hero.alt || site.heroTitle}}" /><text wx:if="{{hero.alt || hero.credit}}" class="field-note">{{hero.alt}}<text wx:if="{{hero.credit}}"> / {{hero.credit}}</text></text></view>
+    <view wx:if="{{site.navigation.length}}" class="home-footer-navigation"><button wx:for="{{site.navigation}}" wx:key="path" class="plain" bindtap="openWebsite" data-url="{{item.path}}">{{item.label}}</button></view>
     <text class="bottom-note">{{site.footer || site.name || '竞在紫荆'}}</text>
   </block>
 </view>

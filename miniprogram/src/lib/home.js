@@ -1,6 +1,7 @@
 const cms = require('./cms');
 const session = require('./session');
 const club = require('./club');
+const native = require('./native-presentation');
 const { error, labels } = require('./page');
 const defaults = ['events', 'teams', 'honors', 'news', 'albums'];
 async function load(page) {
@@ -21,7 +22,7 @@ async function load(page) {
             const valid = selected.filter(Boolean);
             if (valid.length) result = { docs: valid };
           }
-          return { kind, title: configured && configured.title || labels[kind], docs: await cms.decorate(result.docs) };
+          return { kind, title: configured && configured.title || labels[kind], docs: (await cms.decorate(result.docs)).map(native.content) };
         } catch (cause) { return { kind, title: labels[kind], docs: [], error: cause.message }; }
       }));
       const notices = await cms.list('announcements', { limit: 2 });

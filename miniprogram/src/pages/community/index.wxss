@@ -1,28 +1,51 @@
-.community-page .page-heading { margin-bottom: 16rpx; }
-.community-page .title { font-size: 48rpx; }
-.mini-page .intro-toggle { padding-bottom: 0; font-size: 26rpx; }
-.community-intro { margin-top: 24rpx; padding-top: 20rpx; border-top: 1rpx solid var(--z-line); }
-.join-progress { padding: 18rpx 0 26rpx; border-bottom: 1rpx solid var(--z-line); }
-.join-progress.has-record { padding: 24rpx; background: var(--z-surface); border: 1rpx solid var(--z-line); border-left: 4rpx solid var(--z-primary); border-radius: 0 12rpx 12rpx 0; }
-.join-progress .section-heading { border-bottom: 0; padding-bottom: 6rpx; }
-.status-title { display: block; font-size: 31rpx; font-weight: 600; line-height: 1.6; }
-.contact-panel > .section-heading { align-items: center; }
-.contact-panel > .section-heading .section-title { flex: 1; min-width: 300rpx; font-size: 32rpx; }
-.contact { padding: 28rpx 0; border-bottom: 1rpx solid var(--z-line); }
-.contact-qr { width: 328rpx; height: 328rpx; }
-.contact-heading { text-align: left; }
-.qr-caption { display: block; text-align: center; font-size: 26rpx; color: var(--z-muted); }
-.contact-action { margin-top: 24rpx; width: 100%; }
-.join-guide { margin-top: 32rpx; padding-bottom: 26rpx; border-bottom: 1rpx solid var(--z-line); }
-.join-steps { margin: 22rpx 0; }
-.join-steps > view { display: flex; align-items: center; gap: 20rpx; padding: 10rpx 0; font-size: 29rpx; }
-.join-step-number { width: 36rpx; flex-shrink: 0; color: var(--z-primary); font-variant-numeric: tabular-nums; }
-.community-organize { padding: 26rpx; background: var(--z-surface); border: 1rpx solid var(--z-line); border-radius: 12rpx; }
-.honor-pins { margin: 24rpx 0; padding: 24rpx; border: 1rpx solid var(--z-line); border-radius: 12rpx; background: var(--z-surface); }
-.honor-pins .section-heading { border-bottom: 0; }
+.community-heading { padding: 0 0 24px; }
+.community-kind { display: block; color: var(--z-primary); font-size: 14px; line-height: 1.5; margin-bottom: 8px; }
+.community-heading-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 20px; margin-top: 20px; }
+.mini-page.native-page .community-heading-actions .primary { min-width: 148px; }
+.mini-page.native-page .intro-toggle { font-size: 15px; }
+.community-intro { padding-top: 16px; border-top: 1px solid var(--z-line); }
+.community-tabs { display: block; width: 100%; margin-bottom: 20px; white-space: nowrap; border-bottom: 1px solid var(--z-line); }
+.mini-page.native-page .community-tab { display: inline-flex; vertical-align: bottom; align-items: center; justify-content: center; width: calc(33.333% - 6px); min-width: 80px; margin-right: 8px; padding: 12px 0; border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: transparent; color: var(--z-subtitle); font-size: 15px; }
+.mini-page.native-page .community-tab:last-child { margin-right: 0; }
+.mini-page.native-page .community-tab.active { border-bottom-color: var(--z-primary); color: var(--z-primary); font-weight: 600; }
+.join-progress { padding: 12px 16px 16px; background: var(--z-secondary-bg); border-radius: 8px; }
+.join-progress .native-section-head { margin-bottom: 4px; }
+.join-progress-label { font-size: 14px; line-height: 1.6; color: var(--z-muted); }
+.join-status { display: block; font-size: 19px; font-weight: 600; line-height: 1.5; word-break: break-word; }
+.join-next { margin-top: 16px; font-size: 15px; line-height: 1.75; word-break: break-word; }
+.join-next > text { display: block; }
+.join-next-label { font-size: 12px; color: var(--z-muted); margin-bottom: 4px; }
+.join-actual-note { display: block; margin-top: 16px; font-size: 12px; line-height: 1.7; color: var(--z-muted); }
+.mini-page.native-page .join-progress .actions > button { flex-basis: 100%; min-width: 0; }
+.mini-page.native-page .join-manage { display: block; width: 100%; margin-top: 16px; }
+.contact-panel .native-section-head { margin-bottom: 8px; }
+.contact-loading { padding: 20px 0; }
+.contact-feedback { margin-top: 16px; }
+.contact { margin-top: 20px; padding: 20px 16px; border: 1px solid var(--z-line); border-radius: 12px; background: var(--z-surface); }
+.contact-name { display: block; font-size: 18px; font-weight: 600; line-height: 1.5; word-break: break-word; }
+.contact-permission { display: block; font-size: 12px; color: var(--z-muted); line-height: 1.6; margin-top: 4px; }
+.community-page .contact-qr { display: block; width: 180px; height: 180px; max-width: 100%; margin: 20px auto 8px; padding: 12px; background: white; border-radius: 8px; }
+.qr-caption { display: block; text-align: center; color: var(--z-link); font-size: 14px; line-height: 1.6; }
+.contact-remark { display: block; margin-top: 12px; color: var(--z-muted); font-size: 14px; line-height: 1.65; text-align: center; }
+.contact-image-missing { margin-top: 20px; }
+.mini-page.native-page .contact-action { margin-top: 20px; width: 100%; }
+.join-guide { margin-top: 32px; }
+.join-steps { margin: 16px 0; }
+.join-step { display: flex; align-items: flex-start; gap: 16px; padding: 12px 0; }
+.join-step > view { flex: 1; min-width: 0; }
+.join-step-number { display: block; flex-shrink: 0; width: 28px; height: 28px; text-align: center; line-height: 26px; border: 1px solid var(--z-secondary-border); border-radius: 50%; color: var(--z-primary); font-size: 14px; }
+.join-step-title { display: block; margin-bottom: 4px; font-size: 16px; font-weight: 600; line-height: 1.6; }
+.community-organize { padding-top: 24px; border-top: 1px solid var(--z-line); }
+.mini-page.native-page .community-organize > button { margin-top: 16px; }
+.community-content-heading { margin-top: 24px; }
+.honor-pins { margin: 20px 0; padding: 16px; border: 1px solid var(--z-line); border-radius: 8px; background: var(--z-surface); }
 .honor-pins .shortcut:last-child { border-bottom: 0; }
-.community-record { padding: 28rpx 0; border-bottom: 1rpx solid var(--z-line); }
-.community-update .entry-link { display: block; margin-top: 18rpx; font-size: 27rpx; }
-.community-record .card-title { font-size: 33rpx; }
-.community-record .body { margin-top: 16rpx; }
-@media (max-width: 359px) { .qr-caption, .join-steps > view, .community-update .entry-link { font-size: 14px; } }
+.honor-pins .native-meta { margin-top: 8px; }
+.community-record { padding: 20px 0; border-bottom: 1px solid var(--z-line); }
+.community-record .native-entry-title { margin-top: 8px; font-size: 18px; }
+.community-record .body { margin-top: 12px; }
+.mini-page.native-page .community-load-more { width: 100%; margin-top: 24px; }
+.community-opportunities { padding-top: 24px; border-top: 1px solid var(--z-line); }
+.community-opportunities .native-section-head { margin-bottom: 0; }
+.community-staff .native-section-head { flex-wrap: wrap; gap: 0 12px; margin-bottom: 8px; }
+.community-staff .native-section-head .section-title { flex-basis: 120px; }

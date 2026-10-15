@@ -1,0 +1,44 @@
+<template name="native-date">
+  <view class="native-date" aria-label="{{date.label}}">
+    <block wx:if="{{date.known}}"><text class="native-date-month">{{date.month}}</text><text class="native-date-day">{{date.day}}</text><text class="native-date-foot">{{date.year}}</text></block>
+    <view wx:else class="native-date-unknown"><text>时间</text><text>待公布</text></view>
+  </view>
+</template>
+
+<template name="native-events">
+  <view class="native-list">
+    <block wx:for="{{docs}}" wx:key="id">
+      <button class="content-link {{featured && index === 0 ? 'native-featured-event' : (compact ? 'native-schedule-item native-compact-event' : 'native-schedule-item')}}" bindtap="openContent" data-doc="{{item}}" hover-class="pressed">
+        <block wx:if="{{featured && index === 0}}">
+          <view class="native-featured-top"><template is="native-date" data="{{date:item.nativeDate}}" /><view class="native-entry-copy"><view class="native-meta"><text wx:if="{{item.kindText}}">{{item.kindText}}</text><text wx:if="{{item.demo}}">演示资料</text></view><text class="native-entry-title">{{item.title}}</text><text wx:if="{{item.nativeDate.known}}" class="native-detail">{{item.nativeDate.weekday}} {{item.nativeDate.time}} 开始</text><text wx:if="{{item.location}}" class="native-detail">{{item.location}}</text></view></view>
+          <image wx:if="{{item.coverImage}}" class="native-event-cover" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt || item.title}}" /><text wx:if="{{item.coverImage.credit}}" class="native-media-credit">{{item.coverImage.credit}}</text>
+          <view class="native-meta"><text wx:if="{{item.statusText}}" class="native-status">{{item.statusText}}</text><text wx:if="{{item.nativeChannel}}">{{item.nativeChannel}}</text></view>
+          <text wx:if="{{item.nativeDeadline}}" class="native-detail">报名截止 {{item.nativeDeadline}}</text><text class="native-entry-action">查看活动与报名</text>
+        </block>
+        <block wx:else>
+          <template is="native-date" data="{{date:item.nativeDate}}" />
+          <view class="native-entry-copy">
+            <view wx:if="{{!compact}}" class="native-meta"><text wx:if="{{item.kindText}}">{{item.kindText}}</text><text wx:if="{{item.game.title}}">{{item.game.title}}</text><text wx:if="{{item.demo}}">演示资料</text></view>
+            <text class="native-entry-title">{{item.title}}</text>
+            <view wx:if="{{compact}}" class="native-compact-meta"><text wx:if="{{item.nativeDate.known}}">{{item.nativeDate.weekday}} {{item.nativeDate.time}}</text><text wx:if="{{item.statusText}}">{{item.statusText}}</text><text wx:if="{{item.demo}}">演示资料</text></view>
+            <block wx:else><text wx:if="{{item.nativeDate.known}}" class="native-detail">{{item.nativeDate.weekday}} {{item.nativeDate.time}} 开始</text><text wx:if="{{item.location}}" class="native-detail">{{item.location}}</text><text wx:if="{{item.statusText}}" class="native-status">{{item.statusText}}</text><text wx:if="{{item.nativeEnd}}" class="native-detail">结束 {{item.nativeEnd}}</text><text wx:if="{{item.nativeChannel}}" class="native-detail">{{item.nativeChannel}}</text><text wx:if="{{item.nativeDeadline}}" class="native-detail">报名截止 {{item.nativeDeadline}}</text><image wx:if="{{item.coverImage}}" class="native-event-cover" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt || item.title}}" /><text wx:if="{{item.coverImage.credit}}" class="native-media-credit">{{item.coverImage.credit}}</text><text class="native-entry-action">详情与报名</text></block>
+          </view>
+        </block>
+      </button>
+      <template wx:if="{{featured && index === 0 && showNotices}}" is="home-notices" data="{{announcements}}" />
+    </block>
+    <view wx:if="{{!docs.length}}" class="empty"><text class="state-title">{{emptyTitle || '活动日程正在准备'}}</text><text class="muted">{{emptyHint || '新活动发布后会出现在这里，也可先去寻找游戏社群。'}}</text></view>
+  </view>
+</template>
+
+<template name="native-index">
+  <view class="native-list"><button wx:for="{{docs}}" wx:key="id" class="content-link native-index-item" bindtap="openContent" data-doc="{{item}}" hover-class="pressed"><view class="native-entry-copy"><view class="native-meta"><text wx:if="{{item.dateText}}">{{item.dateText}}</text><text wx:if="{{item.kindText}}">{{item.kindText}}</text><text wx:if="{{item.statusText}}">{{item.statusText}}</text><text wx:if="{{item.demo}}">演示资料</text></view><text class="native-entry-title">{{item.title}}</text><text wx:if="{{item.placing}}" class="native-result">{{item.placing}}</text><text wx:if="{{!compact && item.summary}}" class="native-summary">{{item.summary}}</text><text wx:if="{{!compact}}" class="native-entry-action">阅读全文</text></view><image wx:if="{{item.coverImage && item.collection !== 'honors'}}" class="native-thumb" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt || item.title}}" /></button><view wx:if="{{!docs.length}}" class="empty"><text class="state-title">{{emptyTitle || '暂无已发布内容'}}</text><text class="muted">{{emptyHint || '新内容发布后会出现在这里，可稍后下拉刷新。'}}</text></view></view>
+</template>
+
+<template name="native-promotions">
+  <view class="native-recommendations"><button wx:for="{{docs}}" wx:key="sourceKey" class="content-link native-recommendation" bindtap="openWebsite" data-url="{{item.href}}" hover-class="pressed"><view class="native-meta"><text>{{item.gameTitle}}</text><text wx:if="{{item.kindText}}">{{item.kindText}}</text></view><text class="native-entry-title">{{item.snapshot.title}}</text><text wx:if="{{!compact && item.snapshot.body}}" class="native-summary">{{item.snapshot.body}}</text><text class="native-entry-action">查看社群原文</text></button></view>
+</template>
+
+<template name="home-notices">
+  <view class="home-notices"><view class="native-section-head"><text class="section-title">社团通知</text><button class="more" bindtap="openModule" data-kind="announcements">全部通知</button></view><button wx:for="{{announcements}}" wx:key="id" class="content-link home-notice" bindtap="openContent" data-doc="{{item}}" hover-class="pressed"><text class="home-notice-date">{{item.dateText}}</text><text class="home-notice-title">{{item.title}}</text></button><text wx:if="{{!announcements.length}}" class="muted">暂时没有新通知。</text></view>
+</template>

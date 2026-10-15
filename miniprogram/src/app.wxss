@@ -1,3 +1,4 @@
+@import "./styles/native.wxss";
 /* 紫荆主场：原生阅读、目录与操作。颜色由 theme.page 注入共享设计 tokens。 */
 page { background: var(--z-page); color: var(--z-text); font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; font-size: 32rpx; line-height: 1.7; }
 view, button, input, textarea, picker, scroll-view { box-sizing: border-box; }

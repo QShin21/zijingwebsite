@@ -6,11 +6,30 @@ import vm from 'node:vm';
 import crypto from 'node:crypto';
 import { setTimeout, clearTimeout, setInterval, clearInterval } from 'node:timers';
 import { chromium } from '@playwright/test';
+import { stageAFixtures } from './miniapp-050-fixtures.mjs';
+import { evaluateWxmlExpression } from './wxml-preview-expression.mjs';
 
 const repository = path.resolve(import.meta.dirname, '..');
-const sourceRoot = path.join(repository, 'miniprogram/src');
-const output = path.join(repository, '.data/rebuild-native-preview');
-const browserPath = path.join(repository, '.data/visual-direction-browsers-20261013/chromium-1208/chrome-linux64/chrome');
+const options = {};
+for (let index = 2; index < process.argv.length; index += 2) {
+  const key = process.argv[index], value = process.argv[index + 1];
+  if (!['--source-root', '--output', '--browser', '--suite', '--widths', '--fixtures'].includes(key) || !value || value.startsWith('--')) {
+    throw new Error('Usage: node scripts/rebuild-native-preview.mjs [--suite regression|stage-a] [--widths 320,375,390,430] [--fixtures name,name] [--source-root path] [--output path] [--browser path]');
+  }
+  if (key in options) throw new Error('Repeated argument: ' + key);
+  options[key] = value;
+}
+const suite = options['--suite'] || 'regression';
+if (!['regression', 'stage-a'].includes(suite)) throw new Error('Unknown fixture suite: ' + suite);
+const widths = (options['--widths'] || (suite === 'stage-a' ? '320,375,390,430' : '390,320')).split(',').map(Number);
+if (!widths.length || new Set(widths).size !== widths.length || widths.some(width => !Number.isInteger(width) || width < 280 || width > 768)) throw new Error('Widths must be unique integer phone widths between 280 and 768');
+const selectedFixtures = options['--fixtures'] ? options['--fixtures'].split(',') : null;
+if (selectedFixtures && new Set(selectedFixtures).size !== selectedFixtures.length) throw new Error('Fixture names must be unique');
+const sourceRoot = path.resolve(repository, options['--source-root'] || 'miniprogram/src');
+const output = path.resolve(repository, options['--output'] || (suite === 'stage-a' ? '.data/miniapp-050-stage-a' : '.data/rebuild-native-preview'));
+if (output === sourceRoot || output.startsWith(sourceRoot + path.sep)) throw new Error('Output must not be inside the native source tree');
+const oldBrowserPath = path.join(repository, '.data/visual-direction-browsers-20261013/chromium-1208/chrome-linux64/chrome');
+const browserPath = options['--browser'] || (fs.existsSync(oldBrowserPath) ? oldBrowserPath : '/usr/bin/chromium');
 const label = 'WXML 浏览器映射 · 合成数据 · 非官方微信或真机';
 const sourceFiles = new Map();
 const read = file => {
@@ -19,6 +38,7 @@ const read = file => {
   sourceFiles.set(file, source);
   return source;
 };
+for (const file of ['scripts/rebuild-native-preview.mjs', 'scripts/miniapp-050-fixtures.mjs', 'scripts/wxml-preview-expression.mjs']) read(path.join(repository, file));
 const playwrightVersion = JSON.parse(fs.readFileSync(path.join(repository, 'node_modules/@playwright/test/package.json'), 'utf8')).version;
 const native = name => path.join(sourceRoot, name);
 const htmlEscape = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
@@ -115,8 +135,7 @@ function parse(markup) {
   return root.children;
 }
 function evaluate(expression, data, object = false) {
-  const body = expression.trim().replace(/^\{\{/, '').replace(/\}\}$/, '');
-  try { return vm.runInNewContext(object ? '({' + body + '})' : '(' + body + ')', data, { timeout: 300 }); }
+  try { return evaluateWxmlExpression(expression, data, object); }
   catch { return undefined; } // Native templates resolve absent/null field paths as empty.
 }
 function binding(value, data) {
@@ -206,16 +225,21 @@ function styles(file, ancestors = []) {
   return read(resolved).replace(/@import\s+(['"])([^'"]+)\1\s*;/g, (_match, _quote, imported) => styles(path.resolve(path.dirname(resolved), imported), [...ancestors, resolved]));
 }
 const rows = [], fixtures = {}, manifests = [];
+let expectedCases = 0;
 const browser = await chromium.launch({ executablePath: browserPath, args: ['--no-sandbox'] });
 const browserVersion = browser.version();
 try {
   for (const theme of ['light', 'dark']) {
     const rt = runtime(theme), shared = rt.load(native('lib/design-tokens.js'));
-    for (const fixture of fixtureSet(rt)) {
+    const candidates = suite === 'stage-a' ? stageAFixtures(rt, native, file => fs.existsSync(file)) : fixtureSet(rt);
+    if (selectedFixtures && selectedFixtures.some(name => !candidates.some(fixture => fixture.name === name))) throw new Error('Unknown selected fixture');
+    const cases = selectedFixtures ? candidates.filter(fixture => selectedFixtures.includes(fixture.name)) : candidates;
+    expectedCases += cases.length * widths.length;
+    for (const fixture of cases) {
       const data = { ...rt.page(fixture.page), ...fixture.data };
       if (data.themeUnavailable) throw new Error('Native theme failed to initialize');
       fixtures[fixture.name] ||= { page: fixture.page, state: fixture.state, data: fixture.data };
-      for (const width of [390, 320]) {
+      for (const width of widths) {
         const context = await browser.newContext({ viewport: { width, height: 844 }, deviceScaleFactor: 1, reducedMotion: 'reduce', colorScheme: theme });
         const requests = [];
         await context.route('**/*', route => { requests.push(route.request().url()); return route.abort(); });
@@ -236,6 +260,8 @@ try {
           const typographyRules = [
             { category: 'field', selector: 'page input:not([type="checkbox"]):not([type="radio"]),page textarea,page .field picker,page .picker-value', minimumPx: 14, applies: true },
             { category: 'body', selector: '.body,.subtitle,.hero-description,.notice-title,.card-summary,.muted,.choice,.field-label,.label,.answer-label,.consent,.privacy-note,.branch-notice,.error,.question-error,.reading-body', minimumPx: 14, applies: true },
+            { category: 'native-text', selector: '.native-page text', minimumPx: 12, applies: true },
+            { category: 'native-body', selector: '.native-summary,.native-detail,.native-section-note,.native-receipt,.home-description,.home-notice-title', minimumPx: 14, applies: true },
             { category: 'mobile-action', selector: '.mini-page button,.mini-page picker', minimumPx: 15, applies: innerWidth < 360 },
             { category: 'mobile-steps', selector: '.timeline-step', minimumPx: 13, applies: innerWidth < 360 },
             { category: 'mobile-identifiers', selector: '.timeline-number,.record-id', minimumPx: 12, applies: innerWidth < 360 },
@@ -245,7 +271,7 @@ try {
             return { ...rule, matched: items.length, items, violations: rule.applies ? items.filter(item => item.fontSize < rule.minimumPx) : [] };
           });
           const smallFieldText = typography.find(rule => rule.category === 'field').violations;
-          const smallBodyText = typography.find(rule => rule.category === 'body').violations;
+          const smallBodyText = typography.filter(rule => rule.category === 'body' || rule.category.startsWith('native-')).flatMap(rule => rule.violations);
           const smallActionText = typography.find(rule => rule.category === 'mobile-action').violations;
           const smallAuxiliaryText = typography.filter(rule => rule.category.startsWith('mobile-') && rule.category !== 'mobile-action').flatMap(rule => rule.violations);
           const clippedText = nodes.filter(node => ['BUTTON','TEXT','TEXTAREA'].includes(node.tagName) && node.clientWidth > 0 && node.scrollWidth > node.clientWidth + 1 && getComputedStyle(node).whiteSpace !== 'nowrap').map(node => ({ tag: node.tagName, className: node.className, text: node.textContent.trim().slice(0, 80), ...box(node), scrollWidth: node.scrollWidth, clientWidth: node.clientWidth }));
@@ -266,9 +292,9 @@ for (const [file, source] of [...sourceFiles].sort(([a], [b]) => a.localeCompare
   if (fs.readFileSync(file, 'utf8') !== source) throw new Error('Source changed before capture completed: ' + file);
   manifests.push({ path: path.relative(repository, file), sha256: crypto.createHash('sha256').update(source).digest('hex') });
 }
-fs.writeFileSync(path.join(output, 'fixtures.json'), JSON.stringify({ syntheticOnly: true, source: 'authored in scripts/rebuild-native-preview.mjs; actual JS initial state/pure projections; no API calls', fixtures }, null, 2));
-fs.writeFileSync(path.join(output, 'results.json'), JSON.stringify({ label, recordedAt: new Date().toISOString(), playwright: playwrightVersion, browser: browserVersion, scope: 'Current WXML/WXSS/JS data layout mapping; no native lifecycle/events/SDK/official compilation/device validation', mapping: { rpx: 'viewport / 750', safeAreaBottom: '20px explicitly simulated', media: 'No QR, private evidence, real photos, or identifying user data', network: 'all browser requests blocked; native wx side effects throw', hostUI: 'Native navigation/tab bar/keyboard excluded; this is page content only', controls: 'Browser controls approximate static native appearance; checked/disabled/value/progress colors follow current WXML bindings', limits: 'No custom component rendering, image-mode measurement, native text measurement, input focus/keyboard, gesture, modal, media, auth or business event verification' }, sourceFiles: manifests, rows }, null, 2));
+fs.writeFileSync(path.join(output, 'fixtures.json'), JSON.stringify({ syntheticOnly: true, suite, source: 'authored in scripts/rebuild-native-preview.mjs and scripts/miniapp-050-fixtures.mjs; actual JS initial state/pure projections; no API calls', fixtures }, null, 2));
+fs.writeFileSync(path.join(output, 'results.json'), JSON.stringify({ label, suite, widths, expectedCases, recordedAt: new Date().toISOString(), playwright: playwrightVersion, browser: browserVersion, sourceRoot, scope: 'Current WXML/WXSS/JS data layout mapping; no native lifecycle/events/SDK/official compilation/device validation', mapping: { rpx: 'viewport / 750', safeAreaBottom: '20px explicitly simulated', media: 'No QR, private evidence, real photos, or identifying user data', network: 'all browser requests blocked; native wx side effects throw', hostUI: 'Native navigation/tab bar/keyboard excluded; this is page content only', controls: 'Browser controls approximate static native appearance; checked/disabled/value/progress colors follow current WXML bindings', limits: 'No custom component rendering, image-mode measurement, native text measurement, input focus/keyboard, gesture, modal, media, auth or business event verification' }, sourceFiles: manifests, rows }, null, 2));
 const cells = rows.map(row => '<article><h2>' + htmlEscape(row.fixture + ' · ' + row.theme + ' · ' + row.width + 'px') + '</h2><p>' + htmlEscape(row.state) + '</p><a href="' + row.screenshot + '"><img loading="lazy" src="' + row.viewportScreenshot + '" alt="' + htmlEscape(row.fixture) + '"></a><p><a href="' + row.html + '">原结构映射</a> · <a href="' + row.screenshot + '">全页截图</a></p></article>').join('');
-fs.writeFileSync(path.join(output, 'index.html'), '<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + label + '</title><style>body{background:#f7f5f0;color:#202124;font:16px/1.7 sans-serif;margin:24px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}article{border-top:1px solid #dfddd8;padding-top:20px}img{max-width:100%;width:320px;border:1px solid #dfddd8}h2{font-size:18px}a{color:#6f2d67}</style><h1>' + label + '</h1><p>当前原生源码的32个合成布局状态。图片不含真实二维码、证据或个人资料；未执行微信能力或生产请求。</p><main>' + cells + '</main></html>');
+fs.writeFileSync(path.join(output, 'index.html'), '<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + label + '</title><style>body{background:#f7f5f0;color:#202124;font:16px/1.7 sans-serif;margin:24px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}article{border-top:1px solid #dfddd8;padding-top:20px}img{max-width:100%;width:320px;border:1px solid #dfddd8}h2{font-size:18px}a{color:#6f2d67}</style><h1>' + label + '</h1><p>当前原生源码的' + rows.length + '个合成布局状态。图片不含真实二维码、证据或个人资料；未执行微信能力或生产请求。</p><main>' + cells + '</main></html>');
 console.log('Saved ' + rows.length + ' mapped layout cases to ' + path.relative(repository, output));
-if (rows.length !== 32 || rows.some(row => row.errors.length || row.blockedRequests.length || row.overflow.length || row.undersized.length || row.smallFieldText.length || row.smallBodyText.length || row.smallActionText.length || row.smallAuxiliaryText.length || row.clippedText.length)) process.exitCode = 1;
+if (rows.length !== expectedCases || rows.some(row => row.errors.length || row.blockedRequests.length || row.overflow.length || row.undersized.length || row.smallFieldText.length || row.smallBodyText.length || row.smallActionText.length || row.smallAuxiliaryText.length || row.clippedText.length)) process.exitCode = 1;

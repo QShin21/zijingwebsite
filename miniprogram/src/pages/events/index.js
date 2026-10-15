@@ -4,6 +4,7 @@ function withVisualTheme(definition) {
 }
 const cms = require('../../lib/cms');
 const club = require('../../lib/club');
+const native = require('../../lib/native-presentation');
 const { actions, error } = require('../../lib/page');
 Page(withVisualTheme({
   data: { loading: true, error: '', mode: 'events', types: ['全部', '比赛', '观赛', '交流', '训练', '其他'], type: '全部', search: '', docs: [], page: 1, hasMore: false, loadingMore: false, promoted: [], clubError: '' },
@@ -24,7 +25,7 @@ Page(withVisualTheme({
     try {
       const result = await cms.list(this.data.mode, { page: more ? this.data.page + 1 : 1, search: this.data.search,
         type: this.data.mode === 'events' && this.data.type !== '全部' ? this.data.type : undefined });
-      const docs = await cms.decorate(result.docs);
+      const docs = (await cms.decorate(result.docs)).map(native.content);
       if (ticket !== this._ticket) return;
       this.setData({ loading: false, loadingMore: false, docs: more ? this.data.docs.concat(docs) : docs, page: result.page, hasMore: result.hasNextPage });
       if (!more) await this.loadPromoted();

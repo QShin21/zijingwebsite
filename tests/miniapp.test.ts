@@ -2,6 +2,7 @@ import { createRequire } from 'node:module';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 const require = createRequire(import.meta.url);
 const format = require('../miniprogram/src/lib/format.js');
+const nativePresentation = require('../miniprogram/src/lib/native-presentation.js');
 const richtext = require('../miniprogram/src/lib/richtext.js');
 const cms = require('../miniprogram/src/lib/cms.js');
 const session = require('../miniprogram/src/lib/session.js');
@@ -84,6 +85,26 @@ describe('小程序内容与日期', () => {
     expect(format.eventState({ lifecycle: 'cancelled', endAt: '2026-10-01' }, now)).toBe('已取消');
     expect(format.date('2026-10-08T16:30:00Z')).toBe('2026.10.09 00:30');
     for (const url of ['javascript:alert(1)', 'https://user:pass@example.invalid', 'http://example.invalid', 'https://example.invalid/\n']) expect(format.safeURL(url)).toBe(false);
+  });
+  it('原生日程跨UTC日期时显示上海日历，缺少活动时间时不借用发布日期', () => {
+    expect(nativePresentation.calendar('2026-10-08T16:30:00Z')).toMatchObject({ known: true, year: '2026', month: '10月', day: '09', weekday: '周五', time: '00:30' });
+    for (const startAt of [null, '', 'invalid-date']) {
+      const doc = format.card({ id: 71, startAt, createdAt: '2026-10-08T16:30:00Z' }, 'events');
+      expect(nativePresentation.content(doc).nativeDate).toEqual({ known: false, label: '时间待公布' });
+    }
+  });
+  it('原生列表仅标明已有公开渠道，保留原内容与动作且不猜测问卷或本人报名状态', () => {
+    const actions = { edit: false }, coverImage = { url: 'synthetic-cover', alt: '合成封面' };
+    const doc = Object.freeze({ id: 72, collection: 'events', _status: 'published', lifecycle: 'cancelled',
+      registrationURL: 'https://example.invalid/form', startAt: '2026-10-08T16:30:00Z', actions, coverImage });
+    const projected = nativePresentation.content(doc);
+    expect(projected).toMatchObject({ ...doc, nativeChannel: '公开渠道：已关闭' });
+    expect(projected.actions).toBe(actions); expect(projected.coverImage).toBe(coverImage);
+    expect(doc).not.toHaveProperty('nativeDate'); expect(projected).not.toHaveProperty('signup');
+    expect(projected).not.toHaveProperty('canSignup');
+    expect(nativePresentation.content({ collection: 'events', _status: 'published', registrationURL: 'javascript:invalid', channelText: '' }).nativeChannel).toBe('');
+    const notice = { id: 73, collection: 'announcements', title: '合成通知' };
+    expect(nativePresentation.content(notice)).toBe(notice);
   });
   it('富文本保留格式，拒绝脚本与危险链接并限制递归', () => {
     const result = richtext.render({ root: { children: [

@@ -163,6 +163,14 @@ Page(withVisualTheme({
   },
   retryContent() { return this.loadArea(); },
   toggleIntro() { this.setData({ introOpen: !this.data.introOpen }); },
+  contactAdmins() {
+    if (!this._visible || this._disposed || !this.data.game.id) return;
+    this.area({ currentTarget: { dataset: { area: 'contacts' } } });
+    wx.nextTick(() => {
+      if (this._visible && !this._disposed && this.data.area === 'contacts')
+        wx.pageScrollTo({ selector: '#community-contacts', duration: 0 });
+    });
+  },
   honorWorkspace() {
     if (this._visible && !this._disposed && !this._pendingWrite && !this.data.loading && this.data.game.id)
       navigation.go('team-honor-workspace', { game: this.data.game.id });

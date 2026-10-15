@@ -30,7 +30,8 @@ describe('原生社团展示与既有活动权限合同', () => {
     const cms = { site: vi.fn().mockResolvedValue({ modules: [], featuredEvents: [], featuredHonors: [] }),
       list: vi.fn().mockResolvedValue({ docs: [{ id: 4, title: '合成站点活动' }] }), decorate: (docs: Data[]) => docs, media: async () => null };
     const club = { load: vi.fn().mockRejectedValueOnce(new Error('合成弱网')).mockResolvedValue({ staffBatches: [{ id: 9, title: '合成骨干批次' }], promotions: { event: [promoted] } }) };
-    const dependencies: Data = { './cms': cms, './session': { user: () => null }, './club': club, './page': { error: frame.error, labels: { events: '活动' } } };
+    const nativePresentation = createRequire(import.meta.url)('../miniprogram/src/lib/native-presentation.js');
+    const dependencies: Data = { './cms': cms, './session': { user: () => null }, './club': club, './native-presentation': nativePresentation, './page': { error: frame.error, labels: { events: '活动' } } };
     runInNewContext(readFileSync('miniprogram/src/lib/home.js', 'utf8'), { module, require: (key: string) => dependencies[key] });
     const target = { data: {}, setData(next: Data) { Object.assign(this.data, next); } } as NativePage;
     await module.exports.load(target);

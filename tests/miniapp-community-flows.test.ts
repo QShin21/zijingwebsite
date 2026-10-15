@@ -19,7 +19,7 @@ type NativePage = {
   submit(): Promise<void>; openForm(event: Event): Promise<void>; inspect(event: Event): Promise<void>; chooseQr(): Promise<void>;
   consent(event: Event): void; withdraw(event: Event): Promise<void>; decide(event: Event): Promise<void>; note(event: Event): void;
   handle(event: Event): Promise<void>; retryContacts(): Promise<void>; previewImage(event: Event): void;
-  joinAction(event: Event): Promise<void>; retryJoin(): Promise<void>; area(event: Event): Promise<void>;
+  joinAction(event: Event): Promise<void>; retryJoin(): Promise<void>; area(event: Event): Promise<void>; contactAdmins(): void;
   loadArea(more?: boolean): Promise<void>; staff(): void; applyStaff(event: Event): void;
 };
 type RequestOptions = { method?: string; required?: boolean; auth?: boolean; data?: Record<string, unknown> };
@@ -71,6 +71,7 @@ function harness(name: string, options: HarnessOptions = {}) {
   }, reviewer: () => { throw new Error('Client roles must not decide server permissions'); } };
   const navigation = { go: vi.fn(), back: vi.fn(), login: vi.fn(), content: vi.fn(), website: vi.fn(), copy: vi.fn(), requireUser: () => Boolean(current) };
   const wx = { previewImage: vi.fn(), setNavigationBarTitle: vi.fn(), stopPullDownRefresh: vi.fn(),
+    nextTick: vi.fn((_callback: () => void) => {}), pageScrollTo: vi.fn(),
     showModal: vi.fn((value: ModalOptions) => { modals.push(value); if (options.modalAuto !== false) value.success({ confirm: true }); }) };
   const pageModule = { exports: {} };
   runInNewContext(source('lib/page.js'), { module: pageModule, wx,
@@ -219,6 +220,19 @@ describe('Native community applications — synthetic VM only', () => {
 });
 
 describe('Native authorized workbench and manual joins — synthetic VM only', () => {
+  it('locates contact cards without a write and ignores deferred scrolling after the page is hidden', async () => {
+    const h = harness('community'); await h.page.onShow();
+    h.page.setData({ joinBusy: true });
+    const callsBefore = h.calls.length;
+    h.page.contactAdmins();
+    expect(h.page.data.area).toBe('contacts'); expect(h.calls).toHaveLength(callsBefore);
+    h.wx.nextTick.mock.calls[0][0]();
+    expect(h.wx.pageScrollTo).toHaveBeenCalledWith({ selector: '#community-contacts', duration: 0 });
+    h.page.contactAdmins(); h.page.onHide(); h.wx.nextTick.mock.calls[1][0]();
+    expect(h.wx.pageScrollTo).toHaveBeenCalledTimes(1);
+    h.page.contactAdmins(); expect(h.wx.nextTick).toHaveBeenCalledTimes(2);
+    expect(h.calls.filter(call => call.options.method === 'POST')).toEqual([]);
+  });
   it('accepts permissions from fresh server workbench rather than stored president roles', async () => {
     const denied = harness('review', { user: { id: 1, roles: ['president'] } });
     await denied.page.onShow(); expect(denied.page.data.allowed).toBe(false); expect(denied.calls.some(call => call.path.includes('mode=review'))).toBe(false);
