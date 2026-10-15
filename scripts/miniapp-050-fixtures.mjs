@@ -105,5 +105,8 @@ export function stageAFixtures(rt, native, exists) {
       { ...notice, category: 'notice', body: '合成通知正文：此处测试社群内公开动态，不读取真实私人资料。', authorName: '' },
     ] }),
     fixture('community-showcase', 'community', '社群风采和公开荣誉无结果', { ...community, area: 'showcase', docs: [], honorPins: [] }),
-  ];
+  ].map(fixture => fixture.page === 'community' ? { ...fixture, data: {
+    ...fixture.data,
+    contactAvailable: Boolean((fixture.data.contacts || []).some(contact => contact.image && !contact.imageError)),
+  } } : fixture);
 }

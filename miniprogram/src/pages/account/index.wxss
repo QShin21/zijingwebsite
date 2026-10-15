@@ -1,12 +1,37 @@
-.account-heading { border-bottom: 2rpx solid var(--z-text); }
-.account-tasks { margin-top: 24rpx; }
-.account-login { padding: 26rpx; background: var(--z-surface); border: 1rpx solid var(--z-line); border-radius: 12rpx; }
-.account-login > .muted { margin-top: 12rpx; }
-.profile { display: flex; align-items: center; gap: 22rpx; padding-top: 22rpx; }
-.avatar { display: flex; align-items: center; justify-content: center; width: 88rpx; height: 88rpx; flex-shrink: 0; border-radius: 12rpx; background: var(--z-secondary-bg); color: var(--z-primary); font-size: 34rpx; font-weight: 600; }
-.profile-main { flex: 1; min-width: 0; }
-.profile-name { display: block; font-size: 32rpx; font-weight: 600; }
-.profile-email { word-break: break-all; }
-.profile-refresh { display: flex; gap: 16rpx; align-items: center; margin-top: 20rpx; }
-.theme-picker { padding-top: 28rpx; border-top: 1rpx solid var(--z-line); }
-.theme-picker-help { margin-top: 12rpx; }
+.account-heading { padding: 8px 0 24px; }
+.account-identity { display: flex; align-items: flex-start; gap: 16px; padding: 20px 16px; border: 1px solid var(--z-line); border-radius: 12px; background: var(--z-surface); }
+.account-avatar { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; flex-shrink: 0; border: 1px solid var(--z-secondary-border); border-radius: 14px; color: var(--z-primary); background: var(--z-secondary-bg); font-size: 24px; font-weight: 600; }
+.account-identity-copy { flex: 1; min-width: 0; }
+.account-name { display: block; font-size: 21px; font-weight: 600; line-height: 1.5; word-break: break-word; }
+.account-role { display: block; margin-top: 6px; color: var(--z-primary); font-size: 14px; line-height: 1.65; word-break: break-word; }
+.account-email { display: block; margin-top: 6px; color: var(--z-muted); font-size: 14px; line-height: 1.65; word-break: break-all; }
+.account-refresh { display: flex; align-items: center; gap: 8px; padding-top: 12px; }
+.account-profile-error { margin-top: 16px; }
+.account-login { padding: 24px 20px; border: 1px solid var(--z-line); border-radius: 12px; background: var(--z-surface); }
+.mini-page.native-page .account-login .actions > button { min-width: 100px; }
+.account-task-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+.mini-page.native-page .account-task { display: flex; flex-direction: column; flex: 1 1 calc(50% - 12px); min-width: 0; padding: 16px 12px; border: 1px solid var(--z-line); border-radius: 8px; background: var(--z-surface); }
+.account-task-title { display: block; font-size: 16px; line-height: 1.5; font-weight: 600; word-break: break-word; }
+.account-task-detail { display: block; margin-top: 8px; color: var(--z-muted); font-size: 14px; line-height: 1.65; word-break: break-word; }
+.mini-page.native-page .account-activity { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; margin-top: 12px; padding: 16px 12px; border-left: 3px solid var(--z-primary); background: var(--z-secondary-bg); border-radius: 0 8px 8px 0; }
+.account-activity > view { flex: 1; min-width: 0; }
+.account-activity .native-summary { margin-top: 4px; }
+.account-memberships .native-section-head { margin-bottom: 0; }
+.account-memberships .shortcut:last-child { border-bottom: 0; }
+.account-workbench { padding-top: 24px; border-top: 1px solid var(--z-line); }
+.account-workbench .native-section-head { margin-bottom: 8px; }
+.account-workbench-list { margin-top: 12px; }
+.mini-page.native-page .account-workbench-entry { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; min-height: 52px; padding: 12px 0; font-size: 15px; }
+.account-workbench-entry > text:first-child { min-width: 0; flex: 1; }
+.account-workbench-entry > text:last-child { color: var(--z-link); font-size: 22px; }
+.account-appearance { padding-top: 24px; border-top: 1px solid var(--z-line); }
+.account-page .theme-choices { gap: 12px; margin-top: 16px; }
+.mini-page.native-page .theme-choice { padding: 12px; min-width: 0; }
+.account-page .theme-swatch { height: 56px; padding: 8px; border-radius: 6px; }
+.account-page .theme-swatch view { height: 3px; margin-top: 7px; }
+.account-page .theme-choice-title { margin-top: 12px; font-size: 15px; }
+.account-page .theme-message { font-size: 14px; margin-top: 12px; line-height: 1.75; }
+.mini-page.native-page .account-setting { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; min-height: 52px; padding: 12px 0; border-bottom: 1px solid var(--z-line); font-size: 15px; }
+.account-setting > text:first-child { flex: 1; min-width: 0; }
+.account-setting > text:last-child { color: var(--z-link); font-size: 22px; }
+.mini-page.native-page .account-logout { margin-top: 12px; color: var(--z-danger-text); }

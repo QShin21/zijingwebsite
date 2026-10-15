@@ -59,6 +59,54 @@ describe('原生社团展示与既有活动权限合同', () => {
     expect(target.data.promoted).toEqual([{ sourceKey: 'community-posts:8' }]);
   });
 
+  it('活动第二页失败保留第一页和页码，重试原页且重复点击不追加重复记录', async () => {
+    const retry = deferred<Data>();
+    const cms = { list: vi.fn().mockResolvedValueOnce({ docs: [{ id: 1 }], page: 1, hasNextPage: true })
+      .mockRejectedValueOnce(new Error('合成第二页读取失败')).mockReturnValueOnce(retry.promise), decorate: (docs: Data[]) => docs };
+    const club = { load: vi.fn().mockResolvedValue({ promotions: { event: [{ sourceKey: 'community-posts:9' }] } }) };
+    const target = page('events', { '../../lib/cms': cms, '../../lib/club': club, '../../lib/page': frame });
+    const more = target.onReachBottom as () => Promise<void>;
+    await target.load(); await more.call(target);
+    expect(target.data).toMatchObject({ error: '', loadMoreError: '合成第二页读取失败', page: 1, hasMore: true, loading: false, loadingMore: false, docs: [{ id: 1 }] });
+    expect(target.data.promoted).toEqual([{ sourceKey: 'community-posts:9' }]);
+    const pending = more.call(target); await more.call(target);
+    expect(cms.list).toHaveBeenCalledTimes(3);
+    expect(cms.list.mock.calls.map(call => call[1].page)).toEqual([1, 2, 2]);
+    retry.resolve({ docs: [{ id: 2 }], page: 2, hasNextPage: false }); await pending;
+    expect(target.data).toMatchObject({ error: '', loadMoreError: '', page: 2, hasMore: false, loadingMore: false, docs: [{ id: 1 }, { id: 2 }] });
+    expect(club.load).toHaveBeenCalledTimes(1);
+    const markup = readFileSync('miniprogram/src/pages/events/index.wxml', 'utf8');
+    expect(markup).toContain('loadMoreError && !loading');
+    expect(markup).toContain("loadMoreError ? '重试加载更多' : '加载更多'");
+  });
+
+  it('活动原生封面404/损坏回调标记可见fallback，隐藏后不写回', async () => {
+    const coverImage = { url: '/synthetic/current.png', alt: '合成封面' };
+    const cms = { list: vi.fn().mockResolvedValue({ docs: [{ id: 1, collection: 'events', coverImage }], page: 1, hasNextPage: false }), decorate: (docs: Data[]) => docs };
+    const target = page('events', { '../../lib/cms': cms, '../../lib/club': { load: async () => ({ promotions: { event: [] } }) }, '../../lib/page': frame });
+    await (target.onShow as () => Promise<void>)();
+    const fail = (url: string) => (target.nativeCoverError as (event: Data) => void)({ currentTarget: { dataset: { id: 1, collection: 'events', url } }, detail: { errMsg: 'synthetic image 404 / decode failure' } });
+    fail('/synthetic/old.png'); expect((target.data.docs as Data[])[0]).not.toHaveProperty('nativeCoverError');
+    fail(coverImage.url); expect((target.data.docs as Data[])[0]).toMatchObject({ coverImage, nativeCoverError: true });
+    await target.load(); (target.onHide as () => void)(); fail(coverImage.url);
+    expect((target.data.docs as Data[])[0]).not.toHaveProperty('nativeCoverError');
+  });
+
+  it('首页头图和活动图原生错误保留内容与来源，只处理可见的当前URL', async () => {
+    const target = page('home', { '../../lib/home': { load: async (page: NativePage) => page.setData({ loading: false }) } });
+    await (target.onShow as () => Promise<void>)();
+    const hero = { url: '/synthetic/hero', credit: '合成头图来源' }, doc = { id: 1, collection: 'events', coverImage: { url: '/synthetic/cover' } };
+    target.setData({ hero, modules: [{ kind: 'events', docs: [doc] }] });
+    const heroError = target.homeHeroError as (event: Data) => void;
+    heroError.call(target, { currentTarget: { dataset: { url: '/synthetic/old' } } }); expect(target.data.heroErrorURL).toBe('');
+    heroError.call(target, { currentTarget: { dataset: { url: hero.url } } }); expect(target.data.heroErrorURL).toBe(hero.url);
+    (target.nativeCoverError as (event: Data) => void)({ currentTarget: { dataset: { id: 1, collection: 'events', url: doc.coverImage.url } } });
+    expect(target.data.modules).toEqual([{ kind: 'events', docs: [{ ...doc, nativeCoverError: true }] }]);
+    expect(target.data.hero).toBe(hero);
+    target.setData({ heroErrorURL: '' }); (target.onHide as () => void)();
+    heroError.call(target, { currentTarget: { dataset: { url: hero.url } } }); expect(target.data.heroErrorURL).toBe('');
+  });
+
   it('只有名单查看权限时进入现有 view 合同，并由服务端元数据限制编辑与名单动作', async () => {
     const request = vi.fn().mockResolvedValueOnce({ title: '合成活动', form, version: 'v3', state: '报名开放', signup: null, canManage: false, canViewSignups: true })
       .mockResolvedValueOnce({ docs: [{ id: 4, questions: form.questions, answers: { name: '合成报名者' } }], page: 1, totalPages: 1, totalDocs: 1 });

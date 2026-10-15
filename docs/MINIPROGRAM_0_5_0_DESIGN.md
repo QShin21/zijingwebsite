@@ -96,8 +96,8 @@
 
 | 阶段 | 页面及范围 | 状态 |
 | --- | --- | --- |
-| A | 原生基础样式/组件呈现；home、events、community三个样板；先自评再推广 | 开发与自测完成；待独立QA/官方平台验证 |
-| B | 完成五tab一致性；新增完成 communities、explore、account、list、detail、fixed，覆盖各collection与富文本/媒体 | 待实施 |
+| A | 原生基础样式/组件呈现；home、events、community三个样板；先自评再推广 | 独立QA确认分页与图片反馈缺陷，随B修复后待复测；尚未签署通过 |
+| B | 完成五tab一致性；新增完成 communities、explore、account、list、detail、fixed，覆盖各collection与富文本/媒体 | 开发及210项本地测试完成；520个B布局、184个A回归和32个既有回归通过，待独立QA与官方原生验证 |
 | C | auth、applications、review、signup、activity-manage、staff、staff-review、community-joins；长表单、反馈、名片同意、审核与人工进群 | 待实施 |
 | D | team、team-apply、team-review、team-members、team-honors、team-profiles、team-honor-workspace、team-honor-edit | 待实施 |
 | E | 全25页×适用角色/模式/状态、四宽双主题、功能与官方平台验证；独立QA与修复 | 待实施 |

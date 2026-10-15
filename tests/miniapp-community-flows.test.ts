@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -21,6 +22,7 @@ type NativePage = {
   handle(event: Event): Promise<void>; retryContacts(): Promise<void>; previewImage(event: Event): void;
   joinAction(event: Event): Promise<void>; retryJoin(): Promise<void>; area(event: Event): Promise<void>; contactAdmins(): void;
   loadArea(more?: boolean): Promise<void>; staff(): void; applyStaff(event: Event): void;
+  contactImageError(event: Event): void; showcaseImageError(event: Event): void; nativeCoverError(event: Event): void;
 };
 type RequestOptions = { method?: string; required?: boolean; auth?: boolean; data?: Record<string, unknown> };
 type RequestCall = { path: string; options: RequestOptions };
@@ -82,6 +84,7 @@ function harness(name: string, options: HarnessOptions = {}) {
     detail: vi.fn(options.cmsDetail || (async () => ({ id: 9, slug: 'synthetic', title: '合成测试社群', body: null }))),
     decorate: async (docs: unknown[]) => docs, social: vi.fn(options.cmsSocial || (async () => pageResult([]))) };
   const modules: Record<string, unknown> = { cms, http, session, files, privacy, page: pageModule.exports, navigation,
+    'native-presentation': createRequire(import.meta.url)('../miniprogram/src/lib/native-presentation.js'),
     format: { date: (value: string) => value || '' }, richtext: { render: () => ({ nodes: [] }) }, video: { source: (value: string) => value && value.endsWith('.mp4') ? value : '' } };
   let native!: NativePage;
   runInNewContext(source('pages/' + name + '/index.js'), { Page: (value: NativePage) => { native = value; }, wx,
@@ -220,6 +223,32 @@ describe('Native community applications — synthetic VM only', () => {
 });
 
 describe('Native authorized workbench and manual joins — synthetic VM only', () => {
+  it('原生损坏名片降低联系CTA，风采图片保留图注；旧URL和隐藏回调不写回', async () => {
+    const h = harness('community'); await h.page.onShow();
+    h.page.setData({ contacts: [{ id: 5, image: 'wxfile://synthetic-current.png' }], contactAvailable: true,
+      docs: [{ id: 77, localImages: [{ source: 'wxfile://synthetic-photo.png', caption: '合成图注' }] }] });
+    h.page.contactImageError(event({ id: 5, url: 'wxfile://synthetic-old.png' }));
+    expect(h.page.data.contactAvailable).toBe(true);
+    h.page.contactImageError(event({ id: 5, url: 'wxfile://synthetic-current.png' }));
+    expect(h.page.data.contacts).toMatchObject([{ id: 5, image: 'wxfile://synthetic-current.png', imageError: true }]);
+    expect(h.page.data.contactAvailable).toBe(false);
+    h.page.showcaseImageError(event({ id: 77, url: 'wxfile://synthetic-photo.png' }));
+    expect(h.page.data.docs).toMatchObject([{ id: 77, localImages: [{ caption: '合成图注', imageError: true }] }]);
+    h.page.setData({ contacts: [{ id: 5, image: 'wxfile://synthetic-current.png' }], contactAvailable: true });
+    h.page.onHide(); h.page.contactImageError(event({ id: 5, url: 'wxfile://synthetic-current.png' }));
+    expect(h.page.data.contactAvailable).toBe(true);
+    expect(h.calls.some(call => call.options.method === 'POST')).toBe(false);
+  });
+  it('项目目录原生封面失败保留当前媒体来源，离页后不改数据', async () => {
+    const h = harness('communities'); await h.page.onShow();
+    const row = { id: 9, collection: 'games', coverImage: { url: '/synthetic/current', credit: '合成来源' } };
+    h.page.setData({ docs: [row] });
+    h.page.nativeCoverError(event({ id: 9, collection: 'games', url: row.coverImage.url }));
+    expect(h.page.data.docs).toEqual([{ ...row, nativeCoverError: true }]);
+    h.page.setData({ docs: [row] }); h.page.onHide();
+    h.page.nativeCoverError(event({ id: 9, collection: 'games', url: row.coverImage.url }));
+    expect(h.page.data.docs).toEqual([row]);
+  });
   it('locates contact cards without a write and ignores deferred scrolling after the page is hidden', async () => {
     const h = harness('community'); await h.page.onShow();
     h.page.setData({ joinBusy: true });

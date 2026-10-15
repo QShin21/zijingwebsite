@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -71,6 +72,7 @@ function harness(flow: Flow, options: { deferredPost?: boolean; modalAuto?: bool
   const navigation = { back: vi.fn(), login: vi.fn(), content: vi.fn(), go: vi.fn(), website: vi.fn(), copy: vi.fn(), requireUser: () => Boolean(user) };
   const pageModule = { exports: {} }; runInNewContext(source('lib/page.js'), { module: pageModule, wx, require: (path: string) => path === './navigation' ? navigation : session });
   const modules: Record<string, unknown> = { cms, http, session, files, navigation, page: pageModule.exports, privacy: { authorize: vi.fn(async () => {}), openContract: vi.fn(async () => {}) },
+    'native-presentation': createRequire(import.meta.url)('../miniprogram/src/lib/native-presentation.js'),
     format: { date: (value: string) => value || '' }, video: { source: () => '' }, richtext: { render: () => ({ nodes: [] }) } };
   let page!: NativePage;
   runInNewContext(pageSource(flow.page), { Page: (value: NativePage) => { page = value; }, wx, require: (path: string) => modules[path.split('/').pop() || ''] });

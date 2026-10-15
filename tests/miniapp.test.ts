@@ -3,6 +3,7 @@ import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 const require = createRequire(import.meta.url);
 const format = require('../miniprogram/src/lib/format.js');
 const nativePresentation = require('../miniprogram/src/lib/native-presentation.js');
+const nativeReading = require('../miniprogram/src/lib/native-reading.js');
 const richtext = require('../miniprogram/src/lib/richtext.js');
 const cms = require('../miniprogram/src/lib/cms.js');
 const session = require('../miniprogram/src/lib/session.js');
@@ -105,6 +106,37 @@ describe('小程序内容与日期', () => {
     expect(nativePresentation.content({ collection: 'events', _status: 'published', registrationURL: 'javascript:invalid', channelText: '' }).nativeChannel).toBe('');
     const notice = { id: 73, collection: 'announcements', title: '合成通知' };
     expect(nativePresentation.content(notice)).toBe(notice);
+  });
+  it('原生图片错误只标记当前记录和URL，保留原封面、说明及权限字段', () => {
+    const coverImage = Object.freeze({ url: '/synthetic/current.png', credit: '合成来源' });
+    const original = Object.freeze({ id: 71, collection: 'events', coverImage, actions: { edit: false } });
+    const docs = [original, { id: 71, collection: 'news', coverImage }];
+    for (const source of [{ id: 71, collection: 'events', url: '/synthetic/old.png' }, { id: 72, collection: 'events', url: coverImage.url }, { id: 71, collection: 'honors', url: coverImage.url }]) {
+      expect(nativePresentation.markCoverFailure(docs, source)).toBe(docs);
+    }
+    const next = nativePresentation.markCoverFailure(docs, { id: '71', collection: 'events', url: coverImage.url });
+    expect(next[0]).toMatchObject({ ...original, nativeCoverError: true });
+    expect(next[0].coverImage).toBe(coverImage); expect(next[0].actions).toBe(original.actions);
+    expect(next[1]).toBe(docs[1]); expect(original).not.toHaveProperty('nativeCoverError');
+    expect(nativePresentation.markCoverFailure(next, { id: 71, collection: 'events', url: coverImage.url })).toBe(next);
+    expect(nativePresentation.hasContactImage([{ image: '' }, { image: 'synthetic', imageError: true }])).toBe(false);
+    expect(nativePresentation.hasContactImage([{ image: 'synthetic' }])).toBe(true);
+  });
+  it('阅读档案的赛事日期不借用发布日期，上海日期及原记录权限保持', () => {
+    const doc = Object.freeze({ id: 74, collection: 'honors', title: '合成荣誉', date: '', publishedAt: '2026-10-08T16:30:00Z', actions: { review: false } });
+    expect(nativeReading.entry(doc)).toMatchObject({ ...doc, nativeReading: { date: { known: false, text: '待公布' } } });
+    expect(nativeReading.article(doc, 'honors')).toMatchObject({ dateLabel: '赛事日期', dateText: '待公布' });
+    expect(nativeReading.dateParts('2026-10-08T16:30:00Z')).toMatchObject({ known: true, year: '2026', day: '10.09' });
+    expect(nativeReading.entry(doc).actions).toBe(doc.actions);
+    expect(doc).not.toHaveProperty('nativeReading');
+  });
+  it('阅读字号投影保留安全富文本内容并不修改原节点', () => {
+    const safe = richtext.render({ root: { children: [{ type: 'heading', tag: 'h2', children: [{ type: 'text', text: '合成标题' }] }, { type: 'paragraph', children: [{ type: 'text', text: '合成正文' }] }] } }).nodes;
+    const original = JSON.stringify(safe), projected = nativeReading.prose(safe);
+    expect(projected[0].attrs.style).toContain('font-size:21px');
+    expect(projected[1].attrs.style).toContain('font-size:16px');
+    expect(projected[0].children).toEqual(safe[0].children);
+    expect(JSON.stringify(safe)).toBe(original);
   });
   it('富文本保留格式，拒绝脚本与危险链接并限制递归', () => {
     const result = richtext.render({ root: { children: [

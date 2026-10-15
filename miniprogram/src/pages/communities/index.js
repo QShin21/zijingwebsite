@@ -6,6 +6,7 @@ const cms = require('../../lib/cms');
 const http = require('../../lib/http');
 const session = require('../../lib/session');
 const navigation = require('../../lib/navigation');
+const { markCoverFailure } = require('../../lib/native-presentation');
 const { actions, protect } = require('../../lib/page');
 const identity = () => String((session.user() || {}).id || '');
 Page(withVisualTheme({
@@ -63,6 +64,11 @@ Page(withVisualTheme({
     } catch (cause) { if (this.valid(scope, false) && ticket === this._clubTicket) this.setData({ clubLoading: false, clubError: cause.message }); }
   },
   openCommunity(event) { const doc = event.currentTarget.dataset.doc; if (doc && navigation.requireUser()) navigation.go('community', { id: doc.id, slug: doc.slug }); },
+  nativeCoverError(event) {
+    if (this._visible !== true) return;
+    const docs = markCoverFailure(this.data.docs, event.currentTarget.dataset);
+    if (docs !== this.data.docs) this.setData({ docs });
+  },
   apply() { if (navigation.requireUser()) navigation.go('applications', { apply: 1 }); },
   applications() { if (navigation.requireUser()) navigation.go('applications'); },
   staff() { navigation.go('staff'); },

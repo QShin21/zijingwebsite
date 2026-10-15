@@ -36,7 +36,7 @@
 .mini-page.native-page .loading-line { height: 8px; margin-top: 12px; border-radius: 4px; }
 .mini-page.native-page .result-caption { font-size: 14px; line-height: 1.75; margin: 16px 0; }
 .mini-page.native-page .bottom-note { font-size: 12px; padding-top: 20px; margin-top: 32px; }
-.mini-page.native-page .photo { border-radius: 8px; margin: 16px 0 8px; }
+.mini-page.native-page .photo { box-sizing: border-box; border-radius: 8px; margin: 16px 0 8px; }
 .mini-page.native-page .image-button { padding: 0; border: 0; background: transparent; }
 .mini-page.native-page .shortcut { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--z-line); }
 .mini-page.native-page .shortcut-sign { font-size: 24px; }
@@ -62,7 +62,7 @@
 .native-schedule-item .native-entry-title { margin-top: 4px; }
 .native-schedule-item .native-entry-action { margin-top: 8px; }
 .native-schedule-item .native-status { margin-top: 8px; }
-.mini-page.native-page .native-featured-event { display: block; padding: 20px; background: var(--z-secondary-bg); border-radius: 12px; color: var(--z-text); }
+.mini-page.native-page .native-featured-event { display: block; padding: 0; background: var(--z-secondary-bg); border-radius: 12px; color: var(--z-text); }
 .native-featured-top { display: flex; align-items: flex-start; gap: 16px; }
 .native-featured-event .native-date { width: 60px; padding: 8px 0; border-top: 2px solid var(--z-primary); }
 .native-featured-event .native-date-day { font-size: 36px; }
@@ -88,7 +88,7 @@
 @media (max-width: 359px) {
   .mini-page.native-page { padding-left: 16px; padding-right: 16px; }
   .mini-page.native-page .native-schedule-item { gap: 12px; }
-  .mini-page.native-page .native-featured-event { padding: 16px; }
+  .native-featured-body { padding: 16px; }
   .native-featured-top { gap: 12px; }
   .native-featured-event .native-date { width: 48px; }
   .native-featured-event .native-entry-title { font-size: 19px; }
@@ -99,3 +99,28 @@
 .mini-page.native-page .native-compact-event { padding: 16px 0; }
 .native-compact-event .native-entry-title { margin-top: 0; }
 .native-compact-meta { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; color: var(--z-muted); font-size: 14px; line-height: 1.6; }
+
+/* A quiet field outline is a brand cue, never a substitute for a content image. */
+.native-field-graphic { position: relative; display: block; width: 100%; height: 100%; min-height: 64px; color: var(--z-primary); }
+.native-field-boundary { position: absolute; top: 10px; right: 10px; bottom: 10px; left: 10px; border: 1px solid currentColor; border-radius: 12px; }
+.native-field-center { position: absolute; left: 50%; top: 10px; bottom: 10px; border-left: 1px solid currentColor; }
+.native-field-circle { position: absolute; width: 30px; height: 30px; top: 50%; left: 50%; margin-top: -15px; margin-left: -15px; border: 1px solid currentColor; border-radius: 50%; }
+.native-field-end { position: absolute; top: 33%; width: 12px; height: 34%; border: 1px solid currentColor; }
+.native-field-end-left { left: 10px; border-left: 0; border-radius: 0 4px 4px 0; }
+.native-field-end-right { right: 10px; border-right: 0; border-radius: 4px 0 0 4px; }
+.native-tab-heading { padding: 8px 0 24px; }
+.native-tab-heading .subtitle { max-width: 28em; }
+.native-inline-meta { display: block; color: var(--z-muted); font-size: 12px; line-height: 1.6; }
+
+.native-featured-body { padding: 20px; }
+.mini-page.native-page .native-featured-media { background: var(--z-surface); border: 1px solid var(--z-line); }
+.native-featured-media > .native-event-cover { height: 176px; margin: 0; border-radius: 11px 11px 0 0; }
+.native-featured-body > .native-media-credit { margin: 0 0 12px; }
+.native-media-fallback { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 16px; min-height: 128px; background: var(--z-secondary-bg); border-radius: 8px; }
+.native-featured-media > .native-media-fallback { border-radius: 11px 11px 0 0; }
+.native-media-field { width: 100px; height: 64px; opacity: .35; }
+.native-media-error { display: block; margin-top: 8px; color: var(--z-muted); font-size: 14px; line-height: 1.65; word-break: break-word; }
+.native-media-fallback > .native-media-error { margin-top: 0; text-align: center; }
+.native-thumb-fallback { background: var(--z-secondary-bg); }
+.native-thumb-fallback .native-field-graphic { opacity: .35; }
+@media (max-width: 359px) { .native-featured-body { padding: 16px; } }

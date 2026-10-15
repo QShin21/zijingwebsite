@@ -7,26 +7,28 @@ import crypto from 'node:crypto';
 import { setTimeout, clearTimeout, setInterval, clearInterval } from 'node:timers';
 import { chromium } from '@playwright/test';
 import { stageAFixtures } from './miniapp-050-fixtures.mjs';
+import { stageBFixtures } from './miniapp-050-stage-b-fixtures.mjs';
 import { evaluateWxmlExpression } from './wxml-preview-expression.mjs';
+import { renderRichTextNodes } from './wxml-preview-richtext.mjs';
 
 const repository = path.resolve(import.meta.dirname, '..');
 const options = {};
 for (let index = 2; index < process.argv.length; index += 2) {
   const key = process.argv[index], value = process.argv[index + 1];
   if (!['--source-root', '--output', '--browser', '--suite', '--widths', '--fixtures'].includes(key) || !value || value.startsWith('--')) {
-    throw new Error('Usage: node scripts/rebuild-native-preview.mjs [--suite regression|stage-a] [--widths 320,375,390,430] [--fixtures name,name] [--source-root path] [--output path] [--browser path]');
+    throw new Error('Usage: node scripts/rebuild-native-preview.mjs [--suite regression|stage-a|stage-b] [--widths 320,375,390,430] [--fixtures name,name] [--source-root path] [--output path] [--browser path]');
   }
   if (key in options) throw new Error('Repeated argument: ' + key);
   options[key] = value;
 }
 const suite = options['--suite'] || 'regression';
-if (!['regression', 'stage-a'].includes(suite)) throw new Error('Unknown fixture suite: ' + suite);
-const widths = (options['--widths'] || (suite === 'stage-a' ? '320,375,390,430' : '390,320')).split(',').map(Number);
+if (!['regression', 'stage-a', 'stage-b'].includes(suite)) throw new Error('Unknown fixture suite: ' + suite);
+const widths = (options['--widths'] || (suite.startsWith('stage-') ? '320,375,390,430' : '390,320')).split(',').map(Number);
 if (!widths.length || new Set(widths).size !== widths.length || widths.some(width => !Number.isInteger(width) || width < 280 || width > 768)) throw new Error('Widths must be unique integer phone widths between 280 and 768');
 const selectedFixtures = options['--fixtures'] ? options['--fixtures'].split(',') : null;
 if (selectedFixtures && new Set(selectedFixtures).size !== selectedFixtures.length) throw new Error('Fixture names must be unique');
 const sourceRoot = path.resolve(repository, options['--source-root'] || 'miniprogram/src');
-const output = path.resolve(repository, options['--output'] || (suite === 'stage-a' ? '.data/miniapp-050-stage-a' : '.data/rebuild-native-preview'));
+const output = path.resolve(repository, options['--output'] || (suite.startsWith('stage-') ? '.data/miniapp-050-' + suite : '.data/rebuild-native-preview'));
 if (output === sourceRoot || output.startsWith(sourceRoot + path.sep)) throw new Error('Output must not be inside the native source tree');
 const oldBrowserPath = path.join(repository, '.data/visual-direction-browsers-20261013/chromium-1208/chrome-linux64/chrome');
 const browserPath = options['--browser'] || (fs.existsSync(oldBrowserPath) ? oldBrowserPath : '/usr/bin/chromium');
@@ -38,7 +40,7 @@ const read = file => {
   sourceFiles.set(file, source);
   return source;
 };
-for (const file of ['scripts/rebuild-native-preview.mjs', 'scripts/miniapp-050-fixtures.mjs', 'scripts/wxml-preview-expression.mjs']) read(path.join(repository, file));
+for (const file of ['scripts/rebuild-native-preview.mjs', 'scripts/miniapp-050-fixtures.mjs', 'scripts/miniapp-050-stage-b-fixtures.mjs', 'scripts/wxml-preview-expression.mjs', 'scripts/wxml-preview-richtext.mjs']) read(path.join(repository, file));
 const playwrightVersion = JSON.parse(fs.readFileSync(path.join(repository, 'node_modules/@playwright/test/package.json'), 'utf8')).version;
 const native = name => path.join(sourceRoot, name);
 const htmlEscape = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
@@ -186,6 +188,7 @@ function render(pageName, data) {
     for (const [key, value] of Object.entries(a)) {
       if (key.startsWith('wx:') || key === 'is' || key === 'data' || value === undefined) continue;
       const resolved = binding(value, scope);
+      if (tag === 'video' && key === 'src') { attrs.push('data-native-src="' + htmlEscape(resolved) + '"'); continue; }
       if (key.startsWith('bind') || key.startsWith('catch')) { attrs.push('data-native-' + key + '="' + htmlEscape(resolved) + '"'); continue; }
       if (['disabled', 'checked', 'password', 'autoplay', 'controls', 'scroll-x', 'scroll-y', 'auto-height'].includes(key)) {
         if (resolved) attrs.push(key.startsWith('scroll-') || key === 'auto-height' ? 'data-native-' + key + '="true"' : key === 'password' ? 'type="password"' : key);
@@ -201,7 +204,7 @@ function render(pageName, data) {
     if (tag === 'textarea') return '<textarea ' + attrs.filter(item => !item.startsWith('value=')).join(' ') + ' readonly>' + htmlEscape(binding(a.value, scope)) + '</textarea>';
     if (tag === 'checkbox' || tag === 'radio' || tag === 'switch') return '<' + tag + ' ' + attrs.join(' ') + '><input type="' + (tag === 'radio' ? 'radio' : 'checkbox') + '" tabindex="-1" ' + (binding(a.checked, scope) ? 'checked ' : '') + (binding(a.disabled, scope) ? 'disabled ' : '') + 'style="accent-color:' + htmlEscape(binding(a.color, scope)) + '"></' + tag + '>';
     if (tag === 'progress') return '<progress ' + attrs.join(' ') + ' max="100" value="' + Number(binding(a.percent, scope) || 0) + '" style="--mapping-progress-active:' + htmlEscape(binding(a.activeColor, scope)) + ';--mapping-progress-background:' + htmlEscape(binding(a.backgroundColor, scope)) + ';height:' + Number(a['stroke-width'] || 4) + 'px"></progress>';
-    if (tag === 'rich-text') return '<rich-text ' + attrs.join(' ') + '>' + (binding(a.nodes, scope) || []).map(n => htmlEscape(n.text || '')).join('') + '</rich-text>';
+    if (tag === 'rich-text') return '<rich-text ' + attrs.join(' ') + '>' + renderRichTextNodes(binding(a.nodes, scope)) + '</rich-text>';
     return '<' + tag + ' ' + attrs.join(' ') + '>' + children(node.children, scope) + '</' + tag + '>';
   }
   return children(nodes, data);
@@ -231,7 +234,7 @@ const browserVersion = browser.version();
 try {
   for (const theme of ['light', 'dark']) {
     const rt = runtime(theme), shared = rt.load(native('lib/design-tokens.js'));
-    const candidates = suite === 'stage-a' ? stageAFixtures(rt, native, file => fs.existsSync(file)) : fixtureSet(rt);
+    const candidates = suite === 'stage-a' ? stageAFixtures(rt, native, file => fs.existsSync(file)) : suite === 'stage-b' ? stageBFixtures(rt, native, file => fs.existsSync(file)) : fixtureSet(rt);
     if (selectedFixtures && selectedFixtures.some(name => !candidates.some(fixture => fixture.name === name))) throw new Error('Unknown selected fixture');
     const cases = selectedFixtures ? candidates.filter(fixture => selectedFixtures.includes(fixture.name)) : candidates;
     expectedCases += cases.length * widths.length;
@@ -292,7 +295,7 @@ for (const [file, source] of [...sourceFiles].sort(([a], [b]) => a.localeCompare
   if (fs.readFileSync(file, 'utf8') !== source) throw new Error('Source changed before capture completed: ' + file);
   manifests.push({ path: path.relative(repository, file), sha256: crypto.createHash('sha256').update(source).digest('hex') });
 }
-fs.writeFileSync(path.join(output, 'fixtures.json'), JSON.stringify({ syntheticOnly: true, suite, source: 'authored in scripts/rebuild-native-preview.mjs and scripts/miniapp-050-fixtures.mjs; actual JS initial state/pure projections; no API calls', fixtures }, null, 2));
+fs.writeFileSync(path.join(output, 'fixtures.json'), JSON.stringify({ syntheticOnly: true, suite, source: 'authored in scripts/rebuild-native-preview.mjs and scripts/miniapp-050-*-fixtures.mjs; actual JS initial state/pure projections; no API calls', fixtures }, null, 2));
 fs.writeFileSync(path.join(output, 'results.json'), JSON.stringify({ label, suite, widths, expectedCases, recordedAt: new Date().toISOString(), playwright: playwrightVersion, browser: browserVersion, sourceRoot, scope: 'Current WXML/WXSS/JS data layout mapping; no native lifecycle/events/SDK/official compilation/device validation', mapping: { rpx: 'viewport / 750', safeAreaBottom: '20px explicitly simulated', media: 'No QR, private evidence, real photos, or identifying user data', network: 'all browser requests blocked; native wx side effects throw', hostUI: 'Native navigation/tab bar/keyboard excluded; this is page content only', controls: 'Browser controls approximate static native appearance; checked/disabled/value/progress colors follow current WXML bindings', limits: 'No custom component rendering, image-mode measurement, native text measurement, input focus/keyboard, gesture, modal, media, auth or business event verification' }, sourceFiles: manifests, rows }, null, 2));
 const cells = rows.map(row => '<article><h2>' + htmlEscape(row.fixture + ' · ' + row.theme + ' · ' + row.width + 'px') + '</h2><p>' + htmlEscape(row.state) + '</p><a href="' + row.screenshot + '"><img loading="lazy" src="' + row.viewportScreenshot + '" alt="' + htmlEscape(row.fixture) + '"></a><p><a href="' + row.html + '">原结构映射</a> · <a href="' + row.screenshot + '">全页截图</a></p></article>').join('');
 fs.writeFileSync(path.join(output, 'index.html'), '<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + label + '</title><style>body{background:#f7f5f0;color:#202124;font:16px/1.7 sans-serif;margin:24px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}article{border-top:1px solid #dfddd8;padding-top:20px}img{max-width:100%;width:320px;border:1px solid #dfddd8}h2{font-size:18px}a{color:#6f2d67}</style><h1>' + label + '</h1><p>当前原生源码的' + rows.length + '个合成布局状态。图片不含真实二维码、证据或个人资料；未执行微信能力或生产请求。</p><main>' + cells + '</main></html>');

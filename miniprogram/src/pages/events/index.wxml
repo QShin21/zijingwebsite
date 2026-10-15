@@ -11,7 +11,8 @@
     <template wx:if="{{mode === 'events'}}" is="native-events" data="{{docs, featured:false, compact:false, showNotices:false, emptyTitle:search || type !== '全部' ? '没有找到符合条件的活动' : '活动日程正在准备', emptyHint:search || type !== '全部' ? '可调整活动类型或标题关键词，再试一次。' : '新活动发布后会出现在这里，可稍后下拉刷新。'}}" />
     <template wx:else is="native-index" data="{{docs, compact:false, emptyTitle:search ? '没有找到相关通知' : '暂时没有新通知', emptyHint:search ? '可换一个标题关键词，再试一次。' : '新的社团通知发布后会出现在这里。'}}" />
   </block>
-  <button wx:if="{{hasMore && !loading}}" class="secondary events-load-more" bindtap="onReachBottom" loading="{{loadingMore}}" disabled="{{loadingMore}}">加载更多</button><text wx:if="{{docs.length && !hasMore && !loading}}" class="result-caption events-results-end">已展示全部结果</text>
+  <view wx:if="{{loadMoreError && !loading}}" class="native-feedback"><text class="state-title">更多内容暂未加载</text><text class="error">{{loadMoreError}}</text><text class="native-section-note">已加载的内容仍可查看，请重试继续加载。</text></view>
+  <button wx:if="{{hasMore && !loading}}" class="secondary events-load-more" bindtap="onReachBottom" loading="{{loadingMore}}" disabled="{{loadingMore}}">{{loadMoreError ? '重试加载更多' : '加载更多'}}</button><text wx:if="{{docs.length && !hasMore && !loading}}" class="result-caption events-results-end">已展示全部结果</text>
   <view wx:if="{{!loading && !error && promoted.length}}" class="native-section events-promotions"><view class="native-section-head"><text class="section-title">社群推荐</text></view><template is="native-promotions" data="{{docs:promoted, compact:false}}" /></view>
   <view wx:if="{{clubError}}" class="native-section native-feedback"><text class="state-title">社群推荐暂未读取</text><text class="error">{{clubError}}</text><button class="secondary" bindtap="retryClub">重新加载推荐</button></view>
 </view>

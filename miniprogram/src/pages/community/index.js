@@ -11,6 +11,7 @@ const format = require('../../lib/format');
 const { render } = require('../../lib/richtext');
 const { actions, protect } = require('../../lib/page');
 const video = require('../../lib/video');
+const { hasContactImage } = require('../../lib/native-presentation');
 const areas = { updates: 'community-posts', showcase: 'community-showcase' };
 const identity = () => String((session.user() || {}).id || '');
 const joinLabels = { requested: '已记录加入意向，请联系管理员', friendReported: '已报告发送好友申请，待管理员确认',
@@ -18,7 +19,7 @@ const joinLabels = { requested: '已记录加入意向，请联系管理员', fr
 const receipt = record => record ? { ...record, statusText: joinLabels[record.status] || '进度待核对', confirmedText: format.date(record.confirmedAt) } : null;
 Page(withVisualTheme({
   data: { loading: true, error: '', needsLogin: false, game: {}, area: 'contacts', introOpen: false, docs: [], page: 1,
-    hasMore: false, loadingMore: false, nodes: [], contentError: '', contacts: [], contactsLoading: false, contactsError: '',
+    hasMore: false, loadingMore: false, nodes: [], contentError: '', contacts: [], contactAvailable: false, contactsLoading: false, contactsError: '',
     join: null, joinActions: {}, joinLoading: false, joinError: '', joinBusy: false, joinDone: '', canHandle: false,
     clubLoading: false, clubError: '', staffBatches: [], promotions: [], honorPins: [], honorsLoading: false, honorsError: '' },
   ...actions,
@@ -43,7 +44,7 @@ Page(withVisualTheme({
     if (this._visible && this._resumeRead) { this._resumeRead = false; await this.load(); }
   },
   resetPrivate() { this.setData({ needsLogin: !session.user(), loading: false, error: '', game: {}, introOpen: false, docs: [], nodes: [], page: 1,
-    hasMore: false, loadingMore: false, contentError: '', contacts: [], contactsLoading: false, contactsError: '',
+    hasMore: false, loadingMore: false, contentError: '', contacts: [], contactAvailable: false, contactsLoading: false, contactsError: '',
     join: null, joinActions: {}, joinLoading: false, joinError: '', joinBusy: Boolean(this._pendingWrite), joinDone: '', canHandle: false,
     clubLoading: false, clubError: '', staffBatches: [], promotions: [], honorPins: [], honorsLoading: false, honorsError: '' }); },
   onShow() {
@@ -88,7 +89,7 @@ Page(withVisualTheme({
         if (!this.valid(scope) || ticket !== this._contactsTicket) return;
         mapped.push({ id: contact.id, name: contact.name, image });
       }
-      if (this.valid(scope) && ticket === this._contactsTicket) this.setData({ contacts: mapped, contactsLoading: false });
+      if (this.valid(scope) && ticket === this._contactsTicket) this.setData({ contacts: mapped, contactAvailable: hasContactImage(mapped), contactsLoading: false });
     } catch (cause) { if (this.valid(scope) && ticket === this._contactsTicket) this.setData({ contactsLoading: false, contactsError: cause.message }); }
   },
   async retryJoin() {
@@ -163,6 +164,30 @@ Page(withVisualTheme({
   },
   retryContent() { return this.loadArea(); },
   toggleIntro() { this.setData({ introOpen: !this.data.introOpen }); },
+  contactImageError(event) {
+    if (!this.valid(this._scope || 0)) return;
+    const source = event.currentTarget.dataset;
+    let changed = false;
+    const contacts = this.data.contacts.map(contact => {
+      if (String(contact.id) !== String(source.id) || !source.url || contact.image !== source.url || contact.imageError) return contact;
+      changed = true; return { ...contact, imageError: true };
+    });
+    if (changed) this.setData({ contacts, contactAvailable: hasContactImage(contacts) });
+  },
+  showcaseImageError(event) {
+    if (!this.valid(this._scope || 0)) return;
+    const source = event.currentTarget.dataset;
+    let changed = false;
+    const docs = this.data.docs.map(doc => {
+      if (String(doc.id) !== String(source.id)) return doc;
+      const localImages = (doc.localImages || []).map(photo => {
+        if (!source.url || photo.source !== source.url || photo.imageError) return photo;
+        changed = true; return { ...photo, imageError: true };
+      });
+      return { ...doc, localImages };
+    });
+    if (changed) this.setData({ docs });
+  },
   contactAdmins() {
     if (!this._visible || this._disposed || !this.data.game.id) return;
     this.area({ currentTarget: { dataset: { area: 'contacts' } } });

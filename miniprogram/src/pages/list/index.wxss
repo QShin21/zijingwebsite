@@ -1,8 +1,23 @@
-.archive-filters { align-items: flex-start; margin-top: 22rpx; gap: 16rpx; }
-.filter-field { flex: 1; min-width: 220rpx; }
-.filter-field .picker-value { font-size: 28rpx; }
-.list-context { margin: 0 0 28rpx; }
-.list-page-honors .page-heading { border-bottom: 2rpx solid var(--z-text); }
-.list-page-honors .content-record-date { color: var(--z-text); }
-.list-page-honors .content-record { padding: 30rpx 0; }
-.list-page-albums .content-record-image { height: 360rpx; }
+@import "../../styles/native-reading.wxss";
+.list-page .filter-group { margin: 24px 0 28px; padding: 0; border: 0; }
+.list-page .filter-label { margin-bottom: 8px; font-size: 14px; line-height: 1.6; font-weight: 500; }
+.list-page .search { gap: 8px; margin: 0; }
+.list-page .search button { padding-left: 16px; padding-right: 16px; }
+.list-page .archive-filters { align-items: flex-start; margin-top: 16px; gap: 12px; }
+.list-page .filter-field { flex: 1; min-width: 120px; }
+.list-page .filter-field .picker-value { font-size: 15px; }
+.list-page .filter-group .chips { margin: 16px 0 0; }
+.list-page .filter-group .chip { padding: 10px 14px; margin: 0 8px 8px 0; font-size: 15px; }
+.mini-page.native-page .list-clear { margin-top: 4px; }
+.list-page .list-result-heading { margin-bottom: 20px; }
+.list-count { display: block; color: var(--z-muted); font-size: 12px; line-height: 1.65; }
+.list-context { margin: 24px 0; }
+.mini-page.native-page .list-team-entry { display: flex; align-items: center; gap: 16px; padding: 20px; background: var(--z-secondary-bg); border-radius: 8px; }
+.list-team-entry .section-title { color: var(--z-secondary-text); font-size: 18px; }
+.list-team-entry .muted { margin-top: 8px; }
+.list-entry-sign { flex-shrink: 0; color: var(--z-link); font-size: 24px; }
+.mini-page.native-page .list-more { width: 100%; margin-top: 24px; }
+.list-page .result-caption { margin-top: 24px; }
+@media (max-width: 359px) {
+  .mini-page.native-page .list-team-entry { padding: 16px; }
+}

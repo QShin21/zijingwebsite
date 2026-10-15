@@ -80,3 +80,73 @@ A阶段开发与本地自测完成，可交独立QA。B–F仍待执行。微信
 - 用户明确要求后续不使用GitHub CI。已检查本仓库唯一workflow原触发为`push/pull_request`，现仅保留手动定义，取消自动触发；本代理不执行手动触发、重跑或等待。后续提交消息增加`[skip ci]`，测试在执行环境运行并保存日志，不将跳过CI称为通过。没有修改组织其他项目、分支保护或安全设置。
 - B范围：`communities/explore/account/list/detail/fixed`。五个入口采用各自的任务结构；加强真实授权媒体与文字层次、适度品牌细节。有图/无图分别成立，无图只用克制的品牌图形，不编造照片或内容；首页补媒体fixtures；无授权名片时降低联系CTA层级并解释当前状态。
 - 保留A独立QA并行审查；B未完成全部阶段，不执行部署或微信上传。
+
+## B阶段实现与A独立QA缺陷修复（2026-10-15）
+
+本阶段起点为`24cba9981bf3a39a3ae5155a9e005a57b1eb071e`，该提交已普通推送，取消本仓库push/PR自动CI触发。后续未查询、触发、重跑或等待Actions。所有下述检查均在执行环境实际运行，不将跳过CI记为通过。
+
+主助手转达Windows独立QA：确认A的P1“活动第二页失败隐藏第一页”和P2“封面缺少原生加载失败占位”；A尚未签署通过。该QA另报告static/lint/TypeScript、846项扩展小程序测试、184合成布局通过，其他207/343套件可能重叠，本文不累计这些外部数字，也不以它们代替本轮结果。官方原生工具诊断继续进行，B开发未等待该诊断。
+
+### 产品范围和结果
+
+- `communities`采用项目目录：真实可用封面、项目说明与进入社群动作；无图使用低对比场地图形。保留搜索、分页、登录限制、骨干招新与组织申请。
+- `explore`使用队伍/荣誉两个档案入口和日常索引；`account`将实际身份、本人申请与投稿、成员记录、服务端能力限定的工作台和主题设置分区。没有新增虚构统计、本人报名聚合或取消报名能力。
+- `list`按通知/动态索引、队伍/招新、荣誉日期和相册分型；保留各collection、筛选、原始记录和路由。`detail`保留问卷、本人回执、管理、公开渠道、队伍、阵容、照片和视频入口；报名动作置于封面前，文章仍按标题、封面、正文阅读。`fixed`保留七类key、公开隐私正文、联系说明和三类加入入口。
+- 新增`lib/native-reading.js`、`templates/native-content.wxml`、`styles/native-reading.wxss`。纯投影保留原数据与权限；荣誉赛事日期不借用发布时间，富文本通过原安全解析后补px字级、标题、引用与列表间距。
+- 首页真实CMS头图/重点活动封面与文字形成主次；无图使用克制图形。社群的名片加载中、读取失败、无授权名片、原生图片损坏分别呈现；没有可展示图片时降为刷新入口并解释，不滚动到空区。
+
+### 两项QA缺陷与局部读取修复
+
+1. **P1分页失败：**`events`新增独立`loadMoreError`，失败不设置整页`error`，保留`docs/page/hasMore`；重试仍请求失败页，忙碌锁阻止重复追加。`list`发现同类问题，一并使用局部错误；401继续清空受限列表并显示登录反馈。首次读取失败仍使用整页反馈。
+2. **P2图片失败：**原生`image`实际绑定`binderror`，不是靠浏览器占位替代。共享封面按当前ID、collection和URL匹配，只设置`nativeCoverError`，不丢弃原媒体/图注；首页头图、社群名片/风采、阅读封面/照片/二维码各有可见失败反馈。隐藏/卸载后的回调不改页面，旧URL不能标记新图片失败；重新读取可重试。
+3. **固定页迟到读取：**此前`fixed`没有账号/hide/unload票据守卫。补最小可见性、账号和请求票据，在每段异步读取后核对；换号清空正文、联系人、批次和封面；匿名privacy读取仍保留。
+4. **项目筛选迟到读取：**此前`list.loadGames`没有独立读取守卫。新增独立`_gamesTicket`，隐藏、卸载、换号废弃；成功时再次核对账号，不被正常主列表读取误取消。`detail`沿用原票据，将换号/重新加载时的清空扩展到封面、二维码和视频投影。
+
+这些是明确记录的局部读取/呈现修复。网站`src/`、共享tokens、API/集合/数据库、依赖和锁文件、16题型/问卷引擎、媒体核心及服务端权限均无diff。仍保留原social视频读取/复制合同；未触及队伍荣誉受控视频策略。
+
+### 本地检查和截图自审
+
+首轮完整测试有19项失败，原因均为两个旧VM测试夹具没有注入新增`native-presentation`模块。已接入真实纯投影模块，保留所有原业务断言；相关83项复跑通过，最终12文件210项通过。新增回归验证实际Page事件和延迟Promise，不调用生产接口。
+
+| 检查 | 已执行结果 | 日志 |
+| --- | --- | --- |
+| Vitest 12文件 | 210项通过，退出0 | `/workspace/scratch/miniapp-050-stage-b-tests-accepted.log` |
+| 全量ESLint | 退出0 | `/workspace/scratch/miniapp-050-stage-b-lint-accepted.log` |
+| TypeScript `--noEmit` | 退出0 | `/workspace/scratch/miniapp-050-stage-b-typecheck-accepted.log` |
+| 原生源码检查 | 25页、168文件、727637字节；域名检查开启、外部依赖0；退出0 | `/workspace/scratch/miniapp-050-stage-b-native-accepted.log` |
+| tokens与原生配置校验 | 退出0 | `/workspace/scratch/miniapp-050-stage-b-tokens.log` |
+| 首轮375px双主题 | 17状态、34组合，测量全部为0 | `.data/miniapp-050-stage-b-iteration-1/results.json` |
+| 图片边框与补充状态复查 | 5状态×4宽×2主题，40组合，退出0 | `.data/miniapp-050-stage-b-edge-check/results.json` |
+| B完整矩阵 | 65状态×4宽×2主题，520组合，退出0 | `.data/miniapp-050-stage-b/results.json` |
+| A样板回归 | 23状态×4宽×2主题，184组合，退出0 | `.data/miniapp-050-stage-a-regression-b-final/results.json` |
+| 既有8样例回归 | 32组合，退出0 | `.data/miniapp-050-stage-b-regression-final/results.json` |
+| 针对性QA回归 | 9项通过、67项按筛选跳过；为210项的子集，退出0 | `/workspace/scratch/miniapp-050-stage-b-qa-regressions.log` |
+| 交互审查入口检查 | 1560个最终文件齐全，32次状态/宽度/主题切换通过；错误及外部请求为0 | `.data/miniapp-050-stage-b-review/gallery-check.json` |
+
+12文件为A的11个门禁加`tests/miniapp-reading-lifecycle.test.ts`。其中新增13项读取/媒体测试覆盖fixed换号、隐藏、卸载、匿名privacy；list筛选独立票据及迟到账号、分页失败和401；detail/fixed当前URL损坏及隐藏回调。其他新增断言覆盖events分页、home/communities/community原生坏图、纯投影日期与字段保留、嵌套富文本浏览器映射。
+
+截图工具补齐原安全rich-text节点树的递归映射，旧版本只取顶层text会漏掉正文。映射保留实际字号style，转义文本并禁用任意标签/事件与URL样式；视频仅保留静态尺寸、控件及原源地址标记，不加载资源、不验证播放。全部浏览器网络请求阻断，原生wx副作用调用抛错。图片均为明确标注的合成素材，不取真实名片、私人材料或活动照片。
+
+自审发现并修正：荣誉未知日期栏避免“日期待公/布”孤字；活动报名主动作从封面后前置，320px约y702即可看到；新闻首图来源紧贴图片；scheduled无作者时移除空署名区。首次怀疑首页无图标题缺失，随后根代理与开发代理读取原始PNG均确认文字存在，未为不可复现的显示问题修改产品。首轮截图保留。
+
+第二轮62状态完整矩阵的496组合中，16个相册/社群图片组合出现图片超出预览按钮约2px的裁切；其余测量为0。实际DOM测量定位为100%图片宽度叠加边框，已为共享`.photo`补`box-sizing: border-box`，没有隐藏溢出或缩小命中区。增加无封面文章、招新岗位和招新二维码失败三状态；先复查40组合，再重跑最终65状态完整矩阵及A/既有回归，全部通过。失败结果保存在`.data/miniapp-050-stage-b-iteration-2`，审查包保留测量、日志及代表截图。
+
+最终B截图时间`2026-10-15T10:10:34.074Z`，A回归时间`2026-10-15T10:07:50.663Z`，既有回归时间`2026-10-15T10:05:44.710Z`；使用Playwright`1.58.2`和Chromium`154.0.8037.57`。三个最终目录的横向溢出、过小命中区、低于阈值字号、裁切、运行错误及浏览器网络请求均为0；记录的55/34/58个源文件哈希分别与最终工作树一致。40个针对性布局为完整B矩阵的子集，不累计为额外覆盖。
+
+### 独立复测入口
+
+从已安装项目依赖的仓库根目录执行以下四个文件即可复测两项QA缺陷及关联边界，无需GitHub CI、真实账号或网络业务：
+
+```sh
+node node_modules/vitest/vitest.mjs run tests/miniapp-content-flows.test.ts tests/miniapp-community-flows.test.ts tests/miniapp-reading-lifecycle.test.ts tests/miniapp.test.ts
+```
+
+只运行本轮QA缺陷的9项针对性回归：
+
+```sh
+node node_modules/vitest/vitest.mjs run tests/miniapp-content-flows.test.ts tests/miniapp-community-flows.test.ts tests/miniapp-reading-lifecycle.test.ts tests/miniapp.test.ts -t '第二页失败|下一页失败|原生图片错误|活动原生封面|首页头图|原生损坏名片|项目目录原生封面|详情的损坏|固定页损坏'
+```
+
+截图复现使用`node scripts/rebuild-native-preview.mjs --suite stage-b --browser <本机Chromium路径>`；默认四宽320/375/390/430、浅深双主题。交互审查入口`.data/miniapp-050-stage-b-review/index.html`，附375px的8样板与A检查点同数据对照。所有截图属于浏览器布局映射，不能据此声称微信编译、真机键盘/安全区、媒体下载或授权交互通过。
+
+阶段B开发、本地检查与截图自审完成。本阶段共有42个变更/新增文件：30个原生产品文件、4个脚本、6个测试文件、2份文档；实际提交SHA、正常推送后的默认分支/完整远端分支列表及各文件SHA-256由审查包`GIT_RECEIPT.txt`和`manifest.json`保存，交付时另附Library回执。独立QA可按上方命令复测A的P1/P2及关联边界；A/B尚未由独立QA签署通过。主助手最新转达Windows官方工具已编译/加载成功，官方测试preview退出0；真实模拟器截图与交互等待Codex授权提示处理，且当前B提交仍需独立复测。C–F继续待执行。本云端阶段不部署服务器、不上传微信，不使用GitHub CI。

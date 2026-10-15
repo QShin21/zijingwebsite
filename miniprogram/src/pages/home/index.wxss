@@ -32,3 +32,12 @@
 .mini-page.native-page .home-footer-navigation .plain { width: auto; font-size: 15px; text-align: left; }
 @media (max-width: 359px) { .home-title { font-size: 30px; } .home-cover-actions { gap: 16px; } .mini-page.native-page .home-cover-actions .primary { min-width: 152px; } }
 .home-module .home-notices { margin-top: 16px; margin-bottom: 8px; }
+
+.home-lead { position: relative; display: flex; align-items: flex-start; gap: 16px; }
+.home-lead .home-title { position: relative; z-index: 1; flex: 1; min-width: 0; }
+.home-lead-image { display: block; flex-shrink: 0; width: 112px; height: 144px; border-radius: 12px; background: var(--z-media); }
+.home-lead-fallback { background: var(--z-secondary-bg); }
+.home-lead-fallback .native-field-graphic { opacity: .35; }
+.home-field-mark { position: absolute; right: -4px; top: -4px; width: 148px; height: 128px; opacity: .13; pointer-events: none; }
+.home-cover > .native-media-credit { margin-top: 8px; }
+@media (max-width: 359px) { .home-lead { gap: 12px; } .home-lead-image { width: 96px; height: 128px; } }

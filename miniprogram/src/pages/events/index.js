@@ -7,10 +7,11 @@ const club = require('../../lib/club');
 const native = require('../../lib/native-presentation');
 const { actions, error } = require('../../lib/page');
 Page(withVisualTheme({
-  data: { loading: true, error: '', mode: 'events', types: ['全部', '比赛', '观赛', '交流', '训练', '其他'], type: '全部', search: '', docs: [], page: 1, hasMore: false, loadingMore: false, promoted: [], clubError: '' },
+  data: { loading: true, error: '', mode: 'events', types: ['全部', '比赛', '观赛', '交流', '训练', '其他'], type: '全部', search: '', docs: [], page: 1, hasMore: false, loadingMore: false, loadMoreError: '', promoted: [], clubError: '' },
   ...actions,
-  onShow() { return this.load(); },
-  onHide() { this._ticket = (this._ticket || 0) + 1; this._promotionTicket = (this._promotionTicket || 0) + 1; },
+  onShow() { this._visible = true; return this.load(); },
+  onHide() { this._visible = false; this._ticket = (this._ticket || 0) + 1; this._promotionTicket = (this._promotionTicket || 0) + 1; },
+  onUnload() { this.onHide(); },
   onPullDownRefresh() { this.load().finally(() => wx.stopPullDownRefresh()); },
   onReachBottom() { if (this.data.hasMore && !this.data.loading && !this.data.loadingMore) return this.load(true); },
   retry() { this.load(); },
@@ -18,10 +19,15 @@ Page(withVisualTheme({
   changeType(event) { this.setData({ type: event.currentTarget.dataset.type }); this.load(); },
   input(event) { this.setData({ search: event.detail.value }); },
   search() { this.load(); },
+  nativeCoverError(event) {
+    if (!this._visible) return;
+    const docs = native.markCoverFailure(this.data.docs, event.currentTarget.dataset);
+    if (docs !== this.data.docs) this.setData({ docs });
+  },
   async load(more = false) {
     if (more && (this.data.loading || this.data.loadingMore)) return;
     const ticket = this._ticket = (this._ticket || 0) + 1;
-    this.setData(more ? { loadingMore: true } : { loading: true, error: '', docs: [] });
+    this.setData(more ? { loadingMore: true, loadMoreError: '' } : { loading: true, loadingMore: false, loadMoreError: '', error: '', docs: [], page: 1, hasMore: false });
     try {
       const result = await cms.list(this.data.mode, { page: more ? this.data.page + 1 : 1, search: this.data.search,
         type: this.data.mode === 'events' && this.data.type !== '全部' ? this.data.type : undefined });
@@ -29,7 +35,11 @@ Page(withVisualTheme({
       if (ticket !== this._ticket) return;
       this.setData({ loading: false, loadingMore: false, docs: more ? this.data.docs.concat(docs) : docs, page: result.page, hasMore: result.hasNextPage });
       if (!more) await this.loadPromoted();
-    } catch (cause) { if (ticket === this._ticket) { error(this, cause); this.setData({ loadingMore: false }); } }
+    } catch (cause) {
+      if (ticket !== this._ticket) return;
+      if (more) this.setData({ loadingMore: false, loadMoreError: cause.message || '暂时无法加载更多，请重试。' });
+      else { error(this, cause); this.setData({ loadingMore: false }); }
+    }
   },
   retryClub() { return this.loadPromoted(); },
   async loadPromoted() {

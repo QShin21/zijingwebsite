@@ -5,7 +5,8 @@
 <view class="page mini-page native-page home-page">
   <view class="home-masthead"><text class="home-brand">竞在紫荆</text><text class="home-identity">{{user ? '欢迎回到主场' : '校园电竞社团'}}</text></view>
   <view class="home-cover">
-    <text class="home-title">{{site.heroTitle || '找到队友，一起上场'}}</text>
+    <view class="home-lead"><text class="home-title">{{site.heroTitle || '找到队友，一起上场'}}</text><image wx:if="{{hero && hero.url !== heroErrorURL}}" class="home-lead-image" src="{{hero.url}}" mode="aspectFill" aria-label="{{hero.alt || site.heroTitle}}" binderror="homeHeroError" data-url="{{hero.url}}" /><view wx:elif="{{hero && hero.url === heroErrorURL}}" class="home-lead-image home-lead-fallback" aria-hidden="true"><template is="native-field-graphic" /></view><view wx:else class="home-field-mark" aria-hidden="true"><template is="native-field-graphic" /></view></view>
+    <text wx:if="{{hero && hero.url === heroErrorURL}}" class="native-media-error">主场图片暂时无法显示，可下拉刷新重试。</text><text wx:if="{{hero && (hero.alt || hero.credit)}}" class="native-media-credit">{{hero.alt}}<text wx:if="{{hero.credit}}"> / {{hero.credit}}</text></text>
     <text class="home-description">{{site.heroSubtitle || '寻找游戏同好，参加社团活动。'}}</text>
     <view class="home-cover-actions"><button class="primary" bindtap="openPage" data-page="communities">进入游戏社群</button><button class="plain" bindtap="openPage" data-page="events">查看活动</button></view>
     <text wx:if="{{!user}}" class="home-login-hint">活动与通知可直接浏览，进入社群时登录。</text>
@@ -27,7 +28,6 @@
     <view wx:if="{{clubError}}" class="native-section native-feedback"><text class="state-title">招新与社群推荐暂未读取</text><text class="error">{{clubError}}</text><button class="secondary" bindtap="retryClub">重新加载推荐</button></view>
     <view wx:if="{{promotions.event.length || promotions.notice.length || promotions.showcase.length}}" class="native-section home-promotions"><view class="native-section-head"><text class="section-title">来自游戏社群</text></view><view wx:if="{{promotions.event.length}}" class="home-promotion-group"><text class="home-group-label">社群活动</text><template is="native-promotions" data="{{docs:promotions.event, compact:true}}" /></view><view wx:if="{{promotions.notice.length}}" class="home-promotion-group"><text class="home-group-label">社群通知</text><template is="native-promotions" data="{{docs:promotions.notice, compact:true}}" /></view><view wx:if="{{promotions.showcase.length}}" class="home-promotion-group"><text class="home-group-label">社群风采</text><template is="native-promotions" data="{{docs:promotions.showcase, compact:true}}" /></view></view>
     <view wx:if="{{showAbout}}" class="native-section home-about"><text class="section-title">{{site.name}}</text><text wx:if="{{site.description}}" class="native-summary">{{site.description}}</text><button class="plain" bindtap="openWebsite" data-url="/about">了解社团</button></view>
-    <view wx:if="{{hero}}" class="home-photo"><image class="home-photo-image" src="{{hero.url}}" mode="aspectFill" aria-label="{{hero.alt || site.heroTitle}}" /><text wx:if="{{hero.alt || hero.credit}}" class="field-note">{{hero.alt}}<text wx:if="{{hero.credit}}"> / {{hero.credit}}</text></text></view>
     <view wx:if="{{site.navigation.length}}" class="home-footer-navigation"><button wx:for="{{site.navigation}}" wx:key="path" class="plain" bindtap="openWebsite" data-url="{{item.path}}">{{item.label}}</button></view>
     <text class="bottom-note">{{site.footer || site.name || '竞在紫荆'}}</text>
   </block>

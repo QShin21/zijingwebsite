@@ -49,3 +49,4 @@
 .community-opportunities .native-section-head { margin-bottom: 0; }
 .community-staff .native-section-head { flex-wrap: wrap; gap: 0 12px; margin-bottom: 8px; }
 .community-staff .native-section-head .section-title { flex-basis: 120px; }
+.community-contact-note { display: block; margin-top: 8px; color: var(--z-muted); font-size: 14px; line-height: 1.75; word-break: break-word; }

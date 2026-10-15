@@ -31,4 +31,20 @@ function content(doc) {
   };
 }
 
-module.exports = { calendar, content };
+function hasContactImage(contacts) {
+  return Array.isArray(contacts) && contacts.some(contact => Boolean(contact && contact.image && !contact.imageError));
+}
+
+function markCoverFailure(docs, source = {}) {
+  if (!Array.isArray(docs) || !source.url || source.id === undefined || !source.collection) return docs;
+  let changed = false;
+  const next = docs.map(doc => {
+    if (String(doc.id) !== String(source.id) || doc.collection !== source.collection ||
+        !doc.coverImage || doc.coverImage.url !== source.url || doc.nativeCoverError) return doc;
+    changed = true;
+    return { ...doc, nativeCoverError: true };
+  });
+  return changed ? next : docs;
+}
+
+module.exports = { calendar, content, hasContactImage, markCoverFailure };

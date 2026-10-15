@@ -1,19 +1,47 @@
-.detail-heading { padding-bottom: 8rpx; border-bottom: 1rpx solid var(--z-line); }
-.mini-page .detail-title { font-size: 48rpx; margin-top: 18rpx; }
-.detail-heading .object-facts { margin-bottom: 16rpx; }
-.signup-callout { margin-top: 28rpx; padding: 26rpx; border-left: 4rpx solid var(--z-primary); border-radius: 0 12rpx 12rpx 0; background: var(--z-surface); }
-.signup-callout .section-heading { border-bottom: 0; padding-bottom: 0; }
-.signup-callout .primary { width: 100%; margin-top: 24rpx; }
-.signup-callout .body { margin-top: 16rpx; }
-.participation-section { padding: 28rpx 0; border-bottom: 1rpx solid var(--z-line); }
-.competition-record { padding: 30rpx 0; border-bottom: 1rpx solid var(--z-line); }
-.honor-placing { margin-top: 14rpx; }
-.detail-cover { margin-top: 32rpx; }
-.team-quick-links { padding-bottom: 20rpx; border-bottom: 1rpx solid var(--z-line); }
-.qr-image { width: 352rpx; height: 352rpx; }
-.roster-row { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 16rpx; padding: 22rpx 0; border-bottom: 1rpx solid var(--z-line); }
-.roster-name { flex: 1; min-width: 180rpx; word-break: break-word; }
-.position-record { padding-top: 24rpx; border-top: 1rpx solid var(--z-line); }
-.photo-record { margin-top: 30rpx; }
-.content-links { padding-top: 24rpx; }
-@media (min-width: 600px) { .mini-page .detail-title { font-size: 30px; } }
+@import "../../styles/native-reading.wxss";
+.detail-heading { padding-top: 4px; }
+.detail-heading-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; min-height: 24px; }
+.detail-heading-top > .native-meta { flex: 1; min-width: 0; padding-top: 4px; }
+.detail-heading-top .reading-mark { width: 32px; height: 30px; margin-top: 0; }
+.detail-heading-top .reading-mark-stroke { height: 20px; }
+.detail-heading-top .reading-mark-corner { top: 10px; height: 16px; }
+.mini-page.native-page .detail-title { margin-top: 14px; font-size: 28px; line-height: 1.4; letter-spacing: -.4px; }
+.mini-page.native-page .detail-summary { margin-top: 16px; font-size: 16px; line-height: 1.8; }
+.detail-byline { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 16px; color: var(--z-muted); font-size: 12px; line-height: 1.75; }
+.detail-cover-record { margin-top: 24px; }
+.detail-media-failed { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; min-height: 96px; padding: 16px; background: var(--z-surface); border: 1px solid var(--z-line); border-radius: 8px; }
+.detail-media-failed > .muted { flex: 1; min-width: 150px; }
+.detail-media-failed > button { width: 100%; text-align: left; }
+.signup-callout { margin-top: 28px; padding: 20px; background: var(--z-secondary-bg); border-radius: 8px; }
+.signup-callout .section-heading { margin-bottom: 12px; }
+.signup-callout .section-title { color: var(--z-secondary-text); }
+.signup-callout .primary { width: 100%; margin-top: 20px; }
+.signup-callout .body { margin-top: 12px; }
+.participation-section { margin-top: 28px; padding: 24px 0; border-top: 1px solid var(--z-line); border-bottom: 1px solid var(--z-line); }
+.mini-page.native-page .participation-action { width: 100%; margin-top: 20px; }
+.competition-record { position: relative; margin-top: 28px; padding: 20px; background: var(--z-surface); border-radius: 8px; }
+.competition-record::before { content: ''; display: block; width: 32px; height: 3px; margin-bottom: 16px; background: var(--z-primary); border-radius: 2px; }
+.competition-record .honor-placing { margin-top: 14px; font-size: 28px; line-height: 1.4; }
+.competition-record .plain { margin-top: 8px; }
+.team-quick-links { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--z-line); }
+.team-quick-links .section-heading { margin-bottom: 0; }
+.team-quick-links .actions { margin-top: 8px; }
+.team-quick-links .actions > button { text-align: left; }
+.qr-image { width: 200px; height: 200px; padding: 8px; margin: 20px auto; }
+.roster-row { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 8px 16px; padding: 16px 0; border-bottom: 1px solid var(--z-line); }
+.roster-name { flex: 1; min-width: 120px; font-size: 16px; line-height: 1.75; word-break: break-word; }
+.position-record { margin-top: 20px; padding: 20px 0; border-top: 1px solid var(--z-line); }
+.position-record:first-of-type { margin-top: 0; }
+.position-title { display: block; font-size: 19px; line-height: 1.5; font-weight: 600; }
+.position-fact { margin-top: 16px; }
+.position-label { display: block; color: var(--z-muted); font-size: 14px; line-height: 1.7; }
+.mini-page.native-page .position-fact .body { margin-top: 4px; }
+.detail-photos .photo-record { margin-top: 24px; }
+.detail-video-record .detail-video { width: 100%; height: 220px; margin-top: 0; border-radius: 8px; }
+.detail-related { padding-top: 24px; border-top: 1px solid var(--z-line); }
+.mini-page.native-page .detail-workspace { width: 100%; }
+@media (max-width: 359px) {
+  .mini-page.native-page .detail-title { font-size: 26px; }
+  .signup-callout, .competition-record { padding: 16px; }
+  .detail-video-record .detail-video { height: 180px; }
+}

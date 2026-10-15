@@ -10,29 +10,31 @@ const format = require('../../lib/format');
 const navigation = require('../../lib/navigation');
 const files = require('../../lib/files');
 const video = require('../../lib/video');
+const reading = require('../../lib/native-reading');
 const { actions, error } = require('../../lib/page');
 const socialCollections = ['community-posts', 'community-showcase'];
 Page(withVisualTheme({
   data: { loading: true, error: '', needsLogin: false, collection: '', doc: {}, nodes: [], links: [], photos: [],
-    related: [], previewImages: [], registration: '', coverImage: null },
+    related: [], previewImages: [], registration: '', coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', reading: {} },
   ...actions,
   onLoad(options) {
-    this._options = options; this.setData({ collection: options.collection });
+    this._options = options; this._hidden = false; this._unloaded = false;
+    this.setData({ collection: options.collection });
     this._unsubscribe = session.subscribe(user => {
       if (String(user && user.id) === String(this._userId)) return;
       this._ticket = (this._ticket || 0) + 1;
-      this.setData({ loading: false, doc: {}, nodes: [], links: [], photos: [], previewImages: [], signupInfo: null, related: [], needsLogin: !user });
+      this.setData({ loading: false, error: '', doc: {}, reading: {}, nodes: [], links: [], photos: [], previewImages: [], signupInfo: null, related: [], coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', videoError: false, registration: '', signupFailed: false, needsLogin: !user });
     });
   },
-  onShow() { this.load(); },
-  onHide() { this._ticket = (this._ticket || 0) + 1; },
-  onUnload() { this.onHide(); if (this._unsubscribe) this._unsubscribe(); },
+  onShow() { this._hidden = false; this.load(); },
+  onHide() { this._hidden = true; this._ticket = (this._ticket || 0) + 1; },
+  onUnload() { this._unloaded = true; this.onHide(); if (this._unsubscribe) this._unsubscribe(); },
   retry() { this.load(); },
   onPullDownRefresh() { this.load().finally(() => wx.stopPullDownRefresh()); },
   async load() {
     const ticket = this._ticket = (this._ticket || 0) + 1;
     const user = session.user(); this._userId = user && user.id;
-    this.setData({ loading: true, error: '', needsLogin: false, user, signupInfo: null, signupFailed: false, signupStartText: '', signupEndText: '', doc: {}, photos: [], nodes: [], links: [], related: [], previewImages: [] });
+    this.setData({ loading: true, error: '', needsLogin: false, user, signupInfo: null, signupFailed: false, signupStartText: '', signupEndText: '', doc: {}, reading: {}, photos: [], nodes: [], links: [], related: [], previewImages: [], coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', videoError: false, registration: '' });
     try {
       const { collection, id, slug } = this._options;
       const social = socialCollections.includes(collection);
@@ -52,11 +54,12 @@ Page(withVisualTheme({
       let related = [];
       if (collection === 'teams') {
         const [seasons, honors] = await Promise.all([cms.list('seasons', { team: doc.id }), cms.list('honors', { team: doc.id })]);
-        related = [...seasons.docs, ...honors.docs];
+        related = [...seasons.docs, ...honors.docs].map(reading.entry);
       }
       if (ticket !== this._ticket) return;
-      this.setData({ loading: false, doc, social, nodes: rendered.nodes, links: rendered.links, photos, qr, coverImage,
-        previewImages: photos.map(photo => photo.url), related, dateText: format.date(doc.startAt || doc.date || doc.createdAt),
+      const article = reading.article(doc, collection);
+      this.setData({ loading: false, doc, social, reading: article, nodes: reading.prose(rendered.nodes), links: rendered.links, photos, qr, coverImage,
+        previewImages: photos.map(photo => photo.url), related, dateText: article.dateText,
         endDateText: doc.endAt ? format.date(doc.endAt) : '',
         registrationStartText: doc.registrationStart ? format.date(doc.registrationStart) : '', registrationEndText: doc.registrationEnd ? format.date(doc.registrationEnd) : '',
         videoSource: video.source(doc.videoURL), videoError: false,
@@ -78,6 +81,19 @@ Page(withVisualTheme({
   register() {
     if (this.data.registration !== '报名开放') return;
     navigation.copy(this.data.doc.registrationURL || this.data.doc.channelText || '', '报名渠道已复制');
+  },
+  readingImageError(event) {
+    if (this._hidden || this._unloaded || this.data.loading || this.data.needsLogin) return;
+    const { role, url, index } = event.currentTarget.dataset;
+    if (role === 'cover' && this.data.coverImage && this.data.coverImage.url === url) this.setData({ coverImageFailed: true });
+    else if (role === 'qr' && this.data.qr && this.data.qr.url === url) this.setData({ qrFailed: true });
+    else if (role === 'photo' && this.data.photos[index] && this.data.photos[index].url === url)
+      this.setData({ photos: this.data.photos.map((photo, photoIndex) => photoIndex === Number(index) ? { ...photo, failed: true } : photo) });
+  },
+  nativeCoverError(event) {
+    if (this._hidden || this._unloaded) return;
+    const related = require('../../lib/native-presentation').markCoverFailure(this.data.related, event.currentTarget.dataset);
+    if (related !== this.data.related) this.setData({ related });
   },
   videoError() { this.setData({ videoError: true }); },
   onShareAppMessage() { return { title: this.data.doc.title || '竞在紫荆', path: `/pages/detail/index?collection=${this.data.collection}&id=${this.data.doc.id}` }; },
