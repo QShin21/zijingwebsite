@@ -1,0 +1,452 @@
+{
+  "date": "2026-10-15",
+  "baseBranch": "new",
+  "baseRevision": "41601f9fbcd52eb508659b10430b7de83af7aa86",
+  "applicationRevision": "05ffe64cd84263847cc0776e36a73cfb220c8517",
+  "origin": "https://home.thuzijing.top",
+  "filings": {
+    "icp": {
+      "text": "京ICP备2025135109号-2",
+      "href": "https://beian.miit.gov.cn/"
+    },
+    "publicSecurity": {
+      "text": "京公网安备11010802050680号",
+      "href": "https://beian.mps.gov.cn/#/query/webSearch?code=11010802050680",
+      "iconSource": "https://beian.mps.gov.cn/img/logo01.dd7ff50e.png",
+      "iconSHA256": "6189a29f86e1756d1970f4446b9f836642c283c373d312dbddeb42411f1608e6"
+    }
+  },
+  "checks": {
+    "typecheckExitCode": 0,
+    "targetedESLintExitCode": 0,
+    "prettierExitCode": 0,
+    "productionBuildExitCode": 0,
+    "diffCheckExitCode": 0
+  },
+  "build": {
+    "sourceRevision": "05ffe64cd84263847cc0776e36a73cfb220c8517",
+    "buildID": "0YnkbmfoFEhb1VP-S-9Vm",
+    "sourceFiles": 820,
+    "sourceArchiveSHA256": "cdff5e3c8508116dba801242ed0156017ff5623dbc5384cdfd925c3b5ee53c1e",
+    "sourceArchiveBytes": 4876226,
+    "buildArchiveSHA256": "3a75ca3373a3cb3a7fc65d88e906bf0d6ced5260ea58439e7db397acb802894f",
+    "buildArchiveBytes": 5503461,
+    "buildHost": "Windows",
+    "origin": "https://home.thuzijing.top",
+    "browserBundleSecretMatches": 0
+  },
+  "localBrowser": {
+    "origin": "http://127.0.0.1:3417",
+    "at": "2026-10-15T06:13:03.193Z",
+    "layouts": [
+      {
+        "width": 320,
+        "theme": "light",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      },
+      {
+        "width": 390,
+        "theme": "light",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      },
+      {
+        "width": 768,
+        "theme": "light",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      },
+      {
+        "width": 1440,
+        "theme": "light",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      },
+      {
+        "width": 320,
+        "theme": "dark",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      },
+      {
+        "width": 390,
+        "theme": "dark",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      },
+      {
+        "width": 768,
+        "theme": "dark",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      },
+      {
+        "width": 1440,
+        "theme": "dark",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      }
+    ],
+    "routes": [
+      {
+        "route": "/",
+        "status": 200,
+        "footerPresent": true
+      },
+      {
+        "route": "/announcements",
+        "status": 200,
+        "footerPresent": true
+      },
+      {
+        "route": "/login",
+        "status": 200,
+        "footerPresent": true
+      },
+      {
+        "route": "/privacy",
+        "status": 200,
+        "footerPresent": true
+      }
+    ],
+    "errors": []
+  },
+  "deployment": {
+    "revision": "05ffe64cd84263847cc0776e36a73cfb220c8517",
+    "buildID": "0YnkbmfoFEhb1VP-S-9Vm",
+    "release": "/srv/zijingwebsite/releases/footer-beian-20261015-05ffe64",
+    "backup": "/srv/zijingwebsite/backups/footer-beian-20261015-05ffe64",
+    "configHashesUnchanged": true,
+    "mediaHashesUnchanged": true,
+    "databaseProcessUnchanged": true,
+    "freekillHTTPSStatus": 200,
+    "rollbackPrepared": true,
+    "rollbackExecuted": false,
+    "candidate": {
+      "origin": "http://127.0.0.1:3101",
+      "checks": [
+        {
+          "route": "/events",
+          "status": 200,
+          "exactFilings": true,
+          "officialLinks": true,
+          "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+          "iconStatus": 200
+        },
+        {
+          "route": "/announcements",
+          "status": 200,
+          "exactFilings": true,
+          "officialLinks": true,
+          "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+          "iconStatus": 200
+        },
+        {
+          "route": "/login",
+          "status": 200,
+          "exactFilings": true,
+          "officialLinks": true,
+          "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+          "iconStatus": 200
+        },
+        {
+          "route": "/privacy",
+          "status": 200,
+          "exactFilings": true,
+          "officialLinks": true,
+          "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+          "iconStatus": 200
+        },
+        {
+          "route": "/health/live",
+          "status": 200
+        },
+        {
+          "route": "/health/ready",
+          "status": 200
+        }
+      ]
+    },
+    "live": {
+      "origin": "https://home.thuzijing.top",
+      "checks": [
+        {
+          "route": "/events",
+          "status": 200,
+          "exactFilings": true,
+          "officialLinks": true,
+          "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+          "iconStatus": 200
+        },
+        {
+          "route": "/announcements",
+          "status": 200,
+          "exactFilings": true,
+          "officialLinks": true,
+          "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+          "iconStatus": 200
+        },
+        {
+          "route": "/login",
+          "status": 200,
+          "exactFilings": true,
+          "officialLinks": true,
+          "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+          "iconStatus": 200
+        },
+        {
+          "route": "/privacy",
+          "status": 200,
+          "exactFilings": true,
+          "officialLinks": true,
+          "staticIcon": "/_next/static/media/beian.dd7ff50e.png",
+          "iconStatus": 200
+        },
+        {
+          "route": "/health/live",
+          "status": 200
+        },
+        {
+          "route": "/health/ready",
+          "status": 200
+        }
+      ]
+    }
+  },
+  "publicBrowser": {
+    "origin": "https://home.thuzijing.top",
+    "at": "2026-10-15T06:16:57.910Z",
+    "layouts": [
+      {
+        "width": 320,
+        "theme": "light",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      },
+      {
+        "width": 390,
+        "theme": "light",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      },
+      {
+        "width": 768,
+        "theme": "light",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      },
+      {
+        "width": 1440,
+        "theme": "light",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      },
+      {
+        "width": 320,
+        "theme": "dark",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      },
+      {
+        "width": 390,
+        "theme": "dark",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      },
+      {
+        "width": 768,
+        "theme": "dark",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      },
+      {
+        "width": 1440,
+        "theme": "dark",
+        "status": 200,
+        "overflow": false,
+        "icon": {
+          "complete": true,
+          "width": 62,
+          "height": 67
+        },
+        "footerAccessibilityViolations": 0,
+        "keyboardNavigation": true
+      }
+    ],
+    "routes": [
+      {
+        "route": "/",
+        "status": 200,
+        "footerPresent": true
+      },
+      {
+        "route": "/announcements",
+        "status": 200,
+        "footerPresent": true
+      },
+      {
+        "route": "/login",
+        "status": 200,
+        "footerPresent": true
+      },
+      {
+        "route": "/privacy",
+        "status": 200,
+        "footerPresent": true
+      }
+    ],
+    "errors": []
+  },
+  "freeKill": {
+    "https": 200,
+    "websocket": 101,
+    "certificateVerified": true,
+    "gameplayVerified": false
+  },
+  "preservation": {
+    "originalDirtyFileCount": 27,
+    "originalFileHashesUnchanged": true,
+    "productionDatabaseMigrationsExecuted": false,
+    "businessWriteTestsExecuted": false
+  },
+  "ci": {
+    "runID": 38691281877,
+    "url": "https://github.com/QShin21/zijingwebsite/actions/runs/38691281877",
+    "status": "completed",
+    "conclusion": "failure",
+    "jobs": [
+      {
+        "name": "quality",
+        "runnerID": 0,
+        "steps": 0,
+        "conclusion": "failure"
+      }
+    ],
+    "annotations": [
+      {
+        "level": "failure",
+        "message": "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings"
+      },
+      {
+        "level": "notice",
+        "message": "\"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748\""
+      }
+    ]
+  },
+  "limits": [
+    "Full business test suite not rerun for this footer-only change",
+    "No real-phone validation",
+    "Rollback prepared but not executed",
+    "Official filing values copied from user-provided screenshot; registration approval not independently verified"
+  ],
+  "initialLocalIssues": [
+    "Local isolated PostgreSQL was stopped; preview returned 500 until it was started",
+    "A direct public icon path was gated by the existing page access control; changed to a bundled static image and reverified"
+  ]
+}
