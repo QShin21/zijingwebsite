@@ -217,6 +217,21 @@
 .footerBottom p {
   margin: 0;
 }
+.footerLegal,
+.footerRecords {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 24px;
+}
+.footerRecords a,
+.footerBottom > a {
+  white-space: nowrap;
+}
+.footerRecords img {
+  flex: none;
+  object-fit: contain;
+}
 @media (min-width: 1161px) {
   .mobileMenu {
     display: none;

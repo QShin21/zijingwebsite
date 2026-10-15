@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+import beianIcon from "./beian.png";
 import { DesignNavigation } from "./DesignNavigation";
 import { BrandMark, Icon } from "@/components/Identity";
 import { Picture } from "@/components/Content";
@@ -89,9 +91,34 @@ export function DesignFooter({
         </nav>
       </div>
       <div className={chrome.footerBottom}>
-        <p>
-          © {new Date().getFullYear()} {name}
-        </p>
+        <div className={chrome.footerLegal}>
+          <p>
+            © {new Date().getFullYear()} {name}
+          </p>
+          <nav aria-label="网站备案" className={chrome.footerRecords}>
+            <a
+              href="https://beian.miit.gov.cn/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              京ICP备2025135109号-2
+            </a>
+            <a
+              href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802050680"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Image
+                src={beianIcon}
+                alt=""
+                width={18}
+                height={20}
+                unoptimized
+              />
+              京公网安备11010802050680号
+            </a>
+          </nav>
+        </div>
         {preview && <p>隔离设计预览，内容与权限沿用真实业务</p>}
         <a href={preview ? "#design-main" : "#main"}>
           回到页首 <Icon name="diagonal" />
