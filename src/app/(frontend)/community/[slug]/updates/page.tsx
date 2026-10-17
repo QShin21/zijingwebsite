@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { bySlug, cms } from "@/lib/content";
 import { managesGame, formatDate } from "@/lib/rules";
 import { CommunityPager, pageNumber } from "@/components/CommunityPager";
-import { CommunityActivityComposer } from "@/components/CommunityActivityComposer";
 import { StaffRecruitmentNotice } from "@/components/StaffRecruitmentNotice";
 import {
   CommunityEmpty,
@@ -51,9 +50,12 @@ export default async function Updates({
         description="社群的近期安排、参与方式与日常通知。"
         action={
           managesGame(user, game.id) ? (
-            <a className="button light" href="#publish-community-update">
+            <Link
+              className="button light"
+              href={`/community/${slug}/updates/new`}
+            >
               发布活动与通知
-            </a>
+            </Link>
           ) : undefined
         }
       />
@@ -106,11 +108,6 @@ export default async function Updates({
           <Link href={`/community/${slug}/join`}>联系与进群进度</Link>
         </aside>
       </div>
-      {managesGame(user, game.id) && (
-        <section id="publish-community-update" className={styles.section}>
-          <CommunityActivityComposer game={game.id} />
-        </section>
-      )}
     </ClubFrame>
   );
 }

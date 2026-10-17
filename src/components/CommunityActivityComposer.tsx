@@ -12,11 +12,7 @@ export function CommunityActivityComposer({ game }: { game: number }) {
   const [ready, setReady] = useState(false);
   useEffect(() => setReady(true), []);
   return (
-    <details className={styles.disclosure}>
-      <summary>发布活动与通知</summary>
-      <p>
-        发布范围为当前游戏社群。活动可配置报名问卷，通知用于发布安排与说明。
-      </p>
+    <section aria-label="活动与通知发布表单">
       <ActionForm
         action={publishCommunityResultAction}
         resetOnSuccess
@@ -70,6 +66,6 @@ export function CommunityActivityComposer({ game }: { game: number }) {
           </div>
         </fieldset>
       </ActionForm>
-    </details>
+    </section>
   );
 }
