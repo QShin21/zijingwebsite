@@ -336,7 +336,7 @@ export interface TeamEstablishmentApplication {
   createdAt: string;
 }
 /**
- * 扫码或网站操作均不证明已进微信群；在社群进群管理页人工处理。
+ * 历史联系记录，相关功能已停用。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "community-joins".

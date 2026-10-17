@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
-import { canHandleCommunityJoins } from "@/lib/rules";
-import { cms, bySlug } from "@/lib/content";
+import { bySlug } from "@/lib/content";
 import Link from "next/link";
 import { CommunityJoin } from "@/components/CommunityJoin";
 import { CommunityNav } from "@/components/CommunityNav";
@@ -18,7 +16,6 @@ export default async function CommunityLayout({
   const { slug } = await params;
   const game = await bySlug("games", slug);
   if (!game) notFound();
-  const { user } = await (await cms()).auth({ headers: await headers() });
   return (
     <>
       <ClubFrame className={`${styles.page} ${styles.shellHeader}`}>
@@ -32,10 +29,7 @@ export default async function CommunityLayout({
           </nav>
           <CommunityJoin slug={slug} />
         </div>
-        <CommunityNav
-          slug={slug}
-          manageJoins={canHandleCommunityJoins(user, game.id)}
-        />
+        <CommunityNav slug={slug} />
       </ClubFrame>
       {children}
     </>

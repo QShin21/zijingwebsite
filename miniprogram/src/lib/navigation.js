@@ -54,8 +54,8 @@ function website(path) {
   if (path === '/staff/manage') return go('staff');
   const communityHonor = /^\/community\/([a-z0-9-]+)\/showcase\/team-honors\/([1-9]\d*)$/.exec(path);
   if (communityHonor) return go('team-honors', { team: communityHonor[2] });
-  const communityArea = /^\/community\/([a-z0-9-]+)\/(updates|showcase|join)$/.exec(path);
-  if (communityArea) return go('community', { slug: communityArea[1], area: communityArea[2] === 'join' ? 'contacts' : communityArea[2] });
+  const communityArea = /^\/community\/([a-z0-9-]+)\/(updates|showcase)$/.exec(path);
+  if (communityArea) return go('community', { slug: communityArea[1], area: communityArea[2] });
   const communityContent = /^\/community\/([a-z0-9-]+)\/(updates|showcase)\/([1-9]\d*)$/.exec(path);
   if (communityContent) return go('detail', { collection: communityContent[2] === 'updates' ? 'community-posts' : 'community-showcase', id: communityContent[3] });
   const community = /^\/community\/([a-z0-9-]+)$/.exec(path);

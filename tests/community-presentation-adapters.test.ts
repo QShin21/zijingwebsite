@@ -214,26 +214,4 @@ describe("community structured presentation adapters, synthetic service boundari
     expect(h.form.get("video")).toBeInstanceOf(File);
     expect(h.revalidatePath).not.toHaveBeenCalled();
   });
-  it("keeps join decisions on the same service and a stable paged receipt", async () => {
-    const h = harness();
-    h.form.set("action", "confirmJoined");
-    h.form.set("note", "合成已在微信核对");
-    const result = await h.actions.handleJoinResultAction(h.form);
-    expect(h.join).toHaveBeenCalledWith(
-      h.payload,
-      h.user,
-      31,
-      "confirmJoined",
-      expect.objectContaining({
-        id: 81,
-        revision: "synthetic-revision-v2",
-        note: "合成已在微信核对",
-      }),
-    );
-    expect(result.ok).toBe(true);
-    expect(result.successHref).toContain(
-      "/community/synthetic-community/members?message=",
-    );
-    expect(result.successHref).toContain("&page=2");
-  });
 });

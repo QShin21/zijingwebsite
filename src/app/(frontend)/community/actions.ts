@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { cms } from "@/lib/content";
 import { canPublish, canSubmitClubContent, canReviewShowcase, managesGame } from "@/lib/rules";
 import { discardVideo, saveVideo, VIDEO_MAX_BYTES, SUBMISSION_MAX_BYTES } from '@/lib/showcase-videos';
-import { decideCommunityApplication, editCommunityApplication, updateCommunityCard, changeCommunityJoin } from "@/lib/community-operations";
+import { decideCommunityApplication, editCommunityApplication, updateCommunityCard } from "@/lib/community-operations";
 import { applicationError } from "@/lib/application-error";
 import { workflowTransaction } from "@/lib/workflow-transactions";
 import { APIError } from "payload";
@@ -156,22 +156,6 @@ export async function withdrawApplicationAction(form: FormData) {
   catch (error) { problem("/community/apply", applicationError(error)); }
   redirect("/community/apply?message=" + encodeURIComponent("网站申请已撤回，微信联系不受此操作影响。"));
 }
-export async function joinAction(form: FormData) {
-  const { p, user } = await current();
-  const game = numeric(form, "game");
-  try { await changeCommunityJoin(p, user, game, value(form, "action"), {
-    id: numeric(form, "id") || undefined, contact: numeric(form, "contact") || undefined,
-    revision: value(form, "revision"), note: value(form, "note"),
-  }); }
-  catch (error) { return { error: applicationError(error) }; }
-  return { success: true };
-}
-export async function handleJoinAction(form: FormData) {
-  const result = await joinAction(form);
-  const path = `${await gamePath(numeric(form, "game"))}/members`;
-  if (result.error) problem(path, result.error);
-  redirect(`${path}?message=${encodeURIComponent("人工处理结果已保存。")}`);
-}
 export async function updateCommunityCardAction(form: FormData) {
   const { p, user } = await current();
   const file = form.get("wechatQr");
@@ -236,15 +220,6 @@ export async function decideCommunityResultAction(form: FormData) {
   revalidatePath("/community/review");
   revalidatePath("/community/apply");
   return { ok: true, message: "审核结果已保存。", successHref: "/community/review?done=1" + resultPage(form) };
-}
-export async function handleJoinResultAction(form: FormData) {
-  // Authentication redirects from the existing action remain outside a catch.
-  const result = await joinAction(form);
-  if (result.error) return { ok: false, message: result.error };
-  const path = `${await gamePath(numeric(form, "game"))}/members`;
-  const message = "人工处理结果已保存。";
-  revalidatePath(path);
-  return { ok: true, message, successHref: `${path}?message=${encodeURIComponent(message)}${resultPage(form)}` };
 }
 export async function updateCommunityCardResultAction(form: FormData) {
   const p = await cms(), { user } = await p.auth({ headers: await headers() });

@@ -18,7 +18,7 @@ import {
   formatDate,
   relationID,
 } from "@/lib/rules";
-import { applicationLabels, joinLabels } from "@/lib/community-status";
+import { applicationLabels } from "@/lib/community-status";
 import { staffStatusLabels } from "@/lib/staff-recruitment-model";
 import { teamApplicationLabels } from "@/lib/team-core";
 
@@ -87,7 +87,7 @@ const pageNumber = (value: unknown) =>
 export default async function Account({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string; page?: string; joinsPage?: string }>;
+  searchParams: Promise<{ view?: string; page?: string }>;
 }) {
   const p = await cms();
   const { user } = await p.auth({ headers: await headers() });
@@ -96,7 +96,6 @@ export default async function Account({
   const query = await searchParams;
   const history = query.view === "history";
   const page = pageNumber(query.page);
-  const joinsPage = pageNumber(query.joinsPage);
   const ownApplications = (states: string[]): Where => ({
     and: [
       { applicant: { equals: actor.id } },
@@ -109,10 +108,7 @@ export default async function Account({
     teamApplications,
     establishments,
     communityApplications,
-    joins,
-    games,
     memberships,
-    confirmedJoins,
   ] = await Promise.all([
     p.find({
       collection: "event-signups",
@@ -172,26 +168,6 @@ export default async function Account({
       select: { proposedGame: true, status: true, updatedAt: true },
     }),
     p.find({
-      collection: "community-joins",
-      overrideAccess: false,
-      user: actor,
-      depth: 0,
-      limit: 8,
-      page: joinsPage,
-      sort: "-updatedAt",
-      where: { member: { equals: actor.id } },
-      select: { game: true, status: true, updatedAt: true },
-    }),
-    p.find({
-      collection: "games",
-      overrideAccess: false,
-      user: null,
-      draft: false,
-      depth: 0,
-      pagination: false,
-      select: { title: true, slug: true },
-    }),
-    p.find({
       collection: "team-memberships",
       overrideAccess: false,
       user: actor,
@@ -207,19 +183,7 @@ export default async function Account({
         updatedAt: true,
       },
     }),
-    p.count({
-      collection: "community-joins",
-      overrideAccess: false,
-      user: actor,
-      where: {
-        and: [
-          { member: { equals: actor.id } },
-          { status: { equals: "joined" } },
-        ],
-      },
-    }),
   ]);
-  const gameByID = new Map(games.docs.map((game) => [game.id, game]));
   const rows: AccountRecord[] = [
     ...staff.docs.map((row) => ({
       key: `staff-${row.id}`,
@@ -295,15 +259,6 @@ export default async function Account({
   const progressRows = history
     ? rows
     : rows.filter((row) => row.tone !== "warning");
-  const accountURL = (changes: { page?: number; joinsPage?: number }) => {
-    const params = new URLSearchParams();
-    if (history) params.set("view", "history");
-    const signupPage = changes.page ?? page;
-    const joinPage = changes.joinsPage ?? joinsPage;
-    if (signupPage > 1) params.set("page", String(signupPage));
-    if (joinPage > 1) params.set("joinsPage", String(joinPage));
-    return `/account${params.size ? `?${params}` : ""}#joins-title`;
-  };
   const roleLabels: Record<string, string> = {
     president: "社长",
     vicePresident: "副社长",
@@ -369,7 +324,6 @@ export default async function Account({
       <nav className={styles.accountIndex} aria-label="我的事务栏目">
         <a href="#applications-title">申请进度</a>
         <a href="#signups-title">活动回执</a>
-        <a href="#joins-title">进群记录</a>
         <a href="#teams-title">代表队</a>
         <a href="#profile-title">账号资料</a>
         {tools.length > 0 && <a href="#work-title">管理工作台</a>}
@@ -512,65 +466,8 @@ export default async function Account({
             path="/account"
             query={{
               ...(history ? { view: "history" } : {}),
-              ...(joinsPage > 1 ? { joinsPage: String(joinsPage) } : {}),
             }}
           />
-        </section>
-        <section className={styles.section} aria-labelledby="joins-title">
-          <div className={styles.sectionHeader}>
-            <div>
-              <h2 id="joins-title">我的进群记录</h2>
-              <p>在微信中添加好友与接受邀请后，由管理员人工确认进群。</p>
-            </div>
-            <Link href="/community">查看游戏社群</Link>
-          </div>
-          {joins.docs.length ? (
-            <RecordList
-              rows={joins.docs.map((row) => {
-                const game = gameByID.get(Number(relationID(row.game)));
-                return {
-                  key: `join-${row.id}`,
-                  title: game?.title || "历史社群",
-                  category: "人工入社",
-                  status: joinLabels[row.status],
-                  updatedAt: row.updatedAt,
-                  href: game ? `/community/${game.slug}/join` : "/community",
-                  next:
-                    row.status === "requested"
-                      ? "打开社群联系入口，在微信中添加管理员好友。"
-                      : row.status === "joined"
-                        ? "管理员已人工确认你的进群记录。"
-                        : "网站状态用于记录进度，好友与拉群仍需人工完成。",
-                  tone: row.status === "joined" ? "success" : undefined,
-                };
-              })}
-            />
-          ) : (
-            <div className={styles.empty}>
-              <h3>暂无进群记录</h3>
-              <p>
-                选择感兴趣的游戏社群，联系管理员。网站注册、扫码和申请批准均不代表已进入微信群。
-              </p>
-              <Link href="/community">寻找游戏社群</Link>
-            </div>
-          )}
-          {joins.totalPages > 1 && (
-            <nav className={styles.recordPagination} aria-label="进群记录分页">
-              {joinsPage > 1 && (
-                <Link href={accountURL({ joinsPage: joinsPage - 1 })}>
-                  上一页
-                </Link>
-              )}
-              <span>
-                第 {joinsPage} / {joins.totalPages} 页
-              </span>
-              {joinsPage < joins.totalPages && (
-                <Link href={accountURL({ joinsPage: joinsPage + 1 })}>
-                  下一页
-                </Link>
-              )}
-            </nav>
-          )}
         </section>
         <div className={styles.accountDetails}>
           <section className={styles.section} aria-labelledby="teams-title">
@@ -633,14 +530,6 @@ export default async function Account({
                   {actor.department
                     ? `（${departments[actor.department]}）`
                     : ""}
-                </dd>
-              </div>
-              <div>
-                <dt>网站入社记录</dt>
-                <dd>
-                  {confirmedJoins.totalDocs > 0
-                    ? "已有管理员人工确认进群"
-                    : "尚未人工确认进群"}
                 </dd>
               </div>
               <div>

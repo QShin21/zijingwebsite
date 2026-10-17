@@ -9,7 +9,7 @@ export default function NotFound() {
       help={
         <>
           <p>
-            申请、报名与进群进度可以从个人中心继续查看。需要协助时，可使用社团的联系入口。
+            申请与报名可以从个人中心继续查看。需要协助时，可使用社团的联系入口。
           </p>
           <Link href="/account">查看我的事务</Link>
           <Link href="/contact">联系社团</Link>

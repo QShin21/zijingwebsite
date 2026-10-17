@@ -39,7 +39,6 @@ export const communityCapability = (user: Identity | null | undefined, id: unkno
 export const managesGame = (user: Identity | null | undefined, id: unknown) =>
   communityCapability(user, id, "publishContent");
 export const canReviewShowcase = (user: Identity | null | undefined, id: unknown) => communityCapability(user, id, "reviewShowcase");
-export const canHandleCommunityJoins = (user: Identity | null | undefined, id: unknown) => communityCapability(user, id, "handleJoins");
 export const canReviewCommunityApplication = canPublish;
 export const canManageStaffRecruitment = canPublish;
 export const canAppoint = (user: Identity | null | undefined) => hasRole(user, "president");

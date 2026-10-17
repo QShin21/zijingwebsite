@@ -2,13 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./community-pages/CommunityPages.module.css";
-export function CommunityNav({
-  slug,
-  manageJoins = false,
-}: {
-  slug: string;
-  manageJoins?: boolean;
-}) {
+export function CommunityNav({ slug }: { slug: string }) {
   const pathname = usePathname();
   const base = `/community/${slug}`;
   return (
@@ -17,8 +11,6 @@ export function CommunityNav({
         ["", "社群首页"],
         ["updates", "活动与通知"],
         ["showcase", "社群风采"],
-        ["join", "进群进度"],
-        ...(manageJoins ? [["members", "进群管理"]] : []),
       ].map(([path, title]) => (
         <Link
           href={path ? `${base}/${path}` : base}

@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { useId, useRef, useState, useSyncExternalStore } from "react";
 import styles from "./community-pages/CommunityPages.module.css";
 
@@ -121,13 +120,6 @@ export function CommunityJoin({ slug }: { slug: string }) {
           <p>
             保存名片后可在微信中识别，添加好友时备注昵称和社群。请等待管理员回复与人工拉群。
           </p>
-          <Link
-            className="button light"
-            href={`/community/${slug}/join`}
-            onClick={() => dialog.current?.close()}
-          >
-            记录意向与查看进群进度
-          </Link>
           <p>查看、保存或识别名片均不会自动加入微信群。</p>
         </div>
       </dialog>

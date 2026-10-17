@@ -8,7 +8,7 @@ export function miniappUser(user: User) {
     accountStatus: user.accountStatus, department: user.department,
     teams: (user.teams || []).map(value => typeof value === "object" ? value.id : value),
     capabilities: { reviewPromotion: canReviewPromotion(user), reviewCommunityApplication: canReviewCommunityApplication(user), appoint: canAppoint(user),
-      publishCommunities: communityIDs(user, "publishContent"), reviewShowcaseCommunities: communityIDs(user, "reviewShowcase"), handleJoinCommunities: communityIDs(user, "handleJoins"),
+      publishCommunities: communityIDs(user, "publishContent"), reviewShowcaseCommunities: communityIDs(user, "reviewShowcase"),
       viewSignupCommunities: communityIDs(user, "viewSignups"), exportSignupCommunities: communityIDs(user, "exportSignups") },
     communities: (user.communities || []).map(value => typeof value === 'object' ? value.id : value) };
 }

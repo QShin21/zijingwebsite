@@ -553,7 +553,7 @@ export const Users: CollectionConfig = {
         ] },
         { name: "publishContent", label: "发布本社群活动与通知", type: "checkbox", defaultValue: true },
         { name: "reviewShowcase", label: "审核本社群风采", type: "checkbox", defaultValue: true },
-        { name: "handleJoins", label: "人工处理本社群进群", type: "checkbox", defaultValue: true },
+        { name: "handleJoins", label: "管理本社群代表队", type: "checkbox", defaultValue: true },
         { name: "viewSignups", label: "读取本社群报名（含个人资料）", type: "checkbox", defaultValue: false },
         { name: "exportSignups", label: "导出本社群报名", type: "checkbox", defaultValue: false },
         { name: "contactConsent", label: "同意展示已批准申请的微信名片", type: "checkbox", defaultValue: false },

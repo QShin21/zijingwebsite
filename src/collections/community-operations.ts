@@ -160,25 +160,11 @@ export const CommunityApplications: CollectionConfig = {
 };
 
 export const CommunityJoins: CollectionConfig = {
-  slug: "community-joins", labels: { singular: "人工进群记录", plural: "人工进群记录" },
-  admin: { useAsTitle: "memberName", description: "扫码或网站操作均不证明已进微信群；在社群进群管理页人工处理。" },
-  access: {
-    read: ({ req }) => {
-      const user = req.user as Identity;
-      if (!canParticipate(user)) return false;
-      if (canPublish(user)) return true;
-      return { or: [{ member: { equals: user.id } }, { game: { in: communityIDs(user, "handleJoins") } }] } as Where;
-    },
-    create: ({ req }) => canParticipate(req.user as Identity) && req.context.communityJoinWrite === true,
-    update: ({ req }) => req.context.communityJoinWrite === true && canParticipate(req.user as Identity)
-      ? canPublish(req.user as Identity) || { or: [{ member: { equals: req.user!.id } }, { game: { in: communityIDs(req.user as Identity, "handleJoins") } }] } as Where : false,
-    delete: () => false,
-  },
-  hooks: { beforeChange: [({ req, data, operation, originalDoc }) => {
-    if (req.context.communityJoinWrite !== true) throw new APIError("请通过进群流程操作", 403);
-    if (operation === "update" && ["member", "game", "dedupeKey", "memberName"].some(key => data[key] !== undefined && String(relationID(data[key])) !== String(relationID(originalDoc?.[key])))) throw new APIError("不能转移进群记录", 403);
-    return data;
-  }], afterChange: [workflowAudit] },
+  slug: "community-joins", labels: { singular: "历史联系记录", plural: "历史联系记录" },
+  // Retired feature: retain its storage schema without exposing or mutating historical rows.
+  admin: { hidden: true, useAsTitle: "memberName", description: "历史联系记录，相关功能已停用。" },
+  access: { read: () => false, create: () => false, update: () => false, delete: () => false },
+  hooks: { beforeChange: [() => { throw new APIError("相关功能已移除", 404); }] },
   fields: [
     { name: "member", type: "relationship", relationTo: "users", required: true, maxDepth: 0 },
     { name: "game", type: "relationship", relationTo: "games", required: true, maxDepth: 0 },

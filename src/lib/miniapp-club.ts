@@ -1,18 +1,17 @@
 import { APIError, type Payload } from "payload";
-import type { CommunityApplication, CommunityJoin, StaffApplication, StaffBatch, User } from "../payload-types";
-import { canHandleCommunityJoins, canManageStaffRecruitment, canParticipate, canReviewCommunityApplication, relationID } from "./rules";
+import type { CommunityApplication, StaffApplication, StaffBatch, User } from "../payload-types";
+import { canManageStaffRecruitment, canParticipate, canReviewCommunityApplication, relationID } from "./rules";
 import { currentStaffBatches, ownStaffApplication, publicStaffBatch, readStaffApplications } from "./staff-recruitment";
 import { canReviewStaffTransition, staffDeadlinePolicy, staffForm, staffPrivacy, staffWindow } from "./staff-recruitment-model";
 import { formVersion } from "./activity-signups";
 import { promotedContent } from "./content-promotions";
-import { changeCommunityJoin, decideCommunityApplication, editCommunityApplication, updateCommunityCard } from "./community-operations";
+import { decideCommunityApplication, editCommunityApplication, updateCommunityCard } from "./community-operations";
 import { applicationContactConsentRequiredMessage } from "./community-status";
 
 const applicationPath = "community/applications";
 const staffPath = /^staff\/([^/]+)$/;
-const joinPath = /^community\/([^/]+)\/join$/;
-export const miniappClubReadPath = (path: string) => ["club", "staff", "workbench", applicationPath].includes(path) || staffPath.test(path) || joinPath.test(path);
-export const miniappClubWritePath = (path: string) => path === applicationPath || joinPath.test(path);
+export const miniappClubReadPath = (path: string) => ["club", "staff", "workbench", applicationPath].includes(path) || staffPath.test(path);
+export const miniappClubWritePath = (path: string) => path === applicationPath;
 const text = (value: unknown) => typeof value === "string" ? value : "";
 function id(value: unknown) {
   const number = typeof value === "number" || (typeof value === "string" && /^\d+$/.test(value)) ? Number(value) : 0;
@@ -54,24 +53,6 @@ function staffReceipt(row: StaffApplication) {
 function staffBatchReceipt(batch: Pick<StaffBatch, "id" | "title" | "description" | "startAt" | "endAt" | "state" | "signupForm">) {
   return { id: batch.id, title: batch.title, description: batch.description, startAt: batch.startAt, endAt: batch.endAt, state: staffWindow(batch) };
 }
-const joinSelect = { member: true, game: true, contact: true, memberName: true, status: true, note: true, confirmedAt: true,
-  createdAt: true, updatedAt: true } as const;
-type JoinReceipt = Omit<CommunityJoin, "dedupeKey" | "confirmedBy">;
-function joinReceipt(row: JoinReceipt) {
-  return { id: row.id, member: relationID(row.member), game: relationID(row.game), contact: relationID(row.contact) ?? null,
-    memberName: row.memberName, status: row.status, note: row.note, confirmedAt: row.confirmedAt, createdAt: row.createdAt, updatedAt: row.updatedAt };
-}
-function joinActions(row: JoinReceipt | null, user: User) {
-  const own = !row || Number(relationID(row.member)) === user.id;
-  return { request: own && (!row || row.status === "withdrawn"),
-    reportFriend: own && Boolean(row && ["requested", "friendReported"].includes(row.status)),
-    withdraw: own && Boolean(row && !["joined", "withdrawn"].includes(row.status)) };
-}
-function handlingActions(row: JoinReceipt, user: User, gameID: number) {
-  const canHandle = canHandleCommunityJoins(user, gameID);
-  return { confirmFriend: canHandle && ["requested", "friendReported"].includes(row.status), confirmJoined: canHandle && row.status === "awaitingInvite" };
-}
-
 export async function miniappClubGET(p: Payload, request: Request, path: string) {
   if (path === "club") {
     const [batches, event, notice, showcase] = await Promise.all([currentStaffBatches(p), promotedContent(p, "event"), promotedContent(p, "notice"), promotedContent(p, "showcase")]);
@@ -114,24 +95,6 @@ export async function miniappClubGET(p: Payload, request: Request, path: string)
       where: review ? { status: { equals: "pending" } } : { applicant: { equals: user.id } } });
     return pageResult(result, result.docs.map(row => applicationReceipt(row, user)));
   }
-  const join = joinPath.exec(path);
-  if (join) {
-    const gameID = id(join[1]);
-    const game = await p.findByID({ collection: "games", id: gameID, user: null, overrideAccess: false, draft: false, depth: 0,
-      select: { title: true, _status: true } }).catch(() => null);
-    if (!game || game._status !== "published") throw new APIError("该社群尚未开放", 404);
-    const canHandle = canHandleCommunityJoins(user, gameID);
-    if (query.get("mode") === "manage") {
-      if (!canHandle) throw new APIError("无权处理此社群进群", 403);
-      const result = await p.find({ collection: "community-joins", overrideAccess: false, user, depth: 0, limit: 20,
-        page: pageNumber(query), sort: "createdAt", select: joinSelect,
-        where: { and: [{ game: { equals: gameID } }, { status: { in: ["requested", "friendReported", "awaitingInvite"] } }] } });
-      return { ...pageResult(result, result.docs.map(row => ({ ...joinReceipt(row), actions: handlingActions(row, user, gameID) }))), canHandle };
-    }
-    const row = (await p.find({ collection: "community-joins", overrideAccess: false, user, depth: 0, limit: 1, select: joinSelect,
-      where: { and: [{ game: { equals: gameID } }, { member: { equals: user.id } }] } })).docs[0] ?? null;
-    return { record: row ? joinReceipt(row) : null, actions: joinActions(row, user), canHandle };
-  }
   throw new APIError("接口不存在", 404);
 }
 
@@ -153,9 +116,5 @@ export async function miniappClubPOST(p: Payload, request: Request, path: string
     else throw new APIError("操作无效", 400);
     return { application: applicationReceipt(saved, user) };
   }
-  const join = joinPath.exec(path);
-  if (!join || !["request", "reportFriend", "withdraw", "confirmFriend", "confirmJoined"].includes(action)) throw new APIError("操作无效", 400);
-  const gameID = id(join[1]);
-  const row = await changeCommunityJoin(p, user, gameID, action, { id: optionalID(data.id), contact: optionalID(data.contact), revision: data.revision, note: text(data.note) });
-  return { record: { ...joinReceipt(row), actions: handlingActions(row, user, gameID) }, actions: joinActions(row, user), canHandle: canHandleCommunityJoins(user, gameID) };
+  throw new APIError("接口不存在", 404);
 }

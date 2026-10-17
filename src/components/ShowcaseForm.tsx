@@ -13,9 +13,11 @@ import workStyles from "./activity-pages/Workspace.module.css";
 import styles from "./community-pages/CommunityPages.module.css";
 export function ShowcaseForm({
   game,
+  slug,
   manager,
 }: {
   game: number;
+  slug: string;
   manager: boolean;
 }) {
   const ready = useSyncExternalStore(
@@ -56,8 +58,7 @@ export function ShowcaseForm({
     requestAnimationFrame(() => message.current?.focus());
   }
   return (
-    <details className={`${styles.disclosure} showcase-compose`}>
-      <summary>分享社群风采</summary>
+    <section className="showcase-compose" aria-label="分享社群风采表单">
       <p>
         记录活动，分享照片或精彩视频。标题必填，其余选填。
         {manager ? "你可以直接发布。" : "投稿通过本社群管理员审核后公开。"}
@@ -321,11 +322,15 @@ export function ShowcaseForm({
           </p>
         )}
         {failed && (
-          <Link href="?view=mine" target="_blank" rel="noreferrer">
+          <Link
+            href={`/community/${slug}/showcase?view=mine`}
+            target="_blank"
+            rel="noreferrer"
+          >
             在新窗口查看我的投稿，核对提交结果
           </Link>
         )}
       </form>
-    </details>
+    </section>
   );
 }

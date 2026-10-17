@@ -105,7 +105,7 @@ export default async function Updates({
         <aside className={styles.publishAside}>
           <h2>找到一起参与的同学</h2>
           <p>联系管理员申请加入微信群，在社群里了解日常安排与交流方式。</p>
-          <Link href={`/community/${slug}/join`}>联系与进群进度</Link>
+          <Link href={`/community/${slug}#community-contacts`}>查看管理员名片</Link>
         </aside>
       </div>
     </ClubFrame>

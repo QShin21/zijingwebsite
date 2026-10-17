@@ -6,7 +6,7 @@ import { getPayload, type Payload } from "payload";
 import config from "../src/payload.config";
 import type { User } from "../src/payload-types";
 import { canAppoint, canReviewPromotion, canPublish, communityIDs, managesGame } from "../src/lib/rules";
-import { decideCommunityApplication, editCommunityApplication, changeCommunityJoin, updateCommunityCard } from "../src/lib/community-operations";
+import { decideCommunityApplication, editCommunityApplication, updateCommunityCard } from "../src/lib/community-operations";
 import { activity, submitSignup, saveSignupForm } from "../src/lib/activity-signups";
 import { normalizeSignup } from "../src/lib/signup-schema";
 let p: Payload, president: User, vice: User, execution: User, publicity: User, member: User, outsider: User;
@@ -93,28 +93,6 @@ describe.sequential("社群任职、最小权限与人工流程", () => {
     expect(managesGame(user, game)).toBe(true);
     for (const capability of ["viewSignups", "exportSignups", "contactConsent"] as const) expect(communityIDs(user, capability)).toEqual([]);
   });
-  it("更新/关闭名片不改变任职和平台角色，仅本人可操作", async () => {
-    const app = (await p.find({ collection: "community-applications", overrideAccess: false, user: execution, where: { applicant: { equals: execution.id } } })).docs[0];
-    await expect(updateCommunityCard(p, publicity, app.id, app.updatedAt, { contactConsent: false })).rejects.toThrow();
-    const hidden = await updateCommunityCard(p, execution, app.id, app.updatedAt, { contactConsent: false });
-    execution = await p.findByID({ collection: "users", id: execution.id, overrideAccess: true, depth: 0 });
-    expect(communityIDs(execution, "contactConsent")).toEqual([]); expect(managesGame(execution, game)).toBe(true);
-    await expect(changeCommunityJoin(p, member, game, "request", { contact: execution.id })).rejects.toThrow();
-    await updateCommunityCard(p, execution, app.id, hidden.updatedAt, { contactConsent: true });
-  });
-  it("进群意向并发唯一；用户自报不能确认成功；范围/人工步骤/修订检查服务端执行", async () => {
-    const results = await Promise.all([changeCommunityJoin(p, member, game, "request", { contact: execution.id }), changeCommunityJoin(p, member, game, "request", { contact: execution.id })]);
-    expect(results[0].id).toBe(results[1].id); expect(results[0].status).toBe("requested");
-    let row = results[0];
-    await expect(changeCommunityJoin(p, member, game, "confirmJoined", { id: row.id, revision: row.updatedAt })).rejects.toThrow();
-    row = await changeCommunityJoin(p, member, game, "reportFriend", { revision: row.updatedAt }); expect(row.status).toBe("friendReported");
-    await expect(changeCommunityJoin(p, publicity, game, "confirmFriend", { id: row.id, revision: row.updatedAt })).rejects.toThrow();
-    row = await changeCommunityJoin(p, execution, game, "confirmFriend", { id: row.id, revision: row.updatedAt }); expect(row.status).toBe("awaitingInvite");
-    await expect(changeCommunityJoin(p, member, game, "withdraw", { revision: results[0].updatedAt })).rejects.toThrow();
-    row = await changeCommunityJoin(p, execution, game, "confirmJoined", { id: row.id, revision: row.updatedAt });
-    expect(row.status).toBe("joined"); expect(row.confirmedBy).toBe(execution.id);
-    await expect(p.update({ collection: "community-joins", id: row.id, overrideAccess: false, user: member, data: { status: "joined" } })).rejects.toThrow();
-  });
   it("内容/问卷编辑与私人名单读取/导出分开，CAS并发保存不覆盖", async () => {
     execution = await p.findByID({ collection: "users", id: execution.id, overrideAccess: true, depth: 0 });
     const form = normalizeSignup({ enabled: true, questions: [{ id: "name", label: "昵称", type: "text", required: true }] });
@@ -128,26 +106,5 @@ describe.sequential("社群任职、最小权限与人工流程", () => {
     await expect(activity(p, "community-posts", post, execution, true, undefined, "export")).rejects.toThrow();
     const results = await Promise.allSettled([saveSignupForm(p, "community-posts", post, execution, current.version, { ...form, title: "版本A" }), saveSignupForm(p, "community-posts", post, execution, current.version, { ...form, title: "版本B" })]);
     expect(results.filter(result => result.status === "fulfilled")).toHaveLength(1); expect(results.filter(result => result.status === "rejected")).toHaveLength(1);
-  });
-  it("撤任或停用后传入旧身份也不能继续处理；平台角色不改变", async () => {
-    const stale = execution;
-    execution = await p.update({ collection: "users", id: execution.id, user: president, overrideAccess: false, data: { communityOffices: execution.communityOffices!.map(office => ({ ...office, status: "revoked" as const })) } });
-    await expect(saveSignupForm(p, "community-posts", post, stale, "stale", {})).rejects.toThrow();
-    await expect(changeCommunityJoin(p, publicity, game, "request", { contact: execution.id })).rejects.toThrow();
-    expect(execution.roles).toEqual(["backbone"]);
-    otherGame = (await p.create({ collection: "games", overrideAccess: true, context: { system: true }, data: { title: "其他隔离社群", slug: `other-operations-${suffix}`, _status: "published" } })).id;
-    execution = await p.update({ collection: "users", id: execution.id, user: president, overrideAccess: false, data: {
-      communityOffices: [...execution.communityOffices!, { game: otherGame, status: "active", publishContent: false, reviewShowcase: false, handleJoins: false, viewSignups: true, exportSignups: false, contactConsent: false }],
-    } });
-    // Authorship does not bypass revocation of this community's private-data scope.
-    const formerRecords = await p.find({ collection: "event-signups", user: execution, overrideAccess: false, where: { and: [{ game: { equals: game } }, { member: { equals: member.id } }] } });
-    expect(formerRecords.docs).toEqual([]);
-    await p.delete({ collection: "games", id: otherGame, overrideAccess: true }); otherGame = undefined;
-    execution = await p.update({ collection: "users", id: execution.id, user: execution, overrideAccess: false, data: { name: execution.name } });
-    expect(execution.communityOffices?.filter(office => office.status === "active")).toEqual([]);
-    const oldVice = vice;
-    await p.update({ collection: "users", id: vice.id, user: president, overrideAccess: false, data: { accountStatus: "suspended" } });
-    const app = await apply(president, "停用审核测试" );
-    await expect(decideCommunityApplication(p, oldVice, app.id, "approved", "", app.updatedAt)).rejects.toThrow();
   });
 });

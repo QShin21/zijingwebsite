@@ -8,30 +8,14 @@
     <view class="community-heading">
       <text class="community-kind">游戏社群</text><text class="title">{{game.title}}</text>
       <text wx:if="{{game.summary}}" class="subtitle">{{game.summary}}</text>
-      <view class="community-heading-actions"><button wx:if="{{contactsLoading}}" class="secondary" disabled="{{true}}" loading="{{true}}">正在读取名片</button><button wx:elif="{{contactsError}}" class="secondary" bindtap="retryContacts" disabled="{{joinBusy}}">重试管理员名片</button><button wx:elif="{{contactAvailable}}" class="primary" bindtap="contactAdmins">联系管理员</button><button wx:else class="plain" bindtap="retryContacts" disabled="{{joinBusy}}">刷新管理员名片</button><button wx:if="{{nodes.length}}" class="plain intro-toggle" bindtap="toggleIntro">{{introOpen ? '收起社群介绍' : '完整社群介绍'}}</button></view>
+      <view class="community-heading-actions"><button wx:if="{{contactsLoading}}" class="secondary" disabled="{{true}}" loading="{{true}}">正在读取名片</button><button wx:elif="{{contactsError}}" class="secondary" bindtap="retryContacts">重试管理员名片</button><button wx:elif="{{contactAvailable}}" class="primary" bindtap="contactAdmins">联系管理员</button><button wx:else class="plain" bindtap="retryContacts">刷新管理员名片</button><button wx:if="{{nodes.length}}" class="plain intro-toggle" bindtap="toggleIntro">{{introOpen ? '收起社群介绍' : '完整社群介绍'}}</button></view>
       <text wx:if="{{!contactsLoading && contactsError}}" class="community-contact-note">暂时无法读取联系方式，重试后再联系管理员。</text><text wx:elif="{{!contactsLoading && !contactAvailable && contacts.length}}" class="community-contact-note">名片图片暂不可用，请刷新后联系管理员。</text><text wx:elif="{{!contactsLoading && !contactAvailable}}" class="community-contact-note">暂无授权名片，当前没有可展示的联系方式。可稍后刷新。</text>
       <view wx:if="{{introOpen && nodes.length}}" class="body community-intro"><rich-text nodes="{{nodes}}" user-select /></view>
     </view>
-    <scroll-view scroll-x class="community-tabs"><button class="community-tab {{area === 'contacts' ? 'active' : ''}}" bindtap="area" data-area="contacts" aria-label="联系与进群{{area === 'contacts' ? '，已选择' : ''}}">联系与进群</button><button class="community-tab {{area === 'updates' ? 'active' : ''}}" bindtap="area" data-area="updates" aria-label="活动与通知{{area === 'updates' ? '，已选择' : ''}}">活动与通知</button><button class="community-tab {{area === 'showcase' ? 'active' : ''}}" bindtap="area" data-area="showcase" aria-label="社群风采{{area === 'showcase' ? '，已选择' : ''}}">社群风采</button></scroll-view>
+    <scroll-view scroll-x class="community-tabs"><button class="community-tab {{area === 'contacts' ? 'active' : ''}}" bindtap="area" data-area="contacts" aria-label="联系管理员{{area === 'contacts' ? '，已选择' : ''}}">联系管理员</button><button class="community-tab {{area === 'updates' ? 'active' : ''}}" bindtap="area" data-area="updates" aria-label="活动与通知{{area === 'updates' ? '，已选择' : ''}}">活动与通知</button><button class="community-tab {{area === 'showcase' ? 'active' : ''}}" bindtap="area" data-area="showcase" aria-label="社群风采{{area === 'showcase' ? '，已选择' : ''}}">社群风采</button></scroll-view>
     <block wx:if="{{area === 'contacts'}}">
-      <view class="join-progress {{join ? 'has-record' : ''}}">
-        <view class="native-section-head"><text class="join-progress-label">我的进群进度</text><button class="more" bindtap="retryJoin" disabled="{{joinLoading || joinBusy}}">刷新</button></view>
-        <text wx:if="{{join}}" class="join-status">{{join.status === 'requested' ? '加入意向已记录' : join.status === 'friendReported' ? '好友申请待核实' : join.status === 'awaitingInvite' ? '等待邀请进群' : join.status === 'joined' ? '已确认进群' : join.status === 'withdrawn' ? '加入意向已撤回' : join.statusText}}</text>
-        <text wx:elif="{{joinLoading}}" class="join-status" aria-role="status">正在读取进度</text>
-        <text wx:elif="{{joinError}}" class="join-status">进度暂未读取</text>
-        <text wx:else class="join-status">尚未记录加入意向</text>
-        <view wx:if="{{!joinLoading && !joinError}}" class="join-next"><text class="join-next-label">下一步</text><text wx:if="{{join.status === 'friendReported'}}">等待管理员核实好友申请，留意微信消息。</text><text wx:elif="{{join.status === 'awaitingInvite'}}">等待管理员在微信邀请进群。</text><text wx:elif="{{join.status === 'joined'}}">在微信群中参与交流。退出或更正成员情况，请联系管理员。</text><text wx:elif="{{join.status === 'requested'}}">到微信添加管理员好友，发送申请后可在此报告。</text><text wx:elif="{{!join || join.status === 'withdrawn'}}">{{contactAvailable ? '查看下方名片，选择管理员并到微信联系。' : contactsLoading ? '等待管理员名片读取完成。' : contactsError || contacts.length ? '重新读取管理员名片，确认联系方式。' : '暂无授权名片，可稍后刷新，或申请参与社群组织。'}}</text><text wx:else>刷新进度，或联系管理员核对。</text></view>
-        <text wx:if="{{join.note}}" class="native-summary">管理员说明：{{join.note}}</text>
-        <text wx:if="{{join.confirmedAt && join.confirmedText}}" class="field-note">人工确认时间：{{join.confirmedText}}</text>
-        <text wx:if="{{joinLoading && join}}" class="field-note" aria-role="status">正在更新进度…</text>
-        <text wx:if="{{joinError}}" class="error" aria-role="alert">{{joinError}}</text>
-        <text wx:if="{{joinDone}}" class="native-receipt" aria-role="status">{{joinDone}}</text>
-        <view wx:if="{{joinActions.reportFriend || joinActions.withdraw}}" class="actions"><button wx:if="{{joinActions.reportFriend}}" class="primary" bindtap="joinAction" data-action="reportFriend" loading="{{joinBusy}}" disabled="{{joinBusy || joinLoading}}">我已发送好友申请</button><button wx:if="{{joinActions.withdraw}}" class="plain" bindtap="joinAction" data-action="withdraw" disabled="{{joinBusy || joinLoading}}">撤回网站意向</button></view>
-        <text class="join-actual-note">好友与群成员状态以微信中的实际情况为准。</text>
-        <button wx:if="{{canHandle}}" class="secondary join-manage" bindtap="manageJoins" disabled="{{joinBusy}}">人工进群管理</button>
-      </view>
       <view id="community-contacts" class="native-section contact-panel">
-        <view class="native-section-head"><text class="section-title">联系管理员</text><button class="more" bindtap="retryContacts" disabled="{{contactsLoading || joinBusy}}">刷新名片</button></view>
+        <view class="native-section-head"><text class="section-title">联系管理员</text><button class="more" bindtap="retryContacts" disabled="{{contactsLoading}}">刷新名片</button></view>
         <text class="muted">微信名片由在任管理员本人授权展示。点按预览，按微信提供的图片菜单操作。</text>
         <view wx:if="{{contactsLoading}}" class="contact-loading" aria-role="status"><text class="muted">正在读取授权名片…</text><view class="loading-lines" aria-hidden="true"><view class="loading-line"></view><view class="loading-line short"></view></view></view>
         <view wx:if="{{contactsError}}" class="contact-feedback"><text class="error" aria-role="alert">{{contactsError}}</text><button class="secondary" bindtap="retryContacts" disabled="{{contactsLoading}}">重试管理员名片</button></view>
@@ -41,10 +25,8 @@
           <button class="image-button" hover-class="pressed" wx:if="{{item.image && !item.imageError}}" bindtap="previewImage" data-url="{{item.image}}" aria-label="预览{{item.name}}的微信名片"><image class="contact-qr" mode="aspectFit" src="{{item.image}}" show-menu-by-longpress aria-label="{{item.name}}的微信名片" binderror="contactImageError" data-id="{{item.id}}" data-url="{{item.image}}" /></button>
           <text wx:else class="muted contact-image-missing">{{item.imageError ? '名片图片加载失败，请刷新重试。' : '名片图片暂时无法显示，请刷新重试。'}}</text>
           <text wx:if="{{item.image && !item.imageError}}" class="qr-caption">点按预览微信名片</text><text class="contact-remark">添加好友时，请备注昵称和游戏项目。</text>
-          <button wx:if="{{joinActions.request && item.image && !item.imageError && item.id}}" class="secondary contact-action" bindtap="joinAction" data-action="request" data-contact="{{item.id}}" loading="{{joinBusy}}" disabled="{{joinBusy || joinLoading}}">记录联系这位管理员的加入意向</button>
         </view>
       </view>
-      <view class="join-guide"><text class="section-title">从联系到进群</text><view class="join-steps"><view class="join-step"><text class="join-step-number">1</text><view><text class="join-step-title">联系管理员</text><text class="muted">到微信手动发送好友申请。</text></view></view><view class="join-step"><text class="join-step-number">2</text><view><text class="join-step-title">核实好友</text><text class="muted">发送后可报告，等待管理员确认。</text></view></view><view class="join-step"><text class="join-step-number">3</text><view><text class="join-step-title">人工邀请进群</text><text class="muted">管理员在微信操作，再核实进群情况。</text></view></view></view><text class="muted">查看、保存名片或记录意向均不会自动进群。</text></view>
       <view class="native-section community-organize"><text class="section-title">参与组织这个社群</text><text class="native-summary">申请和修改重提时，需要本人主动同意展示微信名片作为进群联系方式；默认不勾选，获批后仍可关闭展示。</text><button class="secondary" bindtap="apply">申请社群管理员</button></view>
     </block>
     <block wx:else>

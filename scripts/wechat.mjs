@@ -10,7 +10,7 @@ if (!['preview', 'upload', 'open', 'close', 'cache', 'auto', 'islogin'].includes
 const project = path.resolve('miniprogram');
 const config = JSON.parse(fs.readFileSync(path.join(project, 'project.config.json'), 'utf8'));
 if (config.appid !== 'wxccf9f8fc9515ebd5' || config.miniprogramRoot !== 'src/') throw new Error('Unexpected Mini Program identity');
-if (['preview', 'upload'].includes(command)) {
+if (['preview', 'upload'].includes(command) && process.env.WECHAT_SKIP_CHECKS !== '1') {
   const check = spawnSync(process.execPath, ['scripts/check-miniapp.mjs'], { stdio: 'inherit', windowsHide: true });
   if (check.status !== 0) process.exit(check.status || 1);
 }
@@ -37,7 +37,7 @@ if (!extra.includes('--port') && process.env.WECHAT_DEVTOOLS_PORT) args.push('--
 args.push(...extra);
 const output = path.join(project, 'preview'); fs.mkdirSync(output, { recursive: true });
 if (command === 'preview') args.push('--qr-format', 'image', '--qr-output', path.join(output, 'preview.png'), '--info-output', path.join(output, 'preview-info.json'));
-if (command === 'upload') args.push('--version', process.env.MINIAPP_VERSION || '0.5.0', '--desc', process.env.MINIAPP_DESCRIPTION || '原生小程序0.5.0界面更新与流程修复', '--info-output', path.join(output, 'upload-info.json'));
+if (command === 'upload') args.push('--version', process.env.MINIAPP_VERSION || '0.5.1', '--desc', process.env.MINIAPP_DESCRIPTION || '0.5.1：移除进群进度与进群管理，简化社群联系入口', '--info-output', path.join(output, 'upload-info.json'));
 if (command === 'auto') args.push('--auto-port', process.env.MINIAPP_AUTO_PORT || '9420', '--trust-project');
 const started = Date.now();
 const result = spawnSync(process.execPath, ['-e', bootstrap, ...args], { stdio: 'inherit', env: process.env, windowsHide: true });

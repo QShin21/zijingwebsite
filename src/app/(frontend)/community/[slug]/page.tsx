@@ -70,11 +70,6 @@ export default async function CommunityHome({
               <Link href="/community/apply">申请参与社群组织</Link>
             </CommunityEmpty>
           )}
-          <div className={styles.note}>
-            <h3>已经联系管理员？</h3>
-            <p>网站记录加入意向与人工处理进度，保存名片不会自动进群。</p>
-            <Link href={`/community/${slug}/join`}>查看我的进群进度</Link>
-          </div>
         </aside>
         <div className={styles.homeContent}>
           <section aria-labelledby="community-recent-title">

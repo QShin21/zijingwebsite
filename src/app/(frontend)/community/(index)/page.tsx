@@ -44,7 +44,6 @@ export default async function Communities({
           <p>
             进入社群查看在任管理员的微信名片，加好友时备注昵称与游戏。管理员回复后，在微信中人工拉群。
           </p>
-          <Link href="/account">查看我的进群进度</Link>
         </aside>
       </header>
       <section aria-label="游戏社群目录">

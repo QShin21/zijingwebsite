@@ -10,7 +10,6 @@ import {
   managesGame,
 } from "@/lib/rules";
 import { CommunityPager, pageNumber } from "@/components/CommunityPager";
-import { ShowcaseForm } from "@/components/ShowcaseForm";
 import { ShowcaseCard } from "@/components/ShowcaseCard";
 import { TeamHonorPins } from "@/components/TeamHonorArchives";
 import {
@@ -85,9 +84,9 @@ export default async function Showcase({
         }
         action={
           canParticipate(user) ? (
-            <a className="button light" href="#share-community-showcase">
+            <Link className="button light" href={`${base}/new`}>
               分享社群风采
-            </a>
+            </Link>
           ) : undefined
         }
       />
@@ -156,7 +155,7 @@ export default async function Showcase({
                 {view === "public"
                   ? "欢迎分享活动记录，投稿审核通过后会在这里公开。"
                   : view === "mine"
-                    ? "通过下方分享入口记录活动，再从这里查看审核状态。"
+                    ? "通过分享入口记录活动，再从这里查看审核状态。"
                     : "新的投稿会按现有权限在此展示。"}
               </p>
             </CommunityEmpty>
@@ -172,23 +171,10 @@ export default async function Showcase({
           <aside className={styles.publishAside}>
             <h2>记录一次共同经历</h2>
             <p>分享你有权发布的活动照片与视频；社群管理员审核后展示。</p>
-            <a href="#share-community-showcase">前往分享入口</a>
+            <Link href={`${base}/new`}>前往分享入口</Link>
           </aside>
         )}
       </div>
-      <section
-        id="share-community-showcase"
-        className={styles.section}
-        aria-label="分享社群风采"
-      >
-        {canParticipate(user) ? (
-          <ShowcaseForm game={game.id} manager={manager} />
-        ) : (
-          <Link className="button" href="/login">
-            登录后分享社群风采
-          </Link>
-        )}
-      </section>
     </ClubFrame>
   );
 }
