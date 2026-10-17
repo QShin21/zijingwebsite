@@ -1,0 +1,30 @@
+{
+  "deployedAt": "2026-10-17T16:07:23.127717+08:00",
+  "sourceRevision": "d98cb043427e7ffcb64e08371e5d2363898f36e2",
+  "release": "/srv/zijingwebsite/releases/community-showcase-051-20261017-d98cb04",
+  "buildID": "i1SeI68ZIKuy_tZWZqXf7",
+  "buildResult": "success",
+  "service": "zijingweb",
+  "serviceStateAfterRestart": "active",
+  "previousRelease": "/srv/zijingwebsite/releases/community-publish-20261017-a8da3cf",
+  "rollbackScript": "/srv/zijingwebsite/backups/community-showcase-051-20261017-d98cb04/rollback.sh",
+  "website": "https://home.thuzijing.top",
+  "changes": [
+    "风采分享按钮跳转 /community/[slug]/showcase/new，删除折叠框",
+    "网页和小程序移除进群进度与管理页面及动作",
+    "微信小程序 0.5.1"
+  ],
+  "migrationsExecuted": false,
+  "testsExecuted": false,
+  "separateTypecheckExecuted": false,
+  "lintExecuted": false,
+  "browserAcceptanceExecuted": false,
+  "httpHealthProbesExecuted": false,
+  "businessProbesExecuted": false,
+  "freekillProbesExecuted": false,
+  "manualAcceptance": "用户手动测试",
+  "rollbackExecuted": false,
+  "frameworkBuildChecksIncluded": true,
+  "buildProfile": "Node heap 1024 MB; MemoryMax 1450 MB; RAYON_NUM_THREADS=1",
+  "firstBuildAttempt": "Node heap 896 MB exhausted; final retry succeeded"
+}

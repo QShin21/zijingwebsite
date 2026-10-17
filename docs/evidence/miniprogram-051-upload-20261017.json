@@ -1,0 +1,28 @@
+{
+  "uploadedAt": "2026-10-17T16:01:02.315402+08:00",
+  "sourceRevision": "d98cb043427e7ffcb64e08371e5d2363898f36e2",
+  "version": "0.5.1",
+  "appid": "wxccf9f8fc9515ebd5",
+  "tool": "微信开发者工具官方 CLI",
+  "uploadResult": "success",
+  "freshOfficialReceipt": true,
+  "officialSize": {
+    "total": 665156,
+    "packages": [
+      {
+        "name": "TOTAL",
+        "size": 665156
+      }
+    ]
+  },
+  "reportedTotalBytes": 665156,
+  "platformStatus": "developmentVersionUploaded",
+  "description": "0.5.1：移除进群进度与进群管理，简化社群联系入口",
+  "independentChecksSkippedByUser": true,
+  "developerToolsCompilationIncluded": true,
+  "automatedTestsExecuted": false,
+  "simulatorAcceptanceExecuted": false,
+  "realDeviceAcceptanceExecuted": false,
+  "reviewSubmitted": false,
+  "publicReleaseExecuted": false
+}
