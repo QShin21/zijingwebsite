@@ -1,0 +1,29 @@
+{
+  "deployedAt": "2026-10-17T15:45:53.098752+08:00",
+  "sourceRevision": "a8da3cf65c9379210ad336cb681dc02fff242514",
+  "release": "/srv/zijingwebsite/releases/community-publish-20261017-a8da3cf",
+  "buildID": "Cv9AE8kjZKzdfzmdMtTPz",
+  "buildResult": "success",
+  "service": "zijingweb",
+  "serviceStateAfterRestart": "active",
+  "previousRelease": "/srv/zijingwebsite/releases/miniapp-050-20261015-fb841c2",
+  "rollbackScript": "/srv/zijingwebsite/backups/community-publish-20261017-a8da3cf/rollback.sh",
+  "website": "https://home.thuzijing.top",
+  "changes": [
+    "发布按钮跳转独立子页面 /community/[slug]/updates/new",
+    "移除列表页底部折叠发布栏",
+    "子页面复用社群布局并直接显示表单"
+  ],
+  "migrationsExecuted": false,
+  "testsExecuted": false,
+  "separateTypecheckExecuted": false,
+  "lintExecuted": false,
+  "browserAcceptanceExecuted": false,
+  "httpHealthProbesExecuted": false,
+  "businessProbesExecuted": false,
+  "freekillProbesExecuted": false,
+  "manualAcceptance": "用户手动测试",
+  "rollbackExecuted": false,
+  "frameworkBuildChecksIncluded": true,
+  "buildProfile": "Node heap 896 MB; RAYON_NUM_THREADS=1; first build stopped due to memory swapping"
+}

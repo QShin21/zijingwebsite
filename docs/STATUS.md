@@ -4,7 +4,9 @@
 
 基于最新 `origin/main@56b6d7a` 实现 `/community/[slug]/updates/new`。列表页白色发布按钮直接跳转，移除底部折叠发布栏；子页面复用社群导航、标题、配色、表单与报名问卷组件，表单直接展示，并提供返回列表入口。服务端按当前社群管理员权限控制页面访问，沿用已有发布动作及错误反馈。
 
-按用户要求跳过独立类型检查、lint、自动化测试、浏览器和线上功能验收，手动测试由用户执行。服务器构建与部署待执行，不把代码完成记为验收通过。本轮无数据库迁移。
+功能提交 `a8da3cf65c9379210ad336cb681dc02fff242514` 已推送至 `origin/main`，于北京时间 2026-10-17 15:45 部署到 `https://home.thuzijing.top`。运行目录 `/srv/zijingwebsite/releases/community-publish-20261017-a8da3cf`，Build ID `Cv9AE8kjZKzdfzmdMtTPz`，生产构建成功，`zijingweb` 服务重启后为 active。
+
+初次服务器构建受内存换页拖慢，停止该次构建后使用 896 MB Node 堆上限与单线程 Rayon 完成构建。Next.js 构建包含框架内置编译及类型处理；按用户要求跳过独立类型检查、lint、自动化测试、浏览器、健康接口和业务探测，手动测试由用户执行。本轮无数据库迁移。旧运行目录及回退脚本保留，未执行回退；详见 [部署记录](evidence/community-publish-page-deployment-20261017.json)。
 
 ## 小程序 0.5.0 对应服务器发布 · 2026-10-15
 
