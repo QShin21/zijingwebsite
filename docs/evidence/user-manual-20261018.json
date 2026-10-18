@@ -1,0 +1,208 @@
+{
+  "documentDate": "2026-10-18",
+  "sourceBaseline": "a07d8c1d192817749408b1836f64fef81bf4ebee",
+  "latestDeploymentRecordSource": "d98cb043427e7ffcb64e08371e5d2363898f36e2",
+  "websitePackageVersion": "1.1.0",
+  "miniappVersion": "0.5.1",
+  "website": "https://home.thuzijing.top",
+  "versionEvidence": [
+    "docs/evidence/community-showcase-051-deployment-20261017.json",
+    "docs/evidence/miniprogram-051-upload-20261017.json",
+    "miniprogram/package.json",
+    "miniprogram/src/config.js"
+  ],
+  "publicReadOnlyChecks": {
+    "checkedDate": "2026-10-18",
+    "http200": [
+      "/events",
+      "/announcements",
+      "/login",
+      "/register",
+      "/privacy",
+      "/api/miniapp/status"
+    ],
+    "miniappStatus": {
+      "version": 2,
+      "authentication": [
+        "email",
+        "nickname"
+      ],
+      "registration": true,
+      "questionnaireVersion": 3,
+      "responseEditing": true,
+      "operationsVersion": 1,
+      "platformRoles": [
+        "member",
+        "backbone",
+        "vicePresident",
+        "president"
+      ],
+      "communityOffices": true,
+      "manualWechatJoin": false
+    }
+  },
+  "document": {
+    "pages": 34,
+    "chapters": 32,
+    "figures": 29,
+    "sourceLayoutFigures": 14,
+    "operationDiagrams": 15,
+    "pdfBytes": 1701794,
+    "htmlBytes": 1774737,
+    "textCharacters": 19038,
+    "sourceBaseline": "a07d8c1",
+    "miniappVersion": "0.5.1",
+    "manualDate": "2026-10-18",
+    "nativeScreenshots": false,
+    "realUserData": false
+  },
+  "pdfValidation": {
+    "pages": 34,
+    "bookmarks": 34,
+    "tocLinks": 32,
+    "figures": 29,
+    "pdfTextBounds": "pass",
+    "replacementGlyphs": 0,
+    "forbiddenPhraseMatches": 0,
+    "outputs": [
+      {
+        "name": "紫荆网站及小程序用户使用手册.pdf",
+        "bytes": 1701794,
+        "sha256": "d5493d2c84bdc7e38f484668e024fceb9aad7b65de478325a283625704330c90"
+      },
+      {
+        "name": "紫荆网站及小程序用户使用手册.html",
+        "bytes": 1774737,
+        "sha256": "04d2728a4ccc577874861dc9fd00d63a5baf6e515c9a0da43768913bf69538a6"
+      }
+    ]
+  },
+  "htmlValidation": [
+    {
+      "width": 1440,
+      "overflow": false,
+      "sections": 32,
+      "navLinks": 32,
+      "badAnchors": 0,
+      "images": 28,
+      "brokenImages": 0,
+      "externalImageSources": 0
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "sections": 32,
+      "navLinks": 32,
+      "badAnchors": 0,
+      "images": 28,
+      "brokenImages": 0,
+      "externalImageSources": 0
+    }
+  ],
+  "layoutRenderValidation": [
+    {
+      "suite": "a",
+      "cases": 6,
+      "scope": "static synthetic source mapping only",
+      "overflow": 0,
+      "undersized": 0,
+      "smallText": 0,
+      "clippedText": 0
+    },
+    {
+      "suite": "b",
+      "cases": 8,
+      "scope": "static synthetic source mapping only",
+      "overflow": 0,
+      "undersized": 0,
+      "smallText": 0,
+      "clippedText": 0
+    },
+    {
+      "suite": "c",
+      "cases": 14,
+      "scope": "static synthetic source mapping only",
+      "overflow": 0,
+      "undersized": 0,
+      "smallText": 0,
+      "clippedText": 0
+    },
+    {
+      "suite": "d",
+      "cases": 10,
+      "scope": "static synthetic source mapping only",
+      "overflow": 0,
+      "undersized": 0,
+      "smallText": 0,
+      "clippedText": 0
+    }
+  ],
+  "visualReview": {
+    "pdfPagesReviewed": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "allPagesReviewed": true,
+    "correctedPagesRechecked": [
+      2,
+      3,
+      12,
+      13,
+      22
+    ],
+    "htmlDesktopAndMobileReviewed": true,
+    "result": "pass"
+  },
+  "imageSources": {
+    "nativeDeviceScreenshots": false,
+    "liveWebsiteScreenshots": false,
+    "syntheticSourceMappings": 14,
+    "operationDiagrams": 15,
+    "privateUserDataUsed": false,
+    "limitation": "Windows UI capture stopped because the browser URL could not be reliably confirmed. All UI illustrations are explicitly labeled source mappings or diagrams."
+  },
+  "notExecuted": [
+    "real-user business submissions",
+    "private production answer reads or exports",
+    "native WeChat or real-device acceptance",
+    "Mini Program review/public release status query",
+    "Mini Program upload or preview",
+    "production deployment",
+    "database migration",
+    "application test-suite rerun"
+  ],
+  "workspacePreserved": true,
+  "productCodeChanged": false
+}
