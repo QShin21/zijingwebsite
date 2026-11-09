@@ -75,6 +75,7 @@ async function run(
           id,
           user,
           url.searchParams,
+          mode === "export",
         );
         if (mode === "export") {
           await p.create({ collection: "audit", overrideAccess: true, data: { actor: String(user!.id), action: "export-signups", object: `${kind}:${id}`, status: "authorized" } });

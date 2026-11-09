@@ -5,8 +5,10 @@ import styles from "./visual-direction/PromotedContent.module.css";
 import type { PromotionKind } from "@/lib/promotion-model";
 import { Icon } from "./Identity";
 
-export async function PromotedContent({ kind }: { kind: PromotionKind }) {
-  const items = await promotedContent(await cms(), kind);
+type PromotionItems = Awaited<ReturnType<typeof promotedContent>>;
+
+export async function PromotedContent({ kind, items: supplied }: { kind: PromotionKind; items?: PromotionItems }) {
+  const items = supplied ?? await promotedContent(await cms(), kind);
   if (!items.length) return null;
   const titles = {
     event: "社团精选活动",

@@ -72,6 +72,7 @@ function beijingTime(value: string | undefined) {
 const metadataHeaders = [
   "报名编号",
   "填写者",
+  "账号邮箱",
   "首次提交时间（北京时间）",
   "最后修改时间（北京时间）",
   "问卷版本",
@@ -79,6 +80,7 @@ const metadataHeaders = [
 const metadata = (r: ResponseRecord): Cell[] => [
   r.id,
   r.memberName || "",
+  r.memberEmail || "",
   beijingTime(r.createdAt),
   beijingTime(r.updatedAt || r.createdAt),
   r.formVersion || "",

@@ -1,11 +1,12 @@
 import Link from "next/link";
 import type { CollectionSlug, Where } from "payload";
-import { site, list, names, fixed, type Content } from "@/lib/content";
+import { cms, site, list, names, fixed, type Content } from "@/lib/content";
 import { publicHref, sectionMeta } from "@/lib/presentation";
 import { Icon } from "@/components/Identity";
 import { Picture, Prose } from "@/components/Content";
 import { designBase, SectionHeading, EmptyState, DemoTag } from "./DesignUI";
 import { PromotedContent } from "@/components/PromotedContent";
+import { promotedContent } from "@/lib/content-promotions";
 import { StaffRecruitmentNotice } from "@/components/StaffRecruitmentNotice";
 import { routeFor, eventState } from "@/lib/rules";
 import { DateStamp, HomeEntries } from "./HomeSections";
@@ -23,7 +24,11 @@ const defaults = [
 export async function FieldHome({
   preview = false,
 }: { preview?: boolean } = {}) {
-  const [s, games] = await Promise.all([site(), list("games", {}, 1, 6)]);
+  const [s, games, promotedEvents] = await Promise.all([
+    site(),
+    list("games", {}, 1, 6),
+    cms().then((p) => promotedContent(p, "event")),
+  ]);
   const seen = new Set<string>();
   const modules = (
     s.modules?.length
@@ -147,7 +152,8 @@ export async function FieldHome({
             games={games.docs}
             preview={preview}
           />
-          {!m.docs.length && (
+          {m.kind === "events" && <PromotedContent kind="event" items={promotedEvents} />}
+          {!m.docs.length && !(m.kind === "events" && promotedEvents.length) && (
             <EmptyState
               title="下一场活动，敬请期待"
               description="活动发布后，这里会列出时间、参与方式与报名入口。"
@@ -273,6 +279,9 @@ export async function FieldHome({
         <StaffRecruitmentNotice home />
       </div>
       {contentSections[0]}
+      {!modules.some((m) => m.kind === "events") && (
+        <PromotedContent kind="event" items={promotedEvents} />
+      )}
       <section className={styles.communitySection} id="communities">
         <div className={styles.sectionIntro}>
           <p className={styles.sectionLabel}>游戏社群</p>
@@ -313,7 +322,6 @@ export async function FieldHome({
         </div>
       </section>
       <div className={styles.promoted}>
-        <PromotedContent kind="event" />
         <PromotedContent kind="notice" />
         <PromotedContent kind="showcase" />
       </div>

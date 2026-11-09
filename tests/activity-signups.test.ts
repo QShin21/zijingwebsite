@@ -3,6 +3,7 @@ import { beforeAll, afterAll, it, expect } from "vitest";
 import { getPayload, type Payload } from "payload";
 import config from "../src/payload.config";
 import type { User } from "../src/payload-types";
+import { queryResponses } from "../src/lib/questionnaire-results";
 import { randomBytes } from "node:crypto";
 import {
   activity,
@@ -232,6 +233,16 @@ it("confirms once under concurrency and protects answers from other members", as
       })
     ).answers,
   ).toEqual(answers);
+});
+it("adds the linked account email only to an authorized export of existing responses", async () => {
+  await activity(p, "events", event, admin, true, undefined, "export");
+  const records = await queryResponses(p, "events", event, admin, new URLSearchParams(), true);
+  const existing = records.find((record) => record.memberName === member.name);
+  expect(existing?.memberEmail).toBe(member.email);
+  expect(existing?.answers).toEqual(answers);
+  const stats = await queryResponses(p, "events", event, admin, new URLSearchParams());
+  expect(stats.some((record) => "memberEmail" in record || "member" in record)).toBe(false);
+  await expect(activity(p, "events", event, other, true, undefined, "export")).rejects.toMatchObject({ status: 403 });
 });
 it("updates only the caller's existing receipt, validates and rejects concurrent stale edits", async () => {
   const current = await activity(p, "events", event, member);

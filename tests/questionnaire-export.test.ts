@@ -29,6 +29,7 @@ const record = (
   createdAt: "2026-10-11T16:00:00Z",
   updatedAt: "2026-10-11T17:01:02Z",
   memberName: "本地演示",
+  memberEmail: "demo@example.invalid",
   formVersion: "v1",
   questions,
   answers,
@@ -80,6 +81,7 @@ it("writes one aligned row per response and expands every advanced answer shape"
   expect(new Set(headers).size).toBe(headers.length);
   expect(records[0]).toMatchObject({
     报名编号: "1",
+    账号邮箱: "demo@example.invalid",
     "首次提交时间（北京时间）": "2026-10-12 00:00:00",
     "最后修改时间（北京时间）": "2026-10-12 01:01:02",
     "Q1. 姓名": 'a,"b"\nc',
@@ -161,6 +163,7 @@ it("expands member details with response context and preserves multiple independ
   ).toHaveLength(1);
   expect(records[0]).toMatchObject({
     报名编号: "1",
+    账号邮箱: "demo@example.invalid",
     "Q1. 队名": "本地演示队",
     信息组题目: "成员名单",
     组内序号: "1",
@@ -184,6 +187,7 @@ it("keeps UTF-8, line breaks, quotes and formula safety across every export layo
   );
   for (const layout of ["responses", "members", "long"] as const) {
     const text = responseCSV([r], [], layout);
+    expect(readCSV(text).records[0]["账号邮箱"]).toBe("demo@example.invalid");
     expect(text).toContain("'\t=1+1");
     expect(text).toContain("'  =HYPERLINK");
     readCSV(text);

@@ -6,7 +6,7 @@ import { workflowTransaction } from "./workflow-transactions";
 import { formVersion } from "./activity-signups";
 import { visibleQuestions } from "./signup-schema";
 import { canReviewStaffTransition, defaultStaffForm, staffAnswers, staffForm, staffWindow } from "./staff-recruitment-model";
-import { responseCSV, type ResponseRecord } from "./questionnaire-results";
+import { accountEmails, responseCSV, type ResponseRecord } from "./questionnaire-results";
 import type { Answers, Question } from "./signup-schema";
 
 type History = { action: string; at: string; from: string; to: string; feedback: string };
@@ -140,7 +140,8 @@ export async function readStaffApplications(p: Payload, actor: User | null, batc
       limit: exportCSV ? 10001 : 20, pagination: !exportCSV, page: Math.max(1, Math.min(10000, Number(query.get("page")) || 1)) });
     if (!exportCSV) return { batch, result };
     if (result.docs.length > 10000 || new TextEncoder().encode(JSON.stringify(result.docs)).length > 16 * 1024 * 1024) throw new APIError("导出超过限制，请按批次、方向或状态筛选", 413);
-    const records: ResponseRecord[] = result.docs.map(row => ({ id: row.id, memberName: row.memberName, createdAt: row.createdAt, updatedAt: row.updatedAt,
+    const emails = await accountEmails(p, result.docs.map(row => row.applicant), req);
+    const records: ResponseRecord[] = result.docs.map(row => ({ id: row.id, memberName: row.memberName, memberEmail: emails.get(Number(relationID(row.applicant))) || "", createdAt: row.createdAt, updatedAt: row.updatedAt,
       formVersion: row.formVersion, questions: row.questions as unknown as Question[], answers: row.answers as unknown as Answers }));
     const csv = responseCSV(records, staffForm(batch.signupForm).questions);
     await p.create({ collection: "audit", req, overrideAccess: true, data: { actor: String(req.user!.id), object: "staff-batches:" + batchID, action: "export-staff-applications", status: "authorized" } });

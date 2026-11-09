@@ -1,4 +1,4 @@
-import type { Payload, Where } from "payload";
+import type { Payload, PayloadRequest, Where } from "payload";
 import { APIError } from "payload";
 import type { User } from "@/payload-types";
 import type { Answers, Question } from "./signup-schema";
@@ -9,6 +9,7 @@ export type ResponseRecord = {
   createdAt: string;
   updatedAt?: string;
   memberName?: string;
+  memberEmail?: string;
   formVersion?: string;
   questions: Question[];
   answers: Answers;
@@ -116,6 +117,7 @@ export async function queryResponses(
   id: number,
   user: User | null,
   query: URLSearchParams,
+  includeEmail = false,
 ) {
   const clauses: Where[] = [
     { activityType: { equals: kind } },
@@ -146,7 +148,7 @@ export async function queryResponses(
     query.get("from")! > query.get("to")!
   )
     throw new APIError("开始日期不能晚于结束日期", 400);
-  const records: ResponseRecord[] = [];
+  const records: (ResponseRecord & { member?: number | { id: number } | null })[] = [];
   let bytes = 0;
   for (let page = 1; ; page++) {
     const result = await p.find({
@@ -160,6 +162,7 @@ export async function queryResponses(
       where: { and: clauses },
       select: {
         memberName: true,
+        ...(includeEmail ? { member: true } : {}),
         answers: true,
         questions: true,
         formVersion: true,
@@ -175,13 +178,13 @@ export async function queryResponses(
     bytes += new TextEncoder().encode(JSON.stringify(result.docs)).length;
     if (bytes > 16 * 1024 * 1024)
       throw new APIError("筛选结果超过 16 MB，请缩小日期或姓名范围", 400);
-    records.push(...(result.docs as unknown as ResponseRecord[]));
+    records.push(...(result.docs as unknown as typeof records));
     if (!result.hasNextPage) break;
   }
   const question = query.get("question"),
     answer = (query.get("answer") || "").trim();
   if (answer.length > 200) throw new APIError("答案筛选内容过长", 400);
-  return question && answer
+  const filtered = question && answer
     ? records.filter(
         (r) =>
           Object.hasOwn(r.answers, question) &&
@@ -191,4 +194,38 @@ export async function queryResponses(
           ).includes(answer),
       )
     : records;
+  if (!includeEmail) return filtered;
+  const emails = await accountEmails(p, filtered.map((record) => record.member));
+  return filtered.map(({ member, ...record }) => ({
+    ...record,
+    memberEmail: emails.get(accountID(member)) || "",
+  }));
+}
+
+function accountID(value: unknown) {
+  const raw = value && typeof value === "object" && "id" in value ? value.id : value;
+  const id = Number(raw);
+  return Number.isSafeInteger(id) && id > 0 ? id : 0;
+}
+
+// Call only after the exact activity or staff batch has authorized an export.
+// Fetch the email field for the selected respondents without exposing user profiles.
+export async function accountEmails(p: Payload, members: unknown[], req?: PayloadRequest) {
+  const ids = [...new Set(members.map(accountID).filter(Boolean))];
+  const emails = new Map<number, string>();
+  for (let offset = 0; offset < ids.length; offset += 200) {
+    const batch = ids.slice(offset, offset + 200);
+    const result = await p.find({
+      collection: "users",
+      overrideAccess: true,
+      ...(req ? { req } : {}),
+      depth: 0,
+      limit: batch.length,
+      pagination: false,
+      where: { id: { in: batch } },
+      select: { email: true },
+    });
+    for (const user of result.docs) emails.set(user.id, user.email || "");
+  }
+  return emails;
 }

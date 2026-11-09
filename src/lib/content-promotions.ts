@@ -103,6 +103,11 @@ async function sourceChanged(req: PayloadRequest, collection: PromotionSource, i
   const current = (await req.payload.find({ collection: "content-promotions", req, overrideAccess: true, depth: 0, limit: 1,
     where: { and: [{ sourceKey: { equals: key } }, { status: { in: ["pending", "approved"] } }] } })).docs[0];
   if (!current) return;
+  if (!deleted) {
+    const source = await readPromotionSource(req.payload, collection, id, req).catch(() => null);
+    const reviewedVersion = current.status === "approved" ? current.approvedVersion : current.requestedVersion;
+    if (source && source.version === reviewedVersion) return;
+  }
   const status = current.status === "approved" ? "needsReview" : "returned";
   const reason = deleted ? "原内容已删除，社团级展示已撤下。" : "原内容已修改或隐藏，社团级展示已撤下；请重新申请复审。";
   const entry: PromotionHistory = { action: deleted ? "sourceDeleted" : "sourceChanged", actor: String(req.user?.id ?? "system"), actorName: req.user?.name ?? "系统", at: new Date().toISOString(),
@@ -120,15 +125,20 @@ export const promotionSourceDeleted: CollectionAfterDeleteHook = async ({ req, d
   return doc;
 };
 export async function promotedContent(p: Payload, kind: PromotionKind, limit = 6) {
-  if (!supportedPromotionKinds.includes(kind)) return [];
-  const result = await p.find({ collection: "content-promotions", overrideAccess: false, user: null, context: { publicPromotionProjection: true },
-    depth: 0, limit, sort: "-approvedAt", where: { and: [{ kind: { equals: kind } }, { status: { equals: "approved" } }] },
-    select: { sourceCollection: true, sourceID: true, approvedVersion: true, approvedSnapshot: true } });
-  const items = await Promise.all(result.docs.map(async item => {
-    const source = await readPromotionSource(p, promotionSource(item.sourceCollection), item.sourceID).catch(() => null);
-    if (!source || source.version !== item.approvedVersion || source.kind !== kind || !item.approvedSnapshot) return null;
-    return { id: item.id, sourceKey: promotionKey(item.sourceCollection, item.sourceID), href: source.href, gameTitle: source.game.title,
-      snapshot: item.approvedSnapshot as unknown as PromotionSnapshot };
-  }));
-  return items.filter(item => item !== null);
+  if (!supportedPromotionKinds.includes(kind) || limit <= 0) return [];
+  const items: { id: number; sourceKey: string; href: string; gameTitle: string; snapshot: PromotionSnapshot }[] = [];
+  for (let page = 1; items.length < limit; page++) {
+    const result = await p.find({ collection: "content-promotions", overrideAccess: false, user: null, context: { publicPromotionProjection: true },
+      depth: 0, page, limit: Math.max(limit, 20), sort: "-approvedAt", where: { and: [{ kind: { equals: kind } }, { status: { equals: "approved" } }] },
+      select: { sourceCollection: true, sourceID: true, approvedVersion: true, approvedSnapshot: true } });
+    const candidates = await Promise.all(result.docs.map(async item => {
+      const source = await readPromotionSource(p, promotionSource(item.sourceCollection), item.sourceID).catch(() => null);
+      if (!source || source.version !== item.approvedVersion || source.kind !== kind || !item.approvedSnapshot) return null;
+      return { id: item.id, sourceKey: promotionKey(item.sourceCollection, item.sourceID), href: source.href, gameTitle: source.game.title,
+        snapshot: item.approvedSnapshot as unknown as PromotionSnapshot };
+    }));
+    items.push(...candidates.filter(item => item !== null).slice(0, limit - items.length));
+    if (!result.hasNextPage || !result.docs.length) break;
+  }
+  return items;
 }

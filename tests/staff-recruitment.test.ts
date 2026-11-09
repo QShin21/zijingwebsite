@@ -136,6 +136,7 @@ it("社群管理员、骨干和其他申请人不能读取/导出他人候选资
   }
   const exported = await readStaffApplications(p, vice, batch.id, new URLSearchParams("department=execution&status=submitted"), true);
   expect("csv" in exported && exported.csv).toContain("合成申请人");
+  expect("csv" in exported && exported.csv).toContain(member.email);
   const audits = await p.find({ collection: "audit", overrideAccess: true, where: { actor: { equals: String(vice.id) } } });
   expect(audits.docs.map(row => row.action)).toEqual(expect.arrayContaining(["read-staff-applications", "export-staff-applications"]));
   expect(JSON.stringify(audits.docs)).not.toContain(answers.contact);

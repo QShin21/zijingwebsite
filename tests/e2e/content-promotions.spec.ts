@@ -83,6 +83,7 @@ test("活动网页申请/撤回/退回/重提/审核/改稿复审及主动升降
     await expect(staffSource).toContainText("已升推");
     await page.goto("/"); const projected = page.locator('[data-section="promoted-event"] [data-promotion-source="community-posts:' + post + '"]');
     await expect(projected.getByRole("link", { name: "合成网页升推活动", exact: true })).toHaveAttribute("href", sourcePath);
+    await expect(page.locator('[data-section="events"] [data-promotion-source="community-posts:' + post + '"]')).toBeVisible();
     await participant.reload(); await expect(participant.getByText("已报名", { exact: false }).first()).toBeVisible();
     expect((await p.findByID({ collection: "community-posts", id: post, overrideAccess: true, depth: 0 })).game).toBe(game);
     expect((await participant.request.get("/api/event-signups/" + receipt.id, { headers: origin })).status()).toBe(200);

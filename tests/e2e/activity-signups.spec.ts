@@ -769,6 +769,8 @@ test("organizer downloads one-row responses and member details with filters and 
         })
       ).status(),
     ).toBe(200);
+    // Chromium supplies its own Sec-Fetch-Site header for page resources.
+    await page.context().setExtraHTTPHeaders({});
     await page.goto(`/activities/events/${target}/manage`);
     await selectQuestionnaireTask(page, "统计与导出");
     const results = page.locator(".questionnaire-results");
@@ -785,6 +787,7 @@ test("organizer downloads one-row responses and member details with filters and 
     const wide = readCSV(await readFile((await download.path())!, "utf8"));
     expect(wide.records).toHaveLength(2);
     expect(wide.records[0]).toMatchObject({
+      "账号邮箱": admin.email,
       "Q6. 队伍名称": "本地演示队",
       "Q7. 成员名单 / 第1条 / 学号": "00001",
       "Q7. 成员名单 / 第5条 / 姓名": "演示成员5",
@@ -796,6 +799,7 @@ test("organizer downloads one-row responses and member details with filters and 
       "Q12. 志愿顺序 / 打野（名次）": "1",
     });
     expect(wide.records[1]).toMatchObject({
+      "账号邮箱": member.email,
       "Q2. 个人姓名": "演示个人",
       "Q3. 个人学号": "00009",
       "Q7. 成员名单 / 记录数": "",
@@ -817,10 +821,12 @@ test("organizer downloads one-row responses and member details with filters and 
     expect(details.records).toHaveLength(5);
     expect(details.records[4]).toMatchObject({
       报名编号: wide.records[0]["报名编号"],
+      账号邮箱: admin.email,
       "Q6. 队伍名称": "本地演示队",
       组内序号: "5",
       "学号": "00005",
     });
+    await page.context().setExtraHTTPHeaders({ "Sec-Fetch-Site": "same-origin" });
     const filtered = await page.request.get(
       endpoint +
         "?mode=export&question=mode&answer=" +
@@ -834,7 +840,9 @@ test("organizer downloads one-row responses and member details with filters and 
     expect(emptyTable.records).toHaveLength(0);
     expect(emptyTable.headers).toContain("Q7. 成员名单 / 第6条 / 学号");
     const long = await page.request.get(endpoint + "?mode=export&layout=long");
-    expect(readCSV(await long.text()).records.length).toBeGreaterThan(2);
+    const longRows = readCSV(await long.text()).records;
+    expect(longRows.length).toBeGreaterThan(2);
+    expect(new Set(longRows.map((row) => row["账号邮箱"]))).toEqual(new Set([admin.email, member.email]));
     expect(
       (
         await page.request.get(endpoint + "?mode=export&layout=invalid")

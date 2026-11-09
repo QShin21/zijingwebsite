@@ -118,6 +118,16 @@ it("退回/拒绝需理由，撤回和重提使用同一记录，历史与审核
   const audits = await p.find({ collection: "audit", overrideAccess: true, where: { object: { equals: "content-promotions:" + id } }, limit: 20 });
   expect(audits.docs).toHaveLength(8);
 });
+it("保存未改变的内容保持升推，正文改变后仍须复审", async () => {
+  const approved = await change(execution, "promote", undefined, "合成主动升推理由");
+  await p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, data: { title: "合成升推活动" } });
+  expect((await row()).status).toBe("approved");
+  expect((await row()).approvedVersion).toBe(approved.approvedVersion);
+  expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + post)).toBe(true);
+  await p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, data: { body: "合成正文新内容" } });
+  expect((await row()).status).toBe("needsReview");
+  expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + post)).toBe(false);
+});
 it("改稿/问卷修改立即撤下并复审，旧批准快照保留且旧版本不能通过", async () => {
   let current = await change(admin, "submit"); current = await change(execution, "approve", current);
   const approvedVersion = current.approvedVersion, approvedSnapshot = current.approvedSnapshot;
