@@ -1,0 +1,61 @@
+{
+  "deployedAt": "2026-11-09T23:13:24+08:00",
+  "applicationRevision": "a30dbd3046440ffef00cf5abfb8016a0012c322e",
+  "release": "/srv/zijingwebsite/releases/home-email-20261109-a30dbd3",
+  "buildId": "xfx_YdDzDtyrppVhca3M3",
+  "build": {
+    "host": "Windows Node 24.12.0",
+    "result": "passed",
+    "serverBuild": "stopped after the server became slow; candidate subsequently ran the Windows build",
+    "archiveSha256": "07678881e460b9943d17db55a9454be47e625606d788796612b7b43a843e4ce4",
+    "matchedSourceFiles": 296
+  },
+  "local": {
+    "targetedUnitAndDatabaseTestsPassed": 46,
+    "browserScenariosPassed": 2,
+    "typecheck": "passed",
+    "changedFilesLint": "passed",
+    "fullLint": "failed on four pre-existing errors in community-operations.ts and club-operations.test.ts"
+  },
+  "backup": {
+    "path": "/srv/zijingwebsite/backups/home-email-20261109",
+    "databaseSnapshot": "/srv/zijingwebsite/backups/home-email-20261109/database/zijing-2026-11-09T15-05-48.889Z",
+    "sameHost": true,
+    "offsiteConfigured": false,
+    "restoredTables": 69,
+    "restoredRecords": 1955,
+    "restoreResult": "passed",
+    "rollbackScript": "/srv/zijingwebsite/backups/home-email-20261109/rollback.sh",
+    "rollbackExecuted": false
+  },
+  "restoredDataChecks": {
+    "activityQuestionnaires": 1,
+    "activityResponses": 73,
+    "activityEmailMatches": 73,
+    "activityLayoutsChecked": 3,
+    "staffBatches": 1,
+    "staffApplications": 5,
+    "staffEmailMatches": 5,
+    "staffExportAuditWrittenOnlyToRestoredDatabase": true
+  },
+  "production": {
+    "migrationsExecuted": false,
+    "eventSignupsUnchanged": 73,
+    "staffApplicationsUnchanged": 5,
+    "communityPostsUnchanged": 1,
+    "staffBatchesUnchanged": 1,
+    "eventsUnchanged": 0,
+    "mediaUnchanged": true,
+    "environmentUnchanged": true,
+    "promotedEventPresentInProjection": true,
+    "candidatePathsPassed": 5,
+    "candidateAssetsPassed": 16,
+    "publicHealth": 200,
+    "publicEvents": 200,
+    "publicAnnouncements": 200,
+    "miniappStatus": 200,
+    "freeKillHome": 200,
+    "anonymousExport": 401,
+    "authenticatedProductionCSVDownload": "not performed"
+  }
+}
