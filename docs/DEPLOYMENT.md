@@ -1,5 +1,11 @@
 # 部署、迁移与恢复
 
+## 2026-11-10 网站发布配图
+
+应用 `8c17547ab3a72d796d85f640ed0d7cb2f533bda6` 于 18:17（北京时间）部署到 `home.thuzijing.top`。构建 `UoKiJPLKwd1JG0tJ_1fLW` 在服务器隔离端口验证后切换。迁移只为活动、通知和活动报名问卷增加 8 个可空配图字段。
+
+同机备份保存在 `/srv/zijingwebsite/backups/publish-images-20261110-8c17547`。69 张表、3,531 条记录恢复校验通过。隔离迁移后，迁移登记之外 68 张表的原有字段一致。正式库切换前后逐条对比 12 张业务表，226 份活动答卷、5 份骨干申请及相关内容的原有记录均一致。应用回退脚本为备份目录中的 `rollback.sh`，回退时保留增量列。异机备份未配置。详见[部署记录](evidence/publication-images-deployment-20261110.json)。
+
 ## 2026-11-09 首页升推与答卷邮箱
 
 应用提交 `a30dbd3046440ffef00cf5abfb8016a0012c322e` 已部署至 `home.thuzijing.top`，运行目录 `/srv/zijingwebsite/releases/home-email-20261109-a30dbd3`，Build ID `xfx_YdDzDtyrppVhca3M3`。296 份源码和配置输入与提交一致；本机生产构建经服务器 3101 候选就绪、页面资源与权限检查后切换。服务器本机构建因响应变慢而停止，现有服务恢复后采用上述构建产物。

@@ -1,0 +1,73 @@
+{
+  "deployedAt": "2026-11-10T18:17:45+08:00",
+  "applicationRevision": "8c17547ab3a72d796d85f640ed0d7cb2f533bda6",
+  "release": "/srv/zijingwebsite/releases/publish-images-20261110-8c17547",
+  "build": {
+    "id": "UoKiJPLKwd1JG0tJ_1fLW",
+    "host": "Windows Node 24.12.0",
+    "result": "passed",
+    "matchedSourceFiles": 350,
+    "sourceArchiveSha256": "80a8200dd01cf6c50dc4abafb2506af5b8d7fbe603a04b688fd999a07fe74ef5",
+    "buildArchiveSha256": "e6dc505741643940171a2804c7afe49d0d7567c5da5e1025ee29514e24000bc8"
+  },
+  "local": {
+    "unitAndDatabasePassed": 70,
+    "unitAndDatabaseFailed": 1,
+    "baselineFailureReproduced": "tests/club-operations.test.ts:60, community-joins count access",
+    "browserScenariosPassed": 2,
+    "typecheck": "passed",
+    "changedFilesLint": "passed",
+    "githubActions": "not run"
+  },
+  "backup": {
+    "path": "/srv/zijingwebsite/backups/publish-images-20261110-8c17547",
+    "databaseSnapshot": "database/zijing-2026-11-10T10-15-18.387Z",
+    "restoreVerified": true,
+    "restoredTables": 69,
+    "restoredRecords": 3531,
+    "mediaFiles": 0,
+    "sameHost": true,
+    "offsiteConfigured": false,
+    "rollbackScript": "rollback.sh",
+    "rollbackExecuted": false
+  },
+  "migration": {
+    "name": "20261110_000000_publication_images",
+    "nullableColumnsAdded": 8,
+    "isolatedTablesWithMatchingOriginalColumns": 68,
+    "isolatedRecordsWithMatchingOriginalColumns": 3514,
+    "isolatedComparisonExcludesMigrationLedger": true,
+    "productionApplied": true
+  },
+  "candidate": {
+    "pathsPassed": 6,
+    "staticAssetsPassed": 29,
+    "publishedContentWithSyntheticImagesChecked": 2,
+    "syntheticReceiptUnchangedAfterImageEdit": true,
+    "syntheticCSV": 200,
+    "existingApprovedActivityProjectionPresent": true
+  },
+  "production": {
+    "businessTablesCompared": 12,
+    "existingBusinessRowsMissing": 0,
+    "existingBusinessRowsChanged": 0,
+    "activityResponses": 226,
+    "staffApplications": 5,
+    "staffBatches": 1,
+    "communityPosts": 1,
+    "contentPromotions": 1,
+    "mediaUnchanged": true,
+    "environmentUnchanged": true,
+    "nginxConfigurationUnchanged": true,
+    "localRuntimePathsPassed": 6,
+    "localRuntimeStaticAssetsPassed": 29,
+    "publicHealth": 200,
+    "publicEvents": 200,
+    "publicAnnouncements": 200,
+    "publicAdminLogin": 200,
+    "miniappStatus": 200,
+    "freeKillHome": 200,
+    "anonymousExport": 401,
+    "authenticatedImageWrites": "verified with synthetic fixtures in the isolated candidate database"
+  }
+}
