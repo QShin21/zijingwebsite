@@ -1,5 +1,9 @@
 # 部署、迁移与恢复
 
+## 2026-11-10 社群配图编辑与活动目录
+
+应用 `c100b2e5754a6f82eba783b68fb25d516b0d18b7` 于 19:36（北京时间）部署，构建 `SsuCqFZ8WCqP2qUMpToJo` 先在备份恢复库和服务器候选端口验收。备份保存在 `/srv/zijingwebsite/backups/community-directory-20261110-c100b2e`，同机隔离恢复核验了 69 张表、3,632 条记录。切换沿用现有数据库结构，迁移登记一致，12 张业务表中的既有记录逐条一致。回退脚本位于备份目录中的 `rollback.sh`。详见[部署记录](evidence/community-directory-deployment-20261110.json)。
+
 ## 2026-11-10 网站发布配图
 
 应用 `8c17547ab3a72d796d85f640ed0d7cb2f533bda6` 于 18:17（北京时间）部署到 `home.thuzijing.top`。构建 `UoKiJPLKwd1JG0tJ_1fLW` 在服务器隔离端口验证后切换。迁移只为活动、通知和活动报名问卷增加 8 个可空配图字段。

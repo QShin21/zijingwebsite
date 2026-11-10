@@ -1,0 +1,73 @@
+{
+  "deployedAt": "2026-11-10T19:36:02+08:00",
+  "applicationRevision": "c100b2e5754a6f82eba783b68fb25d516b0d18b7",
+  "release": "/srv/zijingwebsite/releases/community-directory-20261110-c100b2e",
+  "build": {
+    "id": "SsuCqFZ8WCqP2qUMpToJo",
+    "host": "Windows Node 24.12.0",
+    "result": "passed",
+    "matchedSourceFiles": 352,
+    "sourceArchiveSha256": "8169860d0bf91d882d4d87bb5f5a2e4002941a5011e0d04a9ec4cc1f1e652422",
+    "buildArchiveSha256": "ca1eea0f9404f0cf429990954fb9d4f60ffbe55a04efffb55949a90db440e2b3"
+  },
+  "local": {
+    "unitAndDatabasePassed": 33,
+    "browserScenariosPassed": 4,
+    "changedFilesLint": "passed",
+    "typecheck": "passed",
+    "approvedActivitiesCoveredByPagination": 13,
+    "bodyImageEdit": "activity and notice",
+    "historyAndConcurrentEditGuards": "passed",
+    "githubActions": "not run"
+  },
+  "backup": {
+    "path": "/srv/zijingwebsite/backups/community-directory-20261110-c100b2e",
+    "databaseSnapshot": "database/zijing-2026-11-10T11-35-21.576Z",
+    "restoreVerified": true,
+    "restoredTables": 69,
+    "restoredRecords": 3632,
+    "sameHost": true,
+    "offsiteConfigured": false,
+    "rollbackScript": "rollback.sh",
+    "rollbackExecuted": false
+  },
+  "candidate": {
+    "pathsPassed": 6,
+    "staticAssetsPassed": 29,
+    "publishedActivityDirectories": "passed",
+    "specificGameIncludedUnpromoted": true,
+    "hiddenAndNoticeExcluded": true,
+    "syntheticReceiptAndQuestionnaireRetained": true
+  },
+  "production": {
+    "migrationExecuted": false,
+    "migrationLedgerUnchanged": true,
+    "businessTablesCompared": 12,
+    "existingBusinessRowsMissing": 0,
+    "existingBusinessRowsChanged": 0,
+    "activityResponses": 235,
+    "staffApplications": 5,
+    "communityPosts": 1,
+    "contentPromotions": 1,
+    "mediaUnchanged": true,
+    "environmentUnchanged": true,
+    "nginxConfigurationUnchanged": true,
+    "localRuntimePathsPassed": 6,
+    "localRuntimeStaticAssetsPassed": 29,
+    "publicActivityDirectory": 200,
+    "publicGameFilter": 200,
+    "verifiedPromotedActivity": {
+      "title": "英雄联盟S16决赛观赛",
+      "href": "/community/community-13/updates/5",
+      "game": 10,
+      "presentInBothViews": true
+    },
+    "publicHealth": 200,
+    "publicAnnouncements": 200,
+    "publicAdminLogin": 200,
+    "miniappStatus": 200,
+    "freeKillHome": 200,
+    "anonymousExport": 401,
+    "authenticatedImageWrites": "verified with synthetic fixtures in isolated environments"
+  }
+}
