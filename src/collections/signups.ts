@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from "node:util";
 import {
   APIError,
   type CollectionConfig,
@@ -50,7 +51,8 @@ export const validateSignupForm: CollectionBeforeChangeHook = async ({
   collection,
   req,
 }) => {
-  if (data.signupForm !== undefined) {
+  // Payload fills omitted fields from the saved document. Preserve an untouched form as stored.
+  if (data.signupForm !== undefined && !isDeepStrictEqual(data.signupForm, originalDoc?.signupForm)) {
     try {
       data.signupForm = normalizeSignup(data.signupForm);
     } catch (error) {

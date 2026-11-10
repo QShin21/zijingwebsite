@@ -1,4 +1,5 @@
 import { ActivitySignup } from "@/components/ActivitySignup";
+import { CommunityPostImageEditor } from "@/components/CommunityPostImageEditor";
 import { PublicationImages } from "@/components/PublicationImages";
 import { publicationImages } from "@/lib/publication-images";
 import Link from "next/link";
@@ -34,11 +35,14 @@ export default async function Update({
         postImages: true,
         authorName: true,
         createdAt: true,
+        updatedAt: true,
         category: true,
       },
     })
     .catch(() => null);
   if (!post || Number(post.game) !== game.id) notFound();
+  const canEdit = managesGame(user, game.id);
+  const images = publicationImages(post.postImages);
   return (
     <ClubFrame className={`${styles.page} ${styles.body}`}>
       <nav className={styles.breadcrumb} aria-label="社群活动导航">
@@ -59,7 +63,10 @@ export default async function Update({
       <div className={styles.articleGrid}>
         <article className={styles.article} aria-label="正文">
           <p className={styles.articleBody}>{post.body}</p>
-          <PublicationImages images={publicationImages(post.postImages)} />
+          <PublicationImages images={images} />
+          {canEdit && (
+            <CommunityPostImageEditor key={post.id} id={post.id} game={game.id} images={images} revision={post.updatedAt} />
+          )}
         </article>
         <aside className={styles.articleAside}>
           {post.category === "event" ? (
@@ -79,7 +86,7 @@ export default async function Update({
               </Link>
             </>
           )}
-          {(managesGame(user, game.id) || canReviewPromotion(user)) && (
+          {(canEdit || canReviewPromotion(user)) && (
             <section className={styles.section}>
               <h2>管理展示范围</h2>
               <p>将当前内容申请展示到社团首页，报名继续使用同一活动记录。</p>

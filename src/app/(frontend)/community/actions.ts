@@ -214,9 +214,50 @@ export async function publishCommunityResultAction(form: FormData) {
   try {
     await createCommunityPost(p, user, form, kind);
     revalidatePath(`${await gamePath(game)}/updates`);
+    if (kind === "event") revalidatePath("/events");
     return { ok: true, message: "内容已发布到当前社群。" };
   } catch (error) { return { ok: false, message: workflowFeedback(error) }; }
 }
+export async function updateCommunityPostImagesAction(form: FormData) {
+  const p = await cms();
+  const { user } = await p.auth({ headers: await headers() });
+  const id = numeric(form, "id");
+  const game = numeric(form, "game");
+  let path: string;
+  try {
+    path = await workflowTransaction(p, user, {}, async (req) => {
+      if (!id || !game || !managesGame(req.user, game))
+        throw new APIError("当前账号无权编辑此社群的配图。", 403);
+      const post = await p.findByID({
+        collection: "community-posts", id, req, overrideAccess: false, depth: 0,
+        select: { game: true, status: true, updatedAt: true },
+      });
+      if (Number(post.game) !== game || post.status !== "visible")
+        throw new APIError("该内容已隐藏或不属于当前社群。", 404);
+      if (value(form, "revision") !== post.updatedAt)
+        throw new APIError("内容已有更新，请刷新已保存记录，再载入最新配图。", 409);
+      const currentGame = await p.findByID({
+        collection: "games", id: game, req: { ...req, user: null },
+        overrideAccess: false, user: null, draft: false, depth: 0, select: { slug: true },
+      });
+      let images: unknown;
+      try { images = JSON.parse(value(form, "postImages")); }
+      catch { throw new APIError("请检查配图格式。", 400); }
+      if (!Array.isArray(images)) throw new APIError("请检查配图格式。", 400);
+      await p.update({
+        collection: "community-posts", id, req, overrideAccess: false, data: { postImages: images },
+      });
+      return `/community/${currentGame.slug}/updates/${id}`;
+    });
+  } catch (error) {
+    return { ok: false, message: workflowFeedback(error) };
+  }
+  revalidatePath(path);
+  revalidatePath("/events");
+  revalidatePath("/");
+  return { ok: true, message: "配图已保存。" };
+}
+
 export async function reviewShowcaseResultAction(form: FormData) {
   const p = await cms(), { user } = await p.auth({ headers: await headers() });
   if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再审核，已填写的说明保留。" };

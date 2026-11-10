@@ -3,6 +3,7 @@ import type { Where } from "payload";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { bySlug, cms, list, type Content } from "@/lib/content";
+import { communityEventPage } from "@/lib/community-event-list";
 import { Pagination, Picture } from "@/components/Content";
 import { dateParts } from "@/lib/presentation";
 import { eventState, formatDate, routeFor } from "@/lib/rules";
@@ -17,7 +18,7 @@ const copy = {
     title: "活动",
     headline: "活动日程",
     description:
-      "比赛、观赛、交流与训练。从时间和项目出发，找到下一场想参加的活动。",
+      "浏览站点活动和社团精选活动，或按游戏项目查看已发布的活动。",
     empty: "暂无已发布的活动",
     hint: "新的活动安排会在这里发布。可以先查看社团通知。",
   },
@@ -251,15 +252,17 @@ export async function PublicList({
   collection: PageCollection;
   search: Query;
 }) {
+  const limit = 12;
   const page = Math.floor(
       Math.max(1, Math.min(10000, Number(search.page) || 1)),
     ),
     and: Where[] = [],
     query: Record<string, string> = {};
   if (collection === "events") {
-    if (typeof search.game === "string" && /^\d+$/.test(search.game)) {
-      and.push({ game: { equals: search.game } });
-      query.game = search.game;
+    const gameID = typeof search.game === "string" && /^\d+$/.test(search.game) ? Number(search.game) : 0;
+    if (gameID > 0 && gameID <= 2_147_483_647) {
+      and.push({ game: { equals: gameID } });
+      query.game = String(gameID);
     }
     if (
       typeof search.type === "string" &&
@@ -278,9 +281,16 @@ export async function PublicList({
     }
   }
   const [result, games] = await Promise.all([
-    list(collection, and.length ? { and } : {}, page),
+    list(collection, and.length ? { and } : {}, page, limit),
     list("games", {}, 1, 100),
   ]);
+  const selectedGame = games.docs.find((game) => String(game.id) === query.game);
+  // Community posts have no structured event type or start/end time.
+  const community = collection === "events" && !query.type && !query.time && (!query.game || selectedGame)
+    ? await communityEventPage(await cms(), selectedGame, page, limit)
+    : { docs: [], totalDocs: 0, totalPages: 0 };
+  const totalDocs = result.totalDocs + community.totalDocs;
+  const totalPages = Math.max(result.totalPages, community.totalPages);
   const meta = copy[collection],
     path = `/${routeFor[collection]}`;
   const gameFor = (doc: Content) =>
@@ -370,11 +380,11 @@ export async function PublicList({
               : "相册目录"}
         </h2>
         <span>
-          共 {result.totalDocs} 条
-          {result.totalPages > 1 && `，第 ${page} / ${result.totalPages} 页`}
+          共 {totalDocs} 条
+          {totalPages > 1 && `，第 ${page} / ${totalPages} 页`}
         </span>
       </div>
-      {!result.docs.length ? (
+      {!result.docs.length && !community.docs.length ? (
         <EmptyState
           title={
             Object.keys(query).length ? "没有符合筛选条件的活动" : meta.empty
@@ -434,6 +444,24 @@ export async function PublicList({
             collection === "albums" ? styles.albumGrid : styles.eventGrid
           }
         >
+          {community.docs.map((event) => (
+            <article className={styles.eventCard} key={event.href}>
+              <span className={styles.noticeDate}>{event.promoted ? "社团精选" : "社群活动"}</span>
+              <div className={styles.cardBody}>
+                <div className={styles.meta}>
+                  <span>{event.gameTitle}</span>
+                  {event.createdAt && (
+                    <time dateTime={event.createdAt}>发布于 {formatDate(event.createdAt)}</time>
+                  )}
+                </div>
+                <h2><Link href={event.href}>{event.title}</Link></h2>
+                {event.summary && <p>{event.summary}</p>}
+              </div>
+              <div className={styles.eventAction}>
+                <Link className={styles.textAction} href={event.href}>查看活动详情</Link>
+              </div>
+            </article>
+          ))}
           {result.docs.map((doc) => (
             <EventCard
               key={doc.id}
@@ -446,7 +474,7 @@ export async function PublicList({
       )}
       <Pagination
         page={page}
-        total={result.totalPages}
+        total={totalPages}
         path={path}
         query={query}
       />

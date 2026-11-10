@@ -26,6 +26,7 @@ export function PublicationImagesEditor({
   questions,
   limit = publicationImageLimit,
   readOnly = false,
+  allowReplace = false,
 }: {
   label: string;
   images: PublicationImage[];
@@ -33,10 +34,41 @@ export function PublicationImagesEditor({
   questions?: Question[];
   limit?: number;
   readOnly?: boolean;
+  allowReplace?: boolean;
 }) {
   const id = useId();
   const [error, setError] = useState("");
   const [reading, setReading] = useState(false);
+
+  async function chooseImages(input: HTMLInputElement, replaceIndex?: number) {
+    const files = Array.from(input.files ?? []);
+    input.value = "";
+    if (reading || !files.length) return;
+    setError("");
+    if (replaceIndex === undefined && files.length + images.length > limit) {
+      setError(`还能添加 ${limit - images.length} 张图片。`);
+      return;
+    }
+    if (files.some((file) =>
+      !file.size || file.size > publicationImageBytes || !publicationImageTypes.includes(file.type)
+    )) {
+      setError("请选择 2 MB 以内的 PNG、JPEG 或 WebP 图片。");
+      return;
+    }
+    input.setCustomValidity("图片正在读取，请稍候。");
+    setReading(true);
+    try {
+      const sources = await Promise.all(files.map(readImage));
+      onChange(replaceIndex === undefined
+        ? [...images, ...sources.map((source) => ({ source, alt: "" }))]
+        : images.map((image, index) => index === replaceIndex ? { ...image, source: sources[0] } : image));
+    } catch {
+      setError("无法读取图片，请重新选择。");
+    } finally {
+      input.setCustomValidity("");
+      setReading(false);
+    }
+  }
 
   return (
     <div className={styles.editor} aria-busy={reading}>
@@ -48,36 +80,7 @@ export function PublicationImagesEditor({
         accept={publicationImageTypes.join(",")}
         aria-describedby={`${id}-hint`}
         disabled={readOnly || limit <= images.length}
-        onChange={async (event) => {
-          const input = event.currentTarget;
-          const files = Array.from(input.files ?? []);
-          input.value = "";
-          if (reading || !files.length) return;
-          setError("");
-          if (files.length + images.length > limit) {
-            setError(`还能添加 ${limit - images.length} 张图片。`);
-            return;
-          }
-          if (files.some((file) =>
-            !file.size || file.size > publicationImageBytes || !publicationImageTypes.includes(file.type)
-          )) {
-            setError("请选择 2 MB 以内的 PNG、JPEG 或 WebP 图片。");
-            return;
-          }
-          input.setCustomValidity("图片正在读取，请稍候。");
-          setReading(true);
-          try {
-            const added = await Promise.all(files.map(async (file) => ({
-              source: await readImage(file), alt: "",
-            })));
-            onChange([...images, ...added]);
-          } catch {
-            setError("无法读取图片，请重新选择。");
-          } finally {
-            input.setCustomValidity("");
-            setReading(false);
-          }
-        }}
+        onChange={(event) => void chooseImages(event.currentTarget)}
       />
       <small id={`${id}-hint`}>
         PNG、JPEG、WebP，每张不超过 2 MB。已添加 {images.length} / {limit} 张。
@@ -102,6 +105,16 @@ export function PublicationImagesEditor({
                     onChange={(event) => update({ alt: event.target.value })}
                   />
                 </label>
+                {allowReplace && !readOnly && (
+                  <label>
+                    更换第 {index + 1} 张图片
+                    <input
+                      type="file"
+                      accept={publicationImageTypes.join(",")}
+                      onChange={(event) => void chooseImages(event.currentTarget, index)}
+                    />
+                  </label>
+                )}
                 {questions && (
                   <label>
                     展示位置

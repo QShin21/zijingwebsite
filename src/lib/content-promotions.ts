@@ -138,9 +138,10 @@ export const promotionSourceDeleted: CollectionAfterDeleteHook = async ({ req, d
 export async function promotedContent(p: Payload, kind: PromotionKind, limit = 6) {
   if (!supportedPromotionKinds.includes(kind) || limit <= 0) return [];
   const items: { id: number; sourceKey: string; href: string; gameTitle: string; snapshot: PromotionSnapshot }[] = [];
+  // Keep reads bounded even when the directory requests every approved item.
   for (let page = 1; items.length < limit; page++) {
     const result = await p.find({ collection: "content-promotions", overrideAccess: false, user: null, context: { publicPromotionProjection: true },
-      depth: 0, page, limit: Math.max(limit, 20), sort: "-approvedAt", where: { and: [{ kind: { equals: kind } }, { status: { equals: "approved" } }] },
+      depth: 0, page, limit: 20, sort: ["-approvedAt", "-id"], where: { and: [{ kind: { equals: kind } }, { status: { equals: "approved" } }] },
       select: { sourceCollection: true, sourceID: true, approvedVersion: true, approvedSnapshot: true } });
     const candidates = await Promise.all(result.docs.map(async item => {
       const source = await readPromotionSource(p, promotionSource(item.sourceCollection), item.sourceID).catch(() => null);
