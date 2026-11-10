@@ -13,11 +13,11 @@ function archiveRows(records) {
   });
 }
 Page(withVisualTheme({
-  data: { loading: false, error: '', needsLogin: false, team: null, records: [], previewImages: [], loaded: false },
+  data: { loading: false, error: '', needsLogin: false, team: null, records: [], previewImages: [], loaded: false, validTeam: false },
   onLoad(options = {}) {
     if (this._unsubscribe) this._unsubscribe();
     this.invalidate(); this._team = honor.id(options.team); this._identity = identity(); this._visible = false;
-    this.setData({ error: this._team ? '' : '队伍入口无效，请返回后重新进入' });
+    this.setData({ validTeam: Boolean(this._team), error: this._team ? '' : '队伍入口无效，请返回后重新进入' });
     this._unsubscribe = session.subscribe(() => {
       if (this._identity === identity()) return;
       this._identity = identity(); this.invalidate();
@@ -46,6 +46,9 @@ Page(withVisualTheme({
   onHide() { this._visible = false; this.invalidate(); },
   onUnload() { this.onHide(); if (this._unsubscribe) this._unsubscribe(); },
   back: navigation.back,
+  submitHonor() {
+    if (this._visible && this._team) navigation.go('team-honor-edit', { team: this._team });
+  },
   workspace() {
     if (this._visible && this._team && navigation.requireUser()) navigation.go('team-honor-workspace', { team: this._team });
   },

@@ -3,7 +3,7 @@
 .workspace-loading { padding: 12px 0 24px; }
 .workspace-read-error { margin-bottom: 24px; }
 .workspace-scope { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin: 0 0 24px; padding: 12px 0; border-bottom: 1px solid var(--z-line); }
-.scope-status, .operation-state { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.scope-status, .operation-state, .workspace-shortcuts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
 .mini-page.native-form-page.team-review-page .queue-heading { flex-wrap: wrap; gap: 8px 16px; margin-bottom: 12px; }
 .mini-page.native-form-page.team-review-page .queue-filter { margin: 0 0 20px; }
 .mini-page.native-form-page.team-review-page .queue-filter .field-label { font-size: 14px; font-weight: 400; color: var(--z-muted); }
@@ -26,6 +26,10 @@
 .mini-page.native-form-page.team-review-page .workspace-load-more { width: 100%; margin-top: 24px; }
 .mini-page.native-form-page.team-review-page .website-create { text-align: left; margin-top: 8px; }
 .mini-page.native-form-page.team-review-page .batch-record:first-child { border-top: 0; }
+.mini-page.native-form-page.team-review-page .recruitment-editor { margin-top: 0; }
+.recruitment-pickers { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.recruitment-pickers picker { flex: 1 0 108px; }
+.recruitment-pickers picker .queue-picker { min-height: 44px; }
 .batch-dates { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 16px; }
 .batch-dates > view { flex: 1; min-width: 112px; }
 .date-label { display: block; color: var(--z-muted); font-size: 12px; line-height: 1.6; }

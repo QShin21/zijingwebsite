@@ -7,7 +7,7 @@ type Data = Record<string, unknown>;
 type Event = { currentTarget: { dataset: Record<string, string> } };
 type Page = { data: { loading: boolean; error: string; loaded: boolean; team: { id: number; title: string } | null; records: Data[]; previewImages: string[] };
   setData(value: Data): void; onLoad(value: { team: string }): void; onShow(): Promise<void>; onHide(): void; onUnload(): void;
-  retry(): Promise<void>; load(): Promise<void>; back(): void; source(event: Event): void; preview(event: Event): void; videoError(event: Event): void };
+  retry(): Promise<void>; load(): Promise<void>; back(): void; submitHonor(): void; source(event: Event): void; preview(event: Event): void; videoError(event: Event): void };
 type RequestOptions = { url: string; method: string; header: Record<string, string>; success(value: { statusCode: number; data: unknown }): void; fail(): void };
 type WriteOptions = { filePath: string; data: string; encoding: string; success(): void; fail(): void };
 type Archive = { key: string; team: { id: number; title: string; gameTitle: string }; records: Data[] };
@@ -64,6 +64,19 @@ function harness() {
 }
 
 describe("实际荣誉档案HTTP合同的原生只读消费者", () => {
+  it("空档案仍提供提交入口，并将当前队伍传给原生投稿编辑页", async () => {
+    const h = harness();
+    h.page.onLoad({ team: "41" });
+    const reading = h.page.onShow();
+    h.reply(0, { ...archive(), records: [] });
+    await reading;
+    expect(h.page.data).toMatchObject({ loaded: true, validTeam: true, records: [] });
+    h.page.submitHonor();
+    expect(h.wx.navigateTo).toHaveBeenCalledWith({ url: "/pages/team-honor-edit/index?team=41" });
+    h.page.onHide();
+    h.page.submitHonor();
+    expect(h.wx.navigateTo).toHaveBeenCalledTimes(1);
+  });
   it("只播放批准版本的受控路径，拒绝原始媒体、任意外链及记录不匹配", () => {
     const h = harness(), valid = { key: "team-honor-records:12", legacy: false, videoHref };
     expect(h.honor.videoSource(valid)).toBe(origin + videoHref);
@@ -166,11 +179,12 @@ describe("实际荣誉档案HTTP合同的原生只读消费者", () => {
     expect(h.page.data.records[0].localImages).toEqual([{ url: h.writes[1].filePath, caption: "成功图" }]);
     expect(h.page.data.records[0].mediaError).toContain("部分证据图片"); expect(JSON.stringify(h.patches)).not.toMatch(/videoURL|raw-storage/);
   });
-  it("WXML使用用户主动播放、原生返回、图片与失败重试，不展示未接入写入口", () => {
+  it("WXML使用用户主动播放、原生返回、图片与失败重试，投稿入口跳转到独立页面", () => {
     const wxml = readFileSync("miniprogram/src/pages/team-honors/index.wxml", "utf8");
     expect(wxml).toContain('autoplay="{{false}}"'); expect(wxml).toContain('controls="{{true}}"');
     expect(wxml).toContain('bindtap="back"'); expect(wxml).toContain('bindtap="preview"'); expect(wxml).toContain('bindtap="retry"');
-    expect(wxml).not.toMatch(/videoURL|bindtap="submit|审核|录取|订阅/);
+    expect(wxml).toContain('bindtap="submitHonor"');
+    expect(wxml).not.toMatch(/videoURL|bindtap="(?:save|perform|approve)|录取|订阅/);
     expect(JSON.parse(readFileSync("miniprogram/src/pages/team-honors/index.json", "utf8"))).toMatchObject({ enablePullDownRefresh: true });
   });
 });

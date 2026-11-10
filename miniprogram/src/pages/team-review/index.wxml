@@ -9,8 +9,32 @@
   <view wx:if="{{error}}" class="workspace-read-error"><text class="error" aria-role="alert">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{loading || busy}}">重新加载</button></view>
   <text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text><text wx:if="{{done}}" class="result-message" aria-role="status">{{done}}</text>
   <view wx:if="{{!needsLogin && !loading && !error && !allowed}}" class="empty"><text class="state-title">当前暂无此工作台的查看权限</text><text class="muted">可刷新核对当前队伍或建队审核的授权。</text><button class="secondary" bindtap="retry" disabled="{{busy}}">重新核对权限</button></view>
-  <block wx:if="{{allowed && !needsLogin}}">
-    <view wx:if="{{mode === 'join'}}" class="workspace-scope"><view class="scope-status"><text class="muted">队伍状态</text><text class="badge">{{teamDoc.statusText}}</text></view><button class="plain" bindtap="members" disabled="{{loading || busy}}">管理成员关系</button></view>
+  <view wx:if="{{allowed && !needsLogin && recruitmentEditor}}" class="task-section recruitment-editor">
+    <text class="section-title">{{recruitmentEditor.id ? '编辑招新批次' : '新建招新批次'}}</text>
+    <view class="field">
+      <text class="field-label">批次名称</text>
+      <input value="{{recruitmentEditor.title}}" bindinput="recruitmentTitle" maxlength="120" aria-label="批次名称" disabled="{{loading || busy || recruitmentEditor.blocked}}" />
+    </view>
+    <text class="field-note">选拔问卷共 {{recruitmentEditor.questionCount}} 题。题型和分支可在网站工作台编辑。</text>
+    <button class="plain" bindtap="websiteWorkbench" data-id="{{recruitmentEditor.id}}" data-create="{{!recruitmentEditor.id}}" disabled="{{loading || busy}}">复制网站问卷编辑地址</button>
+    <text class="field-note">以下时间均为北京时间。开始时间留空时，发布后立即接受申请。发布前请填写未来的截止时间。</text>
+    <view wx:for="{{['start', 'end']}}" wx:for-item="key" wx:key="*this" class="field">
+      <text class="field-label">{{key === 'start' ? '报名开始时间（选填）' : '报名截止时间'}}</text>
+      <view class="recruitment-pickers">
+        <picker mode="date" value="{{recruitmentEditor[key].date}}" bindchange="recruitmentTime" data-key="{{key}}" data-part="date" disabled="{{loading || busy || recruitmentEditor.blocked}}" aria-label="{{key === 'start' ? '开始日期' : '截止日期'}}"><view class="queue-picker">{{recruitmentEditor[key].date || '选择日期'}}</view></picker>
+        <picker mode="time" value="{{recruitmentEditor[key].time}}" bindchange="recruitmentTime" data-key="{{key}}" data-part="time" disabled="{{loading || busy || recruitmentEditor.blocked}}" aria-label="{{key === 'start' ? '开始时刻' : '截止时刻'}}"><view class="queue-picker">{{recruitmentEditor[key].time || '选择时刻'}}</view></picker>
+        <button wx:if="{{recruitmentEditor[key].date}}" class="plain" bindtap="recruitmentTime" data-key="{{key}}" data-part="clear" disabled="{{loading || busy || recruitmentEditor.blocked}}">清除</button>
+      </view>
+    </view>
+    <text wx:if="{{teamDoc.teamStatus !== 'active'}}" class="task-note">请在工作台的「调整队伍状态」中将队伍设为活跃，再发布招新。</text>
+    <view class="actions">
+      <button class="primary" bindtap="saveRecruitment" data-status="open" disabled="{{loading || busy || recruitmentEditor.blocked || teamDoc.teamStatus !== 'active'}}">{{recruitmentEditor.status === 'open' ? '保存开放安排' : '发布招新'}}</button>
+      <button wx:if="{{recruitmentEditor.status !== 'open'}}" class="secondary" bindtap="saveRecruitment" data-status="{{recruitmentEditor.status}}" disabled="{{loading || busy || recruitmentEditor.blocked}}">{{recruitmentEditor.status === 'draft' ? '保存草稿' : '保存批次'}}</button>
+      <button class="plain" bindtap="closeRecruitmentEditor" disabled="{{busy}}">返回批次列表</button>
+    </view>
+  </view>
+  <block wx:elif="{{allowed && !needsLogin}}">
+    <view wx:if="{{mode === 'join'}}" class="workspace-scope"><view class="scope-status"><text class="muted">队伍状态</text><text class="badge">{{teamDoc.statusText}}</text></view><view class="workspace-shortcuts"><button class="secondary" bindtap="recruitmentBatches" disabled="{{loading || busy || error}}">管理招新</button><button class="plain" bindtap="members" disabled="{{loading || busy}}">管理成员关系</button></view></view>
     <view class="section-head queue-heading"><text class="section-title">{{mode === 'join' ? '入队申请' : '待审建队申请'}}</text><button class="plain" bindtap="retry" disabled="{{loading || busy}}">刷新核对</button></view>
     <view wx:if="{{mode === 'join'}}" class="field queue-filter"><text class="field-label">申请状态</text><picker range="{{statusLabels}}" value="{{statusIndex}}" bindchange="status" disabled="{{loading || busy}}"><view class="queue-picker"><text>{{statusLabels[statusIndex]}}</text><text class="picker-sign">▾</text></view></picker></view>
     <view class="record-list application-queue">
@@ -28,15 +52,15 @@
     <view wx:if="{{!docs.length && !loading && !error}}" class="empty"><text class="state-title">此状态暂无申请</text><text wx:if="{{mode === 'join'}}" class="muted">未提交草稿不进入审核队列。</text></view>
     <button wx:if="{{hasMore}}" class="secondary workspace-load-more" bindtap="onReachBottom" disabled="{{loading || busy}}">加载更多申请</button>
     <block wx:if="{{mode === 'join'}}">
-      <view class="task-section recruitment-management">
-        <text class="task-section-title">招新批次</text><text class="muted">复制地址可在网站工作台创建批次、设置题型与分支。小程序可填写申请和审核完整答卷。</text>
-        <button wx:if="{{teamActions.createRecruitment}}" class="plain website-create" bindtap="websiteWorkbench" data-create="{{true}}" disabled="{{loading || busy}}">复制新建批次地址</button>
+      <view id="team-recruitment-batches" class="task-section recruitment-management">
+        <text class="task-section-title">招新批次</text><text class="muted">新建批次使用代表队选拔问卷。设置报名时间后即可发布。</text>
+        <button wx:if="{{teamActions.createRecruitment}}" class="primary website-create" bindtap="openRecruitmentEditor" disabled="{{loading || busy || error}}">新建招新批次</button>
         <view class="record-list">
-          <view wx:for="{{recruitments}}" wx:key="id" class="task-record batch-record"><text class="badge">{{item.state}}</text><text class="review-record-title">{{item.title}}</text><view class="batch-dates"><view wx:if="{{item.startText}}"><text class="date-label">开始</text><text class="date-value">{{item.startText}}</text></view><view wx:if="{{item.endText}}"><text class="date-label">截止</text><text class="date-value">{{item.endText}}</text></view></view><view class="actions"><button wx:if="{{item.actions.view}}" class="secondary" bindtap="openRecruitment" data-id="{{item.id}}" disabled="{{loading || busy}}">查看申请入口</button><button wx:if="{{item.actions.edit}}" class="plain" bindtap="websiteWorkbench" data-id="{{item.id}}" disabled="{{loading || busy}}">复制编辑地址</button><button wx:if="{{item.actions.close}}" class="plain" bindtap="operate" data-operation="close-recruitment" data-status="closed" data-id="{{item.id}}" disabled="{{loading || busy}}">关闭本轮招新</button><button wx:if="{{item.actions.archive}}" class="danger" bindtap="operate" data-operation="close-recruitment" data-status="archived" data-id="{{item.id}}" disabled="{{loading || busy}}">归档批次</button></view></view>
+          <view wx:for="{{recruitments}}" wx:key="id" class="task-record batch-record"><text class="badge">{{item.state}}</text><text class="review-record-title">{{item.title}}</text><view class="batch-dates"><view wx:if="{{item.startText}}"><text class="date-label">开始</text><text class="date-value">{{item.startText}}</text></view><view wx:if="{{item.endText}}"><text class="date-label">截止</text><text class="date-value">{{item.endText}}</text></view></view><view class="actions"><button wx:if="{{item.actions.view}}" class="secondary" bindtap="openRecruitment" data-id="{{item.id}}" disabled="{{loading || busy}}">查看申请入口</button><button wx:if="{{item.actions.edit}}" class="secondary" bindtap="openRecruitmentEditor" data-id="{{item.id}}" disabled="{{loading || busy || error}}">{{item.status === 'draft' ? '编辑并发布' : '编辑招新批次'}}</button><button wx:if="{{item.actions.close}}" class="plain" bindtap="operate" data-operation="close-recruitment" data-status="closed" data-id="{{item.id}}" disabled="{{loading || busy}}">关闭本轮招新</button><button wx:if="{{item.actions.archive}}" class="danger" bindtap="operate" data-operation="close-recruitment" data-status="archived" data-id="{{item.id}}" disabled="{{loading || busy}}">归档批次</button></view></view>
         </view>
         <text wx:if="{{!recruitments.length && !loading && !error}}" class="task-note">暂无本队招新批次。</text><button wx:if="{{batchesMore}}" class="secondary workspace-load-more" bindtap="moreBatches" disabled="{{loading || busy}}">加载更多批次</button>
       </view>
-      <view class="task-section team-operations"><text class="task-section-title">队伍运营</text><view class="operation-state"><text class="muted">当前状态</text><text class="badge">{{teamDoc.statusText}}</text></view><text wx:if="{{lifecycleChoices.length}}" class="muted">设为休整或归档会关闭当前开放的招新批次，保存前需确认。</text><view class="actions"><button wx:for="{{lifecycleChoices}}" wx:key="value" class="{{item.value === 'archived' ? 'danger' : 'secondary'}}" bindtap="operate" data-operation="lifecycle" data-status="{{item.value}}" disabled="{{loading || busy}}">设为{{item.label}}</button></view><button class="plain website-workbench" bindtap="websiteWorkbench" disabled="{{loading || busy}}">复制网站工作台地址</button></view>
+      <view class="task-section team-operations"><text class="task-section-title">调整队伍状态</text><view class="operation-state"><text class="muted">当前状态</text><text class="badge">{{teamDoc.statusText}}</text></view><text wx:if="{{lifecycleChoices.length}}" class="muted">设为休整或归档会关闭当前开放的招新批次，保存前需确认。</text><view class="actions"><button wx:for="{{lifecycleChoices}}" wx:key="value" class="{{item.value === 'archived' ? 'danger' : 'secondary'}}" bindtap="operate" data-operation="lifecycle" data-status="{{item.value}}" disabled="{{loading || busy}}">设为{{item.label}}</button></view><button class="plain website-workbench" bindtap="websiteWorkbench" disabled="{{loading || busy}}">复制网站工作台地址</button></view>
     </block>
   </block>
 </view>

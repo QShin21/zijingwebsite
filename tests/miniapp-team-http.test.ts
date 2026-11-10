@@ -176,6 +176,28 @@ describe('小程序队伍合同真实路由与合成数据库', () => {
       expect([403, 404, 409]).toContain(denied.status); expect(await denied.json()).not.toHaveProperty('result');
     }
   });
+  it('小程序凭当前工作台修订发布选拔问卷，过期时间和无权写入被拒绝', async () => {
+    const created = await write(leader, { operation: 'save-recruitment', teamID, title: '合成待发布招新', status: 'draft',
+      form: { ...defaultTeamForm, enabled: false, closed: true } });
+    expect(created.status).toBe(200);
+    const draft = (await created.json()).result;
+    const workbench = await (await read('team/' + teamID + '/workbench', leader)).json();
+    const row = workbench.recruitments.docs.find((value: { id: number }) => value.id === draft.id);
+    expect(row).toMatchObject({ status: 'draft', actions: { edit: true } });
+    const detail = await (await read('team/recruitment/' + draft.id, leader)).json();
+    expect(detail).toMatchObject({ recruitmentID: draft.id, teamID, actions: { workbench: true } });
+    expect((await read('team/recruitment/' + draft.id, candidate)).status).toBe(404);
+    const publish = { operation: 'save-recruitment', id: row.id, revision: row.updatedAt, teamID, title: detail.title,
+      status: 'open', form: { ...detail.form, enabled: true, closed: false, end: new Date(Date.now() + 86400000).toISOString() } };
+    expect((await write(candidate, publish)).status).toBe(403);
+    expect((await write(leader, { ...publish, form: { ...publish.form, end: '2000-01-01T00:00:00.000Z' } })).status).toBe(400);
+    const opened = await write(leader, publish);
+    expect(opened.status).toBe(200);
+    expect((await opened.json()).result).toMatchObject({ id: draft.id, status: 'open', signupForm: publish.form });
+    expect((await write(leader, publish)).status).toBe(409);
+    const applicant = await (await read('team/recruitment/' + draft.id, candidate)).json();
+    expect(applicant).toMatchObject({ state: '招新开放', actions: { submit: true }, form: publish.form });
+  });
   it('队伍归档后的旧回执继续只读，当前隐藏问卷与申请写动作都不恢复', async () => {
     const current = await p.findByID({ collection: 'teams', id: teamID, overrideAccess: true, depth: 0 });
     const archive = await write(leader, { operation: 'lifecycle', id: teamID, status: 'archived', revision: current.updatedAt });

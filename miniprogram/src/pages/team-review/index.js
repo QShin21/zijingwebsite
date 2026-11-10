@@ -7,6 +7,7 @@ const session = require('../../lib/session');
 const navigation = require('../../lib/navigation');
 const config = require('../../config');
 const team = require('../../lib/team');
+const recruitment = require('../../lib/team-recruitment');
 const format = require('../../lib/format');
 const { actions, protect } = require('../../lib/page');
 const identity = () => String((session.user() || {}).id || '');
@@ -18,7 +19,7 @@ Page(withVisualTheme({
   data: { needsLogin: false, loading: false, error: '', operationError: '', done: '', allowed: false, busy: false,
     mode: 'establishment', teamID: '', teamDoc: null, teamActions: {}, lifecycleChoices: [], docs: [], expandedId: '', page: 1, hasMore: false,
     status: 'pending', statusIndex: 0, statusLabels: ['待人工审核', '退回补充', '已批准', '未通过', '已撤回'],
-    recruitments: [], batchesPage: 1, batchesMore: false },
+    recruitments: [], batchesPage: 1, batchesMore: false, recruitmentEditor: null },
   ...actions,
   toggleRecord(event) {
     if (this.data.busy || this.data.loading || this.data.imageBusy) return;
@@ -46,8 +47,8 @@ Page(withVisualTheme({
     this.setData({ busy: false });
     if (this._visible && this._resumeRead) { this._resumeRead = false; await this.load(); }
   },
-  resetPrivate() { this.setData({ needsLogin: !session.user(), loading: false, error: '', operationError: '', done: '', allowed: false, busy: Boolean(this._pendingWrite),
-    teamDoc: null, teamActions: {}, lifecycleChoices: [], docs: [], expandedId: '', page: 1, hasMore: false, recruitments: [], batchesPage: 1, batchesMore: false }); },
+  resetPrivate() { this._recruitmentForm = null; this.setData({ needsLogin: !session.user(), loading: false, error: '', operationError: '', done: '', allowed: false, busy: Boolean(this._pendingWrite),
+    teamDoc: null, teamActions: {}, lifecycleChoices: [], docs: [], expandedId: '', page: 1, hasMore: false, recruitments: [], batchesPage: 1, batchesMore: false, recruitmentEditor: null }); },
   onShow() {
     this._visible = true;
     if (this._disposed) return;
@@ -58,7 +59,7 @@ Page(withVisualTheme({
   onUnload() { this.onHide(); this._disposed = true; if (this._unsubscribe) this._unsubscribe(); },
   retry() { return this.load(); },
   onPullDownRefresh() { return this.load().finally(() => wx.stopPullDownRefresh()); },
-  onReachBottom() { if (this.data.hasMore && !this.data.loading && !this.data.busy) return this.load('applications'); },
+  onReachBottom() { if (!this.data.recruitmentEditor && this.data.hasMore && !this.data.loading && !this.data.busy) return this.load('applications'); },
   moreBatches() { if (this.data.batchesMore && !this.data.loading && !this.data.busy) return this.load('batches'); },
   decorate(doc) {
     const previous = this.data.docs.find(value => String(value.id) === String(doc.id) && value.updatedAt === doc.updatedAt);
@@ -142,6 +143,119 @@ Page(withVisualTheme({
     } catch (cause) { if (this.writeValid(context, actor, writeID)) this.setData({ operationError: cause.message }); }
     finally { await this.finishWrite(writeID); }
   },
+  canEditRecruitment() {
+    return this.valid(this._scope) && this.data.allowed && this.data.teamDoc &&
+      !this.data.loading && !this.data.busy && !this.data.error;
+  },
+  recruitmentBatches() {
+    if (this.canEditRecruitment()) wx.pageScrollTo({ selector: '#team-recruitment-batches', duration: 200 });
+  },
+  async openRecruitmentEditor(event) {
+    if (!this.canEditRecruitment() || this.data.recruitmentEditor) return;
+    const id = event.currentTarget.dataset.id;
+    const row = id ? this.data.recruitments.find(doc => String(doc.id) === String(id) && doc.actions.edit) : null;
+    if (id ? !row : !this.data.teamActions.createRecruitment) return;
+
+    const scope = this._scope, ticket = this._loadTicket = (this._loadTicket || 0) + 1;
+    const teamID = this.data.teamDoc.id;
+    const current = () => this.valid(scope) && ticket === this._loadTicket;
+    this.setData({ loading: true, operationError: '', done: '' });
+    try {
+      const { form, title } = row ? await recruitment.read(row.id, teamID) :
+        { form: recruitment.defaultTeamForm, title: '代表队新一轮招新' };
+      if (!current()) return;
+      this._recruitmentForm = form;
+      this.setData({ recruitmentEditor: {
+        id: row ? row.id : null,
+        title,
+        status: row ? row.status : 'draft',
+        revision: row ? row.updatedAt : '',
+        questionCount: form.questions.length,
+        start: recruitment.parts(form.start),
+        end: recruitment.parts(form.end),
+        blocked: false,
+      } }, () => wx.pageScrollTo({ scrollTop: 0, duration: 0 }));
+    } catch (cause) {
+      if (current()) this.setData({ operationError: cause.message });
+    } finally {
+      if (current()) this.setData({ loading: false });
+    }
+  },
+  back() {
+    if (this.data.recruitmentEditor) return this.closeRecruitmentEditor();
+    return navigation.back();
+  },
+  closeRecruitmentEditor() {
+    if (this.data.busy) return;
+    this._recruitmentForm = null;
+    this.setData({ recruitmentEditor: null, operationError: '' });
+    return this.load();
+  },
+  recruitmentTitle(event) {
+    const editor = this.data.recruitmentEditor;
+    if (!editor || editor.blocked || !this.canEditRecruitment() || typeof event.detail.value !== 'string') return;
+    this.setData({ recruitmentEditor: { ...editor, title: event.detail.value }, operationError: '' });
+  },
+  recruitmentTime(event) {
+    const editor = this.data.recruitmentEditor;
+    const { key, part } = event.currentTarget.dataset;
+    if (!editor || editor.blocked || !this.canEditRecruitment() || !['start', 'end'].includes(key)) return;
+    const schedule = recruitment.changeTime(editor[key], key, part, event.detail && event.detail.value);
+    this.setData({ recruitmentEditor: { ...editor, [key]: schedule }, operationError: '' });
+  },
+  async saveRecruitment(event) {
+    const editor = this.data.recruitmentEditor;
+    if (!editor || editor.blocked || !this._recruitmentForm || !this.canEditRecruitment()) return;
+    const { status } = event.currentTarget.dataset;
+    const publishing = status === 'open';
+    if (!publishing && (status !== editor.status || !['draft', 'closed'].includes(status))) return;
+
+    const teamDoc = this.data.teamDoc;
+    let data;
+    try {
+      data = recruitment.saveInput(teamDoc, editor, this._recruitmentForm, status);
+    } catch (cause) {
+      this.setData({ operationError: cause.message });
+      return;
+    }
+    const scope = this._scope, context = this._context, actor = identity(), writeID = this.beginWrite();
+    this.setData({ busy: true, operationError: '', done: '' });
+    let sent = false;
+    try {
+      if (publishing) {
+        const confirmed = await new Promise((resolve, reject) => wx.showModal({
+          title: editor.status === 'open' ? '更新招新安排' : '发布招新',
+          content: '保存后，申请人可在报名时间内填写并提交选拔问卷。',
+          success: value => resolve(value.confirm),
+          fail: () => reject(new Error('确认未完成，请重试')),
+        }));
+        if (!confirmed || !this.valid(scope)) return;
+      }
+      sent = true;
+      const response = await team.post(data);
+      if (!this.writeValid(context, actor, writeID)) return;
+      const saved = response && response.result;
+      if (!saved || !Number.isSafeInteger(saved.id) || saved.id < 1 || saved.status !== status ||
+          (editor.id && saved.id !== editor.id)) throw new Error('保存回执暂不可用');
+      this._recruitmentForm = null;
+      const done = !publishing ? '招新批次已保存' : editor.status === 'open' ? '招新安排已保存' : '招新批次已发布';
+      this.setData({ recruitmentEditor: null, done });
+      this._resumeRead = true;
+    } catch (cause) {
+      if (!this.writeValid(context, actor, writeID)) return;
+      if (cause.status === 403) {
+        this.resetPrivate();
+        this.setData({ error: cause.message });
+      } else if (sent && (cause.status === 409 || !cause.status || cause.status >= 500)) {
+        const message = cause.status === 409 ? cause.message + '。请返回批次列表核对。' : '请返回批次列表，刷新核对本次保存结果。';
+        this.setData({ recruitmentEditor: { ...editor, blocked: true }, operationError: message });
+      } else {
+        this.setData({ operationError: cause.message });
+      }
+    } finally {
+      await this.finishWrite(writeID);
+    }
+  },
   websiteWorkbench(event) {
     if (!this.data.allowed || !this.data.teamDoc || this.data.loading || this.data.busy) return;
     const id = event.currentTarget.dataset.id, create = event.currentTarget.dataset.create;
@@ -155,7 +269,7 @@ Page(withVisualTheme({
     if (doc && doc.actions.view && !this.data.loading && !this.data.busy) navigation.go('signup', { kind: 'team', id: doc.id });
   },
   async operate(event) {
-    if (!identity() || this._disposed || this._visible === false || this._pendingWrite || !this.data.allowed || !this.data.teamDoc || this.data.loading || this.data.busy) return;
+    if (!identity() || this._disposed || this._visible === false || this._pendingWrite || !this.data.allowed || !this.data.teamDoc || this.data.loading || this.data.busy || this.data.recruitmentEditor) return;
     const { operation: operationName, id, status } = event.currentTarget.dataset;
     let target;
     if (operationName === 'lifecycle' && this.data.lifecycleChoices.some(value => value.value === status)) target = this.data.teamDoc;

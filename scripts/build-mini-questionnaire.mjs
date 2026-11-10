@@ -8,7 +8,7 @@ import ts from 'typescript';
 // Generated native CommonJS modules contain no server or browser dependencies.
 export function buildQuestionnaireRuntime({ check = false } = {}) {
   const directory = path.resolve('miniprogram/src/lib/generated');
-  const modules = ['signup-schema', 'questionnaire-model', 'questionnaire-flow'];
+  const modules = ['signup-schema', 'questionnaire-model', 'questionnaire-flow', 'team-recruitment-form'];
   if (!check) fs.mkdirSync(directory, { recursive: true });
   for (const name of modules) {
     const source = fs.readFileSync(`src/lib/${name}.ts`, 'utf8');

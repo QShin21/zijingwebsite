@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 const require = createRequire(import.meta.url);
 const questionnaire = require('../miniprogram/src/lib/questionnaire.js');
 const format = require('../miniprogram/src/lib/format.js');
+const { defaultTeamForm } = require('../miniprogram/src/lib/generated/team-recruitment-form.js');
 const source = (path: string) => readFileSync('miniprogram/src/' + path, 'utf8');
 type Actions = Record<string, boolean | string[]>;
 type Row = { id: number; title: string; status: string; updatedAt: string; actions: Actions; [key: string]: unknown };
@@ -20,7 +21,10 @@ type NativePage = { data: Data; setData(values: Record<string, unknown>): void; 
   tab(event: Event): void; apply(): void; openRecruitment(event: Event): void; workbench(event: Event): void; members(event?: Event): void;
   submit(): Promise<void>; withdraw(event: Event): Promise<void>; operate(event: Event): Promise<void>; revoke(event: Event): Promise<void>;
   decide(event: Event): Promise<void>; newApplication(): void; openForm(event: Event): void; game(event: Event): void; note(event: Event): void;
-  status(event: Event): Promise<void>; websiteWorkbench(event: Event): void; [key: string]: unknown };
+  status(event: Event): Promise<void>; websiteWorkbench(event: Event): void;
+  openRecruitmentEditor(event: Event): Promise<void>; saveRecruitment(event: Event): Promise<void>;
+  recruitmentTitle(event: Event): void; recruitmentTime(event: Event): void; closeRecruitmentEditor(): Promise<void>;
+  [key: string]: unknown };
 type RequestOptions = { required?: boolean; raw?: boolean; questionnaire?: boolean; method?: string; data?: Record<string, unknown> };
 type RequestCall = { path: string; options: RequestOptions };
 type ModalOptions = { title: string; content: string; success(value: { confirm: boolean }): void; fail(): void };
@@ -68,29 +72,102 @@ function harness(name: string, options: HarnessOptions = {}) {
     listeners.push(callback); return () => { listeners = listeners.filter(value => value !== callback); };
   }, manages: () => { throw new Error('Do not guess current team scope from cached roles'); }, reviewer: () => { throw new Error('Do not guess current review authority from cached roles'); } };
   const navigation = { go: vi.fn(), back: vi.fn(), login: vi.fn(), copy: vi.fn(), content: vi.fn(), website: vi.fn() };
-  const wx = { stopPullDownRefresh: vi.fn(), previewImage: vi.fn(), showModal: vi.fn((value: ModalOptions) => {
+  const wx = { stopPullDownRefresh: vi.fn(), previewImage: vi.fn(), pageScrollTo: vi.fn(), showModal: vi.fn((value: ModalOptions) => {
     modals.push(value); if (options.modalAuto !== false) value.success({ confirm: true });
   }) };
   const teamModule = { exports: {} };
   runInNewContext(source('lib/team.js'), { module: teamModule, require: (path: string) => ({ './http': http, './questionnaire': questionnaire, './format': format })[path] });
+  const recruitmentModule = { exports: {} };
+  runInNewContext(source('lib/team-recruitment.js'), { module: recruitmentModule,
+    require: (path: string) => path === './http' ? http : { defaultTeamForm } });
   const pageModule = { exports: {} };
   runInNewContext(source('lib/page.js'), { module: pageModule, wx, require: (path: string) => path === './navigation' ? navigation : session });
-  const modules: Record<string, unknown> = { http, session, navigation, config: { origin: 'https://home.thuzijing.top' }, team: teamModule.exports, format, page: pageModule.exports };
+  const modules: Record<string, unknown> = { http, session, navigation, config: { origin: 'https://home.thuzijing.top' }, team: teamModule.exports, 'team-recruitment': recruitmentModule.exports, format, page: pageModule.exports };
   let native!: NativePage;
   runInNewContext(source('pages/' + name + '/index.js'), { wx, Page: (value: NativePage) => { native = value; }, require: (path: string) => {
     const value = modules[path.split('/').pop() || '']; if (!value) throw new Error('Unexpected module ' + path); return value;
   } });
-  native.setData = (values: Record<string, unknown>) => {
+  native.setData = (values: Record<string, unknown>, done?: () => void) => {
     for (const [key, value] of Object.entries(values)) {
       const match = /^docs\[(\d+)\]\.(\w+)$/.exec(key);
       if (match) native.data.docs[Number(match[1])][match[2]] = value;
       else native.data[key] = value;
     }
+    done?.();
   };
   native.onLoad(options.route || (['team-review', 'team-members'].includes(name) ? { team: '9' } : {}));
   return { page: native, calls, http, navigation, wx, modals, changeUser(id: number | null) { actor = id ? { id, roles: ['member'] } : null; listeners.slice().forEach(callback => callback(actor)); } };
 }
 const writes = (h: ReturnType<typeof harness>) => h.calls.filter(call => call.options.method === 'POST');
+
+describe('小程序代表队招新发布', () => {
+  it('校验截止时间，以北京时间写入并启用选拔问卷，确认期间只提交一次', async () => {
+    const h = harness('team-review', { modalAuto: false, request: (path, options) =>
+      options.method === 'POST' ? { result: { id: 99, status: 'open' } } : response(path, options) });
+    await h.page.onShow();
+    await h.page.openRecruitmentEditor(event({}));
+    const publish = event({ status: 'open' });
+    await h.page.saveRecruitment(publish);
+    expect(h.page.data.operationError).toContain('填写报名截止时间');
+    h.page.recruitmentTime(event({ key: 'end', part: 'date' }, '2000-01-01'));
+    await h.page.saveRecruitment(publish);
+    expect(h.page.data.operationError).toContain('晚于当前时间');
+    expect(writes(h)).toHaveLength(0);
+
+    const futureDay = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+    h.page.recruitmentTime(event({ key: 'end', part: 'date' }, futureDay));
+    h.page.recruitmentTime(event({ key: 'end', part: 'time' }, '21:30'));
+    const pending = h.page.saveRecruitment(publish);
+    await h.page.saveRecruitment(publish);
+    expect(h.modals).toHaveLength(1);
+    h.modals[0].success({ confirm: true });
+    await pending;
+    expect(writes(h)).toHaveLength(1);
+    expect(writes(h)[0].options.data).toMatchObject({ operation: 'save-recruitment', teamID: 9, status: 'open',
+      form: { ...defaultTeamForm, enabled: true, closed: false, start: '', end: futureDay + 'T13:30:00.000Z' } });
+    expect(h.page.data.done).toBe('招新批次已发布');
+    expect(h.page.data.recruitmentEditor).toBeNull();
+    expect(h.calls.filter(call => call.path.includes('/workbench?'))).toHaveLength(2);
+  });
+
+  it('编辑时保留原问卷、精确时间和修订，冲突后须返回列表核对', async () => {
+    const form = { ...defaultTeamForm, enabled: false, closed: true, end: new Date(Date.now() + 86400000).toISOString(),
+      questions: [...defaultTeamForm.questions, { id: 'extra', type: 'ranking', label: '训练偏好', options: ['线上', '线下'] }] };
+    const h = harness('team-review', { request: (path, options) => {
+      if (options.method === 'POST') throw Object.assign(new Error('记录已更新'), { status: 409 });
+      if (path.endsWith('/recruitment/21')) return { recruitmentID: 21, teamID: 9, title: '批次原始名称', form, actions: { workbench: true } };
+      return workspace({ recruitments: paged([recruitment({ status: 'draft', actions: { edit: true } })]) });
+    } });
+    await h.page.onShow();
+    await h.page.openRecruitmentEditor(event({ id: 21 }));
+    await h.page.saveRecruitment(event({ status: 'open' }));
+    expect(writes(h)[0].options.data).toMatchObject({ id: 21, revision: 'synthetic-v1', title: '批次原始名称',
+      form: { ...form, enabled: true, closed: false } });
+    expect(h.page.data.recruitmentEditor).toMatchObject({ blocked: true, title: '批次原始名称' });
+    await h.page.saveRecruitment(event({ status: 'open' }));
+    expect(writes(h)).toHaveLength(1);
+    await h.page.closeRecruitmentEditor();
+    expect(h.page.data.recruitmentEditor).toBeNull();
+  });
+
+  it('队伍休整时保留草稿入口，账号切换清除编辑状态', async () => {
+    const h = harness('team-review', { request: (path, options) =>
+      options.method === 'POST' ? { result: { id: 99, status: 'draft' } } : workspace({ team: { ...teamRow, teamStatus: 'resting' } }) });
+    await h.page.onShow();
+    await h.page.openRecruitmentEditor(event({}));
+    await h.page.saveRecruitment(event({ status: 'open' }));
+    expect(h.page.data.operationError).toContain('队伍设为活跃');
+    expect(writes(h)).toHaveLength(0);
+    await h.page.saveRecruitment(event({ status: 'draft' }));
+    expect(writes(h)[0].options.data).toMatchObject({ status: 'draft' });
+    await h.page.openRecruitmentEditor(event({}));
+    h.page.recruitmentTitle(event({}, '合成未保存批次'));
+    h.changeUser(2);
+    expect(h.page.data.recruitmentEditor).toBeNull();
+    await h.page.saveRecruitment(event({ status: 'draft' }));
+    expect(writes(h)).toHaveLength(1);
+  });
+});
 
 describe('Native team hub and membership actions — synthetic VM', () => {
   it('uses server actions rather than stored roles for all navigation and keeps the recruitment ID separate from the application ID', async () => {

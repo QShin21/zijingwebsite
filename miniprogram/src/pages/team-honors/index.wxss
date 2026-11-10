@@ -1,5 +1,6 @@
 .mini-page.team-honors-page .page-heading { padding: 8px 0 24px; margin-bottom: 24px; border-bottom: 2px solid var(--z-primary); }
 .mini-page.team-honors-page .eyebrow { margin-bottom: 12px; font-size: 13px; line-height: 1.6; }
+.mini-page.team-honors-page .archive-actions { margin-top: 16px; }
 .archive-year-line { display: flex; align-items: baseline; gap: 12px; margin: 32px 0 4px; }
 .archive-year { display: block; font-size: 36px; line-height: 1.2; letter-spacing: -1px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .archive-year-label { color: var(--z-muted); font-size: 12px; line-height: 1.6; }

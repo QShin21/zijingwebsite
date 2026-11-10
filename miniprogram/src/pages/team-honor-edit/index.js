@@ -12,6 +12,7 @@ Page(withVisualTheme({
     conflict: false, uncertainCreate: false, recentDocs: [], hasSelectedVideo: false, selectedVideoSize: '', videoUploading: false, videoProgress: 0, canUploadVideo: false, videoSource: '', videoError: '' },
   back: navigation.back,
   login: navigation.login,
+  recruitments() { navigation.go('team'); },
   onLoad(options = {}) {
     this._options = { id: options.id || '', team: options.team || '', game: options.game || '' };
     flow.connect(this, JSON.stringify(this._options)); this._id = options.id ? flow.id(options.id) : null;
