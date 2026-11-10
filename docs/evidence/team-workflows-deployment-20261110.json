@@ -1,0 +1,188 @@
+{
+  "deployedAt": "2026-11-10T21:26:41+08:00",
+  "applicationRevision": "fafdf70f7548e414b81829fcd58986a7d95d1f8c",
+  "honorEntryRevision": "b274af2c8add2bc4ae983178a187df4944c9c409",
+  "previousApplicationRevision": "c100b2e5754a6f82eba783b68fb25d516b0d18b7",
+  "release": "/srv/zijingwebsite/releases/team-workflows-20261110-fafdf70",
+  "build": {
+    "id": "qOgziybwzndyDLLGO1uJG",
+    "host": "Windows Node 24.12.0",
+    "environment": "production",
+    "matchedSourceFiles": 352,
+    "sourceArchiveSha256": "0262bbf3ac1ea3fccb1306fead4bed6b2320a261864c72fee72e16e7e3497f90",
+    "buildArchiveSha256": "40b9ae745c143421fc8485a9bdbbfe1b5bc30c05428ec09286443c8162059554"
+  },
+  "backup": {
+    "path": "/srv/zijingwebsite/backups/team-workflows-20261110-fafdf70",
+    "snapshot": "/srv/zijingwebsite/backups/team-workflows-20261110-fafdf70/database/zijing-2026-11-10T13-23-41.028Z",
+    "sameHost": true,
+    "offsiteConfigured": false,
+    "restoreVerified": true,
+    "restoredTables": 69,
+    "restoredRecords": 3910,
+    "honorStorageVerified": true,
+    "rollbackScript": "rollback.sh",
+    "rollbackExecuted": false
+  },
+  "candidate": {
+    "runtime": {
+      "port": 3101,
+      "paths": 6,
+      "staticAssets": 29,
+      "protectedTeamPages": 3,
+      "privateTeamAPIs": 2,
+      "anonymousExport": 401
+    },
+    "workflows": {
+      "isolatedRestore": true,
+      "recruitmentEditor": true,
+      "expiredCutoffRejected": true,
+      "recruitmentPublished": true,
+      "applicantSubmitted": true,
+      "teamMemberApproved": true,
+      "honorsDirectoryEntry": true,
+      "scopedHonorEditor": true,
+      "eligibilityNotice": true,
+      "approvedHonorArchiveEntry": true
+    },
+    "businessWriteScope": "restored isolated database"
+  },
+  "production": {
+    "serviceActive": true,
+    "migrationExecuted": false,
+    "migrationLedgerUnchanged": true,
+    "environmentMatched": true,
+    "nginxConfigurationMatched": true,
+    "runtime": {
+      "port": 3100,
+      "paths": 6,
+      "staticAssets": 29,
+      "protectedTeamPages": 3,
+      "privateTeamAPIs": 2,
+      "anonymousExport": 401
+    },
+    "mediaMatched": true,
+    "businessTables": {
+      "_announcements_v": {
+        "before": 0,
+        "after": 0,
+        "missing": 0,
+        "changed": 0
+      },
+      "_events_v": {
+        "before": 0,
+        "after": 0,
+        "missing": 0,
+        "changed": 0
+      },
+      "announcements": {
+        "before": 0,
+        "after": 0,
+        "missing": 0,
+        "changed": 0
+      },
+      "community_posts": {
+        "before": 1,
+        "after": 1,
+        "missing": 0,
+        "changed": 0
+      },
+      "content_promotions": {
+        "before": 1,
+        "after": 1,
+        "missing": 0,
+        "changed": 0
+      },
+      "event_signups": {
+        "before": 242,
+        "after": 242,
+        "missing": 0,
+        "changed": 0
+      },
+      "events": {
+        "before": 0,
+        "after": 0,
+        "missing": 0,
+        "changed": 0
+      },
+      "honors": {
+        "before": 0,
+        "after": 0,
+        "missing": 0,
+        "changed": 0
+      },
+      "staff_applications": {
+        "before": 5,
+        "after": 5,
+        "missing": 0,
+        "changed": 0
+      },
+      "staff_batches": {
+        "before": 1,
+        "after": 1,
+        "missing": 0,
+        "changed": 0
+      },
+      "team_establishment_applications": {
+        "before": 1,
+        "after": 1,
+        "missing": 0,
+        "changed": 0
+      },
+      "team_honor_records": {
+        "before": 0,
+        "after": 0,
+        "missing": 0,
+        "changed": 0
+      },
+      "team_join_applications": {
+        "before": 0,
+        "after": 0,
+        "missing": 0,
+        "changed": 0
+      },
+      "team_memberships": {
+        "before": 0,
+        "after": 0,
+        "missing": 0,
+        "changed": 0
+      },
+      "team_recruitments": {
+        "before": 1,
+        "after": 1,
+        "missing": 0,
+        "changed": 0
+      },
+      "teams": {
+        "before": 1,
+        "after": 1,
+        "missing": 0,
+        "changed": 0
+      }
+    },
+    "public": {
+      "site": "https://home.thuzijing.top",
+      "buildId": "qOgziybwzndyDLLGO1uJG",
+      "manifestSha256": "fef44be206a9b222a07fbf388d80ab71cee0f839b0eb9473d87b8490fe758f68",
+      "public": {
+        "/health/live": 200,
+        "/health/ready": 200,
+        "/events": 200,
+        "/announcements": 200,
+        "/login": 200,
+        "/admin/login": 200,
+        "/api/miniapp/status": 200
+      },
+      "loginRedirects": {
+        "/teams/honors": 307,
+        "/teams/recruitment": 307,
+        "/teams/manage": 307
+      },
+      "anonymousTeamAPIs": {
+        "/api/team-honors": 401,
+        "/api/team-core": 401
+      }
+    },
+    "businessVerification": "candidate only"
+  }
+}

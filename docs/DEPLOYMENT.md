@@ -1,5 +1,11 @@
 # 部署、迁移与恢复
 
+## 2026-11-10 代表队招新发布与荣誉投稿入口
+
+应用 `fafdf70f7548e414b81829fcd58986a7d95d1f8c` 于 21:26:41（北京时间）部署到 `home.thuzijing.top`，构建 `qOgziybwzndyDLLGO1uJG`。在隔离恢复库中验证了招新编辑、截止时间校验、正式发布、申请提交和录取，以及荣誉总档案、单队档案和队员投稿表单。公网返回了同一构建的资源清单，健康检查与登录边界核验通过。
+
+同机备份恢复核对 69 张表、3,910 条记录。切换前后 16 张业务表的既有记录、迁移登记、媒体和网站配置校验一致。回退脚本位于 `/srv/zijingwebsite/backups/team-workflows-20261110-fafdf70/rollback.sh`。见[部署记录](evidence/team-workflows-deployment-20261110.json)。
+
 ## 2026-11-10 社群配图编辑与活动目录
 
 应用 `c100b2e5754a6f82eba783b68fb25d516b0d18b7` 于 19:36（北京时间）部署，构建 `SsuCqFZ8WCqP2qUMpToJo` 先在备份恢复库和服务器候选端口验收。备份保存在 `/srv/zijingwebsite/backups/community-directory-20261110-c100b2e`，同机隔离恢复核验了 69 张表、3,632 条记录。切换沿用现有数据库结构，迁移登记一致，12 张业务表中的既有记录逐条一致。回退脚本位于备份目录中的 `rollback.sh`。详见[部署记录](evidence/community-directory-deployment-20261110.json)。
