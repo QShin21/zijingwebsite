@@ -404,7 +404,25 @@ export interface CommunityPost {
   author: number | User;
   authorName?: string | null;
   status?: ('visible' | 'hidden') | null;
+  postImages?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   signupForm?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  signupImages?:
     | {
         [k: string]: unknown;
       }
@@ -875,7 +893,25 @@ export interface Event {
   internalNotes?: string | null;
   submittedBy?: (number | null) | User;
   reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
+  postImages?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   signupForm?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  signupImages?:
     | {
         [k: string]: unknown;
       }
@@ -1060,6 +1096,15 @@ export interface Announcement {
   internalNotes?: string | null;
   submittedBy?: (number | null) | User;
   reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
+  postImages?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   /**
    * 按后台 Asia/Shanghai 时区输入；数据库保存 UTC。
    */
@@ -1531,7 +1576,9 @@ export interface CommunityPostsSelect<T extends boolean = true> {
   author?: T;
   authorName?: T;
   status?: T;
+  postImages?: T;
   signupForm?: T;
+  signupImages?: T;
   category?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1862,7 +1909,9 @@ export interface EventsSelect<T extends boolean = true> {
   internalNotes?: T;
   submittedBy?: T;
   reviewState?: T;
+  postImages?: T;
   signupForm?: T;
+  signupImages?: T;
   type?: T;
   game?: T;
   team?: T;
@@ -1967,6 +2016,7 @@ export interface AnnouncementsSelect<T extends boolean = true> {
   internalNotes?: T;
   submittedBy?: T;
   reviewState?: T;
+  postImages?: T;
   publishedAt?: T;
   game?: T;
   updatedAt?: T;

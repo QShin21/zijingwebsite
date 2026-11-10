@@ -17,11 +17,14 @@ import {
 } from "@/lib/questionnaire-model";
 import { questionRoute, endTarget } from "@/lib/questionnaire-flow";
 import { QuestionnaireAdvanced } from "./QuestionnaireAdvanced";
+import { PublicationImages } from "./PublicationImages";
+import type { PublicationImage } from "@/lib/publication-images";
 import surface from "./activity-pages/QuestionnaireSurface.module.css";
 import { SubmissionSteps } from "./activity-pages/SubmissionSteps";
 
 export function Questionnaire({
   form,
+  images = [],
   onSubmit,
   onSaveDraft,
   busy = false,
@@ -31,6 +34,7 @@ export function Questionnaire({
   submitLabel = "提交并确认报名",
 }: {
   form: SignupForm;
+  images?: PublicationImage[];
   onSubmit?: (answers: Answers) => Promise<void>;
   onSaveDraft?: (answers: Answers) => Promise<void>;
   draftKey?: string;
@@ -244,6 +248,7 @@ export function Questionnaire({
         )}
       </aside>
       <div className={surface.answerMain}>
+        {preview && <PublicationImages images={images.filter((image) => !image.questionId)} />}
         <h3 className="questionnaire-step" tabIndex={-1}>
           {review
             ? "核对填写内容"
@@ -325,11 +330,13 @@ export function Questionnaire({
             ]
               .filter(Boolean)
               .join(" · ");
+            const illustrations = images.filter((image) => image.questionId === q.id);
             if (q.type === "description")
               return (
                 <section className="questionnaire-description" key={q.id}>
                   <h4>{q.label}</h4>
                   <p className="preserve">{q.help}</p>
+                  <PublicationImages images={illustrations} />
                 </section>
               );
             return (
@@ -348,6 +355,7 @@ export function Questionnaire({
                 <p id={`${fieldId}-hint`} className="muted">
                   {hint}
                 </p>
+                <PublicationImages images={illustrations} />
                 <QuestionnaireAdvanced
                   q={q}
                   value={value}

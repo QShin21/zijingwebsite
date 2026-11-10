@@ -1,4 +1,6 @@
 import { ActivitySignup } from "@/components/ActivitySignup";
+import { PublicationImages } from "@/components/PublicationImages";
+import { publicationImages } from "@/lib/publication-images";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
@@ -29,6 +31,7 @@ export default async function Update({
         game: true,
         title: true,
         body: true,
+        postImages: true,
         authorName: true,
         createdAt: true,
         category: true,
@@ -56,6 +59,7 @@ export default async function Update({
       <div className={styles.articleGrid}>
         <article className={styles.article} aria-label="正文">
           <p className={styles.articleBody}>{post.body}</p>
+          <PublicationImages images={publicationImages(post.postImages)} />
         </article>
         <aside className={styles.articleAside}>
           {post.category === "event" ? (

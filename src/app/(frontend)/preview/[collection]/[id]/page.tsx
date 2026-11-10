@@ -20,6 +20,7 @@ export default async function Preview({
   if (
     ![
       "events",
+      "announcements",
       "teams",
       "seasons",
       "honors",

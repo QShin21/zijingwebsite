@@ -7,6 +7,8 @@ import { SignupBuilder } from "./SignupBuilder";
 import { formatAnswer } from "@/lib/questionnaire-model";
 import { formatDate } from "@/lib/rules";
 import { Questionnaire } from "./Questionnaire";
+import { PublicationImages } from "./PublicationImages";
+import type { PublicationImage } from "@/lib/publication-images";
 import styles from "./activity-pages/ApplicationFlow.module.css";
 import { SubmissionSteps } from "./activity-pages/SubmissionSteps";
 import { activityRequest } from "./activity-pages/client-request";
@@ -25,6 +27,8 @@ type Receipt = {
 type Info = {
   title: string;
   form: SignupForm;
+  images?: PublicationImage[];
+  imageRevision?: string;
   version: string;
   state: string;
   canManage: boolean;
@@ -40,6 +44,9 @@ export async function signupRequest(
   data?: unknown,
 ) {
   return activityRequest(url, method, data);
+}
+function signupImageRequest(url: string, method = "GET", data?: unknown) {
+  return activityRequest(url, method, data, { "X-Questionnaire-Images": "1" });
 }
 function ReceiptView({ receipt }: { receipt: Receipt }) {
   return (
@@ -85,7 +92,7 @@ export function ActivitySignup({
     writeLock = useRef(false);
   useEffect(() => {
     let alive = true;
-    signupRequest(endpoint)
+    signupImageRequest(endpoint)
       .then((value) => {
         if (alive) {
           setInfo(value);
@@ -142,7 +149,7 @@ export function ActivitySignup({
     if (busy) return;
     setBusy(true);
     try {
-      const latest = await signupRequest(endpoint);
+      const latest = await signupImageRequest(endpoint);
       if (editing) {
         // A GET for verification never advances the revision of local, unsaved answers.
         setVerifiedReceipt(latest.signup);
@@ -256,6 +263,7 @@ export function ActivitySignup({
           <div className={styles.taskContext}>
             <div>
               {info.form.intro && <p className="preserve">{info.form.intro}</p>}
+              <PublicationImages images={info.images?.filter((image) => !image.questionId)} />
             </div>
             {(info.form.start || info.form.end) && (
               <dl>
@@ -304,7 +312,7 @@ export function ActivitySignup({
                   onClick={async () => {
                     setBusy(true);
                     try {
-                      setInfo(await signupRequest(endpoint));
+                      setInfo(await signupImageRequest(endpoint));
                       setEditing(false);
                       setSavedMessage(
                         "已重新加载上次提交的内容，可再次进入修改。",
@@ -354,6 +362,7 @@ export function ActivitySignup({
               <Questionnaire
                 key={`${info.version}:${editing ? info.signup?.updatedAt : "new"}`}
                 form={info.form}
+                images={info.images}
                 initialAnswers={editing ? info.signup?.answers : undefined}
                 draftKey={editing ? undefined : info.draftKey}
                 submitLabel={editing ? "提交修改" : "提交并确认报名"}
@@ -399,6 +408,7 @@ export function SignupManager({
   readOnly?: boolean;
 }) {
   const endpoint = `/api/activities/${kind}/${id}/signup`,
+    manageURL = `${endpoint}?mode=manage`,
     [info, setInfo] = useState<Info | null>(null),
     [message, setMessage] = useState(""),
     [failed, setFailed] = useState(false),
@@ -414,7 +424,7 @@ export function SignupManager({
     writeLock = useRef(false);
   useEffect(() => {
     let live = true;
-    signupRequest(endpoint + (readOnly ? "?mode=view" : "?mode=manage"))
+    signupImageRequest(readOnly ? `${endpoint}?mode=view` : manageURL)
       .then((value) => {
         if (live) setInfo(value);
       })
@@ -427,7 +437,7 @@ export function SignupManager({
     return () => {
       live = false;
     };
-  }, [endpoint, readOnly]);
+  }, [endpoint, manageURL, readOnly]);
   async function loadEntries(n: number) {
     if (busy) return;
     setBusy(true);
@@ -484,8 +494,8 @@ export function SignupManager({
             type="button"
             onClick={() => {
               setMessage("");
-              signupRequest(
-                endpoint + (readOnly ? "?mode=view" : "?mode=manage"),
+              signupImageRequest(
+                readOnly ? `${endpoint}?mode=view` : manageURL,
               )
                 .then(setInfo)
                 .catch((cause) => {
@@ -579,14 +589,24 @@ export function SignupManager({
                   setMessage("");
                   setFailed(false);
                   try {
-                    const result = await signupRequest(endpoint, "PUT", {
-                      version: info.version,
-                      form: info.form,
-                    });
+                    const save = info.imageRevision ? signupImageRequest : signupRequest;
+                    const result = await save(
+                      endpoint,
+                      "PUT",
+                      {
+                        version: info.version,
+                        form: info.form,
+                        ...(info.imageRevision
+                          ? { images: info.images ?? [], imageRevision: info.imageRevision }
+                          : {}),
+                      },
+                    );
                     setInfo({
                       ...info,
                       form: result.form,
                       version: result.version,
+                      images: result.images,
+                      imageRevision: result.imageRevision,
                       state: "报名状态待核对",
                     });
                     setServerVersion(null);
@@ -594,14 +614,12 @@ export function SignupManager({
                     // The write receipt confirms the saved form and revision only.
                     // Read the current window without replacing that form or CAS revision.
                     try {
-                      const latest = await signupRequest(
-                        endpoint + "?mode=manage",
-                      );
+                      const latest = await signupImageRequest(manageURL);
                       setInfo((current) =>
                         current ? { ...current, state: latest.state } : current,
                       );
-                      if (latest.version !== result.version)
-                        setServerVersion(latest.version);
+                      if (latest.version !== result.version || latest.imageRevision !== result.imageRevision)
+                        setServerVersion(latest.imageRevision ?? latest.version);
                     } catch {
                       setMessage(
                         `${result.message}。报名状态暂时无法核对，请打开下方“核对已保存问卷”重新读取。`,
@@ -619,6 +637,10 @@ export function SignupManager({
                 <fieldset className={workspace.actionFields} disabled={busy}>
                   <SignupBuilder
                     value={info.form}
+                    illustrations={info.imageRevision ? {
+                      images: info.images ?? [],
+                      onChange: (images) => setInfo((current) => current ? { ...current, images } : current),
+                    } : undefined}
                     onChange={(form) => setInfo({ ...info, form })}
                   />
                   <div className={workspace.saveBar}>
@@ -644,16 +666,14 @@ export function SignupManager({
                       if (busy) return;
                       setBusy(true);
                       try {
-                        const latest = await signupRequest(
-                          endpoint + "?mode=manage",
-                        );
+                        const latest = await signupImageRequest(manageURL);
                         setInfo((current) =>
                           current ? { ...current, state: latest.state } : current,
                         );
-                        setServerVersion(latest.version);
+                        setServerVersion(latest.imageRevision ?? latest.version);
                         setFailed(false);
                         setMessage(
-                          latest.version === info.version
+                          latest.version === info.version && latest.imageRevision === info.imageRevision
                             ? "已读取当前保存版本，与开始编辑时相同。当前编辑保留。"
                             : "已读取到更新后的问卷版本，当前编辑保留。请核对后决定是否重新载入。",
                         );
@@ -681,9 +701,7 @@ export function SignupManager({
                           return;
                         setBusy(true);
                         try {
-                          setInfo(
-                            await signupRequest(endpoint + "?mode=manage"),
-                          );
+                          setInfo(await signupImageRequest(manageURL));
                           setServerVersion(null);
                           setFailed(false);
                           setMessage("已载入保存的问卷。");

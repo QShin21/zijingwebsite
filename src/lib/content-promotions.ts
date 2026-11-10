@@ -4,13 +4,18 @@ import type { ContentPromotion, User } from "../payload-types";
 import { canReviewPromotion, managesGame, relationID } from "./rules";
 import { workflowTransaction } from "./workflow-transactions";
 import { controlledVideoVersion } from "./showcase-videos";
+import { publicationImages } from "./publication-images";
+import { publicationImageRevision } from "./publication-image-storage";
 import { promotionKey, promotionSource, promotionVersion, supportedPromotionKinds, type PromotionAction, type PromotionHistory, type PromotionKind, type PromotionSnapshot, type PromotionSource } from "./promotion-model";
 
 export async function readPromotionSource(p: Payload, collection: PromotionSource, id: number, req?: PayloadRequest) {
   const common = { title: true, body: true, game: true, status: true, authorName: true } as const;
   const doc = await p.findByID({ collection, id, overrideAccess: false, user: null,
     ...(req ? { req: { ...req, user: null } } : {}), depth: 0,
-    select: collection === "community-posts" ? { ...common, category: true, signupForm: true } : { ...common, images: true, videoURL: true } }).catch(() => null);
+    context: { ...req?.context, readSignupImages: true },
+    select: collection === "community-posts"
+      ? { ...common, category: true, signupForm: true, postImages: true, signupImages: true }
+      : { ...common, images: true, videoURL: true } }).catch(() => null);
   if (!doc || doc.status !== "visible") throw new APIError("原内容尚未发布或已隐藏", 409);
   const kind: PromotionKind = collection === "community-showcase" ? "showcase" : ("category" in doc && doc.category === "event" ? "event" : "notice");
   if (!supportedPromotionKinds.includes(kind)) throw new APIError("该类升推尚未开放", 400);
@@ -21,6 +26,12 @@ export async function readPromotionSource(p: Payload, collection: PromotionSourc
   const videoURL = "videoURL" in doc ? doc.videoURL || null : null;
   const videoVersion = videoURL ? await controlledVideoVersion(videoURL) : null;
   const value = { ...doc, game: gameID, videoVersion } as unknown as Record<string, unknown>;
+  if ("category" in doc) {
+    const postImages = publicationImages(doc.postImages);
+    const signupImages = publicationImages(doc.signupImages);
+    if (postImages.length || signupImages.length)
+      value.images = [publicationImageRevision(postImages), publicationImageRevision(signupImages)];
+  }
   const snapshot: PromotionSnapshot = { title: doc.title, body: doc.body ?? "", authorName: doc.authorName ?? "", kind, game: gameID, videoURL, videoVersion };
   return { collection, doc, game, kind, version: promotionVersion(value), snapshot,
     href: "/community/" + game.slug + (collection === "community-posts" ? "/updates/" + doc.id : "/showcase/" + doc.id) };

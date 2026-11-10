@@ -12,6 +12,7 @@ import {
   type Identity,
 } from "../lib/rules";
 import { normalizeSignup } from "../lib/signup-schema";
+import { normalizePublicationImages } from "../lib/publication-image-storage";
 export const signupFields: Field[] = [
   {
     name: "signupForm",
@@ -26,6 +27,16 @@ export const signupFields: Field[] = [
     admin: { hidden: true },
   },
   {
+    name: "signupImages",
+    type: "json",
+    access: {
+      create: ({ req }) => req.context.manageSignupImages === true,
+      update: ({ req }) => req.context.manageSignupImages === true,
+      read: ({ req }) => req.context.readSignupImages === true,
+    },
+    admin: { hidden: true },
+  },
+  {
     name: "signupEditor",
     type: "ui",
     admin: {
@@ -33,10 +44,11 @@ export const signupFields: Field[] = [
     },
   },
 ];
-export const validateSignupForm: CollectionBeforeChangeHook = ({
+export const validateSignupForm: CollectionBeforeChangeHook = async ({
   data,
   originalDoc,
   collection,
+  req,
 }) => {
   if (data.signupForm !== undefined) {
     try {
@@ -51,6 +63,14 @@ export const validateSignupForm: CollectionBeforeChangeHook = ({
     (data.signupForm || originalDoc?.signupForm)?.enabled
   )
     throw new APIError("通知不能启用活动报名", 400);
+  if (req.context.manageSignupImages === true && data.signupImages !== undefined) {
+    const form = normalizeSignup(data.signupForm ?? originalDoc?.signupForm);
+    data.signupImages = await normalizePublicationImages(
+      data.signupImages,
+      originalDoc?.signupImages,
+      new Set(form.questions.map(({ id }) => id)),
+    );
+  }
   return data;
 };
 export const EventSignups: CollectionConfig = {

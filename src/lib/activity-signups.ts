@@ -3,6 +3,8 @@ import { APIError, createLocalReq, type Payload, type PayloadRequest } from "pay
 import type { User } from "@/payload-types";
 import { canParticipate, canPublish, canSubmitClubContent, canReadActivitySignups, canExportActivitySignups, managesGame } from "./rules";
 import { workflowTransaction } from "./workflow-transactions";
+import { publicationImages } from "./publication-images";
+import { publicationImageRevision } from "./publication-image-storage";
 import {
   normalizeSignup,
   validateAnswers,
@@ -32,6 +34,7 @@ export async function activity(
   edit = false,
   req?: PayloadRequest,
   permission: "edit" | "view" | "export" = "edit",
+  includeImages = false,
 ) {
   if (edit && user) {
     // Private-data actions must honor revocation even when an internal caller has an old identity.
@@ -50,9 +53,11 @@ export async function activity(
       req: req ? (edit ? req : { ...req, user: null }) : undefined,
       draft: edit,
       depth: 0,
+      ...(includeImages ? { context: { ...req?.context, readSignupImages: true } } : {}),
       select: {
         title: true,
         signupForm: true,
+        ...(includeImages ? { signupImages: true } : {}),
         game: true,
         submittedBy: true,
         author: true,
@@ -107,7 +112,8 @@ export async function activity(
   const canExport = canExportActivitySignups(user, kind, doc.game, organizer);
   if (edit && !(permission === "view" ? canView : permission === "export" ? canExport : manager)) throw new APIError("无权执行此活动报名操作", 403);
   const form = normalizeSignup(doc.signupForm);
-  return { doc, form, version: formVersion(form), manager, organizer, canView, canExport };
+  const images = includeImages && "signupImages" in doc ? publicationImages(doc.signupImages) : [];
+  return { doc, form, version: formVersion(form), images, manager, organizer, canView, canExport };
 }
 export function signupState(
   form: SignupForm,
@@ -296,17 +302,34 @@ export async function saveSignupForm(
   user: User | null,
   version: unknown,
   value: unknown,
+  illustrations?: { revision: unknown; images: unknown },
 ) {
-  return workflowTransaction(p, user, { manageSignupForm: true }, async req => {
+  const editImages = illustrations !== undefined;
+  return workflowTransaction(p, user, {
+    manageSignupForm: true,
+    ...(editImages ? { manageSignupImages: true, readSignupImages: true } : {}),
+  }, async req => {
     const actor = req.user as User;
-    const current = await activity(p, kind, id, actor, true, req);
+    const current = await activity(p, kind, id, actor, true, req, "edit", editImages);
     if (version !== current.version) throw new APIError("报名问卷已被更新，请刷新后再编辑", 409);
     let form;
     try { form = normalizeSignup(value); }
     catch (error) { throw new APIError((error as Error).message, 400); }
+    if (illustrations && illustrations.revision !== publicationImageRevision(current.images))
+      throw new APIError("问卷配图已更新，请重新加载后编辑。", 409);
+    const images = illustrations?.images;
+    if (illustrations && !Array.isArray(images)) throw new APIError("问卷配图格式无效。", 400);
     const draft = kind === "events" && !canPublish(actor);
-    await p.update({ collection: kind, id, overrideAccess: false, req,
-      ...(kind === "events" ? { draft } : {}), data: { signupForm: form } });
-    return { form, version: formVersion(form), message: draft ? "问卷草稿已保存，需发布负责人审核发布后生效" : "报名问卷已保存", draft };
+    const saved = await p.update({
+      collection: kind, id, overrideAccess: false, req,
+      ...(kind === "events" ? { draft } : {}),
+      data: { signupForm: form, ...(editImages && Array.isArray(images) ? { signupImages: images } : {}) },
+    });
+    const savedImages = publicationImages(saved.signupImages);
+    return {
+      form, version: formVersion(form), draft,
+      ...(editImages ? { images: savedImages, imageRevision: publicationImageRevision(savedImages) } : {}),
+      message: draft ? "问卷草稿已保存，需发布负责人审核发布后生效" : "报名问卷已保存",
+    };
   });
 }

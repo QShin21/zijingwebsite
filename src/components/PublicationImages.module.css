@@ -1,0 +1,38 @@
+.images {
+  display: grid;
+  gap: 0.75rem;
+  margin-block: 0.75rem;
+  min-width: 0;
+}
+
+.images img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.editor {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.editor input[type="file"] {
+  max-width: 100%;
+}
+
+.editor ol {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding-inline-start: 1.5rem;
+}
+
+.editor li img {
+  display: block;
+  max-width: min(100%, 15rem);
+  max-height: 12rem;
+  object-fit: contain;
+  margin-block: 0.5rem;
+}

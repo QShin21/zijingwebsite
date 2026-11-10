@@ -1,3 +1,4 @@
+import * as publicationImages from "./20261110_000000_publication_images";
 import * as activitySignups from './20261011_160000_activity_signups';
 import * as clubOperations from './20261011_180000_club_operations';
 import * as contentPromotions from './20261012_030000_content_promotions';
@@ -68,4 +69,5 @@ export const migrations = [
   // Authorized core dependency: source aec6f2675fbbe6074ad3867cff21e6fc69c6adaa; core first.
   { up: teamCore.up, down: teamCore.down, name: '20261012_160000_team_core' },
   { up: teamMemberProfiles.up, down: teamMemberProfiles.down, name: '20261012_170000_team_member_profiles' },
+  { up: publicationImages.up, down: publicationImages.down, name: '20261110_000000_publication_images' },
 ];

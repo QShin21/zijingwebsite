@@ -1,4 +1,6 @@
 import { ActivitySignup } from "./ActivitySignup";
+import { PublicationImages } from "./PublicationImages";
+import { publicationImages } from "@/lib/publication-images";
 import { TeamProfilesPanel } from "./team-profiles/TeamProfilesPanel";
 import { TeamHonorsPanel } from "./TeamHonorsPanel";
 import {
@@ -120,6 +122,7 @@ export function Prose({ doc }: { doc: Content }) {
           })}
         />
       )}
+      <PublicationImages images={publicationImages(doc.postImages)} />
       {doc.sections?.map((s, i) => (
         <section id={`content-${doc.id}-section-${i}`} key={i}>
           <h2>{s.heading}</h2>

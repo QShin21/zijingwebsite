@@ -50,6 +50,13 @@ export async function GET() {
     await db.pool.query("SELECT team_honor_records_id FROM payload_locked_documents_rels LIMIT 0");
     const honorMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261012_080000_team_honor_records"]);
     if (honorMigration.rowCount !== 1) throw new Error("Required honor migration unavailable");
+    await db.pool.query("SELECT post_images,signup_images FROM community_posts LIMIT 0");
+    await db.pool.query("SELECT post_images,signup_images FROM events LIMIT 0");
+    await db.pool.query("SELECT version_post_images,version_signup_images FROM _events_v LIMIT 0");
+    await db.pool.query("SELECT post_images FROM announcements LIMIT 0");
+    await db.pool.query("SELECT version_post_images FROM _announcements_v LIMIT 0");
+    const imagesMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261110_000000_publication_images"]);
+    if (imagesMigration.rowCount !== 1) throw new Error("Required publication images migration unavailable");
     const indexes = await db.pool.query<IndexMetadata>(`
       SELECT idx.relname name, src.relname table_name, i.indisvalid valid,
         i.indisready ready, i.indisunique is_unique, pg_get_expr(i.indpred,i.indrelid) predicate,

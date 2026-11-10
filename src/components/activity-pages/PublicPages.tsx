@@ -58,8 +58,8 @@ export function EmptyState({
     </div>
   );
 }
-export async function publicDoc(collection: PageCollection, slug: string) {
-  const doc = await bySlug(collection, slug);
+export async function publicDoc(collection: PageCollection, slug: string, includePostImages = false) {
+  const doc = await bySlug(collection, slug, includePostImages);
   if (doc) return doc;
   const redirects = await (
     await cms()
@@ -107,7 +107,7 @@ export async function PublicDetail({
     >
       <ActivityDetail
         collection={collection}
-        doc={await publicDoc(collection, slug)}
+        doc={await publicDoc(collection, slug, collection !== "albums")}
         photoPage={page}
       />
     </div>

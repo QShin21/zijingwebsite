@@ -5,6 +5,8 @@ import config from "../src/payload.config";
 import type { User } from "../src/payload-types";
 import { queryResponses } from "../src/lib/questionnaire-results";
 import { randomBytes } from "node:crypto";
+import sharp from "sharp";
+import { publicationImageRevision } from "../src/lib/publication-image-storage";
 import {
   activity,
   formVersion,
@@ -333,19 +335,22 @@ it("supports scoped community management and draft-only edits by community autho
   });
   try {
     const config = await activity(p, "events", draft.id, manager, true);
-    expect(
-      (
-        await saveSignupForm(
-          p,
-          "events",
-          draft.id,
-          manager,
-          config.version,
-          form,
-        )
-      ).draft,
-    ).toBe(true);
-    await expect(activity(p, "events", draft.id, member)).rejects.toThrow();
+    const input = await sharp({ create: { width: 32, height: 24, channels: 3, background: "red" } }).png().toBuffer();
+    const saved = await saveSignupForm(p, "events", draft.id, manager, config.version, form, {
+      revision: publicationImageRevision([]),
+      images: [{ source: "data:image/png;base64," + input.toString("base64"), alt: "合成报名说明配图" }],
+    });
+    expect(saved.draft).toBe(true);
+    expect(saved.images?.[0].source).toMatch(/^data:image\/webp;base64,/);
+    expect((await activity(p, "events", draft.id, manager, true, undefined, "edit", true)).images)
+      .toEqual(saved.images);
+    await expect(activity(p, "events", draft.id, member, false, undefined, "edit", true)).rejects.toThrow();
+    await p.update({ collection: "events", id: draft.id, user: manager, overrideAccess: false, draft: true,
+      data: { reviewState: "submitted" } });
+    await p.update({ collection: "events", id: draft.id, user: admin, overrideAccess: false,
+      data: { _status: "published" } });
+    expect((await activity(p, "events", draft.id, member, false, undefined, "edit", true)).images)
+      .toEqual(saved.images);
   } finally {
     await p.delete({
       collection: "events",

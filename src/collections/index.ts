@@ -38,6 +38,7 @@ import { TeamHonorRecords } from "./team-honor-records";
 import { protectLegacyTeamHonors } from "./team-honor-legacy";
 import { publicMediaRead } from "../lib/public-media-access";
 import { nicknameKey, validNickname } from "../lib/nickname";
+import { postImagesField, validatePostImages } from "./publication-images";
 
 const text = (name: string, label: string, required = false): TextField => ({
   name,
@@ -337,6 +338,7 @@ function content(
   scoped = false,
   self = false,
 ): CollectionConfig {
+  const hasPostImages = slug === "events" || slug === "announcements";
   return {
     slug,
     labels: { singular: label, plural: label },
@@ -379,11 +381,12 @@ function content(
           return args;
         },
       ],
-      beforeChange: [guard(scoped, self), ...(slug === 'teams' ? [guardTeamLifecycle] : []), ...(slug === 'events' ? [validateSignupForm] : [])],
+      beforeChange: [guard(scoped, self), ...(slug === 'teams' ? [guardTeamLifecycle] : []), ...(slug === 'events' ? [validateSignupForm] : []), ...(hasPostImages ? [validatePostImages] : [])],
       afterChange: [...(slug === "teams" ? [closeInactiveTeamRecruitments] : []), audit],
     },
     fields: [
       ...common,
+      ...(hasPostImages ? [postImagesField] : []),
       ...fields,
       {
         name: "_status",

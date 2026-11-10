@@ -1,6 +1,8 @@
 "use client";
 import { useId, useRef, useState } from "react";
 import { Questionnaire } from "./Questionnaire";
+import { PublicationImagesEditor } from "./PublicationImagesEditor";
+import type { PublicationImage } from "@/lib/publication-images";
 import surface from "./activity-pages/QuestionnaireSurface.module.css";
 import {
   emptySignup,
@@ -24,9 +26,15 @@ function localDate(value: string) {
 export function SignupBuilder({
   value = emptySignup,
   onChange: onValueChange,
+  illustrations,
 }: {
   value: SignupForm;
   onChange: (value: SignupForm) => void;
+  illustrations?: {
+    images: PublicationImage[];
+    onChange: (images: PublicationImage[]) => void;
+    limit?: number;
+  };
 }) {
   const prefix = useId(),
     dialog = useRef<HTMLDialogElement>(null);
@@ -211,6 +219,13 @@ export function SignupBuilder({
       </details>
       {value.enabled && (
         <>
+          {illustrations && (
+            <PublicationImagesEditor
+              label="问卷配图"
+              questions={value.questions}
+              {...illustrations}
+            />
+          )}
           <div className="designer-tabs" role="group" aria-label="问卷编辑视图">
             <button
               type="button"
@@ -521,7 +536,7 @@ export function SignupBuilder({
         <p>试填答案不会保存。可以返回修改并检查每个跳转分支。</p>
         <p className="preserve">{preview?.intro}</p>
         {preview && (
-          <Questionnaire key={JSON.stringify(preview)} form={preview} preview />
+          <Questionnaire key={JSON.stringify(preview)} form={preview} images={illustrations?.images} preview />
         )}
       </dialog>
     </section>

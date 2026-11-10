@@ -2,6 +2,7 @@ import { getPayload, type CollectionSlug, type Where } from "payload";
 import config from "@payload-config";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import type { Window } from "./rules";
+import type { PublicationImage } from "./publication-images";
 export type Content = Window & {
   id: number;
   signupForm?: { enabled?: boolean };
@@ -10,6 +11,7 @@ export type Content = Window & {
   summary?: string;
   body?: SerializedEditorState;
   cover?: number;
+  postImages?: PublicationImage[] | null;
   seoTitle?: string;
   seoDescription?: string;
   demo?: boolean;
@@ -96,6 +98,7 @@ export async function list(
   where: Where = {},
   page = 1,
   limit = 12,
+  includePostImages = false,
 ) {
   const p = await cms();
   const result = await p.find({
@@ -108,12 +111,12 @@ export async function list(
     limit,
     page,
     sort: collection==='games'?'sort':"-createdAt",
-    select: publicSelect,
+    select: includePostImages ? { ...publicSelect, postImages: true } : publicSelect,
   });
   return { ...result, docs: result.docs as unknown as Content[] };
 }
-export async function bySlug(collection: CollectionSlug, slug: string) {
-  return (await list(collection, { slug: { equals: slug } }, 1, 1)).docs[0];
+export async function bySlug(collection: CollectionSlug, slug: string, includePostImages = false) {
+  return (await list(collection, { slug: { equals: slug } }, 1, 1, includePostImages)).docs[0];
 }
 export async function fixed(key: string) {
   return (await list("pages", { key: { equals: key } }, 1, 1)).docs[0];

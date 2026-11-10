@@ -10,6 +10,8 @@ import { decideCommunityApplication, editCommunityApplication, updateCommunityCa
 import { applicationError } from "@/lib/application-error";
 import { workflowTransaction } from "@/lib/workflow-transactions";
 import { APIError } from "payload";
+import type { User } from "@/payload-types";
+import { publicationImageLimit } from "@/lib/publication-images";
 import { applicationContactConsentRequiredMessage } from "@/lib/community-status";
 
 const value = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
@@ -59,15 +61,50 @@ export async function decideAction(form: FormData) {
   } catch (error) { problem("/community/review", applicationError(error)); }
   redirect("/community/review?done=1");
 }
+async function createCommunityPost(
+  p: Awaited<ReturnType<typeof cms>>,
+  user: User,
+  form: FormData,
+  category: "event" | "notice",
+) {
+  const game = numeric(form, "game");
+  if (!managesGame(user, game)) throw new APIError("无权在此社群发布", 403);
+  const signupForm = category === "event" && value(form, "signupForm")
+    ? JSON.parse(value(form, "signupForm"))
+    : undefined;
+  const postImages = JSON.parse(value(form, "postImages") || "[]");
+  const signupImages = signupForm?.enabled === true
+    ? JSON.parse(value(form, "signupImages") || "[]")
+    : [];
+  if (!Array.isArray(postImages) || !Array.isArray(signupImages) ||
+      postImages.length + signupImages.length > publicationImageLimit)
+    throw new APIError(`同次发布的正文与问卷配图合计最多 ${publicationImageLimit} 张。`, 400);
+
+  return p.create({
+    collection: "community-posts",
+    overrideAccess: false,
+    user,
+    context: { manageSignupForm: true, manageSignupImages: true },
+    data: {
+      game,
+      author: user.id,
+      title: value(form, "title"),
+      body: value(form, "body"),
+      category,
+      signupForm,
+      postImages,
+      signupImages,
+    },
+  });
+}
 export async function publishCommunityAction(form: FormData) {
   const { p, user } = await current();
   const game = numeric(form, "game");
   const kind = value(form, "kind");
   const path = `${await gamePath(game)}/updates`;
-  if (!["event", "notice"].includes(kind)) problem(path, "发布类型无效");
+  if (kind !== "event" && kind !== "notice") problem(path, "发布类型无效");
   try {
-    await p.create({ collection: "community-posts", overrideAccess: false, user, context: { manageSignupForm: true },
-      data: { game, author: user.id, title: value(form, "title"), body: value(form, "body"), category: kind as "event" | "notice", signupForm: kind === "event" && value(form,"signupForm") ? JSON.parse(value(form,"signupForm")) : undefined } });
+    await createCommunityPost(p, user, form, kind as "event" | "notice");
   } catch { problem(path, "发布未成功，请核对内容和权限"); }
   redirect(path);
 }
@@ -173,10 +210,9 @@ export async function publishCommunityResultAction(form: FormData) {
   const p = await cms(), { user } = await p.auth({ headers: await headers() });
   if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再发布，已填写的内容保留。" };
   const game = numeric(form, "game"), kind = value(form, "kind");
-  if (!["event", "notice"].includes(kind)) return { ok: false, message: "发布类型无效，请重新选择。" };
+  if (kind !== "event" && kind !== "notice") return { ok: false, message: "发布类型无效，请重新选择。" };
   try {
-    await p.create({ collection: "community-posts", overrideAccess: false, user, context: { manageSignupForm: true },
-      data: { game, author: user.id, title: value(form, "title"), body: value(form, "body"), category: kind as "event" | "notice", signupForm: kind === "event" && value(form, "signupForm") ? JSON.parse(value(form, "signupForm")) : undefined } });
+    await createCommunityPost(p, user, form, kind);
     revalidatePath(`${await gamePath(game)}/updates`);
     return { ok: true, message: "内容已发布到当前社群。" };
   } catch (error) { return { ok: false, message: workflowFeedback(error) }; }

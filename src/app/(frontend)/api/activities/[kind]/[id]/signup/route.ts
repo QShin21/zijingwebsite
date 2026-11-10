@@ -15,6 +15,7 @@ import {
   updateSignupAnswers,
 } from "@/lib/activity-signups";
 import { applicationError } from "@/lib/application-error";
+import { publicationImageRevision } from "@/lib/publication-image-storage";
 import {
   responseExportFilename,
   responseExportLayout,
@@ -43,6 +44,7 @@ async function run(
       { user } = await p.auth({ headers: request.headers });
     const url = new URL(request.url),
       mode = url.searchParams.get("mode");
+    const includeImages = request.headers.get("x-questionnaire-images") === "1";
     if (method === "GET") {
       const value = await activity(
         p,
@@ -51,6 +53,7 @@ async function run(
         user,
         ["manage", "view", "entries", "stats", "export"].includes(mode || ""),
         undefined, mode === "export" ? "export" : ["view", "entries", "stats"].includes(mode || "") ? "view" : "edit",
+        includeImages && (!mode || mode === "manage"),
       );
       if (
         request.headers.get("authorization")?.startsWith("JWT ") &&
@@ -136,6 +139,13 @@ async function run(
         });
       }
       return reply({
+        ...(includeImages && mode === "manage"
+          ? { images: value.images, imageRevision: publicationImageRevision(value.images) }
+          : includeImages && !mode && value.form.enabled
+            ? { images: value.images.filter(({ questionId }) =>
+                !questionId || value.form.questions.some(({ id }) => id === questionId),
+              ) }
+            : {}),
         title: value.doc.title,
         form: value.form,
         version: value.version,
@@ -150,13 +160,16 @@ async function run(
         signup: await ownSignup(p, kind, id, user),
       });
     }
+    const editImages = method === "PUT" && includeImages;
+    if (editImages && !user) return reply({ error: "请先登录可用账号" }, 401);
+    const limit = (editImages ? 12 : 1) * 1024 * 1024;
     if (
       !request.headers.get("content-type")?.startsWith("application/json") ||
-      Number(request.headers.get("content-length")) > 1048576
+      Number(request.headers.get("content-length")) > limit
     )
       return reply({ error: "请求格式不正确或内容过长" }, 400);
     const raw = await request.text();
-    if (Buffer.byteLength(raw) > 1048576)
+    if (Buffer.byteLength(raw) > limit)
       return reply({ error: "内容过长" }, 400);
     let data;
     try {
@@ -168,7 +181,9 @@ async function run(
       return reply({ error: "请求格式不正确" }, 400);
     if (method === "PUT")
       return reply(
-        await saveSignupForm(p, kind, id, user, data.version, data.form),
+        await saveSignupForm(p, kind, id, user, data.version, data.form,
+          editImages ? { revision: data.imageRevision, images: data.images } : undefined,
+        ),
       );
     if (method === "PATCH" || (method === "POST" && data.action === "edit"))
       return reply({
