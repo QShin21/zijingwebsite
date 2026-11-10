@@ -269,6 +269,15 @@ test("队伍荣誉只有一个置顶档案，普通风采仍为 6+1 分页，稳
   await expect(page.getByText("合成未审私有荣誉", { exact: true })).toHaveCount(
     0,
   );
+  await page
+    .getByRole("link", { name: "提交队伍荣誉", exact: true })
+    .click();
+  await expect(page).toHaveURL(
+    `/teams/honors?view=mine&team=${team}&game=${game}#honor-editor`,
+  );
+  await expect(
+    page.locator("[data-honor-editor]").getByLabel("所属有效代表队"),
+  ).toHaveValue(String(team));
   await page.goto(path + "?page=2");
   await expect(page.locator("[id^=showcase-]")).toHaveCount(1);
   await expect(page.locator("[data-team-honor-archive]")).toHaveCount(0);
@@ -289,6 +298,39 @@ test("队伍荣誉只有一个置顶档案，普通风采仍为 6+1 分页，稳
   ])
     expect(body).not.toContain(field);
 });
+test("荣誉档案入口说明投稿资格，筛选范围外可查看全部投稿队伍", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const submit = page.getByRole("link", { name: "提交队伍荣誉", exact: true });
+  const eligibility = page.locator("#honor-editor").getByRole("heading", {
+    name: "投稿需要当前有效队员身份",
+    exact: true,
+  });
+
+  await login(page, otherReviewer);
+  await page.goto(`/community/${slug}/showcase/team-honors/${team}`);
+  await submit.click();
+  await expect(eligibility).toBeVisible();
+  await expect(page.locator("[data-honor-editor]")).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "查看代表队招新与本人记录" }),
+  ).toHaveAttribute("href", "/teams/recruitment");
+
+  await login(page, player);
+  await page.goto(`/teams/honors?game=${otherGame}`);
+  await expect(
+    page.getByRole("heading", { name: "暂无已批准的荣誉档案" }),
+  ).toBeVisible();
+  await submit.click();
+  await expect(eligibility).toBeVisible();
+  await page.getByRole("link", { name: "查看全部可投稿队伍" }).click();
+  await expect(page).toHaveURL("/teams/honors?view=mine#honor-editor");
+  await expect(
+    page.locator("[data-honor-editor]").getByLabel("所属有效代表队"),
+  ).toHaveValue(String(team));
+});
+
 test("真实 HTTP JWT 上传及审核；旧共享视频跨集合借用在改稿/退回/隐藏/队伍归档后无法再请求字节", async ({
   page,
   request,
@@ -748,7 +790,10 @@ test("真实成员网页草稿/错误保留/提交/撤回/退回重提/批准/�
     const reviewPage = await reviewContext.newPage();
     await login(page, player);
     await login(reviewPage, reviewer);
-    await page.goto("/teams/honors?view=mine");
+    await page.goto(`/teams/honors?team=${team}`);
+    await page
+      .getByRole("link", { name: "提交队伍荣誉", exact: true })
+      .click();
     const receipt = page.locator("main").getByRole("status").filter({
       hasText: /^(草稿已保存|荣誉已提交)/,
     });

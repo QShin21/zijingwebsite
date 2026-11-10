@@ -13,7 +13,7 @@ import { TeamHonorArchiveCards } from "./TeamHonorArchives";
 import { TeamHonorRecordCard } from "./TeamHonorRecord";
 import { TeamHonorEditor } from "./TeamHonorEditor";
 import { CommunityPager } from "./CommunityPager";
-import { teamHonorQuery } from "./TeamHonorNavigation";
+import { teamHonorQuery, teamHonorSubmissionHref } from "./TeamHonorNavigation";
 import styles from "./team-pages/TeamPages.module.css";
 import { TeamSectionHeading } from "./team-pages/TeamPageParts";
 
@@ -33,15 +33,16 @@ export async function TeamHonorsPanel({
   team?: number;
   game?: number;
 }) {
-  const privateView = view !== "public" && canParticipate(user),
-    reviewer = honorCanReview(user);
+  const signedIn = canParticipate(user);
+  const privateView = view !== "public" && signedIn;
+  const reviewer = honorCanReview(user);
   const archives = privateView
     ? []
     : await teamHonorService.archives(p, { team, game });
   let memberships: Awaited<ReturnType<typeof teamHonorService.availableTeams>> =
       [],
     membershipError = "";
-  if (canParticipate(user))
+  if (privateView)
     try {
       memberships = await teamHonorService.availableTeams(p, user);
     } catch (error) {
@@ -78,7 +79,7 @@ export async function TeamHonorsPanel({
         >
           队伍荣誉档案
         </Link>
-        {canParticipate(user) && (
+        {signedIn && (
           <Link
             href={href("mine")}
             aria-current={view === "mine" ? "page" : undefined}
@@ -95,7 +96,11 @@ export async function TeamHonorsPanel({
           </Link>
         )}
       </nav>
-      {membershipError && <p role="status">{membershipError}</p>}
+      {membershipError && (
+        <p id={view === "mine" ? "honor-editor" : undefined} role="status">
+          {membershipError}
+        </p>
+      )}
       <div className={styles.summary}>
         <div>
           <TeamSectionHeading
@@ -116,18 +121,18 @@ export async function TeamHonorsPanel({
               ? "仅显示当前授权社群的材料。打开记录，核对成果与证据后处理。"
               : view === "mine"
                 ? "在这里继续投稿、补充材料，查看本人记录与审核意见。"
-                : "循着赛事与成绩，查阅各队共同留下的记录。档案仅展示当前可见的已批准成果。"}
+                : "查阅各队已核验的赛事成绩。现任队员可提交荣誉，经审核后收录至本队档案。"}
           </p>
         </div>
-        {canParticipate(user) &&
-          view !== "review" &&
-          writableMemberships.length > 0 && (
+        {signedIn &&
+          (view === "public" ||
+            (view === "mine" && writableMemberships.length > 0)) && (
             <Link
               className="button"
               href={
                 view === "mine"
                   ? "#honor-editor"
-                  : href("mine") + "#honor-editor"
+                  : teamHonorSubmissionHref({ team, game })
               }
             >
               提交队伍荣誉
@@ -163,7 +168,9 @@ export async function TeamHonorsPanel({
               <p>
                 {view === "review"
                   ? "有权限处理的新投稿会出现在此处。"
-                  : "如果你是现任队员，可在下方填写荣誉并上传成果材料。"}
+                  : writableMemberships.length
+                    ? "可在下方填写荣誉并上传成果材料。"
+                    : "已提交的荣誉和审核进度会显示在这里。"}
               </p>
             </div>
           )}
@@ -185,7 +192,7 @@ export async function TeamHonorsPanel({
           )}
         </>
       )}
-      {canParticipate(user) &&
+      {privateView &&
         view === "mine" &&
         (writableMemberships.length ? (
           <TeamHonorEditor
@@ -195,12 +202,19 @@ export async function TeamHonorsPanel({
           />
         ) : (
           !membershipError && (
-            <div className={styles.note}>
+            <div id="honor-editor" className={styles.note}>
               <h3>投稿需要当前有效队员身份</h3>
-              <p>当前没有可投稿的有效代表队。已批准历史荣誉会继续保留。</p>
-              <Link className="text-link" href="/teams/recruitment">
-                查看代表队招新与本人记录
-              </Link>
+              <p>当前筛选范围内，你的账号暂无可投稿的代表队。</p>
+              <div className={styles.actions}>
+                {memberships.length > 0 && (
+                  <Link className="text-link" href={teamHonorSubmissionHref()}>
+                    查看全部可投稿队伍
+                  </Link>
+                )}
+                <Link className="text-link" href="/teams/recruitment">
+                  查看代表队招新与本人记录
+                </Link>
+              </div>
             </div>
           )
         ))}

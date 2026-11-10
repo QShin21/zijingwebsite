@@ -27,6 +27,12 @@ export function teamHonorQuery(navigation: TeamHonorNavigation = {}) {
   return query.toString();
 }
 
+export function teamHonorSubmissionHref(
+  scope: Pick<TeamHonorNavigation, "team" | "game"> = {},
+) {
+  return `/teams/honors?${teamHonorQuery({ ...scope, view: "mine" })}#honor-editor`;
+}
+
 export function teamHonorReturnQuery(value: unknown) {
   const query = new URLSearchParams(typeof value === "string" ? value : "");
   const view = query.get("view");
