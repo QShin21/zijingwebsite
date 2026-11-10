@@ -26,10 +26,12 @@ function localDate(value: string) {
 export function SignupBuilder({
   value = emptySignup,
   onChange: onValueChange,
+  showRegistrationControls = true,
   illustrations,
 }: {
   value: SignupForm;
   onChange: (value: SignupForm) => void;
+  showRegistrationControls?: boolean;
   illustrations?: {
     images: PublicationImage[];
     onChange: (images: PublicationImage[]) => void;
@@ -70,8 +72,9 @@ export function SignupBuilder({
   const active = value.questions.some((q) => q.id === selected)
     ? selected
     : value.questions[0]?.id;
+  const showEditor = value.enabled || !showRegistrationControls;
   let issue = "";
-  if (value.enabled && value.questions.length) {
+  if (showEditor && value.questions.length) {
     try {
       normalizeSignup(value);
     } catch (e) {
@@ -153,7 +156,11 @@ export function SignupBuilder({
       <div className="designer-heading">
         <div>
           <h2>问卷制作</h2>
-          <p>先编辑收集内容，再设置接收时间。保存前可随时试填。</p>
+          <p>
+            {showRegistrationControls
+              ? "先编辑收集内容，再设置接收时间。保存前可随时试填。"
+              : "编辑问卷内容，保存前可随时试填。"}
+          </p>
         </div>
         <div className="signup-tools">
           <button
@@ -183,28 +190,30 @@ export function SignupBuilder({
           <button
             type="button"
             className="button light"
-            disabled={!value.enabled || !value.questions.length}
+            disabled={!showEditor || !value.questions.length}
             onClick={openPreview}
           >
             预览填写效果
           </button>
         </div>
       </div>
-      <div className="designer-enable">
-        <label className="signup-choice">
-          <input
-            type="checkbox"
-            checked={value.enabled}
-            onChange={(e) => patch({ enabled: e.target.checked })}
-          />
-          启用填写问卷报名
-        </label>
-        <span>
-          {value.enabled
-            ? `${value.questions.length} 道题目，修改保存后生效`
-            : "当前不接收问卷报名，已编辑的题目保留"}
-        </span>
-      </div>
+      {showRegistrationControls && (
+        <div className="designer-enable">
+          <label className="signup-choice">
+            <input
+              type="checkbox"
+              checked={value.enabled}
+              onChange={(e) => patch({ enabled: e.target.checked })}
+            />
+            启用填写问卷报名
+          </label>
+          <span>
+            {value.enabled
+              ? `${value.questions.length} 道题目，修改保存后生效`
+              : "当前不接收问卷报名，已编辑的题目保留"}
+          </span>
+        </div>
+      )}
       <details className="designer-source-tools" open={!value.questions.length}>
         <summary>模板、AI 与导入工具</summary>
         <QuestionnaireTools
@@ -217,7 +226,7 @@ export function SignupBuilder({
           }}
         />
       </details>
-      {value.enabled && (
+      {showEditor && (
         <>
           {illustrations && (
             <PublicationImagesEditor
@@ -318,41 +327,43 @@ export function SignupBuilder({
                   </label>
                 </div>
               </section>
-              <section className="designer-settings-section">
-                <header>
-                  <h3>接收与时间</h3>
-                  <p>开放时间和暂停状态将影响实际报名入口。</p>
-                </header>
-                <div className="signup-times">
-                  {(["start", "end"] as const).map((key) => (
-                    <label key={key}>
-                      {key === "start" ? "报名开始" : "报名截止"}
-                      <input
-                        type="datetime-local"
-                        value={localDate(value[key])}
-                        onChange={(e) =>
-                          patch({
-                            [key]: e.target.value
-                              ? new Date(e.target.value).toISOString()
-                              : "",
-                          })
-                        }
-                      />
-                    </label>
-                  ))}
-                </div>
-                <label className="signup-choice">
-                  <input
-                    type="checkbox"
-                    checked={value.closed}
-                    onChange={(e) => patch({ closed: e.target.checked })}
-                  />
-                  暂停接收报名
-                </label>
-                <p className="muted">
-                  每个账号保留一份答卷。修改问卷后，已有答卷保留提交时的题目和答案。
-                </p>
-              </section>
+              {showRegistrationControls && (
+                <section className="designer-settings-section">
+                  <header>
+                    <h3>接收与时间</h3>
+                    <p>开放时间和暂停状态将影响实际报名入口。</p>
+                  </header>
+                  <div className="signup-times">
+                    {(["start", "end"] as const).map((key) => (
+                      <label key={key}>
+                        {key === "start" ? "报名开始" : "报名截止"}
+                        <input
+                          type="datetime-local"
+                          value={localDate(value[key])}
+                          onChange={(e) =>
+                            patch({
+                              [key]: e.target.value
+                                ? new Date(e.target.value).toISOString()
+                                : "",
+                            })
+                          }
+                        />
+                      </label>
+                    ))}
+                  </div>
+                  <label className="signup-choice">
+                    <input
+                      type="checkbox"
+                      checked={value.closed}
+                      onChange={(e) => patch({ closed: e.target.checked })}
+                    />
+                    暂停接收报名
+                  </label>
+                  <p className="muted">
+                    每个账号保留一份答卷。修改问卷后，已有答卷保留提交时的题目和答案。
+                  </p>
+                </section>
+              )}
             </div>
           ) : (
             <div className="designer-workspace">

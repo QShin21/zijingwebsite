@@ -492,19 +492,26 @@ export async function saveTeamRecruitment(
       depth: 0,
       select: { game: true, teamStatus: true },
     });
-    if (!["draft", "open", "closed", "archived"].includes(String(input.status)))
+    if (
+      typeof input.status !== "string" ||
+      !["draft", "open", "closed", "archived"].includes(input.status)
+    )
       throw new APIError("招新状态无效", 400);
     const title = text(input.title, "批次名称", 2, 120),
       form = normalizeTeamForm(input.form);
-    if (
-      input.status === "open" &&
-      (team.teamStatus !== "active" ||
-        !form.enabled ||
-        form.closed ||
-        !form.end ||
-        Date.parse(form.end) <= Date.now())
-    )
-      throw new APIError("开放招新需活跃队伍、启用表单和未来截止时间", 400);
+    if (input.status === "open") {
+      if (team.teamStatus !== "active")
+        throw new APIError(
+          "请在工作台的「调整队伍状态」中将队伍设为活跃，再发布招新",
+          400,
+        );
+      if (!form.enabled || form.closed)
+        throw new APIError("发布招新需启用问卷并接收报名", 400);
+      if (!form.end)
+        throw new APIError("发布招新前请填写报名截止时间", 400);
+      if (Date.parse(form.end) <= Date.now())
+        throw new APIError("报名截止时间须晚于当前时间", 400);
+    }
     const doc = input.id
       ? await p.findByID({
           collection: "team-recruitments",

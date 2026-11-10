@@ -818,6 +818,9 @@
   background: transparent;
   align-items: start;
 }
+.surface :global(.designer-form-settings) > :only-child {
+  grid-column: 1 / -1;
+}
 .surface :global(.designer-settings-section) {
   display: grid;
   gap: var(--z-space-4);

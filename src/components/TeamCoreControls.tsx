@@ -386,6 +386,11 @@ export function TeamCoreEstablishmentForm({
     </form>
   );
 }
+function beijingInputTime(value: string) {
+  const date = new Date(Date.parse(value) + 8 * 60 * 60 * 1000);
+  return Number.isFinite(date.getTime()) ? date.toISOString().slice(0, 16) : "";
+}
+
 export function TeamCoreRecruitmentEditor({
   teamID,
   defaultForm,
@@ -401,12 +406,21 @@ export function TeamCoreRecruitmentEditor({
     form: SignupForm;
   };
 }) {
-  const router = useRouter(),
-    [form, setForm] = useState(initial?.form ?? defaultForm),
-    [title, setTitle] = useState(initial?.title ?? "代表队新一轮招新"),
-    [status, setStatus] = useState(initial?.status ?? "draft"),
-    action = useTeamAction();
-  const titleInput = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const initialForm = initial?.form ?? defaultForm;
+  const [form, setForm] = useState(() => ({
+    ...initialForm,
+    start: "",
+    end: "",
+  }));
+  const [schedule, setSchedule] = useState({
+    start: initialForm.start,
+    end: initialForm.end,
+  });
+  const [title, setTitle] = useState(initial?.title ?? "代表队新一轮招新");
+  const [status, setStatus] = useState(initial?.status ?? "draft");
+  const action = useTeamAction();
+  const publishing = status === "open";
   return (
     <section
       id="team-recruitment-editor"
@@ -422,8 +436,9 @@ export function TeamCoreRecruitmentEditor({
         <label className="member-form">
           批次名称
           <input
-            ref={titleInput}
+            form="team-recruitment-publish"
             value={title}
+            disabled={!action.ready}
             required
             minLength={2}
             maxLength={120}
@@ -432,55 +447,95 @@ export function TeamCoreRecruitmentEditor({
         </label>
         <p>
           核心资料为游戏
-          ID、位置、经历、训练时间和一种联系方式。可修改提示和加入选拔题；每位申请人均须填写核心题。开放招新前请设置截止时间。
+          ID、位置、经历、训练时间和一种联系方式。可修改提示和加入选拔题，每位申请人均须填写核心题。
         </p>
       </div>
       <div className={styles.formSection}>
-        <h3>选拔问卷与时间窗口</h3>
-        <SignupBuilder value={form} onChange={setForm} />
+        <h3>选拔问卷</h3>
+        <SignupBuilder
+          value={form}
+          onChange={setForm}
+          showRegistrationControls={false}
+        />
       </div>
-      <div className={`member-form ${styles.commit}`}>
+      <form
+        id="team-recruitment-publish"
+        method="post"
+        className={`member-form ${styles.commit}`}
+        onSubmit={async (event) => {
+          event.preventDefault();
+          if (action.blocked) return;
+          const result = await action.run(
+            {
+              operation: "save-recruitment",
+              teamID,
+              id: initial?.id,
+              revision: initial?.revision,
+              title,
+              status,
+              form: {
+                ...form,
+                ...schedule,
+                ...(publishing ? { enabled: true, closed: false } : {}),
+              },
+            },
+            publishing ? "招新批次已发布。" : "批次已保存。",
+          );
+          if (result.ok) {
+            router.push(`/teams/manage/${teamID}#team-recruitments`);
+            router.refresh();
+          }
+        }}
+      >
         <h3>确认开放安排</h3>
         <label>
           批次状态
-          <select value={status} onChange={(e) => setStatus(e.target.value)}>
+          <select
+            value={status}
+            disabled={!action.ready}
+            onChange={(e) => setStatus(e.target.value)}
+          >
             <option value="draft">草稿</option>
             <option value="open">开放招新</option>
             <option value="closed">关闭招新</option>
             <option value="archived">归档</option>
           </select>
         </label>
-        <button
-          className="button"
-          disabled={action.blocked}
-          onClick={async () => {
-            if (action.blocked) return;
-            if (!titleInput.current?.reportValidity()) return;
-            const result = await action.run(
-              {
-                operation: "save-recruitment",
-                teamID,
-                id: initial?.id,
-                revision: initial?.revision,
-                title,
-                status,
-                form,
-              },
-              "批次已保存。",
-            );
-            if (result.ok) {
-              router.push(`/teams/manage/${teamID}`);
-              router.refresh();
-            }
-          }}
-        >
-          {action.busy ? "正在保存…" : "保存招新批次"}
+        <p id="team-recruitment-schedule-help">
+          时间按北京时间填写。发布时须填写未来的截止时间。开始时间留空时，发布后立即接收申请。
+        </p>
+        <div className="signup-times">
+          {(["start", "end"] as const).map((key) => (
+            <label key={key}>
+              {key === "start" ? "报名开始时间（选填）" : "报名截止时间"}
+              <input
+                type="datetime-local"
+                value={beijingInputTime(schedule[key])}
+                disabled={!action.ready}
+                required={publishing && key === "end"}
+                aria-describedby="team-recruitment-schedule-help"
+                onChange={(event) => {
+                  const time = Date.parse(
+                    `${event.currentTarget.value}+08:00`,
+                  );
+                  const value = Number.isFinite(time)
+                    ? new Date(time).toISOString()
+                    : "";
+                  setSchedule((current) => ({ ...current, [key]: value }));
+                }}
+              />
+            </label>
+          ))}
+        </div>
+        {publishing && <p>发布会启用选拔问卷，在报名时间内接收申请。</p>}
+        <button type="submit" className="button" disabled={action.blocked}>
+          {action.busy ? "正在提交…" : publishing ? "发布招新" : "保存招新批次"}
         </button>
         <TeamActionFeedback
           action={action}
           reviewHref={`/teams/manage/${teamID}`}
         />
-      </div>
+      </form>
     </section>
   );
 }

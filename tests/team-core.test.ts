@@ -693,19 +693,28 @@ describe.sequential("代表队核心合成数据库", () => {
     expect((await teamRecruitmentInfo(p, member, newBatch.id)).state).toBe(
       "招新已关闭",
     );
+    const closedBatch = await p.findByID({
+      collection: "team-recruitments",
+      id: newBatch.id,
+      user: manager,
+      overrideAccess: false,
+    });
+    await expect(
+      saveTeamRecruitment(p, manager, {
+        teamID: newTeam,
+        id: newBatch.id,
+        revision: closedBatch.updatedAt,
+        title: closedBatch.title,
+        status: "open",
+        form,
+      }),
+    ).rejects.toThrow("将队伍设为活跃");
     await closeTeamRecruitment(
       p,
       manager,
       newBatch.id,
       "archived",
-      (
-        await p.findByID({
-          collection: "team-recruitments",
-          id: newBatch.id,
-          user: manager,
-          overrideAccess: false,
-        })
-      ).updatedAt,
+      closedBatch.updatedAt,
     );
   });
   it("离队后新批次复用同一成员ID，跨队赛季拒绝，归档立即使投稿资格失效", async () => {

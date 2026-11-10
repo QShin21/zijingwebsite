@@ -240,6 +240,120 @@ test("建队网页退回、修改重提与高权限批准可进入招新工作�
     await context.close();
   }
 });
+test("工作台保存草稿后可按北京时间发布，申请人可提交问卷", async ({
+  browser,
+}) => {
+  const establishment = await submitTeamEstablishment(p, manager, {
+    gameID: game,
+    title: "合成网页发布队",
+    reason: "合成组织计划，负责选拔并安排训练。",
+  });
+  const approved = await decideTeamEstablishment(
+    p,
+    leader,
+    establishment.id,
+    "approved",
+    "",
+    establishment.updatedAt,
+  );
+  const teamID = Number(approved.team);
+  const context = await browser.newContext({ timezoneId: "UTC" });
+  const applicantContext = await browser.newContext();
+  try {
+    const page = await context.newPage();
+    const applicant = await applicantContext.newPage();
+    await login(page, manager);
+    await login(applicant, participant);
+    await page.goto(`/teams/manage/${teamID}`);
+    await page.getByRole("link", { name: "建立新招新批次" }).click();
+
+    const title = "合成网页正式招新";
+    const editor = page.locator("#team-recruitment-editor");
+    const cutoff = editor.getByLabel("报名截止时间", { exact: true });
+    const card = page.getByRole("article").filter({
+      has: page.getByRole("heading", { name: title, exact: true }),
+    });
+    await editor.getByLabel("批次名称").fill(title);
+    await expect(cutoff).toHaveValue("");
+    await editor.getByRole("button", { name: "保存招新批次" }).click();
+    await expect(card.getByText("草稿", { exact: true })).toBeVisible();
+    const href = await card
+      .getByRole("link", { name: "查看申请入口" })
+      .getAttribute("href");
+    expect(href).toMatch(/^\/teams\/recruitment\/\d+$/);
+    const batchID = Number(href!.split("/").at(-1));
+    await applicant.goto("/teams/recruitment");
+    await expect(
+      applicant.getByRole("link", { name: title, exact: true }),
+    ).toHaveCount(0);
+
+    const draft = await p.findByID({
+      collection: "team-recruitments",
+      id: batchID,
+      user: manager,
+      overrideAccess: false,
+      depth: 0,
+    });
+    await saveTeamRecruitment(p, manager, {
+      teamID,
+      id: batchID,
+      revision: draft.updatedAt,
+      title,
+      status: "draft",
+      form: { ...defaultTeamForm, enabled: false, closed: true },
+    });
+    await page.reload();
+    await card.getByRole("link", { name: "编辑表单与窗口" }).click();
+    await editor.getByLabel("批次状态").selectOption("open");
+    const publish = editor.getByRole("button", { name: "发布招新", exact: true });
+    await publish.click();
+    await expect(cutoff).toBeFocused();
+
+    await cutoff.fill("2020-01-01T12:00");
+    await publish.click();
+    await expect(editor.getByRole("alert")).toHaveText(
+      "报名截止时间须晚于当前时间",
+    );
+    await expect(editor.getByLabel("批次名称")).toHaveValue(title);
+
+    const deadline = new Date(Date.now() + 86400000);
+    deadline.setUTCSeconds(0, 0);
+    const beijingDeadline = new Date(deadline.getTime() + 8 * 3600000)
+      .toISOString()
+      .slice(0, 16);
+    await cutoff.fill(beijingDeadline);
+    await publish.click();
+    await expect(card.getByText("招新开放", { exact: true })).toBeVisible();
+
+    await applicant.reload();
+    await applicant.getByRole("link", { name: title, exact: true }).click();
+    await applicant.getByLabel(/游戏 ID \/ 游戏昵称/).fill("合成发布验证ID");
+    await applicant.getByLabel(/擅长位置/).fill("合成位置");
+    await applicant.getByLabel(/游戏、比赛经历/).fill("合成赛事经历");
+    await applicant.getByLabel(/可参加训练的时间/).fill("合成周三晚上");
+    await applicant.getByLabel(/一种联系方式/).fill("synthetic@example.invalid");
+    await applicant.getByRole("button", { name: "核对并提交", exact: true }).click();
+    await applicant.getByRole("button", { name: "提交入队申请", exact: true }).click();
+    await expect(applicant.getByText("待人工审核", { exact: true })).toBeVisible();
+    const response = await applicant.request.get(
+      `/api/team-core?mode=recruitment&id=${batchID}`,
+      { headers: origin },
+    );
+    expect(response.status()).toBe(200);
+    expect((await response.json()).form).toMatchObject({
+      enabled: true,
+      closed: false,
+      end: deadline.toISOString(),
+    });
+
+    await card.getByRole("link", { name: "编辑表单与窗口" }).click();
+    await expect(cutoff).toHaveValue(beijingDeadline);
+  } finally {
+    await applicantContext.close();
+    await context.close();
+  }
+});
+
 test("本人草稿、提交、退回重提、人工录取、撤销与真实REST权限", async ({
   page,
   browser,
