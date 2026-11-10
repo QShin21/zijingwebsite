@@ -1,0 +1,34 @@
+{
+  "uploadedAt": "2026-11-10T22:26:31.4480001+08:00",
+  "sourceRevision": "9fa90a598f056ebcebf46075b7bb13f33cb0bd24",
+  "featureRevision": "aadaf2722e15c0e748ec8c20a077d9a354dc4022",
+  "miniprogramSourceTree": "abc7d07e6f0b7950827ba74cac5091ff7c41920f",
+  "version": "0.5.2",
+  "appid": "wxccf9f8fc9515ebd5",
+  "tool": "微信开发者工具官方 CLI",
+  "toolVersion": "2.02.2608080",
+  "uploadResult": "success",
+  "freshOfficialReceipt": true,
+  "officialSize": {
+    "total": 697107,
+    "packages": [
+      {
+        "name": "TOTAL",
+        "size": 697107
+      }
+    ]
+  },
+  "reportedTotalBytes": 697107,
+  "platformStatus": "developmentVersionUploaded",
+  "description": "补齐代表队荣誉投稿入口与招新发布",
+  "nativePackageCheck": {
+    "pages": 24,
+    "files": 167,
+    "bytes": 778355,
+    "domainChecking": true
+  },
+  "developerToolsCompilationIncluded": true,
+  "realDeviceAcceptanceExecuted": false,
+  "reviewSubmitted": false,
+  "publicReleaseExecuted": false
+}
