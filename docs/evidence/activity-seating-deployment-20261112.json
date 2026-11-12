@@ -1,0 +1,69 @@
+{
+  "deployedAt": "2026-11-12T13:27:14+08:00",
+  "sourceRevision": "d3a1446ee0677876cdea2e833a24d479ec047c8f",
+  "buildID": "kk0HK-b4qmNuiNPdilfqE",
+  "releaseDirectory": "/srv/zijingwebsite/releases/activity-seating-20261112-d3a1446",
+  "backup": {
+    "directory": "/srv/zijingwebsite/backups/activity-seating-20261112-d3a1446",
+    "restoredTables": 69,
+    "restoredRecords": 3963,
+    "originalDataTablesMatchedAfterIsolatedMigration": 68,
+    "originalRecordsMatchedAfterIsolatedMigration": 3945,
+    "rollbackScript": "/srv/zijingwebsite/backups/activity-seating-20261112-d3a1446/rollback.sh"
+  },
+  "migration": {
+    "name": "20261112_000000_activity_seating",
+    "addedTables": 4,
+    "liveBusinessTablesCompared": 12,
+    "missingPreExistingRows": 0,
+    "changedPreExistingRows": 0,
+    "existingSignupRecordsMatched": 278
+  },
+  "verification": {
+    "targetedTestsPassed": 109,
+    "typescript": "passed",
+    "changedFilesESLint": "passed",
+    "productionBuild": "passed",
+    "browserLoopback": {
+      "seatCount": 381,
+      "mobileViewport": 390,
+      "horizontalSeatScroll": true,
+      "keyboardNavigation": true,
+      "proofUpload": true,
+      "rejectAndRelease": true,
+      "resubmitAndConfirm": true,
+      "anonymousProofDenied": true
+    },
+    "serverIsolated": {
+      "submission": true,
+      "privateProof": true,
+      "rejectAndRelease": true,
+      "resubmitAndConfirm": true
+    },
+    "publicHTTPS": {
+      "origin": "https://home.thuzijing.top",
+      "build": "kk0HK-b4qmNuiNPdilfqE",
+      "sameBuildAsset": true,
+      "http": {
+        "/health/live": 200,
+        "/health/ready": 200,
+        "/events": 200,
+        "/api/miniapp/status": 200,
+        "/_next/static/kk0HK-b4qmNuiNPdilfqE/_buildManifest.js": 200,
+        "/activities/events/1/seating": 307,
+        "/api/activities/events/2147483647/seating": 404,
+        "/api/activities/community-posts/5/seating": 200,
+        "/api/activities/community-posts/5/seating?mode=review": 401
+      }
+    },
+    "productionAuthenticatedWorkflow": "verified with synthetic accounts in isolated restore"
+  },
+  "miniProgram": {
+    "version": "0.5.3",
+    "packageCheck": "passed",
+    "nativePageLogic": "passed with simulated wx APIs",
+    "officialWXMLAndWXSSCompilation": "passed",
+    "wechatPlatformUpload": "pending",
+    "realDeviceAcceptance": "pending"
+  }
+}
