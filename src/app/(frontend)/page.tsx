@@ -331,7 +331,7 @@ function MemberHome({ home }: { home: HomeResponse }) {
     if (!content) return null;
     return (
       <div className={styles.sectionBlock} data-section={kind}>
-        {["upcoming", "open", "notices", "about"].includes(kind) && (
+        {["upcoming", "notices", "about"].includes(kind) && (
           <PixelCorners seed={kind} />
         )}
         {content}
