@@ -1,12 +1,12 @@
 # 清华大学学生紫荆电竞社网站
 
-Next.js + Payload CMS + PostgreSQL 模块化单体。公开内容、招新批次、赛季、相册和首页均由中文后台维护。已有网站入口为 https://home.thuzijing.top；本轮 1.1.0 社团运营底座仅在保存的云开发环境实现，尚未部署。完整历史验收见 [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)，接手开发先读 [docs/STATUS.md](docs/STATUS.md)。
+基于 Next.js、Payload CMS 和 PostgreSQL 的社团网站，提供活动日程与报名、游戏社群、代表队选拔、骨干招新、公告影像和个人工作台。内容与业务配置由中文后台维护。
 
-当前流程、角色矩阵、版本及已测范围见 [社团运营 1.1.0](docs/CLUB_OPERATIONS.md)，完整改版需求与后续清单见 [设计输入](docs/CLUB_OPERATIONS_DESIGN.md)。平台角色与社群任职独立；注册、扫码和提交网站意向不代表进入微信群，微信建群及拉群均由管理员人工完成。
+本分支将像素校园设计接入正式网页。原生小程序继续使用原有界面；网页改版说明见 [PIXEL_CAMPUS_WEB.md](docs/PIXEL_CAMPUS_WEB.md)。部署记录见 [STATUS.md](docs/STATUS.md)，日常运营流程见 [CLUB_OPERATIONS.md](docs/CLUB_OPERATIONS.md)。
 
-## 本地启动
+## 本地运行
 
-要求 Node.js 24.12.0、pnpm 11.19.0。PowerShell 和 Linux 都可运行以下命令：
+需要 Node.js 24.12.0 和 pnpm 11.19.0。在项目根目录执行：
 
 ```sh
 pnpm install --frozen-lockfile
@@ -14,56 +14,98 @@ pnpm setup:local
 pnpm db:dev
 ```
 
-数据库终端保持运行；另开项目终端：
+保留数据库终端，另开终端执行：
 
 ```sh
 pnpm migrate
 pnpm dev
 ```
 
-访问 http://localhost:3000 ，后台 http://localhost:3000/admin 。数据库仅监听 127.0.0.1:55439，数据在 `.data/postgres`。`setup:local` 生成随机秘密且保留已有 `.env`。Windows 使用 PostgreSQL 自带 pg_ctl 的受限进程启动，不建立系统用户。停止数据库：`pnpm db:stop`（Windows）；其他平台在数据库终端按 Ctrl+C。
+- 网页：<http://localhost:3000>
+- 管理后台：<http://localhost:3000/admin>
+- 本地数据库：`127.0.0.1:55439`，数据目录 `.data/postgres`
 
-## 首位管理员
+`setup:local` 在没有 `.env` 时生成本地配置和随机密钥，已有配置会保留。数据库启动脚本支持 macOS、Linux 和 Windows；Windows 使用 PostgreSQL 自带的受限进程，不创建系统用户。停止数据库：Windows 执行 `pnpm db:stop`，其他平台在数据库终端按 Ctrl+C。
 
-没有默认账号。通过临时环境变量提供自己的邮箱与至少 16 位随机密码。PowerShell：
+查看生产构建效果：
 
-```powershell
-$env:ADMIN_EMAIL = Read-Host '管理员邮箱'
-$securePassword = Read-Host '至少16位随机密码' -AsSecureString
-$env:ADMIN_PASSWORD = [Net.NetworkCredential]::new('', $securePassword).Password
-pnpm admin:create
-Remove-Item Env:ADMIN_PASSWORD
-Remove-Item Env:ADMIN_EMAIL
+```sh
+pnpm build
+pnpm start
 ```
 
-已有后台用户时初始化拒绝执行，后续由管理员在后台新增账号。密码不写入仓库或命令参数。首次注册 REST 入口也由服务端限制。没有 SMTP 时密码重置明确失败，不打印重置令牌；管理员可在后台重置其他账号。
+## 网页改版
 
-## 内容与预览
+- **清华经典**：紫色校园、暖金主操作与秋日二校门，首次访问默认使用。
+- **清凉夏夜**：深蓝绿、薄荷色与夏日校门。
+- **温煦冬日**：暖白、深绿与雪景校门。
+- **简约**：系统字体、平面控件，减少装饰和环境动画。
 
-真实内容尚未提供。首次启动展示空状态。`pnpm seed:demo` 显式导入标注的演示内容，重复执行不重复导入；`pnpm demo:clean` 只删除 `demo=true` 内容，不删除真实记录。两者只允许 development/staging。已发布内容编辑保存草稿，发布负责人审核后点“发布修改”；后台“预览”需登录，禁止公共缓存。
+主题通过 `zijing_theme` Cookie 保存，兼容旧版深浅主题。切换不重置填写中的表单。
 
-## 实际脚本
+登录首页按工作台／近期日程、焦点活动／正在招募、公告／赛场高光分组，游戏社群位于下方。访客保留独立的浏览与参与入口。日历分别标记未来活动、本人已报名活动与今天；历史日期仍可查询。
 
-| 命令 | 用途 |
-|---|---|
-| `pnpm typecheck` / `pnpm lint` | 类型与静态检查 |
-| `pnpm test` | 时间单元测试、真实数据库权限测试；只准开发库 |
-| `pnpm exec playwright install chromium` | 安装浏览器测试环境 |
-| `pnpm test:e2e` | 浏览器发布、导航、布局、无障碍；先导入演示 |
-| `pnpm build` / `pnpm start` | 生产构建 / 启动构建产物 |
-| `pnpm generate:types` | 根据 CMS 模型生成类型 |
-| `pnpm payload generate:importmap` | 更新后台组件映射 |
-| `pnpm migrate:create` / `pnpm migrate` | 生成可审查迁移 / 执行迁移 |
-| `pnpm payload migrate:status` | 查看迁移状态 |
-| `pnpm backup` | 数据库与媒体完整备份（需 pg_dump 17+） |
-| `pnpm restore:verify <备份目录>` | 新建隔离库恢复、核验所有表和媒体 |
-| `pnpm club:migration-drill` | 仅历史 58 表开发库：备份、恢复到新库、迁移及旧字段核对 |
-| `pnpm club:rollback-check` | 只读核对旧 1.0 构建的角色、数据状态和权限兼容性 |
-| `pnpm preflight` | 上线缺项检查；不会执行部署 |
+按钮按用途采用台阶切角、票券缺口、菜单页签和方向键，选中、按下、键盘焦点与禁用状态保持明确。消息和照片支持手动切换；鼠标停留、键盘聚焦、离开视口、页面隐藏、减少动态或简约主题时停止自动切换。
 
-`pnpm test` 和浏览器测试会建立并清理虚构测试记录，保留必要审计记录。不要指向生产数据库。容器、反向代理和异机备份说明在 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)。
-# 账号与社群 V2
+## 预览内容与账号
 
-网站支持清华邮箱验证码注册、平台角色、独立社群任职、管理员申请、人工进群回执、社群活动与通知及风采审核。聊天、论坛、评论、点赞继续关闭，历史表保留。
-早期部署与运营步骤见 [docs/COMMUNITY_V2.md](docs/COMMUNITY_V2.md)，当前流程以 [社团运营说明](docs/CLUB_OPERATIONS.md) 为准。注册需要 SMTP 环境变量；
-社长通过指定邮箱的验证码认领，密码只由用户在站内安全输入。普通用户使用唯一昵称或邮箱登录；昵称匹配不区分大小写，显示保留用户输入的大小写。
+新数据库默认展示空状态。需要示例内容时执行：
+
+```sh
+pnpm seed:demo
+```
+
+像素改版另有更完整的本地预览资料。在 `.env` 设置 `APP_ENV=development`，使用本机数据库并保持 SMTP、S3 未配置后执行：
+
+```sh
+PIXEL_PREVIEW_SEED=1 pnpm exec tsx scripts/pixel-preview-seed.ts
+```
+
+PowerShell 可先设置 `$env:PIXEL_PREVIEW_SEED = '1'`，再运行 `pnpm exec tsx scripts/pixel-preview-seed.ts`，完成后删除该环境变量。
+
+脚本补充标记为演示的公告、活动与相册，重复运行不重复导入，演示活动不接受实际报名。`pnpm demo:clean` 清理 `demo=true` 内容，保留正式记录。
+
+网站没有默认账号。正常注册需要清华邮箱及 SMTP；登录支持唯一昵称或邮箱。首位后台管理员可通过 `ADMIN_EMAIL`、`ADMIN_PASSWORD` 临时环境变量运行 `pnpm admin:create` 创建；密码至少 16 位，使用安全交互输入，完成后清除环境变量。已有后台用户时初始化会拒绝执行。
+
+登录后界面的合成记录脚本为 `scripts/pixel-preview-account-seed.ts`：仅接受本机 55439 端口、`APP_ENV=development`、未配置 SMTP/S3 的数据库，以及预先创建、仅有 `member` 角色的专用体验账号。它不创建账号或授予权限；具体约束见 [改版记录](docs/PIXEL_CAMPUS_WEB.md)。
+
+## 目录导航
+
+- `src/app/(frontend)/`：网页路由、首页与主题覆盖样式。
+- `src/components/v2/`：导航、校园封面、按钮、卡片、日历和轮播。
+- `src/components/activity-pages/`：活动详情、报名与座位界面。
+- `src/lib/`：业务规则、权限和页面数据读取。
+- `src/collections/`、`src/migrations/`：CMS 模型与数据库迁移。
+- `public/pixel-campus/`：像素校园、字体与游戏图标。
+- `scripts/`：本地环境、演示资料和运维工具。
+- `tests/`：单元、集成与浏览器回归。
+- `miniprogram/`：原生微信小程序。
+
+## 检查与测试
+
+```sh
+pnpm typecheck
+pnpm lint
+pnpm build
+```
+
+像素网页、日历与本轮审核修复的定向回归：
+
+```sh
+pnpm exec vitest run tests/pixel-campus.test.ts tests/pixel-campus-render.test.ts tests/v2-calendar.test.ts tests/pixel-audit-followups.test.ts tests/rebuild-activity-feedback.test.ts
+```
+
+完整测试使用 `pnpm test`。部分集成和浏览器测试会写入、清理合成记录，应使用独立开发数据库。浏览器环境安装与运行：
+
+```sh
+pnpm exec playwright install chromium
+pnpm test:e2e
+```
+
+本地已执行的检查、覆盖范围与未完成项见 [改版验证记录](docs/PIXEL_CAMPUS_WEB.md)。
+
+## 素材与维护
+
+素材来源和处理方式记录在 [ASSET-PROVENANCE.json](public/pixel-campus/ASSET-PROVENANCE.json)，游戏图标来源见 [SOURCES.json](public/pixel-campus/game-icons/SOURCES.json)，像素字体附 [SIL OFL 许可](public/pixel-campus/FONT-LICENSE.txt)。校门概念插画保留 AI 标识，赛事示例照片保留原水印和来源；CMS 主图与已发布内容优先。
+
+原有报名、申请、人工进群、CMS 发布和服务端授权继续使用。注册或提交意向不会自动进入微信群，拉群由管理员完成。隐私与运营说明见 [COMMUNITY_V2.md](docs/COMMUNITY_V2.md) 和 [CLUB_OPERATIONS.md](docs/CLUB_OPERATIONS.md)。备份、恢复及部署工具见 [DEPLOYMENT.md](docs/DEPLOYMENT.md)。

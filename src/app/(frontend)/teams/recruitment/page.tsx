@@ -68,9 +68,7 @@ export default async function Recruitment({ searchParams }: { searchParams: Prom
     <>
       <PageHero
         tone="stage"
-        eyebrow="TRYOUTS · 代表队选拔 · 骨干招新"
         title="选拔中心"
-        description="开放中的代表队选拔与骨干批次都在这里。提交后在本页查看本人回执与审核意见，由管理员人工选拔。"
         actions={
           <ButtonLink href="#my-team-applications" tone="accent" icon="arrow">
             我的入队申请
@@ -112,7 +110,7 @@ export default async function Recruitment({ searchParams }: { searchParams: Prom
               </Section>
             )}
 
-            <Section id="my-team-applications" title="我的入队申请" description={`${own.totalDocs} 份记录。草稿只保存在本人回执中，提交后进入审核队列。`}>
+            <Section id="my-team-applications" title="我的入队申请" count={own.totalDocs}>
               <div className={work.records}>
                 {own.docs.length ? (
                   own.docs.map((doc) => (
@@ -130,7 +128,7 @@ export default async function Recruitment({ searchParams }: { searchParams: Prom
                       )}
                       <div className={work.actions}>
                         <Link className={buttonClass("primary", "small")} href={`/teams/recruitment/${positiveID(doc.recruitment)}`}>
-                          查看回执 / 继续修改
+                          查看申请
                         </Link>
                         {["draft", "pending", "returned"].includes(doc.status) && (
                           <TeamCoreOperation operation="withdraw-join" id={doc.id} revision={doc.updatedAt} label="撤回申请" />
@@ -140,14 +138,14 @@ export default async function Recruitment({ searchParams }: { searchParams: Prom
                   ))
                 ) : (
                   <EmptyState title="还没有入队申请" icon="ticket" compact>
-                    从下方招新批次开始，了解选拔要求；填写后可以先保存草稿。
+                    选择招新批次了解要求，填写后可先保存草稿。
                   </EmptyState>
                 )}
               </div>
               <TeamCorePagination page={teamPage(query.ownPage)} total={own.totalPages} path="/teams/recruitment" parameter="ownPage" query={query} label="我的申请" />
             </Section>
 
-            <Section id="team-recruitment-list" title="代表队招新批次" description={`${batches.totalDocs} 个公开批次；开放中的批次见上方。`}>
+            <Section id="team-recruitment-list" title="代表队招新批次" description="开放批次见上方，其余批次按发布时间排列">
               <div className={work.records}>
                 {listed.length ? (
                   listed.map((batch) => {
@@ -163,16 +161,14 @@ export default async function Recruitment({ searchParams }: { searchParams: Prom
                         {form.intro && <p className={work.meta}>{form.intro}</p>}
                         <div className={work.actions}>
                           <Link className={work.chipLink} href={`/teams/recruitment/${batch.id}`}>
-                            查看申请与选拔说明
+                            查看选拔要求
                           </Link>
                         </div>
                       </article>
                     );
                   })
                 ) : (
-                  <EmptyState title={batches.docs.length ? "其余批次已在上方显示" : "目前没有公开招新批次"} icon="flag" compact>
-                    {batches.docs.length ? "开放中的代表队选拔见“开放中的批次”。" : "新的选拔安排确认后将在这里发布。"}
-                  </EmptyState>
+                  <EmptyState title={batches.docs.length ? "暂无其他批次" : "目前没有公开招新批次"} icon="flag" compact />
                 )}
               </div>
               <TeamCorePagination page={page} total={batches.totalPages} path="/teams/recruitment" parameter="page" query={query} label="招新批次" />
@@ -181,7 +177,8 @@ export default async function Recruitment({ searchParams }: { searchParams: Prom
             <Section
               id="my-team-memberships"
               title="我的代表队成员记录"
-              description={`${memberships.totalDocs} 条记录。在队时可填写本人简介、投稿队伍荣誉；公开简介须由本人明确选择展示。`}
+              count={memberships.totalDocs}
+              description="在队期间可编辑简介、投稿荣誉；公开简介需本人授权"
             >
               <div className={work.records}>
                 {memberships.docs.length ? (
@@ -195,17 +192,17 @@ export default async function Recruitment({ searchParams }: { searchParams: Prom
                       {doc.status === "active" && positiveID(doc.team) && (
                         <nav className={work.actions} aria-label="本队成员操作">
                           <Link className={work.chipLink} href={`/teams/profiles/${positiveID(doc.team)}`}>
-                            填写或修改我的队内简介
+                            编辑队内简介
                           </Link>
                           <Link className={work.chipLink} href={`/teams/honors?view=mine&team=${positiveID(doc.team)}`}>
-                            本队荣誉与我的投稿
+                            荣誉与我的投稿
                           </Link>
                         </nav>
                       )}
                       {doc.status === "active" && (
                         <details className={work.disclosure}>
                           <summary>办理离队</summary>
-                          <p>离队后会停止仅现任队员可使用的编辑与投稿权限，历史记录继续保留。</p>
+                          <p>离队后将停止编辑队内简介和投稿荣誉，历史记录保留。</p>
                           <TeamCoreOperation operation="leave" id={doc.id} revision={doc.updatedAt} label="办理本人离队" />
                         </details>
                       )}
@@ -229,8 +226,8 @@ export default async function Recruitment({ searchParams }: { searchParams: Prom
                 { href: "/teams/manage", label: "代表队工作台" },
               ]}
             >
-              <p>先阅读批次要求与开放时间，填写后可保存草稿。提交后在本人回执查看审核意见。</p>
-              <p>录取建立代表队成员关系，不授予平台或社群管理权限。</p>
+              <p>核对选拔要求与开放时间后填写申请。草稿仅本人可见，提交后由管理员审核；处理意见可在申请中查看。</p>
+              <p>录取后成为队员；管理权限需另行任命。</p>
             </TaskNote>
           </aside>
         </div>

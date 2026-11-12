@@ -107,10 +107,9 @@ async function FixedPageView({ name }: { name: string }) {
     <>
       <PageHero
         tone="stage"
-        eyebrow={privacy ? "资料用途 · 展示选择 · 联系方式" : contact ? "CONTACT · 联系社团" : "ABOUT · 关于紫荆"}
         title={page.title}
         description={
-          privacy ? "我们如何使用、展示与保留你提交的资料。" : contact ? "活动咨询、社团交流与合作，欢迎与我们联系。" : "了解紫荆，找到与你并肩的伙伴。"
+          privacy ? "资料的用途、展示范围与保留期限" : undefined
         }
         meta={page.updatedAt ? <span>更新于 {formatDate(page.updatedAt)}</span> : undefined}
       />
@@ -238,9 +237,7 @@ async function JoinView({ sub, page }: { sub: string; page: number }) {
     <>
       <PageHero
         tone="stage"
-        eyebrow="JOIN · 加入紫荆"
         title={selected ? selected.title : "加入紫荆"}
-        description={selected ? selected.body : "一起玩，认真赢。三条路径，选一条开始。"}
         back={sub ? { href: "/join", label: "加入紫荆" } : undefined}
         actions={
           user ? undefined : (
@@ -308,7 +305,6 @@ async function NewsView({ search }: { search: Awaited<Search> }) {
   return (
     <FeedView
       title="动态"
-      description="公告、社群通知、新闻、影像、风采与荣誉，汇成一条阅读流。"
       kind={kind}
       result={result}
       signedIn

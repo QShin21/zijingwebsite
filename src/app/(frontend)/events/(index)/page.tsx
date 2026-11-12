@@ -21,6 +21,7 @@ import { empty } from "@/components/v2/copy";
 import { dayKey } from "@/components/v2/format";
 import { ScheduleCalendar } from "@/components/v2/ScheduleCalendar";
 import { ScheduleRunner } from "@/components/v2/ScheduleRunner";
+import { ScheduleTimeFields } from "@/components/v2/ScheduleTimeFields";
 import { PixelCorners } from "@/components/v2/PixelCorners";
 import styles from "./events.module.css";
 import calendarStyles from "@/components/v2/schedule-calendar.module.css";
@@ -226,22 +227,7 @@ export default async function Calendar({
             />
             只看报名开放
           </label>
-          <label>
-            时间
-            <select name="range" defaultValue={range}>
-              <option value="upcoming">即将开始</option>
-              <option value="past">已结束</option>
-              <option value="month">按月份</option>
-            </select>
-          </label>
-          <label>
-            月份（按月份时）
-            <input
-              type="month"
-              name="month"
-              defaultValue={month ?? currentMonth()}
-            />
-          </label>
+          <ScheduleTimeFields key={`${range}:${month ?? ""}`} range={range} month={month ?? currentMonth()} />
           <label>
             活动类型
             <select name="category" defaultValue={category ?? ""}>

@@ -29,7 +29,7 @@ export function FeedView({
   query = {},
 }: {
   title: string;
-  description: string;
+  description?: string;
   kind: FeedKind;
   result: Page<FeedItem> & { restricted: boolean };
   signedIn: boolean;
@@ -38,7 +38,7 @@ export function FeedView({
 }) {
   return (
     <>
-      <PageHero tone="stage" eyebrow="FEED · 动态" title={title} description={description} />
+      <PageHero tone="stage" title={title} description={description} />
       <Wrap className={layout.pageBody}>
         {signedIn && (
           <LinkTabs

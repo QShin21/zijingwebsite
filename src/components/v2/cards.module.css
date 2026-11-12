@@ -194,7 +194,7 @@
 }
 .clubTag {
   background: var(--z-tint);
-  color: var(--z-action);
+  color: var(--z-ink);
 }
 .category {
   border: 1px solid var(--z-line-strong);
@@ -1101,10 +1101,23 @@
 
 /* Featured content carries depth; ordinary records rely on type and separators. */
 .stretch {
-  text-decoration: underline;
-  text-decoration-color: var(--z-line-strong);
-  text-underline-offset: 4px;
-  text-decoration-thickness: 1px;
+  text-decoration: none;
+}
+.eventState {
+  color: var(--z-muted);
+  font-weight: 500;
+}
+.matchTop > span {
+  min-height: 22px;
+  font-weight: 500;
+  white-space: normal;
+}
+.receiptUnavailable {
+  display: block;
+  margin-top: 4px;
+}
+.receipt:not(:has(a)):hover {
+  background: transparent;
 }
 .match_spotlight {
   background: var(--z-feature);
@@ -1229,3 +1242,58 @@
   clip-path: none;
   box-shadow: none;
 }
+
+/* Only real destinations react. Static facts and status labels remain flat. */
+.matchArrow {
+  border-width: 2px;
+  border-color: var(--z-field-border);
+  background: var(--z-field);
+  box-shadow: inset 0 1px var(--z-control-highlight), 0 3px var(--z-secondary-base);
+}
+:is(.community, .team, .call, .article, .application) :is(h2, h3):has(> .stretch)::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 10px;
+  border-top: 2px solid var(--z-action);
+  border-right: 2px solid var(--z-action);
+  transform: rotate(45deg);
+  vertical-align: middle;
+}
+:is(.match, .notice, .article, .community, .team, .call, .application, .showcase):has(a[href]) {
+  cursor: pointer;
+}
+:is(.match, .notice, .article, .community, .team, .call, .application, .showcase):has(a:focus-visible) {
+  box-shadow: inset 0 0 0 2px var(--z-focus);
+}
+:is(.match, .notice, .article, .community, .team, .call, .application, .showcase):has(a[href]):active {
+  box-shadow: inset 0 2px var(--z-control-shadow), inset 0 0 0 2px var(--z-action);
+}
+.match:active .matchArrow {
+  background: var(--z-action);
+  color: var(--z-action-ink);
+  border-color: var(--z-action);
+  box-shadow: inset 0 1px var(--z-control-shadow);
+}
+@media (hover: hover) {
+  .match:hover .matchArrow,
+  .match:focus-within .matchArrow {
+    background: var(--z-action);
+    color: var(--z-action-ink);
+    border-color: var(--z-action);
+  }
+  :is(.article, .community, .team, .call, .application, .showcase):has(a[href]):hover {
+    border-color: var(--z-focus);
+  }
+}
+
+/* The entry arrow is a directional token rather than another miniature card. */
+.matchArrow {
+  width: 38px;
+  border: 0;
+  background: var(--z-raised);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, calc(100% - 12px) 6px, calc(100% - 6px) 6px, calc(100% - 6px) 12px, 100% 12px, 100% calc(100% - 12px), calc(100% - 6px) calc(100% - 12px), calc(100% - 6px) calc(100% - 6px), calc(100% - 12px) calc(100% - 6px), calc(100% - 12px) 100%, 0 100%);
+  box-shadow: inset 0 2px var(--z-control-highlight), inset 0 -3px var(--z-secondary-base);
+}
+:global(:root[data-z-theme="simple"]) .matchArrow { clip-path: none; box-shadow: none; }

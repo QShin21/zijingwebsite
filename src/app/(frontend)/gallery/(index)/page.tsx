@@ -10,7 +10,6 @@ export default async function Gallery({ searchParams }: { searchParams: Search }
   return (
     <FeedView
       title="影像"
-      description="社团活动与赛场瞬间的公开相册。"
       kind="albums"
       result={result}
       signedIn

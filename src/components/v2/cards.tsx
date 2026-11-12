@@ -114,6 +114,8 @@ export function MatchCard({
   const Heading = headingLevel === 2 ? "h2" : "h3";
   const when = event.startAt ? formatRange(event.startAt, event.endAt) : event.publishedAt ? `发布于 ${formatDate(event.publishedAt)}` : "时间待定";
   const soon = event.state === "upcoming" ? countdown(event.startAt) : null;
+  // The card already carries DemoPill; keep the stored titles unchanged.
+  const displayTitle = (title: string) => event.demo ? title.replace(/^演示\s*[·•：:]\s*/, "") : title;
   return (
     <article
       className={`${styles.match} ${styles[`match_${variant}`]}`}
@@ -127,14 +129,14 @@ export function MatchCard({
       <DateBlock iso={event.startAt} size={variant === "spotlight" ? "lg" : variant === "tile" ? "sm" : "md"} tone={variant === "spotlight" ? "accent" : "plain"} />
       <div className={styles.matchBody}>
         <div className={styles.matchTop}>
-          {event.community ? <CommunityChip community={event.community} /> : <span className={styles.clubTag}>社团活动</span>}
+          {event.community ? <CommunityChip community={{ ...event.community, title: displayTitle(event.community.title) }} /> : <span className={styles.clubTag}>社团活动</span>}
           {event.category && <span className={styles.category}>{event.category}</span>}
           {event.promoted && <span className={styles.promoted}>精选</span>}
           {event.demo && <DemoPill />}
         </div>
         <Heading className={styles.matchTitle}>
           <Link href={event.href} className={styles.stretch}>
-            {event.title}
+            {displayTitle(event.title)}
           </Link>
         </Heading>
         <p className={styles.matchMeta}>
@@ -151,15 +153,18 @@ export function MatchCard({
           {event.team && (
             <span>
               <Icon name="trophy" size={15} />
-              {event.team.title}
+              {displayTitle(event.team.title)}
             </span>
           )}
         </p>
         {variant === "spotlight" && event.summary && <p className={styles.matchSummary}>{event.summary}</p>}
         <div className={styles.matchFoot}>
-          <StatusPill tone={eventTone(event)}>{event.stateLabel}</StatusPill>
+          {soon ? (
+            <span className={styles.countdown}>
+              <span className={styles.eventState}>{event.stateLabel}</span> · {soon}
+            </span>
+          ) : <StatusPill tone={eventTone(event)}>{event.stateLabel}</StatusPill>}
           <SignupPill event={event} />
-          {soon && <span className={styles.countdown}>{soon}</span>}
           {event.signup.state === "open" && event.signup.deadline && !event.signup.viewerSubmitted && (
             <span className={styles.deadline}>{deadlineText(event.signup.deadline)}</span>
           )}
@@ -528,13 +533,16 @@ export function ReceiptRow({ receipt }: { receipt: SignupReceiptCard }) {
       <DateBlock iso={receipt.event?.startAt ?? null} size="sm" />
       <div>
         <h3>
-          <Link href={receipt.href} className={styles.stretch}>
-            {receipt.eventTitle}
-          </Link>
+          {receipt.event ? (
+            <Link href={receipt.href} className={styles.stretch}>
+              {receipt.eventTitle}
+            </Link>
+          ) : receipt.eventTitle}
         </h3>
         <p className={styles.small}>
           提交于 {formatDateTime(receipt.submittedAt)}
           {receipt.updatedAt !== receipt.submittedAt && ` · 更新于 ${formatDateTime(receipt.updatedAt)}`}
+          {!receipt.event && <span className={styles.receiptUnavailable}>历史记录保留，活动已撤下，无法再进入报名</span>}
         </p>
       </div>
       <StatusPill tone={receipt.editable ? "success" : "neutral"}>{receipt.editable ? "可修改" : receipt.event ? "已提交" : "活动已撤下"}</StatusPill>

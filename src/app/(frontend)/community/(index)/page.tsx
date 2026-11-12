@@ -18,9 +18,8 @@ export default async function Communities({ searchParams }: { searchParams: Sear
     <>
       <PageHero
         tone="stage"
-        eyebrow="COMMUNITIES · 游戏社群"
-        title="找到同好，从这里开场"
-        description="游戏社群是紫荆的日常据点。找到你玩的游戏，看看活动与风采，再联系管理员人工拉你进群。"
+        title="游戏社群"
+        description="选择游戏社群，联系在任管理员邀请进群"
         actions={
           <ButtonLink href="/community/apply" tone="stage" icon="plus">
             申请组织社群
@@ -65,8 +64,8 @@ export default async function Communities({ searchParams }: { searchParams: Sear
         <Pager page={result.page} totalPages={result.totalPages} path="/community" query={{ q: q || undefined }} />
         <section className={styles.organize} aria-labelledby="organize-title">
           <div>
-            <h2 id="organize-title">把热爱的游戏，组织成社群</h2>
-            <p>参与已有社群的组织工作，或为还没出现的游戏发起申请。审核状态和处理意见会保存在你的申请记录中。</p>
+            <h2 id="organize-title">组织游戏社群</h2>
+            <p>可申请管理已有社群或组织新社群，审核进度见「我的申请」。</p>
           </div>
           <ButtonLink href="/community/apply" tone="accent" icon="arrow">
             申请成为社群管理员

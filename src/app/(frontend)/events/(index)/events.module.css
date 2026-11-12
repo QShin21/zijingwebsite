@@ -10,24 +10,9 @@
 .scopeBar a {
   flex-shrink: 0;
   min-height: 44px;
-  padding: 8px 20px;
+  padding: 8px 36px 8px 20px;
   font-family: var(--z-pixel);
   font-size: 17px;
-  background: transparent;
-  border: 1px solid transparent;
-  box-shadow: none;
-}
-.scopeBar a[aria-current] {
-  color: var(--z-action-ink);
-  background: var(--z-action);
-  border-color: var(--z-action);
-  box-shadow:
-    inset 0 2px var(--z-control-highlight),
-    0 3px var(--z-button-base);
-}
-.scopeBar a:active {
-  translate: 0 2px;
-  box-shadow: inset 0 1px var(--z-control-shadow);
 }
 .filters {
   position: relative;
@@ -63,7 +48,8 @@
 }
 @media (max-width: 760px) {
   .scopeBar a {
-    padding-inline: 14px;
+    padding-left: 14px;
+    padding-right: 30px;
   }
   .filters {
     padding: 16px;

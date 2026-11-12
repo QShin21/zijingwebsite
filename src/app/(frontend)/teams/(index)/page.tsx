@@ -25,9 +25,7 @@ export default async function Teams({ searchParams }: { searchParams: Search }) 
     <>
       <PageHero
         tone="stage"
-        eyebrow="TEAMS · 代表队中心"
         title="代表队"
-        description="各游戏社群的代表队、公开队员简介与已核验荣誉。想上场？到选拔中心找开放批次。"
         actions={
           <>
             <ButtonLink href="/teams/recruitment" tone="accent" icon="arrow">
@@ -106,7 +104,7 @@ export default async function Teams({ searchParams }: { searchParams: Search }) 
                   )
                 }
               >
-                代表队由社群管理员申请建立，审核通过后出现在这里。
+                社群管理员可申请建队，审核通过后公开。
               </EmptyState>
             )}
             <Pager page={result.page} totalPages={result.totalPages} path="/teams" query={{ community, status }} />

@@ -522,9 +522,18 @@
   border-bottom: 0;
 }
 .quick a {
-  text-decoration: underline;
-  text-decoration-color: var(--z-line-strong);
-  text-underline-offset: 5px;
+  text-decoration: none;
+}
+.quick a::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-left: auto;
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  transform: rotate(45deg);
+  flex: 0 0 auto;
+  color: var(--z-action);
 }
 .quick a:hover {
   background: var(--z-tint);

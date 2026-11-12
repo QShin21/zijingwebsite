@@ -65,7 +65,7 @@ function PersonalPanel({ home }: { home: HomeResponse }) {
           <li>
             <Link href="/teams/recruitment">
               <Icon name="trophy" />
-              代表队选拔与我的申请
+              代表队选拔与申请
             </Link>
           </li>
           <li>
@@ -84,7 +84,7 @@ function PersonalPanel({ home }: { home: HomeResponse }) {
     >
       <PixelCorners variant="gold" />
       <h2 id="join-title" className={layout.panelTitle}>
-        三步加入紫荆
+        选择参与方式
         <Link href="/join">了解全部</Link>
       </h2>
       <ol className={styles.joinSteps}>
@@ -215,7 +215,6 @@ function HomeBlock({
         <Section
           id="promoted"
           title={section.title}
-          description="经审核升推到社团主页的社群活动、通知与风采。"
         >
           {events.length > 0 && (
             <div className={layout.grid3}>
@@ -283,7 +282,6 @@ function HomeBlock({
         <Section
           id="highlights"
           title={section.title}
-          description="最新荣誉、精选风采与社团影像。"
           more={{ href: "/news", label: "全部动态" }}
         >
           <div className={`${layout.mosaic} ${styles.highlights}`}>

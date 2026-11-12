@@ -5,6 +5,7 @@ import {
   canPublish,
   canReviewCommunityApplication,
   canReviewPromotion,
+  canReviewShowcase,
   canSubmitClubContent,
   communityIDs,
 } from "../rules";
@@ -136,7 +137,7 @@ export async function getMySignups(p: Payload, viewer: User | null, input: Input
     const kind = row.activityType === "events" ? "club" : row.activityType === "community-posts" ? "community" : null;
     const event = kind ? cards.get(`${kind}:${row.activityID}`) ?? null : null;
     return { key: `signup:${row.id}`, eventTitle: row.eventTitle, event, submittedAt: row.createdAt, updatedAt: row.updatedAt,
-      href: kind ? `/activities/${row.activityType}/${row.activityID}/fill` : "/account", editable: Boolean(event && event.signup.mode === "form" && event.signup.state === "open") };
+      href: event && kind ? `/activities/${row.activityType}/${row.activityID}/fill` : "/account?view=signups", editable: Boolean(event && event.signup.mode === "form" && event.signup.state === "open") };
   });
   return { docs, page, totalDocs: result.totalDocs, totalPages: result.totalPages, hasNextPage: result.hasNextPage };
 }
@@ -152,6 +153,21 @@ async function ownMemberships(p: Payload, user: User): Promise<MembershipView[]>
       actions: { editProfile: established, submitHonor: established, leave: row.status === "active" } };
   }));
   return projected.filter((row): row is MembershipView => row !== null);
+}
+
+async function showcaseReviewTargets(p: Payload, user: User) {
+  const high = canPublish(user), reviews = communityIDs(user, "reviewShowcase");
+  if (!high && !reviews.length) return [];
+  const result = await p.find({ collection: "games", user: null, overrideAccess: false, draft: false, depth: 0,
+    pagination: false, limit: 0, sort: "sort", where: publicWhere(high ? {} : { id: { in: reviews } }),
+    select: { title: true, slug: true, _status: true, demo: true } });
+  return result.docs.filter(game => game._status === "published" && canReviewShowcase(user, game.id)
+    && !(process.env.APP_ENV === "production" && game.demo)).map(game => ({ id: game.id, title: game.title,
+      href: `/community/${game.slug}/showcase?view=review` }));
+}
+
+export async function getShowcaseReviewTargets(p: Payload, viewer: User | null) {
+  return showcaseReviewTargets(p, await requireViewer(p, viewer));
 }
 
 async function manageQueues(p: Payload, user: User): Promise<ManageQueue[]> {
@@ -174,8 +190,13 @@ async function manageQueues(p: Payload, user: User): Promise<ManageQueue[]> {
   if (high || reviews.length) queues.push({ key: "honors", title: "代表队荣誉审核", href: "/teams/honors?view=review", webOnly: false, pending: await count("team-honor-records",
     { and: [{ state: { equals: "pending" } }, { author: { not_equals: user.id } }, ...(high ? [] : [{ game: { in: reviews } }])] }), scope });
   if (canReviewPromotion(user)) queues.push({ key: "promotions", title: "社群升推审核", href: "/community/promotions?view=review", webOnly: true, pending: await count("content-promotions", { status: { equals: "pending" } }), scope: "全部社群" });
-  if (high || reviews.length) queues.push({ key: "showcase", title: "社群风采审核", href: "/community", webOnly: false, pending: await count("community-showcase",
-    { and: [{ status: { equals: "pending" } }, ...(high ? [] : [{ game: { in: reviews } }])] }), scope });
+  if (high || reviews.length) {
+    const targets = await showcaseReviewTargets(p, user);
+    if (targets.length) queues.push({ key: "showcase", title: "社群风采审核",
+      href: targets.length === 1 ? targets[0].href : "/community/review/showcase", webOnly: targets.length > 1,
+      pending: await count("community-showcase", { and: [{ status: { equals: "pending" } }, { game: { in: targets.map(target => target.id) } }] }),
+      scope: targets.length === 1 ? targets[0].title : scope });
+  }
   if (canSubmitClubContent(user) || communityIDs(user, "viewSignups").length) queues.push({ key: "activities", title: "活动问卷工作台", href: "/activities", webOnly: true, pending: null, scope: high ? "全部活动" : "本人及已授权活动" });
   if (canSubmitClubContent(user)) queues.push({ key: "cms", title: "内容管理后台", href: "/admin", webOnly: true, pending: null, scope: high ? "社团内容" : "授权范围内的草稿" });
   return queues;

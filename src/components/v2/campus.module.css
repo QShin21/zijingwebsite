@@ -489,25 +489,35 @@
 @media (max-width: 600px) {
   .cover,
   .heroInner {
-    min-height: 520px;
+    min-height: 440px;
   }
   .scene {
-    background-position: 64% center;
+    background-position: 70% center;
+  }
+  .cover::after {
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--z-cover-mobile-color) 98%, transparent),
+      color-mix(in srgb, var(--z-cover-mobile-color) 88%, transparent) 65%,
+      color-mix(in srgb, var(--z-cover-mobile-color) 64%, transparent)
+    );
   }
   .heroInner {
     align-items: flex-start;
-    padding-block: 42px 52px;
+    padding-block: 32px 42px;
   }
   .heroCopy {
     width: 100%;
   }
   .heroCopy h1 {
-    font-size: 46px;
+    font-size: clamp(36px, 11.2vw, 44px);
     max-width: 7em;
+    margin-bottom: 20px;
   }
   .heroCopy > p {
     font-size: 14px;
     max-width: 20em;
+    margin-bottom: 24px;
   }
   .heroActions {
     gap: 14px;

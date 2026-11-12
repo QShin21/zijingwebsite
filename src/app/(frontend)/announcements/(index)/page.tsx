@@ -12,7 +12,6 @@ export default async function Announcements({ searchParams }: { searchParams: Se
   return (
     <FeedView
       title="公告"
-      description={user ? "社团公告与各社群通知。" : "社团公告与精选社群通知，确认后在这里发布。"}
       kind="announcements"
       result={result}
       signedIn={Boolean(user)}

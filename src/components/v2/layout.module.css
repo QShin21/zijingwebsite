@@ -295,3 +295,11 @@
 .dayHead::after {
   height: 1px;
 }
+
+.filters input[aria-disabled="true"] {
+  background: var(--z-disabled-bg);
+  color: var(--z-disabled-ink);
+  border-color: var(--z-line);
+  box-shadow: none;
+  cursor: not-allowed;
+}

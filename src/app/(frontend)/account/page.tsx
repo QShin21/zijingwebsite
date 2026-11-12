@@ -181,7 +181,7 @@ export default async function Account({ searchParams }: { searchParams: Search }
               )}
             </Section>
             {manage && manage.queues.length > 0 && (
-              <Section id="manage" title="管理台" description="按当前授权显示，进入后继续按对象与所属社群判断可处理范围。">
+              <Section id="manage" title="管理台">
                 <QueueGrid queues={manage.queues} />
               </Section>
             )}
@@ -202,7 +202,7 @@ export default async function Account({ searchParams }: { searchParams: Search }
                 },
               ]}
             />
-            <p className={styles.hint}>平台角色、社群任职与队伍成员关系分别维护。骨干或代表队录用结果不会自动授予管理角色。</p>
+            <p className={styles.hint}>骨干与队员身份不自动附带管理权限。</p>
             <nav className={styles.settingLinks} aria-label="账号设置">
               <Link href="/account/reset">修改登录密码</Link>
               <Link href="/privacy">隐私说明</Link>

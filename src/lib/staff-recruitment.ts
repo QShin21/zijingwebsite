@@ -128,6 +128,15 @@ export async function ownStaffReceiptHeaders(p: Payload, actor: User | null, bat
     page, sort: "-updatedAt", where: { and: [{ applicant: { equals: actor.id } }, ...(batchID ? [{ batch: { equals: batchID } }] : [])] },
     select: { batch: true, batchTitle: true, status: true, updatedAt: true } });
 }
+/** Mark displayed batches independently from the paginated receipt list. */
+export async function ownStaffBatchIDs(p: Payload, actor: User | null, batchIDs: number[]): Promise<Set<string>> {
+  if (!actor || !batchIDs.length) return new Set();
+  const result = await p.find({ collection: "staff-applications", user: actor, overrideAccess: false, depth: 0,
+    pagination: false, limit: 0, where: { and: [{ applicant: { equals: actor.id } }, { batch: { in: batchIDs } }] },
+    select: { batch: true } });
+  const allowed = new Set(batchIDs.map(String));
+  return new Set(result.docs.map(receipt => String(relationID(receipt.batch))).filter(id => allowed.has(id)));
+}
 export async function readStaffApplications(p: Payload, actor: User | null, batchID: number, query: URLSearchParams, exportCSV = false) {
   checkedID(batchID);
   return workflowTransaction(p, actor, {}, async req => {

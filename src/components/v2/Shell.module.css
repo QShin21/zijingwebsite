@@ -678,3 +678,54 @@
 .themeOptions button:active {
   translate: 0 2px;
 }
+
+/* Navigation and theme choices use the same persistent selection language. */
+.topLink[aria-current="page"] {
+  background: var(--z-field);
+  box-shadow: inset 0 -2px var(--z-action);
+}
+.topLink:active,
+.tab:active {
+  background: var(--z-field);
+  box-shadow: inset 0 2px var(--z-control-shadow);
+}
+.tab[aria-current="page"] .tabIcon {
+  background: var(--z-action);
+  color: var(--z-action-ink);
+  box-shadow: inset 0 -2px var(--z-control-highlight);
+}
+.themePicker {
+  border-width: 2px;
+}
+.themeMenu[open] .themePicker {
+  border-color: var(--z-focus);
+  background: var(--z-raised);
+}
+.themeOptions button {
+  border-color: var(--z-field-border);
+  box-shadow: inset 0 1px var(--z-control-highlight), 0 2px var(--z-secondary-base);
+}
+.themeOptions button[aria-pressed="true"] {
+  background: var(--z-action);
+  color: var(--z-action-ink);
+  border-color: var(--z-action);
+  box-shadow: inset 0 -2px var(--z-control-highlight);
+}
+.themeOptions button[aria-pressed="true"]::before {
+  width: 9px;
+  height: 5px;
+  border: 0;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  background: transparent;
+  transform: rotate(-45deg);
+}
+.themeOptions button:active {
+  box-shadow: inset 0 2px var(--z-control-shadow);
+}
+@media (hover: hover) {
+  .themeOptions button:not([aria-pressed="true"]):hover {
+    border-color: var(--z-focus);
+    background: var(--z-raised);
+  }
+}

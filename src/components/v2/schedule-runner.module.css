@@ -25,16 +25,16 @@
   left: 10%;
   bottom: 16px;
   display: block;
-  width: 22px;
-  height: 24px;
+  width: 28px;
+  height: 30px;
   animation: hop 8s linear infinite;
 }
 .dinosaur > span {
   display: block;
 }
 .dinosaur svg {
-  width: 22px;
-  height: 24px;
+  width: 28px;
+  height: 30px;
   fill: currentColor;
 }
 .eye {

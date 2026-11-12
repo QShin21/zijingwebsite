@@ -4,7 +4,7 @@ import { cms, fixed, list } from "@/lib/content";
 import { Prose, Cards } from "@/components/Content";
 import { formatDate, relationID } from "@/lib/rules";
 import { staffStatusLabels, staffWindow } from "@/lib/staff-recruitment-model";
-import { ownStaffReceiptHeaders } from "@/lib/staff-recruitment";
+import { ownStaffBatchIDs, ownStaffReceiptHeaders } from "@/lib/staff-recruitment";
 import { TaskFrame, TaskNote } from "@/components/v2/TaskFrame";
 import { ButtonLink, EmptyState, Pager, Section, StatusPill } from "@/components/v2/ui";
 import { deadlineText } from "@/components/v2/format";
@@ -29,12 +29,12 @@ export default async function Staff({ searchParams }: { searchParams: Promise<{ 
     sort: "-createdAt",
     select: { title: true, description: true, state: true, startAt: true, endAt: true, signupForm: true },
   });
+  const ownBatches = await ownStaffBatchIDs(p, user, batches.docs.map(batch => batch.id));
   const hasReceipts = Boolean(receipts && receipts.totalDocs > 0);
   return (
     <TaskFrame
-      eyebrow="STAFF · 骨干招新"
-      title="一起把活动办起来"
-      description="执行部／宣传部骨干招新。参与活动执行与社团宣传，具体职责、条件和时间安排以每个批次的说明为准。"
+      title="骨干招新"
+      description="执行部与宣传部招新，职责和申请条件见各批次说明"
       back={{ href: "/join", label: "加入紫荆" }}
       steps={["阅读批次", "填写申请", "核对提交", "查看回执"]}
       actions={
@@ -45,11 +45,7 @@ export default async function Staff({ searchParams }: { searchParams: Promise<{ 
       aside={
         <>
           <TaskNote title="如何参与选拔">
-            <ol>
-              <li>阅读批次说明，核对职责和开放时间。</li>
-              <li>填写申请，核对后提交同一份资料。</li>
-              <li>查看本人回执，按负责人反馈补充。</li>
-            </ol>
+            <p>提交前核对职责和开放时间，提交后可在本人回执查看反馈。</p>
             <p>录用结果与账号角色任命分别处理。</p>
           </TaskNote>
           <TaskNote title="还有其他参与方式" links={[{ href: "/community", label: "加入现有游戏社群" }, { href: "/community/apply", label: "申请组织新社群" }]}>
@@ -62,7 +58,7 @@ export default async function Staff({ searchParams }: { searchParams: Promise<{ 
         <section id="my-staff-receipts" className={styles.block} aria-labelledby="my-staff-title">
           <div className={styles.blockHead}>
             <h2 id="my-staff-title">我的骨干申请</h2>
-            <p>查看已提交的资料、处理反馈和结果。原批次撤下后，本人回执仍可从这里打开。</p>
+            <p>批次撤下后仍可查看本人回执。</p>
           </div>
           <ul className={styles.receipts}>
             {receipts.docs.map((receipt) => (
@@ -98,12 +94,12 @@ export default async function Staff({ searchParams }: { searchParams: Promise<{ 
               </ButtonLink>
             }
           >
-            新的选拔安排发布后会在这里展示。你可以先加入游戏社群，参与社团活动。
+            可先加入游戏社群，参与活动。
           </EmptyState>
         ) : (
           <div className={layout.grid2}>
             {batches.docs.map((batch) => {
-              const own = receipts?.docs.some((receipt) => String(relationID(receipt.batch)) === String(batch.id));
+              const own = ownBatches.has(String(batch.id));
               const batchState = staffWindow(batch);
               const open = batchState === "申请开放";
               return (
@@ -137,7 +133,7 @@ export default async function Staff({ searchParams }: { searchParams: Promise<{ 
         </Section>
       )}
       {legacy.docs.length > 0 && (
-        <Section id="staff-history" title="历史招新资料" description="既有外部批次与历史资料，保留原报名详情入口。">
+        <Section id="staff-history" title="历史招新资料">
           <Cards docs={legacy.docs} collection="recruitment" />
         </Section>
       )}
