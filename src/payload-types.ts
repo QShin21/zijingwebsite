@@ -133,6 +133,8 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * 社长、副社长可在用户详情中点击「更改密码」，填写至少 8 位新密码并保存，直接完成重置。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
