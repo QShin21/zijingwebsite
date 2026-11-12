@@ -266,3 +266,66 @@
     align-self: center;
   }
 }
+
+/* Share content tracks so wrapping labels and titles stay aligned across each pair. */
+@media (min-width: 761px) {
+  @supports (grid-template-rows: subgrid) {
+    .scheduleGrid article {
+      grid-row: span 4;
+      grid-template-rows: subgrid;
+      row-gap: 7px;
+    }
+    .scheduleGrid article > div {
+      height: auto;
+      grid-row: 1 / -1;
+      grid-template-rows: subgrid;
+    }
+    .scheduleGrid article > span:not([data-pixel-corners]) {
+      grid-row: 1 / -1;
+    }
+  }
+}
+
+/* Pair the spotlight heading and card with the adjacent photo surface. */
+@media (min-width: 761px) {
+  .homeFlow:has(.featureSection) {
+    align-items: stretch;
+  }
+  .homeFlow:has(.featureSection) .mainColumn {
+    display: flex;
+  }
+  .homeFlow .featureSection {
+    flex: 1;
+    margin: 0;
+    grid-template-rows: 56px 1fr;
+  }
+  .featureSection > div {
+    align-items: center;
+    padding-bottom: 0;
+  }
+  .featureSection > div > div {
+    display: flex;
+    align-items: center;
+  }
+  .homeFlow .featureSection h2,
+  .homeFlow .campusSide h2 {
+    font-size: 28px;
+  }
+  .homeFlow:has(.featureSection) .campusSide {
+    align-self: stretch;
+  }
+  .homeFlow:has(.featureSection) .campusSide > div {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .campusSide [class*="reelHead"] {
+    flex: 0 0 55px;
+    padding: 0 14px;
+    border-bottom: 1px solid var(--z-line-strong);
+  }
+  .homeFlow:has(.featureSection) .campusSide > div > a {
+    flex: 1;
+    margin-top: 16px;
+  }
+}
