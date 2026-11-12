@@ -14,11 +14,6 @@ export function CommunityGameIcon({ image }: { image?: ImageRef | null }) {
       loading="lazy"
       decoding="async"
       referrerPolicy="no-referrer"
-      style={
-        image.src.endsWith("/apps/730/logo.png")
-          ? { filter: "brightness(0) invert(1)" }
-          : undefined
-      }
       onError={() => setFailed(image.src)}
     />
   ) : (

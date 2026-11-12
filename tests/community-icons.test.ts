@@ -390,7 +390,9 @@ describe("image validation and geometry", () => {
       "蛋仔派对",
       "英雄联盟",
     ])
-      expect(defaultGameIcon(title, "")?.src).toMatch(/^https:\/\//);
+      expect(defaultGameIcon(title, "")?.src).toMatch(
+        /^\/api\/game-icons\/default\/[a-z0-9-]+$/,
+      );
     expect(defaultGameIcon("新社群", "unknown")).toBeNull();
   });
 });
