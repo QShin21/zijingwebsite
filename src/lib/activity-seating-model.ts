@@ -53,6 +53,16 @@ export type SeatReview = SeatRequest & {
   phone: string;
   proofs: string[];
   releasedSeats: { seat: string; releasedAt: string }[];
+  addedSeats: { seat: string; addedAt: string }[];
+};
+
+export type SeatAssignment = {
+  title: string;
+  request: SeatRequest;
+  rows: typeof seatRows;
+  seatLimit: number;
+  occupancy: Partial<Record<string, "pending" | "confirmed">>;
+  blockedSeats: string[];
 };
 
 export type SeatingAvailability = {

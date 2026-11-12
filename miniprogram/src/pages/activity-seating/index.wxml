@@ -5,10 +5,11 @@
     <view class="zj-stage-stripes"></view>
     <view class="zj-hero-inner">
       <button class="zj-hero-back" bindtap="back">‹ 返回</button>
-      <text class="zj-hero-kicker">{{review ? 'SEATING · 选座工作台' : manage ? 'SEATING · 管理座位' : 'SEATING · 活动选座'}}</text>
-      <text class="zj-hero-title">{{title || (review ? '选座工作台' : manage ? '管理未开放座位' : '活动选座')}}</text>
+      <text class="zj-hero-kicker">{{review ? 'SEATING · 选座工作台' : manage ? 'SEATING · 管理座位' : adding ? 'SEATING · 增加座位' : 'SEATING · 活动选座'}}</text>
+      <text class="zj-hero-title">{{title || (review ? '选座工作台' : manage ? '管理未开放座位' : adding ? '增加座位' : '活动选座')}}</text>
       <view wx:if="{{title}}" class="zj-hero-meta">
         <text wx:if="{{review}}" class="zj-pill {{enabled ? 'zj-pill-live' : 'zj-pill-neutral'}}">{{scheduled ? '等待开放' : open ? '选座开放中' : enabled ? '选座已关闭' : '选座未开启'}}</text>
+        <text wx:elif="{{adding}}">为申请 #{{requestNumber}} 增加座位</text>
         <text wx:else class="zj-pill {{open ? 'zj-pill-live' : 'zj-pill-neutral'}}">{{scheduled ? '等待开放' : open ? '选座开放' : enabled ? '选座已关闭' : '选座未启用'}}</text>
         <text wx:if="{{!review && enabled && counts}}">{{counts.rows}} 排 · {{counts.total}} 座 · 剩余 {{counts.free}}</text>
         <text wx:if="{{review}}">核对手机号与凭证：通过锁定，驳回释放</text>
@@ -57,6 +58,7 @@
           <view class="zj-kv-row"><text class="zj-kv-label">手机号</text><text class="zj-kv-value" selectable>{{record.phone}}</text></view>
           <view class="zj-kv-row"><text class="zj-kv-label">座位</text><text class="zj-kv-value">{{record.seatCount}} 个 · {{record.seats}}</text></view>
           <view wx:if="{{record.releasedSeats}}" class="zj-kv-row"><text class="zj-kv-label">已撤销座位</text><text class="zj-kv-value">{{record.releasedSeats}}</text></view>
+          <view wx:if="{{record.addedSeats}}" class="zj-kv-row"><text class="zj-kv-label">管理员增加座位</text><text class="zj-kv-value">{{record.addedSeats}}</text></view>
           <view class="zj-kv-row"><text class="zj-kv-label">提交时间</text><text class="zj-kv-value">{{record.submitted}}</text></view>
           <view wx:if="{{record.reviewed}}" class="zj-kv-row"><text class="zj-kv-label">审核时间</text><text class="zj-kv-value">{{record.reviewed}}</text></view>
         </view>
@@ -74,6 +76,7 @@
         </view>
         <view class="zj-record-actions">
           <button class="plain" data-phone="{{record.phone}}" bindtap="call" disabled="{{busy}}">拨打</button>
+          <button wx:if="{{record.status === 'pending' || record.status === 'confirmed'}}" class="secondary" data-id="{{record.id}}" bindtap="openAdd" disabled="{{busy || loading || record.seatCount >= 10}}">增加座位</button>
           <button wx:if="{{record.status === 'pending'}}" class="primary" data-id="{{record.id}}" data-status="confirmed" bindtap="decide" disabled="{{busy || loading}}">通过并锁定</button>
           <button wx:if="{{record.status === 'pending'}}" class="danger" data-id="{{record.id}}" data-status="rejected" bindtap="decide" disabled="{{busy || loading}}">驳回并释放</button>
           <button wx:if="{{record.status === 'confirmed'}}" class="danger" data-id="{{record.id}}" bindtap="revoke" disabled="{{busy || loading}}">撤销确认</button>
@@ -94,9 +97,14 @@
         <view wx:if="{{canEditMine && !editing}}" class="zj-record-actions"><button class="primary" bindtap="startEdit" disabled="{{busy || loading}}">修改申请</button></view>
         <view wx:if="{{mine.status === 'pending'}}" class="zj-record-actions"><button class="secondary" bindtap="cancelRequest" disabled="{{busy || loading}}">取消选座申请</button></view>
       </view>
-      <view wx:if="{{canReview && !manage}}" class="seat-tools"><button class="secondary" bindtap="openReview" disabled="{{busy}}">选座工作台</button></view>
+      <view wx:if="{{canReview && !manage && !adding}}" class="seat-tools"><button class="secondary" bindtap="openReview" disabled="{{busy}}">选座工作台</button></view>
 
-      <view wx:if="{{enabled || manage || editing}}" class="seat-arena">
+      <view wx:if="{{adding}}" class="zj-sheet">
+        <text class="zj-sheet-title">为申请 #{{requestNumber}} 增加座位</text>
+        <text class="zj-form-hint">已有 {{existingCount}} 个座位，最多还可增加 {{seatLimit}} 个；申请状态保持不变。</text>
+      </view>
+
+      <view wx:if="{{enabled || manage || editing || adding}}" class="seat-arena">
         <view class="seat-arena-tools">
           <view class="seat-legend" aria-label="座位状态图例">
             <view class="seat-key"><view class="seat-swatch available"></view><text>可选</text></view>
@@ -137,19 +145,27 @@
         </view>
       </view>
 
-      <text wx:if="{{scheduled && !manage}}" class="zj-callout" aria-role="status">将于北京时间 {{openingLabel}} 开放选座。</text>
-      <text wx:elif="{{enabled && !open && !manage}}" class="zj-callout">当前活动选座已关闭，不再接收新的申请；已提交的申请仍由管理员处理。</text>
-      <view wx:if="{{!enabled && !mine && !canReview && !manage}}" class="zj-empty" aria-role="status">
+      <text wx:if="{{scheduled && !manage && !adding}}" class="zj-callout" aria-role="status">将于北京时间 {{openingLabel}} 开放选座。</text>
+      <text wx:elif="{{enabled && !open && !manage && !adding}}" class="zj-callout">当前活动选座已关闭，不再接收新的申请；已提交的申请仍由管理员处理。</text>
+      <view wx:if="{{!enabled && !mine && !canReview && !manage && !adding}}" class="zj-empty" aria-role="status">
         <text class="zj-empty-icon">◎</text>
         <text class="zj-empty-title">本活动暂未开启选座</text>
         <text class="zj-small">开启后会在活动详情显示选座入口。</text>
       </view>
       <view class="seat-tools">
-        <button wx:if="{{enabled || manage}}" class="secondary" bindtap="refresh" disabled="{{loading || busy}}">刷新座位</button>
-        <button wx:if="{{open && !loggedIn && !manage}}" class="primary" bindtap="login">登录后选座</button>
+        <button wx:if="{{enabled || manage || adding}}" class="secondary" bindtap="refresh" disabled="{{loading || busy}}">刷新座位</button>
+        <button wx:if="{{open && !loggedIn && !manage && !adding}}" class="primary" bindtap="login">登录后选座</button>
       </view>
 
-      <view wx:if="{{editable && !manage}}" class="zj-sheet seat-form">
+      <view wx:if="{{adding && editable}}" class="zj-sheet seat-form">
+        <text class="zj-sheet-title">选择要增加的座位</text>
+        <view class="seat-count"><text class="seat-count-value">{{selected.length}}</text><text class="zj-small">/ {{seatLimit}} 个座位</text></view>
+        <view wx:if="{{chips.length}}" class="seat-chips"><button wx:for="{{chips}}" wx:key="id" class="seat-chip" data-seat="{{item.id}}" bindtap="unpick" disabled="{{busy || loading}}">{{item.label}} ×</button></view>
+        <text wx:else class="zj-form-hint">在座位图中点选可用座位。</text>
+      </view>
+      <view wx:if="{{adding && editable}}" class="zj-dock"><button class="primary" bindtap="submitAdd" disabled="{{busy || loading || !selected.length}}">确认增加座位</button></view>
+
+      <view wx:if="{{editable && !manage && !adding}}" class="zj-sheet seat-form">
         <text class="zj-sheet-title">{{editing ? '修改选座申请' : '提交选座申请'}}</text>
         <view class="seat-count"><text class="seat-count-value">{{selected.length}}</text><text class="zj-small">/ {{seatLimit}} 个座位</text></view>
         <view wx:if="{{chips.length}}" class="seat-chips">
@@ -173,7 +189,7 @@
         <text class="zj-form-hint">{{editing ? '保存成功后更新座位和凭证，申请继续等待审核。' : '手机号与凭证仅供本活动审核使用。提交后座位进入待审核；每人每场活动只保留一份待审核或已确认的申请。'}}</text>
         <button wx:if="{{editing}}" class="secondary" bindtap="cancelEdit" disabled="{{busy || loading}}">取消修改</button>
       </view>
-      <view wx:if="{{editable && !manage}}" class="zj-dock">
+      <view wx:if="{{editable && !manage && !adding}}" class="zj-dock">
         <button class="primary" bindtap="submit" disabled="{{busy || loading}}">{{editing ? '保存修改' : '提交选座'}}</button>
       </view>
     </block>

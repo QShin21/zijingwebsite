@@ -102,6 +102,12 @@ async function revoke(activity: Activity, who: Actor, id: number, revision: numb
 async function revokeOne(activity: Activity, who: Actor, id: number, revision: number, seat: string) {
   return route.POST(request(activity, "POST", who, { action: "revoke-seat", id, revision, seat }), context(activity));
 }
+async function addSeats(activity: Activity, who: Actor, id: number, revision: number, status: string, seats: string[]) {
+  return route.POST(request(activity, "POST", who, { action: "add-seats", id, revision, status, seats }), context(activity));
+}
+async function assignment(activity: Activity, who: Actor, id: number) {
+  return route.GET(request(activity, "GET", who, undefined, `?mode=assignment&request=${id}`), context(activity));
+}
 async function block(activity: Activity, who: Actor | undefined, seats: string[], blocked: boolean, browserOrigin?: string) {
   return route.POST(request(activity, "POST", who, { action: "block", seats, blocked }, "", browserOrigin), context(activity));
 }
@@ -710,4 +716,55 @@ it("并发逐座撤销时，过期版本不能覆盖另一个管理员的操作"
   expect(state.mine).toMatchObject({ status: "confirmed", revision: 1 });
   expect(state.mine?.seats).toHaveLength(2);
   expect(Object.keys(state.occupancy)).toHaveLength(2);
+});
+
+it("管理员为待审核和已确认申请增加座位，保留原信息和操作记录", async () => {
+  const activity = await extraActivity("admin-add");
+  const proof = await added(activity, first);
+  const submitted = await submit(activity, first, ["10-1"], [proof]);
+  const mine = (await submitted.json()).mine;
+  expect((await assignment(activity, first, mine.id)).status).toBe(403);
+  expect((await assignment(activity, otherReviewer, mine.id)).status).toBe(403);
+  expect((await addSeats(activity, first, mine.id, 0, "pending", ["10-2"])).status).toBe(403);
+  expect((await addSeats(activity, otherReviewer, mine.id, 0, "pending", ["10-2"])).status).toBe(403);
+  expect((await block(activity, reviewer, ["10-3"], true)).status).toBe(200);
+  const available = await assignment(activity, reviewer, mine.id);
+  expect(await available.json()).toMatchObject({ request: { id: mine.id, status: "pending", revision: 0 }, blockedSeats: ["10-3"], occupancy: { "10-1": "pending" } });
+  expect((await addSeats(activity, reviewer, mine.id, 0, "pending", ["10-3"])).status).toBe(409);
+  expect((await addSeats(activity, reviewer, mine.id, 0, "pending", ["10-2", "10-2"])).status).toBe(400);
+  const addedPending = await addSeats(activity, reviewer, mine.id, 0, "pending", ["10-2"]);
+  expect(addedPending.status).toBe(200);
+  expect(await addedPending.json()).toMatchObject({ request: { status: "pending", revision: 1, seats: ["10-1", "10-2"] } });
+  expect((await addSeats(activity, reviewer, mine.id, 0, "pending", ["10-4"])).status).toBe(409);
+  expect((await route.POST(request(activity, "POST", reviewer, { action: "review", id: mine.id, revision: 1, status: "confirmed" }), context(activity))).status).toBe(200);
+  // A reviewer looking at the older pending state must explicitly reload after approval.
+  expect((await addSeats(activity, reviewer, mine.id, 1, "pending", ["10-4"])).status).toBe(409);
+  expect((await put(activity, reviewer, false)).status).toBe(200);
+  const addedConfirmed = await addSeats(activity, reviewer, mine.id, 1, "confirmed", ["10-4"]);
+  expect(addedConfirmed.status).toBe(200);
+  expect((await addedConfirmed.json()).request).toMatchObject({ status: "confirmed", revision: 2, seats: ["10-1", "10-2", "10-4"] });
+  expect((await map(activity, first)).mine).toMatchObject({ status: "confirmed", seats: ["10-1", "10-2", "10-4"] });
+  expect((await image(activity, proof, first)).status).toBe(200);
+  const history = await route.GET(request(activity, "GET", reviewer, undefined, "?mode=review&status=confirmed"), context(activity));
+  expect((await history.json()).docs).toMatchObject([{ id: mine.id, phone: "13800138000", proofs: [proof], addedSeats: [{ seat: "10-2" }, { seat: "10-4" }] }]);
+  expect((await addSeats(activity, reviewer, mine.id, 2, "confirmed", ["10-5", "10-6", "10-7", "10-8", "10-9", "10-10", "10-11", "10-12"])).status).toBe(400);
+  expect((await addSeats(activity, reviewer, mine.id, 2, "confirmed", ["10-1"])).status).toBe(409);
+  expect((await revokeOne(activity, reviewer, mine.id, 2, "10-4")).status).toBe(200);
+  expect((await addSeats(activity, reviewer, mine.id, 3, "confirmed", ["10-4"])).status).toBe(200);
+});
+
+it("管理员增加座位与成员选座并发时，同一座位只被占用一次", async () => {
+  const activity = await extraActivity("admin-add-race", "community-posts");
+  const firstProof = await added(activity, first), secondProof = await added(activity, second);
+  const submitted = await submit(activity, first, ["11-1"], [firstProof]);
+  const mine = (await submitted.json()).mine;
+  const result = await Promise.all([
+    addSeats(activity, reviewer, mine.id, 0, "pending", ["11-2"]),
+    submit(activity, second, ["11-2"], [secondProof]),
+  ]);
+  expect(result.map(response => response.status).sort()).toEqual([200, 409]);
+  const state = await map(activity, first);
+  expect(state.occupancy["11-1"]).toBe("pending");
+  expect(state.occupancy["11-2"]).toBe("pending");
+  expect(state.mine?.seats.length).toBe(result[0].status === 200 ? 2 : 1);
 });

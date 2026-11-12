@@ -100,3 +100,57 @@ it("小程序管理员确认后撤销已确认申请并携带版本", async () =
   expect(calls[1]).toMatchObject({ method: "POST", data: { action: "revoke", id: 52, revision: 3 } });
   expect(page.data.notice).toBe("已撤销确认，全部座位已释放。");
 });
+
+it("小程序管理员打开申请座位图并追加空座", async () => {
+  const request = { id: 53, revision: 2, status: "confirmed", seats: ["1-1"], createdAt: "2026-11-12T00:00:00Z", reviewedAt: null };
+  const state = { title: "合成活动", request, rows: [{ row: 1, count: 4, offset: 0 }], seatLimit: 10,
+    occupancy: { "1-1": "confirmed", "1-2": "confirmed" } as Record<string, string>, blockedSeats: ["1-2"] };
+  const navigation = { go: vi.fn() };
+  const http = { request: vi.fn(async (path: string, options: { method?: string; data?: { seats: string[] } }) => {
+    if (options.method === "POST") {
+      request.seats = request.seats.concat(options.data!.seats);
+      request.revision++;
+      state.occupancy["1-3"] = "confirmed";
+      return { request: structuredClone(request) };
+    }
+    if (path.includes("mode=review")) return { title: state.title, docs: [{ ...request, memberName: "合成成员", phone: "13800138000", proofs: [] }] };
+    return structuredClone(state);
+  }) };
+  const modules: Record<string, unknown> = {
+    "../../lib/theme": { page: (value: NativePage) => value }, "../../lib/http": http,
+    "../../lib/files": {}, "../../lib/privacy": {}, "../../lib/navigation": navigation,
+    "../../lib/session": { user: () => ({ id: 1 }), subscribe: () => () => {} },
+    "../../lib/format": { date: () => "", beijingParts: () => ({}) }, "../../lib/page": { actions: {} },
+  };
+  let page!: NativePage;
+  const createPage = () => {
+    runInNewContext(readFileSync("miniprogram/src/pages/activity-seating/index.js", "utf8"), {
+      Page: (value: NativePage) => { page = value; }, require: (name: string) => modules[name],
+      wx: { setNavigationBarTitle: vi.fn() }, clearTimeout, setTimeout,
+    });
+    page.setData = values => {
+      for (const [key, value] of Object.entries(values)) {
+        const path = /^rows\[(\d+)\]\.seats\[(\d+)\]$/.exec(key);
+        if (path) (page.data.rows as { seats: unknown[] }[])[Number(path[1])].seats[Number(path[2])] = value;
+        else page.data[key] = value;
+      }
+    };
+  };
+  createPage();
+  invoke(page, "onLoad", { kind: "events", id: "1", mode: "review" });
+  await invoke(page, "onShow");
+  invoke(page, "openAdd", { currentTarget: { dataset: { id: 53 } } });
+  expect(navigation.go).toHaveBeenCalledWith("activity-seating", { kind: "events", id: 1, mode: "add", request: 53 });
+  invoke(page, "onUnload");
+  createPage();
+  invoke(page, "onLoad", { kind: "events", id: "1", mode: "add", request: "53" });
+  await invoke(page, "onShow");
+  expect(page.data).toMatchObject({ adding: true, requestNumber: 53, existingCount: 1, seatLimit: 9 });
+  invoke(page, "toggle", tap("1-1"));
+  invoke(page, "toggle", tap("1-2"));
+  invoke(page, "toggle", tap("1-3"));
+  await invoke(page, "submitAdd");
+  const sent = http.request.mock.calls.find(([, options]) => options.method === "POST")?.[1].data;
+  expect(sent).toMatchObject({ action: "add-seats", id: 53, revision: 2, status: "confirmed", seats: ["1-3"] });
+  expect(page.data).toMatchObject({ existingCount: 2, selected: [], notice: "已为申请增加 1 个座位。" });
+});

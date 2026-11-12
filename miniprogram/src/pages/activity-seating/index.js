@@ -28,7 +28,7 @@ const step = zoom => zooms[zoom].size + GAP;
 const boardWidth = (rows, zoom) => Math.max(...rows.map(row => row.offset + row.count)) * step(zoom) + 24;
 // Everything private or account-bound that must disappear when the account changes.
 const cleared = () => ({ rows: [], chips: [], selected: [], phone: '', drafts: [], mine: null, docs: [], counts: null, busy: '', error: '', notice: '',
-  editable: false, editing: false, editRevision: null, editProofs: [], canEditMine: false, loggedIn: false, canReview: false, enabled: false, open: false, scheduled: false, opensAt: null, openingLabel: '', openingDate: '', openingTime: '', title: '', loadError: '', selectedBlocked: 0, selectedAvailable: 0 });
+  editable: false, editing: false, editRevision: null, editProofs: [], canEditMine: false, loggedIn: false, canReview: false, enabled: false, open: false, scheduled: false, opensAt: null, openingLabel: '', openingDate: '', openingTime: '', title: '', loadError: '', selectedBlocked: 0, selectedAvailable: 0, requestNumber: null, existingCount: 0 });
 
 function seatCell(id, number, taken, picked, accent, blocked, manage, own) {
   const style = blocked ? 'blocked' : own && picked ? 'selected' : taken || (picked ? 'selected' : 'available');
@@ -50,12 +50,13 @@ function reviewDoc(row) {
     tone: tones[row.status] || 'neutral', seats: seatNames(row.seats), seatCount: (row.seats || []).length,
     seatItems: (row.seats || []).map(id => ({ id, label: seatLabel(id) })),
     releasedSeats: seatNames((row.releasedSeats || []).map(item => item.seat)),
+    addedSeats: seatNames((row.addedSeats || []).map(item => item.seat)),
     proofs: (row.proofs || []).filter(id => proofPattern.test(String(id))),
     submitted: format.date(row.createdAt), reviewed: row.reviewedAt ? format.date(row.reviewedAt) : '' };
 }
 
 Page(withVisualTheme({
-  data: { review: false, manage: false, kind: '', title: '', loading: true, busy: '', error: '', loadError: '', notice: '', needsLogin: false,
+  data: { review: false, manage: false, adding: false, requestNumber: null, existingCount: 0, kind: '', title: '', loading: true, busy: '', error: '', loadError: '', notice: '', needsLogin: false,
     enabled: false, open: false, scheduled: false, opensAt: null, openingLabel: '', openingDate: '', openingTime: '', loggedIn: false, canReview: false, editable: false, editing: false, editRevision: null, editProofs: [], canEditMine: false, counts: null,
     rows: [], boardWidth: 0, zoom: 1, zoomLabel: zooms[1].label, selected: [], selectedBlocked: 0, selectedAvailable: 0, chips: [], phone: '', drafts: [], mine: null,
     seatLimit: 10, proofLimit: 10, proofMB: 8,
@@ -70,14 +71,17 @@ Page(withVisualTheme({
     }
     const review = Boolean(options && options.mode === 'review');
     const manage = Boolean(options && options.mode === 'manage');
+    const adding = Boolean(options && options.mode === 'add');
+    const request = String((options && options.request) || '');
+    this._requestID = /^[1-9]\d*$/.test(request) && Number(request) <= 2147483647 ? Number(request) : null;
     this._member = memberOf(session.user());
-    this.setData({ review, manage, kind: this._kind || '' });
-    wx.setNavigationBarTitle({ title: review ? '选座工作台' : manage ? '管理未开放座位' : '活动选座' });
+    this.setData({ review, manage, adding, kind: this._kind || '' });
+    wx.setNavigationBarTitle({ title: review ? '选座工作台' : manage ? '管理未开放座位' : adding ? '增加座位' : '活动选座' });
     this._unsubscribe = session.subscribe(user => {
       const member = memberOf(user);
       if (member === this._member) return;
       // Another account: drop in-flight replies and every private value of the previous one.
-      this._member = member; this._revision++; this._read++; this._state = null; this._seats = null; clearTimeout(this._openingTimer);
+      this._member = member; this._revision++; this._read++; this._state = null; this._seats = null; this._assignment = null; clearTimeout(this._openingTimer);
       this.setData({ ...cleared(), loading: false, needsLogin: false });
       if (!this._closed) this.load();
     });
@@ -95,7 +99,7 @@ Page(withVisualTheme({
     if (this.data.loading) { this._read++; this._stale = true; this.setData({ loading: false }); }
   },
   onUnload() {
-    this._closed = true; this._revision++; this._read++; this._state = null; this._seats = null;
+    this._closed = true; this._revision++; this._read++; this._state = null; this._seats = null; this._assignment = null;
     if (this._unsubscribe) this._unsubscribe();
     this._unsubscribe = null;
   },
@@ -114,26 +118,27 @@ Page(withVisualTheme({
     if (this._closed) return;
     if (this._hidden) { this._stale = true; return; }
     if (!this._endpoint) { this.setData({ loading: false, loadError: '活动入口无效，请从活动详情重新进入。' }); return; }
+    if (this.data.adding && !this._requestID) { this.setData({ loading: false, loadError: '申请入口无效，请从工作台重新进入。' }); return; }
     this._stale = false;
     const read = ++this._read, revision = this._revision, review = this.data.review;
-    if ((review || this.data.manage) && !session.user()) { this.setData({ ...cleared(), loading: false, needsLogin: true }); return; }
+    if ((review || this.data.manage || this.data.adding) && !session.user()) { this.setData({ ...cleared(), loading: false, needsLogin: true }); return; }
     this.setData({ loading: true, loadError: '', needsLogin: false });
     try {
-      const path = review ? this._endpoint + '?mode=review&status=' + this.data.status + '&page=' + this.data.pageNumber : this._endpoint;
-      const data = await http.request(path, { required: review || this.data.manage, raw: true });
+      const path = review ? this._endpoint + '?mode=review&status=' + this.data.status + '&page=' + this.data.pageNumber : this.data.adding ? this._endpoint + '?mode=assignment&request=' + this._requestID : this._endpoint;
+      const data = await http.request(path, { required: review || this.data.manage || this.data.adding, raw: true });
       if (!this.reading(read, revision)) return;
       if (this.data.manage && !data.canReview) {
         this._state = null; this._seats = null;
         this.setData({ ...cleared(), loadError: '无权管理此活动的座位' });
         return;
       }
-      if (review) this.showReview(data); else this.showState(data);
+      if (review) this.showReview(data); else if (this.data.adding) this.showAssignment(data); else this.showState(data);
     } catch (cause) {
       if (!this.reading(read, revision)) return;
       const message = (cause && cause.message) || '选座信息读取失败，请重试';
       // 401 anonymous/expired, 403 revoked reviewer, 404 hidden activity: drop every private value.
-      if (cause && cause.status === 401) { this._state = null; this._seats = null; this.setData({ ...cleared(), needsLogin: true }); }
-      else if (cause && (cause.status === 403 || cause.status === 404)) { this._state = null; this._seats = null; this.setData({ ...cleared(), loadError: message }); }
+      if (cause && cause.status === 401) { this._state = null; this._seats = null; this._assignment = null; this.setData({ ...cleared(), needsLogin: true }); }
+      else if (cause && (cause.status === 403 || cause.status === 404 || (this.data.adding && cause.status === 409))) { this._state = null; this._seats = null; this._assignment = null; this.setData({ ...cleared(), loadError: message }); }
       else this.setData({ loadError: message, ...(review ? { docs: [], hasNextPage: false } : {}) });
     } finally {
       if (this.reading(read, revision)) this.setData({ loading: false });
@@ -168,6 +173,15 @@ Page(withVisualTheme({
       scheduled: data.scheduled === true, opensAt, openingLabel: opensAt ? format.date(opensAt) : '',
       ...(fields ? { openingDate: fields.date, openingTime: fields.time } : {}),
       docs: (data.docs || []).map(reviewDoc), hasNextPage: Boolean(data.hasNextPage) });
+  },
+  showAssignment(data) {
+    this._state = data;
+    this._assignment = data.request;
+    const remaining = Math.max(0, data.seatLimit - data.request.seats.length);
+    const selected = this.data.selected.filter(id => !data.occupancy[id]).slice(0, remaining);
+    this.setData({ title: data.title || '增加座位', requestNumber: data.request.id, existingCount: data.request.seats.length,
+      seatLimit: remaining, editable: remaining > 0, canReview: true, selected, chips: chipsFor(selected), counts: counts(data),
+      rows: this.layout(data, selected, this.data.zoom, false), boardWidth: boardWidth(data.rows, this.data.zoom) });
   },
   layout(state, selected, zoom, editing = this.data.editing) {
     const index = {};
@@ -322,6 +336,21 @@ Page(withVisualTheme({
   // ---- reviewer workbench ----
   openMap() { if (this._endpoint) navigation.go('activity-seating', { kind: this._kind, id: this._id }); },
   openManage() { if (this.data.review && this._endpoint) navigation.go('activity-seating', { kind: this._kind, id: this._id, mode: 'manage' }); },
+  openAdd(event) {
+    const request = Number(event.currentTarget.dataset.id);
+    const doc = this.data.docs.find(value => value.id === request);
+    if (this.data.review && doc && (doc.status === 'pending' || doc.status === 'confirmed') && doc.seatCount < 10 && !this.data.busy && !this.data.loading)
+      navigation.go('activity-seating', { kind: this._kind, id: this._id, mode: 'add', request });
+  },
+  submitAdd() {
+    const request = this._assignment, seats = this.data.selected.slice();
+    if (!this.data.adding || !request || !this.data.editable || !seats.length) return;
+    return this.work('正在增加座位', async revision => {
+      await http.request(this._endpoint, { method: 'POST', required: true, raw: true,
+        data: { action: 'add-seats', id: request.id, revision: request.revision, status: request.status, seats } });
+      if (this.current(revision)) this.setData({ selected: [], chips: [], notice: '已为申请增加 ' + seats.length + ' 个座位。' });
+    }, true);
+  },
   filter(event) {
     const status = event.currentTarget.dataset.status;
     if (!this.data.review || !labels[status] || this.data.busy || this.data.loading || status === this.data.status) return;

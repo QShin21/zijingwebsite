@@ -1,5 +1,5 @@
 
-import { cancelPendingSeats, decideSeats, editPendingSeats, revokeConfirmedSeat, revokeConfirmedSeats, seatActivity, seatingState, seatingWorkbench, setSeatBlocks, setSeating, submitSeats } from "@/lib/activity-seating";
+import { addSeats, cancelPendingSeats, decideSeats, editPendingSeats, revokeConfirmedSeat, revokeConfirmedSeats, seatActivity, seatingAssignment, seatingState, seatingWorkbench, setSeatBlocks, setSeating, submitSeats } from "@/lib/activity-seating";
 import { seatingHTTP, seatingJSON, seatingFields, seatingReviewFilter, seatReply, type SeatRouteContext } from "@/lib/activity-seating-http";
 
 export const runtime = "nodejs";
@@ -8,6 +8,9 @@ export const dynamic = "force-dynamic";
 export function GET(request: Request, context: SeatRouteContext) {
   return seatingHTTP(request, context, async (p, kind, id, user) => {
     const query = new URL(request.url).searchParams;
+    if (query.get("mode") === "assignment") {
+      return seatReply(await seatingAssignment(p, await seatActivity(p, kind, id, user), user, query.get("request")));
+    }
     if (query.get("mode") === "review") {
       const activity = await seatActivity(p, kind, id, user);
       const { status, page } = seatingReviewFilter(query);
@@ -28,6 +31,10 @@ export function PUT(request: Request, context: SeatRouteContext) {
 export function POST(request: Request, context: SeatRouteContext) {
   return seatingHTTP(request, context, async (p, kind, id, user) => {
     const data = await seatingJSON(request);
+    if (data.action === "add-seats") {
+      seatingFields(data, ["action", "id", "revision", "status", "seats"]);
+      return seatReply({ request: await addSeats(p, await seatActivity(p, kind, id, user), user, data.id, data.revision, data.status, data.seats) });
+    }
     if (data.action === "review") {
       seatingFields(data, ["action", "id", "status", "revision"]);
       return seatReply(await decideSeats(p, await seatActivity(p, kind, id, user), user, data.id, data.status, data.revision));

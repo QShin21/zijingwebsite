@@ -129,7 +129,7 @@ it.each([0, 2])("seating migration must exist exactly once: %s", async count => 
   seatingMigrationRows = count;
   expect((await GET()).status).toBe(503);
 });
-it.each(["activity_seatings", "activity_seat_claims", "activity_seat_blocks", "activity_seat_releases", "activity_seat_requests", "activity_seat_proofs", "pending_uploads", "site_home_sections"])("missing seating/V2 structure is not ready: %s", async table => {
+it.each(["activity_seatings", "activity_seat_claims", "activity_seat_blocks", "activity_seat_releases", "activity_seat_additions", "activity_seat_requests", "activity_seat_proofs", "pending_uploads", "site_home_sections"])("missing seating/V2 structure is not ready: %s", async table => {
   unavailableProbe = "FROM " + table;
   expect((await GET()).status).toBe(503);
 });
