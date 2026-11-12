@@ -5,7 +5,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
   gap: 24px;
-  align-items: stretch;
+  align-items: start;
   margin: 28px 0;
 }
 .mainColumn,
@@ -17,17 +17,11 @@
 }
 .featureSection {
   margin: 0;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-.featureSection > article {
-  flex: 1;
 }
 .lowerSections {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: stretch;
+  align-items: start;
   gap: 24px;
   margin-bottom: 32px;
 }
@@ -39,7 +33,6 @@
 }
 .sectionBlock > section {
   margin: 0;
-  height: 100%;
 }
 .sectionBlock[data-section="upcoming"],
 .sectionBlock[data-section="open"],
@@ -74,6 +67,7 @@
 }
 .scheduleGrid {
   display: grid;
+  align-items: start;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
@@ -208,9 +202,6 @@
   }
   .scheduleGrid {
     grid-template-columns: 1fr;
-  }
-  .featureSection {
-    height: auto;
   }
   .sectionBlock[data-section="upcoming"] > section,
   .sectionBlock[data-section="notices"] > section,

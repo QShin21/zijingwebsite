@@ -29,6 +29,15 @@
 .corners svg[data-color="3"] {
   color: var(--z-muted);
 }
+.corners svg[data-color="4"] {
+  color: var(--z-info);
+}
+.corners svg[data-color="5"] {
+  color: color-mix(in srgb, var(--z-coral) 65%, var(--z-accent));
+}
+.corners svg[data-color="6"] {
+  color: color-mix(in srgb, var(--z-muted) 65%, var(--z-ink));
+}
 :global(:root[data-z-theme="simple"]) .corners {
   display: none;
 }

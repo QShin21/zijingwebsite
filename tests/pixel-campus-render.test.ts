@@ -145,7 +145,7 @@ describe("real campus components preserve functional entry points", () => {
 });
 
 describe("corner ornaments", () => {
-  it("keeps four-cell pieces stable across server renders and varies neighbouring cards", () => {
+  it("keeps 3–5 cell pieces stable across server renders and varies neighbouring cards", () => {
     const render = (seed: string) =>
       renderToStaticMarkup(createElement(PixelCorners, { seed }));
     const neighbours = ["event:11", "event:12", "event:13", "event:14"].map(
@@ -154,7 +154,17 @@ describe("corner ornaments", () => {
     expect(new Set(neighbours).size).toBe(4);
     for (let i = 0; i < neighbours.length; i++) {
       expect(neighbours[i]).toBe(render(`event:${11 + i}`));
-      expect(neighbours[i].match(/<rect /g)).toHaveLength(8);
+      const pieces = [
+        ...neighbours[i].matchAll(
+          /<svg[^>]*data-cells="(\d)"[^>]*>(.*?)<\/svg>/g,
+        ),
+      ];
+      expect(pieces).toHaveLength(2);
+      for (const [, count, body] of pieces) {
+        expect(Number(count)).toBeGreaterThanOrEqual(3);
+        expect(Number(count)).toBeLessThanOrEqual(5);
+        expect(body.match(/<rect /g)).toHaveLength(Number(count));
+      }
       expect(neighbours[i]).toContain('aria-hidden="true"');
       expect(neighbours[i]).not.toContain("<a");
     }

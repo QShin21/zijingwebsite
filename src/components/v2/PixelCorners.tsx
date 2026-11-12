@@ -1,42 +1,60 @@
 import styles from "./pixel-corners.module.css";
 
-// Each four-cell piece starts at the outer corner and grows along its edges.
+// Pieces of 3–5 cells start at the corner and grow along its edges.
 const shapes = [
   [
     [0, 0],
     [1, 0],
-    [2, 0],
     [0, 1],
-  ],
-  [
-    [0, 0],
-    [0, 1],
-    [0, 2],
-    [1, 0],
   ],
   [
     [0, 0],
     [1, 0],
     [2, 0],
-    [1, 1],
+    [0, 1],
   ],
   [
     [0, 0],
+    [1, 0],
+    [2, 0],
     [0, 1],
     [0, 2],
+  ],
+  [
+    [0, 0],
+    [1, 0],
+    [2, 0],
+  ],
+  [
+    [0, 0],
+    [1, 0],
+    [2, 0],
     [1, 1],
   ],
   [
     [0, 0],
     [1, 0],
-    [0, 1],
+    [2, 0],
     [1, 1],
+    [1, 2],
+  ],
+  [
+    [0, 0],
+    [0, 1],
+    [0, 2],
   ],
   [
     [0, 0],
     [1, 0],
     [1, 1],
     [2, 1],
+  ],
+  [
+    [0, 0],
+    [1, 0],
+    [0, 1],
+    [1, 1],
+    [0, 2],
   ],
 ];
 
@@ -58,9 +76,16 @@ export function PixelCorners({
   return (
     <span className={styles.corners} data-pixel-corners="" aria-hidden="true">
       {[first, second].map((shape, index) => {
-        const cells = shapes[shape];
+        const cells = shapes[shape].map(([x, y]) =>
+          (hash >>> (index + 9)) & 1 ? [y, x] : [x, y],
+        );
         const width = (Math.max(...cells.map(([x]) => x)) + 1) * 8;
         const height = (Math.max(...cells.map(([, y]) => y)) + 1) * 8;
+        const color =
+          (hash +
+            index * (1 + ((hash >>> 8) % 6)) +
+            (variant === "mint" ? 1 : variant === "coral" ? 2 : 0)) %
+          7;
         return (
           <svg
             key={index}
@@ -68,12 +93,8 @@ export function PixelCorners({
             width={width}
             height={height}
             data-shape={shape}
-            data-color={
-              (hash +
-                index +
-                (variant === "mint" ? 1 : variant === "coral" ? 2 : 0)) %
-              4
-            }
+            data-cells={cells.length}
+            data-color={color}
             shapeRendering="crispEdges"
           >
             {cells.map(([x, y]) => (
