@@ -12,6 +12,7 @@ import config from '../src/payload.config';
 import * as v2 from '../src/lib/v2';
 import { mediaRef } from '../src/lib/v2/shared';
 import { controlledImageRef } from '../src/lib/v2/images';
+import { seatActivity, seatingState, seatProof, seatingWorkbench } from '../src/lib/activity-seating';
 import { v2Request } from '../src/lib/v2/http';
 
 const url = new URL(process.env.DATABASE_URL!);
@@ -53,8 +54,13 @@ const password = 'Synthetic-Only-Legacy-Password-20261112', salt = 'Synthetic-Le
 const legacyHash = pbkdf2Sync(password, salt, 25000, 512, 'sha256').toString('hex');
 const image = await sharp({ create: { width: 4, height: 4, channels: 3, background: '#7956cf' } }).png().toBuffer();
 const dataImage = 'data:image/png;base64,' + image.toString('base64');
+const proofImage = await sharp(image).webp().toBuffer();
 let member = 0, manager = 0, game = 0, event = 0, post = 0, showcase = 0, media = 0;
 let interruptedMigrationAtomic = false;
+const mainSeating = process.env.V2_COMPAT_SEATING === 'true';
+const applied = new Set<number>();
+const appliedNames: string[] = [];
+let historicalProof = '';
 async function insert(table: string, values: Record<string, unknown>): Promise<number> {
   const keys = Object.keys(values);
   return (await db.query(`INSERT INTO ${quote(table)} (${keys.map(quote).join(',')}) VALUES (${keys.map((_, i) => '$' + (i + 1)).join(',')}) RETURNING id`, Object.values(values))).rows[0].id;
@@ -66,10 +72,12 @@ async function apply(index: number) {
     await migration.up({ db: executor } as unknown as MigrateUpArgs);
     await db.query('INSERT INTO payload_migrations(name,batch) VALUES($1,$2)', [migration.name, index + 1]);
     await db.query('COMMIT');
+    applied.add(index); appliedNames.push(migration.name);
   } catch (error) { await db.query('ROLLBACK'); throw error; }
 }
 try {
   for (let i = 0; i < migrations.length; i++) {
+    if (applied.has(i)) continue;
     // Simulate a process interruption during an additive migration, then retry.
     if (migrations[i].name === '20261111_000000_v2_media_schedule') {
       const before = await census();
@@ -112,6 +120,24 @@ try {
     if (i === 17) {
       await db.query('UPDATE events SET post_images=$1 WHERE id=$2', [JSON.stringify([{ source: dataImage, alt: 'Synthetic old publication' }]), event]);
       checkpoints.push({ baseline: migrations[i].name, before: await census() });
+      if (mainSeating) {
+        // main deployed seating before either V2 migration. Keep its original name
+        // and rows, then apply the missing V2 migrations without recreating it.
+        const index = migrations.findIndex(m => m.name === '20261112_000000_activity_seating');
+        assert.ok(index > i); await apply(index);
+        const setting = await insert('activity_seatings', { event_id: event, enabled: true });
+        const oldRequest = await insert('activity_seat_requests', { seating_id: setting, member_id: member,
+          member_name: 'Synthetic historical member', phone: '13900000000', seats: ['1-1', '1-2'], status: 'pending' });
+        await db.query("INSERT INTO activity_seat_claims(seating_id,seat,request_id) VALUES($1,'1-1',$2),($1,'1-2',$2)", [setting, oldRequest]);
+        historicalProof = '12345678-1234-4567-89ab-1234567890ab';
+        await db.query('INSERT INTO activity_seat_proofs(id,seating_id,member_id,request_id,picture) VALUES($1,$2,$3,$4,$5)',
+          [historicalProof, setting, member, oldRequest, proofImage]);
+        const otherSetting = await insert('activity_seatings', { post_id: post, enabled: false });
+        await insert('activity_seat_requests', { seating_id: otherSetting, member_id: manager,
+          member_name: 'Synthetic historical manager', phone: '13900000001', seats: ['2-1'], status: 'rejected',
+          reviewer_id: member, reviewed_at: new Date('2026-11-01T01:00:00Z') });
+        checkpoints.push({ baseline: 'main-7f56e08-with-activity-seating-before-v2', before: await census() });
+      }
     }
   }
   // The earliest checkpoint predates intentionally added fixture rows/fields.
@@ -160,7 +186,20 @@ try {
       schemaReadCollections.push(collection.slug);
     }
     await p.findGlobal({ slug: 'site', overrideAccess: true, depth: 0 });
+    if (mainSeating) {
+      const { GET } = await import('../src/app/health/ready/route');
+      assert.equal((await GET()).status, 200);
+    }
     const actor = await p.findByID({ collection: 'users', id: member, overrideAccess: true });
+    if (mainSeating) {
+      const activity = await seatActivity(p, 'events', event, actor);
+      const state = await seatingState(p, activity, actor);
+      assert.deepEqual(state.occupancy, { '1-1': 'pending', '1-2': 'pending' });
+      assert.equal(state.mine?.status, 'pending');
+      assert.deepEqual(await seatProof(p, activity, actor, historicalProof), proofImage);
+      const reviewer = await p.findByID({ collection: 'users', id: manager, overrideAccess: true });
+      assert.equal((await seatingWorkbench(p, activity, reviewer, 'pending', 1)).docs.length, 1);
+    }
     const home = await v2.getHome(p, null);
     assert.equal(home.viewer, null);
     assert.equal((await v2.getCommunity(p, actor, { slug: 'synthetic-legacy' })).card.community.id, game);
@@ -184,8 +223,8 @@ try {
     assert.equal((await db.query('SELECT account FROM users WHERE id=$1', [newUser.id])).rows[0].account, null);
     await fs.writeFile(process.env.V2_COMPAT_EVIDENCE!, JSON.stringify({
       at: new Date().toISOString(), result: 'PASS', productionAccess: false, databasePush: false,
-      source: 'new branch dd3aad4b71c85f34ad96d0b49a6f1dd80c7fbfeb plus compatibility fixes',
-      migrationsApplied: migrations.map(m => m.name), schemaReadCollections,
+      source: mainSeating ? 'new 90c7c8d plus main d3a1446 seating integration; synthetic main-to-new upgrade' : 'new checkout with compatibility fixes',
+      migrationsApplied: appliedNames, schemaReadCollections, mainSeatingHistoryPreserved: mainSeating,
       preservedCheckpoints: checkpoints.slice(1).map(c => ({ baseline: c.baseline, tables: Object.keys(c.before).length, rows: Object.values(c.before).reduce((n, t) => n + t.count, 0), unchangedOriginalColumnsSHA256: true })),
       preNicknameAccountAndAuthColumnsPreserved: true, invalidOrDuplicateNicknamesFailWithoutChanges: true, legacyPasswordLogin: true,
       websiteCookieAndMiniappJWT: true, rerunSkipsAppliedMigrations: true, interruptedMigrationAtomic,

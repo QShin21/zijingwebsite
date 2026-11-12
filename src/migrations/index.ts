@@ -1,3 +1,4 @@
+import * as activitySeating from "./20261112_000000_activity_seating";
 import * as v2HomeSections from "./20261112_000000_v2_home_sections";
 import * as publicationImages from "./20261110_000000_publication_images";
 import * as v2MediaSchedule from "./20261111_000000_v2_media_schedule";
@@ -74,4 +75,5 @@ export const migrations = [
   { up: publicationImages.up, down: publicationImages.down, name: '20261110_000000_publication_images' },
   { up: v2MediaSchedule.up, down: v2MediaSchedule.down, name: '20261111_000000_v2_media_schedule' },
   { up: v2HomeSections.up, down: v2HomeSections.down, name: "20261112_000000_v2_home_sections" },
+  { up: activitySeating.up, down: activitySeating.down, name: "20261112_000000_activity_seating" },
 ];

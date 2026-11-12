@@ -68,6 +68,14 @@ function website(path) {
   if (teamHonors) return go('team-honors', { team: teamHonors[1] });
   const staff = /^\/join\/staff\/batches\/([1-9]\d*)$/.exec(path);
   if (staff) return go('signup', { kind: 'staff', id: staff[1] });
+  // Activity seating: the reviewer workbench and the member anchor on V2 event pages. The
+  // seating page re-checks the session and the server re-checks review rights on every call.
+  const seatWorkbench = /^\/activities\/(events|community-posts)\/([1-9]\d{0,9})\/seating$/.exec(path);
+  if (seatWorkbench) return go('activity-seating', { kind: seatWorkbench[1], id: seatWorkbench[2], mode: 'review' });
+  const communitySeating = /^\/community\/([a-z0-9-]+)\/updates\/([1-9]\d{0,9})#activity-seating$/.exec(path);
+  if (communitySeating && !communityStatic.includes(communitySeating[1])) return go('activity-seating', { kind: 'community-posts', id: communitySeating[2] });
+  const eventSeating = /^\/events\/([a-z0-9-]+)#activity-seating$/.exec(path);
+  if (eventSeating) return go('detail', { collection: 'events', slug: eventSeating[1] });
   if (path === '/community/apply') return go('applications', { apply: 1 });
   if (path === '/community/review') return go('review');
   if (path === '/staff/manage') return go('staff');

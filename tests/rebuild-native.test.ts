@@ -16,10 +16,11 @@ function navigationHarness(depth = 1) {
 
 describe('Native rebuild: route and rendering contracts, not an official WeChat compiler', () => {
   it('keeps every existing native route (explore as a redirect) and the five V2 tabs', () => {
-    expect(app.pages).toHaveLength(28);
+    // 28 V2 routes plus the native activity seating page (member map + reviewer workbench).
+    expect(app.pages).toHaveLength(29);
     for (const route of ['detail', 'list', 'fixed', 'community', 'signup', 'team', 'team-honors', 'staff', 'explore'])
       expect(app.pages).toContain('pages/' + route + '/index');
-    for (const route of ['teams', 'team-home', 'recruitment', 'showcase-new']) expect(app.pages).toContain('pages/' + route + '/index');
+    for (const route of ['teams', 'team-home', 'recruitment', 'showcase-new', 'activity-seating']) expect(app.pages).toContain('pages/' + route + '/index');
     expect(app.tabBar.list.map(tab => tab.pagePath)).toEqual(['home', 'events', 'communities', 'teams', 'account'].map(name => 'pages/' + name + '/index'));
     expect(app.tabBar.list.map(tab => (tab as unknown as { text: string }).text)).toEqual(['主场', '日程', '社群', '代表队', '我的']);
     for (const route of app.pages) {
@@ -70,7 +71,7 @@ describe('Native rebuild: route and rendering contracts, not an official WeChat 
   });
   it('rebuilt inner pages use the V2 hero frame and no longer use the retired thin-line page classes', () => {
     const inner = ['detail', 'list', 'fixed', 'auth', 'community', 'signup', 'applications', 'review', 'staff', 'staff-review', 'activity-manage',
-      'team', 'team-apply', 'team-review', 'team-members', 'team-honors', 'team-profiles', 'team-honor-workspace', 'team-honor-edit', 'showcase-new'];
+      'team', 'team-apply', 'team-review', 'team-members', 'team-honors', 'team-profiles', 'team-honor-workspace', 'team-honor-edit', 'showcase-new', 'activity-seating'];
     for (const route of inner) {
       const markup = read('pages/' + route + '/index.wxml');
       expect(markup, route).toMatch(/class="zj-hero[" ]/);
@@ -99,6 +100,10 @@ describe('Native rebuild: route and rendering contracts, not an official WeChat 
     ['/community/synthetic-game/showcase', '/pages/community/index?slug=synthetic-game&area=showcase'],
     ['/community/synthetic-game/showcase/team-honors/52', '/pages/team-honors/index?team=52'],
     ['/teams/honors?view=review&team=52&game=11', '/pages/team-honor-workspace/index?view=review&team=52&game=11'],
+    ['/activities/events/31/seating', '/pages/activity-seating/index?kind=events&id=31&mode=review'],
+    ['/activities/community-posts/47/seating', '/pages/activity-seating/index?kind=community-posts&id=47&mode=review'],
+    ['/community/synthetic-game/updates/47#activity-seating', '/pages/activity-seating/index?kind=community-posts&id=47'],
+    ['/events/synthetic-event#activity-seating', '/pages/detail/index?collection=events&slug=synthetic-event'],
   ])('maps the existing website deep link %s to its native flow', (path, url) => {
     const h = navigationHarness(); h.navigation.website(path); expect(h.wx.navigateTo).toHaveBeenCalledWith({ url });
   });

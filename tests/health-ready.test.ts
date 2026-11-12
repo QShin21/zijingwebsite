@@ -27,7 +27,17 @@ function migratedIndexes(): IndexRow[] {
     name, table_name: "team_honor_records", columns: [column],
     valid: true, ready: true, is_unique: false, predicate: null,
   }));
-  return [...records, {
+  const seats = [
+    ["activity_seatings_event_id_key", "activity_seatings", ["event_id"]],
+    ["activity_seatings_post_id_key", "activity_seatings", ["post_id"]],
+    ["activity_seat_claims_pkey", "activity_seat_claims", ["seating_id", "seat"]],
+    ["activity_seat_requests_active_idx", "activity_seat_requests", ["seating_id", "member_id"]],
+  ].map(([name, table_name, columns]) => ({
+    name: name as string, table_name: table_name as string, columns: columns as string[],
+    valid: true, ready: true, is_unique: true,
+    predicate: name === "activity_seat_requests_active_idx" ? "(status <> 'rejected'::text)" : null,
+  }));
+  return [...records, ...seats, {
     name: "payload_locked_documents_rels_team_honor_records_id_idx",
     table_name: "payload_locked_documents_rels", columns: ["team_honor_records_id"],
     valid: true, ready: true, is_unique: false, predicate: null,
@@ -35,11 +45,12 @@ function migratedIndexes(): IndexRow[] {
 }
 let catalog: IndexRow[];
 let honorMigrationRows: number;
+let seatingMigrationRows: number;
 let unavailableProbe: string;
 beforeEach(() => {
   vi.resetAllMocks();
   catalog = migratedIndexes();
-  honorMigrationRows = 1;
+  honorMigrationRows = 1; seatingMigrationRows = 1;
   unavailableProbe = "";
   mocks.count.mockResolvedValue({ totalDocs: 0 });
   mocks.cms.mockResolvedValue({ count: mocks.count, db: { pool: { query: mocks.query } } });
@@ -48,7 +59,7 @@ beforeEach(() => {
     if (statement.includes("FROM pg_index")) return { rows: catalog, rowCount: catalog.length };
     if (statement.includes("FROM payload_migrations")) {
       if (Array.isArray(parameters?.[0])) return { rows: parameters[0].map(name => ({ name })), rowCount: parameters[0].length };
-      const rowCount = parameters?.[0] === "20261012_080000_team_honor_records" ? honorMigrationRows : 1;
+      const rowCount = parameters?.[0] === "20261012_080000_team_honor_records" ? honorMigrationRows : parameters?.[0] === "20261112_000000_activity_seating" ? seatingMigrationRows : 1;
       return { rows: rowCount ? [{ name: parameters?.[0] }] : [], rowCount };
     }
     return { rows: [], rowCount: 0 };
@@ -110,4 +121,22 @@ it.each([
   const response = await GET();
   expect(response.status).toBe(503);
   expect(await response.json()).toEqual({ status: "unavailable" });
+});
+
+
+it.each([0, 2])("seating migration must exist exactly once: %s", async count => {
+  seatingMigrationRows = count;
+  expect((await GET()).status).toBe(503);
+});
+it.each(["activity_seatings", "activity_seat_claims", "activity_seat_requests", "activity_seat_proofs", "pending_uploads", "site_home_sections"])("missing seating/V2 structure is not ready: %s", async table => {
+  unavailableProbe = "FROM " + table;
+  expect((await GET()).status).toBe(503);
+});
+it.each(["activity_seatings_event_id_key", "activity_seatings_post_id_key", "activity_seat_claims_pkey", "activity_seat_requests_active_idx"])("missing seating unique index is not ready: %s", async name => {
+  catalog = catalog.filter(index => index.name !== name);
+  expect((await GET()).status).toBe(503);
+});
+it.each([{ valid: false }, { ready: false }, { is_unique: false }, { columns: ["member_id"] }, { predicate: null }, { predicate: "status = 'pending'::text" }])("a weakened active-seat uniqueness index is not ready: %j", async invalid => {
+  Object.assign(catalog.find(index => index.name === "activity_seat_requests_active_idx")!, invalid);
+  expect((await GET()).status).toBe(503);
 });

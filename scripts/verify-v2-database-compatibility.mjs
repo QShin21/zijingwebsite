@@ -7,6 +7,7 @@ import EmbeddedPostgres from 'embedded-postgres';
 
 // Never reads .env or connects to an existing server. Retains all synthetic
 // databases/media/logs after the run; no cleanup, drop or backup retention.
+const seating = process.argv.includes('--seating');
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 await fs.mkdir(path.join(repo, '.data'), { recursive: true });
 const directory = await fs.mkdtemp(path.join(repo, '.data/v2-database-compatibility-'));
@@ -40,7 +41,7 @@ const env = {
   SERVER_URL: 'http://localhost:3000', NEXT_PUBLIC_SERVER_URL: 'http://localhost:3000',
   MEDIA_DIR: path.join(directory, 'media'), SMTP_HOST: '', S3_BUCKET: '',
   NEXT_TELEMETRY_DISABLED: '1', DISABLE_PAYLOAD_HMR: 'true',
-  REBUILD_QA_PROFILE: 'contracts', V2_COMPAT_SYNTHETIC: 'true',
+  REBUILD_QA_PROFILE: 'contracts', V2_COMPAT_SYNTHETIC: 'true', V2_COMPAT_SEATING: String(seating),
   V2_COMPAT_EVIDENCE: path.join(directory, 'evidence.json'),
 };
 await fs.mkdir(env.MEDIA_DIR);
@@ -66,7 +67,7 @@ try {
   console.log(`Isolated synthetic run: ${directory}`);
   await run(['--import', 'tsx', 'scripts/v2-database-compatibility.ts'], 'upgrade.log');
   await run([path.join(repo, 'node_modules/vitest/vitest.mjs'), 'run',
-    'tests/v2-backend.integration.test.ts', 'tests/v2-read-projections.test.ts', 'tests/nickname-db.test.ts',
+    ...(seating ? ['tests/activity-seating.test.ts', 'tests/health-ready.test.ts'] : []), 'tests/v2-backend.integration.test.ts', 'tests/v2-read-projections.test.ts', 'tests/nickname-db.test.ts',
     'tests/v2-image-tickets.test.ts', 'tests/v2-core.test.ts', 'tests/v2-media-compatibility.test.ts',
     'tests/v2-legacy-http-contract.test.ts', 'tests/v2-legacy-questionnaire.test.ts',
     'tests/v2-legacy-signup-methods.test.ts', 'tests/v2-legacy-staff-flows.test.ts',
@@ -78,7 +79,7 @@ try {
   if (!contracts.success || contracts.numFailedTests || contracts.numPendingTests) throw new Error('Contracts did not all execute successfully');
   evidence.contractSuites = { result: 'PASS', files: contracts.testResults.length, passed: contracts.numPassedTests, failed: contracts.numFailedTests, skipped: contracts.numPendingTests };
   await fs.writeFile(env.V2_COMPAT_EVIDENCE, JSON.stringify(evidence, null, 2) + '\n');
-  await fs.copyFile(env.V2_COMPAT_EVIDENCE, path.join(repo, 'docs/evidence/v2-database-compatibility-20261112.json'));
+  await fs.copyFile(env.V2_COMPAT_EVIDENCE, path.join(repo, seating ? 'docs/evidence/activity-seating-new-validation-20261112.json' : 'docs/evidence/v2-database-compatibility-20261112.json'));
 } catch (error) { failed = true; console.error(error); }
 finally {
   if (postgres.process?.exitCode === null) await postgres.stop();

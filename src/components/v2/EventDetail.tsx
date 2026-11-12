@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { EventDetail } from "@/lib/v2";
 import { ActivitySignup } from "@/components/ActivitySignup";
+import { ActivitySeating } from "@/components/activity-pages/ActivitySeating";
 import { safeURL } from "@/lib/rules";
 import { ArticleTile, DateBlock, eventTone, signupTone } from "./cards";
 import { CommunityChip, DemoPill, Img, KeyValues, PageHero, StatusPill, Wrap, buttonClass } from "./ui";
@@ -188,6 +189,9 @@ export function EventDetailView({
             )}
           </aside>
         </div>
+        {/* Seat selection spans the full width (wide map). It renders only when the server
+            reports seating enabled, an own request or review rights for this viewer. */}
+        <ActivitySeating kind={kind} id={id} returnTo={event.href} />
       </Wrap>
     </>
   );
