@@ -1,0 +1,45 @@
+{
+  "deployedAt": "2026-11-13T01:08:05+08:00",
+  "revision": "856e0b35bb6e0403eb6669b538cc7ad90776ff9b",
+  "buildId": "l40IsmMWILU4nU1M2Gzrf",
+  "release": "/srv/zijingwebsite/releases/publication-roles-20261113-856e0b3",
+  "backup": "/srv/zijingwebsite/backups/publication-roles-20261113-856e0b3",
+  "offsiteBackupConfigured": false,
+  "migrations": [
+    "20261113_000000_publication_content",
+    "20261113_000100_publication_asset_owner",
+    "20261113_000200_honorary_backbone",
+    "20261113_000300_restore_edited_promotions"
+  ],
+  "rowCountsBeforeAndAfter": {
+    "users": 540,
+    "roles": 540,
+    "communityPosts": 2,
+    "communityShowcase": 1,
+    "promotions": 2,
+    "staffApplications": 5,
+    "activitySignups": 395,
+    "seatRequests": 143,
+    "pendingUploads": 0
+  },
+  "verification": {
+    "isolatedDatabaseMigration": "passed",
+    "roleRecruitmentPromotionAndImageTests": "41 passed",
+    "imageAndMiniappProjectionTests": "78 passed",
+    "browser": "isolated gallery upload, article editing, promotion editing, showcase approval and hide/restore passed",
+    "productionBuild": "passed",
+    "publicHomeHttp": 200,
+    "publicReady": "ready",
+    "publicBuildManifestHttp": 200,
+    "anonymousTenMiBUploadHttp": 401,
+    "productionAuthenticatedPublishing": "not tested",
+    "miniappRealDevice": "not tested"
+  },
+  "miniapp": {
+    "version": "0.5.18",
+    "developmentUpload": "success",
+    "packageBytes": 836087,
+    "submittedForReview": false,
+    "publicRelease": false
+  }
+}
