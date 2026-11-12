@@ -1,0 +1,71 @@
+{
+  "deployedAt": "2026-11-12T15:51:55+08:00",
+  "branch": "new",
+  "applicationRevision": "b1d7486b257b78b57bd4fc994da42dccfec02ce4",
+  "origin": "https://home.thuzijing.top",
+  "releaseDirectory": "/srv/zijingwebsite/releases/icons-admin-reset-20261112-b1d7486",
+  "previous": {
+    "applicationRevision": "a16d8918a39b2aabf07d70372fbba58120f94f38",
+    "buildId": "bkehYLmB_oHMRH5reBKaP",
+    "releaseDirectory": "/srv/zijingwebsite/releases/new-v3-20261112-a16d891"
+  },
+  "build": {
+    "id": "IsTigo95Y8jZwGzhxpi9h",
+    "node": "24.12.0",
+    "appEnv": "production",
+    "matchedSourceFiles": 452,
+    "lockfilesMatchServerDependencies": true,
+    "sourceArchiveSha256": "8877b108521634faf1c003dd780bab5b25df50b9e931fddde2ce8510ad1eec22",
+    "buildArchiveSha256": "4641c735cfefcf26e382bb016922846c9dadeffb5b1cfc4acc5dd90624dfa5bb",
+    "bundleSha256": "7f5969b8306720bd9cc3e37d101e7954d68ab7c3a767aa3a42908a1ebc1897ad"
+  },
+  "backup": {
+    "storage": "server-local",
+    "directory": "/srv/zijingwebsite/backups/icons-admin-reset-20261112-b1d7486",
+    "snapshot": "/srv/zijingwebsite/backups/icons-admin-reset-20261112-b1d7486/database/zijing-2026-11-12T07-51-17.916Z",
+    "restoreVerified": true,
+    "restoredTables": 75,
+    "restoredRecords": 4748,
+    "restoredMediaFiles": 0,
+    "rollbackScript": "/srv/zijingwebsite/backups/icons-admin-reset-20261112-b1d7486/rollback.sh",
+    "rollbackExecuted": false
+  },
+  "migrations": {
+    "applied": [
+      "20261112_020000_community_icons"
+    ],
+    "databasePush": false,
+    "scope": "New icon table, indexes, and a nullable document-lock relationship",
+    "isolatedUpgrade": {
+      "originalTablesCompared": 74,
+      "originalRecordsCompared": 4726,
+      "mismatches": []
+    },
+    "productionSchemaVerified": true
+  },
+  "production": {
+    "websiteService": "active",
+    "databaseService": "active",
+    "candidateStopped": true,
+    "environmentMatched": true,
+    "nginxConfigurationMatched": true,
+    "businessData": {
+      "tablesCompared": 21,
+      "recordsCompared": 739,
+      "mismatches": [],
+      "mediaMatched": true
+    },
+    "publicHttp": {
+      "/": 200,
+      "/health/live": 200,
+      "/health/ready": 200,
+      "/admin/login": 200,
+      "/api/miniapp/status": 200
+    },
+    "manifestSha256": "666a1ac8cc62b869c7fa838305869a4acf4cb00e9fe18eac1f7f17d580a462fc",
+    "manifestMatchedCandidateAndPublic": true,
+    "publicVerifiedFromDeploymentHostAndClient": true,
+    "accountWorkflowVerification": "Local synthetic accounts covered both admin roles. Production checks were read-only."
+  },
+  "scope": "Website rollout of community game icons and administrative password reset"
+}

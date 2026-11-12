@@ -37,4 +37,4 @@
 - 新迁移 `20261112_020000_community_icons` 仅增加图标表、索引和后台文档锁关系。社群正文及现有待审草稿沿用原记录。
 - 发布时先运行已有迁移命令，再启动新构建。回退应用时保留新增表和图片数据。
 
-实际验证与部署状态见 [验收记录](evidence/community-icons-20261112.json)。
+功能已上线至紫荆网站。实际验证范围见 [本地验收](evidence/community-icons-20261112.json) 和 [部署记录](evidence/icons-admin-reset-deployment-20261112.json)。

@@ -11,4 +11,4 @@
 
 普通用户的自助改密继续使用原验证流程。副社长的角色、任职、账号状态及邮箱管理限制保持原规则。此改动使用既有后台控件与账号字段，无新增数据库迁移。
 
-本地合成账号已通过社长、副社长的后台操作核验。验证范围见 [验收记录](evidence/admin-password-reset-20261112.json)。
+本地合成账号已通过社长、副社长的后台操作核验。功能已上线至紫荆网站，见 [本地验收](evidence/admin-password-reset-20261112.json) 和 [部署记录](evidence/icons-admin-reset-deployment-20261112.json)。
