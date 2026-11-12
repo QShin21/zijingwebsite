@@ -1,0 +1,45 @@
+{
+  "sourceRevision": "ba3721d2b8d78c7bcb7bdaa6db2466ef276ab3f2",
+  "branch": "main",
+  "deployedAt": "2026-11-12T21:57:08+08:00",
+  "origin": "https://home.thuzijing.top",
+  "releaseDirectory": "/srv/zijingwebsite/releases/seat-random-20261112-ba3721d",
+  "buildID": "iIRECAG1NeYvCjDnEyxLw",
+  "previousRevision": "6f17453d8e55d7d27a9bfe005f95e5a082e3d6ea",
+  "migration": "20261112_090000_activity_seat_modes",
+  "existingSeatingMode": "selection",
+  "migrationComparison": {
+    "existingSeatingDataUnchanged": true,
+    "compared": ["requests excluding new mode and count fields", "seating settings excluding new mode field", "seat claims", "blocked seats", "proof records and picture contents"],
+    "seatCountsAtBackupAndAfterMigration": { "requests": 133, "claims": 231, "proofs": 180, "blocks": 21 }
+  },
+  "backup": {
+    "storage": "server-local",
+    "directory": "/srv/zijingwebsite/backups/seat-random-20261112-ba3721d",
+    "snapshot": "/srv/zijingwebsite/backups/seat-random-20261112-ba3721d/database/zijing-2026-11-12T13-56-56.091Z",
+    "rollbackScript": "/srv/zijingwebsite/backups/seat-random-20261112-ba3721d/rollback.sh",
+    "restoreVerified": false
+  },
+  "checks": {
+    "isolatedDatabaseCases": "7 passed, including migration compatibility, privacy, mode conversion, concurrent approval and insufficient capacity",
+    "targetedTests": "47 passed: allocation, mini-program editing and blocking, readiness",
+    "simulatedBrowserFlows": "passed: admin mode switching, count adjustment and approval; member submission, editing, confirmed seat visibility and mode change; existing seat management",
+    "miniappStaticCheck": "passed",
+    "changedFilesLint": "passed",
+    "productionBuildAndTypecheck": "passed",
+    "publicHttp": { "/events": 200, "/health/ready": 200, "buildManifest": 200 },
+    "productionAuthenticatedWorkflow": "not exercised",
+    "ci": "skipped"
+  },
+  "miniProgram": {
+    "version": "0.5.16",
+    "sourceTree": "fb48bfd657c0ced89c7ce190117b2c090c2dcf3d",
+    "uploadedAt": "2026-11-12T21:56:49+08:00",
+    "platformStatus": "developmentVersionUploaded",
+    "officialTool": "WeChat Developer Tools cli.bat",
+    "sizeBytes": 831618,
+    "reviewSubmitted": false,
+    "publicReleaseExecuted": false,
+    "realDeviceVerified": false
+  }
+}

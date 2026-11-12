@@ -13,9 +13,9 @@ const { actions } = require('../../lib/page');
 // Activity seat selection (member map + reviewer workbench) over the authorized seating API.
 // Server state decides every capability. Phone numbers and proof ids live only in page data
 // for the current account: cleared on account change, never stored, logged or shared.
-const labels = { pending: '待审核', confirmed: '已确认', rejected: '已驳回' };
-const tones = { pending: 'warning', confirmed: 'success', rejected: 'neutral' };
-const filters = ['pending', 'confirmed', 'rejected'].map(status => ({ status, label: labels[status] }));
+const labels = { pending: '待审核', confirmed: '已确认', rejected: '已驳回', cancelled: '已取消', revoked: '已撤销', blocked: '未开放' };
+const tones = { pending: 'warning', confirmed: 'success', rejected: 'neutral', cancelled: 'neutral', revoked: 'neutral' };
+const filters = ['pending', 'confirmed', 'rejected', 'cancelled', 'revoked'].map(status => ({ status, label: labels[status] }));
 const zooms = [{ size: 36, label: '紧凑' }, { size: 52, label: '标准' }, { size: 68, label: '放大' }];
 const GAP = 8; // rpx between seats; keep in step with .seat margin-right in index.wxss
 const phonePattern = /^\+?[1-9]\d{6,14}$/;
@@ -27,34 +27,40 @@ const memberOf = user => (user && user.id ? String(user.id) : '');
 const step = zoom => zooms[zoom].size + GAP;
 const boardWidth = (rows, zoom) => Math.max(...rows.map(row => row.offset + row.count)) * step(zoom) + 24;
 // Everything private or account-bound that must disappear when the account changes.
-const cleared = () => ({ rows: [], chips: [], selected: [], phone: '', drafts: [], mine: null, docs: [], counts: null, busy: '', error: '', notice: '',
-  editable: false, loggedIn: false, canReview: false, enabled: false, open: false, scheduled: false, opensAt: null, openingLabel: '', openingDate: '', openingTime: '', title: '', loadError: '' });
+const cleared = () => ({ rows: [], chips: [], selected: [], phone: '', drafts: [], mine: null, docs: [], counts: null, busy: '', error: '', notice: '', proofError: '', proofNotice: '',
+  editable: false, editing: false, editRevision: null, editProofs: [], canEditMine: false, loggedIn: false, canReview: false, enabled: false, mode: 'selection', requestedCount: 1, open: false, scheduled: false, opensAt: null, openingLabel: '', openingDate: '', openingTime: '', title: '', loadError: '', selectedBlocked: 0, selectedAvailable: 0, requestNumber: null, existingCount: 0, seatReview: null, inspectedSeat: '', changeReady: false });
 
-function seatCell(id, number, taken, picked, accent) {
-  const style = taken || (picked ? 'selected' : 'available');
-  const state = taken ? labels[taken] : picked ? '已选' : '可选';
-  return { id, number, style, locked: Boolean(taken), label: seatLabel(id) + (accent ? ' · 中心区' : '') + ' · ' + state };
+function seatCell(id, number, taken, picked, accent, blocked, manage, own) {
+  const style = blocked ? 'blocked' : own && picked ? 'selected' : taken || (picked ? 'selected' : 'available');
+  const state = blocked ? labels.blocked : taken ? labels[taken] : picked ? '已选' : '可选';
+  const inspect = Boolean(manage && taken && !blocked && !own);
+  return { id, number, style, picked, locked: Boolean(taken && !(manage && blocked) && !own && !inspect), label: seatLabel(id) + (accent ? ' · 中心区' : '') + ' · ' + state + (picked && (blocked || own) ? ' · 已选' : '') + (inspect ? ' · 查看申请' : '') };
 }
 function counts(state) {
   const total = state.rows.reduce((sum, row) => sum + row.count, 0);
-  const values = Object.keys(state.occupancy || {}).map(key => state.occupancy[key]);
+  const blocked = (state.blockedSeats || []).length;
+  const values = Object.keys(state.occupancy || {}).filter(key => !(state.blockedSeats || []).includes(key)).map(key => state.occupancy[key]);
   const pending = values.filter(value => value === 'pending').length, confirmed = values.filter(value => value === 'confirmed').length;
-  return { rows: state.rows.length, total, pending, confirmed, free: Math.max(0, total - pending - confirmed) };
+  return { rows: state.rows.length, total, pending, confirmed, blocked, free: Math.max(0, total - pending - confirmed - blocked) };
 }
 function mineView(mine) {
-  return mine && labels[mine.status] ? { status: mine.status, label: labels[mine.status], tone: tones[mine.status], seats: seatNames(mine.seats) } : null;
+  return mine && labels[mine.status] ? { status: mine.status, label: labels[mine.status], tone: tones[mine.status], seats: seatNames(mine.seats), count: mine.requestedCount || (mine.seats || []).length } : null;
 }
 function reviewDoc(row) {
-  return { id: row.id, memberName: row.memberName || '成员', phone: row.phone || '', status: row.status, label: labels[row.status] || '',
-    tone: tones[row.status] || 'neutral', seats: seatNames(row.seats), seatCount: (row.seats || []).length,
+  const unassigned = row.status === 'pending' && row.allocationMode === 'random' && !(row.seats || []).length;
+  return { id: row.id, revision: row.revision, memberName: row.memberName || '成员', phone: row.phone || '', status: row.status, label: labels[row.status] || '',
+    tone: tones[row.status] || 'neutral', seats: unassigned ? '审核通过后安排' : seatNames(row.seats), seatCount: unassigned ? row.requestedCount : (row.seats || []).length, unassigned,
+    seatItems: (row.seats || []).map(id => ({ id, label: seatLabel(id) })),
+    releasedSeats: seatNames((row.releasedSeats || []).map(item => item.seat)),
+    addedSeats: seatNames((row.addedSeats || []).map(item => item.seat)),
     proofs: (row.proofs || []).filter(id => proofPattern.test(String(id))),
     submitted: format.date(row.createdAt), reviewed: row.reviewedAt ? format.date(row.reviewedAt) : '' };
 }
 
 Page(withVisualTheme({
-  data: { review: false, kind: '', title: '', loading: true, busy: '', error: '', loadError: '', notice: '', needsLogin: false,
-    enabled: false, open: false, scheduled: false, opensAt: null, openingLabel: '', openingDate: '', openingTime: '', loggedIn: false, canReview: false, editable: false, counts: null,
-    rows: [], boardWidth: 0, zoom: 1, zoomLabel: zooms[1].label, selected: [], chips: [], phone: '', drafts: [], mine: null,
+  data: { review: false, manage: false, adding: false, changing: false, changeReady: false, requestNumber: null, existingCount: 0, seatReview: null, inspectedSeat: '', kind: '', title: '', loading: true, busy: '', error: '', loadError: '', notice: '', proofError: '', proofNotice: '', needsLogin: false,
+    enabled: false, mode: 'selection', requestedCount: 1, open: false, scheduled: false, opensAt: null, openingLabel: '', openingDate: '', openingTime: '', loggedIn: false, canReview: false, editable: false, editing: false, editRevision: null, editProofs: [], canEditMine: false, counts: null,
+    rows: [], boardWidth: 0, zoom: 1, zoomLabel: zooms[1].label, selected: [], selectedBlocked: 0, selectedAvailable: 0, chips: [], phone: '', drafts: [], mine: null,
     seatLimit: 10, proofLimit: 10, proofMB: 8,
     filters, status: 'pending', statusLabel: labels.pending, pageNumber: 1, hasNextPage: false, docs: [] },
   ...actions,
@@ -66,14 +72,19 @@ Page(withVisualTheme({
       this._kind = kind; this._id = Number(id); this._endpoint = '/api/activities/' + kind + '/' + id + '/seating';
     }
     const review = Boolean(options && options.mode === 'review');
+    const manage = Boolean(options && options.mode === 'manage');
+    const adding = Boolean(options && options.mode === 'add');
+    const changing = Boolean(options && options.mode === 'change');
+    const request = String((options && options.request) || '');
+    this._requestID = /^[1-9]\d*$/.test(request) && Number(request) <= 2147483647 ? Number(request) : null;
     this._member = memberOf(session.user());
-    this.setData({ review, kind: this._kind || '' });
-    wx.setNavigationBarTitle({ title: review ? '选座工作台' : '活动选座' });
+    this.setData({ review, manage, adding, changing, kind: this._kind || '' });
+    wx.setNavigationBarTitle({ title: review ? '选座工作台' : manage ? '管理座位' : adding ? '增加座位' : changing ? '更换座位' : '活动选座' });
     this._unsubscribe = session.subscribe(user => {
       const member = memberOf(user);
       if (member === this._member) return;
       // Another account: drop in-flight replies and every private value of the previous one.
-      this._member = member; this._revision++; this._read++; this._state = null; this._seats = null; clearTimeout(this._openingTimer);
+      this._member = member; this._revision++; this._read++; this._state = null; this._seats = null; this._assignment = null; clearTimeout(this._openingTimer);
       this.setData({ ...cleared(), loading: false, needsLogin: false });
       if (!this._closed) this.load();
     });
@@ -81,17 +92,19 @@ Page(withVisualTheme({
   onShow() {
     this._hidden = false;
     // Returning from our own proof preview or dialer: no reload unless a read was interrupted.
-    if (this._external) { this._external = false; if (!this._stale) return; }
+    if (this._external) { this._external = false; if (!this._stale) { this.scheduleModeRefresh(); return; } }
     if (this.data.busy) { this._stale = true; return; }
     return this.load();
   },
   onHide() {
     this._hidden = true;
     clearTimeout(this._openingTimer);
+    clearTimeout(this._modeTimer);
     if (this.data.loading) { this._read++; this._stale = true; this.setData({ loading: false }); }
   },
   onUnload() {
-    this._closed = true; this._revision++; this._read++; this._state = null; this._seats = null;
+    this._closed = true; this._revision++; this._read++; this._state = null; this._seats = null; this._assignment = null;
+    clearTimeout(this._modeTimer);
     if (this._unsubscribe) this._unsubscribe();
     this._unsubscribe = null;
   },
@@ -105,26 +118,41 @@ Page(withVisualTheme({
 
   current(revision) { return !this._closed && revision === this._revision; },
   reading(read, revision) { return this.current(revision) && read === this._read && !this._hidden; },
+  scheduleModeRefresh() {
+    clearTimeout(this._modeTimer);
+    if (this._closed || this._hidden || this.data.review || this.data.manage || this.data.adding || this.data.changing) return;
+    this._modeTimer = setTimeout(() => {
+      if (this._closed || this._hidden) return;
+      if (this.data.busy || this.data.loading) this.scheduleModeRefresh(); else this.load();
+    }, 15000);
+    if (this._modeTimer && typeof this._modeTimer.unref === 'function') this._modeTimer.unref();
+  },
 
   async load() {
     if (this._closed) return;
     if (this._hidden) { this._stale = true; return; }
     if (!this._endpoint) { this.setData({ loading: false, loadError: '活动入口无效，请从活动详情重新进入。' }); return; }
+    if ((this.data.adding || this.data.changing) && !this._requestID) { this.setData({ loading: false, loadError: '申请入口无效，请从工作台重新进入。' }); return; }
     this._stale = false;
     const read = ++this._read, revision = this._revision, review = this.data.review;
-    if (review && !session.user()) { this.setData({ ...cleared(), loading: false, needsLogin: true }); return; }
+    if ((review || this.data.manage || this.data.adding || this.data.changing) && !session.user()) { this.setData({ ...cleared(), loading: false, needsLogin: true }); return; }
     this.setData({ loading: true, loadError: '', needsLogin: false });
     try {
-      const path = review ? this._endpoint + '?mode=review&status=' + this.data.status + '&page=' + this.data.pageNumber : this._endpoint;
-      const data = await http.request(path, { required: review, raw: true });
+      const path = review ? this._endpoint + '?mode=review&status=' + this.data.status + '&page=' + this.data.pageNumber : (this.data.adding || this.data.changing) ? this._endpoint + '?mode=assignment&request=' + this._requestID : this.data.manage ? this._endpoint + '?mode=review-map' : this._endpoint;
+      const data = await http.request(path, { required: review || this.data.manage || this.data.adding || this.data.changing, raw: true });
       if (!this.reading(read, revision)) return;
-      if (review) this.showReview(data); else this.showState(data);
+      if (this.data.manage && !data.canReview) {
+        this._state = null; this._seats = null;
+        this.setData({ ...cleared(), loadError: '无权管理此活动的座位' });
+        return;
+      }
+      if (review) this.showReview(data); else if (this.data.adding || this.data.changing) this.showAssignment(data); else this.showState(data);
     } catch (cause) {
       if (!this.reading(read, revision)) return;
       const message = (cause && cause.message) || '选座信息读取失败，请重试';
       // 401 anonymous/expired, 403 revoked reviewer, 404 hidden activity: drop every private value.
-      if (cause && cause.status === 401) { this._state = null; this._seats = null; this.setData({ ...cleared(), needsLogin: true }); }
-      else if (cause && (cause.status === 403 || cause.status === 404)) { this._state = null; this._seats = null; this.setData({ ...cleared(), loadError: message }); }
+      if (cause && cause.status === 401) { this._state = null; this._seats = null; this._assignment = null; this.setData({ ...cleared(), needsLogin: true }); }
+      else if (cause && (cause.status === 403 || cause.status === 404 || ((this.data.adding || this.data.changing) && cause.status === 409))) { this._state = null; this._seats = null; this._assignment = null; this.setData({ ...cleared(), loadError: message }); }
       else this.setData({ loadError: message, ...(review ? { docs: [], hasNextPage: false } : {}) });
     } finally {
       if (this.reading(read, revision)) this.setData({ loading: false });
@@ -138,32 +166,53 @@ Page(withVisualTheme({
       const delay = Math.min(2147483647, Math.max(0, Date.parse(data.opensAt) - data.serverTime) + 200);
       this._openingTimer = setTimeout(() => { if (this.current(revision) && !this._hidden && !this.data.busy) this.load(); }, delay);
     }
-    const mine = mineView(data.mine);
-    const editable = Boolean(data.enabled && data.open && data.loggedIn && (!mine || mine.status === 'rejected'));
+    const manage = this.data.manage;
+    const mode = data.mode === 'random' ? 'random' : 'selection';
+    const mine = manage ? null : mineView(data.mine);
+    const canEditMine = Boolean(!manage && mine && mine.status === 'pending' && data.mineDetails && data.mineDetails.canEdit);
+    const editing = Boolean(this.data.editing && canEditMine && data.mine.revision === this.data.editRevision);
+    const editable = manage ? Boolean(data.canReview) : Boolean(editing || (data.enabled && data.open && data.loggedIn && (!mine || mine.status === 'rejected' || mine.status === 'cancelled' || mine.status === 'revoked')));
     // Seats taken by someone else since the last read drop out of the local selection.
-    const selected = editable ? this.data.selected.filter(id => !data.occupancy[id]) : [];
-    this.setData({ title: data.title || '活动选座', enabled: Boolean(data.enabled), open: Boolean(data.open), scheduled: data.scheduled === true, opensAt: data.opensAt || null, openingLabel: data.opensAt ? format.date(data.opensAt) : '', loggedIn: Boolean(data.loggedIn),
-      canReview: Boolean(data.canReview), editable, mine, drafts: editable ? (data.drafts || []).filter(id => proofPattern.test(String(id))) : [],
+    const selected = editable && !manage && mode === 'selection' ? this.data.selected.filter(id => !data.occupancy[id] || (editing && data.mine.seats.includes(id))) : [];
+    const showMap = mode === 'selection' || manage || data.canReview;
+    this.setData({ title: data.title || '活动选座', enabled: Boolean(data.enabled), mode, ...(mode !== this.data.mode ? { requestedCount: data.mine && data.mine.requestedCount || 1, ...(this.data.title ? { notice: '座位模式已更新，请按当前模式填写申请。' } : {}) } : {}), open: Boolean(data.open), scheduled: data.scheduled === true, opensAt: data.opensAt || null, openingLabel: data.opensAt ? format.date(data.opensAt) : '', loggedIn: Boolean(data.loggedIn),
+      canReview: Boolean(data.canReview), editable, editing, canEditMine, mine, drafts: (data.drafts || []).filter(id => proofPattern.test(String(id))),
+      ...(!editing && this.data.editing ? { editRevision: null, editProofs: [], phone: '' } : {}),
       seatLimit: data.seatLimit, proofLimit: data.proofLimit, proofMB: Math.round(data.proofBytes / 1024 / 1024),
-      selected, chips: chipsFor(selected), counts: counts(data),
-      rows: data.enabled ? this.layout(data, selected, this.data.zoom) : [], boardWidth: data.enabled ? boardWidth(data.rows, this.data.zoom) : 0 });
+      selected, selectedBlocked: 0, selectedAvailable: 0, chips: chipsFor(selected), counts: showMap ? counts(data) : null, seatReview: null, inspectedSeat: '',
+      rows: showMap && (data.enabled || manage || editing) ? this.layout(data, selected, this.data.zoom, editing) : [], boardWidth: showMap && (data.enabled || manage || editing) ? boardWidth(data.rows, this.data.zoom) : 0 });
+    this.scheduleModeRefresh();
   },
   showReview(data) {
     const opensAt = data.opensAt || null;
     const fields = opensAt !== this.data.opensAt ? format.beijingParts(opensAt) : null;
-    this.setData({ title: data.title || '选座工作台', enabled: Boolean(data.enabled), open: Boolean(data.open),
+    this.setData({ title: data.title || '选座工作台', enabled: Boolean(data.enabled), mode: data.mode === 'random' ? 'random' : 'selection', open: Boolean(data.open),
       scheduled: data.scheduled === true, opensAt, openingLabel: opensAt ? format.date(opensAt) : '',
       ...(fields ? { openingDate: fields.date, openingTime: fields.time } : {}),
       docs: (data.docs || []).map(reviewDoc), hasNextPage: Boolean(data.hasNextPage) });
   },
-  layout(state, selected, zoom) {
+  showAssignment(data) {
+    const prior = this._assignment, changing = this.data.changing;
+    this._state = data;
+    this._assignment = data.request;
+    const remaining = Math.max(0, data.seatLimit - data.request.seats.length);
+    const same = prior && prior.id === data.request.id && prior.revision === data.request.revision && prior.status === data.request.status;
+    const limit = changing ? data.request.seats.length : remaining;
+    const selected = changing && !same ? data.request.seats.slice() : this.data.selected.filter(id => !data.occupancy[id] || (changing && data.request.seats.includes(id))).slice(0, limit);
+    const changeReady = Boolean(changing && selected.length === limit && data.request.seats.some(id => !selected.includes(id)));
+    this.setData({ title: data.title || (changing ? '更换座位' : '增加座位'), requestNumber: data.request.id, existingCount: data.request.seats.length,
+      seatLimit: limit, editable: changing || remaining > 0, canReview: true, selected, changeReady, chips: chipsFor(selected), counts: counts(data),
+      rows: this.layout(data, selected, this.data.zoom, false), boardWidth: boardWidth(data.rows, this.data.zoom) });
+  },
+  layout(state, selected, zoom, editing = this.data.editing) {
     const index = {};
     const rows = state.rows.map((row, r) => {
       const accent = Boolean(row.accent);
       return { row: row.row, accent, indent: row.offset * step(zoom), seats: Array.from({ length: row.count }, (_, s) => {
         const id = row.row + '-' + (s + 1);
         index[id] = [r, s, accent];
-        return seatCell(id, s + 1, state.occupancy[id], selected.includes(id), accent);
+        const own = Boolean((editing && state.mine && state.mine.seats.includes(id)) || (this.data.changing && state.request && state.request.seats.includes(id)));
+        return seatCell(id, s + 1, state.occupancy[id], selected.includes(id), accent, (state.blockedSeats || []).includes(id), this.data.manage, own);
       }) };
     });
     this._seats = index;
@@ -178,20 +227,64 @@ Page(withVisualTheme({
     this._state.rows.forEach((row, r) => { patch['rows[' + r + '].indent'] = row.offset * step(zoom); });
     this.setData(patch);
   },
-  toggle(event) { this.pick(event.currentTarget.dataset.seat); },
+  toggle(event) { return this.pick(event.currentTarget.dataset.seat); },
   unpick(event) { if (this.data.selected.includes(event.currentTarget.dataset.seat)) this.pick(event.currentTarget.dataset.seat); },
   pick(id) {
     const state = this._state, place = this._seats && this._seats[id];
-    if (!state || !place || !this.data.editable || this.data.busy || this.data.loading || state.occupancy[id]) return;
+    const blocked = Boolean(state && (state.blockedSeats || []).includes(id));
+    const own = Boolean(state && ((this.data.editing && state.mine && state.mine.seats.includes(id)) || (this.data.changing && state.request && state.request.seats.includes(id))));
+    if (!state || !place || !this.data.editable || this.data.busy || this.data.loading) return;
+    if (this.data.mode === 'random' && !this.data.manage && !this.data.adding && !this.data.changing) return;
+    if (this.data.manage && state.occupancy[id] && !blocked) return this.inspectSeat(id);
+    if (state.occupancy[id] && !(this.data.manage && blocked) && !own) return;
     let selected = this.data.selected;
     if (selected.includes(id)) selected = selected.filter(value => value !== id);
-    else if (selected.length < this.data.seatLimit) selected = selected.concat(id);
+    else if (this.data.manage || selected.length < this.data.seatLimit) selected = selected.concat(id);
     else { this.setData({ error: '每人最多选择 ' + this.data.seatLimit + ' 个座位' }); return; }
     // Patch just the touched seat instead of re-sending all 381 cells.
-    this.setData({ ['rows[' + place[0] + '].seats[' + place[1] + ']']: seatCell(id, place[1] + 1, '', selected.includes(id), place[2]),
-      selected, chips: chipsFor(selected), error: '' });
+    const selectedBlocked = selected.filter(value => (state.blockedSeats || []).includes(value)).length;
+    this.setData({ ['rows[' + place[0] + '].seats[' + place[1] + ']']: seatCell(id, place[1] + 1, state.occupancy[id], selected.includes(id), place[2], blocked, this.data.manage, own),
+      selected, selectedBlocked, selectedAvailable: selected.length - selectedBlocked, chips: chipsFor(selected), error: '',
+      changeReady: Boolean(this.data.changing && state.request && selected.length === state.request.seats.length && state.request.seats.some(value => !selected.includes(value))) });
+  },
+  startEdit() {
+    const state = this._state;
+    if (!this.data.canEditMine || !state || !state.mine || !state.mineDetails || this.data.busy || this.data.loading) return;
+    const selected = state.mine.seats.slice(), editProofs = state.mineDetails.proofs.concat(state.drafts || []);
+    this.setData({ editing: true, editable: true, editRevision: state.mine.revision, editProofs, selected, chips: chipsFor(selected),
+      requestedCount: state.mine.requestedCount || state.mine.seats.length || 1, phone: state.mineDetails.phone, rows: this.data.mode === 'random' && !this.data.canReview ? [] : this.layout(state, selected, this.data.zoom, true), boardWidth: boardWidth(state.rows, this.data.zoom), error: '', notice: '', proofError: '', proofNotice: '' });
+  },
+  cancelEdit() {
+    if (!this.data.editing || !this._state || this.data.busy) return;
+    this.setData({ editing: false, editable: false, editRevision: null, editProofs: [], selected: [], chips: [], phone: '', error: '', proofError: '', proofNotice: '',
+      rows: this._state.enabled ? this.layout(this._state, [], this.data.zoom, false) : [] });
+  },
+  cancelRequest() {
+    const state = this._state;
+    if (!state || !state.mine || state.mine.status !== 'pending' || this.data.manage || this.data.review) return;
+    return this.work('正在取消申请', async revision => {
+      const answer = await new Promise(resolve => wx.showModal({ title: '取消选座申请', content: '取消后全部座位将释放给其他成员。确认取消？',
+        confirmText: '确认取消', success: resolve, fail: () => resolve({ confirm: false }) }));
+      if (!answer.confirm || !this.current(revision)) return false;
+      await http.request(this._endpoint, { method: 'DELETE', required: true, raw: true,
+        data: { id: state.mine.id, revision: state.mine.revision } });
+      if (this.current(revision)) this.setData({ editing: false, editRevision: null, editProofs: [], selected: [], chips: [], phone: '', proofError: '', proofNotice: '',
+        notice: '申请已取消，全部座位已释放。' });
+    }, true);
+  },
+  setSeatBlocks(event) {
+    if (!this.data.manage || !this.data.canReview || !this._state) return;
+    const blocked = event.currentTarget.dataset.blocked;
+    if (typeof blocked !== 'boolean') return;
+    const seats = this.data.selected.filter(id => (this._state.blockedSeats || []).includes(id) === !blocked);
+    if (!seats.length) return;
+    return this.work(blocked ? '正在锁定座位' : '正在解锁座位', async revision => {
+      await http.request(this._endpoint, { method: 'POST', required: true, raw: true, data: { action: 'block', seats, blocked } });
+      if (this.current(revision)) this.setData({ notice: '已' + (blocked ? '锁定' : '解锁') + ' ' + seats.length + ' 个座位。' });
+    }, true);
   },
   phoneInput(event) { if (!this.data.busy) this.setData({ phone: String(event.detail.value || '').slice(0, 24) }); },
+  countInput(event) { if (!this.data.busy) this.setData({ requestedCount: event.detail.value }); },
 
   // One action at a time; every action re-reads the server state unless it reports nothing changed.
   async work(label, task, refresh) {
@@ -209,27 +302,48 @@ Page(withVisualTheme({
     }
   },
   chooseProofs() {
-    if (!this.data.editable || this.data.drafts.length >= this.data.proofLimit) return;
+    const proofs = this.data.editing ? this.data.editProofs : this.data.drafts;
+    if (!this.data.editable || proofs.length >= this.data.proofLimit) return;
     return this.work('正在上传凭证', async revision => {
-      await privacy.authorize();
-      if (!this.current(revision)) return false;
-      let paths;
-      try { paths = await files.choose(Math.min(9, this.data.proofLimit - this.data.drafts.length)); }
-      catch { return false; /* Cancelling the picker is not an error. */ }
-      for (const filePath of paths) {
+      this.setData({ proofError: '', proofNotice: '' });
+      let uploaded = 0;
+      try {
+        await privacy.authorize();
         if (!this.current(revision)) return false;
-        await http.upload(this._endpoint + '/proofs', filePath, { raw: true });
+        const paths = await files.choose(Math.min(9, this.data.proofLimit - proofs.length));
+        for (const filePath of paths) {
+          if (!this.current(revision)) return false;
+          const result = await http.upload(this._endpoint + '/proofs', filePath, { raw: true });
+          if (!this.current(revision)) return false;
+          const id = result && String(result.id);
+          if (!proofPattern.test(id)) throw new Error('上传结果暂不可确认，请刷新座位后核对');
+          const field = this.data.editing ? 'editProofs' : 'drafts';
+          if (!this.data[field].includes(id)) this.setData({ [field]: this.data[field].concat(id) });
+          uploaded++;
+          this.setData({ proofNotice: '已上传 ' + uploaded + ' 张凭证。' });
+        }
+      } catch (cause) {
+        if (cause && cause.code === 'MEDIA_PICK_CANCELLED') return false;
+        if (this.current(revision)) this.setData({ proofError: (cause && cause.message) || '凭证上传未完成，请重试' });
+        throw cause;
       }
     }, true);
   },
   removeProof(event) {
     const id = String(event.currentTarget.dataset.proof || '');
-    if (!this.data.editable || !proofPattern.test(id) || !this.data.drafts.includes(id)) return;
+    const proofs = this.data.editing ? this.data.editProofs : this.data.drafts;
+    if (!this.data.editable || !proofPattern.test(id) || !proofs.includes(id)) return;
+    this.setData({ proofError: '', proofNotice: '' });
+    if (this.data.editing && !this.data.drafts.includes(id)) {
+      this.setData({ editProofs: this.data.editProofs.filter(value => value !== id) });
+      return;
+    }
+    if (this.data.editing) this.setData({ editProofs: this.data.editProofs.filter(value => value !== id) });
     return this.work('正在移除凭证', () => http.request(this._endpoint + '/proofs/' + id, { method: 'DELETE', required: true, raw: true }), true);
   },
   previewProof(event) {
     const id = String(event.currentTarget.dataset.proof || '');
-    const known = this.data.review ? this.data.docs.some(doc => doc.proofs.includes(id)) : this.data.drafts.includes(id);
+    const known = this.data.review ? this.data.docs.some(doc => doc.proofs.includes(id)) : this.data.manage ? Boolean(this.data.seatReview && this.data.seatReview.proofs.includes(id)) : (this.data.editing ? this.data.editProofs : this.data.drafts).includes(id);
     if (!proofPattern.test(id) || !known) return;
     return this.work('正在读取凭证', async revision => {
       const path = await http.download(this._endpoint + '/proofs/' + id);
@@ -241,21 +355,74 @@ Page(withVisualTheme({
   },
   submit() {
     if (!this.data.editable || this.data.busy || this.data.loading) return;
-    const selected = this.data.selected, drafts = this.data.drafts;
+    const selected = this.data.selected, drafts = this.data.editing ? this.data.editProofs : this.data.drafts;
     const phone = String(this.data.phone || '').trim().replace(/[\s-]/g, '');
-    if (!selected.length) { this.setData({ error: '请先在座位图中选择座位' }); return; }
+    const random = this.data.mode === 'random', count = Number(this.data.requestedCount);
+    if (random && (!Number.isInteger(count) || count < 1 || count > this.data.seatLimit)) { this.setData({ error: '请输入 1 至 ' + this.data.seatLimit + ' 个座位' }); return; }
+    if (!random && !selected.length) { this.setData({ error: '请先在座位图中选择座位' }); return; }
     if (!phonePattern.test(phone)) { this.setData({ error: '请填写有效的手机号' }); return; }
-    if (!drafts.length) { this.setData({ error: '请上传至少 1 张活动参与凭证' }); return; }
-    return this.work('正在提交选座', async revision => {
-      const result = await http.request(this._endpoint, { method: 'POST', required: true, raw: true, data: { seats: selected, phone, proofs: drafts } });
+    if (!drafts.length || drafts.length > this.data.proofLimit) { this.setData({ error: '请选择 1 至 ' + this.data.proofLimit + ' 张活动参与凭证' }); return; }
+    const editing = this.data.editing;
+    const data = random ? { mode: 'random', count, phone, proofs: drafts } : { mode: 'selection', seats: selected, phone, proofs: drafts };
+    if (editing) { data.action = 'edit'; data.id = this._state.mine.id; data.revision = this.data.editRevision; }
+    return this.work(editing ? '正在保存修改' : '正在提交选座', async revision => {
+      const result = await http.request(this._endpoint, { method: 'POST', required: true, raw: true, data });
       if (!this.current(revision)) return false;
-      this.setData({ selected: [], chips: [], phone: '', drafts: [], editable: false, mine: mineView(result && result.mine), notice: '选座申请已提交，座位进入待审核。' });
+      this.setData({ selected: [], chips: [], phone: '', drafts: [], editing: false, editProofs: [], editRevision: null, editable: false, proofError: '', proofNotice: '', mine: mineView(result && result.mine), notice: editing ? '修改已保存，申请继续等待审核。' : random ? '申请已提交，审核通过后安排座位。' : '选座申请已提交，座位进入待审核。' });
     }, true);
   },
   openReview() { if (this.data.canReview && this._endpoint && navigation.requireUser()) navigation.go('activity-seating', { kind: this._kind, id: this._id, mode: 'review' }); },
 
   // ---- reviewer workbench ----
   openMap() { if (this._endpoint) navigation.go('activity-seating', { kind: this._kind, id: this._id }); },
+  openManage() { if (this.data.review && this._endpoint) navigation.go('activity-seating', { kind: this._kind, id: this._id, mode: 'manage' }); },
+  inspectSeat(seat) {
+    if (!this.data.manage || !this.data.canReview || !this._state || !this._state.occupancy[seat] || (this._state.blockedSeats || []).includes(seat)) return;
+    this.setData({ seatReview: null, inspectedSeat: '' });
+    return this.work('正在读取座位申请', async revision => {
+      const result = await http.request(this._endpoint + '?mode=seat-review&seat=' + encodeURIComponent(seat), { required: true, raw: true });
+      if (this.current(revision)) this.setData({ inspectedSeat: seatLabel(seat), seatReview: result && result.request ? reviewDoc(result.request) : null }, () => {
+        if (wx.pageScrollTo) wx.pageScrollTo({ selector: '#seat-review-detail', duration: 200 });
+      });
+      return false;
+    }, false);
+  },
+  closeSeatReview() { this.setData({ seatReview: null, inspectedSeat: '' }); },
+  reviewRecord(id) {
+    if (this.data.review) return this.data.docs.find(value => value.id === id);
+    if (this.data.manage && this.data.canReview && this.data.seatReview && this.data.seatReview.id === id) return this.data.seatReview;
+    return null;
+  },
+  openAdd(event) {
+    const request = Number(event.currentTarget.dataset.id);
+    const doc = this.reviewRecord(request);
+    if (doc && (doc.status === 'pending' || doc.status === 'confirmed') && doc.seatCount < 10 && !this.data.busy && !this.data.loading)
+      navigation.go('activity-seating', { kind: this._kind, id: this._id, mode: 'add', request });
+  },
+  openChange(event) {
+    const request = Number(event.currentTarget.dataset.id);
+    const doc = this.reviewRecord(request);
+    if (doc && (doc.status === 'pending' || doc.status === 'confirmed') && !this.data.busy && !this.data.loading)
+      navigation.go('activity-seating', { kind: this._kind, id: this._id, mode: 'change', request });
+  },
+  submitAdd() {
+    const request = this._assignment, seats = this.data.selected.slice();
+    if (!this.data.adding || !request || !this.data.editable || !seats.length) return;
+    return this.work('正在增加座位', async revision => {
+      await http.request(this._endpoint, { method: 'POST', required: true, raw: true,
+        data: { action: 'add-seats', id: request.id, revision: request.revision, status: request.status, seats } });
+      if (this.current(revision)) this.setData({ selected: [], chips: [], notice: '已为申请增加 ' + seats.length + ' 个座位。' });
+    }, true);
+  },
+  submitChange() {
+    const request = this._assignment, seats = this.data.selected.slice();
+    if (!this.data.changing || !request || !this.data.editable || !this.data.changeReady) return;
+    return this.work('正在更换座位', async revision => {
+      await http.request(this._endpoint, { method: 'POST', required: true, raw: true,
+        data: { action: 'change-seats', id: request.id, revision: request.revision, status: request.status, seats } });
+      if (this.current(revision)) this.setData({ notice: '已更换座位，申请状态保持不变。' });
+    }, true);
+  },
   filter(event) {
     const status = event.currentTarget.dataset.status;
     if (!this.data.review || !labels[status] || this.data.busy || this.data.loading || status === this.data.status) return;
@@ -270,6 +437,25 @@ Page(withVisualTheme({
   },
   changeOpeningDate(event) { this.setData({ openingDate: event.detail.value }); },
   changeOpeningTime(event) { this.setData({ openingTime: event.detail.value }); },
+  setMode(event) {
+    const mode = event.currentTarget.dataset.mode;
+    if (!this.data.review || !['selection', 'random'].includes(mode) || mode === this.data.mode) return;
+    return this.work('正在切换座位模式', async revision => {
+      await http.request(this._endpoint, { method: 'PUT', required: true, raw: true, data: { mode } });
+      if (this.current(revision)) this.setData({ notice: mode === 'random' ? '已切换为随机座位模式。' : '已切换为自主选座模式。' });
+    }, true);
+  },
+  adjustRandomCount(event) {
+    const request = Number(event.currentTarget.dataset.id), doc = this.reviewRecord(request);
+    if (!doc || !doc.unassigned) return;
+    return this.work('正在调整申请数量', async revision => {
+      const answer = await new Promise(resolve => wx.showActionSheet({ itemList: Array.from({ length: 10 }, (_, index) => (index + 1) + ' 个座位'), success: resolve, fail: () => resolve(null) }));
+      if (!answer || !this.current(revision)) return false;
+      await http.request(this._endpoint, { method: 'POST', required: true, raw: true,
+        data: { action: 'random-count', id: request, revision: doc.revision, count: answer.tapIndex + 1 } });
+      if (this.current(revision)) this.setData({ notice: '申请数量已更新，请重新核对后审核。' });
+    }, true);
+  },
   setEnabled(event) {
     if (!this.data.review) return;
     const enabled = event && event.currentTarget && typeof event.currentTarget.dataset.enabled === 'boolean'
@@ -289,8 +475,8 @@ Page(withVisualTheme({
   },
   decide(event) {
     const status = event.currentTarget.dataset.status, request = Number(event.currentTarget.dataset.id);
-    if (!this.data.review || (status !== 'confirmed' && status !== 'rejected') || !Number.isSafeInteger(request) || request <= 0) return;
-    const doc = this.data.docs.find(item => item.id === request);
+    if ((status !== 'confirmed' && status !== 'rejected') || !Number.isSafeInteger(request) || request <= 0) return;
+    const doc = this.reviewRecord(request);
     if (!doc || doc.status !== 'pending') return;
     return this.work(status === 'confirmed' ? '正在通过申请' : '正在驳回申请', async revision => {
       if (status === 'rejected') {
@@ -298,13 +484,43 @@ Page(withVisualTheme({
           confirmText: '确认驳回', success: resolve, fail: () => resolve({ confirm: false }) }));
         if (!answer.confirm || !this.current(revision)) return false;
       }
-      await http.request(this._endpoint, { method: 'POST', required: true, raw: true, data: { action: 'review', id: request, status } });
-      if (this.current(revision)) this.setData({ notice: status === 'confirmed' ? '已通过并锁定座位。' : '已驳回并释放座位。' });
+      await http.request(this._endpoint, { method: 'POST', required: true, raw: true, data: { action: 'review', id: request, status, revision: doc.revision, ...(doc.unassigned ? { expectedCount: doc.seatCount } : {}) } });
+      if (this.current(revision)) this.setData({ notice: status === 'confirmed' ? (doc.unassigned ? '已通过并安排座位。' : '已通过并锁定座位。') : '已驳回并释放座位。' });
+    }, true);
+  },
+  revoke(event) {
+    const request = Number(event.currentTarget.dataset.id);
+    if (!Number.isSafeInteger(request) || request <= 0) return;
+    const doc = this.reviewRecord(request);
+    if (!doc || doc.status !== 'confirmed') return;
+    return this.work('正在撤销确认', async revision => {
+      const answer = await new Promise(resolve => wx.showModal({ title: '撤销确认', content: '撤销后此申请的全部座位将释放给其他成员。确认撤销？',
+        confirmText: '确认撤销', success: resolve, fail: () => resolve({ confirm: false }) }));
+      if (!answer.confirm || !this.current(revision)) return false;
+      await http.request(this._endpoint, { method: 'POST', required: true, raw: true,
+        data: { action: 'revoke', id: request, revision: doc.revision } });
+      if (this.current(revision)) this.setData({ notice: '已撤销确认，全部座位已释放。' });
+    }, true);
+  },
+  revokeSeat(event) {
+    const request = Number(event.currentTarget.dataset.id), seat = String(event.currentTarget.dataset.seat || '');
+    if (!Number.isSafeInteger(request) || request <= 0) return;
+    const doc = this.reviewRecord(request);
+    if (!doc || doc.status !== 'confirmed' || !doc.seatItems.some(item => item.id === seat)) return;
+    return this.work('正在撤销座位', async revision => {
+      const message = doc.seatCount === 1 ? '这是最后一个座位，撤销后整份申请将变为已撤销。' : '该座位将释放，其余座位继续保持已确认。';
+      const answer = await new Promise(resolve => wx.showModal({ title: '撤销 ' + seatLabel(seat), content: message,
+        confirmText: '确认撤销', success: resolve, fail: () => resolve({ confirm: false }) }));
+      if (!answer.confirm || !this.current(revision)) return false;
+      const result = await http.request(this._endpoint, { method: 'POST', required: true, raw: true,
+        data: { action: 'revoke-seat', id: request, revision: doc.revision, seat } });
+      if (this.current(revision)) this.setData({ notice: result && result.fullyRevoked ? '座位已释放，申请已全部撤销。' : '该座位已释放，其余座位保持已确认。' });
     }, true);
   },
   call(event) {
     const phone = String(event.currentTarget.dataset.phone || '').replace(/[\s-]/g, '');
-    if (!this.data.review || !phonePattern.test(phone) || !this.data.docs.some(doc => doc.phone.replace(/[\s-]/g, '') === phone)) return;
+    const known = this.data.review ? this.data.docs.some(doc => doc.phone.replace(/[\s-]/g, '') === phone) : this.data.manage && this.data.seatReview && this.data.seatReview.phone.replace(/[\s-]/g, '') === phone;
+    if (!phonePattern.test(phone) || !known) return;
     this._external = true;
     wx.makePhoneCall({ phoneNumber: phone, fail: () => { this._external = false; } });
   },

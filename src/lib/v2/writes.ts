@@ -10,6 +10,7 @@ import { canReviewShowcase, relationID } from "../rules";
 import { normalizeShowcaseImage } from "../showcase-images";
 import { communityVideo } from "../community-video";
 import { workflowTransaction } from "../workflow-transactions";
+import { publicationImageBytes } from "../publication-images";
 
 const text = (value: unknown, max: number, label: string, required = false) => {
   if (value != null && typeof value !== "string") throw new APIError(`${label}无效`, 400);
@@ -35,10 +36,12 @@ export async function createUpload(
   input: { file: unknown; purpose: unknown },
 ): Promise<{ upload: UploadReceipt }> {
   const actor = await requireViewer(p, viewer);
-  if (input.purpose !== "showcase") throw new APIError("上传用途无效", 400);
+  if (input.purpose !== "showcase" && input.purpose !== "publication") throw new APIError("上传用途无效", 400);
+  const purpose = input.purpose;
   const file = input.file;
   if (!(file instanceof File) || !file.size) throw new APIError("请选择一张图片", 400);
-  if (file.size > 2 * 1024 * 1024) throw new APIError("单张图片不得超过 2 MB", 413);
+  const maxBytes = purpose === "publication" ? publicationImageBytes : 2 * 1024 * 1024;
+  if (file.size > maxBytes) throw new APIError(`单张图片不得超过 ${maxBytes / 1024 / 1024} MB`, 413);
   if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) throw new APIError("仅支持静态 PNG、JPEG 或 WebP 图片", 415);
   const bytes = Buffer.from(await file.arrayBuffer());
   const metadata = await sharp(bytes, { limitInputPixels: 40_000_000 }).metadata().catch(() => null);
@@ -47,19 +50,19 @@ export async function createUpload(
     throw new APIError("仅支持静态 PNG、JPEG 或 WebP 图片", 415);
   if (!metadata.width || !metadata.height || metadata.width * metadata.height > 40_000_000)
     throw new APIError("图片不得超过 4000 万像素", 400);
-  const data = await normalizeShowcaseImage(`data:${file.type};base64,${bytes.toString("base64")}`, { limitInputPixels: 40_000_000 })
+  const data = await normalizeShowcaseImage(`data:${file.type};base64,${bytes.toString("base64")}`, { limitInputPixels: 40_000_000, maxInputBytes: maxBytes })
     .catch(() => { throw new APIError("图片处理失败，请选择有效的静态图片", 400); });
   const normalized = await sharp(Buffer.from(data.slice(data.indexOf(",") + 1), "base64")).metadata();
   const upload = await workflowTransaction(p, actor, { v2UploadWrite: true }, async req => {
     // Cleanup is confined to expired temporary records, with access still on.
     await p.delete({ collection: "pending-uploads", req: { ...req, context: { ...req.context, v2UploadCleanup: true } },
-      overrideAccess: false, where: { expiresAt: { less_than_equal: new Date().toISOString() } } });
+      overrideAccess: false, where: { and: [{ expiresAt: { less_than_equal: new Date().toISOString() } }, { consumedAt: { exists: false } }] } });
     return p.create({ collection: "pending-uploads", req, overrideAccess: false, data: {
-      owner: req.user!.id as number, purpose: "showcase", data, width: normalized.width!, height: normalized.height!,
+      owner: req.user!.id as number, purpose, data, width: normalized.width!, height: normalized.height!,
       expiresAt: new Date(Date.now() + 24 * 3600_000).toISOString(),
     } });
   });
-  return { upload: { id: upload.id, purpose: "showcase", width: upload.width, height: upload.height, expiresAt: upload.expiresAt,
+  return { upload: { id: upload.id, purpose, width: upload.width, height: upload.height, expiresAt: upload.expiresAt,
     preview: controlledImageRef("upload", upload.id, 0, upload.data, "待提交的风采图片", upload)! } };
 }
 

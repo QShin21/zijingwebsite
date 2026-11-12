@@ -7,6 +7,7 @@ import { safeURL } from "@/lib/rules";
 import { ArticleTile, DateBlock, eventTone, signupTone } from "./cards";
 import { CommunityChip, DemoPill, Img, KeyValues, PageHero, StatusPill, Wrap, buttonClass } from "./ui";
 import { RichText } from "./RichText";
+import { PublicationPresentation } from "./PublicationPresentation";
 import { Icon } from "./Icon";
 import { formatDateTime, formatRange } from "./format";
 import layout from "./layout.module.css";
@@ -33,6 +34,9 @@ export function EventDetailView({
       : { href: `/community/${community?.slug ?? ""}/updates`, label: `${community?.title ?? "社群"} · 活动与通知` };
   const signup = signupTone(event);
   const showExternal = event.signup.mode === "external" || event.signup.mode === "channel";
+  const images = event.cover && !detail.images.some((image) => image.src === event.cover?.src)
+    ? [event.cover, ...detail.images]
+    : detail.images;
   return (
     <>
       <PageHero
@@ -65,7 +69,7 @@ export function EventDetailView({
           <div>
             <p className={styles.whenTime}>
               <Icon name="clock" size={16} />
-              {event.startAt ? formatRange(event.startAt, event.endAt) : "时间待定"}
+              {event.startAt || event.endAt ? formatRange(event.startAt, event.endAt) : "时间待定"}
             </p>
             {event.location && (
               <p className={styles.whenPlace}>
@@ -89,22 +93,24 @@ export function EventDetailView({
         {notice}
         <div className={styles.grid}>
           <article className={styles.main} aria-label="活动说明">
-            {event.cover && (
-              <figure className={styles.cover}>
-                <Img image={event.cover} eager sizes="(min-width: 1024px) 760px, 100vw" />
-              </figure>
-            )}
             <h2 className={styles.mainTitle}>活动说明</h2>
-            {detail.body || detail.bodyText ? (
+            {detail.presentation ? <PublicationPresentation presentation={detail.presentation} images={detail.images} text={detail.bodyText} /> : detail.body || detail.bodyText ? (
               <RichText body={detail.body} text={detail.bodyText} />
             ) : (
               <p className={styles.muted}>主办方暂未补充更多说明。</p>
             )}
-            {detail.images.length > 0 && (
+            {!detail.presentation && images.length > 0 && (
               <div className={styles.gallery}>
-                {detail.images.map((image, index) => (
+                {images.map((image, index) => (
                   <figure key={`${image.src}-${index}`}>
-                    <Img image={image} sizes="(min-width: 1024px) 380px, 50vw" />
+                    <a
+                      href={image.src}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={image.alt ? `在新窗口查看原图：${image.alt}` : `在新窗口查看第 ${index + 1} 张图片原图`}
+                    >
+                      <Img image={image} sizes="(min-width: 600px) 380px, 100vw" />
+                    </a>
                   </figure>
                 ))}
               </div>

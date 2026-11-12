@@ -133,7 +133,7 @@ export interface UserAuthOperations {
   };
 }
 /**
- * 社长、副社长可在用户详情中点击「更改密码」，填写至少 8 位新密码并保存，直接完成重置。
+ * 社长、副社长可重置密码；办理退休时将平台角色设为荣誉骨干并保存，原有社群任职将自动撤任。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
@@ -145,7 +145,7 @@ export interface User {
    */
   name: string;
   nameKey?: string;
-  roles: ('president' | 'vicePresident' | 'backbone' | 'communityAdmin' | 'member')[];
+  roles: ('president' | 'vicePresident' | 'backbone' | 'communityAdmin' | 'honoraryBackbone' | 'member')[];
   accountStatus?: ('active' | 'suspended') | null;
   department?: ('execution' | 'publicity') | null;
   /**
@@ -258,7 +258,7 @@ export interface Media {
   };
 }
 /**
- * 在网站社群申请审核页处理决定、退回及初始化；平台角色不会随审批改变。
+ * 在网站社群申请审核页处理决定、退回及初始化；批准后授予对应社群权限。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "community-applications".
@@ -405,7 +405,7 @@ export interface CommunityShowcase {
 export interface CommunityPost {
   id: number;
   title: string;
-  body: string;
+  body?: string | null;
   game?: (number | null) | Game;
   author: number | User;
   authorName?: string | null;
@@ -429,6 +429,16 @@ export interface CommunityPost {
     | boolean
     | null;
   signupImages?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  contentMode?: string | null;
+  contentBlocks?:
     | {
         [k: string]: unknown;
       }
@@ -528,7 +538,7 @@ export interface StaffBatch {
   createdAt: string;
 }
 /**
- * 候选资料仅本人及社长/副社长可见；录用状态不会授予平台角色。
+ * 候选资料仅本人及社长/副社长可见；录用后普通成员自动获得骨干身份。
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "staff-applications".
@@ -1251,8 +1261,8 @@ export interface Audit {
  */
 export interface PendingUpload {
   id: number;
-  owner: number | User;
-  purpose: 'showcase';
+  owner?: (number | null) | User;
+  purpose: 'showcase' | 'publication';
   data: string;
   width: number;
   height: number;
@@ -1641,6 +1651,8 @@ export interface CommunityPostsSelect<T extends boolean = true> {
   postImages?: T;
   signupForm?: T;
   signupImages?: T;
+  contentMode?: T;
+  contentBlocks?: T;
   category?: T;
   startAt?: T;
   endAt?: T;

@@ -1,5 +1,39 @@
 # 部署、迁移与恢复
 
+## 2026-11-13 社群活动、平台角色和升推
+
+北京时间 01:08:05，`main@856e0b3` 部署至 `home.thuzijing.top`，构建 `l40IsmMWILU4nU1M2Gzrf`。部署前创建本机数据库与媒体备份，四项增量迁移完成；迁移前后用户、角色、社群活动、风采、升推、骨干申请、活动报名、选座及临时上传记录数量一致。候选及正式服务就绪，公网首页、健康、构建资源和未登录的 10 MB 上传请求检查通过。小程序 0.5.18 已上传微信开发版，尚未提交审核；真机和线上登录态完整操作未核验。备份及回退脚本位于 `/srv/zijingwebsite/backups/publication-roles-20261113-856e0b3`；异机备份未配置。见[发布记录](evidence/publication-roles-deployment-20261113.json)。
+
+## 2026-11-12 管理员逐座撤销选座
+
+北京时间 20:40:07，`main@13ba540` 已部署到 `home.thuzijing.top`，构建 `fGATQ8zJXueQjIgjzF8Tt`。迁移 `20261112_070000_activity_seat_release` 新增逐座撤销记录表；迁移前备份与迁移后的申请、占用、凭证及未开放座位计数均为 130、228、178、23。公网就绪、活动页和构建清单返回 200。
+
+服务器同机备份和应用回退脚本位于 `/srv/zijingwebsite/backups/seat-single-20261112-13ba540`。小程序 0.5.11 已上传开发版。详见[发布记录](evidence/activity-seat-single-release-deployment-20261112.json)。
+
+## 2026-11-12 管理员撤销已确认选座
+
+北京时间 20:33:47，`main@2250da6` 已部署到 `home.thuzijing.top`，构建 `eb7IF3uB0e2YzZ7PGpYT1`。新增迁移 `20261112_060000_activity_seat_revocation` 记录撤销人和时间；迁移前备份与迁移后的申请、占用、凭证及未开放座位计数均为 130、228、177、23。公网就绪、活动页和构建清单返回 200。
+
+服务器同机备份和应用回退脚本位于 `/srv/zijingwebsite/backups/seat-revoke-20261112-2250da6`。小程序 0.5.10 开发版已上传。详见[发布记录](evidence/activity-seat-revocation-deployment-20261112.json)。
+
+## 2026-11-12 待审核选座申请取消
+
+北京时间 19:49:03，`main@b5707ff` 已部署到 `home.thuzijing.top`，构建 `YiHlCB83VjPvfMwJe7N9w`。新增迁移 `20261112_050000_activity_seat_cancellation` 记录取消时间；迁移前备份与迁移后的申请、占用、凭证及未开放座位计数均为 125、230、171、23。公网就绪、活动页和构建清单返回 200。
+
+服务器同机备份和应用回退脚本位于 `/srv/zijingwebsite/backups/seat-cancel-20261112-b5707ff`。小程序 0.5.9 开发版已上传，含取消申请及修改申请请求兼容修复。详见[发布记录](evidence/activity-seat-cancel-deployment-20261112.json)。
+
+## 2026-11-12 待审核选座申请修改
+
+北京时间 19:39:58，`main@bf86300` 已部署到 `home.thuzijing.top`，构建 `ajZqV_Gz8oAI5cIXnuwwv`。新增迁移 `20261112_040000_activity_seat_revision` 为申请记录增加版本字段。迁移前备份与迁移后检查的选座申请、占用、凭证及未开放座位计数分别为 124、228、170、23。公网健康检查、活动页和构建清单返回 200。
+
+服务器同机备份及应用回退脚本位于 `/srv/zijingwebsite/backups/seat-edit-20261112-bf86300`。微信开发者工具已上传 0.5.8 开发版，尚未提交审核。详见[发布记录](evidence/activity-seat-edit-deployment-20261112.json)。
+
+## 2026-11-12 活动未开放座位
+
+北京时间 17:56:37，`main@b002cf7` 已部署到 `home.thuzijing.top`，构建 `CwRcJ2O2oroQeRGYySeUZ`。增量迁移 `20261112_030000_activity_seat_blocks` 已登记；迁移前后的选座申请、占用和凭证计数分别保持 6、14、6。公网首页、活动页、小程序状态接口、健康检查和构建清单返回 200。
+
+服务器同机备份位于 `/srv/zijingwebsite/backups/seat-lock-20261112-b002cf7`，该目录包含数据库与媒体备份及应用回退脚本。首次备份因目录权限失败后自动恢复旧服务，调整备份执行身份后完成发布。微信开发者工具已上传 0.5.7 开发版。详细范围见[发布记录](evidence/activity-seat-blocks-deployment-20261112.json)。
+
 ## 2026-11-12 网页社群图标入口
 
 北京时间 16:41:46，`new@324b467` 已部署到 `home.thuzijing.top`，构建 `iPpEtsO3NwkGpYO1zhdC1`。首页和社群列表的卡片只提供浏览入口，图标编辑入口集中在社群页头。改动文件 lint、生产构建、隔离候选和公网就绪检查通过。应用沿用现有数据库结构，回退脚本为 `/srv/zijingwebsite/backups/community-card-entry-20261112-324b467/rollback.sh`。
@@ -175,3 +209,27 @@ SSE 通过 Nginx 公网 HTTPS 验证，响应禁止缓冲，每 15 秒心跳、6
 应用 `00c485fe1e2ae538f556892429e08bfb49da1f46` 已部署至 `home.thuzijing.top`，无新增迁移。完整数据库、源码、媒体、环境和旧构建保存在 `/srv/zijingwebsite/backups/questionnaire-responses-mini-20261012`。完整 pg_restore 到隔离库后逐表核对 58 张表；候选 3101 端口用隔离账号完成新版 JWT 问卷提交/读取/PATCH/冲突/权限/关闭验证，测试对象已清理。线上 127 份源码、58 张表内容、媒体、私有环境、Nginx 和 FreeKill 配置/进程保留检查通过。
 
 该备份目录的 `rollback.sh` 恢复旧应用和构建，保留现有生产数据库。旧版本支持信息组读取，但缺少本轮本人作答 PATCH；回退时需同步处理小程序修改入口与服务端能力。没有实际执行生产回滚。网站就绪 200，FreeKill HTTPS 200 / WebSocket 101，均检查可信证书；完整 CI、原生上传与验证边界见 [本次记录](QUESTIONNAIRE_RESPONSE_EDITING.md)。
+
+## 2026-11-12 管理员增加申请座位
+
+应用 `d67eb92d44fb2a21d079cd0c0c8c29fd1904b10c` 已部署，增量迁移 `20261112_080000_activity_seat_addition` 建立增加记录表。服务器本地备份与迁移后统计均为 131 份选座申请、225 个座位占用、178 个凭证和 23 个未开放座位；就绪及公网静态资源检查通过。备份保留在 `/srv/zijingwebsite/backups/seat-add-20261112-d67eb92`，本轮未执行恢复演练。详见[部署记录](evidence/activity-seat-addition-deployment-20261112.json)。
+
+## 2026-11-12 点击座位查看申请
+
+应用 `7bda1e51eabe25fb8b04b93d33fa0b1447a63da9` 已部署，无新增数据库迁移。服务器本地备份和切换前统计均为 131 份申请、225 个座位占用、178 个凭证和 23 个未开放座位。就绪及公网资源检查通过，备份在 `/srv/zijingwebsite/backups/seat-inspect-20261112-7bda1e5`；本轮未执行恢复演练。详见[部署记录](evidence/activity-seat-inspection-deployment-20261112.json)。
+
+## 2026-11-12 座位详情直接处理申请
+
+应用 `f9500c890b962c1b5e9c7cdc61114e3f4d88404d` 已部署，无新增数据库迁移。服务器本地备份和切换前统计均为 131 份申请、227 个座位占用、178 个凭证和 21 个未开放座位。公网就绪及资源检查通过，备份在 `/srv/zijingwebsite/backups/seat-actions-20261112-f9500c8`；本轮未执行恢复演练。详见[部署记录](evidence/activity-seat-map-actions-deployment-20261112.json)。
+
+## 2026-11-12 管理员更换申请座位
+
+应用 `6f17453d8e55d7d27a9bfe005f95e5a082e3d6ea` 已部署，无新增数据库迁移。服务器本地备份和切换前统计均为 131 份申请、227 个座位占用、178 个凭证和 21 个未开放座位。公网就绪及资源检查通过，备份在 `/srv/zijingwebsite/backups/seat-change-20261112-6f17453`；本轮未执行恢复演练。详见[部署记录](evidence/activity-seat-change-deployment-20261112.json)。
+
+## 2026-11-12 自主选座与随机座位
+
+应用 `ba3721d2b8d78c7bcb7bdaa6db2466ef276ab3f2` 已部署，迁移 `20261112_090000_activity_seat_modes` 新增模式和申请数量字段。迁移前后核对原有申请、设置、占座、锁座及凭证内容一致，原有活动均为自主选座；备份和迁移后均有 133 份申请、231 个座位占用、180 个凭证和 21 个未开放座位。公网就绪及资源检查通过，服务器本地备份在 `/srv/zijingwebsite/backups/seat-random-20261112-ba3721d`；本轮未执行恢复演练。备份内的应用回滚脚本会在存在随机模式活动或随机待审申请时拒绝切回旧应用，以免旧应用无法正确处理新状态。详见[部署记录](evidence/activity-seat-random-mode-deployment-20261112.json)。
+
+## 2026-11-12 活动详情图片排版
+
+应用 `f7d4f3aeb1de2b91fcba432d11532fe3f5c07c50` 已部署，无新增迁移。候选端口及公网就绪、活动列表和构建资源检查通过，公网活动详情样式文件与构建产物的 SHA-256 一致。服务器本地备份和回退脚本位于 `/srv/zijingwebsite/backups/event-images-20261112-f7d4f3a`；本轮未执行恢复演练。登录后的真实活动详情未做视觉核验。详见[部署记录](evidence/event-images-layout-deployment-20261112.json)。

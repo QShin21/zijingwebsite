@@ -72,7 +72,11 @@ function upload(path, filePath, options = {}) {
           reject(Object.assign(new Error(message(data, response.statusCode)), { status: response.statusCode }));
         }
       },
-      fail() { reject(new Error('上传未完成，请检查网络并重新加载核对')); },
+      fail(result) {
+        const detail = result && typeof result.errMsg === 'string' ? result.errMsg : '';
+        const domain = /url\s+not\s+in\s+domain\s+list/i.test(detail);
+        reject(new Error(domain ? '微信未允许当前图片上传域名，请联系负责人检查小程序后台设置' : '上传未完成，请检查网络并重新加载核对'));
+      },
     });
     taskCallbacks(task, options);
   });

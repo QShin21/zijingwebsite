@@ -52,7 +52,7 @@ export default async function Manage({ searchParams }: Props) {
         <>
           <TaskNote title="管理范围">
             <p>骨干招新由社长／副社长处理。本人反馈可供申请者查看，内部备注仅管理层可见。</p>
-            <p>录用记录不改变账号角色，后续任命通过独立授权流程处理。</p>
+            <p>普通成员录用后自动获得骨干身份；其他身份保持现有角色。</p>
           </TaskNote>
           <TaskNote title="工作区" links={[{ href: "#staff-candidates", label: "处理申请" }, { href: "#staff-batch-config", label: "批次配置" }]}>
             <p>导出只在点击时生成，筛选和浏览不会预取私人答卷。</p>

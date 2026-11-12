@@ -12,6 +12,7 @@ import { PendingUploads } from "./collections/PendingUploads";
 import { CommunityIcons } from "./collections/CommunityIcons";
 import { email } from "./lib/email";
 import {serverURL} from './lib/environment';
+import { publicationImageRequestBytes } from "./lib/publication-images";
 if (!process.env.PAYLOAD_SECRET) throw new Error("PAYLOAD_SECRET is required");
 export default buildConfig({
   email,
@@ -45,7 +46,8 @@ export default buildConfig({
   typescript: { outputFile: path.resolve("src/payload-types.ts") },
   csrf: [serverURL],
   cors: [serverURL],
-  upload: { limits: { fileSize: 8 * 1024 * 1024 } },
+  // Existing admin documents may contain inline images; new images upload individually.
+  upload: { limits: { fileSize: 8 * 1024 * 1024, fieldSize: publicationImageRequestBytes } },
   plugins: process.env.S3_BUCKET
     ? [
         s3Storage({

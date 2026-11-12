@@ -3,20 +3,25 @@
 import { useId, useState } from "react";
 import {
   publicationImageBytes,
-  publicationImageLimit,
+  publicationImageMegabytes,
   publicationImageTypes,
+  publicationPreview,
   type PublicationImage,
 } from "@/lib/publication-images";
 import type { Question } from "@/lib/signup-schema";
 import styles from "./PublicationImages.module.css";
 
-function readImage(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
+export async function uploadPublicationImage(file: File) {
+  const data = new FormData();
+  data.set("purpose", "publication");
+  data.set("file", file);
+  const response = await fetch("/api/v2/uploads", { method: "POST", body: data, credentials: "same-origin" });
+  const result = await response.json().catch(() => null);
+  const upload = result?.upload;
+  const match = typeof upload?.preview?.src === "string" && /\?v=([a-f0-9]{16})$/.exec(upload.preview.src);
+  if (!response.ok || !Number.isSafeInteger(upload?.id) || !match)
+    throw new Error(typeof result?.error === "string" ? result.error : "图片上传失败，请重新选择。");
+  return { source: `asset:${upload.id}:${match[1]}`, preview: upload.preview.src, alt: "" };
 }
 
 export function PublicationImagesEditor({
@@ -24,7 +29,6 @@ export function PublicationImagesEditor({
   images,
   onChange,
   questions,
-  limit = publicationImageLimit,
   readOnly = false,
   allowReplace = false,
 }: {
@@ -32,7 +36,6 @@ export function PublicationImagesEditor({
   images: PublicationImage[];
   onChange: (images: PublicationImage[]) => void;
   questions?: Question[];
-  limit?: number;
   readOnly?: boolean;
   allowReplace?: boolean;
 }) {
@@ -45,25 +48,22 @@ export function PublicationImagesEditor({
     input.value = "";
     if (reading || !files.length) return;
     setError("");
-    if (replaceIndex === undefined && files.length + images.length > limit) {
-      setError(`还能添加 ${limit - images.length} 张图片。`);
-      return;
-    }
     if (files.some((file) =>
       !file.size || file.size > publicationImageBytes || !publicationImageTypes.includes(file.type)
     )) {
-      setError("请选择 2 MB 以内的 PNG、JPEG 或 WebP 图片。");
+      setError(`请选择 ${publicationImageMegabytes} MB 以内的 PNG、JPEG 或 WebP 图片。`);
       return;
     }
     input.setCustomValidity("图片正在读取，请稍候。");
     setReading(true);
     try {
-      const sources = await Promise.all(files.map(readImage));
+      const sources: PublicationImage[] = [];
+      for (const file of files) sources.push(await uploadPublicationImage(file));
       onChange(replaceIndex === undefined
-        ? [...images, ...sources.map((source) => ({ source, alt: "" }))]
-        : images.map((image, index) => index === replaceIndex ? { ...image, source: sources[0] } : image));
-    } catch {
-      setError("无法读取图片，请重新选择。");
+        ? [...images, ...sources]
+        : images.map((image, index) => index === replaceIndex ? { ...image, ...sources[0], alt: image.alt } : image));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "图片上传失败，请重新选择。");
     } finally {
       input.setCustomValidity("");
       setReading(false);
@@ -79,11 +79,11 @@ export function PublicationImagesEditor({
         multiple
         accept={publicationImageTypes.join(",")}
         aria-describedby={`${id}-hint`}
-        disabled={readOnly || limit <= images.length}
+        disabled={readOnly}
         onChange={(event) => void chooseImages(event.currentTarget)}
       />
       <small id={`${id}-hint`}>
-        PNG、JPEG、WebP，每张不超过 2 MB。已添加 {images.length} / {limit} 张。
+        PNG、JPEG、WebP，每张不超过 {publicationImageMegabytes} MB。已添加 {images.length} 张。
       </small>
       {error && <p role="alert">{error}</p>}
       {images.length > 0 && (
@@ -95,7 +95,7 @@ export function PublicationImagesEditor({
               ));
             return (
               <li key={index}>
-                <img src={image.source} alt={image.alt || `第 ${index + 1} 张图片预览`} />
+                <img src={publicationPreview(image)} alt={image.alt || `第 ${index + 1} 张图片预览`} />
                 <label>
                   第 {index + 1} 张图片说明（选填）
                   <input

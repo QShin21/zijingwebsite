@@ -51,6 +51,10 @@
   background: repeating-linear-gradient(135deg, rgba(240, 192, 96, .44) 0, rgba(240, 192, 96, .44) 6rpx, rgba(240, 192, 96, .12) 6rpx, rgba(240, 192, 96, .12) 12rpx); }
 .seat.confirmed, .seat-swatch.confirmed { border-color: #6a6280; color: rgba(241, 238, 246, .62);
   background: linear-gradient(135deg, transparent 43%, rgba(241, 238, 246, .3) 43%, rgba(241, 238, 246, .3) 57%, transparent 57%), #3b3549; }
+.seat.blocked, .seat-swatch.blocked { border-color: #f18d8d; color: #ffe3e3;
+  background: repeating-linear-gradient(45deg, #542b3a 0, #542b3a 8rpx, #803c4a 8rpx, #803c4a 16rpx); }
+.seat.blocked.chosen { box-shadow: 0 0 0 4rpx #f3d6fa; }
+.seat-management { margin: 20rpx 0; }
 .seat-arena-hint { display: block; margin-top: 14rpx; color: var(--z-stage-muted); font-size: 23rpx; line-height: 1.6; }
 
 /* Member form */

@@ -1,37 +1,42 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { beijingInputTime } from "@/lib/rules";
 import {
   seatAPI,
   seatLabel,
+  seatLimit,
   seatStatusLabels,
   type SeatDecision,
+  type SeatAssignment,
   type SeatReview,
   type SeatStatus,
   type SeatingKind,
+  type SeatingMode,
   type SeatingState,
   type SeatingWorkbench,
 } from "@/lib/activity-seating-model";
 import { EmptyState, KeyValues, StatusPill, buttonClass, type Tone } from "@/components/v2/ui";
 import { formatDateTime } from "@/components/v2/format";
 import work from "@/components/v2/work.module.css";
-import { SeatLegend, SeatMap, SeatZoom } from "./ActivitySeating";
+import { SeatLegend, SeatMap, SeatSelection, SeatZoom } from "./ActivitySeating";
 import { SeatRequestError, seatJSON, seatRequest } from "./seat-request";
 import styles from "./ActivitySeating.module.css";
 
-export const seatStatusOrder: readonly SeatStatus[] = ["pending", "confirmed", "rejected"];
-export const seatTone: Record<SeatStatus, Tone> = { pending: "warning", confirmed: "success", rejected: "neutral" };
+export const seatStatusOrder: readonly SeatStatus[] = ["pending", "confirmed", "rejected", "cancelled", "revoked"];
+export const seatTone: Record<SeatStatus, Tone> = { pending: "warning", confirmed: "success", rejected: "neutral", cancelled: "neutral", revoked: "neutral" };
 /** Map seat statuses onto the shared V2 record accents (work.module.css). */
-const recordState: Record<SeatStatus, string> = { pending: "pending", confirmed: "approved", rejected: "rejected" };
+const recordState: Record<SeatStatus, string> = { pending: "pending", confirmed: "approved", rejected: "rejected", cancelled: "rejected", revoked: "rejected" };
 
 /** Seat counts for the overview: pending holds, confirmed locks and what is still free. */
-export function seatCounts(state: Pick<SeatingState, "rows" | "occupancy">) {
+export function seatCounts(state: Pick<SeatingState, "rows" | "occupancy"> & Partial<Pick<SeatingState, "blockedSeats">>) {
   const total = state.rows.reduce((sum, row) => sum + row.count, 0);
-  const values = Object.values(state.occupancy);
+  const blockedSeats = new Set(state.blockedSeats || []);
+  const values = Object.entries(state.occupancy).filter(([seat]) => !blockedSeats.has(seat)).map(([, status]) => status);
   const pending = values.filter((value) => value === "pending").length;
   const confirmed = values.filter((value) => value === "confirmed").length;
-  return { total, pending, confirmed, free: Math.max(0, total - pending - confirmed) };
+  const blocked = blockedSeats.size;
+  return { total, pending, confirmed, blocked, free: Math.max(0, total - pending - confirmed - blocked) };
 }
 
 /**
@@ -45,23 +50,43 @@ export function SeatReviewCard({
   busy = false,
   confirming = false,
   onDecide,
+  onRevoke,
+  confirmingSeat,
+  onAskSeat,
+  onCancelSeat,
+  onReleaseSeat,
   onAskReject,
   onCancelReject,
+  onAdd,
+  onChangeSeats,
+  onRandomCount,
+  mapCard = false,
 }: {
   review: SeatReview;
   proofHref?: (proof: string) => string;
   busy?: boolean;
   confirming?: boolean;
   onDecide?: (id: number, decision: SeatDecision) => void;
+  onRevoke?: (id: number) => void;
+  confirmingSeat?: string;
+  onAskSeat?: (id: number, seat: string) => void;
+  onCancelSeat?: () => void;
+  onReleaseSeat?: (id: number, seat: string) => void;
   onAskReject?: (id: number) => void;
   onCancelReject?: () => void;
+  onAdd?: (id: number) => void;
+  onChangeSeats?: (id: number) => void;
+  onRandomCount?: (id: number, count: number) => void;
+  mapCard?: boolean;
 }) {
   const live = Boolean(onDecide);
+  const unassigned = review.status === "pending" && review.allocationMode === "random" && !review.seats.length;
+  const headingID = `seat-review-${mapCard ? "map-" : ""}${review.id}`;
   return (
-    <article className={work.record} data-state={recordState[review.status]} aria-labelledby={`seat-review-${review.id}`}>
+    <article className={work.record} data-state={recordState[review.status]} aria-labelledby={headingID}>
       <header className={work.recordHead}>
         <div>
-          <h3 id={`seat-review-${review.id}`}>{review.memberName}</h3>
+          <h3 id={headingID}>{review.memberName}</h3>
           <p className={work.meta}>
             <span>申请 #{review.id}</span>
             <span>提交 {formatDateTime(review.createdAt)}</span>
@@ -76,7 +101,9 @@ export function SeatReviewCard({
           <KeyValues
             items={[
               { label: "手机号", value: live ? <a href={`tel:${review.phone}`}>{review.phone}</a> : review.phone },
-              { label: "座位", value: `${review.seats.length} 个 · ${review.seats.map(seatLabel).join("、")}` },
+              { label: "座位", value: unassigned ? `${review.requestedCount} 个 · 审核通过后安排` : `${review.seats.length} 个 · ${review.seats.map(seatLabel).join("、")}` },
+              ...(review.releasedSeats?.length ? [{ label: "已释放座位", value: review.releasedSeats.map(item => seatLabel(item.seat)).join("、") }] : []),
+              ...(review.addedSeats?.length ? [{ label: "管理员增加座位", value: review.addedSeats.map(item => seatLabel(item.seat)).join("、") }] : []),
             ]}
           />
           <details className={work.disclosure} open={review.status === "pending"}>
@@ -106,9 +133,25 @@ export function SeatReviewCard({
         </div>
         <section className={work.decision} aria-label={`${review.memberName}的审核操作`}>
           <h4>审核决定</h4>
+          {unassigned ? (
+            <form className={work.actions} onSubmit={event => {
+              event.preventDefault();
+              const count = Number(new FormData(event.currentTarget).get("count"));
+              if (Number.isInteger(count) && count >= 1 && count <= seatLimit) onRandomCount?.(review.id, count);
+            }}>
+              <label className={styles.field}>申请数量<input key={`${review.id}-${review.revision}`} type="number" name="count" min={1} max={seatLimit} defaultValue={review.requestedCount} required disabled={busy || !onRandomCount} /></label>
+              <button type="submit" className={buttonClass("ghost", "small")} disabled={busy || !onRandomCount}>调整数量</button>
+            </form>
+          ) : (review.status === "pending" || review.status === "confirmed") && (
+            <div className={work.actions}>
+              <button type="button" className={buttonClass("ghost")} disabled={busy || !onAdd || review.seats.length >= seatLimit} onClick={() => onAdd?.(review.id)}>增加座位</button>
+              <button type="button" className={buttonClass("ghost")} disabled={busy || !onChangeSeats} onClick={() => onChangeSeats?.(review.id)}>更换座位</button>
+              {review.seats.length >= seatLimit && <p className={styles.hint}>已达到每份申请 {seatLimit} 个座位的上限。</p>}
+            </div>
+          )}
           {review.status === "pending" ? (
             <>
-              <p className={styles.hint}>通过后座位锁定；驳回后座位释放给其他成员。决定提交后不能撤回。</p>
+              <p className={styles.hint}>{unassigned ? "通过后系统优先安排同排连坐；座位不足时可调整数量或释放座位。" : "通过后座位锁定；驳回后座位释放给其他成员。已确认的申请可撤销或逐座释放。"}</p>
               <div className={work.actions}>
                 {confirming ? (
                   <>
@@ -132,8 +175,36 @@ export function SeatReviewCard({
               </div>
               {!live && <p className={styles.hint}>合成样本：操作已停用。</p>}
             </>
+          ) : review.status === "confirmed" ? (
+            <>
+              <p className={styles.hint}>已通过，座位已锁定。可撤销单个座位或整份申请。</p>
+              <details className={work.disclosure}>
+                <summary>撤销单个座位</summary>
+                <p className={styles.hint}>选择需要释放的座位。</p>
+                <div className={work.actions}>
+                  {review.seats.map(seat => <button type="button" key={seat} className={buttonClass("ghost", "small")}
+                    disabled={busy || !onReleaseSeat} onClick={() => onAskSeat?.(review.id, seat)}>撤销 {seatLabel(seat)}</button>)}
+                </div>
+                {confirmingSeat && review.seats.includes(confirmingSeat) && (
+                  <div className={work.actions}>
+                    <p className={styles.hint}>{review.seats.length === 1 ? "这是最后一个座位，撤销后整份申请将变为已撤销。" : "该座位将释放，其余座位继续保持已确认。"}</p>
+                    <button type="button" className={buttonClass("danger", "small")} disabled={busy || !onReleaseSeat}
+                      onClick={() => onReleaseSeat?.(review.id, confirmingSeat)}>确认撤销 {seatLabel(confirmingSeat)}</button>
+                    <button type="button" className={buttonClass("ghost", "small")} disabled={busy} onClick={onCancelSeat}>返回</button>
+                  </div>
+                )}
+              </details>
+              <div className={work.actions}>
+                {confirming ? (
+                  <>
+                    <button type="button" className={buttonClass("danger")} disabled={busy || !onRevoke} onClick={() => onRevoke?.(review.id)}>确认撤销并释放</button>
+                    <button type="button" className={buttonClass("ghost")} disabled={busy} onClick={onCancelReject}>返回</button>
+                  </>
+                ) : <button type="button" className={buttonClass("ghost")} disabled={busy || !onRevoke} onClick={() => onAskReject?.(review.id)}>撤销确认</button>}
+              </div>
+            </>
           ) : (
-            <p className={styles.hint}>{review.status === "confirmed" ? "已通过，座位已锁定。" : "已驳回，座位已释放。"}</p>
+            <p className={styles.hint}>{review.status === "cancelled" ? "申请人已取消，座位已释放。" : review.status === "revoked" ? "管理员已撤销确认，座位已释放。" : "已驳回，座位已释放。"}</p>
           )}
         </section>
       </div>
@@ -158,11 +229,20 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [confirming, setConfirming] = useState<number | null>(null);
+  const [confirmingSeat, setConfirmingSeat] = useState<{ id: number; seat: string } | null>(null);
   const [zoom, setZoom] = useState(0);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [assignment, setAssignment] = useState<SeatAssignment>();
+  const [addOrigin, setAddOrigin] = useState<"map" | "list">("list");
+  const [assignmentMode, setAssignmentMode] = useState<"add" | "change">("add");
+  const [adding, setAdding] = useState<string[]>([]);
+  const [inspected, setInspected] = useState<{ seat: string; request: SeatReview | null }>();
   const [openingTime, setOpeningTime] = useState<string | null>(null);
   const lock = useRef(false);
   const ticket = useRef(0);
   const alive = useRef(true);
+  const inspection = useRef<HTMLElement>(null);
+  const addition = useRef<HTMLElement>(null);
 
   useEffect(() => {
     alive.current = true;
@@ -171,6 +251,14 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (inspected) inspection.current?.scrollIntoView({ block: "nearest" });
+  }, [inspected]);
+
+  useEffect(() => {
+    if (assignment) addition.current?.scrollIntoView({ block: "nearest" });
+  }, [assignment]);
+
   const load = useCallback(
     async (next: View, signal?: AbortSignal) => {
       const current = ++ticket.current;
@@ -178,11 +266,15 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
       const [records, seats] = await Promise.all([
         seatRequest<SeatingWorkbench>(`${endpoint}?${query}`, { signal }),
         // The occupancy overview is a convenience; the review list must not fail with it.
-        seatRequest<SeatingState>(endpoint, { signal }).catch(() => undefined),
+        seatRequest<SeatingState>(`${endpoint}?mode=review-map`, { signal }).catch(() => undefined),
       ]);
       if (!alive.current || signal?.aborted || current !== ticket.current) return;
       setData(records);
       setLayout(seats);
+      setSelected([]);
+      setAssignment(undefined);
+      setAdding([]);
+      setInspected(undefined);
     },
     [endpoint],
   );
@@ -194,6 +286,11 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
       setData(undefined);
       setLayout(undefined);
       setConfirming(null);
+      setConfirmingSeat(null);
+      setSelected([]);
+      setAssignment(undefined);
+      setAdding([]);
+      setInspected(undefined);
     }
   }, []);
 
@@ -214,13 +311,17 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
   function show(status: SeatStatus, page: number) {
     if (lock.current) return;
     setConfirming(null);
+    setConfirmingSeat(null);
+    setAssignment(undefined);
+    setAdding([]);
+    setInspected(undefined);
     setError("");
     setNotice("");
     setLoading(true);
     setView({ status, page });
   }
 
-  async function act(label: string, task: () => Promise<string>) {
+  async function act(label: string, task: () => Promise<string>, seatToRefresh?: string) {
     if (lock.current) return;
     lock.current = true;
     setBusy(label);
@@ -233,10 +334,22 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
       if (alive.current) setError(cause instanceof Error ? cause.message : "操作失败，请重试");
     } finally {
       if (alive.current) await load(view).catch((cause) => forget(cause, false));
+      if (alive.current && seatToRefresh) {
+        try {
+          const result = await seatRequest<{ seat: string; request: SeatReview | null }>(`${endpoint}?mode=seat-review&seat=${encodeURIComponent(seatToRefresh)}`);
+          if (alive.current) setInspected(result);
+        } catch (cause) {
+          forget(cause, false);
+          if (alive.current) setError(cause instanceof Error ? cause.message : "座位申请读取失败，请重试");
+        }
+      }
       lock.current = false;
       if (alive.current) {
         setBusy("");
         setConfirming(null);
+        setConfirmingSeat(null);
+        setAssignment(undefined);
+        setAdding([]);
       }
     }
   }
@@ -246,6 +359,21 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
       await seatRequest(endpoint, seatJSON("PUT", { enabled }));
       setOpeningTime(null);
       return enabled ? "选座已开启，成员可以提交申请。" : "选座已关闭：已有申请仍可审核。";
+    });
+  }
+
+  function setMode(mode: SeatingMode) {
+    void act("正在切换座位模式", async () => {
+      await seatRequest(endpoint, seatJSON("PUT", { mode }));
+      return mode === "random" ? "已切换为随机座位模式。" : "已切换为自主选座模式。";
+    });
+  }
+
+  function randomCount(record: SeatReview, count: number) {
+    if (record.status !== "pending" || record.allocationMode !== "random" || record.seats.length) return;
+    void act("正在调整申请数量", async () => {
+      await seatRequest(endpoint, seatJSON("POST", { action: "random-count", id: record.id, revision: record.revision, count }));
+      return "申请数量已更新，请重新核对后审核。";
     });
   }
 
@@ -259,15 +387,135 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
     });
   }
 
-  function decide(request: number, status: SeatDecision) {
+  function decide(record: SeatReview, status: SeatDecision, seat?: string) {
+    if (record.status !== "pending") return;
     void act(status === "confirmed" ? "正在通过申请" : "正在驳回申请", async () => {
-      await seatRequest(endpoint, seatJSON("POST", { action: "review", id: request, status }));
-      return status === "confirmed" ? "已通过并锁定座位。" : "已驳回并释放座位。";
+      await seatRequest(endpoint, seatJSON("POST", { action: "review", id: record.id, status, revision: record.revision,
+        ...(record.allocationMode === "random" && !record.seats.length ? { expectedCount: record.requestedCount } : {}) }));
+      return status === "confirmed" ? (record.allocationMode === "random" && !record.seats.length ? "已通过并安排座位。" : "已通过并锁定座位。") : "已驳回并释放座位。";
+    }, seat);
+  }
+
+  function revoke(record: SeatReview, seat?: string) {
+    if (record.status !== "confirmed") return;
+    void act("正在撤销确认", async () => {
+      await seatRequest(endpoint, seatJSON("POST", { action: "revoke", id: record.id, revision: record.revision }));
+      return "已撤销确认，全部座位已释放。";
+    }, seat);
+  }
+
+  function releaseSeat(record: SeatReview, seat: string, inspectedSeat?: string) {
+    if (record.status !== "confirmed" || !record.seats.includes(seat)) return;
+    void act("正在撤销座位", async () => {
+      const result = await seatRequest<{ fullyRevoked: boolean }>(endpoint, seatJSON("POST", { action: "revoke-seat", id: record.id, revision: record.revision, seat }));
+      return result.fullyRevoked ? `已撤销 ${seatLabel(seat)}，申请已全部撤销。` : `已撤销 ${seatLabel(seat)}，其余座位保持已确认。`;
+    }, inspectedSeat);
+  }
+
+  async function startAssignment(request: number, origin: "map" | "list", mode: "add" | "change") {
+    if (lock.current) return;
+    lock.current = true;
+    setBusy("正在读取可选座位");
+    setError("");
+    setNotice("");
+    setAssignment(undefined);
+    setAddOrigin(origin);
+    setAssignmentMode(mode);
+    setAdding([]);
+    setConfirming(null);
+    setConfirmingSeat(null);
+    try {
+      const result = await seatRequest<SeatAssignment>(`${endpoint}?mode=assignment&request=${request}`);
+      if (alive.current) {
+        setAssignment(result);
+        setAdding(mode === "change" ? result.request.seats.slice() : []);
+      }
+    } catch (cause) {
+      forget(cause, false);
+      if (alive.current) setError(cause instanceof Error ? cause.message : "座位读取失败，请重试");
+    } finally {
+      lock.current = false;
+      if (alive.current) setBusy("");
+    }
+  }
+
+  async function inspectSeat(seat: string) {
+    if (lock.current) return;
+    lock.current = true;
+    setBusy("正在读取座位申请");
+    setInspected(undefined);
+    setAssignment(undefined);
+    setAdding([]);
+    setConfirming(null);
+    setConfirmingSeat(null);
+    setError("");
+    setNotice("");
+    try {
+      const result = await seatRequest<{ seat: string; request: SeatReview | null }>(`${endpoint}?mode=seat-review&seat=${encodeURIComponent(seat)}`);
+      if (alive.current) setInspected(result);
+    } catch (cause) {
+      forget(cause, false);
+      if (alive.current) setError(cause instanceof Error ? cause.message : "座位申请读取失败，请重试");
+    } finally {
+      lock.current = false;
+      if (alive.current) setBusy("");
+    }
+  }
+
+  function saveAssignment() {
+    if (!assignment || !adding.length) return;
+    const { id: request, revision, status } = assignment.request;
+    const changing = assignmentMode === "change";
+    if (changing && (adding.length !== assignment.request.seats.length || assignment.request.seats.every(seat => adding.includes(seat)))) return;
+    const refreshSeat = addOrigin === "map" ? (changing && inspected && !adding.includes(inspected.seat) ? adding[0] : inspected?.seat) : undefined;
+    void act(changing ? "正在更换座位" : "正在增加座位", async () => {
+      await seatRequest(endpoint, seatJSON("POST", { action: changing ? "change-seats" : "add-seats", id: request, revision, status, seats: adding }));
+      return changing ? `已为申请 #${request} 更换座位。` : `已为申请 #${request} 增加 ${adding.length} 个座位。`;
+    }, refreshSeat);
+  }
+
+  function setBlocks(blocked: boolean) {
+    if (!layout) return;
+    const blockedSeats = new Set(layout.blockedSeats || []);
+    const seats = selected.filter(seat => blockedSeats.has(seat) === !blocked);
+    if (!seats.length) return;
+    void act(blocked ? "正在锁定座位" : "正在解锁座位", async () => {
+      await seatRequest(endpoint, seatJSON("POST", { action: "block", seats, blocked }));
+      return `已${blocked ? "锁定" : "解锁"} ${seats.length} 个座位。`;
     });
   }
 
   const counts = layout ? seatCounts(layout) : null;
   const disabled = loading || Boolean(busy);
+  const lockedSelection = selected.filter(seat => layout?.blockedSeats?.includes(seat)).length;
+  const availableSelection = selected.length - lockedSelection;
+
+  function additionPanel(review: SeatReview, origin: "map" | "list") {
+    if (!assignment || assignment.request.id !== review.id || addOrigin !== origin) return null;
+    const changing = assignmentMode === "change";
+    const limit = changing ? assignment.request.seats.length : assignment.seatLimit - assignment.request.seats.length;
+    const unchanged = changing && assignment.request.seats.every(seat => adding.includes(seat));
+    return (
+      <section ref={addition} className={styles.control} aria-label={`为申请 ${review.id} ${changing ? "更换" : "增加"}座位`}>
+        <div className={styles.controlText}>
+          <h3>为 {review.memberName} 的申请 #{review.id} {changing ? "更换" : "增加"}座位</h3>
+          <p>{changing ? `先取消要换出的座位，再选择新座位，保留 ${limit} 个座位。` : `已有 ${assignment.request.seats.length} 个座位，最多还可增加 ${limit} 个。`}申请状态保持{seatStatusLabels[assignment.request.status]}。</p>
+          <div className={styles.mapBlock}>
+            <div className={styles.mapTools}><SeatLegend /><SeatZoom zoom={zoom} onChange={setZoom} /></div>
+            <SeatMap state={assignment} selected={adding} editable={!disabled} zoom={zoom} own={changing ? assignment.request.seats : []} label={changing ? "选择更换后的座位" : "选择要增加的座位"} toggle={seat => {
+              setAdding(current => current.includes(seat) ? current.filter(value => value !== seat) : current.length < limit ? [...current, seat] : current);
+            }} />
+          </div>
+          <SeatSelection selected={adding} limit={limit} disabled={disabled} onRemove={seat => setAdding(current => current.filter(value => value !== seat))} />
+          <div className={work.actions}>
+            <button type="button" className={buttonClass("primary")} disabled={disabled || !adding.length || (changing && (adding.length !== limit || unchanged))} onClick={saveAssignment}>{changing ? "确认更换座位" : "确认增加座位"}</button>
+            <button type="button" className={buttonClass("ghost")} disabled={disabled} onClick={() => { setAssignment(undefined); setAdding([]); }}>取消</button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <div className={styles.workbench} aria-busy={disabled}>
       {data && (
@@ -284,6 +532,11 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
                 : "开启后成员可在活动页选择 1–10 个座位并提交手机号与凭证；未公开的活动不能开启。"}
             </p>
             {data.scheduled && <p>将于北京时间 {formatDateTime(data.opensAt)} 开放选座。</p>}
+            <p>当前模式：{data.mode === "random" ? "随机安排" : "自主选座"}。已确认的座位及已有申请保持不变。</p>
+            <div className={work.actions} role="group" aria-label="座位模式">
+              <button type="button" className={buttonClass(data.mode === "selection" ? "primary" : "ghost", "small")} disabled={disabled || data.mode === "selection"} onClick={() => setMode("selection")}>自主选座</button>
+              <button type="button" className={buttonClass(data.mode === "random" ? "primary" : "ghost", "small")} disabled={disabled || data.mode === "random"} onClick={() => setMode("random")}>随机座位</button>
+            </div>
             {data.enabled && layout && !layout.open && !data.scheduled && <p>活动已结束、取消或暂未公开，成员端当前不能提交新申请。</p>}
             <form className={styles.schedule} onSubmit={schedule}>
               <label className={styles.field}>定时开放（北京时间）
@@ -310,22 +563,56 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
             <span>已确认锁定</span>
           </li>
           <li>
+            <strong>{counts.blocked}</strong>
+            <span>未开放</span>
+          </li>
+          <li>
             <strong>{counts.free}</strong>
             <span>剩余可选 / {counts.total}</span>
           </li>
         </ul>
       )}
 
-      {layout && layout.enabled && (
+      {layout && (
         <details className={`${work.disclosure} ${styles.overview}`} open>
-          <summary>座位占用总览</summary>
+          <summary>管理座位和查看申请</summary>
+          <p className={styles.blockHint}>点击待审核或已确认的座位查看申请；点选空座锁定，或点选未开放的座位解锁。</p>
           <div className={styles.mapBlock}>
             <div className={styles.mapTools}>
               <SeatLegend />
               <SeatZoom zoom={zoom} onChange={setZoom} />
             </div>
-            <SeatMap state={layout} selected={[]} editable={false} zoom={zoom} label="座位占用总览" />
+            <SeatMap state={layout} selected={selected} editable={!disabled} manage zoom={zoom} label="管理座位和查看申请" onInspect={inspectSeat} toggle={seat => setSelected(current => current.includes(seat) ? current.filter(value => value !== seat) : [...current, seat])} />
           </div>
+          <div className={styles.blockControls}>
+            <span className={styles.blockHint}>已选 {availableSelection} 个空座、{lockedSelection} 个未开放座位</span>
+            <button type="button" className={buttonClass("primary", "small")} disabled={disabled || !availableSelection} onClick={() => setBlocks(true)}>锁定所选空座</button>
+            <button type="button" className={buttonClass("ghost", "small")} disabled={disabled || !lockedSelection} onClick={() => setBlocks(false)}>解锁所选座位</button>
+            <button type="button" className={buttonClass("ghost", "small")} disabled={disabled || !selected.length} onClick={() => setSelected([])}>清除选择</button>
+          </div>
+          {inspected && (
+            <section ref={inspection} aria-label={`${seatLabel(inspected.seat)}的申请`}>
+              <div className={work.actions}>
+                <h3>{seatLabel(inspected.seat)}的申请</h3>
+                <button type="button" className={buttonClass("ghost", "small")} disabled={disabled} onClick={() => { setInspected(undefined); setAssignment(undefined); setAdding([]); setConfirming(null); setConfirmingSeat(null); }}>关闭</button>
+              </div>
+              {inspected.request ? <>
+                <SeatReviewCard review={inspected.request} mapCard proofHref={proof => `${endpoint}/proofs/${encodeURIComponent(proof)}`}
+                  busy={disabled} confirming={confirming === inspected.request.id}
+                  onDecide={(_request, status) => decide(inspected.request!, status, inspected.seat)}
+                  onRevoke={() => revoke(inspected.request!, inspected.seat)}
+                  confirmingSeat={confirmingSeat?.id === inspected.request.id ? confirmingSeat.seat : undefined}
+                  onAskSeat={(request, seat) => { setConfirming(null); setConfirmingSeat({ id: request, seat }); }}
+                  onCancelSeat={() => setConfirmingSeat(null)}
+                  onReleaseSeat={(_request, seat) => releaseSeat(inspected.request!, seat, inspected.seat)}
+                  onAskReject={request => { setConfirmingSeat(null); setConfirming(request); }}
+                  onCancelReject={() => setConfirming(null)}
+                  onAdd={request => { void startAssignment(request, "map", "add"); }}
+                  onChangeSeats={request => { void startAssignment(request, "map", "change"); }} />
+                {additionPanel(inspected.request, "map")}
+              </> : <p className={styles.hint}>该座位当前没有申请，请刷新座位图。</p>}
+            </section>
+          )}
         </details>
       )}
 
@@ -363,16 +650,26 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
           {data.docs.length ? (
             <div className={work.records}>
               {data.docs.map((review) => (
+                <Fragment key={review.id}>
                 <SeatReviewCard
-                  key={review.id}
                   review={review}
                   proofHref={(proof) => `${endpoint}/proofs/${encodeURIComponent(proof)}`}
                   busy={Boolean(busy)}
                   confirming={confirming === review.id}
-                  onDecide={decide}
-                  onAskReject={setConfirming}
+                  onDecide={(_request, status) => decide(review, status)}
+                  onRevoke={() => revoke(review)}
+                  confirmingSeat={confirmingSeat?.id === review.id ? confirmingSeat.seat : undefined}
+                  onAskSeat={(request, seat) => { setConfirming(null); setConfirmingSeat({ id: request, seat }); }}
+                  onCancelSeat={() => setConfirmingSeat(null)}
+                  onReleaseSeat={(_request, seat) => releaseSeat(review, seat)}
+                  onAskReject={request => { setConfirmingSeat(null); setConfirming(request); }}
                   onCancelReject={() => setConfirming(null)}
+                  onAdd={request => { void startAssignment(request, "list", "add"); }}
+                  onChangeSeats={request => { void startAssignment(request, "list", "change"); }}
+                  onRandomCount={(_request, count) => randomCount(review, count)}
                 />
+                {additionPanel(review, "list")}
+                </Fragment>
               ))}
             </div>
           ) : (

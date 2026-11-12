@@ -3,6 +3,7 @@ import type { User } from "@/payload-types";
 import { promotedContent } from "../content-promotions";
 import { publicationImages } from "../publication-images";
 import { controlledImageRef } from "./images";
+import { projectPublicationContent } from "../publication-content";
 import { refreshViewer, requireViewer } from "./identity";
 import { communityRef, teamRef, mediaRef, txt, rel, iso, rows, readRows, findRow, publicWhere, paginate, safeBody, notFound, type Row, type Input } from "./shared";
 import { showcaseCard, showcaseFields } from "./community";
@@ -87,13 +88,14 @@ export async function getArticle(p: Payload, viewer: User | null, input: Input):
   if (kind !== "announcement") viewer = await requireViewer(p, viewer);
   if (kind === "communityNotice" && !rel(input.idOrSlug ?? input.id)) notFound();
   const collection = kind === "announcement" ? "announcements" : kind === "communityNotice" ? "community-posts" : kind === "news" ? "news" : "albums";
-  const row = await findRow(p, collection, input.idOrSlug ?? input.id, articleFields, null, kind === "communityNotice" ? { and: [{ status: { equals: "visible" } }, { category: { equals: "notice" } }] } : publicWhere());
+  const row = await findRow(p, collection, input.idOrSlug ?? input.id, kind === "communityNotice" ? [...articleFields, "contentMode", "contentBlocks"] : articleFields, null, kind === "communityNotice" ? { and: [{ status: { equals: "visible" } }, { category: { equals: "notice" } }] } : publicWhere());
   if (!row) notFound();
   if (kind === "communityNotice" && !(await communityRef(p, row.game))) notFound();
   const article = await articleCard(p, row, kind as ArticleCard["kind"]), photoRows = rows(row.photos);
-  const images = publicationImages(row.postImages).map((image, index) => controlledImageRef(kind === "announcement" ? "announcement-post" : "community-post", row.id, index, image.source, image.alt)).filter((image): image is NonNullable<typeof image> => !!image);
+  const indexedImages = publicationImages(row.postImages).map((image, index) => controlledImageRef(kind === "announcement" ? "announcement-post" : "community-post", row.id, index, image.source, image.alt));
+  const images = indexedImages.filter((image): image is NonNullable<typeof image> => !!image);
   const photos = kind === "album" ? paginate((await Promise.all(photoRows.map(async photo => { const image = await mediaRef(p, photo.image, txt(photo.caption) ?? article.title); return image ? { image, caption: txt(photo.caption) } : null; }))).filter((photo): photo is NonNullable<typeof photo> => !!photo), { page: input.page, limit: 12 }) : null;
   const { getEventDetail } = await import("./events");
   const event = row.event ? await getEventDetail(p, viewer, { source: "club", id: row.event }).then(value => value.event).catch(error => { if ((error as { status?: number }).status === 404) return null; throw error; }) : null;
-  return { article, body: kind === "communityNotice" ? null : safeBody(row.body), bodyText: kind === "communityNotice" ? txt(row.body) : null, images, sections: rows(row.sections).map((section, index) => ({ id: String(section.id ?? index), heading: String(section.heading ?? ""), text: String(section.text ?? "") })), photos, related: { event, team: await teamRef(p, row.team) } };
+  return { article, body: kind === "communityNotice" ? null : safeBody(row.body), bodyText: kind === "communityNotice" ? txt(row.body) : null, images, presentation: kind === "communityNotice" ? projectPublicationContent(row.contentMode, row.contentBlocks, indexedImages) : null, sections: rows(row.sections).map((section, index) => ({ id: String(section.id ?? index), heading: String(section.heading ?? ""), text: String(section.text ?? "") })), photos, related: { event, team: await teamRef(p, row.team) } };
 }

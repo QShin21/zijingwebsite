@@ -24,7 +24,7 @@ const workflowAudit: CollectionAfterChangeHook = async ({ doc, previousDoc, req,
 
 export const CommunityApplications: CollectionConfig = {
   slug: "community-applications", labels: { singular: "建群与管理员申请", plural: "建群与管理员申请" },
-  admin: { useAsTitle: "proposedGame", description: "在网站社群申请审核页处理决定、退回及初始化；平台角色不会随审批改变。" },
+  admin: { useAsTitle: "proposedGame", description: "在网站社群申请审核页处理决定、退回及初始化；批准后授予对应社群权限。" },
   access: {
     read: ownApplication,
     create: ({ req }) => canParticipate(req.user as Identity),
@@ -131,13 +131,15 @@ export const CommunityApplications: CollectionConfig = {
       const offices = [...(applicant.communityOffices ?? [])];
       const index = offices.findIndex(office => Number(relationID(office.game)) === game);
       const grant = { game, status: "active" as const, publishContent: true, reviewShowcase: true, handleJoins: true,
-        viewSignups: false, exportSignups: false, contactConsent: doc.contactConsent === true,
+        viewSignups: true, exportSignups: true, contactConsent: doc.contactConsent === true,
         grantedBy: req.user!.id, grantedAt: new Date().toISOString(), sourceApplication: doc.id };
       if (index < 0) offices.push(grant);
       else if (offices[index].status !== "active") offices[index] = { ...offices[index], ...grant };
-      else offices[index] = { ...offices[index], contactConsent: doc.contactConsent === true, sourceApplication: doc.id };
-      // Platform roles and other offices remain intact. Approval makes no claim about WeChat membership.
-      await req.payload.update({ collection: "users", id: applicant.id, req: { ...req, context: { ...req.context, system: true } }, overrideAccess: true, data: { communityOffices: offices } });
+      else offices[index] = { ...offices[index], ...grant };
+      // A new grant changes only the lower platform roles and the requested community.
+      const roles = applicant.roles?.length === 1 && ["member", "honoraryBackbone"].includes(applicant.roles[0])
+        ? ["communityAdmin" as const] : applicant.roles;
+      await req.payload.update({ collection: "users", id: applicant.id, req: { ...req, context: { ...req.context, system: true } }, overrideAccess: true, data: { communityOffices: offices, roles } });
       await req.payload.update({ collection: "community-applications", id: doc.id, req: { ...req, context: { ...req.context, applicationResolved: true } }, overrideAccess: true, data: { game } });
       return { ...doc, game };
     }, workflowAudit],

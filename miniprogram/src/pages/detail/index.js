@@ -11,6 +11,7 @@ const navigation = require('../../lib/navigation');
 const files = require('../../lib/files');
 const video = require('../../lib/video');
 const reading = require('../../lib/native-reading');
+const v2 = require('../../lib/v2');
 const { actions, error } = require('../../lib/page');
 const socialCollections = ['community-posts', 'community-showcase'];
 const seatLabels = { pending: '待审核', confirmed: '已确认', rejected: '已驳回' };
@@ -27,7 +28,7 @@ function seatSummary(info) {
 }
 Page(withVisualTheme({
   data: { loading: true, error: '', needsLogin: false, collection: '', doc: {}, nodes: [], links: [], photos: [],
-    related: [], previewImages: [], registration: '', seatInfo: null, coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', reading: {} },
+    related: [], previewImages: [], presentation: null, registration: '', seatInfo: null, coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', reading: {} },
   ...actions,
   onLoad(options) {
     this._options = options; this._hidden = false; this._unloaded = false;
@@ -35,7 +36,7 @@ Page(withVisualTheme({
     this._unsubscribe = session.subscribe(user => {
       if (String(user && user.id) === String(this._userId)) return;
       this._ticket = (this._ticket || 0) + 1;
-      this.setData({ loading: false, error: '', doc: {}, reading: {}, nodes: [], links: [], photos: [], previewImages: [], signupInfo: null, seatInfo: null, related: [], coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', videoError: false, registration: '', signupFailed: false, needsLogin: !user });
+      this.setData({ loading: false, error: '', doc: {}, reading: {}, nodes: [], links: [], photos: [], previewImages: [], presentation: null, signupInfo: null, seatInfo: null, related: [], coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', videoError: false, registration: '', signupFailed: false, needsLogin: !user });
     });
   },
   onShow() { this._hidden = false; this.load(); },
@@ -46,11 +47,26 @@ Page(withVisualTheme({
   async load() {
     const ticket = this._ticket = (this._ticket || 0) + 1;
     const user = session.user(); this._userId = user && user.id;
-    this.setData({ loading: true, error: '', needsLogin: false, user, signupInfo: null, seatInfo: null, signupFailed: false, signupStartText: '', signupEndText: '', doc: {}, reading: {}, photos: [], nodes: [], links: [], related: [], previewImages: [], coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', videoError: false, registration: '' });
+    this.setData({ loading: true, error: '', needsLogin: false, user, signupInfo: null, seatInfo: null, signupFailed: false, signupStartText: '', signupEndText: '', doc: {}, reading: {}, photos: [], nodes: [], links: [], related: [], previewImages: [], presentation: null, coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', videoError: false, registration: '' });
     try {
       const { collection, id, slug } = this._options;
       const social = socialCollections.includes(collection);
       const doc = social ? await cms.socialDetail(collection, id) : await cms.detail(collection, id, slug);
+      let presentation = null;
+      if (collection === 'community-posts') try {
+        const path = doc.category === 'event' ? 'events/community/' + id : 'articles/communityNotice/' + id;
+        const detail = await v2.get(path, {}, { required: true });
+        const layout = detail.presentation || (detail.images && detail.images.length ? { mode: 'gallery', blocks: [] } : null);
+        if (layout) {
+          const urls = {};
+          const refs = layout.mode === 'article' ? layout.blocks.filter(block => block.type === 'image').map(block => block.image) : detail.images;
+          for (const image of refs) {
+            if (!urls[image.src]) urls[image.src] = await http.download(image.src).catch(() => '');
+          }
+          presentation = { mode: layout.mode, images: (detail.images || []).map(image => ({ url: urls[image.src] || '', alt: image.alt || '' })),
+            blocks: (layout.blocks || []).map(block => block.type === 'image' ? { type: 'image', url: urls[block.image.src] || '', alt: block.image.alt || '' } : block) };
+        }
+      } catch { /* Preserve the legacy detail if the newer projection is unavailable. */ }
       const rendered = typeof doc.body === 'object' ? render(doc.body) : { nodes: [], links: [] };
       const coverImage = await cms.media(doc.cover);
       const photos = [];
@@ -70,7 +86,7 @@ Page(withVisualTheme({
       }
       if (ticket !== this._ticket) return;
       const article = reading.article(doc, collection);
-      this.setData({ loading: false, doc, social, reading: article, nodes: reading.prose(rendered.nodes), links: rendered.links, photos, qr, coverImage,
+      this.setData({ loading: false, doc, social, presentation, reading: article, nodes: reading.prose(rendered.nodes), links: rendered.links, photos, qr, coverImage,
         previewImages: photos.map(photo => photo.url), related, dateText: article.dateText,
         endDateText: doc.endAt ? format.date(doc.endAt) : '',
         registrationStartText: doc.registrationStart ? format.date(doc.registrationStart) : '', registrationEndText: doc.registrationEnd ? format.date(doc.registrationEnd) : '',

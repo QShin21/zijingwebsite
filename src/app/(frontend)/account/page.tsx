@@ -16,6 +16,7 @@ const roleLabels: Record<PlatformRole, string> = {
   vicePresident: "副社长",
   backbone: "骨干",
   communityAdmin: "社群管理员",
+  honoraryBackbone: "荣誉骨干",
   member: "成员",
 };
 const departments = { execution: "执行部", publicity: "宣传部" } as const;
@@ -202,7 +203,7 @@ export default async function Account({ searchParams }: { searchParams: Search }
                 },
               ]}
             />
-            <p className={styles.hint}>骨干与队员身份不自动附带管理权限。</p>
+            <p className={styles.hint}>骨干录用后自动获得骨干身份；社群任职与队伍成员关系分别记录。</p>
             <nav className={styles.settingLinks} aria-label="账号设置">
               <Link href="/account/reset">修改登录密码</Link>
               <Link href="/privacy">隐私说明</Link>

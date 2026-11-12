@@ -8,7 +8,7 @@ import { readPromotionSource } from "../content-promotions";
 import { getActiveTeamMembership, getTeamMembershipByID } from "../team-memberships";
 import { teamHonorService } from "../team-honor-service";
 import { refreshViewer, requireViewer } from "./identity";
-import { publicationImages } from "../publication-images";
+import { publicationAsset, publicationImages } from "../publication-images";
 
 export type ControlledImageKind = "showcase" | "community-post" | "event-post" | "announcement-post" | "profile" | "contact" | "honor" | "upload";
 const kinds = new Set<string>(["showcase", "community-post", "event-post", "announcement-post", "profile", "contact", "honor", "upload"]);
@@ -41,12 +41,25 @@ export function controlledImageRef(
   alt = "",
   dimensions?: { width?: number | null; height?: number | null },
 ): ImageRef | null {
+  const asset = typeof source === "string" ? publicationAsset(source) : null;
+  if (asset && positiveID(id) && Number.isSafeInteger(index) && index >= 0 && kinds.has(kind))
+    return { src: `/api/v2/images/${kind}/${id}/${index}?v=${asset.version}`, width: dimensions?.width ?? null, height: dimensions?.height ?? null, alt };
   const image = storedImage(source);
   if (!image || !positiveID(id) || !Number.isSafeInteger(index) || index < 0 || !kinds.has(kind)) return null;
   return {
     src: `/api/v2/images/${kind}/${id}/${index}?v=${image.version}`,
     width: dimensions?.width ?? null, height: dimensions?.height ?? null, alt,
   };
+}
+
+/** Resolve an attached asset only after the owning record has passed access checks. */
+export async function publicationAssetData(p: Payload, source: unknown) {
+  const asset = typeof source === "string" ? publicationAsset(source) : null;
+  if (!asset) return typeof source === "string" ? source : null;
+  const upload = await p.findByID({ collection: "pending-uploads", id: asset.id, overrideAccess: true, depth: 0,
+    select: { purpose: true, data: true, consumedAt: true } }).catch(() => null);
+  const image = upload?.purpose === "publication" && upload.consumedAt ? storedImage(upload.data) : null;
+  return image?.version === asset.version ? upload!.data : null;
 }
 
 async function publicGame(p: Payload, id: unknown) {
@@ -67,8 +80,8 @@ async function publicCommunityPost(p: Payload, id: number) {
     select: { approvedVersion: true },
   });
   if (!rows.docs[0]?.approvedVersion) return null;
-  const source = await readPromotionSource(p, "community-posts", id).catch(() => null);
-  return source?.version === rows.docs[0].approvedVersion ? source.doc : null;
+  const source = await readPromotionSource(p, "community-posts", id, undefined, true).catch(() => null);
+  return source?.doc ?? null;
 }
 
 async function contactSource(p: Payload, viewer: User | null, communityID: number, userID: number) {
@@ -112,9 +125,13 @@ async function imageSource(p: Payload, viewer: User | null, kind: ControlledImag
   if (kind === "honor") return (await teamHonorService.publicRecord(p, id))?.images[index]?.source ?? null;
   if (kind === "upload") {
     if (!viewer || index !== 0) return null;
-    const upload = await p.findByID({ collection: "pending-uploads", id, user: viewer,
-      overrideAccess: false, depth: 0, select: { data: true, owner: true, expiresAt: true, consumedAt: true } }).catch(() => null);
-    return upload && Number(relationID(upload.owner)) === viewer.id && !upload.consumedAt && Date.parse(upload.expiresAt) > Date.now()
+    const fields = { data: true, owner: true, purpose: true, expiresAt: true, consumedAt: true } as const;
+    const own = await p.findByID({ collection: "pending-uploads", id, user: viewer,
+      overrideAccess: false, depth: 0, select: fields }).catch(() => null);
+    const upload = own || (canPublish(viewer) ? await p.findByID({ collection: "pending-uploads", id, user: viewer,
+      overrideAccess: true, depth: 0, select: fields }).catch(() => null) : null);
+    const allowed = upload && (Number(relationID(upload.owner)) === viewer.id || upload.purpose === "publication" && canPublish(viewer));
+    return allowed && (!upload.consumedAt && Date.parse(upload.expiresAt) > Date.now() || upload.purpose === "publication" && upload.consumedAt)
       ? upload.data : null;
   }
   if (kind === "event-post" || kind === "announcement-post") {
@@ -122,14 +139,14 @@ async function imageSource(p: Payload, viewer: User | null, kind: ControlledImag
       overrideAccess: false, user: null, depth: 0, draft: false,
       select: { postImages: true, _status: true, demo: true } }).catch(() => null);
     if (!row || row._status !== "published" || process.env.APP_ENV === "production" && row.demo) return null;
-    return publicationImages(row.postImages)[index]?.source ?? null;
+    return publicationAssetData(p, publicationImages(row.postImages)[index]?.source);
   }
   if (kind === "community-post") {
     const row = viewer ? await p.findByID({ collection: "community-posts", id, overrideAccess: false, user: viewer, depth: 0,
       select: { postImages: true, game: true } }).catch(() => null) : await publicCommunityPost(p, id);
     if (!row || !await publicGame(p, row.game)) return null;
     const images = "postImages" in row ? row.postImages : null;
-    return publicationImages(images)[index]?.source ?? null;
+    return publicationAssetData(p, publicationImages(images)[index]?.source);
   }
   const row = await p.findByID({ collection: "community-showcase", id, overrideAccess: false, user: viewer, depth: 0,
     select: { images: true, status: true, game: true, author: true } }).catch(() => null);

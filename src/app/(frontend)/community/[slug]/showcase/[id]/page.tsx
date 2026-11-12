@@ -93,7 +93,7 @@ export default async function ShowcaseDetail({
           <details className={work.disclosure}>
             <summary>上传或替换本站视频</summary>
             <p>
-              保留同一风采及原社群。保存新视频会撤下社团级展示，需重新申请复审；已有文件保留。
+              保留同一风采及原社群。保存新视频后，已升推内容同步更新；已有文件保留。
             </p>
             <ActionForm
               action={replaceShowcaseVideoResultAction}

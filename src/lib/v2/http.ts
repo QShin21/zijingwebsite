@@ -5,6 +5,7 @@ import { refreshViewer } from "./identity";
 import type { ErrorCode } from "./types";
 import * as service from "./index";
 import { signImages } from "./images";
+import { publicationImageBytes } from "../publication-images";
 
 const codes: Record<number, ErrorCode> = { 400: "VALIDATION", 401: "AUTH_REQUIRED", 403: "FORBIDDEN", 404: "NOT_FOUND", 409: "CONFLICT", 413: "PAYLOAD_TOO_LARGE", 415: "UNSUPPORTED_MEDIA", 429: "RATE_LIMITED", 503: "UNAVAILABLE" };
 const messages: Record<number, string> = { 400: "请求内容无效，请检查后重试", 401: "请先登录可用账号", 403: "无权进行此操作", 404: "内容暂时不可访问", 409: "内容已更新或已处理，请刷新后重试", 413: "请求内容过大", 415: "不支持此文件格式", 429: "操作过于频繁，请稍后重试", 503: "服务暂时不可用，请稍后重试" };
@@ -102,7 +103,7 @@ export async function v2Request(p: Payload, request: Request, path: string[]): P
       if (route === "uploads") {
         if (!/^multipart\/form-data\s*;/i.test(request.headers.get("content-type") ?? "")) throw new APIError("上传格式无效", 415);
         const data = await new Request(request.url, { method: "POST", headers: request.headers,
-          body: Buffer.from(await bytes(request, 2 * 1024 * 1024 + 64 * 1024)) }).formData().catch(() => { throw new APIError("上传格式无效", 400); });
+          body: Buffer.from(await bytes(request, publicationImageBytes + 64 * 1024)) }).formData().catch(() => { throw new APIError("上传格式无效", 400); });
         if (data.getAll("file").length !== 1 || data.getAll("purpose").length !== 1 || [...data.keys()].some(key => !["file", "purpose"].includes(key)))
           throw new APIError("请一次上传一张图片", 400);
         return reply(await service.createUpload(p, actor, { file: data.get("file"), purpose: data.get("purpose") }), 201);

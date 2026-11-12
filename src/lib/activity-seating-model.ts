@@ -1,7 +1,8 @@
 
 export type SeatingKind = "events" | "community-posts";
-export type SeatStatus = "pending" | "confirmed" | "rejected";
-export type SeatDecision = Exclude<SeatStatus, "pending">;
+export type SeatStatus = "pending" | "confirmed" | "rejected" | "cancelled" | "revoked";
+export type SeatDecision = "confirmed" | "rejected";
+export type SeatingMode = "selection" | "random";
 export const seatLimit = 10;
 export const seatProofLimit = 10;
 export const seatProofBytes = 8 * 1024 * 1024;
@@ -9,6 +10,8 @@ export const seatStatusLabels: Record<SeatStatus, string> = {
   pending: "待审核",
   confirmed: "已确认",
   rejected: "已驳回",
+  cancelled: "已取消",
+  revoked: "已撤销",
 };
 
 export const seatRows = [
@@ -40,7 +43,10 @@ export const seatProofID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]
 export type SeatRequest = {
   id: number;
   seats: string[];
+  requestedCount: number;
+  allocationMode: SeatingMode;
   status: SeatStatus;
+  revision: number;
   createdAt: string;
   reviewedAt: string | null;
 };
@@ -49,10 +55,22 @@ export type SeatReview = SeatRequest & {
   memberName: string;
   phone: string;
   proofs: string[];
+  releasedSeats: { seat: string; releasedAt: string }[];
+  addedSeats: { seat: string; addedAt: string }[];
+};
+
+export type SeatAssignment = {
+  title: string;
+  request: SeatRequest;
+  rows: typeof seatRows;
+  seatLimit: number;
+  occupancy: Partial<Record<string, "pending" | "confirmed">>;
+  blockedSeats: string[];
 };
 
 export type SeatingAvailability = {
   enabled: boolean;
+  mode: SeatingMode;
   open: boolean;
   scheduled: boolean;
   opensAt: string | null;
@@ -67,8 +85,10 @@ export type SeatingState = SeatingAvailability & {
   seatLimit: number;
   proofLimit: number;
   proofBytes: number;
-  occupancy: Partial<Record<string, Exclude<SeatStatus, "rejected">>>;
+  occupancy: Partial<Record<string, "pending" | "confirmed">>;
+  blockedSeats: string[];
   mine: SeatRequest | null;
+  mineDetails: { phone: string; proofs: string[]; canEdit: boolean } | null;
   drafts: string[];
 };
 

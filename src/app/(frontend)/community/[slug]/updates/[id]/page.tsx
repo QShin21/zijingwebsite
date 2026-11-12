@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getArticle, getEventDetail } from "@/lib/v2";
 import { CommunityPostImageEditor } from "@/components/CommunityPostImageEditor";
+import { CommunityArticleEditor } from "@/components/CommunityArticleEditor";
+import { publicationBlocks } from "@/lib/publication-content";
 import { publicationImages } from "@/lib/publication-images";
 import { bySlug } from "@/lib/content";
 import { canReviewPromotion, managesGame } from "@/lib/rules";
@@ -26,16 +28,18 @@ export default async function Update({ params, searchParams }: { params: Promise
       overrideAccess: false,
       user: null,
       depth: 0,
-      select: { game: true, category: true, postImages: true, updatedAt: true },
+      select: { game: true, category: true, postImages: true, contentMode: true, contentBlocks: true, updatedAt: true },
     })
     .catch(() => null);
   if (!post || Number(post.game) !== game.id) notFound();
   const message = single(search.message);
   const notice = message ? <Notice>{message}</Notice> : undefined;
   const canEdit = managesGame(user, game.id);
+  const images = publicationImages(post.postImages);
   const editor = canEdit ? (
-    <section className={layout.panel} aria-label="编辑配图">
-      <CommunityPostImageEditor key={post.id} id={post.id} game={game.id} images={publicationImages(post.postImages)} revision={post.updatedAt} />
+    <section className={layout.panel} aria-label={post.contentMode === "article" ? "编辑文章" : "编辑配图"}>
+      {post.contentMode === "article" ? <CommunityArticleEditor key={post.updatedAt} id={post.id} game={game.id} images={images} blocks={publicationBlocks(post.contentBlocks, images.length)} revision={post.updatedAt} />
+        : <CommunityPostImageEditor key={post.id} id={post.id} game={game.id} images={images} revision={post.updatedAt} />}
     </section>
   ) : null;
   if (post.category === "event") {

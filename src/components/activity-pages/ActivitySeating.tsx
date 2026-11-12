@@ -16,19 +16,20 @@ import { buttonClass } from "@/components/v2/ui";
 import { SeatRequestError, seatJSON, seatRequest } from "./seat-request";
 import styles from "./ActivitySeating.module.css";
 
-export type SeatVisual = "available" | "selected" | "pending" | "confirmed";
+export type SeatVisual = "available" | "selected" | "pending" | "confirmed" | "blocked";
 export const seatLegend: readonly (readonly [SeatVisual, string])[] = [
   ["available", "可选"],
   ["selected", "已选"],
   ["pending", "待审核"],
   ["confirmed", "已确认"],
+  ["blocked", "未开放"],
 ];
 /** Seat sizes (px) for the three zoom steps. Even the compact step keeps a 24px target pitch. */
 export const seatZooms = [20, 26, 34] as const;
 export const seatGap = 4;
 const zoomNames = ["紧凑", "标准", "放大"];
 const proofTypes = ["image/jpeg", "image/png", "image/webp"];
-type SeatLayout = Pick<SeatingState, "rows" | "occupancy">;
+type SeatLayout = Pick<SeatingState, "rows" | "occupancy"> & Partial<Pick<SeatingState, "blockedSeats">>;
 
 /** Widest zoom whose whole board fits `width`; narrow screens keep the touch-friendly standard step and scroll. */
 export function fittedZoom(rows: SeatLayout["rows"], width: number) {
@@ -73,7 +74,7 @@ export function SeatZoom({ zoom, onChange }: { zoom: number; onChange: (zoom: nu
 /**
  * The seat map. Layout and occupancy come from the server, selection from the caller.
  * One seat is in the tab order (roving tabindex); arrow keys move between enabled seats,
- * Space/Enter toggles. Taken seats are disabled and announced with their state.
+ * Space/Enter toggles selectable seats; reviewers can inspect occupied seats.
  */
 export function SeatMap({
   state,
@@ -82,6 +83,9 @@ export function SeatMap({
   toggle,
   zoom = 1,
   label = "座位图",
+  manage = false,
+  own = [],
+  onInspect,
 }: {
   state: SeatLayout;
   selected: readonly string[];
@@ -89,10 +93,16 @@ export function SeatMap({
   toggle?: (seat: string) => void;
   zoom?: number;
   label?: string;
+  manage?: boolean;
+  own?: readonly string[];
+  onInspect?: (seat: string) => void;
 }) {
   const [focused, setFocused] = useState("");
   const keys = state.rows.flatMap(({ row, count }) => Array.from({ length: count }, (_, index) => `${row}-${index + 1}`));
-  const first = focused && keys.includes(focused) && !state.occupancy[focused] ? focused : keys.find((seat) => !state.occupancy[seat]);
+  const blocked = new Set(state.blockedSeats || []);
+  const inspectable = (seat: string) => Boolean(onInspect && state.occupancy[seat] && !blocked.has(seat) && !own.includes(seat));
+  const selectable = (seat: string) => !state.occupancy[seat] || (manage && blocked.has(seat)) || own.includes(seat) || inspectable(seat);
+  const first = focused && keys.includes(focused) && selectable(focused) ? focused : keys.find(selectable);
 
   function moveFocus(event: KeyboardEvent<HTMLDivElement>) {
     if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key) || !(event.target instanceof HTMLButtonElement)) return;
@@ -143,23 +153,24 @@ export function SeatMap({
                   const seat = `${row.row}-${index + 1}`;
                   const taken = state.occupancy[seat];
                   const picked = selected.includes(seat);
-                  const value: SeatVisual = taken || (picked ? "selected" : "available");
+                  const value: SeatVisual = blocked.has(seat) ? "blocked" : own.includes(seat) && picked ? "selected" : taken || (picked ? "selected" : "available");
                   return (
                     <button
                       type="button"
                       key={seat}
                       data-seat={seat}
                       data-state={value}
+                      data-picked={picked ? "true" : undefined}
                       data-row={row.row}
                       data-column={row.offset + index}
                       className={styles.seat}
-                      disabled={!editable || Boolean(taken)}
+                      disabled={!editable || !selectable(seat)}
                       tabIndex={seat === first ? 0 : -1}
-                      aria-pressed={taken ? undefined : picked}
-                      aria-label={`${seatLabel(seat)}${accent ? " · 中心区" : ""} · ${seatLegend.find(([key]) => key === value)?.[1]}`}
+                      aria-pressed={selectable(seat) && !inspectable(seat) ? picked : undefined}
+                      aria-label={`${seatLabel(seat)}${accent ? " · 中心区" : ""} · ${seatLegend.find(([key]) => key === value)?.[1]}${picked && value === "blocked" ? " · 已选" : ""}${inspectable(seat) ? " · 查看申请" : ""}`}
                       title={seatLabel(seat)}
                       onFocus={() => setFocused(seat)}
-                      onClick={() => toggle?.(seat)}
+                      onClick={() => inspectable(seat) ? onInspect?.(seat) : toggle?.(seat)}
                     >
                       {index + 1}
                     </button>
@@ -215,7 +226,7 @@ export function SeatSelection({
 }
 
 /** The member's own request: seats and status only, never phone numbers or proofs. */
-export function SeatReceipt({ mine, editable }: { mine: Pick<SeatRequest, "seats" | "status">; editable: boolean }) {
+export function SeatReceipt({ mine, editable }: { mine: Pick<SeatRequest, "seats" | "status"> & Partial<Pick<SeatRequest, "requestedCount">>; editable: boolean }) {
   return (
     <div className={styles.receipt} data-status={mine.status}>
       <p className={styles.receiptHead}>
@@ -224,12 +235,14 @@ export function SeatReceipt({ mine, editable }: { mine: Pick<SeatRequest, "seats
         </span>
         <strong>我的选座申请</strong>
       </p>
-      <p className={styles.receiptSeats}>{mine.seats.map(seatLabel).join("、")}</p>
-      {mine.status === "pending" && <p className={styles.hint}>座位已为你保留，等待管理员核对凭证后锁定。</p>}
+      <p className={styles.receiptSeats}>{mine.seats.length ? mine.seats.map(seatLabel).join("、") : `${mine.requestedCount ?? 0} 个座位`}</p>
+      {mine.status === "pending" && <p className={styles.hint}>{mine.seats.length ? "座位已为你保留，等待管理员核对凭证后锁定。" : "申请等待审核，通过后可查看座位。"}</p>}
       {mine.status === "confirmed" && <p className={styles.hint}>审核已通过，座位已锁定。</p>}
       {mine.status === "rejected" && (
         <p className={styles.hint}>{editable ? "申请已驳回，座位已释放；可以重新选座并提交凭证。" : "申请已驳回，座位已释放。"}</p>
       )}
+      {mine.status === "cancelled" && <p className={styles.hint}>{editable ? "申请已取消，座位已释放；可以重新选座。" : "申请已取消，座位已释放。"}</p>}
+      {mine.status === "revoked" && <p className={styles.hint}>{editable ? "管理员已撤销确认，座位已释放；可以重新选座。" : "管理员已撤销确认，座位已释放。"}</p>}
     </div>
   );
 }
@@ -244,6 +257,10 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
   const [state, setState] = useState<SeatingState>();
   const [failed, setFailed] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
+  const [count, setCount] = useState("1");
+  const [editing, setEditing] = useState(false);
+  const [editProofs, setEditProofs] = useState<string[]>([]);
+  const [confirmCancel, setConfirmCancel] = useState(false);
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
@@ -253,6 +270,9 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
   const alive = useRef(true);
   const fitted = useRef(false);
   const mapRef = useRef<HTMLDivElement>(null);
+  const editVersion = useRef<number | null>(null);
+  const lastMode = useRef<SeatingState["mode"] | null>(null);
+  const readTicket = useRef(0);
 
   useEffect(() => {
     alive.current = true;
@@ -263,12 +283,22 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
 
   const load = useCallback(
     async (signal?: AbortSignal) => {
+      const ticket = ++readTicket.current;
       const fresh = await seatRequest<SeatingState>(endpoint, { signal });
-      if (!alive.current || signal?.aborted) return;
+      if (!alive.current || signal?.aborted || ticket !== readTicket.current) return;
       setState(fresh);
       setFailed(false);
+      const changed = lastMode.current !== null && lastMode.current !== fresh.mode;
+      lastMode.current = fresh.mode;
+      if (changed) {
+        setCount(String(fresh.mine?.requestedCount || 1));
+        setSelected(editVersion.current !== null && fresh.mode === "selection" ? fresh.mine?.seats || [] : []);
+        setNotice("座位模式已更新，请按当前模式填写申请。");
+        return;
+      }
       // Seats taken by someone else since the last read drop out of the local selection.
-      setSelected((values) => values.filter((seat) => !fresh.occupancy[seat]));
+      setSelected((values) => values.filter((seat) => !fresh.occupancy[seat] ||
+        (editVersion.current !== null && fresh.mine?.status === "pending" && fresh.mine.seats.includes(seat))));
     },
     [endpoint],
   );
@@ -296,12 +326,26 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
     return () => { clearTimeout(timer); controller.abort(); };
   }, [state?.scheduled, state?.opensAt, state?.serverTime, load]);
 
+  useEffect(() => {
+    if (!state) return;
+    const timer = setInterval(() => {
+      if (document.visibilityState !== "visible" || lock.current) return;
+      void load().catch(cause => {
+        if (!alive.current || !(cause instanceof SeatRequestError) || (cause.status !== 401 && cause.status !== 403)) return;
+        setState(current => current && { ...current, loggedIn: false, canReview: false, mine: null, mineDetails: null, drafts: [],
+          ...(current.mode === "random" ? { occupancy: {}, blockedSeats: [] } : {}) });
+        setEditing(false); setEditProofs([]); editVersion.current = null; setSelected([]); setPhone("");
+      });
+    }, 15000);
+    return () => clearInterval(timer);
+  }, [state, load]);
+
   // Pick the widest zoom that fits once the map first appears; members can still change it.
   useEffect(() => {
-    if (fitted.current || !state?.enabled || !mapRef.current) return;
+    if (fitted.current || !state || (!state.enabled && !editing) || !mapRef.current) return;
     fitted.current = true;
     setZoom(fittedZoom(state.rows, mapRef.current.clientWidth));
-  }, [state]);
+  }, [state, editing]);
 
   function retry() {
     if (lock.current) return;
@@ -334,13 +378,17 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
     );
   }
   if (!state.enabled && !state.canReview && !state.mine) return null;
-  const editable = state.open && state.loggedIn && (!state.mine || state.mine.status === "rejected");
+  const activeEdit = editing && state.mine?.status === "pending" && state.mineDetails?.canEdit === true;
+  const editable = Boolean(activeEdit || (state.open && state.loggedIn && (!state.mine || state.mine.status === "rejected" || state.mine.status === "cancelled" || state.mine.status === "revoked")));
+  const visibleProofs = activeEdit ? editProofs : state.drafts;
   const total = state.rows.reduce((sum, row) => sum + row.count, 0);
+  const randomMode = state.mode === "random";
 
   /** One action at a time; failures keep the form; errors and conflicts (409) refresh the map. */
   async function run(label: string, task: () => Promise<void>, reloadAfter = false) {
     if (lock.current) return;
     lock.current = true;
+    readTicket.current++;
     setBusy(label);
     setError("");
     setNotice("");
@@ -363,13 +411,18 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
   /** Session gone or rights revoked (401/403): drop own drafts, selection and phone; public occupancy may stay. */
   function forget(cause: unknown) {
     if (!alive.current || !(cause instanceof SeatRequestError) || (cause.status !== 401 && cause.status !== 403)) return;
-    setState((current) => current && { ...current, loggedIn: false, canReview: false, mine: null, drafts: [] });
+    setState((current) => current && { ...current, loggedIn: false, canReview: false, mine: null, mineDetails: null, drafts: [],
+      ...(current.mode === "random" ? { occupancy: {}, blockedSeats: [] } : {}) });
+    setEditing(false);
+    setConfirmCancel(false);
+    setEditProofs([]);
+    editVersion.current = null;
     setSelected([]);
     setPhone("");
   }
 
   function toggle(seat: string) {
-    if (!state || lock.current || !editable || state.occupancy[seat]) return;
+    if (!state || lock.current || !editable || (state.occupancy[seat] && !(activeEdit && state.mine?.seats.includes(seat)))) return;
     setError("");
     if (selected.includes(seat)) setSelected(selected.filter((value) => value !== seat));
     else if (selected.length < state.seatLimit) setSelected([...selected, seat]);
@@ -378,8 +431,8 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
 
   function upload(files: File[]) {
     if (!state || !files.length || lock.current) return;
-    if (files.length > state.proofLimit - state.drafts.length) {
-      setError(`最多上传 ${state.proofLimit} 张凭证，还可上传 ${Math.max(0, state.proofLimit - state.drafts.length)} 张`);
+    if (files.length > state.proofLimit - visibleProofs.length) {
+      setError(`最多上传 ${state.proofLimit} 张凭证，还可上传 ${Math.max(0, state.proofLimit - visibleProofs.length)} 张`);
       return;
     }
     if (files.some((file) => !proofTypes.includes(file.type))) {
@@ -397,33 +450,84 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
         const saved = await seatRequest<{ id: string }>(`${endpoint}/proofs`, { method: "POST", body: form });
         if (!alive.current) return;
         setState((current) => current && { ...current, drafts: [...current.drafts, saved.id] });
+        if (activeEdit) setEditProofs(current => [...current, saved.id]);
       }
     });
   }
 
   function remove(proof: string) {
+    if (activeEdit && !state?.drafts.includes(proof)) {
+      setEditProofs(current => current.filter(value => value !== proof));
+      return;
+    }
     void run("正在移除凭证", async () => {
       await seatRequest(`${endpoint}/proofs/${encodeURIComponent(proof)}`, { method: "DELETE" });
       if (alive.current) setState((current) => current && { ...current, drafts: current.drafts.filter((value) => value !== proof) });
+      if (alive.current && activeEdit) setEditProofs(current => current.filter(value => value !== proof));
     });
+  }
+
+  function startEdit() {
+    if (!state?.mine || !state.mineDetails?.canEdit) return;
+    editVersion.current = state.mine.revision;
+    setSelected([...state.mine.seats]);
+    setCount(String(state.mine.requestedCount || state.mine.seats.length || 1));
+    setPhone(state.mineDetails.phone);
+    setEditProofs([...state.mineDetails.proofs, ...state.drafts]);
+    setEditing(true);
+    setError("");
+    setNotice("");
+  }
+
+  function cancelEdit() {
+    editVersion.current = null;
+    setEditing(false);
+    setEditProofs([]);
+    setSelected([]);
+    setPhone("");
+    setError("");
+  }
+
+  function cancelRequest() {
+    if (!state?.mine || state.mine.status !== "pending") return;
+    const { id: requestID, revision } = state.mine;
+    void run("正在取消申请", async () => {
+      const { mine } = await seatRequest<{ mine: SeatRequest }>(endpoint, seatJSON("DELETE", { id: requestID, revision }));
+      if (!alive.current) return;
+      setState(current => current && { ...current, mine, mineDetails: null, drafts: [] });
+      editVersion.current = null;
+      setEditing(false);
+      setEditProofs([]);
+      setConfirmCancel(false);
+      setSelected([]);
+      setPhone("");
+      setNotice("申请已取消，全部座位已释放。");
+    }, true);
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!state || lock.current) return;
     const normalized = phone.trim().replace(/[\s-]/g, "");
-    if (!selected.length) return setError("请先在座位图中选择座位");
+    const requestedCount = Number(count);
+    if (randomMode && (!Number.isInteger(requestedCount) || requestedCount < 1 || requestedCount > state.seatLimit)) return setError(`请输入 1 至 ${state.seatLimit} 个座位`);
+    if (!randomMode && !selected.length) return setError("请先在座位图中选择座位");
     if (!seatPhonePattern.test(normalized)) return setError("请填写有效的手机号");
-    if (!state.drafts.length) return setError("请上传至少 1 张活动参与凭证");
+    if (!visibleProofs.length || visibleProofs.length > state.proofLimit) return setError(`请选择 1 至 ${state.proofLimit} 张活动参与凭证`);
     void run(
-      "正在提交选座",
+      activeEdit ? "正在保存修改" : "正在提交选座",
       async () => {
-        const { mine } = await seatRequest<{ mine: SeatRequest }>(endpoint, seatJSON("POST", { seats: selected, phone: normalized, proofs: state.drafts }));
+        const payload = randomMode ? { mode: "random", count: requestedCount, phone: normalized, proofs: visibleProofs } : { mode: "selection", seats: selected, phone: normalized, proofs: visibleProofs };
+        const { mine } = await seatRequest<{ mine: SeatRequest }>(endpoint, activeEdit
+          ? seatJSON("PATCH", { ...payload, id: state.mine!.id, revision: editVersion.current }) : seatJSON("POST", payload));
         if (!alive.current) return;
         setState((current) => current && { ...current, mine, drafts: [] });
+        editVersion.current = null;
+        setEditing(false);
+        setEditProofs([]);
         setSelected([]);
         setPhone("");
-        setNotice("选座申请已提交，座位进入待审核。");
+        setNotice(activeEdit ? "修改已保存，申请继续等待审核。" : randomMode ? "申请已提交，审核通过后安排座位。" : "选座申请已提交，座位进入待审核。");
       },
       true,
     );
@@ -436,7 +540,7 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
           <p className={styles.kicker}>SEATING</p>
           <h2 id="activity-seating-title">活动选座</h2>
           <p className={styles.meta}>
-            {state.rows.length} 排 · {total} 座 · 每人最多 {state.seatLimit} 座
+            {randomMode ? `随机安排 · 每人最多 ${state.seatLimit} 座` : `${state.rows.length} 排 · ${total} 座 · 每人最多 ${state.seatLimit} 座`}
           </p>
         </div>
         <div className={styles.headActions}>
@@ -445,7 +549,7 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
           </span>
           {state.enabled && (
             <button type="button" className={buttonClass("ghost", "small")} disabled={Boolean(busy)} onClick={() => void run("正在刷新座位", async () => undefined, true)}>
-              刷新座位
+              {randomMode ? "刷新申请状态" : "刷新座位"}
             </button>
           )}
           {state.canReview && (
@@ -457,17 +561,32 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
       </header>
 
       {state.mine && <SeatReceipt mine={state.mine} editable={editable} />}
+      {state.mine?.status === "pending" && state.mineDetails?.canEdit && !activeEdit && (
+        <div><button type="button" className={buttonClass("primary", "small")} disabled={Boolean(busy)} onClick={startEdit}>修改申请</button></div>
+      )}
+      {state.mine?.status === "pending" && (
+        <div className={styles.blockControls}>
+          {confirmCancel ? (
+            <>
+              <span className={styles.blockHint}>取消后全部座位将释放。</span>
+              <button type="button" className={buttonClass("danger", "small")} disabled={Boolean(busy)} onClick={cancelRequest}>确认取消申请</button>
+              <button type="button" className={buttonClass("ghost", "small")} disabled={Boolean(busy)} onClick={() => setConfirmCancel(false)}>返回</button>
+            </>
+          ) : <button type="button" className={buttonClass("ghost", "small")} disabled={Boolean(busy)} onClick={() => setConfirmCancel(true)}>取消选座申请</button>}
+        </div>
+      )}
 
-      {state.enabled && (
+      {(state.enabled || activeEdit) && (!randomMode || state.canReview) && (
         <div className={styles.mapBlock} ref={mapRef}>
           <div className={styles.mapTools}>
             <SeatLegend />
             <SeatZoom zoom={zoom} onChange={setZoom} />
           </div>
-          <SeatMap state={state} selected={selected} editable={editable && !busy} toggle={toggle} zoom={zoom} label="活动座位图" />
+          <SeatMap state={state} selected={selected} editable={!randomMode && editable && !busy} own={activeEdit && !randomMode ? state.mine?.seats : []} toggle={toggle} zoom={zoom} label="活动座位图" />
           <p className={styles.mapHint}>座位图可左右滑动；键盘用方向键在可选座位间移动，空格或回车选择。</p>
         </div>
       )}
+      {randomMode && <p className={styles.note}>当前为随机座位模式，审核通过后系统安排座位，并优先安排同排连坐。</p>}
 
       {state.scheduled && <p className={styles.note} role="status">将于北京时间 {formatDateTime(state.opensAt)} 开放选座。</p>}
       {state.enabled && !state.open && !state.scheduled && <p className={styles.note}>当前活动选座已关闭，不再接收新的申请；已提交的申请仍由管理员处理。</p>}
@@ -480,7 +599,9 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
 
       {editable && (
         <form onSubmit={submit} className={styles.form} noValidate>
-          <SeatSelection selected={selected} limit={state.seatLimit} disabled={Boolean(busy)} onRemove={(seat) => setSelected(selected.filter((value) => value !== seat))} />
+          {randomMode ? (
+            <label className={styles.field}><span>订座数量</span><input type="number" min={1} max={state.seatLimit} step={1} required value={count} onChange={event => setCount(event.currentTarget.value)} disabled={Boolean(busy)} /><small>审核通过后安排座位，尽量让同行人员坐在一起。</small></label>
+          ) : <SeatSelection selected={selected} limit={state.seatLimit} disabled={Boolean(busy)} onRemove={(seat) => setSelected(selected.filter((value) => value !== seat))} />}
           <div className={styles.fields}>
             <label className={styles.field}>
               <span>手机号</span>
@@ -493,20 +614,20 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 multiple
-                disabled={Boolean(busy) || state.drafts.length >= state.proofLimit}
+                disabled={Boolean(busy) || visibleProofs.length >= state.proofLimit}
                 onChange={(event) => {
                   upload(Array.from(event.currentTarget.files || []));
                   event.currentTarget.value = "";
                 }}
               />
               <small>
-                已上传 {state.drafts.length} / {state.proofLimit} 张 · JPEG/PNG/WebP · 单张最多 {state.proofBytes / 1024 / 1024} MB
+                已选择 {visibleProofs.length} / {state.proofLimit} 张 · JPEG/PNG/WebP · 单张最多 {state.proofBytes / 1024 / 1024} MB
               </small>
             </label>
           </div>
-          {state.drafts.length > 0 && (
+          {visibleProofs.length > 0 && (
             <ul className={styles.proofs} aria-label="已上传凭证">
-              {state.drafts.map((proof, index) => (
+              {visibleProofs.map((proof, index) => (
                 <li key={proof}>
                   <a href={`${endpoint}/proofs/${encodeURIComponent(proof)}`} target="_blank" rel="noreferrer">
                     凭证 {index + 1}
@@ -520,9 +641,10 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
           )}
           <div className={styles.submitRow}>
             <button className={buttonClass("primary")} type="submit" disabled={Boolean(busy)}>
-              提交选座
+              {activeEdit ? "保存修改" : "提交选座"}
             </button>
-            <p className={styles.hint}>提交后座位进入待审核；每人每场活动只保留一份待审核或已确认的申请。</p>
+            {activeEdit && <button className={buttonClass("ghost")} type="button" disabled={Boolean(busy)} onClick={cancelEdit}>取消修改</button>}
+            <p className={styles.hint}>{randomMode ? "审核通过后系统安排座位。" : "提交后座位进入待审核。"}每人每场活动只保留一份待审核或已确认的申请。</p>
           </div>
         </form>
       )}

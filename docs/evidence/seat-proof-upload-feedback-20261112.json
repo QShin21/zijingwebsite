@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-12",
+  "version": "0.5.17",
+  "diagnosis": {
+    "missingUploadDomainReportedByUser": true,
+    "userAddedUploadDomain": true,
+    "platformConfigurationIndependentlyVerified": false,
+    "phoneRetest": "user reported the selected proof count became 1 after adding the uploadFile legal domain; tested mini-program version and seat application submission were not verified",
+    "serverLogScope": "aggregate request times, methods and statuses; no image content or personal data read"
+  },
+  "changes": [
+    "distinguish picker cancellation and failure",
+    "show upload feedback alongside the proof field",
+    "retain acknowledged proof IDs if the next read fails",
+    "report upload domain rejection without exposing raw SDK details"
+  ],
+  "checks": {
+    "targetedSyntheticTests": 189,
+    "targetedSyntheticFailures": 0,
+    "nativeStatic": "passed",
+    "typecheck": "passed",
+    "changedFilesLint": "passed",
+    "baselineCommunityLifecycle": "17 failures reproduced on unchanged main: obsolete community and community-joins page expectations"
+  },
+  "wechatUpload": true,
+  "wechatUploadEvidence": "docs/evidence/miniprogram-0517-upload-20261112.json",
+  "productionDeployment": false
+}

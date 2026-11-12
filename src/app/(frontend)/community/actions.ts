@@ -11,7 +11,6 @@ import { applicationError } from "@/lib/application-error";
 import { workflowTransaction } from "@/lib/workflow-transactions";
 import { APIError } from "payload";
 import type { User } from "@/payload-types";
-import { publicationImageLimit } from "@/lib/publication-images";
 import { applicationContactConsentRequiredMessage } from "@/lib/community-status";
 import { beijingScheduleTime, communitySchedule, updateCommunityPostSchedule } from "@/lib/v2/schedule";
 import { reviewShowcase, submitShowcase } from "@/lib/v2/writes";
@@ -78,9 +77,8 @@ async function createCommunityPost(
   const signupImages = signupForm?.enabled === true
     ? JSON.parse(value(form, "signupImages") || "[]")
     : [];
-  if (!Array.isArray(postImages) || !Array.isArray(signupImages) ||
-      postImages.length + signupImages.length > publicationImageLimit)
-    throw new APIError(`同次发布的正文与问卷配图合计最多 ${publicationImageLimit} 张。`, 400);
+  if (!Array.isArray(postImages) || !Array.isArray(signupImages))
+    throw new APIError("请检查配图格式。", 400);
 
   return p.create({
     collection: "community-posts",
@@ -93,6 +91,8 @@ async function createCommunityPost(
       title: value(form, "title"),
       body: value(form, "body"),
       category,
+      contentMode: value(form, "contentMode") || "gallery",
+      contentBlocks: value(form, "contentMode") === "article" ? JSON.parse(value(form, "contentBlocks") || "[]") : null,
       ...communitySchedule({ startAt: beijingScheduleTime(value(form, "startAt")),
         endAt: beijingScheduleTime(value(form, "endAt")), location: value(form, "location") }, category),
       signupForm,
@@ -182,7 +182,7 @@ export async function updateCommunityPostScheduleAction(form: FormData) {
 }
 export async function replaceShowcaseVideoAction(form: FormData) {
   const { p, user } = await current(), id = numeric(form, "id");
-  let uploaded = "", game = 0, message = "本站视频已更新，社团级展示需重新申请复审。";
+  let uploaded = "", game = 0, message = "本站视频已更新，已升推内容会同步更新。";
   try {
     await workflowTransaction(p, user, { webShowcaseWrite: true }, async req => {
       const post = await p.findByID({ collection: "community-showcase", id, req, overrideAccess: false, depth: 0 });
@@ -270,6 +270,34 @@ export async function updateCommunityPostImagesAction(form: FormData) {
   return { ok: true, message: "配图已保存。" };
 }
 
+export async function updateCommunityArticleAction(form: FormData) {
+  const p = await cms();
+  const { user } = await p.auth({ headers: await headers() });
+  const id = numeric(form, "id"), game = numeric(form, "game");
+  let path: string;
+  try {
+    path = await workflowTransaction(p, user, {}, async req => {
+      if (!id || !game || !managesGame(req.user, game)) throw new APIError("当前账号无权编辑此社群内容。", 403);
+      const post = await p.findByID({ collection: "community-posts", id, req, overrideAccess: false, depth: 0,
+        select: { game: true, status: true, updatedAt: true, contentMode: true } });
+      if (Number(post.game) !== game || post.status !== "visible" || post.contentMode !== "article")
+        throw new APIError("内容已隐藏或不属于当前社群。", 404);
+      if (value(form, "revision") !== post.updatedAt) throw new APIError("内容已有更新，请刷新后重新编辑。", 409);
+      let images: unknown, blocks: unknown;
+      try { images = JSON.parse(value(form, "postImages")); blocks = JSON.parse(value(form, "contentBlocks")); }
+      catch { throw new APIError("请检查文章内容。", 400); }
+      if (!Array.isArray(images) || !Array.isArray(blocks)) throw new APIError("请检查文章内容。", 400);
+      await p.update({ collection: "community-posts", id, req, overrideAccess: false,
+        data: { postImages: images, contentMode: "article", contentBlocks: blocks } });
+      const parent = await p.findByID({ collection: "games", id: game, req: { ...req, user: null },
+        user: null, overrideAccess: false, draft: false, depth: 0, select: { slug: true } });
+      return `/community/${parent.slug}/updates/${id}`;
+    });
+  } catch (error) { return { ok: false, message: workflowFeedback(error) }; }
+  revalidatePath(path); revalidatePath("/events"); revalidatePath("/");
+  return { ok: true, message: "文章已保存。" };
+}
+
 export async function reviewShowcaseResultAction(form: FormData) {
   const p = await cms(), { user } = await p.auth({ headers: await headers() });
   if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再审核，已填写的说明保留。" };
@@ -345,7 +373,7 @@ export async function replaceShowcaseVideoResultAction(form: FormData) {
     return { ok: false, message: workflowFeedback(error) };
   }
   const path = `${await gamePath(game)}/showcase/${id}`;
-  const message = "本站视频已更新，社团级展示需重新申请复审。";
+  const message = "本站视频已更新，已升推内容会同步更新。";
   revalidatePath(path);
   revalidatePath(`${await gamePath(game)}/showcase`);
   return { ok: true, message, successHref: path + "?message=" + encodeURIComponent(message) };

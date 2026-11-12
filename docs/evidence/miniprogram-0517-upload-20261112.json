@@ -1,0 +1,26 @@
+{
+  "version": "0.5.17",
+  "appId": "wxccf9f8fc9515ebd5",
+  "uploadedAt": "2026-11-12T22:24:22+08:00",
+  "sourceRevision": "bbcecd86bad605c4cb5d160edef5e175eaead824",
+  "miniProgramTree": "8a6c670ed89111eb241cd68b403e0eb1ab5914f7",
+  "officialTool": "WeChat Developer Tools cli.bat upload",
+  "requestedVersion": "0.5.17",
+  "cliResult": "upload success",
+  "freshReceipt": {
+    "totalBytes": 833321,
+    "sha256": "8b15e45b208e380e5237fe457032e750a410de28d83145a9afcfa31651cfa33e",
+    "containsVersion": false
+  },
+  "staticCheck": {
+    "pages": 29,
+    "files": 199,
+    "bytes": 959284,
+    "domainChecking": true,
+    "nativeDependencies": 0
+  },
+  "platformVersionListIndependentlyChecked": false,
+  "reviewSubmitted": false,
+  "publicReleaseExecuted": false,
+  "realDeviceVerifiedOn0517": false
+}

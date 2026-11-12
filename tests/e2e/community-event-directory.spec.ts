@@ -205,7 +205,7 @@ test("管理员在原详情页给已发布活动和通知补图与换图，原�
   expect((await activity(p, "community-posts", featured, member)).version).toBe(questionnaire.version);
   const approval = (await p.find({ collection: "content-promotions", overrideAccess: true, depth: 0,
     where: { sourceKey: { equals: "community-posts:" + featured } } })).docs[0];
-  expect(approval.status).toBe("needsReview");
+  expect(approval.status).toBe("approved");
 
   await page.goto(href(notice));
   const noticeEditor = await openEditor(page);

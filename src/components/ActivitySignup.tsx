@@ -10,6 +10,7 @@ import { formatAnswer } from "@/lib/questionnaire-model";
 import { formatDate } from "@/lib/rules";
 import { Questionnaire } from "./Questionnaire";
 import { PublicationImages } from "./PublicationImages";
+import { publicationImageInput } from "@/lib/publication-images";
 import type { PublicationImage } from "@/lib/publication-images";
 import styles from "./activity-pages/ApplicationFlow.module.css";
 import { SubmissionSteps } from "./activity-pages/SubmissionSteps";
@@ -608,7 +609,7 @@ export function SignupManager({
                         version: info.version,
                         form: info.form,
                         ...(info.imageRevision
-                          ? { images: info.images ?? [], imageRevision: info.imageRevision }
+                          ? { images: publicationImageInput(info.images ?? []), imageRevision: info.imageRevision }
                           : {}),
                       },
                     );

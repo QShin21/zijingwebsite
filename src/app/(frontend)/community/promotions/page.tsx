@@ -68,8 +68,8 @@ export default async function Promotions({
       : await p.find({ collection: "community-showcase", user: null, overrideAccess: false, depth: 0, limit: 20, sort: "-createdAt", where: { and: showcaseScope }, select: { title: true } });
   const sources = (
     await Promise.all([
-      ...candidates.docs.map((doc) => readPromotionSource(p, "community-posts", doc.id).catch(() => null)),
-      ...showcases.docs.map((doc) => readPromotionSource(p, "community-showcase", doc.id).catch(() => null)),
+      ...candidates.docs.map((doc) => readPromotionSource(p, "community-posts", doc.id, undefined, true).catch(() => null)),
+      ...showcases.docs.map((doc) => readPromotionSource(p, "community-showcase", doc.id, undefined, true).catch(() => null)),
     ])
   ).filter((source) => source !== null);
   const current = sources.length
@@ -86,7 +86,7 @@ export default async function Promotions({
   const byKey = new Map(current.docs.map((row) => [row.sourceKey, row]));
   const recordSources = new Map(
     await Promise.all(
-      records.docs.map(async (row) => [row.id, await readPromotionSource(p, row.sourceCollection, row.sourceID).catch(() => null)] as const),
+      records.docs.map(async (row) => [row.id, await readPromotionSource(p, row.sourceCollection, row.sourceID, undefined, row.status === "approved").catch(() => null)] as const),
     ),
   );
 

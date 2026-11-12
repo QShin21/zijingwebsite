@@ -1,0 +1,44 @@
+{
+  "sourceRevision": "b002cf7dd3d0d5d7189dff664209f22270f6743a",
+  "branch": "main",
+  "deployedAt": "2026-11-12T17:56:37+08:00",
+  "origin": "https://home.thuzijing.top",
+  "releaseDirectory": "/srv/zijingwebsite/releases/seat-lock-20261112-b002cf7",
+  "buildID": "CwRcJ2O2oroQeRGYySeUZ",
+  "previousRevision": "324b46776fd7331eb43bb93196324eb9ecb20875",
+  "migration": "20261112_030000_activity_seat_blocks",
+  "seatCountsBeforeAndAfter": { "requests": 6, "claims": 14, "proofs": 6 },
+  "blocksOnMigration": 0,
+  "backup": {
+    "storage": "server-local",
+    "directory": "/srv/zijingwebsite/backups/seat-lock-20261112-b002cf7",
+    "snapshot": "/srv/zijingwebsite/backups/seat-lock-20261112-b002cf7/database/zijing-2026-11-12T09-56-27.041Z",
+    "rollbackScript": "/srv/zijingwebsite/backups/seat-lock-20261112-b002cf7/rollback.sh",
+    "restoreVerified": false,
+    "initialBackupAttempt": "Directory permission denied; previous website restarted before migration."
+  },
+  "checks": {
+    "isolatedHistoricalSchemaAndSeatingDataPreserved": true,
+    "isolatedSeatBlockAndConcurrencyCases": 2,
+    "miniappSeatBlockLogicCases": 2,
+    "healthAndNativeRoutingCases": 61,
+    "typecheck": "passed in isolated production build",
+    "changedFilesLint": "passed; migration files excluded by repository ESLint configuration",
+    "productionBuild": "passed",
+    "initialSeatSuite": "13 passed; new anonymous request assertion expected 401 but site origin protection correctly returned 403. Assertion corrected and both new cases passed on rerun.",
+    "publicHttp": { "/": 200, "/events": 200, "/health/live": 200, "/health/ready": 200, "/api/miniapp/status": 200, "buildManifest": 200 },
+    "productionAuthenticatedWorkflow": "not exercised",
+    "ci": "skipped"
+  },
+  "miniProgram": {
+    "version": "0.5.7",
+    "sourceTree": "b8512b8ad1221c2fd4b21d7d347021fde406fce3",
+    "uploadedAt": "2026-11-12T17:57:14+08:00",
+    "platformStatus": "developmentVersionUploaded",
+    "officialTool": "WeChat Developer Tools CLI",
+    "sizeBytes": 807611,
+    "reviewSubmitted": false,
+    "publicReleaseExecuted": false,
+    "realDeviceVerified": false
+  }
+}
