@@ -1,4 +1,6 @@
 import { APIError, type Payload, type Where } from "payload";
+import { communityIconRef } from "../community-icons";
+import { canManageCommunityIcon } from "../community-icons-access";
 import type { User } from "@/payload-types";
 import { canPublish, canReviewShowcase, communityIDs, managesGame } from "../rules";
 import { communityVideo } from "../community-video";
@@ -25,9 +27,10 @@ export async function communityCard(p: Payload, viewer: User, row: Row): Promise
   const [upcomingEvents, teams, showcase, cover] = await Promise.all([
     count("community-posts", { and: [{ game: { equals: row.id } }, { status: { equals: "visible" } }, { category: { equals: "event" } }, { or: [{ endAt: { greater_than: now } }, { and: [{ endAt: { exists: false } }, { startAt: { greater_than_equal: now } }] }, { and: [{ startAt: { exists: false } }, { createdAt: { greater_than_equal: cutoff } }] }] }] }),
     count("teams", publicWhere({ and: [{ game: { equals: row.id } }, { archived: { not_equals: true } }, { teamStatus: { not_equals: "archived" } }] })),
-    count("community-showcase", { and: [{ game: { equals: row.id } }, { status: { equals: "visible" } }] }), mediaRef(p, row.cover, community.title),
+    count("community-showcase", { and: [{ game: { equals: row.id } }, { status: { equals: "visible" } }] }),
+    communityIconRef(p, row).then(icon => icon ?? mediaRef(p, row.cover, community.title)),
   ]);
-  return { community, summary: txt(row.summary), cover, demo: row.demo === true, counts: { upcomingEvents, teams, showcase }, viewer: { isOfficer: communityIDs(viewer).includes(String(row.id)) } };
+  return { community, summary: txt(row.summary), cover, demo: row.demo === true, counts: { upcomingEvents, teams, showcase }, viewer: { isOfficer: communityIDs(viewer).includes(String(row.id)), canManageIcon: canManageCommunityIcon(viewer, row.id) } };
 }
 export async function getCommunities(p: Payload, viewer: User | null, input: Input = {}): Promise<Page<CommunityCard>> {
   const actor = await requireViewer(p, viewer), q = String(input.q ?? "").trim();

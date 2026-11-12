@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CommunityGameIcon } from "../CommunityGameIcon";
 import type {
   ApplicationItem,
   ArticleCard,
@@ -243,10 +244,10 @@ export function ArticleTile({ article, headingLevel = 3 }: { article: ArticleCar
 }
 
 /* ---------- community ---------- */
-export function CommunityCover({ title, hue, cover, size = "md" }: { title: string; hue: number; cover?: CommunityCard["cover"]; size?: "md" | "lg" }) {
+export function CommunityCover({ hue, cover, size = "md" }: { title: string; hue: number; cover?: CommunityCard["cover"]; size?: "md" | "lg" }) {
   return (
     <span className={`${styles.cover} ${size === "lg" ? styles.coverLg : ""}`} style={hueStyle(hue)} aria-hidden="true">
-      {cover ? <Img image={cover} alt="" /> : <span className={styles.coverInitial}>{initial(title)}</span>}
+      <span className={styles.gameIcon}><CommunityGameIcon image={cover} /></span>
     </span>
   );
 }
@@ -272,6 +273,7 @@ export function CommunityTile({ card }: { card: CommunityCard }) {
           {card.viewer?.isOfficer && <span className={styles.officer}>我是管理员</span>}
           {card.demo && <DemoPill />}
         </p>
+        {card.viewer?.canManageIcon && <Link className={styles.editIcon} href={`/community/${community.slug}/appearance`}>修改社群图标</Link>}
       </div>
     </article>
   );

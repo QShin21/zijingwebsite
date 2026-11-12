@@ -50,6 +50,7 @@ export interface Config {
     redirects: Redirect;
     audit: Audit;
     'pending-uploads': PendingUpload;
+    'community-icons': CommunityIcon;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -87,6 +88,7 @@ export interface Config {
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     audit: AuditSelect<false> | AuditSelect<true>;
     'pending-uploads': PendingUploadsSelect<false> | PendingUploadsSelect<true>;
+    'community-icons': CommunityIconsSelect<false> | CommunityIconsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1259,6 +1261,29 @@ export interface PendingUpload {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-icons".
+ */
+export interface CommunityIcon {
+  id: number;
+  game: number | Game;
+  source: string;
+  image: string;
+  crop:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  credit?: string | null;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1400,6 +1425,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pending-uploads';
         value: number | PendingUpload;
+      } | null)
+    | ({
+        relationTo: 'community-icons';
+        value: number | CommunityIcon;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -2150,6 +2179,20 @@ export interface PendingUploadsSelect<T extends boolean = true> {
   height?: T;
   expiresAt?: T;
   consumedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "community-icons_select".
+ */
+export interface CommunityIconsSelect<T extends boolean = true> {
+  game?: T;
+  source?: T;
+  image?: T;
+  crop?: T;
+  credit?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -92,7 +92,7 @@ export type FeedItem =
 export type CommunityCard = {
   community: CommunityRef; summary: string | null; cover: ImageRef | null; demo: boolean;
   counts: { upcomingEvents: number; teams: number; showcase: number };
-  viewer: { isOfficer: boolean } | null;
+  viewer: { isOfficer: boolean; canManageIcon?: boolean } | null;
 };
 export type TeamCard = {
   team: TeamRef; summary: string | null; cover: ImageRef | null; demo: boolean; archived: boolean;

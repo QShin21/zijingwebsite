@@ -1,0 +1,78 @@
+{
+  "date": "2026-11-12",
+  "timezone": "Asia/Shanghai",
+  "baseCommit": "51fead45edfe64572be21e2d4834daf5ffd663cc",
+  "targetBranch": "new",
+  "scope": "Community game icons and scoped website upload/crop/edit flow",
+  "environment": {
+    "app": "development",
+    "database": "isolated local PostgreSQL",
+    "server": "local production Next.js build",
+    "buildID": "rLyz0HYyC1dEb_rlYmCEq",
+    "data": "synthetic fixtures only"
+  },
+  "checks": {
+    "migrations": {
+      "result": "passed",
+      "detail": "Full migration chain including 20261112_020000_community_icons applied to a fresh local database"
+    },
+    "typecheck": "passed",
+    "changedFilesLint": "passed",
+    "productionBuild": "passed",
+    "unitAndDatabaseTests": {
+      "result": "passed",
+      "count": 66,
+      "files": [
+        "community-icons.test.ts",
+        "rules.test.ts",
+        "v2-core.test.ts",
+        "v2-read-projections.test.ts",
+        "v2-home-selection.test.ts"
+      ]
+    },
+    "browser": {
+      "result": "passed",
+      "scenarios": 1,
+      "widths": [
+        320,
+        390,
+        768,
+        1440
+      ],
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "editorAxeViolations": 0,
+      "checks": [
+        "five default publisher images decode",
+        "scoped entry visibility",
+        "real upload and server save",
+        "pointer and keyboard crop controls",
+        "512x512 WebP response",
+        "reload and recrop retained source",
+        "responsive editor without horizontal overflow",
+        "revoked permission blocks an already open editor",
+        "unrelated member receives 404 on edit page"
+      ]
+    },
+    "gitDiffCheck": "passed"
+  },
+  "screenshots": {
+    "storage": "checkout-local ignored .data/icon-evidence",
+    "files": [
+      "cards-detail.png",
+      "cards-desktop.png",
+      "editor-light-390.png",
+      "editor-light-1440.png",
+      "editor-dark-390.png",
+      "editor-dark-1440.png"
+    ]
+  },
+  "deployment": {
+    "production": "not performed",
+    "requiredMigration": "20261112_020000_community_icons",
+    "ci": "not run",
+    "miniProgram": "not uploaded or separately validated"
+  }
+}

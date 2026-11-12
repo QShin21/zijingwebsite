@@ -4,8 +4,9 @@ import { getCommunityHeader } from "@/lib/v2";
 import { read } from "@/components/v2/data";
 import { CommunityJoin } from "@/components/CommunityJoin";
 import { CommunityNav } from "@/components/CommunityNav";
+import { CommunityGameIcon } from "@/components/CommunityGameIcon";
 import { DemoPill } from "@/components/v2/ui";
-import { hueStyle, initial } from "@/components/v2/format";
+import { hueStyle } from "@/components/v2/format";
 import styles from "@/components/v2/community.module.css";
 
 /**
@@ -27,7 +28,7 @@ export default async function CommunityLayout({ params, children }: { params: Pr
           </nav>
           <div className={styles.identity}>
             <span className={styles.crest} aria-hidden="true">
-              {initial(community.title)}
+              <CommunityGameIcon image={card.cover} />
             </span>
             <div className={styles.titleBlock}>
               <p className={styles.stats}>
@@ -45,6 +46,7 @@ export default async function CommunityLayout({ params, children }: { params: Pr
             </div>
             <div className={styles.actions}>
               <CommunityJoin slug={community.slug} />
+              {card.viewer?.canManageIcon && <Link className={styles.editIcon} href={`/community/${community.slug}/appearance`}>修改社群图标</Link>}
             </div>
           </div>
           <CommunityNav slug={community.slug} />
