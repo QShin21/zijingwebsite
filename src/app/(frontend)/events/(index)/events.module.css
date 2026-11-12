@@ -4,7 +4,7 @@
 .scopeBar > nav {
   gap: 10px;
   padding: 8px;
-  border: 1px solid var(--z-line-strong);
+  border: 0;
   overflow: auto;
 }
 .scopeBar a {
@@ -13,11 +13,9 @@
   padding: 8px 20px;
   font-family: var(--z-pixel);
   font-size: 17px;
-  background: var(--z-surface);
-  border: 2px solid var(--z-line-strong);
-  box-shadow:
-    inset 0 2px var(--z-control-highlight),
-    0 3px var(--z-secondary-base);
+  background: transparent;
+  border: 1px solid transparent;
+  box-shadow: none;
 }
 .scopeBar a[aria-current] {
   color: var(--z-action-ink);

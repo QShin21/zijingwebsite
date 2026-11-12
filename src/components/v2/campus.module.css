@@ -285,26 +285,99 @@
   box-shadow: none;
 }
 .reel {
-  border: 1px solid var(--z-line-strong);
-  background: color-mix(in srgb, var(--z-raised) 55%, var(--z-paper));
-  overflow: hidden;
+  position: relative;
+  border: 0;
+  background: transparent;
+  min-width: 0;
 }
 .reelHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  padding: 8px 14px;
+  gap: 10px;
+  padding: 0 0 12px;
+  min-height: 54px;
 }
 .reelHead h2 {
+  margin: 0;
+  padding: 8px 28px 8px 14px;
+  background: var(--z-accent);
+  color: var(--z-accent-ink);
   font-size: 24px;
   white-space: nowrap;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 16px),
+    calc(100% - 8px) calc(100% - 16px),
+    calc(100% - 8px) calc(100% - 8px),
+    calc(100% - 16px) calc(100% - 8px),
+    calc(100% - 16px) 100%,
+    0 100%
+  );
+}
+.reelHead .controls span {
+  color: var(--z-ink);
+}
+.reelTrack {
+  display: flex;
+  gap: 5px;
+  padding-top: 8px;
+  flex: 0 0 14px;
+}
+.reelTrack span {
+  flex: 1;
+  height: 6px;
+  background: var(--z-line);
+}
+.reelTrack span[data-active="true"] {
+  background: var(--z-mint);
 }
 .photo {
+  position: relative;
   display: block;
   aspect-ratio: 16/9;
   overflow: hidden;
-  background: var(--z-raised);
+  background: var(--z-media);
+  clip-path: polygon(
+    12px 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 6px) calc(100% - 12px),
+    calc(100% - 6px) calc(100% - 6px),
+    calc(100% - 12px) calc(100% - 6px),
+    calc(100% - 12px) 100%,
+    0 100%,
+    0 12px,
+    6px 12px,
+    6px 6px,
+    12px 6px
+  );
+}
+.photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--z-mint), var(--z-mint)) left 12px top / 28px 3px
+      no-repeat,
+    linear-gradient(var(--z-mint), var(--z-mint)) left top 12px / 3px 28px
+      no-repeat,
+    linear-gradient(var(--z-accent), var(--z-accent)) right 12px bottom / 28px
+      3px no-repeat,
+    linear-gradient(var(--z-accent), var(--z-accent)) right bottom 12px / 3px
+      28px no-repeat;
+}
+.photo:focus-visible {
+  outline-offset: -5px;
+}
+:global(:root[data-z-theme="simple"]) .photo,
+:global(:root[data-z-theme="simple"]) .reelHead h2 {
+  clip-path: none;
+}
+:global(:root[data-z-theme="simple"]) .photo::after {
+  display: none;
 }
 .photo img {
   display: block;
@@ -516,9 +589,6 @@
   }
 }
 
-.reel {
-  position: relative;
-}
 @media (max-width: 380px) {
   .paths strong {
     font-size: 14px;
@@ -709,7 +779,7 @@
   padding: 22px;
   margin: 0;
   border: 1px solid var(--z-line-strong);
-  background: color-mix(in srgb, var(--z-raised) 80%, var(--z-surface));
+  background: var(--z-community-board);
 }
 .gamesCompact .gameIntro {
   display: flex;

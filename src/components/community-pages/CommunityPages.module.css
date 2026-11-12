@@ -343,10 +343,10 @@
   gap: 16px;
   min-width: 0;
   margin: 0;
-  padding: clamp(16px, 3vw, 24px);
-  border: 1px solid var(--z-line);
-  border-radius: var(--z-radius);
-  background: var(--z-surface);
+  padding: 20px 0 4px;
+  border: 0;
+  border-top: 1px solid var(--z-line);
+  background: transparent;
 }
 .formGroup legend {
   padding: 0 6px;

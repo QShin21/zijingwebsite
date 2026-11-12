@@ -351,7 +351,8 @@ export function AvatarStack({ people, total }: { people: { name: string; avatar:
 export function Notice({ tone = "info", children }: { tone?: "info" | "warning" | "success" | "danger"; children: ReactNode }) {
   return (
     <div className={`${styles.notice} ${styles[`notice_${tone}`]}`} role={tone === "danger" ? "alert" : "status"}>
-      {children}
+      <Icon name={tone === "success" ? "check" : tone === "danger" ? "close" : tone === "warning" ? "bell" : "news"} size={20} />
+      <div>{children}</div>
     </div>
   );
 }

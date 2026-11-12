@@ -8,7 +8,6 @@ import {
   type FocusEvent,
 } from "react";
 import { Icon } from "./Icon";
-import { PixelCorners } from "./PixelCorners";
 import styles from "./campus.module.css";
 
 /** One clock for each visible surface; all automatic motion uses the same stop conditions. */
@@ -143,7 +142,6 @@ export function CampusReel({
       aria-label={title}
       aria-roledescription="轮播"
     >
-      <PixelCorners variant="mint" />
       <div className={styles.reelHead}>
         <h2>{title}</h2>
         <div className={styles.controls}>
@@ -188,6 +186,11 @@ export function CampusReel({
           </span>
         )}
       </Link>
+      <div className={styles.reelTrack} aria-hidden="true">
+        {slides.map((item, position) => (
+          <span key={`${item.src}:${position}`} data-active={position === index} />
+        ))}
+      </div>
       {showCaption && (
         <div className={styles.reelCaption}>
           <Link href={slide.href}>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { ArticleDetail, FeedItem, Page } from "@/lib/v2";
-import { ArticleTile, FeedTile, MatchCard } from "./cards";
+import { ArticleTile, FeedTile, MatchCard, NoticeRow } from "./cards";
 import { ButtonLink, CommunityChip, DemoPill, EmptyState, Img, LinkTabs, PageHero, Pager, Wrap } from "./ui";
 import { RichText, Sections } from "./RichText";
 import { empty, memberOnly } from "./copy";
@@ -47,11 +47,21 @@ export function FeedView({
           />
         )}
         {result.docs.length ? (
-          <div className={`${layout.mosaic} ${styles.feed}`}>
-            {result.docs.map((item) => (
-              <FeedTile key={item.item.key} item={item} />
-            ))}
-          </div>
+          kind === "announcements" ? (
+            <ul className={styles.announcements} aria-label="公告列表">
+              {result.docs.map((item) => item.kind === "article" ? (
+                <NoticeRow key={item.item.key} article={item.item} />
+              ) : (
+                <li key={item.item.key}><FeedTile item={item} /></li>
+              ))}
+            </ul>
+          ) : (
+            <div className={`${layout.mosaic} ${styles.feed}`}>
+              {result.docs.map((item) => (
+                <FeedTile key={item.item.key} item={item} />
+              ))}
+            </div>
+          )
         ) : (
           <EmptyState title={kind === "announcements" ? empty.notices.title : empty.feed.title} icon="news">
             {kind === "announcements" ? empty.notices.body : empty.feed.body}

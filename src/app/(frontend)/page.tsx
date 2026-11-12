@@ -259,7 +259,7 @@ function HomeBlock({
           more={{ href: "/community", label: "全部社群" }}
         >
           {home.communities.length ? (
-            <div className={layout.communities}>
+            <div className={`${layout.communities} ${styles.communityList}`}>
               {home.communities.map((card) => (
                 <CommunityTile key={card.community.id} card={card} />
               ))}
@@ -331,9 +331,7 @@ function MemberHome({ home }: { home: HomeResponse }) {
     if (!content) return null;
     return (
       <div className={styles.sectionBlock} data-section={kind}>
-        {["upcoming", "notices", "about"].includes(kind) && (
-          <PixelCorners seed={kind} />
-        )}
+        {["notices", "about"].includes(kind) && <PixelCorners seed={kind} />}
         {content}
       </div>
     );
@@ -399,7 +397,9 @@ function MemberHome({ home }: { home: HomeResponse }) {
                 compact
               >
                 {home.communities?.length ? (
-                  <div className={layout.communities}>
+                  <div
+                    className={`${layout.communities} ${styles.communityList}`}
+                  >
                     {home.communities.map((card) => (
                       <CommunityTile key={card.community.id} card={card} />
                     ))}
@@ -446,7 +446,7 @@ export default async function Home() {
           className={styles.sectionBlock}
           data-section={section.kind}
         >
-          {["upcoming", "open", "notices", "about"].includes(section.kind) && (
+          {["notices", "about"].includes(section.kind) && (
             <PixelCorners
               seed={section.kind}
               variant={section.kind === "notices" ? "coral" : "gold"}

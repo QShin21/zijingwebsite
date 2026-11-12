@@ -92,3 +92,33 @@
   color: var(--z-action);
   font-weight: 800;
 }
+
+.announcements {
+  margin: 0;
+  padding: 4px 24px;
+  list-style: none;
+  background: var(--z-board);
+  border-block: 1px solid var(--z-line-strong);
+}
+.announcements > li {
+  padding-block: 22px;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+}
+.announcements h3 {
+  font-size: 18px;
+}
+.announcements > li > span:first-child {
+  color: var(--z-action);
+}
+@media (max-width: 600px) {
+  .announcements {
+    padding-inline: 16px;
+  }
+  .announcements > li {
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+  .announcements h3 {
+    font-size: 16px;
+  }
+}

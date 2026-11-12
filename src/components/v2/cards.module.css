@@ -529,7 +529,7 @@
   transform: translateY(-2px);
 }
 .team {
-  border-top: 4px solid hsl(var(--hue, 262) 70% 55%);
+  border-top: 2px solid hsl(var(--hue, 262) 70% 55%);
 }
 .teamHead {
   display: flex;
@@ -693,7 +693,7 @@
 
 /* ---------- recruitment ---------- */
 .call {
-  border-top: 4px solid var(--z-action);
+  border-top: 2px solid var(--z-action);
 }
 .call[data-kind="team"] {
   border-top-color: hsl(var(--hue, 262) 70% 55%);
@@ -1097,4 +1097,135 @@
 }
 .notice:active {
   background: var(--z-field);
+}
+
+/* Featured content carries depth; ordinary records rely on type and separators. */
+.stretch {
+  text-decoration: underline;
+  text-decoration-color: var(--z-line-strong);
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+.match_spotlight {
+  background: var(--z-feature);
+  border-color: var(--z-feature-line);
+  box-shadow:
+    inset 0 2px var(--z-control-highlight),
+    0 3px var(--z-secondary-base);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 8px) 0,
+    100% 8px,
+    100% 100%,
+    8px 100%,
+    0 calc(100% - 8px)
+  );
+}
+.match_spotlight:focus-within {
+  box-shadow: inset 0 0 0 3px var(--z-focus);
+}
+.match_spotlight,
+.match_tile {
+  position: relative;
+}
+.match_spotlight .matchArrow,
+.match_tile .matchArrow {
+  display: grid;
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+}
+.match_spotlight .matchFoot,
+.match_tile .matchFoot {
+  padding-right: 40px;
+}
+.match:hover .matchArrow {
+  transform: none;
+}
+.match:active .matchArrow {
+  transform: translateY(2px);
+}
+.article:hover,
+.community:hover,
+.showcase:hover,
+.team:hover,
+.call:hover,
+.application:hover {
+  transform: none;
+}
+.article:active,
+.community:active,
+.showcase:active,
+.team:active,
+.call:active,
+.application:active {
+  background: var(--z-field);
+}
+.notice:hover,
+.receipt:hover {
+  background: var(--z-tint);
+}
+.notice {
+  padding: 16px 4px;
+}
+.noticeDate {
+  font-variant-numeric: tabular-nums;
+  font-size: 18px;
+  color: var(--z-ink);
+}
+.noticeLabel {
+  font-weight: 500;
+}
+.category {
+  border: 0;
+  padding-inline: 0;
+}
+.call {
+  background: var(--z-board);
+  border-top-width: 2px;
+}
+.todo {
+  gap: 0;
+  background: var(--z-board);
+}
+.todo li {
+  border: 0;
+  border-bottom: 1px solid var(--z-line);
+  border-radius: 0;
+  background: transparent;
+}
+.todo li:last-child {
+  border-bottom: 0;
+}
+.todo li:hover,
+.queues li:hover {
+  transform: none;
+  background: var(--z-tint);
+}
+.todo li:active,
+.queues li:active {
+  background: var(--z-field);
+}
+.todoIcon,
+.queueIcon,
+.queues li,
+.steps li > span:first-child {
+  border-radius: 0;
+}
+.application {
+  background: var(--z-board);
+}
+.application:has([data-state="current"]) .next {
+  color: var(--z-ink);
+}
+.membership {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--z-line);
+  border-radius: 0;
+  padding-inline: 0;
+}
+:global(:root[data-z-theme="simple"]) .match_spotlight {
+  clip-path: none;
+  box-shadow: none;
 }

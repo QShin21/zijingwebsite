@@ -42,25 +42,18 @@
   grid-column: 1 / -1;
 }
 .sectionBlock[data-section="upcoming"] > section {
-  padding: 22px;
-  border: 1px solid var(--z-line-strong);
-  background: color-mix(in srgb, var(--z-surface) 50%, var(--z-paper));
+  padding: 0;
 }
 .sectionBlock[data-section="notices"] > section {
   padding: 22px;
   border: 1px solid var(--z-line-strong);
-  background: color-mix(in srgb, var(--z-raised) 75%, var(--z-paper));
+  background: var(--z-notice-board);
 }
 .sectionBlock[data-section="open"] > section {
-  padding: 22px;
-  border: 1px solid var(--z-line-strong);
-  background: var(--z-surface);
+  padding: 0;
 }
 .sectionBlock[data-section="notices"] h2 {
   color: var(--z-ink);
-}
-.sectionBlock[data-section="upcoming"] article {
-  background: color-mix(in srgb, var(--z-surface) 75%, var(--z-paper));
 }
 .sectionBlock[data-section="notices"] ul {
   background: transparent;
@@ -76,6 +69,12 @@
   background: var(--z-surface);
   border: 1px solid var(--z-line-strong);
   padding: 22px;
+}
+.mePanel {
+  background: var(--z-workspace);
+}
+.sectionBlock[data-section="open"] article {
+  background: var(--z-opportunity);
 }
 .joinPanel h2,
 .mePanel h2 {
@@ -150,9 +149,9 @@
   gap: 8px;
   height: 100%;
   padding: 12px;
-  border: 1px solid var(--z-line);
-  background: var(--z-raised);
-  font-size: 13px;
+  border-bottom: 1px solid var(--z-line);
+  background: transparent;
+  font-size: 14px;
   font-weight: 600;
 }
 .quick a:hover {
@@ -204,9 +203,7 @@
   .scheduleGrid {
     grid-template-columns: 1fr;
   }
-  .sectionBlock[data-section="upcoming"] > section,
   .sectionBlock[data-section="notices"] > section,
-  .sectionBlock[data-section="open"] > section,
   .joinPanel,
   .mePanel,
   .about {
@@ -321,8 +318,8 @@
   }
   .campusSide [class*="reelHead"] {
     flex: 0 0 55px;
-    padding: 0 14px;
-    border-bottom: 1px solid var(--z-line-strong);
+    padding: 0 0 12px;
+    border-bottom: 0;
   }
   .homeFlow:has(.featureSection) .campusSide > div > a {
     flex: 1;
@@ -387,18 +384,16 @@
 .memberHome .quick {
   grid-template-columns: 1fr;
   flex: 1;
-  gap: 12px;
+  gap: 0;
 }
 .memberHome .quick a {
-  min-height: 60px;
+  min-height: 54px;
 }
 .greeting {
   color: var(--z-muted);
   margin-top: 12px;
   font-size: 14px;
 }
-.memberHome .sectionBlock[data-section="upcoming"] > section,
-.memberHome .sectionBlock[data-section="open"] > section,
 .memberHome .sectionBlock[data-section="notices"] > section {
   padding: 20px;
 }
@@ -406,9 +401,7 @@
   grid-template-columns: 1fr;
 }
 .memberHome .sectionBlock[data-section="spotlight"] {
-  padding: 20px;
-  border: 1px solid var(--z-line-strong);
-  background: var(--z-surface);
+  padding: 0;
 }
 .memberHome .sectionBlock[data-section="spotlight"] article {
   margin: 0;
@@ -454,10 +447,7 @@
   .memberRow[data-home-row="about"] .about {
     grid-template-columns: 1fr;
   }
-  .memberHome .sectionBlock[data-section="upcoming"] > section,
-  .memberHome .sectionBlock[data-section="open"] > section,
-  .memberHome .sectionBlock[data-section="notices"] > section,
-  .memberHome .sectionBlock[data-section="spotlight"] {
+  .memberHome .sectionBlock[data-section="notices"] > section {
     padding: 20px 16px;
   }
 }
@@ -524,5 +514,75 @@
   .memberHome .scheduleGrid article:nth-child(even) {
     background: var(--z-schedule-right);
     border-color: var(--z-line-strong);
+  }
+}
+
+/* A continuous shortcut menu instead of six nested cards. */
+.quick li:last-child a {
+  border-bottom: 0;
+}
+.quick a {
+  text-decoration: underline;
+  text-decoration-color: var(--z-line-strong);
+  text-underline-offset: 5px;
+}
+.quick a:hover {
+  background: var(--z-tint);
+  color: var(--z-action);
+}
+.quick a:active {
+  background: var(--z-field);
+}
+.quick li:nth-child(-n + 2) a {
+  background: var(--z-raised);
+}
+.quick strong {
+  font-size: 18px;
+}
+.memberHome .mePanel {
+  background: var(--z-board);
+}
+.memberHome .sectionBlock[data-section="upcoming"] > section {
+  height: 100%;
+}
+.memberHome .sectionBlock[data-section="upcoming"] {
+  align-self: stretch;
+}
+.memberHome .sectionBlock[data-section="upcoming"] > section > div:last-child {
+  flex: 1;
+}
+.memberHome .sectionBlock[data-section="upcoming"] > section {
+  display: flex;
+  flex-direction: column;
+}
+/* Community summaries are inventory rows within the shared game board. */
+.communityPanel .communityList {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.communityList article {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  border: 0;
+  border-bottom: 1px solid var(--z-line);
+  background: transparent;
+  box-shadow: none;
+}
+.communityList article > span:first-child {
+  min-height: 64px;
+  height: 64px;
+  aspect-ratio: 1;
+}
+.communityList article > div {
+  padding: 0 14px 12px;
+}
+.communityList article [data-pixel-corners] {
+  display: none;
+}
+.communityList article h3 {
+  font-size: 18px;
+}
+@media (max-width: 600px) {
+  .communityPanel .communityList {
+    grid-template-columns: 1fr;
   }
 }

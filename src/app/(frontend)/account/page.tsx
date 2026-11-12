@@ -45,7 +45,6 @@ export default async function Account({ searchParams }: { searchParams: Search }
           {initial(viewer.name)}
         </span>
         <div className={styles.who}>
-          <p className={styles.kicker}>MY ZIJING · 我的</p>
           <h1>{viewer.name}</h1>
           <p className={styles.roles}>
             {(viewer.roles.length ? viewer.roles : (["member"] as PlatformRole[])).map((role) => (
@@ -59,16 +58,22 @@ export default async function Account({ searchParams }: { searchParams: Search }
         </div>
         <ul className={styles.numbers}>
           <li>
-            <strong>{me.todo.length}</strong>
-            <span>待办</span>
+            <Link href="/account#todo">
+              <strong>{me.todo.length}</strong>
+              <span>待办</span>
+            </Link>
           </li>
           <li>
-            <strong>{me.counts.signups}</strong>
-            <span>报名</span>
+            <Link href="/account?view=signups">
+              <strong>{me.counts.signups}</strong>
+              <span>报名</span>
+            </Link>
           </li>
           <li>
-            <strong>{me.counts.applications}</strong>
-            <span>申请</span>
+            <Link href="/account?view=applications">
+              <strong>{me.counts.applications}</strong>
+              <span>申请</span>
+            </Link>
           </li>
         </ul>
       </div>

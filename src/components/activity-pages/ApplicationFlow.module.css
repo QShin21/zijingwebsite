@@ -21,20 +21,9 @@
   font-size: clamp(20px, 2vw, 24px);
 }
 .kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--z-action);
-  font-size: 13px;
-  font-weight: 900;
-  letter-spacing: 0.1em;
-}
-.kicker::before {
-  content: "";
-  width: 16px;
-  height: 4px;
-  border-radius: 4px;
-  background: var(--z-accent);
+  color: var(--z-muted);
+  font-size: 14px;
+  font-weight: 600;
 }
 .state {
   display: inline-flex;
@@ -112,7 +101,8 @@
   display: grid;
   gap: 12px;
   padding: 16px;
-  border: 1.5px solid var(--z-success-line);
+  border: 0;
+  border-top: 1px solid var(--z-success-line);
   border-radius: var(--z-radius-small);
   background: color-mix(in srgb, var(--z-success-bg) 60%, var(--z-surface));
 }
@@ -177,8 +167,8 @@
 .taskContext,
 .notice {
   padding: 12px 16px;
-  border-left: 4px solid var(--z-action);
-  border-radius: 0 12px 12px 0;
+  border-left: 1px solid var(--z-line-strong);
+  border-radius: 0;
   background: var(--z-tint);
   font-size: 14px;
 }
@@ -224,7 +214,7 @@
   place-items: center;
   width: 24px;
   height: 24px;
-  border-radius: 50%;
+  border-radius: 0;
   background: var(--z-line);
   color: var(--z-ink);
   font-family: var(--z-num);
@@ -248,4 +238,69 @@
   background: var(--z-success-bg);
   color: var(--z-success);
   border: 1px solid var(--z-success-line);
+}
+
+.flow {
+  background: var(--z-board);
+  border-color: var(--z-line-strong);
+}
+.header {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--z-line);
+}
+.state {
+  background: var(--z-disabled-bg);
+  color: var(--z-muted);
+}
+.state[data-open="true"] {
+  background: var(--z-success-bg);
+  color: var(--z-success);
+}
+.compact .receipt {
+  padding: 14px 0 0;
+  background: transparent;
+}
+.compact .receiptMeta > div {
+  grid-template-columns: 76px minmax(0, 1fr);
+}
+
+.utilityBar {
+  padding: 0;
+  background: transparent;
+}
+.utilityBar button,
+.editingHeader button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--z-line-strong);
+  background: var(--z-raised);
+  color: var(--z-ink);
+  box-shadow:
+    inset 0 1px var(--z-control-highlight),
+    0 2px var(--z-secondary-base);
+  cursor: pointer;
+}
+.utilityBar button:not(:disabled):hover,
+.editingHeader button:not(:disabled):hover {
+  border-color: var(--z-action);
+}
+.utilityBar button:not(:disabled):active,
+.editingHeader button:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: inset 0 1px var(--z-control-shadow);
+}
+.utilityBar a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+:global(:root[data-z-theme="simple"]) .utilityBar button,
+:global(:root[data-z-theme="simple"]) .editingHeader button {
+  box-shadow: none;
+}
+
+.utilityBar button:disabled,
+.editingHeader button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+  box-shadow: none;
 }

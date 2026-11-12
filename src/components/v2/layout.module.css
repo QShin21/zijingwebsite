@@ -251,3 +251,47 @@
   border: 1px solid var(--z-line-strong);
   background: var(--z-field);
 }
+
+/* Reading boards and operating panels are distinct from page-level groups. */
+.panel {
+  background: var(--z-board);
+  border-color: var(--z-line);
+}
+.panelTitle a,
+.resultMeta a {
+  color: var(--z-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--z-line-strong);
+  text-underline-offset: 5px;
+}
+.filters {
+  background: var(--z-board);
+  border-color: var(--z-line-strong);
+  gap: 14px;
+}
+.dayGroup > div {
+  border-block: 1px solid var(--z-line);
+  background: var(--z-board);
+  gap: 0;
+}
+.dayGroup article {
+  border: 0;
+  border-bottom: 1px solid var(--z-line);
+  background: transparent;
+  padding: 18px 14px;
+}
+.dayGroup article:last-child {
+  border-bottom: 0;
+}
+.dayGroup article > [data-pixel-corners] {
+  display: none;
+}
+.dayGroup article:hover {
+  background: var(--z-tint);
+}
+.dayGroup article:active {
+  background: var(--z-field);
+}
+.dayHead::after {
+  height: 1px;
+}

@@ -6,23 +6,23 @@
 :root {
   color-scheme: dark;
   --z-pixel: FusionPixel, "PingFang SC", sans-serif;
-  --z-paper: #1b1729;
-  --z-surface: #2b253b;
-  --z-raised: #3a314c;
-  --z-ink: #faf1db;
-  --z-muted: #c8bfd3;
-  --z-action: #e8c77f;
-  --z-action-hover: #f4d99d;
+  --z-paper: #3d2c50;
+  --z-surface: #5a3e70;
+  --z-raised: #705084;
+  --z-ink: #fff7ed;
+  --z-muted: #eee0fa;
+  --z-action: #ffe0a1;
+  --z-action-hover: #ffedc4;
   --z-action-ink: #282032;
-  --z-tint: #39304a;
-  --z-accent: #e8c77f;
+  --z-tint: #805e91;
+  --z-accent: #ffe0a1;
   --z-accent-ink: #282032;
   --z-mint: #a1d9ca;
   --z-coral: #eda895;
-  --z-line: #51465f;
-  --z-line-strong: #80708f;
-  --z-field: #211c30;
-  --z-field-border: #9985ab;
+  --z-line: #9478aa;
+  --z-line-strong: #c0a2d6;
+  --z-field: #30213f;
+  --z-field-border: #c9ace0;
   --z-focus: #b3e7d9;
   --z-success: #a5e2ca;
   --z-success-bg: #233d38;
@@ -36,8 +36,8 @@
   --z-danger: #ffb7ac;
   --z-danger-bg: #4b282f;
   --z-danger-line: #a06871;
-  --z-disabled-bg: #383243;
-  --z-disabled-ink: #bdb3c7;
+  --z-disabled-bg: #624e72;
+  --z-disabled-ink: #ded0eb;
   --z-stage: var(--z-raised);
   --z-stage-2: var(--z-surface);
   --z-stage-ink: var(--z-ink);
@@ -46,16 +46,16 @@
   --z-bar: var(--z-surface);
   --z-header-bg: var(--z-surface);
   --z-header-ink: var(--z-ink);
-  --z-footer-bg: #333d46;
-  --z-footer-muted: #c0cbd0;
-  --z-footer-line: #64737b;
-  --z-schedule-left: #483951;
-  --z-schedule-right: #34324e;
+  --z-footer-bg: #293f59;
+  --z-footer-muted: #d4e5f3;
+  --z-footer-line: #789bb8;
+  --z-schedule-left: #795487;
+  --z-schedule-right: #4e5684;
   --z-footer-ink: var(--z-ink);
   --z-purple: var(--z-action);
   --z-hover: var(--z-action-hover);
   --z-lilac: var(--z-action);
-  --z-media: var(--z-raised);
+  --z-media: #30213f;
   --z-button-base: #8c6b3d;
   --z-radius: 2px;
   --z-radius-small: 0px;
@@ -77,6 +77,7 @@
   );
 }
 :root[data-z-theme="summer"] {
+  --z-media: #10232d;
   --z-footer-bg: #353b4a;
   --z-footer-muted: #c9cbd9;
   --z-footer-line: #74798e;
@@ -84,7 +85,7 @@
   --z-schedule-right: #263c50;
   --z-paper: #14242f;
   --z-surface: #203640;
-  --z-raised: #1a3039;
+  --z-raised: #2b4650;
   --z-ink: #edf5e9;
   --z-muted: #bad0d2;
   --z-action: #9ce0c8;
@@ -95,7 +96,7 @@
   --z-accent-ink: #23302c;
   --z-line: #3e5a66;
   --z-line-strong: #668d99;
-  --z-field: #1a3039;
+  --z-field: #162c35;
   --z-field-border: #7ca3ae;
   --z-focus: #edcc84;
   --z-button-base: #466e64;
@@ -110,13 +111,14 @@
 :root[data-z-theme="winter"],
 :root[data-z-theme="simple"] {
   color-scheme: light;
+  --z-media: #d5d9cf;
   --z-footer-bg: #d7dce5;
   --z-footer-muted: #4f5f66;
   --z-footer-line: #8c9ca8;
   --z-schedule-left: #fffaf0;
   --z-schedule-right: #e2e9e0;
-  --z-paper: #f6f3eb;
-  --z-surface: #eee9de;
+  --z-paper: #eeeae1;
+  --z-surface: #f8f4eb;
   --z-raised: #fffdf8;
   --z-ink: #293c34;
   --z-muted: #5e6d62;
@@ -130,7 +132,7 @@
   --z-coral: #a45946;
   --z-line: #d1d3c5;
   --z-line-strong: #9ba995;
-  --z-field: #fffdf8;
+  --z-field: #e6e4db;
   --z-field-border: #89977f;
   --z-focus: #326252;
   --z-button-base: #1d4537;
@@ -157,12 +159,13 @@
   );
 }
 :root[data-z-theme="simple"] {
+  --z-field: #edf0e9;
   --z-footer-bg: #e5e8e3;
   --z-footer-muted: #536158;
   --z-footer-line: #a5b0a6;
   --z-schedule-left: #fff;
   --z-schedule-right: #edf0eb;
-  --z-paper: #fafaf8;
+  --z-paper: #f5f6f2;
   --z-surface: #fff;
   --z-raised: #f3f4f0;
   --z-ink: #26342e;
@@ -317,4 +320,99 @@ a {
   ::view-transition-new(root) {
     animation: none;
   }
+}
+
+/* Surface roles: background < reading board < featured content; controls stay recessed. */
+:root {
+  --z-workspace: var(--z-surface);
+  --z-notice-board: var(--z-board);
+  --z-community-board: color-mix(
+    in srgb,
+    var(--z-raised) 80%,
+    var(--z-surface)
+  );
+  --z-opportunity: var(--z-board);
+  --z-board: color-mix(in srgb, var(--z-surface) 86%, var(--z-raised));
+  --z-feature: color-mix(in srgb, var(--z-schedule-left) 72%, var(--z-raised));
+  --z-feature-line: color-mix(in srgb, var(--z-line-strong) 75%, var(--z-ink));
+}
+:root:not([data-z-theme]),
+:root[data-z-theme="classic"] {
+  --z-workspace: #514473;
+  --z-notice-board: #70466f;
+  --z-community-board: #355e72;
+  --z-opportunity: #48577c;
+}
+
+.button.light {
+  background: var(--z-raised);
+  border-color: var(--z-line-strong);
+  box-shadow:
+    inset 0 2px var(--z-control-highlight),
+    0 3px var(--z-secondary-base);
+}
+.button.light:not(:disabled):not([aria-disabled="true"]):hover {
+  background: var(--z-tint);
+  box-shadow:
+    inset 0 2px var(--z-control-highlight),
+    0 4px var(--z-secondary-base);
+}
+.button.light:not(:disabled):not([aria-disabled="true"]):active {
+  box-shadow:
+    inset 0 1px var(--z-control-shadow),
+    0 1px var(--z-secondary-base);
+}
+:where(a, button, summary, input, select, textarea, [tabindex]):focus-visible {
+  border-radius: 0;
+}
+:root[data-z-theme="simple"] .button.light {
+  box-shadow: none;
+}
+
+/* Form grouping is typographic; only inputs and choices get recessed slots. */
+.questionnaire .signup-question {
+  padding: 20px 0;
+  border: 0;
+  border-top: 1px solid var(--z-line);
+  background: transparent;
+}
+.questionnaire .signup-question legend {
+  padding: 0 8px 0 0;
+  color: var(--z-ink);
+}
+.questionnaire-option {
+  margin-block: 0;
+  border-color: var(--z-line);
+  background: var(--z-field);
+}
+.questionnaire-option:has(input:checked) {
+  background: var(--z-raised);
+  border-color: var(--z-action);
+  box-shadow: inset 0 1px var(--z-control-highlight);
+}
+.form-feedback {
+  border: 0;
+}
+
+.questionnaire .signup-question {
+  gap: 8px;
+}
+.questionnaire progress,
+.questionnaire-progress progress {
+  appearance: none;
+  border: 0;
+  border-radius: 0;
+  background: var(--z-field);
+}
+.questionnaire progress::-webkit-progress-bar,
+.questionnaire-progress progress::-webkit-progress-bar {
+  background: var(--z-field);
+}
+.questionnaire progress::-webkit-progress-value,
+.questionnaire-progress progress::-webkit-progress-value {
+  background: var(--z-action);
+}
+.questionnaire progress::-moz-progress-bar,
+.questionnaire-progress progress::-moz-progress-bar {
+  background: var(--z-action);
 }

@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { HomeResponse, EventCard } from "../src/lib/v2/types";
 import { CampusHero, HomeReel, PixelGames } from "../src/components/v2/Campus";
 import { ScheduleRunner } from "../src/components/v2/ScheduleRunner";
+import { FeedView } from "../src/components/v2/Feed";
 import { PageHero } from "../src/components/v2/ui";
 import { ScheduleCalendar } from "../src/components/v2/ScheduleCalendar";
 import { SuccessMark } from "../src/components/v2/SuccessMark";
@@ -320,4 +321,50 @@ it("keeps the schedule animation controls outside the heading and initially stat
   expect(html).not.toContain("暂停");
   expect(html).not.toContain("点击 / 空格");
   expect(html).toContain('data-running="false"');
+});
+
+it("keeps announcement destinations, dates, pagination and member access while using list rows", () => {
+  const html = renderToStaticMarkup(
+    createElement(FeedView, {
+      title: "社团公告",
+      description: "合成公告列表",
+      kind: "announcements",
+      signedIn: false,
+      basePath: "/announcements",
+      query: { kind: "announcements" },
+      result: {
+        docs: [
+          {
+            kind: "article",
+            item: {
+              key: "announcement:9",
+              kind: "announcement",
+              ref: { type: "announcement", id: 9, slug: "synthetic" },
+              href: "/announcements/synthetic",
+              label: "公告",
+              title: "合成活动通知",
+              summary: null,
+              cover: null,
+              community: null,
+              publishedAt: "2026-11-13T08:00:00Z",
+              promoted: false,
+              demo: true,
+            },
+          },
+        ],
+        page: 1,
+        totalPages: 2,
+        totalDocs: 2,
+        hasNextPage: true,
+        restricted: true,
+      },
+    }),
+  );
+  expect(html).toContain('aria-label="公告列表"');
+  expect(html).toContain('href="/announcements/synthetic"');
+  expect(html).toContain("合成活动通知");
+  expect(html).toContain("11/13");
+  expect(html).toContain("kind=announcements&amp;page=2");
+  expect(html).toContain("/login?returnTo=%2Fannouncements");
+  expect(html).toContain("演示资料");
 });

@@ -151,3 +151,32 @@
     top: calc(var(--z-topbar) + 20px);
   }
 }
+
+.when {
+  padding-top: 20px;
+  border-top: 1px solid var(--z-line);
+  gap: 16px;
+}
+.main {
+  padding-top: 8px;
+}
+.mainTitle {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--z-line);
+}
+.panel {
+  background: var(--z-board);
+  border: 0;
+  border-top: 1px solid var(--z-line-strong);
+}
+.requirements {
+  padding: 12px 0 0;
+  background: transparent;
+  border-top: 1px solid var(--z-line);
+}
+.manage a {
+  flex: 1 1 auto;
+}
+.aside {
+  scroll-margin-top: calc(var(--z-topbar) + 20px);
+}

@@ -736,3 +736,56 @@ a.communityChip:hover {
 :global(:root[data-z-theme="simple"]) .button {
   box-shadow: none;
 }
+
+/* Clickability is visible at rest; static status surfaces never lift. */
+.tab {
+  border-color: transparent;
+}
+.tab:hover {
+  background: var(--z-surface);
+}
+.tab[aria-current="page"] {
+  border-color: var(--z-accent);
+}
+.tab:active {
+  translate: 0 2px;
+}
+.more,
+.back {
+  min-height: 32px;
+}
+.more:hover,
+.back:hover {
+  color: var(--z-action);
+  text-decoration-color: currentColor;
+}
+.pill {
+  min-height: 24px;
+  padding-inline: 8px;
+  font-size: 12px;
+}
+.chip_neutral {
+  background: transparent;
+  color: var(--z-muted);
+}
+.empty {
+  border: 0;
+  background: var(--z-board);
+  padding-block: 32px;
+}
+.emptyIcon,
+.wallIcon {
+  border-radius: 0;
+  width: 44px;
+  height: 44px;
+}
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 0;
+}
+.notice > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
