@@ -1,0 +1,33 @@
+{
+  "uploadedAt": "2026-11-12T13:46:07.3540687+08:00",
+  "sourceRevision": "7f56e08112da9eac4627c91f1ecef1b971922ed6",
+  "featureRevision": "d3a1446ee0677876cdea2e833a24d479ec047c8f",
+  "miniprogramSourceTree": "c8df241a6ea09a66fe13b4fa07a77141944a679a",
+  "version": "0.5.3",
+  "appid": "wxccf9f8fc9515ebd5",
+  "tool": "微信开发者工具官方 CLI",
+  "uploadResult": "success",
+  "freshOfficialReceipt": true,
+  "officialSize": {
+    "total": 696368,
+    "packages": [
+      {
+        "name": "TOTAL",
+        "size": 696368
+      }
+    ]
+  },
+  "reportedTotalBytes": 696368,
+  "platformStatus": "developmentVersionUploaded",
+  "description": "活动影院式选座、凭证提交与选座审核",
+  "nativePackageCheck": {
+    "pages": 25,
+    "files": 171,
+    "bytes": 798760,
+    "domainChecking": true
+  },
+  "developerToolsCompilationIncluded": true,
+  "realDeviceAcceptanceExecuted": false,
+  "reviewSubmitted": false,
+  "publicReleaseExecuted": false
+}

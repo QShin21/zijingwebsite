@@ -63,7 +63,8 @@
     "packageCheck": "passed",
     "nativePageLogic": "passed with simulated wx APIs",
     "officialWXMLAndWXSSCompilation": "passed",
-    "wechatPlatformUpload": "pending",
+    "wechatPlatformUpload": "developmentVersionUploaded",
+    "wechatUploadRecord": "miniprogram-053-upload-20261112.json",
     "realDeviceAcceptance": "pending"
   }
 }
