@@ -209,3 +209,82 @@ it("小程序管理员从申请打开换座并保留座位数量", async () => {
   expect(sent).toMatchObject({ action: "change-seats", id: 54, revision: 2, status: "confirmed", seats: ["1-2", "1-5"] });
   expect(page.data).toMatchObject({ selected: ["1-2", "1-5"], changeReady: false, notice: "已更换座位，申请状态保持不变。" });
 });
+
+it("小程序随机申请按数量提交和修改，审核前不显示座位", async () => {
+  const proof = "12345678-1234-4567-89ab-1234567890ab";
+  const state = { title: "合成活动", mode: "random", enabled: true, open: true, scheduled: false, loggedIn: true, canReview: false,
+    rows: [{ row: 1, count: 5, offset: 0 }], occupancy: {}, blockedSeats: [], seatLimit: 10, proofLimit: 10, proofBytes: 8388608,
+    drafts: [proof], mine: null as null | { id: number; revision: number; status: string; seats: string[]; requestedCount: number; allocationMode: string },
+    mineDetails: null as null | { phone: string; proofs: string[]; canEdit: boolean } };
+  const http = { request: vi.fn(async (_path: string, options: { method?: string; data?: { action?: string; count: number; phone: string; proofs: string[] } }) => {
+    if (options.method === "POST") {
+      const data = options.data!;
+      state.mine = { id: 77, revision: data.action === "edit" ? 1 : 0, status: "pending", seats: [], requestedCount: data.count, allocationMode: "random" };
+      state.mineDetails = { phone: data.phone, proofs: data.proofs, canEdit: true };
+      state.drafts = [];
+      return { mine: structuredClone(state.mine) };
+    }
+    return structuredClone(state);
+  }) };
+  const modules: Record<string, unknown> = {
+    "../../lib/theme": { page: (value: NativePage) => value }, "../../lib/http": http,
+    "../../lib/files": {}, "../../lib/privacy": {}, "../../lib/navigation": {},
+    "../../lib/session": { user: () => ({ id: 1 }), subscribe: () => () => {} },
+    "../../lib/format": { date: () => "", beijingParts: () => ({}) }, "../../lib/page": { actions: {} },
+  };
+  let page!: NativePage;
+  runInNewContext(readFileSync("miniprogram/src/pages/activity-seating/index.js", "utf8"), {
+    Page: (value: NativePage) => { page = value; }, require: (name: string) => modules[name],
+    wx: { setNavigationBarTitle: vi.fn() }, clearTimeout, setTimeout,
+  });
+  page.setData = values => Object.assign(page.data, values);
+  invoke(page, "onLoad", { kind: "events", id: "1" });
+  await invoke(page, "onShow");
+  expect(page.data).toMatchObject({ mode: "random", rows: [], counts: null });
+  invoke(page, "countInput", { detail: { value: "2" } });
+  invoke(page, "phoneInput", { detail: { value: "13800138000" } });
+  await invoke(page, "submit");
+  expect(page.data).toMatchObject({ mine: { status: "pending", count: 2, seats: "" }, rows: [] });
+  invoke(page, "startEdit");
+  invoke(page, "countInput", { detail: { value: "3" } });
+  await invoke(page, "submit");
+  const writes = http.request.mock.calls.filter(([, options]) => options.method === "POST").map(([, options]) => options.data);
+  expect(writes[0]).toMatchObject({ mode: "random", count: 2, proofs: [proof] });
+  expect(writes[1]).toMatchObject({ action: "edit", id: 77, revision: 0, mode: "random", count: 3 });
+  state.mine = { ...state.mine!, status: "confirmed", seats: ["1-1", "1-2", "1-3"] };
+  state.mineDetails = null;
+  await invoke(page, "refresh");
+  expect(page.data).toMatchObject({ mine: { status: "confirmed", seats: "1排1座、1排2座、1排3座" }, rows: [], counts: null });
+});
+
+it("小程序管理员切换模式并调整随机申请数量", async () => {
+  const doc = { id: 78, revision: 0, status: "pending", allocationMode: "random", requestedCount: 2, seats: [] as string[],
+    memberName: "合成成员", phone: "13800138000", proofs: [], createdAt: "2026-11-12T00:00:00Z" };
+  let mode = "selection";
+  const http = { request: vi.fn(async (_path: string, options: { method?: string; data?: { action?: string; mode?: string; count?: number } }) => {
+    if (options.method === "PUT") mode = options.data!.mode!;
+    if (options.data?.action === "random-count") { doc.requestedCount = options.data.count!; doc.revision++; }
+    return { title: "合成活动", enabled: true, open: true, scheduled: false, mode, docs: [structuredClone(doc)], hasNextPage: false };
+  }) };
+  const modules: Record<string, unknown> = {
+    "../../lib/theme": { page: (value: NativePage) => value }, "../../lib/http": http,
+    "../../lib/files": {}, "../../lib/privacy": {}, "../../lib/navigation": {},
+    "../../lib/session": { user: () => ({ id: 1 }), subscribe: () => () => {} },
+    "../../lib/format": { date: () => "", beijingParts: () => ({}) }, "../../lib/page": { actions: {} },
+  };
+  let page!: NativePage;
+  runInNewContext(readFileSync("miniprogram/src/pages/activity-seating/index.js", "utf8"), {
+    Page: (value: NativePage) => { page = value; }, require: (name: string) => modules[name],
+    wx: { setNavigationBarTitle: vi.fn(), showActionSheet: (options: { success: (answer: { tapIndex: number }) => void }) => options.success({ tapIndex: 3 }) }, clearTimeout, setTimeout,
+  });
+  page.setData = values => Object.assign(page.data, values);
+  invoke(page, "onLoad", { kind: "events", id: "1", mode: "review" });
+  await invoke(page, "onShow");
+  await invoke(page, "setMode", { currentTarget: { dataset: { mode: "random" } } });
+  expect(page.data.mode).toBe("random");
+  expect(page.data.docs).toMatchObject([{ id: 78, seatCount: 2, unassigned: true }]);
+  await invoke(page, "adjustRandomCount", { currentTarget: { dataset: { id: 78 } } });
+  const change = http.request.mock.calls.find(([, options]) => options.data?.action === "random-count")?.[1].data;
+  expect(change).toMatchObject({ action: "random-count", id: 78, revision: 0, count: 4 });
+  expect(page.data.docs).toMatchObject([{ id: 78, seatCount: 4, unassigned: true }]);
+});

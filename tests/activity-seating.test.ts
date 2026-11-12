@@ -74,6 +74,12 @@ async function map(activity: Activity, who?: Actor): Promise<SeatingState> {
 async function put(activity: Activity, who: Actor, enabled: boolean, browserOrigin?: string) {
   return route.PUT(request(activity, "PUT", who, { enabled }, "", browserOrigin), context(activity));
 }
+async function mode(activity: Activity, who: Actor, value: string) {
+  return route.PUT(request(activity, "PUT", who, { mode: value }), context(activity));
+}
+async function randomSubmit(activity: Activity, who: Actor, count: number, proofs: string[]) {
+  return route.POST(request(activity, "POST", who, { mode: "random", count, phone: "13800138000", proofs }), context(activity));
+}
 async function upload(activity: Activity, who: Actor, valid = true) {
   const form = new FormData();
   form.set("file", new File([valid ? picture : "not an image"], "proof.png", { type: "image/png" }));
@@ -87,8 +93,8 @@ async function added(activity: Activity, who: Actor) {
 async function submit(activity: Activity, who: Actor, seats: string[], proofs: string[], phone = "13800138000") {
   return route.POST(request(activity, "POST", who, { seats, proofs, phone }), context(activity));
 }
-async function decide(activity: Activity, who: Actor, id: number, status: string) {
-  return route.POST(request(activity, "POST", who, { action: "review", id, status }), context(activity));
+async function decide(activity: Activity, who: Actor, id: number, status: string, expectedCount?: number) {
+  return route.POST(request(activity, "POST", who, { action: "review", id, status, expectedCount }), context(activity));
 }
 async function edit(activity: Activity, who: Actor, data: unknown) {
   return route.PATCH(request(activity, "PATCH", who, data), context(activity));
@@ -848,4 +854,109 @@ it("管理员换座与成员选座并发时失败的一方保留原座位", asyn
   expect(state.mine?.seats).toEqual(result[0].status === 200 ? ["3-2"] : ["3-1"]);
   expect(state.occupancy["3-2"]).toBe("pending");
   expect(state.occupancy["3-1"]).toBe(result[0].status === 200 ? undefined : "pending");
+});
+
+it("随机模式隐藏座位，修改数量后审核连坐并保留已确认座位", async () => {
+  const activity = await extraActivity("random-mode");
+  const originalProof = await added(activity, first);
+  const original = (await (await submit(activity, first, ["1-1", "1-2"], [originalProof])).json()).mine;
+  expect((await decide(activity, reviewer, original.id, "confirmed")).status).toBe(200);
+  expect((await mode(activity, first, "random")).status).toBe(403);
+  expect((await mode(activity, otherReviewer, "random")).status).toBe(403);
+  expect((await mode(activity, reviewer, "random")).status).toBe(200);
+  expect((await block(activity, reviewer, ["1-3"], true)).status).toBe(200);
+  const publicState = await map(activity);
+  expect(publicState).toMatchObject({ mode: "random", occupancy: {}, blockedSeats: [] });
+  expect((await map(activity, first)).mine).toMatchObject({ status: "confirmed", seats: ["1-1", "1-2"] });
+  expect((await map(activity, reviewer)).occupancy).toMatchObject({ "1-1": "confirmed", "1-3": "confirmed" });
+  const proof = await added(activity, second);
+  expect((await submit(activity, second, ["1-4"], [proof])).status).toBe(409);
+  const response = await randomSubmit(activity, second, 3, [proof]);
+  expect(response.status).toBe(200);
+  const mine = (await response.json()).mine;
+  expect(mine).toMatchObject({ status: "pending", seats: [], requestedCount: 3, allocationMode: "random", revision: 0 });
+  const changed = await edit(activity, second, { id: mine.id, revision: 0, mode: "random", count: 4, phone: "13900139000", proofs: [proof] });
+  expect(changed.status).toBe(200);
+  expect((await changed.json()).mine).toMatchObject({ seats: [], requestedCount: 4, revision: 1 });
+  expect((await route.POST(request(activity, "POST", reviewer, { action: "review", id: mine.id, status: "confirmed", revision: 0 }), context(activity))).status).toBe(409);
+  const reviewList = await review(activity, reviewer);
+  expect((await reviewList.json()).docs).toMatchObject([{ id: mine.id, requestedCount: 4, seats: [], phone: "13900139000" }]);
+  expect((await route.POST(request(activity, "POST", reviewer, { action: "review", id: mine.id, status: "confirmed", revision: 1 }), context(activity))).status).toBe(409);
+  const approved = await route.POST(request(activity, "POST", reviewer, { action: "review", id: mine.id, status: "confirmed", revision: 1, expectedCount: 4 }), context(activity));
+  expect(approved.status).toBe(200);
+  const assigned = (await approved.json()).seats as string[];
+  expect(assigned).toHaveLength(4);
+  const pairs = assigned.map(seat => seat.split("-").map(Number));
+  expect(new Set(pairs.map(pair => pair[0])).size).toBe(1);
+  expect(pairs[3][1] - pairs[0][1]).toBe(3);
+  expect(assigned).not.toContain("1-3");
+  const confirmedState = await map(activity, second);
+  expect(confirmedState).toMatchObject({ mode: "random", occupancy: {}, blockedSeats: [], mine: { status: "confirmed", seats: assigned } });
+  expect((await mode(activity, reviewer, "selection")).status).toBe(200);
+  const selectable = await map(activity, first);
+  expect(selectable.occupancy["1-1"]).toBe("confirmed");
+  for (const seat of assigned) expect(selectable.occupancy[seat]).toBe("confirmed");
+});
+
+it("随机模式切换保留旧申请，待审时可转换申请方式", async () => {
+  const activity = await extraActivity("random-switch", "community-posts");
+  const proof = await added(activity, first);
+  const original = (await (await submit(activity, first, ["3-1", "3-2"], [proof])).json()).mine;
+  expect((await mode(activity, reviewer, "random")).status).toBe(200);
+  const hidden = await map(activity, first);
+  expect(hidden.mine).toMatchObject({ status: "pending", seats: [], requestedCount: 2, allocationMode: "selection" });
+  expect((await map(activity, reviewer)).occupancy).toMatchObject({ "3-1": "pending", "3-2": "pending" });
+  const changed = await edit(activity, first, { id: original.id, revision: 0, mode: "random", count: 3, phone: "13800138000", proofs: [proof] });
+  expect(changed.status).toBe(200);
+  expect((await map(activity, reviewer)).occupancy).not.toHaveProperty("3-1");
+  expect((await mode(activity, reviewer, "selection")).status).toBe(200);
+  expect((await edit(activity, first, { id: original.id, revision: 1, mode: "random", count: 2, phone: "13800138000", proofs: [proof] })).status).toBe(409);
+  const newSeats = await edit(activity, first, { id: original.id, revision: 1, mode: "selection", seats: ["3-3", "3-4"], phone: "13800138000", proofs: [proof] });
+  expect(newSeats.status).toBe(200);
+  expect((await newSeats.json()).mine).toMatchObject({ allocationMode: "selection", requestedCount: 2, seats: ["3-3", "3-4"] });
+});
+
+it("随机待审申请切换模式后仍可分配，座位不足时并发审核保持原申请", async () => {
+  const activity = await extraActivity("random-race");
+  expect((await mode(activity, reviewer, "random")).status).toBe(200);
+  expect((await block(activity, reviewer, seatKeys.filter(seat => !["1-1", "1-2", "1-3"].includes(seat)), true)).status).toBe(200);
+  const p1 = await added(activity, first), p2 = await added(activity, second);
+  const r1 = (await (await randomSubmit(activity, first, 2, [p1])).json()).mine;
+  const r2 = (await (await randomSubmit(activity, second, 2, [p2])).json()).mine;
+  expect((await mode(activity, reviewer, "selection")).status).toBe(200);
+  const result = await Promise.all([decide(activity, reviewer, r1.id, "confirmed", 2), decide(activity, president, r2.id, "confirmed", 2)]);
+  expect(result.map(value => value.status).sort()).toEqual([200, 409]);
+  const one = await map(activity, first), two = await map(activity, second);
+  expect([one.mine?.status, two.mine?.status].sort()).toEqual(["confirmed", "pending"]);
+  const pending = one.mine?.status === "pending" ? one.mine : two.mine;
+  expect(pending).toMatchObject({ seats: [], requestedCount: 2, revision: 0 });
+  const reduced = await route.POST(request(activity, "POST", reviewer, { action: "random-count", id: pending!.id, revision: 0, count: 1 }), context(activity));
+  expect(reduced.status).toBe(200);
+  expect((await route.POST(request(activity, "POST", reviewer, { action: "review", id: pending!.id, revision: 1, status: "confirmed", expectedCount: 1 }), context(activity))).status).toBe(200);
+});
+
+it("模式迁移兼容旧版自主选座的写入格式", async () => {
+  const activity = await extraActivity("mode-legacy-write");
+  const db = (p.db as unknown as PostgresAdapter).pool;
+  const setting = await db.query("SELECT id FROM activity_seatings WHERE event_id = $1", [activity.id]);
+  const inserted = await db.query(`INSERT INTO activity_seat_requests (seating_id, member_id, member_name, phone, seats, status)
+    VALUES ($1, $2, '合成成员', '13800138000', ARRAY['4-1','4-2'], 'pending') RETURNING id, requested_count, allocation_mode`,
+    [setting.rows[0].id, first.user.id]);
+  expect(inserted.rows[0]).toMatchObject({ requested_count: 2, allocation_mode: "selection" });
+  const changed = await db.query("UPDATE activity_seat_requests SET seats = ARRAY['4-1'] WHERE id = $1 RETURNING requested_count", [inserted.rows[0].id]);
+  expect(changed.rows[0].requested_count).toBe(1);
+});
+
+it("随机申请待审核时，活动结束或关闭后仍能修改数量和凭证", async () => {
+  const activity = await extraActivity("random-pending-edit");
+  expect((await mode(activity, reviewer, "random")).status).toBe(200);
+  const firstProof = await added(activity, first);
+  const mine = (await (await randomSubmit(activity, first, 2, [firstProof])).json()).mine;
+  expect((await put(activity, reviewer, false)).status).toBe(200);
+  await p.db.drizzle.execute(sql`UPDATE events SET lifecycle = 'ended' WHERE id = ${activity.id}`);
+  expect((await map(activity, first)).mineDetails?.canEdit).toBe(true);
+  const secondProof = await added(activity, first);
+  const changed = await edit(activity, first, { id: mine.id, revision: 0, mode: "random", count: 3, phone: "13800138000", proofs: [secondProof] });
+  expect(changed.status).toBe(200);
+  expect((await changed.json()).mine).toMatchObject({ status: "pending", seats: [], requestedCount: 3, revision: 1 });
 });

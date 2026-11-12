@@ -12,6 +12,7 @@ import {
   type SeatReview,
   type SeatStatus,
   type SeatingKind,
+  type SeatingMode,
   type SeatingState,
   type SeatingWorkbench,
 } from "@/lib/activity-seating-model";
@@ -58,6 +59,7 @@ export function SeatReviewCard({
   onCancelReject,
   onAdd,
   onChangeSeats,
+  onRandomCount,
   mapCard = false,
 }: {
   review: SeatReview;
@@ -74,9 +76,11 @@ export function SeatReviewCard({
   onCancelReject?: () => void;
   onAdd?: (id: number) => void;
   onChangeSeats?: (id: number) => void;
+  onRandomCount?: (id: number, count: number) => void;
   mapCard?: boolean;
 }) {
   const live = Boolean(onDecide);
+  const unassigned = review.status === "pending" && review.allocationMode === "random" && !review.seats.length;
   const headingID = `seat-review-${mapCard ? "map-" : ""}${review.id}`;
   return (
     <article className={work.record} data-state={recordState[review.status]} aria-labelledby={headingID}>
@@ -97,7 +101,7 @@ export function SeatReviewCard({
           <KeyValues
             items={[
               { label: "手机号", value: live ? <a href={`tel:${review.phone}`}>{review.phone}</a> : review.phone },
-              { label: "座位", value: `${review.seats.length} 个 · ${review.seats.map(seatLabel).join("、")}` },
+              { label: "座位", value: unassigned ? `${review.requestedCount} 个 · 审核通过后安排` : `${review.seats.length} 个 · ${review.seats.map(seatLabel).join("、")}` },
               ...(review.releasedSeats?.length ? [{ label: "已释放座位", value: review.releasedSeats.map(item => seatLabel(item.seat)).join("、") }] : []),
               ...(review.addedSeats?.length ? [{ label: "管理员增加座位", value: review.addedSeats.map(item => seatLabel(item.seat)).join("、") }] : []),
             ]}
@@ -129,7 +133,16 @@ export function SeatReviewCard({
         </div>
         <section className={work.decision} aria-label={`${review.memberName}的审核操作`}>
           <h4>审核决定</h4>
-          {(review.status === "pending" || review.status === "confirmed") && (
+          {unassigned ? (
+            <form className={work.actions} onSubmit={event => {
+              event.preventDefault();
+              const count = Number(new FormData(event.currentTarget).get("count"));
+              if (Number.isInteger(count) && count >= 1 && count <= seatLimit) onRandomCount?.(review.id, count);
+            }}>
+              <label className={styles.field}>申请数量<input key={`${review.id}-${review.revision}`} type="number" name="count" min={1} max={seatLimit} defaultValue={review.requestedCount} required disabled={busy || !onRandomCount} /></label>
+              <button type="submit" className={buttonClass("ghost", "small")} disabled={busy || !onRandomCount}>调整数量</button>
+            </form>
+          ) : (review.status === "pending" || review.status === "confirmed") && (
             <div className={work.actions}>
               <button type="button" className={buttonClass("ghost")} disabled={busy || !onAdd || review.seats.length >= seatLimit} onClick={() => onAdd?.(review.id)}>增加座位</button>
               <button type="button" className={buttonClass("ghost")} disabled={busy || !onChangeSeats} onClick={() => onChangeSeats?.(review.id)}>更换座位</button>
@@ -138,7 +151,7 @@ export function SeatReviewCard({
           )}
           {review.status === "pending" ? (
             <>
-              <p className={styles.hint}>通过后座位锁定；驳回后座位释放给其他成员。已确认的申请可撤销或逐座释放。</p>
+              <p className={styles.hint}>{unassigned ? "通过后系统优先安排同排连坐；座位不足时可调整数量或释放座位。" : "通过后座位锁定；驳回后座位释放给其他成员。已确认的申请可撤销或逐座释放。"}</p>
               <div className={work.actions}>
                 {confirming ? (
                   <>
@@ -349,6 +362,21 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
     });
   }
 
+  function setMode(mode: SeatingMode) {
+    void act("正在切换座位模式", async () => {
+      await seatRequest(endpoint, seatJSON("PUT", { mode }));
+      return mode === "random" ? "已切换为随机座位模式。" : "已切换为自主选座模式。";
+    });
+  }
+
+  function randomCount(record: SeatReview, count: number) {
+    if (record.status !== "pending" || record.allocationMode !== "random" || record.seats.length) return;
+    void act("正在调整申请数量", async () => {
+      await seatRequest(endpoint, seatJSON("POST", { action: "random-count", id: record.id, revision: record.revision, count }));
+      return "申请数量已更新，请重新核对后审核。";
+    });
+  }
+
   function schedule(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const opensAt = openingTime ?? beijingInputTime(data?.opensAt);
@@ -362,8 +390,9 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
   function decide(record: SeatReview, status: SeatDecision, seat?: string) {
     if (record.status !== "pending") return;
     void act(status === "confirmed" ? "正在通过申请" : "正在驳回申请", async () => {
-      await seatRequest(endpoint, seatJSON("POST", { action: "review", id: record.id, status, revision: record.revision }));
-      return status === "confirmed" ? "已通过并锁定座位。" : "已驳回并释放座位。";
+      await seatRequest(endpoint, seatJSON("POST", { action: "review", id: record.id, status, revision: record.revision,
+        ...(record.allocationMode === "random" && !record.seats.length ? { expectedCount: record.requestedCount } : {}) }));
+      return status === "confirmed" ? (record.allocationMode === "random" && !record.seats.length ? "已通过并安排座位。" : "已通过并锁定座位。") : "已驳回并释放座位。";
     }, seat);
   }
 
@@ -503,6 +532,11 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
                 : "开启后成员可在活动页选择 1–10 个座位并提交手机号与凭证；未公开的活动不能开启。"}
             </p>
             {data.scheduled && <p>将于北京时间 {formatDateTime(data.opensAt)} 开放选座。</p>}
+            <p>当前模式：{data.mode === "random" ? "随机安排" : "自主选座"}。已确认的座位及已有申请保持不变。</p>
+            <div className={work.actions} role="group" aria-label="座位模式">
+              <button type="button" className={buttonClass(data.mode === "selection" ? "primary" : "ghost", "small")} disabled={disabled || data.mode === "selection"} onClick={() => setMode("selection")}>自主选座</button>
+              <button type="button" className={buttonClass(data.mode === "random" ? "primary" : "ghost", "small")} disabled={disabled || data.mode === "random"} onClick={() => setMode("random")}>随机座位</button>
+            </div>
             {data.enabled && layout && !layout.open && !data.scheduled && <p>活动已结束、取消或暂未公开，成员端当前不能提交新申请。</p>}
             <form className={styles.schedule} onSubmit={schedule}>
               <label className={styles.field}>定时开放（北京时间）
@@ -632,6 +666,7 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
                   onCancelReject={() => setConfirming(null)}
                   onAdd={request => { void startAssignment(request, "list", "add"); }}
                   onChangeSeats={request => { void startAssignment(request, "list", "change"); }}
+                  onRandomCount={(_request, count) => randomCount(review, count)}
                 />
                 {additionPanel(review, "list")}
                 </Fragment>

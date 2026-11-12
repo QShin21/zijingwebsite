@@ -2,6 +2,7 @@
 export type SeatingKind = "events" | "community-posts";
 export type SeatStatus = "pending" | "confirmed" | "rejected" | "cancelled" | "revoked";
 export type SeatDecision = "confirmed" | "rejected";
+export type SeatingMode = "selection" | "random";
 export const seatLimit = 10;
 export const seatProofLimit = 10;
 export const seatProofBytes = 8 * 1024 * 1024;
@@ -42,6 +43,8 @@ export const seatProofID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]
 export type SeatRequest = {
   id: number;
   seats: string[];
+  requestedCount: number;
+  allocationMode: SeatingMode;
   status: SeatStatus;
   revision: number;
   createdAt: string;
@@ -67,6 +70,7 @@ export type SeatAssignment = {
 
 export type SeatingAvailability = {
   enabled: boolean;
+  mode: SeatingMode;
   open: boolean;
   scheduled: boolean;
   opensAt: string | null;

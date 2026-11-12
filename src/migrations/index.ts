@@ -5,6 +5,7 @@ import * as activitySeatCancellation from "./20261112_050000_activity_seat_cance
 import * as activitySeatRevocation from "./20261112_060000_activity_seat_revocation";
 import * as activitySeatRelease from "./20261112_070000_activity_seat_release";
 import * as activitySeatAddition from "./20261112_080000_activity_seat_addition";
+import * as activitySeatModes from "./20261112_090000_activity_seat_modes";
 import * as activitySeating from "./20261112_000000_activity_seating";
 import * as activitySeatingSchedule from "./20261112_010000_activity_seating_schedule";
 import * as v2HomeSections from "./20261112_000000_v2_home_sections";
@@ -92,4 +93,5 @@ export const migrations = [
   { up: activitySeatRevocation.up, down: activitySeatRevocation.down, name: "20261112_060000_activity_seat_revocation" },
   { up: activitySeatRelease.up, down: activitySeatRelease.down, name: "20261112_070000_activity_seat_release" },
   { up: activitySeatAddition.up, down: activitySeatAddition.down, name: "20261112_080000_activity_seat_addition" },
+  { up: activitySeatModes.up, down: activitySeatModes.down, name: "20261112_090000_activity_seat_modes" },
 ];
