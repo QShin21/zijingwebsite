@@ -6,6 +6,7 @@ import { eventState, registrationState, safeURL, managesGame } from "../rules";
 import { promotedContent } from "../content-promotions";
 import { publicationImages } from "../publication-images";
 import { controlledImageRef } from "./images";
+import { projectPublicationContent } from "../publication-content";
 import { refreshViewer, requireViewer } from "./identity";
 import { communityRef, teamRef, mediaRef, txt, rel, iso, readRows, findRow, publicWhere, paginate, safeBody, notFound, type Row, type Input } from "./shared";
 import type { EventCard, EventDetail, Page, SignupSummary } from "./types";
@@ -103,13 +104,14 @@ export async function getEventDetail(p: Payload, viewer: User | null, input: Inp
   if (!source) notFound();
   if (source === "community") viewer = await requireViewer(p, viewer);
   if (source === "community" && !rel(input.idOrSlug ?? input.id)) notFound();
-  const row = await findRow(p, source === "club" ? "events" : "community-posts", input.idOrSlug ?? input.id, eventFields, null, source === "club" ? publicWhere() : { and: [{ status: { equals: "visible" } }, { category: { equals: "event" } }] });
+  const row = await findRow(p, source === "club" ? "events" : "community-posts", input.idOrSlug ?? input.id, source === "community" ? [...eventFields, "contentMode", "contentBlocks"] : eventFields, null, source === "club" ? publicWhere() : { and: [{ status: { equals: "visible" } }, { category: { equals: "event" } }] });
   if (!row || source === "community" && !await communityRef(p, row.game)) notFound();
   const submissions = await submittedKeys(p, viewer), event = await eventCard(p, row, source, viewer, submissions);
   const permissions = viewer ? await activity(p, source === "club" ? "events" : "community-posts", row.id, viewer).catch(() => null) : null;
-  const images = publicationImages(row.postImages).map((image, index) => controlledImageRef(source === "club" ? "event-post" : "community-post", row.id, index, image.source, image.alt)).filter((image): image is NonNullable<typeof image> => image !== null);
+  const indexedImages = publicationImages(row.postImages).map((image, index) => controlledImageRef(source === "club" ? "event-post" : "community-post", row.id, index, image.source, image.alt));
+  const images = indexedImages.filter((image): image is NonNullable<typeof image> => image !== null);
   // Related content follows member-only article rules, even on a public event page.
   const relatedRows = viewer && source === "club" ? await Promise.all([readRows(p, "news", ["title", "slug", "summary", "cover", "publishedAt", "type", "game", "demo"], publicWhere({ event: { equals: row.id } }), null, 12), readRows(p, "albums", ["title", "slug", "summary", "cover", "publishedAt", "date", "game", "demo"], publicWhere({ event: { equals: row.id } }), null, 12)]) : [[], []];
   const { articleCard } = await import("./feed");
-  return { event, body: source === "club" ? safeBody(row.body) : null, bodyText: source === "community" ? txt(row.body) : null, images, registration: source === "club" ? { url: safeURL(row.registrationURL) ? String(row.registrationURL) : null, channelText: txt(row.channelText), qrCode: await mediaRef(p, row.qrCode), contact: txt(row.contact), requirements: txt(row.requirements), checkedAt: iso(row.channelCheckedAt) } : null, related: { news: await Promise.all(relatedRows[0].map(row => articleCard(p, row, "news"))), albums: await Promise.all(relatedRows[1].map(row => articleCard(p, row, "album"))) }, viewer: viewer ? { canManageSignup: permissions?.manager ?? false, canViewSignups: permissions?.canView ?? false, canExportSignups: permissions?.canExport ?? false, canRequestPromotion: source === "community" && managesGame(viewer, rel(row.game)) } : null };
+  return { event, body: source === "club" ? safeBody(row.body) : null, bodyText: source === "community" ? txt(row.body) : null, images, presentation: source === "community" ? projectPublicationContent(row.contentMode, row.contentBlocks, indexedImages) : null, registration: source === "club" ? { url: safeURL(row.registrationURL) ? String(row.registrationURL) : null, channelText: txt(row.channelText), qrCode: await mediaRef(p, row.qrCode), contact: txt(row.contact), requirements: txt(row.requirements), checkedAt: iso(row.channelCheckedAt) } : null, related: { news: await Promise.all(relatedRows[0].map(row => articleCard(p, row, "news"))), albums: await Promise.all(relatedRows[1].map(row => articleCard(p, row, "album"))) }, viewer: viewer ? { canManageSignup: permissions?.manager ?? false, canViewSignups: permissions?.canView ?? false, canExportSignups: permissions?.canExport ?? false, canRequestPromotion: source === "community" && managesGame(viewer, rel(row.game)) } : null };
 }

@@ -21,6 +21,6 @@ export async function reviewStaffApplicationAction(form: FormData) {
   try {
     const saved = await changeStaffApplication(p, user, batch, "review", { id: Number(value("id")), revision: value("revision"), status: value("status"), feedback: value("feedback"), reviewNotes: value("reviewNotes") });
     revalidatePath("/staff/manage");
-    return { ok: true, revision: saved.updatedAt, message: "申请处理结果已保存。录用状态未授予平台角色。" };
+    return { ok: true, revision: saved.updatedAt, message: "申请处理结果已保存。普通成员录用后自动获得骨干身份。" };
   } catch (error) { return { ok: false, message: workflowFeedback(error) }; }
 }

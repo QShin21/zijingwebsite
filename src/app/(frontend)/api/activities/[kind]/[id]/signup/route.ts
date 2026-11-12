@@ -16,6 +16,11 @@ import {
 } from "@/lib/activity-signups";
 import { applicationError } from "@/lib/application-error";
 import { publicationImageRevision } from "@/lib/publication-image-storage";
+import { publicationImageRequestBytes } from "@/lib/publication-images";
+import { boundedBody } from "@/lib/site-request";
+import { publicationAssetData } from "@/lib/v2/images";
+import type { PublicationImage } from "@/lib/publication-images";
+import type { Payload } from "payload";
 import {
   responseExportFilename,
   responseExportLayout,
@@ -31,6 +36,9 @@ const reply = (data: unknown, status = 200) =>
       "X-Content-Type-Options": "nosniff",
     },
   });
+async function withImagePreviews(p: Payload, images: PublicationImage[]) {
+  return Promise.all(images.map(async image => ({ ...image, preview: await publicationAssetData(p, image.source) ?? "" })));
+}
 async function run(
   request: Request,
   context: Context,
@@ -140,11 +148,11 @@ async function run(
       }
       return reply({
         ...(includeImages && mode === "manage"
-          ? { images: value.images, imageRevision: publicationImageRevision(value.images) }
+          ? { images: await withImagePreviews(p, value.images), imageRevision: publicationImageRevision(value.images) }
           : includeImages && !mode && value.form.enabled
-            ? { images: value.images.filter(({ questionId }) =>
+            ? { images: await withImagePreviews(p, value.images.filter(({ questionId }) =>
                 !questionId || value.form.questions.some(({ id }) => id === questionId),
-              ) }
+              )) }
             : {}),
         title: value.doc.title,
         form: value.form,
@@ -162,15 +170,13 @@ async function run(
     }
     const editImages = method === "PUT" && includeImages;
     if (editImages && !user) return reply({ error: "请先登录可用账号" }, 401);
-    const limit = (editImages ? 12 : 1) * 1024 * 1024;
+    const limit = editImages ? publicationImageRequestBytes : 1024 * 1024;
     if (
       !request.headers.get("content-type")?.startsWith("application/json") ||
       Number(request.headers.get("content-length")) > limit
     )
       return reply({ error: "请求格式不正确或内容过长" }, 400);
-    const raw = await request.text();
-    if (Buffer.byteLength(raw) > limit)
-      return reply({ error: "内容过长" }, 400);
+    const raw = (await boundedBody(request, limit)).toString("utf8");
     let data;
     try {
       data = JSON.parse(raw);
@@ -179,12 +185,12 @@ async function run(
     }
     if (!data || typeof data !== "object" || Array.isArray(data))
       return reply({ error: "请求格式不正确" }, 400);
-    if (method === "PUT")
-      return reply(
-        await saveSignupForm(p, kind, id, user, data.version, data.form,
+    if (method === "PUT") {
+      const saved = await saveSignupForm(p, kind, id, user, data.version, data.form,
           editImages ? { revision: data.imageRevision, images: data.images } : undefined,
-        ),
-      );
+        );
+      return reply(saved.images ? { ...saved, images: await withImagePreviews(p, saved.images) } : saved);
+    }
     if (method === "PATCH" || (method === "POST" && data.action === "edit"))
       return reply({
         signup: await updateSignupAnswers(p, kind, id, user, data.version, data.revision, data.answers),

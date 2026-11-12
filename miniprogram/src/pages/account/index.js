@@ -8,7 +8,7 @@ const v2 = require('../../lib/v2');
 const navigation = require('../../lib/navigation');
 const config = require('../../config');
 const { actions } = require('../../lib/page');
-const roleLabels = { president: '社长', vicePresident: '副社长', backbone: '社团骨干', communityAdmin: '社群管理员', member: '社团成员' };
+const roleLabels = { president: '社长', vicePresident: '副社长', backbone: '社团骨干', communityAdmin: '社群管理员', honoraryBackbone: '荣誉骨干', member: '社团成员' };
 
 function profile(user) {
   return { user, initial: user ? v2.initial(user.name) : 'Z',

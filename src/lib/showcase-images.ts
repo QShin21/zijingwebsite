@@ -1,8 +1,9 @@
 import sharp from "sharp";
-export async function normalizeShowcaseImage(value: unknown, options: { limitInputPixels?: number } = {}) {
-  if (typeof value !== "string" || value.length > 2_800_000 || !/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(value)) throw new Error("图片格式无效");
+export async function normalizeShowcaseImage(value: unknown, options: { limitInputPixels?: number; maxInputBytes?: number } = {}) {
+  const maxInputBytes = options.maxInputBytes ?? 2 * 1024 * 1024;
+  if (typeof value !== "string" || value.length > 23 + Math.ceil(maxInputBytes / 3) * 4 || !/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(value)) throw new Error("图片格式无效");
   const bytes = Buffer.from(value.split(",")[1], "base64");
-  if (!bytes.length || bytes.length > 2 * 1024 * 1024) throw new Error("单张图片不得超过 2 MB");
+  if (!bytes.length || bytes.length > maxInputBytes) throw new Error("图片大小超出限制");
   const result = await normalizeImageBytes(bytes, options);
   return `data:image/webp;base64,${result.toString("base64")}`;
 }

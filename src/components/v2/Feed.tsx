@@ -4,6 +4,7 @@ import type { ArticleDetail, FeedItem, Page } from "@/lib/v2";
 import { ArticleTile, FeedTile, MatchCard } from "./cards";
 import { ButtonLink, CommunityChip, DemoPill, EmptyState, Img, LinkTabs, PageHero, Pager, Wrap } from "./ui";
 import { RichText, Sections } from "./RichText";
+import { PublicationPresentation } from "./PublicationPresentation";
 import { empty, memberOnly } from "./copy";
 import { formatDate } from "./format";
 import layout from "./layout.module.css";
@@ -112,13 +113,13 @@ export function ArticleView({
       <Wrap width="reading" className={layout.pageBody}>
         {notice}
         <article className={styles.reading}>
-          {article.cover && (
+          {article.cover && !detail.presentation && !detail.images.some(image => image.src === article.cover?.src) && (
             <figure className={styles.cover}>
               <Img image={article.cover} eager sizes="(min-width: 800px) 720px, 100vw" />
             </figure>
           )}
-          <RichText body={detail.body} text={detail.bodyText} />
-          {detail.images.length > 0 && (
+          {detail.presentation ? <PublicationPresentation presentation={detail.presentation} images={detail.images} text={detail.bodyText} /> : <RichText body={detail.body} text={detail.bodyText} />}
+          {!detail.presentation && detail.images.length > 0 && (
             <div className={styles.images}>
               {detail.images.map((image, index) => (
                 <figure key={`${image.src}-${index}`}>

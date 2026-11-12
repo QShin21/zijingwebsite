@@ -2,12 +2,13 @@
 export type ID = number;
 export type ISODateTime = string;
 export type BeijingDate = string;
-export type PlatformRole = "president" | "vicePresident" | "backbone" | "communityAdmin" | "member";
+export type PlatformRole = "president" | "vicePresident" | "backbone" | "communityAdmin" | "honoraryBackbone" | "member";
 export type ErrorCode = "AUTH_REQUIRED" | "FORBIDDEN" | "NOT_FOUND" | "VALIDATION" | "CONFLICT"
   | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA" | "RATE_LIMITED" | "UNAVAILABLE";
 
 export type Page<T> = { docs: T[]; page: number; totalPages: number; totalDocs: number; hasNextPage: boolean };
 export type ImageRef = { src: string; width: number | null; height: number | null; alt: string };
+export type PublicationPresentation = { mode: "gallery" | "article"; blocks: ({ type: "text"; text: string } | { type: "image"; image: ImageRef })[] };
 export type CommunityRef = { id: ID; slug: string; title: string; hue: number }; // hue = (id * 137) % 360
 export type TeamRef = { id: ID; slug: string; title: string; community: CommunityRef | null };
 export type FixedPageKey = "about" | "contact" | "privacy" | "join" | "join-members" | "join-teams" | "join-staff";
@@ -165,6 +166,7 @@ export type HomeResponse = {
 export type EventDetail = {
   event: EventCard;
   body: unknown | null; bodyText: string | null; images: ImageRef[];
+  presentation?: PublicationPresentation | null;
   registration: { url: string | null; channelText: string | null; qrCode: ImageRef | null; contact: string | null;
     requirements: string | null; checkedAt: ISODateTime | null } | null; // 仅社团活动
   related: { news: ArticleCard[]; albums: ArticleCard[] };              // 仅社团活动
@@ -173,6 +175,7 @@ export type EventDetail = {
 
 export type ArticleDetail = {
   article: ArticleCard; body: unknown | null; bodyText: string | null; images: ImageRef[];
+  presentation?: PublicationPresentation | null;
   sections: { id: string; heading: string; text: string }[];
   photos: Page<{ image: ImageRef; caption: string | null }> | null; // album 分页，limit 12
   related: { event: EventCard | null; team: TeamRef | null };
@@ -209,7 +212,7 @@ export type RecruitmentCenter = {
   mine: ApplicationItem[] | null;           // 成员：本人骨干与入队申请；访客 null
 };
 
-export type UploadReceipt = { id: ID; purpose: "showcase"; width: number; height: number; expiresAt: ISODateTime; preview: ImageRef };
+export type UploadReceipt = { id: ID; purpose: "showcase" | "publication"; width: number; height: number; expiresAt: ISODateTime; preview: ImageRef };
 
 export type MeResponse = {
   viewer: Viewer;

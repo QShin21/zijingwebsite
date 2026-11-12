@@ -32,6 +32,7 @@ beforeAll(async () => {
 });
 beforeEach(async () => {
   vice = await p.update({ collection: "users", id: vice.id, user: president, overrideAccess: false, data: { roles: ["vicePresident"], accountStatus: "active" } });
+  member = await p.update({ collection: "users", id: member.id, user: president, overrideAccess: false, data: { roles: ["member"], department: null } });
   batch = await create();
 });
 afterEach(async () => {
@@ -97,7 +98,7 @@ it("开放期间修改、撤回及重提保留同一ID与历史，截止后仅�
   await expect(changeStaffApplication(p, member, batch.id, "withdraw", { revision: current.updatedAt })).rejects.toThrow("截止");
   expect((await ownStaffApplication(p, member, batch.id))?.id).toBe(id);
 });
-it("明确退回反馈、内部备注分开；录用不改变角色，任免仍仅社长", async () => {
+it("明确退回反馈、内部备注分开；录用普通成员自动授予骨干身份", async () => {
   let current = await apply();
   await expect(changeStaffApplication(p, vice, batch.id, "review", { id: current.id, revision: current.updatedAt, status: "returned" })).rejects.toThrow();
   await changeStaffApplication(p, vice, batch.id, "review", { id: current.id, revision: current.updatedAt, status: "returned", feedback: "请补充合成时段", reviewNotes: "管理层合成内部备注" });
@@ -105,9 +106,15 @@ it("明确退回反馈、内部备注分开；录用不改变角色，任免仍�
   current = await changeStaffApplication(p, member, batch.id, "edit", { revision: own!.updatedAt, version: formVersion(defaultStaffForm), answers });
   current = await changeStaffApplication(p, vice, batch.id, "review", { id: current.id, revision: current.updatedAt, status: "accepted", feedback: "合成录用结果" });
   expect(current.status).toBe("accepted");
-  expect((await p.findByID({ collection: "users", id: member.id, overrideAccess: true })).roles).toEqual(["member"]);
+  expect((await p.findByID({ collection: "users", id: member.id, overrideAccess: true })).roles).toEqual(["backbone"]);
   expect(canAppoint(vice)).toBe(false); expect(canAppoint(president)).toBe(true);
   await expect(changeStaffApplication(p, member, batch.id, "edit", { revision: current.updatedAt, version: formVersion(defaultStaffForm), answers })).rejects.toThrow("最终结果");
+});
+it.each(["communityAdmin", "backbone"] as const)("录用已有 %s 身份的申请人保留现有身份", async role => {
+  const applicant = role === "communityAdmin" ? admin : backbone;
+  const current = await apply(applicant);
+  await changeStaffApplication(p, vice, batch.id, "review", { id: current.id, revision: current.updatedAt, status: "accepted" });
+  expect((await p.findByID({ collection: "users", id: applicant.id, overrideAccess: true })).roles).toEqual([role]);
 });
 it.each(["accepted", "rejected"] as const)("最终 %s 仅可保留结果或带反馈明确退回，不能静默进入选拔解锁", async status => {
   let current = await apply();
@@ -125,7 +132,7 @@ it.each(["accepted", "rejected"] as const)("最终 %s 仅可保留结果或带�
   expect(current.feedback).toBe("请补充合成资料");
   current = await changeStaffApplication(p, member, batch.id, "edit", { revision: current.updatedAt, version: current.formVersion, answers: { ...answers, time: "合成补充时段" } });
   expect(current.id).toBe(final.id); expect(current.status).toBe("submitted");
-  expect((await p.findByID({ collection: "users", id: member.id, overrideAccess: true })).roles).toEqual(["member"]);
+  expect((await p.findByID({ collection: "users", id: member.id, overrideAccess: true })).roles).toEqual([status === "accepted" ? "backbone" : "member"]);
 });
 it("社群管理员、骨干和其他申请人不能读取/导出他人候选资料", async () => {
   const current = await apply();

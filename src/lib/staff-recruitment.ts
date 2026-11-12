@@ -107,6 +107,15 @@ export async function changeStaffApplication(p: Payload, actor: User | null, bat
     data.history = [...history(current), entry];
     const saved = current ? await p.update({ collection: "staff-applications", id: current.id, req, overrideAccess: false, data })
       : await p.create({ collection: "staff-applications", req, overrideAccess: false, data: { ...data, batch: batchID, applicant: user.id, requestKey: key, memberName: user.name, batchTitle: batch.title, department: data.department!, status: data.status!, formVersion: data.formVersion!, questions: data.questions!, answers: data.answers! } });
+    if (action === "review" && saved.status === "accepted" && current?.status !== "accepted") {
+      const applicantID = Number(relationID(saved.applicant));
+      await db.execute(sql`SELECT id FROM users WHERE id=${applicantID} FOR UPDATE`);
+      const applicant = await p.findByID({ collection: "users", id: applicantID, req, overrideAccess: true, depth: 0 });
+      if (applicant.roles?.length === 1 && applicant.roles[0] === "member") {
+        await p.update({ collection: "users", id: applicantID, req: { ...req, context: { ...req.context, system: true } }, overrideAccess: true,
+          data: { roles: ["backbone"], department: saved.department === "both" ? null : saved.department } });
+      }
+    }
     await p.create({ collection: "audit", req, overrideAccess: true, data: { actor: String(user.id), object: "staff-applications:" + saved.id, action: action + ":" + entry.from + "->" + entry.to, status: saved.status } });
     return saved;
   });

@@ -306,6 +306,22 @@ describe('原生社团展示与既有活动权限合同', () => {
     expect(target.data.videoSource).toBe('https://home.thuzijing.top/api/showcase-videos/12345678-1234-1234-1234-123456789abc.mp4');
     expect(cms.list).not.toHaveBeenCalled();
   });
+
+  it.each(['gallery', 'article'])('社群活动原生详情读取%s内容与受控图片', async mode => {
+    const src = '/api/v2/images/community-post/12/0?v=0123456789abcdef';
+    const detail = { presentation: { mode, blocks: mode === 'article' ? [{ type: 'text', text: '合成段落' }, { type: 'image', image: { src, alt: '合成配图' } }] : [] }, images: [{ src, alt: '合成配图' }] };
+    const cms = { socialDetail: vi.fn().mockResolvedValue({ id: 12, title: '合成活动', body: '合成段落', status: 'visible', category: 'event', startAt: '2099-03-25T12:30:00.000Z', location: '合成地点' }), media: async () => null, list: vi.fn() };
+    const http = { request: vi.fn().mockResolvedValue({ form: { enabled: false } }), download: vi.fn().mockResolvedValue('/synthetic/download.webp') };
+    const api = { get: vi.fn().mockResolvedValue(detail) };
+    const target = page('detail', { '../../lib/cms': cms, '../../lib/http': http, '../../lib/v2': api,
+      '../../lib/session': { user: () => ({ id: 1 }), subscribe: () => () => {} }, '../../lib/page': frame }, { setNavigationBarTitle: vi.fn() });
+    target.onLoad!({ collection: 'community-posts', id: '12' }); await target.load();
+    expect(api.get).toHaveBeenCalledWith('events/community/12', {}, { required: true });
+    expect(http.download).toHaveBeenCalledWith(src);
+    expect(target.data.presentation).toMatchObject({ mode, images: [{ url: '/synthetic/download.webp', alt: '合成配图' }] });
+    if (mode === 'article') expect(target.data.presentation).toMatchObject({ blocks: [{ type: 'text', text: '合成段落' }, { type: 'image', url: '/synthetic/download.webp' }] });
+    expect(target.data.doc).toMatchObject({ location: '合成地点' });
+  });
 });
 
 it('退出后迟到的私有图片写入会删除文件，不向新账号恢复旧图片路径', async () => {

@@ -24,5 +24,6 @@ export function promotionVersion(value: Record<string, unknown>) {
   // Preserve reviewed legacy hashes while no new schedule exists. As soon as a
   // schedule is supplied it is part of the approved content identity.
   if (["startAt", "endAt", "location"].some(key => value[key] != null && value[key] !== "")) keys.push("startAt", "endAt", "location");
+  if (value.contentMode || value.contentBlocks) keys.push("contentMode", "contentBlocks");
   return createHash("sha256").update(JSON.stringify(Object.fromEntries(keys.map(key => [key, value[key] ?? null])))).digest("hex");
 }

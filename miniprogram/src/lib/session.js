@@ -18,6 +18,7 @@ function project(value) {
     id: value.id, name: value.name || '社团成员', email: value.email || '',
     roles: value.roles || [], accountStatus: value.accountStatus,
     communities: (value.communities || []).map(v => typeof v === 'object' ? v.id : v),
+    publishCommunities: (value.capabilities && value.capabilities.publishCommunities) || [],
   };
 }
 function save(result) {
@@ -54,7 +55,7 @@ function subscribe(callback) {
 function manages(game) {
   const current = user();
   return Boolean(current && (current.roles.some(role => ['president', 'vicePresident'].includes(role)) ||
-    (current.roles.includes('communityAdmin') && current.communities.some(id => String(id) === String(game)))));
+    (current.publishCommunities || []).some(id => String(id) === String(game))));
 }
 function reviewer() { const current = user(); return Boolean(current && current.roles.some(role => ['president', 'vicePresident'].includes(role))); }
 module.exports = { read, user, token, save, refreshUser, clear, subscribe, manages, reviewer };

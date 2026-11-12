@@ -35,7 +35,6 @@ export function SignupBuilder({
   illustrations?: {
     images: PublicationImage[];
     onChange: (images: PublicationImage[]) => void;
-    limit?: number;
   };
 }) {
   const prefix = useId(),

@@ -50,7 +50,7 @@ export default async function Staff({ searchParams }: { searchParams: Promise<{ 
               <li>填写申请，核对后提交同一份资料。</li>
               <li>查看本人回执，按负责人反馈补充。</li>
             </ol>
-            <p>录用结果与账号角色任命分别处理。</p>
+            <p>普通成员录用后自动获得骨干身份。</p>
           </TaskNote>
           <TaskNote title="还有其他参与方式" links={[{ href: "/community", label: "加入现有游戏社群" }, { href: "/community/apply", label: "申请组织新社群" }]}>
             <p>社群、代表队与骨干工作分别申请、分别记录。</p>

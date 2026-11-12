@@ -17,6 +17,7 @@ let president: User;
 let member: User;
 let game: number;
 let png: Buffer;
+let largePng: Buffer;
 const eventTitle = `合成配图活动 ${suffix}`;
 const noticeTitle = `合成配图通知 ${suffix}`;
 
@@ -36,6 +37,11 @@ test.beforeAll(async () => {
     data: { title: "合成配图社群", slug, _status: "published", demo: true },
   })).id;
   png = await sharp({ create: { width: 640, height: 320, channels: 3, background: "#8352aa" } }).png().toBuffer();
+  largePng = await sharp(randomBytes(1800 * 1800 * 3), {
+    raw: { width: 1800, height: 1800, channels: 3 },
+  }).png().toBuffer();
+  expect(largePng.length).toBeGreaterThan(9 * 1024 * 1024);
+  expect(largePng.length).toBeLessThan(10 * 1024 * 1024);
 });
 
 test.afterAll(async () => {
@@ -80,6 +86,9 @@ test("网站发布活动和通知，问卷配图可以预览、保存和显示�
   const body = page.getByRole("region", { name: "内容与发布范围" });
   await body.getByRole("textbox", { name: "标题", exact: true }).fill(eventTitle);
   await body.getByRole("textbox", { name: "内容", exact: true }).fill("合成活动正文");
+  await body.locator('input[name="startAt"]').fill("2099-03-25T20:30");
+  await body.locator('input[name="endAt"]').fill("2099-03-25T22:00");
+  await body.locator('input[name="location"]').fill("合成活动地点");
   await addImage(body, "正文配图", "合成活动海报");
   const builder = page.getByRole("region", { name: "问卷制作" });
   await builder.getByLabel("启用填写问卷报名").check();
@@ -97,15 +106,19 @@ test("网站发布活动和通知，问卷配图可以预览、保存和显示�
     collection: "community-posts", overrideAccess: true, limit: 1, where: { title: { equals: eventTitle } },
   })).docs[0];
   expect(post).toBeTruthy();
+  expect(post.startAt).toBe("2099-03-25T12:30:00.000Z");
+  expect(post.endAt).toBe("2099-03-25T14:00:00.000Z");
+  expect(post.location).toBe("合成活动地点");
 
   await page.goto(composer);
   await body.getByLabel("类型").selectOption("notice");
+  await expect(body.getByLabel("活动开始时间", { exact: true })).toHaveCount(0);
   await body.getByRole("textbox", { name: "标题", exact: true }).fill(noticeTitle);
   await body.getByRole("textbox", { name: "内容", exact: true }).fill("合成通知正文");
   await addImage(body, "正文配图", "合成通知配图");
   await page.getByRole("button", { name: "发布社群通知" }).click();
   await expect(page.getByRole("status").filter({ hasText: "内容已发布到当前社群" })).toBeVisible();
-  await page.goto(`/community/${slug}/updates`);
+  await page.goto(`/community/${slug}/updates?category=notice`);
   await page.getByRole("link", { name: noticeTitle, exact: true }).click();
   await decoded(page.getByRole("img", { name: "合成通知配图", exact: true }));
 
@@ -115,6 +128,9 @@ test("网站发布活动和通知，问卷配图可以预览、保存和显示�
     await login(viewer, member);
     await viewer.goto(`/community/${slug}/updates/${post.id}`);
     await decoded(viewer.getByRole("img", { name: "合成活动海报", exact: true }));
+    await expect(viewer.getByText("合成活动地点").first()).toBeVisible();
+    await expect(viewer.getByText(/20:30/).first()).toBeVisible();
+    await expect(viewer.getByText(/22:00/).first()).toBeVisible();
     const fill = `/activities/community-posts/${post.id}/fill`;
     await viewer.goto(fill);
     await decoded(viewer.getByRole("img", { name: "合成题目插图", exact: true }));
@@ -153,6 +169,7 @@ test("网站发布活动和通知，问卷配图可以预览、保存和显示�
     const csv = await page.request.get(endpoint + "?mode=export", { headers });
     expect(csv.status()).toBe(200);
     expect(await csv.text()).toContain("合成原答卷");
+
   } finally {
     await viewer.close();
   }
@@ -179,4 +196,135 @@ test("后台正文配图随通知草稿保存，公开页只显示已发布的�
   }).toBe("published");
   await page.goto(`/announcements/${slug}`);
   await decoded(page.getByRole("img", { name: "合成后台通知配图", exact: true }));
+});
+
+test("后台活动可以保存四张接近 10 MB 的大图", async ({ page }) => {
+  const doc = await p.create({
+    collection: "events", user: president, overrideAccess: false, draft: true,
+    data: { title: "合成大图活动", slug: `${slug}-large`, game },
+  });
+  await login(page, president);
+  await page.goto(`/admin/collections/events/${doc.id}`);
+  await page.getByLabel("正文配图", { exact: true }).setInputFiles(
+    Array.from({ length: 4 }, (_, index) => ({
+      name: `synthetic-${index}.png`, mimeType: "image/png", buffer: largePng,
+    })),
+  );
+  await page.getByLabel("第 4 张图片说明（选填）", { exact: true }).fill("合成大图");
+  await page.getByRole("button", { name: "保存草稿", exact: true }).click();
+  await expect.poll(async () => {
+    const draft = await p.findByID({ collection: "events", id: doc.id, draft: true, overrideAccess: true });
+    const images = draft.postImages as { alt: string }[] | undefined;
+    return { count: images?.length, lastAlt: images?.[3]?.alt };
+  }).toEqual({ count: 4, lastAlt: "合成大图" });
+});
+
+test("社群活动支持大图、选填日程及错误后保留填写内容", async ({ page }) => {
+  test.setTimeout(150000);
+  await login(page, president);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/community/${slug}/updates/new`);
+  const body = page.getByRole("region", { name: "内容与发布范围" });
+  await body.getByRole("textbox", { name: "标题", exact: true }).fill(`合成大图社群活动 ${suffix}`);
+  await body.getByRole("textbox", { name: "内容", exact: true }).fill("测试大图和可选日程");
+  const start = body.locator('input[name="startAt"]');
+  const end = body.locator('input[name="endAt"]');
+  const place = body.locator('input[name="location"]');
+  await start.fill("2099-03-25T20:30");
+  await end.fill("2099-03-25T19:30");
+  await place.fill("合成地点二");
+  await body.getByLabel("类型").selectOption("notice");
+  await expect(start).toHaveCount(0);
+  await body.getByLabel("类型").selectOption("event");
+  await expect(start).toHaveValue("2099-03-25T20:30");
+  await expect(place).toHaveValue("合成地点二");
+  await page.getByRole("button", { name: "发布社群活动" }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "结束时间必须晚于开始时间" })).toBeVisible();
+  await expect(place).toHaveValue("合成地点二");
+  await end.fill("2099-03-25T22:00");
+
+  const input = body.getByLabel("正文配图", { exact: true });
+  await input.setInputFiles({ name: "too-large.png", mimeType: "image/png", buffer: Buffer.alloc(10 * 1024 * 1024 + 1) });
+  await expect(page.getByRole("alert").filter({ hasText: "10 MB" })).toBeVisible();
+  await input.setInputFiles(Array.from({ length: 3 }, (_, index) => ({
+    name: `large-${index}.png`, mimeType: "image/png", buffer: largePng,
+  })));
+  await expect(body.getByLabel("第 3 张图片说明（选填）", { exact: true })).toBeVisible();
+  await input.setInputFiles(Array.from({ length: 3 }, (_, index) => ({
+    name: `large-extra-${index}.png`, mimeType: "image/png", buffer: largePng,
+  })));
+  await body.getByLabel("第 6 张图片说明（选填）", { exact: true }).fill("合成大海报");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.getByRole("button", { name: "发布社群活动" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "内容已发布到当前社群" })).toBeVisible({ timeout: 60000 });
+  const post = (await p.find({ collection: "community-posts", overrideAccess: true, limit: 1,
+    where: { title: { equals: `合成大图社群活动 ${suffix}` } } })).docs[0];
+  expect(post).toMatchObject({ startAt: "2099-03-25T12:30:00.000Z", endAt: "2099-03-25T14:00:00.000Z", location: "合成地点二" });
+  expect(post.postImages).toHaveLength(6);
+  await page.goto(`/community/${slug}/updates/${post.id}`);
+  await page.getByRole("button", { name: "查看第 6 张图片" }).click();
+  await expect(page.getByRole("img", { name: "合成大海报" })).toBeVisible();
+  await expect.poll(() => page.getByRole("img", { name: "合成大海报" }).evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+  await expect(page.getByText("合成地点二").first()).toBeVisible();
+});
+
+test("文章形式保存并展示文字与图片的先后顺序", async ({ page }) => {
+  await login(page, president);
+  await page.goto(`/community/${slug}/updates/new`);
+  const body = page.getByRole("region", { name: "内容与发布范围" });
+  await body.getByRole("textbox", { name: "标题", exact: true }).fill(`合成文章 ${suffix}`);
+  await body.getByLabel("内容形式").selectOption("article");
+  const editor = body.getByRole("textbox", { name: "文章正文" });
+  await editor.fill("图片前的文字");
+  await editor.press("End");
+  await body.getByLabel("插入图片").setInputFiles({ name: "article.png", mimeType: "image/png", buffer: png });
+  await expect(editor.locator("img")).toHaveCount(1);
+  await editor.press("End");
+  await editor.press("Enter");
+  await editor.type("图片后的文字");
+  await page.getByRole("button", { name: "发布社群活动" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "内容已发布到当前社群" })).toBeVisible();
+  const post = (await p.find({ collection: "community-posts", overrideAccess: true, limit: 1,
+    where: { title: { equals: `合成文章 ${suffix}` } } })).docs[0];
+  expect(post.contentMode).toBe("article");
+  const blocks = post.contentBlocks as { type: string; text?: string; index?: number }[];
+  expect(blocks.findIndex(block => block.type === "image")).toBeGreaterThan(0);
+  expect(blocks.at(-1)?.text).toContain("图片后的文字");
+  await page.goto(`/community/${slug}/updates/${post.id}`);
+  const article = page.getByRole("article", { name: "活动说明" });
+  await expect(article.getByText("图片前的文字")).toBeVisible();
+  await expect(article.getByRole("img", { name: "文章配图" })).toBeVisible();
+  await expect(article.getByText("图片后的文字")).toBeVisible();
+  await article.getByText("编辑文章", { exact: true }).click();
+  const revisionEditor = article.getByRole("textbox", { name: "文章正文" });
+  await revisionEditor.click();
+  await revisionEditor.press("Control+End");
+  await revisionEditor.type("，已补充");
+  await article.getByRole("button", { name: "保存文章" }).click();
+  await expect(article.getByText(/图片后的文字，已补充/)).toBeVisible();
+  await page.reload();
+  await expect(article.getByText(/图片后的文字，已补充/)).toBeVisible();
+  await expect(article.getByRole("img", { name: "文章配图" })).toBeVisible();
+});
+
+test("正文和问卷可以分别添加多张图片", async ({ page }) => {
+  await login(page, president);
+  await page.goto(`/community/${slug}/updates/new`);
+  const body = page.getByRole("region", { name: "内容与发布范围" });
+  await body.getByRole("textbox", { name: "标题", exact: true }).fill(`合成多图问卷 ${suffix}`);
+  await body.getByRole("textbox", { name: "内容", exact: true }).fill("合成多图正文");
+  await body.getByLabel("正文配图", { exact: true }).setInputFiles(Array.from({ length: 5 }, (_, index) => ({ name: `post-${index}.png`, mimeType: "image/png", buffer: png })));
+  await expect(body.getByLabel("第 5 张图片说明（选填）")).toBeVisible();
+  const builder = page.getByRole("region", { name: "问卷制作" });
+  await builder.getByLabel("启用填写问卷报名").check();
+  await builder.getByRole("button", { name: "单行文本", exact: true }).click();
+  await builder.getByLabel("题目标题", { exact: true }).fill("合成问题");
+  await builder.getByLabel("问卷配图", { exact: true }).setInputFiles(Array.from({ length: 5 }, (_, index) => ({ name: `question-${index}.png`, mimeType: "image/png", buffer: png })));
+  await expect(builder.getByLabel("第 5 张图片说明（选填）")).toBeVisible();
+  await page.getByRole("button", { name: "发布社群活动" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "内容已发布到当前社群" })).toBeVisible();
+  const post = (await p.find({ collection: "community-posts", overrideAccess: true, limit: 1,
+    context: { readSignupImages: true }, where: { title: { equals: `合成多图问卷 ${suffix}` } } })).docs[0];
+  expect(post.postImages).toHaveLength(5);
+  expect(post.signupImages).toHaveLength(5);
 });

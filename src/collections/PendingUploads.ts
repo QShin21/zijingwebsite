@@ -12,13 +12,13 @@ export const PendingUploads: CollectionConfig = {
     update: ({ req }) => canParticipate(req.user) && req.context.v2UploadConsume === true
       ? { owner: { equals: req.user!.id } } as Where : false,
     delete: ({ req }) => canParticipate(req.user) && req.context.v2UploadCleanup === true
-      ? { expiresAt: { less_than_equal: new Date().toISOString() } } as Where : false,
+      ? { and: [{ expiresAt: { less_than_equal: new Date().toISOString() } }, { consumedAt: { exists: false } }] } as Where : false,
   },
   hooks: {
     beforeChange: [({ req, data, originalDoc, operation }) => {
       if (!canParticipate(req.user)) throw new APIError("请登录可用账号", 403);
       if (operation === "create") {
-        if (req.context.v2UploadWrite !== true || data.purpose !== "showcase" ||
+        if (req.context.v2UploadWrite !== true || !["showcase", "publication"].includes(data.purpose) ||
           typeof data.data !== "string" || !/^data:image\/webp;base64,[A-Za-z0-9+/=]+$/.test(data.data) ||
           !Number.isSafeInteger(data.width) || !Number.isSafeInteger(data.height) || data.width < 1 || data.height < 1)
           throw new APIError("请通过图片上传入口操作", 403);
@@ -36,8 +36,8 @@ export const PendingUploads: CollectionConfig = {
     }],
   },
   fields: [
-    { name: "owner", label: "上传者", type: "relationship", relationTo: "users", required: true, maxDepth: 0, index: true },
-    { name: "purpose", label: "用途", type: "select", required: true, options: ["showcase"] },
+    { name: "owner", label: "上传者", type: "relationship", relationTo: "users", maxDepth: 0, index: true },
+    { name: "purpose", label: "用途", type: "select", required: true, options: ["showcase", "publication"] },
     { name: "data", label: "图片内容", type: "textarea", required: true, maxLength: 6_000_000 },
     { name: "width", label: "宽度", type: "number", required: true, min: 1 },
     { name: "height", label: "高度", type: "number", required: true, min: 1 },

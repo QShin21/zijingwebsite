@@ -33,7 +33,7 @@ export const StaffBatches: CollectionConfig = {
 };
 export const StaffApplications: CollectionConfig = {
   slug: "staff-applications", labels: { singular: "骨干申请", plural: "骨干申请" },
-  admin: { useAsTitle: "memberName", description: "候选资料仅本人及社长/副社长可见；录用状态不会授予平台角色。" },
+  admin: { useAsTitle: "memberName", description: "候选资料仅本人及社长/副社长可见；录用后普通成员自动获得骨干身份。" },
   access: {
     read: async ({ req }) => {
       const user = await currentReader(req);

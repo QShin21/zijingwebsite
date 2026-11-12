@@ -1,5 +1,9 @@
 import * as communityIcons from "./20261112_020000_community_icons";
 import * as activitySeatBlocks from "./20261112_030000_activity_seat_blocks";
+import * as publicationContent from "./20261113_000000_publication_content";
+import * as publicationAssetOwner from "./20261113_000100_publication_asset_owner";
+import * as honoraryBackbone from "./20261113_000200_honorary_backbone";
+import * as restoreEditedPromotions from "./20261113_000300_restore_edited_promotions";
 import * as activitySeatRevision from "./20261112_040000_activity_seat_revision";
 import * as activitySeatCancellation from "./20261112_050000_activity_seat_cancellation";
 import * as activitySeatRevocation from "./20261112_060000_activity_seat_revocation";
@@ -94,4 +98,8 @@ export const migrations = [
   { up: activitySeatRelease.up, down: activitySeatRelease.down, name: "20261112_070000_activity_seat_release" },
   { up: activitySeatAddition.up, down: activitySeatAddition.down, name: "20261112_080000_activity_seat_addition" },
   { up: activitySeatModes.up, down: activitySeatModes.down, name: "20261112_090000_activity_seat_modes" },
+  { up: publicationContent.up, down: publicationContent.down, name: "20261113_000000_publication_content" },
+  { up: publicationAssetOwner.up, down: publicationAssetOwner.down, name: "20261113_000100_publication_asset_owner" },
+  { up: honoraryBackbone.up, down: honoraryBackbone.down, name: "20261113_000200_honorary_backbone" },
+  { up: restoreEditedPromotions.up, down: restoreEditedPromotions.down, name: "20261113_000300_restore_edited_promotions" },
 ];

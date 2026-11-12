@@ -1,0 +1,7 @@
+.editor { display: grid; gap: 10px; min-width: 0; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.toolbar label { font-weight: 700; }
+.toolbar span { color: var(--z-muted); font-size: 14px; }
+.canvas { min-height: 280px; padding: 16px; border: 1.5px solid var(--z-line-strong); border-radius: var(--z-radius-small); background: var(--z-surface); white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; }
+.canvas:focus { outline: 2px solid var(--z-action); outline-offset: 2px; }
+.canvas img { display: block; width: auto; max-width: 100%; max-height: 600px; margin: 12px auto; }

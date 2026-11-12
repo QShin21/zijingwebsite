@@ -45,8 +45,7 @@ export const canAppoint = (user: Identity | null | undefined) => hasRole(user, "
 export const canReviewPromotion = (user: Identity | null | undefined) => canPublish(user) || hasRole(user, "backbone");
 export const canSubmitClubContent = (user: Identity | null | undefined) =>
   canPublish(user) || hasRole(user, "backbone", "communityAdmin") || communityIDs(user, "publishContent").length > 0;
-// Legacy communityAdmin retains its existing club draft permission during the additive transition.
-// It grants no community scope or private signup access. All new approvals preserve platform roles.
+// Community access is determined by the active office and its individual permissions.
 const signupScope = (user: Identity | null | undefined, game: unknown, capability: "viewSignups" | "exportSignups") =>
   relationID(game) == null ? communityIDs(user, capability).length > 0 : communityIDs(user, capability).includes(String(relationID(game)));
 export const canReadActivitySignups = (user: Identity | null | undefined, kind: string, game: unknown, organizer: unknown) =>

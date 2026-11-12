@@ -71,6 +71,7 @@ export const validateSignupForm: CollectionBeforeChangeHook = async ({
       data.signupImages,
       originalDoc?.signupImages,
       new Set(form.questions.map(({ id }) => id)),
+      req,
     );
   }
   return data;

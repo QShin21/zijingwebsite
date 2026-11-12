@@ -86,7 +86,22 @@
       <text wx:if="{{coverImage.credit}}" class="zj-credit">{{coverImage.credit}}</text>
     </view>
 
-    <view wx:if="{{nodes.length || social}}" class="detail-body">
+    <view wx:if="{{presentation.mode === 'gallery' && presentation.images.length}}" class="detail-publication-gallery">
+      <swiper indicator-dots="{{presentation.images.length > 1}}" class="detail-publication-swiper">
+        <swiper-item wx:for="{{presentation.images}}" wx:key="index">
+          <image wx:if="{{item.url}}" src="{{item.url}}" mode="aspectFit" class="detail-publication-slide" aria-label="{{item.alt || '活动配图'}}" />
+          <text wx:else class="zj-small">图片暂时无法显示</text>
+        </swiper-item>
+      </swiper>
+    </view>
+    <view wx:if="{{presentation.mode === 'article'}}" class="detail-body">
+      <block wx:for="{{presentation.blocks}}" wx:key="index">
+        <text wx:if="{{item.type === 'text'}}" class="reading-text" selectable>{{item.text}}</text>
+        <image wx:elif="{{item.url}}" class="detail-publication-article-image" src="{{item.url}}" mode="widthFix" aria-label="{{item.alt || '文章配图'}}" />
+        <text wx:else class="zj-small">图片暂时无法显示</text>
+      </block>
+    </view>
+    <view wx:elif="{{nodes.length || social}}" class="detail-body">
       <template wx:if="{{!coverImage}}" is="native-reading-mark" />
       <rich-text wx:if="{{nodes.length}}" nodes="{{nodes}}" user-select />
       <text wx:elif="{{social}}" class="reading-text" selectable>{{doc.body}}</text>

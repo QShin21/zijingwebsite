@@ -9,6 +9,7 @@ import { CommunityApplications, CommunityJoins } from "./community-operations";
 import { promotionSourceChanged, promotionSourceDeleted } from "../lib/content-promotions";
 import { postImagesField, validatePostImages } from "./publication-images";
 import { validateCommunitySchedule } from "../lib/v2/schedule";
+import { validatePublicationContent } from "../lib/publication-content";
 
 const relation = (name: string, to: "games" | "users") =>
   ({ name, type: "relationship" as const, relationTo: to, required: true, maxDepth: 0,
@@ -89,7 +90,8 @@ const participationGuard = (kind: "local" | "showcase"): CollectionBeforeChangeH
         throw new APIError("仅对应社群管理员可直接发布", 403);
     } else throw new APIError("缺少游戏社群", 400);
     const body = String(data.body ?? "").trim();
-    if ((kind !== "showcase" && body.length < 1) || body.length > 5000) throw new APIError("文字最多 5000 字；活动与通知须填写正文", 400);
+    const hasArticleImages = kind === "local" && data.contentMode === "article" && Array.isArray(data.contentBlocks) && data.contentBlocks.some((block: { type?: unknown }) => block?.type === "image");
+    if ((kind !== "showcase" && body.length < 1 && !hasArticleImages) || body.length > 5000) throw new APIError("文字最多 5000 字；请填写正文或插入图片", 400);
     data.body = body;
     data.author = user.id;
     data.authorName = String((req.user as Identity & { name?: string }).name ?? "社团成员");
@@ -99,7 +101,7 @@ const participationGuard = (kind: "local" | "showcase"): CollectionBeforeChangeH
 function social(slug: string, title: string, kind: "local" | "showcase"): CollectionConfig {
   const fields: CollectionConfig["fields"] = [
     { name: "title", type: "text", required: true, maxLength: 120 },
-    { name: "body", type: "textarea", required: kind !== "showcase", maxLength: 5000 },
+    { name: "body", type: "textarea", maxLength: 5000 },
     { name: "game", type: "relationship", relationTo: "games", maxDepth: 0 },
     relation("author", "users"),
     { name: "authorName", type: "text", access: { create: () => false, update: () => false } },
@@ -117,6 +119,8 @@ function social(slug: string, title: string, kind: "local" | "showcase"): Collec
   );
   if (kind === "local") fields.push(postImagesField, ...signupFields);
   if (kind === "local") fields.push(
+    { name: "contentMode", type: "text", admin: { hidden: true } },
+    { name: "contentBlocks", type: "json", admin: { hidden: true } },
     { name: "category", type: "select", options: ["event", "notice"], required: true },
     ...(["startAt", "endAt"] as const).map(name => ({
       name, label: name === "startAt" ? "活动开始时间" : "活动结束时间", type: "date" as const,
@@ -140,7 +144,7 @@ function social(slug: string, title: string, kind: "local" | "showcase"): Collec
       update: kind === "showcase" ? (args) => args.req.context.webShowcaseWrite === true ? (canPublish(args.req.user as Identity) || { game: { in: communityIDs(args.req.user as Identity, "reviewShowcase") } }) : false : moderatorWhere,
       delete: ({ req }) => canPublish(req.user as Identity) && (kind !== "showcase" || req.context.webShowcaseWrite === true),
     },
-    hooks: { beforeChange: [participationGuard(kind), ...(kind === "local" ? [validateCommunitySchedule, validatePostImages, validateSignupForm] : [])],
+    hooks: { beforeChange: [participationGuard(kind), ...(kind === "local" ? [validateCommunitySchedule, validatePostImages, validatePublicationContent, validateSignupForm] : [])],
       afterChange: [promotionSourceChanged], afterDelete: [promotionSourceDeleted] },
     fields,
   };

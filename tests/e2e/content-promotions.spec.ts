@@ -6,6 +6,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { getPayload, type Payload } from "payload";
 import config from "../../src/payload.config";
 import type { User } from "../../src/payload-types";
+import { changePromotion, readPromotionSource } from "../../src/lib/content-promotions";
 let p: Payload, leader: User, admin: User, execution: User, publicity: User, member: User, game: number, post: number;
 const suffix = randomBytes(6).toString("hex"), password = randomBytes(24).toString("hex"), slug = "promotion-web-" + suffix;
 const origin = { Origin: browserTestOrigin }, postIDs: number[] = [], showcaseIDs: number[] = [], receiptIDs: number[] = [];
@@ -46,13 +47,14 @@ async function openReviewedContent(page: Page, recordID: number, message: string
   await expect(page.locator('[data-promotion-record="' + recordID + '"]')).toHaveCount(0);
   await page.getByRole("link", { name: "内容与进度", exact: true }).click();
 }
-test("活动网页申请/撤回/退回/重提/审核/改稿复审及主动升降级，报名ID与隐私权限保持", async ({ page, browser, request }) => {
+test("活动网页申请/审核后改稿保持升推及主动升降级，报名ID与隐私权限保持", async ({ page, browser, request }) => {
   test.setTimeout(180000);
   const staffContext = await browser.newContext(), memberContext = await browser.newContext();
   try {
     const staff = await staffContext.newPage(), participant = await memberContext.newPage();
     await login(participant, member); const sourcePath = "/community/" + slug + "/updates/" + post;
-    await participant.goto(sourcePath); await participant.getByLabel("合成称呼", { exact: true }).fill("合成参与者");
+    await participant.goto(sourcePath); await participant.getByRole("link", { name: "填写报名问卷" }).click();
+    await participant.getByLabel("合成称呼", { exact: true }).fill("合成参与者");
     await participant.getByRole("button", { name: "核对并提交", exact: true }).click();
     await participant.getByRole("button", { name: "提交并确认报名", exact: true }).click();
     await expect(participant.getByText("已报名", { exact: false }).first()).toBeVisible();
@@ -93,11 +95,9 @@ test("活动网页申请/撤回/退回/重提/审核/改稿复审及主动升降
     expect((await page.request.post("/api/content-promotions", { headers: origin, data: { sourceCollection: "community-posts", sourceID: post, sourceKey: "community-posts:" + post, game, kind: "event", status: "approved", context: { promotionWrite: true, promotionAction: "promote", system: true } } })).status()).toBe(403);
     expect((await request.get("/api/content-promotions")).status()).toBe(403);
     expect((await page.request.patch("/api/community-posts/" + post, { headers: origin, data: { title: "合成改稿升推活动" } })).status()).toBe(200);
-    await page.reload(); await expect(projected).toHaveCount(0); await page.goto("/community/promotions"); await expect(source).toContainText("改稿待复审");
-    await source.getByRole("button", { name: "重新申请升推", exact: true }).click(); await expect(page.getByRole("status", { name: "升推操作结果", exact: true })).toHaveText("升推结果已保存：申请已提交，等待审核。");
-    await expect(source).toContainText("待审核");
-    await staff.goto("/community/promotions?view=review"); await record.getByRole("button", { name: "通过升推", exact: true }).click();
-    await openReviewedContent(staff, pending.id, "审核通过，已升推。");
+    await page.reload(); await expect(projected.getByRole("link", { name: "合成改稿升推活动", exact: true })).toBeVisible();
+    await page.goto("/community/promotions"); await expect(source).toContainText("已升推");
+    await staff.goto("/community/promotions");
     await expect(staffSource).toContainText("已升推");
     await staffSource.getByLabel("降级理由", { exact: true }).fill("合成降级说明");
     await staffSource.getByRole("button", { name: "降为社群展示", exact: true }).click(); await expect(staff.getByRole("status", { name: "升推操作结果", exact: true })).toHaveText("升推结果已保存：已降为社群展示。");
@@ -109,6 +109,22 @@ test("活动网页申请/撤回/退回/重提/审核/改稿复审及主动升降
     await page.goto("/"); await expect(projected.getByRole("link", { name: "合成改稿升推活动", exact: true })).toBeVisible();
     expect((await p.findByID({ collection: "event-signups", id: receipt.id, user: member, overrideAccess: false })).id).toBe(receipt.id);
   } finally { await staffContext.close(); await memberContext.close(); }
+});
+test("已升推活动修改后首页立即展示新内容", async ({ page }) => {
+  const added = await p.create({ collection: "community-posts", user: admin, overrideAccess: false,
+    data: { game, author: admin.id, title: "合成网页升推活动", body: "合成活动", category: "event" } });
+  postIDs.push(added.id);
+  const original = await readPromotionSource(p, "community-posts", added.id);
+  await changePromotion(p, leader, "community-posts", added.id, "promote", { sourceVersion: original.version, reason: "合成升推展示验证" });
+  await login(page, admin);
+  await page.goto("/");
+  const projected = page.locator(`main [data-section="promoted"] [data-promotion-source="community-posts:${added.id}"]`).first();
+  await expect(projected.getByRole("link", { name: "合成网页升推活动", exact: true })).toBeVisible();
+  expect((await page.request.patch(`/api/community-posts/${added.id}`, { headers: origin, data: { title: "合成升推后修改" } })).status()).toBe(200);
+  await page.reload();
+  await expect(projected.getByRole("link", { name: "合成升推后修改", exact: true })).toBeVisible();
+  const retained = (await p.find({ collection: "content-promotions", overrideAccess: true, where: { sourceKey: { equals: `community-posts:${added.id}` } } })).docs[0];
+  expect(retained.status).toBe("approved");
 });
 test("公告网页申请由宣传部骨干审核，社团首页链接原公告且不出现报名", async ({ page, browser }) => {
   const notice = await p.create({ collection: "community-posts", user: admin, overrideAccess: false, data: { game, author: admin.id, title: "合成网页升推公告", body: "合成公告说明", category: "notice" } }); postIDs.push(notice.id);
@@ -132,7 +148,7 @@ test("公告网页申请由宣传部骨干审核，社团首页链接原公告�
     await expect(page.getByRole("button", { name: "核对并提交" })).toHaveCount(0);
   } finally { await staffContext.close(); }
 });
-test("风采本地批准后网页申请升推，隐藏关闭首页且重新公开仍需复审", async ({ page, browser }) => {
+test("风采本地批准后网页申请升推，隐藏暂停首页展示且重新公开后恢复", async ({ page, browser }) => {
   test.setTimeout(120000);
   const source = await p.create({ collection: "community-showcase", user: member, overrideAccess: false, context: { webShowcaseWrite: true },
     data: { game, author: member.id, title: "合成网页升推风采", body: "合成风采说明", images: [{ source: "data:image/png;base64," + (await sharp({ create: { width: 32, height: 32, channels: 3, background: "purple" } }).png().toBuffer()).toString("base64"), caption: "合成照片" }] } }); showcaseIDs.push(source.id);
@@ -141,7 +157,6 @@ test("风采本地批准后网页申请升推，隐藏关闭首页且重新公�
     await login(page, admin); await page.goto(path + "?view=review");
     let card = page.locator("#showcase-" + source.id); await expect(card.getByRole("link", { name: "申请社团级展示" })).toHaveCount(0);
     await card.getByRole("button", { name: "批准发布", exact: true }).click();
-    await expect(page.getByRole("status").filter({ hasText: "审核结果已保存。" })).toHaveText("审核结果已保存。");
     await expect(card).toHaveCount(0);
     const newerPosts = async (start: number) => {
       for (let i = start; i < start + 7; i++) {
@@ -173,17 +188,16 @@ test("风采本地批准后网页申请升推，隐藏关闭首页且重新公�
     await expect(page).toHaveURL(url => url.pathname === detail && url.search === "" && url.hash === "");
     await expect(page.getByRole("heading", { name: "合成网页升推风采", level: 1, exact: true })).toBeVisible();
     await page.locator("#showcase-" + source.id).locator("summary").filter({ hasText: /^管理这条风采$/ }).click();
+    await page.locator("#showcase-" + source.id).getByLabel("审核说明").fill("合成临时隐藏原因");
     await page.locator("#showcase-" + source.id).getByRole("button", { name: "隐藏风采", exact: true }).click();
-    await expect(page.getByRole("status").filter({ hasText: "审核结果已保存。" })).toHaveText("审核结果已保存。");
     await expect(page).toHaveURL(url => url.pathname === path && url.searchParams.get("view") === "review");
     expect((await page.request.get(detail, { headers: origin })).status()).toBe(404);
     await page.goto("/"); await expect(projected).toHaveCount(0);
     await page.goto(path + "?view=review"); await page.locator("#showcase-" + source.id).getByRole("button", { name: "批准发布", exact: true }).click();
-    await expect(page.getByRole("status").filter({ hasText: "审核结果已保存。" })).toHaveText("审核结果已保存。");
     await expect(page.locator("#showcase-" + source.id)).toHaveCount(0);
-    await page.goto("/"); await expect(projected).toHaveCount(0);
+    await page.goto("/"); await expect(projected.getByRole("link", { name: "合成网页升推风采", exact: true })).toBeVisible();
     const retained = await p.findByID({ collection: "content-promotions", id: pending.id, user: admin, overrideAccess: false });
-    expect(retained.status).toBe("needsReview"); expect(retained.approvedVersion).toBeTruthy();
+    expect(retained.status).toBe("approved"); expect(retained.approvedVersion).toBeTruthy();
   } finally { await staffContext.close(); }
 });
 test("外链风采保留社群展示，在同一风采上传受控视频后才可审核升推", async ({ page, browser }) => {

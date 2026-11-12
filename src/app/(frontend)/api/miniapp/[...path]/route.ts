@@ -41,7 +41,7 @@ async function clubReply(operation: () => Promise<unknown>) {
 }
 export async function GET(request: Request, context: Context) {
   const path = (await context.params).path.join('/');
-  if (path === 'status') return reply({ version: 2, authentication: ['email', 'nickname'], registration: true, questionnaireVersion: 3, responseEditing: true, operationsVersion: 1, platformRoles: ['member', 'backbone', 'vicePresident', 'president'], communityOffices: true, manualWechatJoin: false });
+  if (path === 'status') return reply({ version: 2, authentication: ['email', 'nickname'], registration: true, questionnaireVersion: 3, responseEditing: true, operationsVersion: 1, platformRoles: ['member', 'honoraryBackbone', 'communityAdmin', 'backbone', 'vicePresident', 'president'], communityOffices: true, manualWechatJoin: false });
   if (miniappTeamReadPath(path)) return clubReply(async () => miniappTeamGET(await cms(), request, path));
   if (miniappClubReadPath(path)) return clubReply(async () => miniappClubGET(await cms(), request, path));
   return reply({ error: '接口不存在' }, 404);

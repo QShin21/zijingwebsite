@@ -4,7 +4,6 @@ import { Buffer } from "node:buffer";
 import ts from "typescript";
 import { describe, expect, it, vi } from "vitest";
 import { workflowFeedback } from "../src/components/activity-pages/action-feedback";
-import { publicationImageLimit } from "../src/lib/publication-images";
 
 type Result = { ok: boolean; message: string; successHref?: string };
 type Action = (form: FormData) => Promise<Result>;
@@ -76,7 +75,6 @@ function harness(allowed = true) {
       applicationError: (error: Error) => error.message,
     },
     "@/lib/community-status": {},
-    "@/lib/publication-images": { publicationImageLimit },
     // Newly shared V2 services are separate boundaries. These legacy adapter
     // cases do not execute them; V2 service/HTTP suites exercise their behavior.
     "@/lib/v2/schedule": {

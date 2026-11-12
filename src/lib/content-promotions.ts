@@ -8,13 +8,13 @@ import { publicationImages } from "./publication-images";
 import { publicationImageRevision } from "./publication-image-storage";
 import { promotionKey, promotionSource, promotionVersion, supportedPromotionKinds, type PromotionAction, type PromotionHistory, type PromotionKind, type PromotionSnapshot, type PromotionSource } from "./promotion-model";
 
-export async function readPromotionSource(p: Payload, collection: PromotionSource, id: number, req?: PayloadRequest) {
+export async function readPromotionSource(p: Payload, collection: PromotionSource, id: number, req?: PayloadRequest, liveApproved = false) {
   const common = { title: true, body: true, game: true, status: true, authorName: true, author: true, createdAt: true, updatedAt: true } as const;
   const doc = await p.findByID({ collection, id, overrideAccess: false, user: null,
     ...(req ? { req: { ...req, user: null } } : {}), depth: 0,
     context: { ...req?.context, readSignupImages: true },
     select: collection === "community-posts"
-      ? { ...common, category: true, signupForm: true, postImages: true, signupImages: true, startAt: true, endAt: true, location: true }
+      ? { ...common, category: true, signupForm: true, postImages: true, signupImages: true, startAt: true, endAt: true, location: true, contentMode: true, contentBlocks: true }
       : { ...common, images: true, videoURL: true } }).catch(() => null);
   if (!doc || doc.status !== "visible") throw new APIError("原内容尚未发布或已隐藏", 409);
   const kind: PromotionKind = collection === "community-showcase" ? "showcase" : ("category" in doc && doc.category === "event" ? "event" : "notice");
@@ -24,7 +24,10 @@ export async function readPromotionSource(p: Payload, collection: PromotionSourc
     ...(req ? { req: { ...req, user: null } } : {}), draft: false, depth: 0, select: { title: true, slug: true, _status: true, demo: true } }).catch(() => null);
   if (!game || game._status !== "published" || process.env.APP_ENV === "production" && game.demo) throw new APIError("原社群尚未开放", 409);
   const videoURL = "videoURL" in doc ? doc.videoURL || null : null;
-  const videoVersion = videoURL ? await controlledVideoVersion(videoURL) : null;
+  const videoVersion = videoURL ? await controlledVideoVersion(videoURL).catch(error => {
+    if (liveApproved) return null;
+    throw error;
+  }) : null;
   const value = { ...doc, game: gameID, videoVersion } as unknown as Record<string, unknown>;
   if ("category" in doc) {
     const postImages = publicationImages(doc.postImages);
@@ -108,18 +111,26 @@ export async function changePromotion(p: Payload, actor: User | null, collection
     return saved;
   });
 }
-async function sourceChanged(req: PayloadRequest, collection: PromotionSource, id: number, deleted = false) {
+async function sourceChanged(req: PayloadRequest, collection: PromotionSource, id: number, deleted = false, kind?: PromotionKind) {
   const key = promotionKey(collection, id);
   await lockPromotion(req, key);
   const current = (await req.payload.find({ collection: "content-promotions", req, overrideAccess: true, depth: 0, limit: 1,
     where: { and: [{ sourceKey: { equals: key } }, { status: { in: ["pending", "approved"] } }] } })).docs[0];
   if (!current) return;
+  // Approval belongs to the content record. Later edits and temporary hiding
+  // keep that approval; a public projection still requires a visible source.
+  if (current.status === "approved") {
+    if (!deleted && kind && kind !== current.kind)
+      await req.payload.update({ collection: "content-promotions", id: current.id,
+        req: { ...req, context: { ...req.context, promotionWrite: true, promotionSourceChanged: true } },
+        overrideAccess: true, data: { kind } });
+    return;
+  }
   if (!deleted) {
     const source = await readPromotionSource(req.payload, collection, id, req).catch(() => null);
-    const reviewedVersion = current.status === "approved" ? current.approvedVersion : current.requestedVersion;
-    if (source && source.version === reviewedVersion) return;
+    if (source && source.version === current.requestedVersion) return;
   }
-  const status = current.status === "approved" ? "needsReview" : "returned";
+  const status = "returned";
   const reason = deleted ? "原内容已删除，社团级展示已撤下。" : "原内容已修改或隐藏，社团级展示已撤下；请重新申请复审。";
   const entry: PromotionHistory = { action: deleted ? "sourceDeleted" : "sourceChanged", actor: String(req.user?.id ?? "system"), actorName: req.user?.name ?? "系统", at: new Date().toISOString(),
     from: current.status, to: status, reason, version: current.approvedVersion ?? current.requestedVersion ?? "" };
@@ -128,7 +139,10 @@ async function sourceChanged(req: PayloadRequest, collection: PromotionSource, i
   await req.payload.create({ collection: "audit", req, overrideAccess: true, data: { actor: entry.actor, object: "content-promotions:" + current.id, action: entry.action + ":" + entry.from + "->" + entry.to, status } });
 }
 export const promotionSourceChanged: CollectionAfterChangeHook = async ({ req, doc, collection, operation }) => {
-  if (operation === "update") await sourceChanged(req, promotionSource(collection.slug), doc.id);
+  if (operation === "update") {
+    const source = promotionSource(collection.slug);
+    await sourceChanged(req, source, doc.id, false, source === "community-showcase" ? "showcase" : doc.category === "event" ? "event" : "notice");
+  }
   return doc;
 };
 export const promotionSourceDeleted: CollectionAfterDeleteHook = async ({ req, doc, collection }) => {
@@ -149,18 +163,18 @@ async function collectApprovedSources<T extends object>(p: Payload, kind: Promot
       depth: 0, page, limit: 20, sort: ["-approvedAt", "-id"], where: { and: [{ kind: { equals: kind } }, { status: { equals: "approved" } }] },
       select: { sourceCollection: true, sourceID: true, approvedVersion: true, approvedSnapshot: true } });
     const candidates = await Promise.all(result.docs.map(async (item): Promise<T | null> => {
-      const source = await readPromotionSource(p, promotionSource(item.sourceCollection), item.sourceID).catch(() => null);
-      if (!source || source.version !== item.approvedVersion || source.kind !== kind || !item.approvedSnapshot) return null;
+      const source = await readPromotionSource(p, promotionSource(item.sourceCollection), item.sourceID, undefined, true).catch(() => null);
+      if (!source || source.kind !== kind || !item.approvedSnapshot) return null;
       return project({ id: item.id, sourceKey: promotionKey(item.sourceCollection, item.sourceID), source,
-        snapshot: item.approvedSnapshot as unknown as PromotionSnapshot });
+        snapshot: source.snapshot });
     }));
     for (const item of candidates) if (item && items.length < limit) items.push(item);
     if (!result.hasNextPage || !result.docs.length) break;
   }
   return items;
 }
-/** Small internal view, retaining the exact document from the approval-version
- * check. Home asks for six, never the 500-item calendar/feed candidate budget.
+/** Small internal view of the current visible source for approved records.
+ * Home asks for six, never the 500-item calendar/feed candidate budget.
  */
 export async function approvedPromotionSources(p: Payload, kind: PromotionKind, limit = 6) {
   const bounded = Number.isFinite(limit) ? Math.min(6, Math.max(0, Math.floor(limit))) : 0;

@@ -408,7 +408,7 @@ export const Users: CollectionConfig = {
   labels: { singular: "用户", plural: "用户" },
   admin: {
     useAsTitle: "name",
-    description: "社长、副社长可在用户详情中点击「更改密码」，填写至少 8 位新密码并保存，直接完成重置。",
+    description: "社长、副社长可重置密码；办理退休时将平台角色设为荣誉骨干并保存，原有社群任职将自动撤任。",
   },
   auth: {
     maxLoginAttempts: 5,
@@ -471,10 +471,13 @@ export const Users: CollectionConfig = {
           data.department = undefined;
         }
         if (operation === "update" && !req.context.system) {
-          if (!hasRole(req.user as Identity, "president") &&
-            Object.entries(req.context.userSubmittedPermissions as Record<string, unknown> ?? {}).some(
-              ([key, value]) => !userPermissionUnchanged(key, value, originalDoc?.[key]),
-            ))
+          const submitted = req.context.userSubmittedPermissions as Record<string, unknown> ?? {};
+          const retirement = hasRole(req.user as Identity, "vicePresident") &&
+            Array.isArray(submitted.roles) && submitted.roles.length === 1 && submitted.roles[0] === "honoraryBackbone" &&
+            !hasRole(originalDoc as Identity, "president") &&
+            Object.entries(submitted).every(([key, value]) => key === "roles" || userPermissionUnchanged(key, value, originalDoc?.[key]));
+          if (!hasRole(req.user as Identity, "president") && !retirement &&
+            Object.entries(submitted).some(([key, value]) => !userPermissionUnchanged(key, value, originalDoc?.[key])))
             throw new APIError("只有社长可以调整权限", 403);
           if (data.email !== undefined && data.email !== originalDoc?.email)
             throw new APIError("修改账号邮箱必须经过受控邮箱验证", 403);
@@ -491,8 +494,13 @@ export const Users: CollectionConfig = {
           data.roles && !data.roles.includes("president") && !req.context.system)
           throw new APIError("社长账号不可通过普通编辑降级", 403);
         if (data.roles && (data.roles.length !== 1 ||
-          !["president", "vicePresident", "backbone", "communityAdmin", "member"].includes(data.roles[0])))
+          !["president", "vicePresident", "backbone", "communityAdmin", "honoraryBackbone", "member"].includes(data.roles[0])))
           throw new APIError("账号必须且只能拥有一个等级", 400);
+        if (operation === "update" && data.roles?.[0] === "honoraryBackbone" && originalDoc?.roles?.[0] !== "honoraryBackbone") {
+          data.department = null;
+          data.teams = [];
+          data.communityOffices = (originalDoc?.communityOffices ?? []).map((office: Record<string, unknown>) => ({ ...office, status: "revoked" }));
+        }
         // Preserve legacy controlled assignments, while making the independent office canonical.
         if (data.communities !== undefined && req.context.legacyCommunitiesInput === true) {
           const old = originalDoc?.communityOffices ?? [];
@@ -557,10 +565,11 @@ export const Users: CollectionConfig = {
         { label: "社长", value: "president" },
         { label: "副社长", value: "vicePresident" },
         { label: "骨干", value: "backbone" },
-        { label: "历史社群管理标记（不授社群范围）", value: "communityAdmin" },
+        { label: "社群管理", value: "communityAdmin" },
+        { label: "荣誉骨干（退休）", value: "honoraryBackbone" },
         { label: "普通用户", value: "member" },
       ],
-      access: { create: () => true, update: adminField },
+      access: { create: () => true, update: publisherField },
     },
     { name: "accountStatus", label: "账号状态", type: "select", defaultValue: "active",
       options: ["active", "suspended"], access: { create: adminField, update: adminField } },

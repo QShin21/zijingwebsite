@@ -43,7 +43,7 @@ export default async function Showcase({ params, searchParams }: { params: Promi
           sort: "-createdAt",
           limit: 6,
           page,
-          select: { title: true, body: true, images: true, videoURL: true, status: true, authorName: true, createdAt: true, reviewNote: true },
+          select: { title: true, body: true, images: true, videoURL: true, status: true, authorName: true, createdAt: true, updatedAt: true, reviewNote: true },
         });
 
   return (

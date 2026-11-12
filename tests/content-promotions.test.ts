@@ -11,6 +11,8 @@ import type { PromotionAction } from "../src/lib/promotion-model";
 import { activity, submitSignup, saveSignupForm } from "../src/lib/activity-signups";
 import { canAppoint, canPublish } from "../src/lib/rules";
 import { saveVideo, discardVideo, videoPath, controlledVideoVersion } from "../src/lib/showcase-videos";
+import type { PostgresAdapter } from "@payloadcms/db-postgres";
+import { up as restoreEditedPromotions } from "../src/migrations/20261113_000300_restore_edited_promotions";
 
 let p: Payload, leader: User, vice: User, admin: User, execution: User, publicity: User, member: User, outsider: User;
 let game: number, otherGame: number, post: number;
@@ -118,40 +120,51 @@ it("退回/拒绝需理由，撤回和重提使用同一记录，历史与审核
   const audits = await p.find({ collection: "audit", overrideAccess: true, where: { object: { equals: "content-promotions:" + id } }, limit: 20 });
   expect(audits.docs).toHaveLength(8);
 });
-it("保存未改变的内容保持升推，正文改变后仍须复审", async () => {
+it("保存和修改正文均保持升推，并展示最新内容", async () => {
   const approved = await change(execution, "promote", undefined, "合成主动升推理由");
   await p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, data: { title: "合成升推活动" } });
   expect((await row()).status).toBe("approved");
   expect((await row()).approvedVersion).toBe(approved.approvedVersion);
   expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + post)).toBe(true);
   await p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, data: { body: "合成正文新内容" } });
-  expect((await row()).status).toBe("needsReview");
-  expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + post)).toBe(false);
+  expect((await row()).status).toBe("approved");
+  expect((await promotedContent(p, "event")).find(item => item.sourceKey === "community-posts:" + post)?.snapshot.body).toBe("合成正文新内容");
 });
-it("改稿/问卷修改立即撤下并复审，旧批准快照保留且旧版本不能通过", async () => {
+it("升级时恢复因改稿撤下的已批准记录，保留明确降级", async () => {
+  const restored = await change(execution, "promote", undefined, "合成原有升推");
+  const other = await event();
+  let demoted = await change(execution, "promote", undefined, "合成另一升推", other);
+  demoted = await change(execution, "demote", demoted, "合成手动降级", other);
+  const adapter = p.db as unknown as PostgresAdapter;
+  await adapter.pool.query("UPDATE content_promotions SET status='needsReview', history=history || $1::jsonb WHERE id=$2", [JSON.stringify([{ action: "sourceChanged" }]), restored.id]);
+  await restoreEditedPromotions({ db: adapter.drizzle } as Parameters<typeof restoreEditedPromotions>[0]);
+  expect((await row()).status).toBe("approved");
+  expect((await row(other)).status).toBe("demoted");
+  expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + post)).toBe(true);
+});
+it("改稿与问卷修改保留升推并展示当前内容，历史批准快照保留", async () => {
   let current = await change(admin, "submit"); current = await change(execution, "approve", current);
   const approvedVersion = current.approvedVersion, approvedSnapshot = current.approvedSnapshot;
   await p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, data: { title: "合成改稿活动" } });
-  current = await row(); expect(current.status).toBe("needsReview"); expect(current.approvedVersion).toBe(approvedVersion); expect(current.approvedSnapshot).toEqual(approvedSnapshot);
-  expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + post)).toBe(false);
-  current = await change(admin, "submit", current);
-  const oldPending = current, source = await activity(p, "community-posts", post, admin, true);
+  current = await row(); expect(current.status).toBe("approved"); expect(current.approvedVersion).toBe(approvedVersion); expect(current.approvedSnapshot).toEqual(approvedSnapshot);
+  expect((await promotedContent(p, "event")).find(item => item.sourceKey === "community-posts:" + post)?.snapshot.title).toBe("合成改稿活动");
+  const source = await activity(p, "community-posts", post, admin, true);
   await saveSignupForm(p, "community-posts", post, admin, source.version, { ...source.form, title: "合成更新问卷" });
-  expect((await row()).status).toBe("returned");
-  await expect(change(execution, "approve", oldPending)).rejects.toThrow();
-  current = await change(admin, "submit", await row()); current = await change(publicity, "approve", current);
-  expect(current.approvedVersion).not.toBe(approvedVersion); expect((current.approvedSnapshot as { title: string }).title).toBe("合成改稿活动");
+  expect((await row()).status).toBe("approved");
+  expect((await promotedContent(p, "event")).find(item => item.sourceKey === "community-posts:" + post)?.snapshot.title).toBe("合成改稿活动");
 });
 it("源隐藏/删除关闭展示，保留升推决定与既有本人答卷", async () => {
   const value = await activity(p, "community-posts", post, member);
   const receipt = await submitSignup(p, "community-posts", post, member, value.version, { name: "历史合成答案" }); receipts.push(receipt.id);
   await change(publicity, "promote", undefined, "合成主动升推理由");
   await p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, data: { status: "hidden" } });
-  expect((await row()).status).toBe("needsReview"); expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + post)).toBe(false);
+  expect((await row()).status).toBe("approved"); expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + post)).toBe(false);
   await p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, data: { status: "visible" } });
-  const current = await change(execution, "promote", await row(), "合成重新升推");
+  const current = await row();
+  expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + post)).toBe(true);
   await p.delete({ collection: "community-posts", id: post, overrideAccess: true });
-  expect((await row()).approvedSnapshot).toEqual(current.approvedSnapshot); expect((await row()).status).toBe("needsReview");
+  expect((await row()).approvedSnapshot).toEqual(current.approvedSnapshot); expect((await row()).status).toBe("approved");
+  expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + post)).toBe(false);
   expect((await p.findByID({ collection: "event-signups", id: receipt.id, user: member, overrideAccess: false })).answers).toEqual({ name: "历史合成答案" });
 });
 it("重复申请唯一，审核与撤回/其他审核竞争仅一项决定生效", async () => {
@@ -163,12 +176,13 @@ it("重复申请唯一，审核与撤回/其他审核竞争仅一项决定生效
   expect(decisions.filter(result => result.status === "fulfilled")).toHaveLength(1);
   expect((await row()).history).toHaveLength(2);
 });
-it.each([1, 2, 3])("审核与改稿竞态 %i：新稿不能静默替换审核版本", async () => {
+it.each([1, 2, 3])("审核与改稿竞态 %i：以最终升推状态展示当前内容", async () => {
   const pending = await change(admin, "submit");
   await Promise.allSettled([change(execution, "approve", pending), p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, data: { title: "合成竞态新稿" } })]);
   const latest = await readPromotionSource(p, "community-posts", post), current = await row();
-  if (latest.snapshot.title === "合成竞态新稿") { expect(current.status).not.toBe("approved"); expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + post)).toBe(false); }
-  else if (current.status === "approved") expect(current.approvedVersion).toBe(latest.version);
+  const shown = (await promotedContent(p, "event")).find(item => item.sourceKey === "community-posts:" + post);
+  if (current.status === "approved") expect(shown?.snapshot.title).toBe(latest.snapshot.title);
+  else expect(shown).toBeUndefined();
   expect(current.history).toBeDefined();
 });
 it("旧身份不能在撤任/撤销骨干后继续申请或审核", async () => {
@@ -189,17 +203,19 @@ it("公告使用原内容引用与审核流程，升推不生成活动或报名�
   await expect(activity(p, "community-posts", notice.id, member)).rejects.toThrow();
   const snapshot = current.approvedSnapshot;
   await p.update({ collection: "community-posts", id: notice.id, user: admin, overrideAccess: false, data: { body: "合成公告改稿" } });
-  current = await row(notice.id); expect(current.status).toBe("needsReview"); expect(current.approvedSnapshot).toEqual(snapshot);
+  current = await row(notice.id); expect(current.status).toBe("approved"); expect(current.approvedSnapshot).toEqual(snapshot);
+  expect((await promotedContent(p, "notice")).find(item => item.sourceKey === "community-posts:" + notice.id)?.snapshot.body).toBe("合成公告改稿");
 });
-it("活动改为公告必须复审，保留原来源键、原答卷及唯一升推记录", async () => {
+it("活动改为公告后延续升推，保留原来源键、原答卷及唯一升推记录", async () => {
   const value = await activity(p, "community-posts", post, member), receipt = await submitSignup(p, "community-posts", post, member, value.version, { name: "合成历史答卷" }); receipts.push(receipt.id);
   let current = await change(execution, "promote", undefined, "合成活动主动升推");
   const id = current.id;
   await p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, context: { manageSignupForm: true },
     data: { category: "notice", signupForm: { enabled: false, questions: [] } } });
-  expect((await row()).status).toBe("needsReview");
-  current = await change(admin, "submit", await row()); current = await change(vice, "approve", current);
+  current = await row(); expect(current.status).toBe("approved");
   expect(current.id).toBe(id); expect(current.kind).toBe("notice"); expect(current.sourceKey).toBe("community-posts:" + post);
+  expect((await promotedContent(p, "notice")).some(item => item.sourceKey === "community-posts:" + post)).toBe(true);
+  expect((await promotedContent(p, "event")).some(item => item.sourceKey === "community-posts:" + post)).toBe(false);
   expect((await p.findByID({ collection: "event-signups", id: receipt.id, user: member, overrideAccess: false })).answers).toEqual({ name: "合成历史答卷" });
 });
 it("风采先本地审核再申请，骨干升推不授本地发布或私人报名能力", async () => {
@@ -216,7 +232,7 @@ it("风采先本地审核再申请，骨干升推不授本地发布或私人报�
   expect((await promotedContent(p, "showcase")).find(item => item.sourceKey === "community-showcase:" + source.id)?.href).toContain("/showcase/" + source.id);
   expect(canPublish(execution)).toBe(false);
 });
-it("风采媒体改稿撤下并保留旧批准版本，重新申请后才展示新版本", async () => {
+it("风采媒体改稿保留升推并展示新版本", async () => {
   const image = async (background: string) => "data:image/png;base64," + (await sharp({ create: { width: 32, height: 32, channels: 3, background } }).png().toBuffer()).toString("base64");
   const source = await p.create({ collection: "community-showcase", user: admin, overrideAccess: false, context: { webShowcaseWrite: true },
     data: { game, author: admin.id, title: "合成风采媒体", body: "合成媒体", images: [{ source: await image("white"), caption: "合成原图" }] } }); showcases.push(source.id);
@@ -225,12 +241,8 @@ it("风采媒体改稿撤下并保留旧批准版本，重新申请后才展示�
   const approved = current.approvedVersion, snapshot = current.approvedSnapshot;
   await p.update({ collection: "community-showcase", id: source.id, user: admin, overrideAccess: false, context: { webShowcaseWrite: true }, data: { images: [{ source: await image("purple"), caption: "合成新图" }] } });
   current = (await p.find({ collection: "content-promotions", overrideAccess: true, where: { sourceKey: { equals: "community-showcase:" + source.id } } })).docs[0];
-  expect(current.status).toBe("needsReview"); expect(current.approvedVersion).toBe(approved); expect(current.approvedSnapshot).toEqual(snapshot);
-  expect((await promotedContent(p, "showcase")).some(item => item.sourceKey === "community-showcase:" + source.id)).toBe(false);
-  const next = await readPromotionSource(p, "community-showcase", source.id);
-  current = await changePromotion(p, admin, "community-showcase", source.id, "submit", { revision: current.updatedAt, sourceVersion: next.version, reason: "合成媒体改稿重新申请" });
-  current = await changePromotion(p, vice, "community-showcase", source.id, "approve", { revision: current.updatedAt, sourceVersion: current.requestedVersion });
-  expect(current.approvedVersion).not.toBe(approved);
+  expect(current.status).toBe("approved"); expect(current.approvedVersion).toBe(approved); expect(current.approvedSnapshot).toEqual(snapshot);
+  expect((await promotedContent(p, "showcase")).some(item => item.sourceKey === "community-showcase:" + source.id)).toBe(true);
 });
 it("社群外链视频仍可发布，但外链 MP4/B站均不能成为受审核视频升推", async () => {
   for (const url of ["https://example.invalid/mutable.mp4", "https://www.bilibili.com/video/BV1B7411m7LV/"]) {
@@ -241,7 +253,7 @@ it("社群外链视频仍可发布，但外链 MP4/B站均不能成为受审核�
     await expect(changePromotion(p, execution, "community-showcase", source.id, "promote", { sourceVersion: "fake", reason: "不可用外链的合成升推" })).rejects.toThrow("本站受控");
   }
 });
-it("受控视频绑定实际字节，原地变化或删除不会继续展示旧批准版本，换新文件需复审", async () => {
+it("视频改动保留升推资格，替换视频后展示当前内容", async () => {
   const url = await saveVideo(new File([syntheticVideo()], "synthetic.mp4", { type: "video/mp4" })); videos.push(url);
   const source = await p.create({ collection: "community-showcase", user: admin, overrideAccess: false, context: { webShowcaseWrite: true },
     data: { game, author: admin.id, title: "合成受控视频", videoURL: url } }); showcases.push(source.id);
@@ -249,23 +261,21 @@ it("受控视频绑定实际字节，原地变化或删除不会继续展示旧�
   let current = await changePromotion(p, execution, "community-showcase", source.id, "promote", { sourceVersion: first.version, reason: "合成受控视频审核" });
   expect((current.approvedSnapshot as { videoVersion: string }).videoVersion).toBe(await controlledVideoVersion(url));
   await writeFile(videoPath(url.split("/").pop()!), syntheticVideo("b"));
-  expect((await promotedContent(p, "showcase")).some(item => item.sourceKey === "community-showcase:" + source.id)).toBe(false);
+  expect((await promotedContent(p, "showcase")).some(item => item.sourceKey === "community-showcase:" + source.id)).toBe(true);
   expect((await readPromotionSource(p, "community-showcase", source.id)).version).not.toBe(current.approvedVersion);
   await discardVideo(url);
   await expect(readPromotionSource(p, "community-showcase", source.id)).rejects.toThrow("不可用");
-  expect((await promotedContent(p, "showcase")).some(item => item.sourceKey === "community-showcase:" + source.id)).toBe(false);
+  expect((await promotedContent(p, "showcase")).some(item => item.sourceKey === "community-showcase:" + source.id)).toBe(true);
   const nextURL = await saveVideo(new File([syntheticVideo("c")], "synthetic-new.mp4", { type: "video/mp4" })); videos.push(nextURL);
   await p.update({ collection: "community-showcase", id: source.id, user: admin, overrideAccess: false, context: { webShowcaseWrite: true }, data: { videoURL: nextURL } });
   current = (await p.find({ collection: "content-promotions", overrideAccess: true, where: { sourceKey: { equals: "community-showcase:" + source.id } } })).docs[0];
-  expect(current.status).toBe("needsReview"); expect((current.approvedSnapshot as { videoURL: string }).videoURL).toBe(url);
-  const next = await readPromotionSource(p, "community-showcase", source.id);
-  current = await changePromotion(p, publicity, "community-showcase", source.id, "promote", { revision: current.updatedAt, sourceVersion: next.version, reason: "合成新视频重新审核" });
-  expect(current.approvedVersion).toBe(next.version);
+  expect(current.status).toBe("approved"); expect((current.approvedSnapshot as { videoURL: string }).videoURL).toBe(url);
+  expect((await promotedContent(p, "showcase")).find(item => item.sourceKey === "community-showcase:" + source.id)?.snapshot.videoURL).toBe(nextURL);
 });
-it.each([1, 2, 3])("首次主动升推与改稿竞争 %i：不匹配新稿不能作为批准版本展示", async () => {
+it.each([1, 2, 3])("首次主动升推与改稿竞争 %i：已升推时展示当前内容", async () => {
   await Promise.allSettled([change(execution, "promote", undefined, "合成首次主动升推"), p.update({ collection: "community-posts", id: post, user: admin, overrideAccess: false, data: { title: "合成首次竞态新稿" } })]);
   const latest = await readPromotionSource(p, "community-posts", post), current = await row();
   const displayed = (await promotedContent(p, "event")).find(item => item.sourceKey === "community-posts:" + post);
-  if (displayed) { expect(current.approvedVersion).toBe(latest.version); expect(displayed.snapshot.title).toBe(latest.snapshot.title); }
-  if (latest.snapshot.title === "合成首次竞态新稿" && current?.approvedVersion !== latest.version) expect(displayed).toBeUndefined();
+  if (current?.status === "approved") expect(displayed?.snapshot.title).toBe(latest.snapshot.title);
+  else expect(displayed).toBeUndefined();
 });

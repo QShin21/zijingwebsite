@@ -32,6 +32,7 @@ export function ShowcaseCard({
     | "status"
     | "authorName"
     | "createdAt"
+    | "updatedAt"
     | "reviewNote"
   >;
   manager?: boolean;
@@ -47,6 +48,7 @@ export function ShowcaseCard({
       className="member-form showcase-review"
     >
       <input type="hidden" name="id" value={post.id} />
+      <input type="hidden" name="revision" value={post.updatedAt} />
       <input type="hidden" name="returnQuery" value={returnQuery} />
       <label>
         审核说明

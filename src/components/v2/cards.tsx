@@ -111,7 +111,7 @@ export function MatchCard({
   eager?: boolean;
 }) {
   const Heading = headingLevel === 2 ? "h2" : "h3";
-  const when = event.startAt ? formatRange(event.startAt, event.endAt) : event.publishedAt ? `发布于 ${formatDate(event.publishedAt)}` : "时间待定";
+  const when = event.startAt || event.endAt ? formatRange(event.startAt, event.endAt) : event.publishedAt ? `发布于 ${formatDate(event.publishedAt)}` : "时间待定";
   const soon = event.state === "upcoming" ? countdown(event.startAt) : null;
   return (
     <article

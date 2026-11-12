@@ -16,7 +16,7 @@ import {
 import { publicWhere, rel, selectFields, type Input } from "./shared";
 import type { CommunityCapabilities, PlatformRole, Viewer } from "./types";
 
-const roles = new Set<PlatformRole>(["president", "vicePresident", "backbone", "communityAdmin", "member"]);
+const roles = new Set<PlatformRole>(["president", "vicePresident", "backbone", "communityAdmin", "honoraryBackbone", "member"]);
 
 /** Authentication identifies the account, never its current authority. Read only that account. */
 export async function refreshViewer(p: Payload, viewer: User | null): Promise<User | null> {

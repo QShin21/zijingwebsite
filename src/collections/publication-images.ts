@@ -10,8 +10,8 @@ export const postImagesField: Field = {
   },
 };
 
-export const validatePostImages: CollectionBeforeChangeHook = async ({ data, originalDoc }) => {
+export const validatePostImages: CollectionBeforeChangeHook = async ({ data, originalDoc, req }) => {
   if (data.postImages !== undefined)
-    data.postImages = await normalizePublicationImages(data.postImages, originalDoc?.postImages);
+    data.postImages = await normalizePublicationImages(data.postImages, originalDoc?.postImages, undefined, req);
   return data;
 };

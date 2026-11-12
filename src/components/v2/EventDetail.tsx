@@ -7,6 +7,7 @@ import { safeURL } from "@/lib/rules";
 import { ArticleTile, DateBlock, eventTone, signupTone } from "./cards";
 import { CommunityChip, DemoPill, Img, KeyValues, PageHero, StatusPill, Wrap, buttonClass } from "./ui";
 import { RichText } from "./RichText";
+import { PublicationPresentation } from "./PublicationPresentation";
 import { Icon } from "./Icon";
 import { formatDateTime, formatRange } from "./format";
 import layout from "./layout.module.css";
@@ -68,7 +69,7 @@ export function EventDetailView({
           <div>
             <p className={styles.whenTime}>
               <Icon name="clock" size={16} />
-              {event.startAt ? formatRange(event.startAt, event.endAt) : "时间待定"}
+              {event.startAt || event.endAt ? formatRange(event.startAt, event.endAt) : "时间待定"}
             </p>
             {event.location && (
               <p className={styles.whenPlace}>
@@ -93,12 +94,12 @@ export function EventDetailView({
         <div className={styles.grid}>
           <article className={styles.main} aria-label="活动说明">
             <h2 className={styles.mainTitle}>活动说明</h2>
-            {detail.body || detail.bodyText ? (
+            {detail.presentation ? <PublicationPresentation presentation={detail.presentation} images={detail.images} text={detail.bodyText} /> : detail.body || detail.bodyText ? (
               <RichText body={detail.body} text={detail.bodyText} />
             ) : (
               <p className={styles.muted}>主办方暂未补充更多说明。</p>
             )}
-            {images.length > 0 && (
+            {!detail.presentation && images.length > 0 && (
               <div className={styles.gallery}>
                 {images.map((image, index) => (
                   <figure key={`${image.src}-${index}`}>
