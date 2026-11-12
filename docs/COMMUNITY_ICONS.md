@@ -20,6 +20,8 @@
 
 默认图片采用下列游戏方资源，由本站的 `/api/game-icons/default/<游戏标识>` 返回。图片居中并带透明留白，方便小程序的横向卡片完整展示游戏标志。小程序首页和社群列表刷新后即可读取默认图标和管理员上传的图片。仓库保存资源 URL 与代码。
 
+运行 `node --import tsx scripts/prepare-default-game-icons.ts` 可在 `MEDIA_DIR/.default-game-icons-v1` 预备五张默认图片。服务器优先读取这组文件，缺少文件时从对应的游戏方地址获取并缓存。
+
 | 游戏 | 来源页 | 默认图片 |
 | --- | --- | --- |
 | 王者荣耀 | [腾讯游戏官网](https://pvp.qq.com/) | [页面公共页头标志](https://game.gtimg.cn/images/yxzj/pvpcommonimage/header/logo.png) |

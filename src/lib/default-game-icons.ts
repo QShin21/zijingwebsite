@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import sharp from "sharp";
 import type { ImageRef } from "./v2/types";
 
@@ -37,6 +39,10 @@ const icons = [
 const size = 512;
 const maxBytes = 1024 * 1024;
 const rendered = new Map<string, Promise<Buffer>>();
+
+export const defaultGameIconKeys = icons.map((icon) => icon.key);
+export const defaultGameIconDirectory = () =>
+  resolve(process.env.MEDIA_DIR || "media", ".default-game-icons-v1");
 
 export function defaultGameIcon(title: string, slug: string): ImageRef | null {
   const match = icons.find(
@@ -113,10 +119,15 @@ export async function readDefaultGameIcon(key: string): Promise<Buffer | null> {
   if (!icon) return null;
   let image = rendered.get(key);
   if (!image) {
-    image = renderGameIcon(icon).catch((error) => {
-      rendered.delete(key);
-      throw error;
-    });
+    image = readFile(resolve(defaultGameIconDirectory(), `${key}.png`))
+      .catch((error: NodeJS.ErrnoException) => {
+        if (error.code !== "ENOENT") throw error;
+        return renderGameIcon(icon);
+      })
+      .catch((error) => {
+        rendered.delete(key);
+        throw error;
+      });
     rendered.set(key, image);
   }
   return image;
