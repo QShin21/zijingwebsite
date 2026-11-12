@@ -1,0 +1,62 @@
+{
+  "publishedAt": "2026-11-12T21:59:44.197+08:00",
+  "lastUpdatedAt": "2026-11-12T22:01:01.547+08:00",
+  "origin": "https://home.thuzijing.top",
+  "cms": {
+    "collection": "pages",
+    "key": "privacy",
+    "id": 1,
+    "status": "published",
+    "reviewState": "approved",
+    "versions": 2,
+    "auditActor": "system",
+    "auditActions": [
+      "create",
+      "update"
+    ]
+  },
+  "content": {
+    "notice": "docs/PRIVACY_NOTICE_20261112.md",
+    "cmsDocument": "docs/privacy-page-20261112.json",
+    "noticeSHA256": "fda79d528c034aeff07e19c49438843f0c98e91f2f831b886548d15f23191d66",
+    "cmsDocumentSHA256": "d91fc243ffff53c5ff692320ccc5957c7a7a52a31c50f638801091c0b9110cc4",
+    "includes": [
+      "activity seating and proof upload",
+      "random seat assignment",
+      "community showcase upload",
+      "service providers and data usage"
+    ]
+  },
+  "productionServicesObserved": {
+    "hosting": "Alibaba Cloud ECS",
+    "emailHost": "smtp.163.com",
+    "aiEndpoint": "llmapi.paratera.com",
+    "databaseHost": "loopback",
+    "mediaStorage": "server directory",
+    "s3PluginEnabled": false
+  },
+  "verification": {
+    "anonymousCMSHttp": 200,
+    "publishedDocuments": 1,
+    "publicBodyMatchesPreparedContent": true,
+    "websiteHttp": 200,
+    "websiteFallbackAbsent": true,
+    "nativeCMSAndConsentWithSyntheticWechatSDK": "passed using the actual public CMS response",
+    "realWechatDevice": "not verified",
+    "wechatPlatformPrivacyDeclarations": "not verified",
+    "localTests": {
+      "files": [
+        "tests/miniapp-privacy-consent.test.ts",
+        "tests/privacy-publication-content.test.ts"
+      ],
+      "passed": 47,
+      "failed": 0,
+      "scope": "synthetic SDK and content validation"
+    }
+  },
+  "runningApplicationAtVerification": {
+    "revision": "ba3721d2b8d78c7bcb7bdaa6db2466ef276ab3f2",
+    "buildID": "iIRECAG1NeYvCjDnEyxLw"
+  },
+  "codeDeploymentOrWechatUpload": false
+}
