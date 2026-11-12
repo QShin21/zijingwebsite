@@ -1,5 +1,11 @@
 # 部署、迁移与恢复
 
+## 2026-11-12 活动未开放座位
+
+北京时间 17:56:37，`main@b002cf7` 已部署到 `home.thuzijing.top`，构建 `CwRcJ2O2oroQeRGYySeUZ`。增量迁移 `20261112_030000_activity_seat_blocks` 已登记；迁移前后的选座申请、占用和凭证计数分别保持 6、14、6。公网首页、活动页、小程序状态接口、健康检查和构建清单返回 200。
+
+服务器同机备份位于 `/srv/zijingwebsite/backups/seat-lock-20261112-b002cf7`，该目录包含数据库与媒体备份及应用回退脚本。首次备份因目录权限失败后自动恢复旧服务，调整备份执行身份后完成发布。微信开发者工具已上传 0.5.7 开发版。详细范围见[发布记录](evidence/activity-seat-blocks-deployment-20261112.json)。
+
 ## 2026-11-12 网页社群图标入口
 
 北京时间 16:41:46，`new@324b467` 已部署到 `home.thuzijing.top`，构建 `iPpEtsO3NwkGpYO1zhdC1`。首页和社群列表的卡片只提供浏览入口，图标编辑入口集中在社群页头。改动文件 lint、生产构建、隔离候选和公网就绪检查通过。应用沿用现有数据库结构，回退脚本为 `/srv/zijingwebsite/backups/community-card-entry-20261112-324b467/rollback.sh`。
