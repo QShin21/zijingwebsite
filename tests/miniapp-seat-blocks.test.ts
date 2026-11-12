@@ -95,6 +95,8 @@ it("小程序从座位详情审核、撤销和进入增加座位", async () => {
   await invoke(page, "toggle", tap("1-14"));
   invoke(page, "openAdd", event(42));
   expect(navigation.go).toHaveBeenCalledWith("activity-seating", { kind: "events", id: 1, mode: "add", request: 42 });
+  invoke(page, "openChange", event(42));
+  expect(navigation.go).toHaveBeenCalledWith("activity-seating", { kind: "events", id: 1, mode: "change", request: 42 });
   await invoke(page, "decide", event(999, { status: "confirmed" }));
   expect(http.request.mock.calls.filter(([, options]) => options.method === "POST")).toHaveLength(0);
   await invoke(page, "decide", event(42, { status: "confirmed" }));

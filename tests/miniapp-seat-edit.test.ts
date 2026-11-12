@@ -154,3 +154,58 @@ it("小程序管理员打开申请座位图并追加空座", async () => {
   expect(sent).toMatchObject({ action: "add-seats", id: 53, revision: 2, status: "confirmed", seats: ["1-3"] });
   expect(page.data).toMatchObject({ existingCount: 2, selected: [], notice: "已为申请增加 1 个座位。" });
 });
+
+it("小程序管理员从申请打开换座并保留座位数量", async () => {
+  const request = { id: 54, revision: 2, status: "confirmed", seats: ["1-1", "1-2"], createdAt: "2026-11-12T00:00:00Z", reviewedAt: null };
+  const state = { title: "合成活动", request, rows: [{ row: 1, count: 5, offset: 0 }], seatLimit: 10,
+    occupancy: { "1-1": "confirmed", "1-2": "confirmed", "1-3": "pending", "1-4": "confirmed" } as Record<string, string>, blockedSeats: ["1-4"] };
+  const navigation = { go: vi.fn() };
+  const http = { request: vi.fn(async (path: string, options: { method?: string; data?: { seats: string[] } }) => {
+    if (options.method === "POST") {
+      request.seats = options.data!.seats.slice(); request.revision++;
+      state.occupancy = { "1-2": "confirmed", "1-3": "pending", "1-4": "confirmed", "1-5": "confirmed" };
+      return { request: structuredClone(request) };
+    }
+    if (path.includes("mode=review")) return { title: state.title, docs: [{ ...request, memberName: "合成成员", phone: "13800138000", proofs: [] }] };
+    return structuredClone(state);
+  }) };
+  const modules: Record<string, unknown> = {
+    "../../lib/theme": { page: (value: NativePage) => value }, "../../lib/http": http,
+    "../../lib/files": {}, "../../lib/privacy": {}, "../../lib/navigation": navigation,
+    "../../lib/session": { user: () => ({ id: 1 }), subscribe: () => () => {} },
+    "../../lib/format": { date: () => "", beijingParts: () => ({}) }, "../../lib/page": { actions: {} },
+  };
+  let page!: NativePage;
+  const createPage = () => {
+    runInNewContext(readFileSync("miniprogram/src/pages/activity-seating/index.js", "utf8"), {
+      Page: (value: NativePage) => { page = value; }, require: (name: string) => modules[name],
+      wx: { setNavigationBarTitle: vi.fn() }, clearTimeout, setTimeout,
+    });
+    page.setData = values => {
+      for (const [key, value] of Object.entries(values)) {
+        const path = /^rows\[(\d+)\]\.seats\[(\d+)\]$/.exec(key);
+        if (path) (page.data.rows as { seats: unknown[] }[])[Number(path[1])].seats[Number(path[2])] = value;
+        else page.data[key] = value;
+      }
+    };
+  };
+  createPage();
+  invoke(page, "onLoad", { kind: "events", id: "1", mode: "review" });
+  await invoke(page, "onShow");
+  invoke(page, "openChange", { currentTarget: { dataset: { id: 54 } } });
+  expect(navigation.go).toHaveBeenCalledWith("activity-seating", { kind: "events", id: 1, mode: "change", request: 54 });
+  invoke(page, "onUnload");
+  createPage();
+  invoke(page, "onLoad", { kind: "events", id: "1", mode: "change", request: "54" });
+  await invoke(page, "onShow");
+  expect(page.data).toMatchObject({ changing: true, selected: ["1-1", "1-2"], seatLimit: 2, changeReady: false });
+  invoke(page, "toggle", tap("1-3"));
+  invoke(page, "toggle", tap("1-4"));
+  invoke(page, "toggle", tap("1-1"));
+  invoke(page, "toggle", tap("1-5"));
+  expect(page.data).toMatchObject({ selected: ["1-2", "1-5"], changeReady: true });
+  await invoke(page, "submitChange");
+  const sent = http.request.mock.calls.find(([, options]) => options.method === "POST")?.[1].data;
+  expect(sent).toMatchObject({ action: "change-seats", id: 54, revision: 2, status: "confirmed", seats: ["1-2", "1-5"] });
+  expect(page.data).toMatchObject({ selected: ["1-2", "1-5"], changeReady: false, notice: "已更换座位，申请状态保持不变。" });
+});

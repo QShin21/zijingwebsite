@@ -105,6 +105,9 @@ async function revokeOne(activity: Activity, who: Actor, id: number, revision: n
 async function addSeats(activity: Activity, who: Actor, id: number, revision: number, status: string, seats: string[]) {
   return route.POST(request(activity, "POST", who, { action: "add-seats", id, revision, status, seats }), context(activity));
 }
+async function changeSeats(activity: Activity, who: Actor, id: number, revision: number, status: string, seats: string[]) {
+  return route.POST(request(activity, "POST", who, { action: "change-seats", id, revision, status, seats }), context(activity));
+}
 async function assignment(activity: Activity, who: Actor, id: number) {
   return route.GET(request(activity, "GET", who, undefined, `?mode=assignment&request=${id}`), context(activity));
 }
@@ -798,4 +801,51 @@ it("管理员按座位查看当前申请，权限和活动范围受到限制", a
   expect(await (await detail(reviewer, "12-3")).json()).toEqual({ seat: "12-3", request: null });
   expect((await put(activity, reviewer, false)).status).toBe(200);
   expect((await detail(reviewer, "12-1")).status).toBe(200);
+});
+
+it("管理员更换待审核和已确认申请的座位，保留数量、状态和凭证", async () => {
+  const activity = await extraActivity("admin-change");
+  const proof = await added(activity, first), otherProof = await added(activity, second);
+  const mine = (await (await submit(activity, first, ["2-1", "2-2"], [proof])).json()).mine;
+  expect((await submit(activity, second, ["2-5"], [otherProof])).status).toBe(200);
+  expect((await block(activity, reviewer, ["2-4"], true)).status).toBe(200);
+  expect((await changeSeats(activity, first, mine.id, 0, "pending", ["2-2", "2-3"])).status).toBe(403);
+  expect((await changeSeats(activity, otherReviewer, mine.id, 0, "pending", ["2-2", "2-3"])).status).toBe(403);
+  expect((await changeSeats(activity, reviewer, mine.id, 0, "pending", ["2-2"])).status).toBe(400);
+  expect((await changeSeats(activity, reviewer, mine.id, 0, "pending", ["2-2", "2-2"])).status).toBe(400);
+  expect((await changeSeats(activity, reviewer, mine.id, 0, "pending", ["2-2", "2-4"])).status).toBe(409);
+  expect((await changeSeats(activity, reviewer, mine.id, 0, "pending", ["2-2", "2-5"])).status).toBe(409);
+  expect((await map(activity, first)).mine).toMatchObject({ revision: 0, seats: ["2-1", "2-2"] });
+  const swapped = await changeSeats(activity, reviewer, mine.id, 0, "pending", ["2-2", "2-3"]);
+  expect(swapped.status).toBe(200);
+  expect((await swapped.json()).request).toMatchObject({ revision: 1, status: "pending", seats: ["2-2", "2-3"] });
+  const state = await map(activity, first);
+  expect(state.occupancy["2-1"]).toBeUndefined();
+  expect(state.occupancy["2-3"]).toBe("pending");
+  expect(state.occupancy["2-5"]).toBe("pending");
+  expect((await image(activity, proof, first)).status).toBe(200);
+  const pendingHistory = await review(activity, reviewer);
+  expect((await pendingHistory.json()).docs).toEqual(expect.arrayContaining([expect.objectContaining({ id: mine.id, proofs: [proof], releasedSeats: [expect.objectContaining({ seat: "2-1" })], addedSeats: [expect.objectContaining({ seat: "2-3" })] })]));
+  expect((await route.POST(request(activity, "POST", reviewer, { action: "review", id: mine.id, status: "confirmed", revision: 1 }), context(activity))).status).toBe(200);
+  expect((await changeSeats(activity, reviewer, mine.id, 1, "pending", ["2-3", "2-6"])).status).toBe(409);
+  expect((await put(activity, reviewer, false)).status).toBe(200);
+  expect((await changeSeats(activity, reviewer, mine.id, 1, "confirmed", ["2-3", "2-6"])).status).toBe(200);
+  expect((await map(activity, first)).mine).toMatchObject({ status: "confirmed", revision: 2, seats: ["2-3", "2-6"] });
+  const same = await changeSeats(activity, reviewer, mine.id, 2, "confirmed", ["2-6", "2-3"]);
+  expect((await same.json()).request).toMatchObject({ revision: 2, seats: ["2-3", "2-6"] });
+});
+
+it("管理员换座与成员选座并发时失败的一方保留原座位", async () => {
+  const activity = await extraActivity("admin-change-race", "community-posts");
+  const firstProof = await added(activity, first), secondProof = await added(activity, second);
+  const mine = (await (await submit(activity, first, ["3-1"], [firstProof])).json()).mine;
+  const result = await Promise.all([
+    changeSeats(activity, reviewer, mine.id, 0, "pending", ["3-2"]),
+    submit(activity, second, ["3-2"], [secondProof]),
+  ]);
+  expect(result.map(response => response.status).sort()).toEqual([200, 409]);
+  const state = await map(activity, first);
+  expect(state.mine?.seats).toEqual(result[0].status === 200 ? ["3-2"] : ["3-1"]);
+  expect(state.occupancy["3-2"]).toBe("pending");
+  expect(state.occupancy["3-1"]).toBe(result[0].status === 200 ? undefined : "pending");
 });
