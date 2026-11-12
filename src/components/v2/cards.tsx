@@ -273,7 +273,6 @@ export function CommunityTile({ card }: { card: CommunityCard }) {
           {card.viewer?.isOfficer && <span className={styles.officer}>我是管理员</span>}
           {card.demo && <DemoPill />}
         </p>
-        {card.viewer?.canManageIcon && <Link className={styles.editIcon} href={`/community/${community.slug}/appearance`}>修改社群图标</Link>}
       </div>
     </article>
   );

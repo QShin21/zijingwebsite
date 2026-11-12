@@ -104,7 +104,7 @@ test("default logos, real upload, keyboard/drag crop, re-edit, responsive themes
       has: page.getByRole("heading", { name: "王者荣耀", exact: true }),
     })
     .first();
-  await expect(card.getByRole("link", { name: "修改社群图标" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "修改社群图标" })).toHaveCount(0);
   for (const title of [
     "王者荣耀",
     "CS2",
@@ -133,7 +133,10 @@ test("default logos, real upload, keyboard/drag crop, re-edit, responsive themes
     path: artifacts + "/cards-desktop.png",
     fullPage: true,
   });
-  await card.getByRole("link", { name: "修改社群图标" }).click();
+  await card.getByRole("link", { name: "王者荣耀", exact: true }).click();
+  const editIcon = page.getByRole("link", { name: "修改社群图标", exact: true });
+  await expect(editIcon).toHaveCount(1);
+  await editIcon.click();
   await expect(
     page.getByRole("heading", { name: "修改社群图标", exact: true }),
   ).toBeVisible();
@@ -231,7 +234,7 @@ test("default logos, real upload, keyboard/drag crop, re-edit, responsive themes
     page.getByRole("alert").filter({ hasText: "无权修改此社群图标" }),
   ).toBeVisible();
   await page.context().clearCookies();
-  await login(page, member, "/community");
+  await login(page, member, "/community/" + slug);
   await expect(page.getByRole("link", { name: "修改社群图标" })).toHaveCount(0);
   const denied = await page.goto("/community/" + slug + "/appearance");
   expect(denied?.status()).toBe(404);
