@@ -16,13 +16,13 @@ function harness(manage: boolean, canReview = true) {
   const state: State = { title: "合成活动", enabled: false, open: false, scheduled: false, loggedIn: true, canReview,
     rows: [{ row: 1, count: 15, offset: 0 }], occupancy: { "1-13": "confirmed", "1-14": "pending", "1-15": "confirmed" },
     blockedSeats: ["1-15"], seatLimit: 10, proofLimit: 10, proofBytes: 8388608, drafts: [], mine: null };
-  const http = { request: vi.fn(async (path: string, options: { method?: string; data?: { seats: string[]; blocked: boolean } }) => {
+  const http = { request: vi.fn(async (path: string, options: { method?: string; data?: { action?: string; seats?: string[]; blocked?: boolean; id?: number; revision?: number; status?: string; seat?: string } }) => {
     if (path.includes("mode=seat-review")) {
       const confirmed = path.includes("1-13"), seat = confirmed ? "1-13" : "1-14";
       return { seat, request: { id: confirmed ? 43 : 42, revision: 0, status: confirmed ? "confirmed" : "pending", memberName: "合成申请人", phone: "13800138000", seats: [seat], proofs: [], createdAt: "2026-11-12T00:00:00Z" } };
     }
-    if (options.method === "POST" && options.data) {
-      for (const seat of options.data.seats) {
+    if (options.method === "POST" && options.data?.action === "block") {
+      for (const seat of options.data.seats || []) {
         if (options.data.blocked) { state.blockedSeats.push(seat); state.occupancy[seat] = "confirmed"; }
         else { state.blockedSeats = state.blockedSeats.filter(value => value !== seat); delete state.occupancy[seat]; }
       }
@@ -30,15 +30,16 @@ function harness(manage: boolean, canReview = true) {
     return structuredClone(state);
   }) };
   const session = { user: () => ({ id: 1 }), subscribe: () => () => {} };
+  const navigation = { go: vi.fn() };
   const modules: Record<string, unknown> = {
     "../../lib/theme": { page: (definition: NativePage) => definition }, "../../lib/http": http,
-    "../../lib/files": {}, "../../lib/navigation": {}, "../../lib/privacy": {}, "../../lib/session": session,
+    "../../lib/files": {}, "../../lib/navigation": navigation, "../../lib/privacy": {}, "../../lib/session": session,
     "../../lib/format": { date: () => "", beijingParts: () => ({}) }, "../../lib/page": { actions: {} },
   };
   let page!: NativePage;
   runInNewContext(readFileSync("miniprogram/src/pages/activity-seating/index.js", "utf8"), {
     Page: (value: NativePage) => { page = value; }, require: (name: string) => modules[name],
-    wx: { setNavigationBarTitle: vi.fn() }, clearTimeout, setTimeout,
+    wx: { setNavigationBarTitle: vi.fn(), showModal: (options: { success: (answer: { confirm: boolean }) => void }) => options.success({ confirm: true }) }, clearTimeout, setTimeout,
   });
   page.setData = values => {
     for (const [key, value] of Object.entries(values)) {
@@ -50,7 +51,7 @@ function harness(manage: boolean, canReview = true) {
     }
   };
   invoke(page, "onLoad", { kind: "events", id: "1", ...(manage ? { mode: "manage" } : {}) });
-  return { page, http, state };
+  return { page, http, state, navigation };
 }
 
 it("小程序管理员在开放前锁定和解锁座位，并点击已申请座位查看记录", async () => {
@@ -85,4 +86,30 @@ it("小程序成员看到未开放座位且无法选择，无权用户不能进�
   const unauthorized = harness(true, false);
   await invoke(unauthorized.page, "onShow");
   expect(unauthorized.page.data).toMatchObject({ editable: false, rows: [], loadError: "无权管理此活动的座位" });
+});
+
+it("小程序从座位详情审核、撤销和进入增加座位", async () => {
+  const { page, http, navigation } = harness(true);
+  const event = (id: number, extra = {}) => ({ currentTarget: { dataset: { id, ...extra } } });
+  await invoke(page, "onShow");
+  await invoke(page, "toggle", tap("1-14"));
+  invoke(page, "openAdd", event(42));
+  expect(navigation.go).toHaveBeenCalledWith("activity-seating", { kind: "events", id: 1, mode: "add", request: 42 });
+  await invoke(page, "decide", event(999, { status: "confirmed" }));
+  expect(http.request.mock.calls.filter(([, options]) => options.method === "POST")).toHaveLength(0);
+  await invoke(page, "decide", event(42, { status: "confirmed" }));
+  expect(http.request.mock.calls.filter(([, options]) => options.method === "POST")[0][1].data)
+    .toMatchObject({ action: "review", id: 42, revision: 0, status: "confirmed" });
+  await invoke(page, "toggle", tap("1-14"));
+  await invoke(page, "decide", event(42, { status: "rejected" }));
+  expect(http.request.mock.calls.filter(([, options]) => options.method === "POST")[1][1].data)
+    .toMatchObject({ action: "review", id: 42, revision: 0, status: "rejected" });
+  await invoke(page, "toggle", tap("1-13"));
+  await invoke(page, "revokeSeat", event(43, { seat: "1-13" }));
+  expect(http.request.mock.calls.filter(([, options]) => options.method === "POST")[2][1].data)
+    .toMatchObject({ action: "revoke-seat", id: 43, revision: 0, seat: "1-13" });
+  await invoke(page, "toggle", tap("1-13"));
+  await invoke(page, "revoke", event(43));
+  expect(http.request.mock.calls.filter(([, options]) => options.method === "POST")[3][1].data)
+    .toMatchObject({ action: "revoke", id: 43, revision: 0 });
 });

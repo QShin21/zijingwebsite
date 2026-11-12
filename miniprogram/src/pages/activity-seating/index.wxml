@@ -153,7 +153,17 @@
           <view class="seat-proof-row"><text class="zj-small">活动参与凭证 {{seatReview.proofs.length}} 张</text>
             <view class="seat-proof-buttons"><button wx:for="{{seatReview.proofs}}" wx:key="*this" class="secondary seat-proof-button" data-proof="{{item}}" bindtap="previewProof" disabled="{{busy || loading}}">凭证 {{index + 1}}</button></view>
           </view>
-          <view class="zj-record-actions"><button class="plain" data-phone="{{seatReview.phone}}" bindtap="call" disabled="{{busy}}">拨打</button></view>
+          <view wx:if="{{seatReview.status === 'confirmed'}}" class="seat-proof-row">
+            <text class="zj-small">撤销单个座位</text>
+            <view class="seat-proof-buttons"><button wx:for="{{seatReview.seatItems}}" wx:key="id" wx:for-item="seat" class="secondary seat-proof-button" data-id="{{seatReview.id}}" data-seat="{{seat.id}}" bindtap="revokeSeat" disabled="{{busy || loading}}">撤销 {{seat.label}}</button></view>
+          </view>
+          <view class="zj-record-actions">
+            <button class="plain" data-phone="{{seatReview.phone}}" bindtap="call" disabled="{{busy}}">拨打</button>
+            <button class="secondary" data-id="{{seatReview.id}}" bindtap="openAdd" disabled="{{busy || loading || seatReview.seatCount >= 10}}">增加座位</button>
+            <button wx:if="{{seatReview.status === 'pending'}}" class="primary" data-id="{{seatReview.id}}" data-status="confirmed" bindtap="decide" disabled="{{busy || loading}}">通过并锁定</button>
+            <button wx:if="{{seatReview.status === 'pending'}}" class="danger" data-id="{{seatReview.id}}" data-status="rejected" bindtap="decide" disabled="{{busy || loading}}">驳回并释放</button>
+            <button wx:if="{{seatReview.status === 'confirmed'}}" class="danger" data-id="{{seatReview.id}}" bindtap="revoke" disabled="{{busy || loading}}">撤销确认</button>
+          </view>
         </block>
         <text wx:else class="zj-form-hint">该座位当前没有申请，请刷新座位图。</text>
       </view>

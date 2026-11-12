@@ -351,10 +351,15 @@ Page(withVisualTheme({
     }, false);
   },
   closeSeatReview() { this.setData({ seatReview: null, inspectedSeat: '' }); },
+  reviewRecord(id) {
+    if (this.data.review) return this.data.docs.find(value => value.id === id);
+    if (this.data.manage && this.data.canReview && this.data.seatReview && this.data.seatReview.id === id) return this.data.seatReview;
+    return null;
+  },
   openAdd(event) {
     const request = Number(event.currentTarget.dataset.id);
-    const doc = this.data.docs.find(value => value.id === request);
-    if (this.data.review && doc && (doc.status === 'pending' || doc.status === 'confirmed') && doc.seatCount < 10 && !this.data.busy && !this.data.loading)
+    const doc = this.reviewRecord(request);
+    if (doc && (doc.status === 'pending' || doc.status === 'confirmed') && doc.seatCount < 10 && !this.data.busy && !this.data.loading)
       navigation.go('activity-seating', { kind: this._kind, id: this._id, mode: 'add', request });
   },
   submitAdd() {
@@ -399,8 +404,8 @@ Page(withVisualTheme({
   },
   decide(event) {
     const status = event.currentTarget.dataset.status, request = Number(event.currentTarget.dataset.id);
-    if (!this.data.review || (status !== 'confirmed' && status !== 'rejected') || !Number.isSafeInteger(request) || request <= 0) return;
-    const doc = this.data.docs.find(item => item.id === request);
+    if ((status !== 'confirmed' && status !== 'rejected') || !Number.isSafeInteger(request) || request <= 0) return;
+    const doc = this.reviewRecord(request);
     if (!doc || doc.status !== 'pending') return;
     return this.work(status === 'confirmed' ? '正在通过申请' : '正在驳回申请', async revision => {
       if (status === 'rejected') {
@@ -414,8 +419,8 @@ Page(withVisualTheme({
   },
   revoke(event) {
     const request = Number(event.currentTarget.dataset.id);
-    if (!this.data.review || !Number.isSafeInteger(request) || request <= 0) return;
-    const doc = this.data.docs.find(item => item.id === request);
+    if (!Number.isSafeInteger(request) || request <= 0) return;
+    const doc = this.reviewRecord(request);
     if (!doc || doc.status !== 'confirmed') return;
     return this.work('正在撤销确认', async revision => {
       const answer = await new Promise(resolve => wx.showModal({ title: '撤销确认', content: '撤销后此申请的全部座位将释放给其他成员。确认撤销？',
@@ -428,8 +433,8 @@ Page(withVisualTheme({
   },
   revokeSeat(event) {
     const request = Number(event.currentTarget.dataset.id), seat = String(event.currentTarget.dataset.seat || '');
-    if (!this.data.review || !Number.isSafeInteger(request) || request <= 0) return;
-    const doc = this.data.docs.find(item => item.id === request);
+    if (!Number.isSafeInteger(request) || request <= 0) return;
+    const doc = this.reviewRecord(request);
     if (!doc || doc.status !== 'confirmed' || !doc.seatItems.some(item => item.id === seat)) return;
     return this.work('正在撤销座位', async revision => {
       const message = doc.seatCount === 1 ? '这是最后一个座位，撤销后整份申请将变为已撤销。' : '该座位将释放，其余座位继续保持已确认。';
