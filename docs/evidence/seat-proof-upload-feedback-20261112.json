@@ -22,6 +22,7 @@
     "changedFilesLint": "passed",
     "baselineCommunityLifecycle": "17 failures reproduced on unchanged main: obsolete community and community-joins page expectations"
   },
-  "wechatUpload": false,
+  "wechatUpload": true,
+  "wechatUploadEvidence": "docs/evidence/miniprogram-0517-upload-20261112.json",
   "productionDeployment": false
 }
