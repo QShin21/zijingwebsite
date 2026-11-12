@@ -5,7 +5,7 @@
     "missingUploadDomainReportedByUser": true,
     "userAddedUploadDomain": true,
     "platformConfigurationIndependentlyVerified": false,
-    "phoneRetest": "pending",
+    "phoneRetest": "user reported the selected proof count became 1 after adding the uploadFile legal domain; tested mini-program version and seat application submission were not verified",
     "serverLogScope": "aggregate request times, methods and statuses; no image content or personal data read"
   },
   "changes": [
