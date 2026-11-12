@@ -1,0 +1,27 @@
+{
+  "sourceRevision": "f7d4f3aeb1de2b91fcba432d11532fe3f5c07c50",
+  "branch": "main",
+  "deployedAt": "2026-11-12T22:34:37+08:00",
+  "origin": "https://home.thuzijing.top",
+  "releaseDirectory": "/srv/zijingwebsite/releases/event-images-20261112-f7d4f3a",
+  "buildID": "m1uPFFODazwdpoCdvSt7E",
+  "previousRevision": "ba3721d2b8d78c7bcb7bdaa6db2466ef276ab3f2",
+  "migration": null,
+  "backup": {
+    "storage": "server-local",
+    "directory": "/srv/zijingwebsite/backups/event-images-20261112-f7d4f3a",
+    "snapshot": "/srv/zijingwebsite/backups/event-images-20261112-f7d4f3a/database/zijing-2026-11-12T14-34-32.583Z",
+    "rollbackScript": "/srv/zijingwebsite/backups/event-images-20261112-f7d4f3a/rollback.sh",
+    "restoreVerified": false
+  },
+  "checks": {
+    "changedFileLint": "passed",
+    "isolatedTypecheck": "passed; stale generated route types in the original workspace caused the initial typecheck to fail",
+    "productionBuildAndTypecheck": "passed from exact source revision",
+    "syntheticBrowser": "passed at 1440, 390 and 320 px: cover fallback appears once; images retain their proportions; desktop side-by-side and mobile wrapping; separate cover and cover-only cases; original image link; no horizontal overflow",
+    "candidate": { "ready": 200, "events": 200, "buildManifest": 200 },
+    "publicHttp": { "ready": 200, "events": 200, "buildManifest": 200, "eventStylesheetMatchesBuild": true },
+    "productionActivityDetail": "not visually checked in an authenticated session",
+    "ci": "skipped"
+  }
+}

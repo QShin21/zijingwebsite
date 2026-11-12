@@ -225,3 +225,7 @@ SSE 通过 Nginx 公网 HTTPS 验证，响应禁止缓冲，每 15 秒心跳、6
 ## 2026-11-12 自主选座与随机座位
 
 应用 `ba3721d2b8d78c7bcb7bdaa6db2466ef276ab3f2` 已部署，迁移 `20261112_090000_activity_seat_modes` 新增模式和申请数量字段。迁移前后核对原有申请、设置、占座、锁座及凭证内容一致，原有活动均为自主选座；备份和迁移后均有 133 份申请、231 个座位占用、180 个凭证和 21 个未开放座位。公网就绪及资源检查通过，服务器本地备份在 `/srv/zijingwebsite/backups/seat-random-20261112-ba3721d`；本轮未执行恢复演练。备份内的应用回滚脚本会在存在随机模式活动或随机待审申请时拒绝切回旧应用，以免旧应用无法正确处理新状态。详见[部署记录](evidence/activity-seat-random-mode-deployment-20261112.json)。
+
+## 2026-11-12 活动详情图片排版
+
+应用 `f7d4f3aeb1de2b91fcba432d11532fe3f5c07c50` 已部署，无新增迁移。候选端口及公网就绪、活动列表和构建资源检查通过，公网活动详情样式文件与构建产物的 SHA-256 一致。服务器本地备份和回退脚本位于 `/srv/zijingwebsite/backups/event-images-20261112-f7d4f3a`；本轮未执行恢复演练。登录后的真实活动详情未做视觉核验。详见[部署记录](evidence/event-images-layout-deployment-20261112.json)。
