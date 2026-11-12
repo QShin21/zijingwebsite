@@ -232,3 +232,22 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+.filters {
+  background: var(--z-surface);
+}
+.filters select {
+  background: var(--z-field);
+  box-shadow:
+    inset 2px 2px 0 var(--z-control-shadow),
+    inset -1px -1px 0 var(--z-control-highlight);
+}
+.filters label.filterCheck:has(input:checked) {
+  background: var(--z-raised);
+  box-shadow: inset 0 1px 0 var(--z-control-highlight);
+}
+.filters label.filterCheck {
+  padding: 6px 10px;
+  border: 1px solid var(--z-line-strong);
+  background: var(--z-field);
+}

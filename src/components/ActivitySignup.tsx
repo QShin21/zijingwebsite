@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { SuccessMark } from "./v2/SuccessMark";
 import { useEffect, useId, useRef, useState } from "react";
 import type { SignupForm, Question, Answers } from "@/lib/signup-schema";
 import { QuestionnaireResults } from "./QuestionnaireResults";
@@ -93,6 +95,8 @@ export function ActivitySignup({
     [verifiedReceipt, setVerifiedReceipt] = useState<Receipt | null>(null),
     [savedMessage, setSavedMessage] = useState(""),
     [retry, setRetry] = useState(0);
+  const router = useRouter();
+  const [confirmed, setConfirmed] = useState(false);
   const reloadHelp = useId(),
     writeLock = useRef(false);
   useEffect(() => {
@@ -152,6 +156,7 @@ export function ActivitySignup({
     return null;
   async function verifyReceipt() {
     if (busy) return;
+    setConfirmed(false);
     setBusy(true);
     try {
       const latest = await signupImageRequest(endpoint);
@@ -222,7 +227,12 @@ export function ActivitySignup({
         </div>
       )}
       {savedMessage && (
-        <p className={styles.feedback} role="status">
+        <p
+          className={styles.feedback}
+          role="status"
+          data-confirmed={confirmed || undefined}
+        >
+          {confirmed && <SuccessMark />}
           {savedMessage}
         </p>
       )}
@@ -254,6 +264,7 @@ export function ActivitySignup({
               className="button"
               onClick={() => {
                 setEditing(true);
+                setConfirmed(false);
                 setVerifiedReceipt(null);
                 setSavedMessage("");
               }}
@@ -316,6 +327,7 @@ export function ActivitySignup({
                   disabled={busy}
                   aria-describedby={reloadHelp}
                   onClick={async () => {
+                    setConfirmed(false);
                     setBusy(true);
                     try {
                       setInfo(await signupImageRequest(endpoint));
@@ -376,6 +388,9 @@ export function ActivitySignup({
                 onSubmit={async (answers) => {
                   if (writeLock.current || busy) return;
                   writeLock.current = true;
+                  setConfirmed(false);
+                  setSavedMessage("");
+                  setError("");
                   setBusy(true);
                   try {
                     const result = await signupRequest(
@@ -391,7 +406,11 @@ export function ActivitySignup({
                     );
                     setInfo({ ...info, signup: result.signup });
                     setEditing(false);
-                    setSavedMessage(result.message);
+                    setSavedMessage(
+                      result.message || "报名已保存，请查看本人回执",
+                    );
+                    setConfirmed(Boolean(result.signup));
+                    router.refresh();
                   } finally {
                     writeLock.current = false;
                     setBusy(false);

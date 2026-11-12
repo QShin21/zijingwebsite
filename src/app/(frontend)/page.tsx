@@ -78,7 +78,10 @@ function PersonalPanel({ home }: { home: HomeResponse }) {
         {joinPaths.map((path) => (
           <li key={path.key}>
             <strong>
-              <Link href={path.href}>{path.title}</Link>
+              <Link href={path.href}>
+                {path.title}
+                <Icon name="arrow" size={16} />
+              </Link>
             </strong>
             <p>{path.body}</p>
           </li>
@@ -183,7 +186,7 @@ function HomeBlock({
           }
         >
           {home.notices.length ? (
-            <ul className={`${layout.list} ${layout.panel}`}>
+            <ul className={layout.list}>
               {home.notices.map((notice) => (
                 <NoticeRow key={notice.key} article={notice} />
               ))}
@@ -370,9 +373,7 @@ export default async function Home() {
             <HomeReel home={home} />
           </aside>
         </div>
-        <div className={styles.lowerSections}>
-          {blocks}
-        </div>
+        <div className={styles.lowerSections}>{blocks}</div>
       </Wrap>
     </>
   );

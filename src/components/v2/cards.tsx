@@ -120,9 +120,10 @@ export function MatchCard({
       style={event.community ? hueStyle(event.community.hue) : undefined}
       data-community={event.community ? "" : undefined}
       data-state={event.state}
+      data-pixel-interactive="true"
       data-promotion-source={promotionSource(event.ref, event.promoted)}
     >
-      <PixelCorners seed={event.key} variant={variant === "spotlight" ? "coral" : "mint"} />
+      <PixelCorners interactive seed={event.key} variant={variant === "spotlight" ? "coral" : "mint"} />
       <DateBlock iso={event.startAt} size={variant === "spotlight" ? "lg" : variant === "tile" ? "sm" : "md"} tone={variant === "spotlight" ? "accent" : "plain"} />
       <div className={styles.matchBody}>
         <div className={styles.matchTop}>

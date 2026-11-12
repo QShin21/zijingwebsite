@@ -164,6 +164,7 @@ export function PixelGames({
               aria-label={`${game.name} · 寻找游戏社群`}
             >
               <span>
+                <PixelCorners interactive seed={`game-${game.kind}`} />
                 <PixelGameIcon src={`/pixel-campus/game-icons/${game.file}`} />
               </span>
               <strong>{game.name}</strong>

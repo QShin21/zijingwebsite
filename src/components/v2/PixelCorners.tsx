@@ -61,9 +61,11 @@ const shapes = [
 export function PixelCorners({
   variant = "gold",
   seed = variant,
+  interactive = false,
 }: {
   variant?: "gold" | "mint" | "coral";
   seed?: string;
+  interactive?: boolean;
 }) {
   // Stable variation keeps server rendering and client hydration identical.
   const hash = Array.from(seed).reduce(
@@ -74,7 +76,12 @@ export function PixelCorners({
   const second =
     (first + 1 + ((hash >>> 4) % (shapes.length - 1))) % shapes.length;
   return (
-    <span className={styles.corners} data-pixel-corners="" aria-hidden="true">
+    <span
+      className={styles.corners}
+      data-pixel-corners=""
+      data-interactive={interactive || undefined}
+      aria-hidden="true"
+    >
       {[first, second].map((shape, index) => {
         const cells = shapes[shape].map(([x, y]) =>
           (hash >>> (index + 9)) & 1 ? [y, x] : [x, y],

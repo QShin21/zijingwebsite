@@ -41,3 +41,24 @@
 :global(:root[data-z-theme="simple"]) .corners {
   display: none;
 }
+
+.corners[data-interactive] svg {
+  transition: scale 90ms steps(2, end);
+  transform-origin: top left;
+}
+.corners[data-interactive] svg:last-child {
+  transform-origin: center;
+}
+:global(:is(a, button, [data-pixel-interactive]):active)
+  > .corners[data-interactive]
+  svg,
+:global(:is([aria-pressed="true"], [aria-selected="true"]))
+  > .corners[data-interactive]
+  svg {
+  scale: 0.82;
+}
+@media (prefers-reduced-motion: reduce) {
+  .corners[data-interactive] svg {
+    transition: none;
+  }
+}

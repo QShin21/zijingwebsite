@@ -91,7 +91,12 @@
 .loadingLine {
   height: 14px;
   border-radius: 8px;
-  background: linear-gradient(90deg, var(--z-tint) 0%, var(--z-raised) 50%, var(--z-tint) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--z-tint) 0%,
+    var(--z-raised) 50%,
+    var(--z-tint) 100%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
 }
@@ -234,4 +239,13 @@
 .steps li[aria-current="step"] > span {
   background: var(--z-action);
   color: var(--z-action-ink);
+}
+
+.feedback[data-confirmed] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--z-success-bg);
+  color: var(--z-success);
+  border: 1px solid var(--z-success-line);
 }

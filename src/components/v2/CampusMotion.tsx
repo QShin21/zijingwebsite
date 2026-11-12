@@ -97,7 +97,14 @@ export function CampusCover({
       onFocus={onFocus}
       onBlur={onBlur}
     >
-      <div className={styles.scene} aria-hidden="true" />
+      <div className={styles.scene} aria-hidden="true">
+        <div className={styles.ambience}>
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
+      </div>
       {children}
     </div>
   );

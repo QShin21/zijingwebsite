@@ -1,0 +1,21 @@
+.mark {
+  flex: 0 0 auto;
+  color: var(--z-success);
+  animation: confirmMark 180ms steps(3, end) both;
+}
+@keyframes confirmMark {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mark {
+    animation: none;
+  }
+}
+:global(:root[data-z-theme="simple"]) .mark {
+  animation: none;
+}

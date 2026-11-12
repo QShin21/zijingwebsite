@@ -8,6 +8,7 @@ import {
   type ThemeName,
 } from "./theme";
 import { Icon } from "./Icon";
+import { PixelCorners } from "./PixelCorners";
 import styles from "./Shell.module.css";
 
 export function ThemeToggle({
@@ -26,19 +27,35 @@ export function ThemeToggle({
     document.addEventListener("pointerdown", close);
     return () => document.removeEventListener("pointerdown", close);
   }, []);
+  const transition = useRef<ViewTransition | null>(null);
   const choose = (next: ThemeName) => {
-    document.documentElement.dataset.zTheme = next;
-    document.cookie = `${themeCookieName}=${next}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
-    document
-      .querySelector('meta[name="color-scheme"]')
-      ?.setAttribute("content", themeScheme(next));
-    document
-      .querySelector('meta[name="theme-color"]')
-      ?.setAttribute("content", themeColors[next]);
-    setTheme(next);
     if (menu.current) {
       menu.current.open = false;
       menu.current.querySelector("summary")?.focus();
+    }
+    if (next === theme) return;
+    const apply = () => {
+      document.documentElement.dataset.zTheme = next;
+      document.cookie = `${themeCookieName}=${next}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
+      document
+        .querySelector('meta[name="color-scheme"]')
+        ?.setAttribute("content", themeScheme(next));
+      document
+        .querySelector('meta[name="theme-color"]')
+        ?.setAttribute("content", themeColors[next]);
+      setTheme(next);
+    };
+    transition.current?.skipTransition();
+    if (
+      next === "simple" ||
+      theme === "simple" ||
+      matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      !document.startViewTransition
+    ) {
+      apply();
+    } else {
+      transition.current = document.startViewTransition(apply);
+      void transition.current.finished.catch(() => {});
     }
   };
   return (
@@ -70,6 +87,7 @@ export function ThemeToggle({
               aria-pressed={theme === value}
               onClick={() => choose(value)}
             >
+              <PixelCorners interactive seed={`theme-${value}`} />
               {label}
             </button>
           ),

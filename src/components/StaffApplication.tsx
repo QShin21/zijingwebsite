@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { SuccessMark } from "./v2/SuccessMark";
 import { Questionnaire } from "./Questionnaire";
 import type { Answers, Question, SignupForm } from "@/lib/signup-schema";
 import { formatAnswer } from "@/lib/questionnaire-model";
@@ -53,6 +55,8 @@ function StaffReceipt({ receipt }: { receipt: Receipt }) {
   );
 }
 export function StaffApplication({ batch }: { batch: number }) {
+  const router = useRouter();
+  const [confirmed, setConfirmed] = useState(false);
   const [info, setInfo] = useState<Info | null>(null),
     [editing, setEditing] = useState(false),
     [busy, setBusy] = useState(false),
@@ -84,13 +88,17 @@ export function StaffApplication({ batch }: { batch: number }) {
     open = info?.state === "申请开放",
     final = saved && ["accepted", "rejected"].includes(saved.status);
   async function change(method: string, body: unknown) {
+    setConfirmed(false);
     const data = await activityRequest(endpoint, method, body);
     setInfo((previous) =>
       previous ? { ...previous, application: data.application } : previous,
     );
+    setConfirmed(Boolean(data.application));
+    router.refresh();
   }
   async function verifyReceipt() {
     if (busy) return;
+    setConfirmed(false);
     setBusy(true);
     setFailed(false);
     try {
@@ -176,7 +184,9 @@ export function StaffApplication({ batch }: { batch: number }) {
         <p
           className={failed ? styles.error : styles.feedback}
           role={failed ? "alert" : "status"}
+          data-confirmed={(confirmed && !failed) || undefined}
         >
+          {confirmed && !failed && <SuccessMark />}
           {message}
         </p>
       )}
@@ -221,6 +231,7 @@ export function StaffApplication({ batch }: { batch: number }) {
                 disabled={busy}
                 onClick={() => {
                   setEditing(true);
+                  setConfirmed(false);
                   setVerifiedReceipt(null);
                   setMessage("");
                 }}
@@ -287,6 +298,7 @@ export function StaffApplication({ batch }: { batch: number }) {
               aria-describedby={reloadHelp}
               onClick={async () => {
                 if (busy) return;
+                setConfirmed(false);
                 setBusy(true);
                 try {
                   setInfo(await activityRequest(endpoint));

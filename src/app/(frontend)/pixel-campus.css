@@ -6,9 +6,9 @@
 :root {
   color-scheme: dark;
   --z-pixel: FusionPixel, "PingFang SC", sans-serif;
-  --z-paper: #211d32;
-  --z-surface: #30283f;
-  --z-raised: #282338;
+  --z-paper: #1b1729;
+  --z-surface: #2b253b;
+  --z-raised: #3a314c;
   --z-ink: #faf1db;
   --z-muted: #c8bfd3;
   --z-action: #e8c77f;
@@ -21,7 +21,7 @@
   --z-coral: #eda895;
   --z-line: #51465f;
   --z-line-strong: #80708f;
-  --z-field: #282338;
+  --z-field: #211c30;
   --z-field-border: #9985ab;
   --z-focus: #b3e7d9;
   --z-success: #a5e2ca;
@@ -213,4 +213,89 @@ select {
 :root[data-z-theme="simple"] .button {
   box-shadow: none;
   transform: none;
+}
+
+/* Recessed fields are shared by legacy forms and V2 filters. */
+:root {
+  --z-control-highlight: color-mix(in srgb, var(--z-ink) 18%, transparent);
+  --z-control-shadow: color-mix(in srgb, var(--z-paper) 80%, #000);
+  --z-secondary-base: color-mix(in srgb, var(--z-line) 65%, var(--z-paper));
+}
+:where(
+  select,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  textarea
+) {
+  box-shadow:
+    inset 2px 2px 0 var(--z-control-shadow),
+    inset -1px -1px 0 var(--z-control-highlight);
+}
+select option {
+  background: var(--z-field);
+  color: var(--z-ink);
+}
+button,
+summary,
+a {
+  -webkit-tap-highlight-color: color-mix(
+    in srgb,
+    var(--z-focus) 20%,
+    transparent
+  );
+}
+::view-transition-old(root) {
+  animation: none;
+}
+::view-transition-new(root) {
+  animation: campusThemeReveal 240ms steps(4, end) both;
+}
+@keyframes campusThemeReveal {
+  from {
+    clip-path: polygon(
+      0 0,
+      0 0,
+      0 25%,
+      0 25%,
+      0 50%,
+      0 50%,
+      0 75%,
+      0 75%,
+      0 100%,
+      0 100%
+    );
+  }
+  50% {
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 25%,
+      75% 25%,
+      75% 50%,
+      50% 50%,
+      50% 75%,
+      25% 75%,
+      25% 100%,
+      0 100%
+    );
+  }
+  to {
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 25%,
+      100% 25%,
+      100% 50%,
+      100% 50%,
+      100% 75%,
+      100% 75%,
+      100% 100%,
+      0 100%
+    );
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
 }

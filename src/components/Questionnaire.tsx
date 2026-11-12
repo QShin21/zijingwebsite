@@ -542,6 +542,7 @@ export function Questionnaire({
                 type="button"
                 className="button"
                 disabled={locked}
+                aria-busy={locked}
                 onClick={() => void submit()}
               >
                 {locked ? "正在提交…" : preview ? "验证预览答案" : submitLabel}

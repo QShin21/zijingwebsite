@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { HomeResponse } from "../src/lib/v2/types";
 import { CampusHero, HomeReel, PixelGames } from "../src/components/v2/Campus";
+import { SuccessMark } from "../src/components/v2/SuccessMark";
 import { PixelCorners } from "../src/components/v2/PixelCorners";
 import { TopBar, MobileTabs, Footer } from "../src/components/v2/Shell";
 
@@ -169,4 +170,17 @@ describe("corner ornaments", () => {
       expect(neighbours[i]).not.toContain("<a");
     }
   });
+});
+
+it("keeps ordinary corners static and explicitly opts in actionable corners", () => {
+  const plain = renderToStaticMarkup(createElement(PixelCorners));
+  const action = renderToStaticMarkup(
+    createElement(PixelCorners, { interactive: true }),
+  );
+  expect(plain).not.toContain("data-interactive");
+  expect(action).toContain('data-interactive="true"');
+  const mark = renderToStaticMarkup(createElement(SuccessMark));
+  expect(mark).toContain("data-confirmed-success");
+  expect(mark).toContain('aria-hidden="true"');
+  expect(mark).not.toContain('role="status"');
 });

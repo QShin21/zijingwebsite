@@ -1064,3 +1064,37 @@
 .matchArrow {
   border: 1px solid var(--z-line);
 }
+
+.matchArrow {
+  background: var(--z-raised);
+  color: var(--z-ink);
+  border-color: var(--z-line-strong);
+  box-shadow:
+    inset 0 1px 0 var(--z-control-highlight),
+    0 2px 0 var(--z-secondary-base);
+}
+.match:active .matchArrow {
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 0 var(--z-control-shadow);
+}
+.match_spotlight .date {
+  background: var(--z-raised);
+  color: var(--z-ink);
+}
+.match_spotlight .dateMonth,
+.match_spotlight .dateWeek {
+  color: var(--z-muted);
+}
+.noticeDate {
+  color: var(--z-muted);
+  font-size: 17px;
+}
+.notice {
+  min-height: 82px;
+}
+.notice > svg {
+  color: var(--z-ink);
+}
+.notice:active {
+  background: var(--z-field);
+}

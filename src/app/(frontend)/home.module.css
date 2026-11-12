@@ -57,13 +57,13 @@
   background: var(--z-surface);
 }
 .sectionBlock[data-section="notices"] h2 {
-  color: var(--z-action);
+  color: var(--z-ink);
 }
 .sectionBlock[data-section="upcoming"] article {
   background: color-mix(in srgb, var(--z-surface) 75%, var(--z-paper));
 }
 .sectionBlock[data-section="notices"] ul {
-  background: color-mix(in srgb, var(--z-surface) 60%, var(--z-raised));
+  background: transparent;
 }
 .scheduleGrid {
   display: grid;
@@ -111,8 +111,9 @@
   place-items: center;
   width: 28px;
   height: 28px;
-  background: var(--z-accent);
-  color: var(--z-accent-ink);
+  background: var(--z-raised);
+  color: var(--z-ink);
+  border: 1px solid var(--z-line-strong);
   font-family: var(--z-num);
   font-size: 13px;
   font-weight: 900;
@@ -213,5 +214,55 @@
   }
   .quick {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.joinSteps strong {
+  text-decoration: underline;
+  text-decoration-color: var(--z-line-strong);
+  text-underline-offset: 5px;
+}
+.joinSteps a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  gap: 8px;
+}
+.joinSteps a svg {
+  color: var(--z-muted);
+}
+
+/* Align paired working areas while keeping the final introduction row natural. */
+@media (min-width: 761px) {
+  .joinPanel,
+  .mePanel,
+  .sectionBlock[data-section="notices"] {
+    align-self: stretch;
+  }
+  .sectionBlock[data-section="notices"] > section {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .sectionBlock[data-section="notices"] ul {
+    flex: 1;
+    display: grid;
+    grid-auto-rows: 1fr;
+  }
+  .scheduleGrid {
+    align-items: stretch;
+  }
+  .scheduleGrid article {
+    align-items: start;
+  }
+  .scheduleGrid article > div {
+    height: 100%;
+    grid-template-rows: auto auto 1fr auto;
+  }
+  .scheduleGrid article > div > p {
+    align-content: start;
+  }
+  .scheduleGrid article > span:not([data-pixel-corners]) {
+    align-self: center;
   }
 }
