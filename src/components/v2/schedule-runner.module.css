@@ -1,0 +1,171 @@
+.runner {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  flex: 0 1 280px;
+  max-width: 280px;
+  margin-left: auto;
+  min-width: 0;
+  color: var(--z-mint);
+}
+.track {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 64px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.dinosaur {
+  position: absolute;
+  left: 10%;
+  bottom: 16px;
+  display: block;
+  width: 22px;
+  height: 24px;
+  animation: hop 8s linear infinite;
+}
+.dinosaur > span {
+  display: block;
+}
+.dinosaur svg {
+  width: 22px;
+  height: 24px;
+  fill: currentColor;
+}
+.eye {
+  fill: var(--z-surface);
+}
+.leg {
+  animation: stride 240ms steps(2, end) infinite;
+}
+.otherLeg {
+  animation: stride 240ms steps(2, end) -120ms infinite;
+}
+.obstacles {
+  position: absolute;
+  inset: auto 0 16px;
+  height: 15px;
+  color: var(--z-coral);
+  animation: course 8s linear infinite;
+}
+.obstacles svg {
+  display: block;
+  width: 12px;
+  height: 15px;
+  fill: currentColor;
+}
+.ground {
+  position: absolute;
+  inset: auto 0 12px;
+  height: 2px;
+  background: var(--z-line-strong);
+}
+.ground::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  width: 4px;
+  height: 2px;
+  background: var(--z-line-strong);
+  box-shadow:
+    32px 3px var(--z-line),
+    96px 0 var(--z-line-strong),
+    140px 4px var(--z-line),
+    220px 0 var(--z-line),
+    300px 2px var(--z-line-strong);
+  animation: course 8s linear infinite;
+}
+.cloud {
+  position: absolute;
+  top: 6px;
+  left: 63%;
+  width: 20px;
+  height: 6px;
+  border-top: 2px solid var(--z-line-strong);
+  border-bottom: 2px solid var(--z-line-strong);
+}
+.cloud::before {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 4px;
+  top: -6px;
+  left: 8px;
+  border: 2px solid var(--z-line-strong);
+  border-bottom: 0;
+}
+.manualJump {
+  animation: manualHop 500ms steps(7, end);
+}
+.runner[data-running="false"] *,
+.runner[data-running="false"] *::after {
+  animation-play-state: paused;
+}
+.runner[data-running="false"] .manualJump {
+  animation-play-state: running;
+}
+@keyframes stride {
+  50% {
+    transform: translateY(-2px);
+  }
+}
+@keyframes course {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(-20%);
+  }
+}
+@keyframes hop {
+  0%,
+  66%,
+  84%,
+  100% {
+    transform: translateY(0);
+  }
+  74%,
+  77% {
+    transform: translateY(-18px);
+  }
+}
+@keyframes manualHop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  45%,
+  55% {
+    transform: translateY(-16px);
+  }
+}
+:global(:root[data-z-theme="simple"]) .runner {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .runner *,
+  .runner *::after {
+    animation: none !important;
+  }
+  .track {
+    cursor: default;
+  }
+  .obstacles {
+    transform: translateX(70%);
+  }
+}
+@media (max-width: 760px) {
+  .runner {
+    order: 3;
+    flex-basis: 100%;
+    max-width: 280px;
+  }
+  .track {
+    height: 64px;
+  }
+}

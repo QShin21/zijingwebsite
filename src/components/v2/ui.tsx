@@ -16,6 +16,7 @@ export function PageHero({
   eyebrow,
   description,
   actions,
+  visual,
   back,
   tone = "plain",
   meta,
@@ -26,6 +27,7 @@ export function PageHero({
   eyebrow?: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
+  visual?: ReactNode;
   back?: { href: string; label: string };
   tone?: "plain" | "stage";
   meta?: ReactNode;
@@ -54,6 +56,7 @@ export function PageHero({
             {description && <p className={styles.heroDescription}>{description}</p>}
             {meta && <div className={styles.heroMeta}>{meta}</div>}
           </div>
+          {visual}
           {actions && <div className={styles.heroActions}>{actions}</div>}
         </div>
         {children}

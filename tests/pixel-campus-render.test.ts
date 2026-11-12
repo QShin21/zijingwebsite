@@ -3,6 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { HomeResponse, EventCard } from "../src/lib/v2/types";
 import { CampusHero, HomeReel, PixelGames } from "../src/components/v2/Campus";
+import { ScheduleRunner } from "../src/components/v2/ScheduleRunner";
+import { PageHero } from "../src/components/v2/ui";
 import { ScheduleCalendar } from "../src/components/v2/ScheduleCalendar";
 import { SuccessMark } from "../src/components/v2/SuccessMark";
 import { PixelCorners } from "../src/components/v2/PixelCorners";
@@ -283,6 +285,7 @@ it("renders leap-month dates and distinct personal, event, today and selected ma
       today: "2028-02-14",
       selectedDay: "2028-02-15",
       days: [
+        { date: "2028-02-13", count: 2, mine: 1 },
         { date: "2028-02-14", count: 3, mine: 1 },
         { date: "2028-02-15", count: 2, mine: 0 },
       ],
@@ -293,6 +296,9 @@ it("renders leap-month dates and distinct personal, event, today and selected ma
   expect(html).toContain("2028年2月29日，0场活动");
   expect(html).not.toContain("2028年2月30日");
   expect(html).toContain("2028年2月14日，3场活动，已报名1场");
+  expect(html).toContain("2028年2月13日，查看历史日程");
+  expect(html).not.toContain("2028年2月13日，2场活动");
+  expect(html.match(/data-mine="true"/g)).toHaveLength(1);
   expect(html).toContain('data-mine="true"');
   expect(html).toContain('data-events="true"');
   expect(html).toContain('data-today="true"');
@@ -300,4 +306,18 @@ it("renders leap-month dates and distinct personal, event, today and selected ma
   expect(html).toContain("month=2028-01");
   expect(html).toContain("month=2028-03");
   expect(html).toContain("day=2028-02-15#event-results");
+});
+
+it("keeps the schedule animation controls outside the heading and initially stationary", () => {
+  const html = renderToStaticMarkup(
+    createElement(PageHero, {
+      title: "日程",
+      visual: createElement(ScheduleRunner),
+    }),
+  );
+  expect(html).toContain("<h1>日程</h1>");
+  expect(html).toContain('aria-label="让像素小恐龙跳跃"');
+  expect(html).not.toContain("暂停");
+  expect(html).not.toContain("点击 / 空格");
+  expect(html).toContain('data-running="false"');
 });

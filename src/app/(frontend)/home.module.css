@@ -518,9 +518,11 @@
 
 @media (min-width: 761px) {
   .memberHome .scheduleGrid article:nth-child(odd) {
-    background: color-mix(in srgb, var(--z-raised) 55%, var(--z-surface));
+    background: var(--z-schedule-left);
+    border-color: var(--z-line-strong);
   }
   .memberHome .scheduleGrid article:nth-child(even) {
-    background: color-mix(in srgb, var(--z-surface) 80%, var(--z-paper));
+    background: var(--z-schedule-right);
+    border-color: var(--z-line-strong);
   }
 }

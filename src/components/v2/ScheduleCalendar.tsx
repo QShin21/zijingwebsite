@@ -19,7 +19,11 @@ export function ScheduleCalendar({
   const first = new Date(Date.UTC(year, number - 1, 1));
   const length = new Date(Date.UTC(year, number, 0)).getUTCDate();
   const offset = (first.getUTCDay() + 6) % 7;
-  const markers = new Map(days.map((day) => [day.date, day]));
+  const markers = new Map(
+    days
+      .filter((day) => !today || day.date >= today)
+      .map((day) => [day.date, day]),
+  );
   const shift = (step: number) => {
     const date = new Date(Date.UTC(year, number - 1 + step, 1));
     return date.toISOString().slice(0, 7);
@@ -61,7 +65,7 @@ export function ScheduleCalendar({
             <Link
               key={date}
               href={`${href({ range: "month", month, day: date })}#event-results`}
-              aria-label={`${year}年${number}月${i + 1}日，${marker?.count ?? 0}场活动${marker?.mine ? `，已报名${marker.mine}场` : ""}`}
+              aria-label={`${year}年${number}月${i + 1}日${today && date < today ? "，查看历史日程" : `，${marker?.count ?? 0}场活动${marker?.mine ? `，已报名${marker.mine}场` : ""}`}`}
               aria-current={date === selectedDay ? "date" : undefined}
               data-today={date === today || undefined}
               data-events={Boolean(marker?.count) || undefined}

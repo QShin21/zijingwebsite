@@ -491,9 +491,9 @@
 }
 .footer {
   padding-top: 32px;
-  background: var(--z-surface);
-  color: var(--z-ink);
-  border-top: 2px solid var(--z-line-strong);
+  background: var(--z-footer-bg);
+  color: var(--z-footer-ink);
+  border-top: 2px solid var(--z-footer-line);
 }
 .footerBrand strong {
   font-size: 16px;
@@ -507,11 +507,11 @@
 .footerBrand p:last-child,
 .footerNav p,
 .footerLegal {
-  color: var(--z-muted);
+  color: var(--z-footer-muted);
 }
 .footerLegal {
   margin-top: 24px;
-  border-color: var(--z-line);
+  border-color: var(--z-footer-line);
   font-size: 12px;
 }
 .tabs {

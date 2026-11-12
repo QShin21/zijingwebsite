@@ -20,6 +20,9 @@ import { MatchCard, groupByDay } from "@/components/v2/cards";
 import { empty } from "@/components/v2/copy";
 import { dayKey } from "@/components/v2/format";
 import { ScheduleCalendar } from "@/components/v2/ScheduleCalendar";
+import { ScheduleRunner } from "@/components/v2/ScheduleRunner";
+import { PixelCorners } from "@/components/v2/PixelCorners";
+import styles from "./events.module.css";
 import calendarStyles from "@/components/v2/schedule-calendar.module.css";
 import layout from "@/components/v2/layout.module.css";
 
@@ -145,11 +148,7 @@ export default async function Calendar({
         tone="stage"
         eyebrow="SCHEDULE · 日程"
         title="日程"
-        description={
-          signedIn
-            ? "社团活动与各游戏社群的活动汇成一条时间线。报名、回执与历史安排都从这里找。"
-            : "社团活动与精选社群活动。登录后可查看全部社群活动与本人报名。"
-        }
+        visual={<ScheduleRunner />}
         actions={
           signedIn ? (
             <ButtonLink
@@ -171,46 +170,49 @@ export default async function Calendar({
         }
       />
       <Wrap className={layout.pageBody}>
-        <LinkTabs
-          label="日程范围"
-          items={[
-            {
-              href: href({ scope: undefined, signupOpen: undefined }),
-              label: "全部",
-              current: scope === "all" && !signupOpen,
-            },
-            {
-              href: href({ scope: undefined, signupOpen: "1" }),
-              label: "可报名",
-              current: scope === "all" && Boolean(signupOpen),
-            },
-            {
-              href: href({ scope: "club", signupOpen: undefined }),
-              label: "社团活动",
-              current: scope === "club",
-            },
-            {
-              href: href({ scope: "community", signupOpen: undefined }),
-              label: "社群活动",
-              current: scope === "community",
-            },
-            ...(signedIn
-              ? [
-                  {
-                    href: href({ scope: "mine", signupOpen: undefined }),
-                    label: "已报名",
-                    current: scope === "mine",
-                  },
-                ]
-              : []),
-          ]}
-        />
+        <div className={styles.scopeBar}>
+          <LinkTabs
+            label="日程范围"
+            items={[
+              {
+                href: href({ scope: undefined, signupOpen: undefined }),
+                label: "全部",
+                current: scope === "all" && !signupOpen,
+              },
+              {
+                href: href({ scope: undefined, signupOpen: "1" }),
+                label: "可报名",
+                current: scope === "all" && Boolean(signupOpen),
+              },
+              {
+                href: href({ scope: "club", signupOpen: undefined }),
+                label: "社团活动",
+                current: scope === "club",
+              },
+              {
+                href: href({ scope: "community", signupOpen: undefined }),
+                label: "社群活动",
+                current: scope === "community",
+              },
+              ...(signedIn
+                ? [
+                    {
+                      href: href({ scope: "mine", signupOpen: undefined }),
+                      label: "已报名",
+                      current: scope === "mine",
+                    },
+                  ]
+                : []),
+            ]}
+          />
+        </div>
         <form
-          className={layout.filters}
+          className={`${layout.filters} ${styles.filters}`}
           method="get"
           action="/events"
           aria-label="筛选日程"
         >
+          <PixelCorners seed="schedule-filters" />
           {query.day && <input type="hidden" name="day" value={query.day} />}
           {query.scope && (
             <input type="hidden" name="scope" value={query.scope} />

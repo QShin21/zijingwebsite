@@ -12,7 +12,7 @@ import { PixelCorners } from "./PixelCorners";
 import styles from "./campus.module.css";
 
 /** One clock for each visible surface; all automatic motion uses the same stop conditions. */
-function useCampusMotion(count: number) {
+export function useCampusMotion(count: number) {
   const ref = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const [running, setRunning] = useState(false);
