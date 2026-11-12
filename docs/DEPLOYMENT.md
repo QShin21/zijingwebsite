@@ -1,5 +1,11 @@
 # 部署、迁移与恢复
 
+## 2026-11-12 管理员撤销已确认选座
+
+北京时间 20:33:47，`main@2250da6` 已部署到 `home.thuzijing.top`，构建 `eb7IF3uB0e2YzZ7PGpYT1`。新增迁移 `20261112_060000_activity_seat_revocation` 记录撤销人和时间；迁移前备份与迁移后的申请、占用、凭证及未开放座位计数均为 130、228、177、23。公网就绪、活动页和构建清单返回 200。
+
+服务器同机备份和应用回退脚本位于 `/srv/zijingwebsite/backups/seat-revoke-20261112-2250da6`。小程序 0.5.10 开发版已上传。详见[发布记录](evidence/activity-seat-revocation-deployment-20261112.json)。
+
 ## 2026-11-12 待审核选座申请取消
 
 北京时间 19:49:03，`main@b5707ff` 已部署到 `home.thuzijing.top`，构建 `YiHlCB83VjPvfMwJe7N9w`。新增迁移 `20261112_050000_activity_seat_cancellation` 记录取消时间；迁移前备份与迁移后的申请、占用、凭证及未开放座位计数均为 125、230、171、23。公网就绪、活动页和构建清单返回 200。
