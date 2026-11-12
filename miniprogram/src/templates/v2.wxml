@@ -1,0 +1,216 @@
+<!-- 紫荆赛场 V2 native templates. Taps use page actions: openPage (data-page/data-params) and openWebsite (data-url). -->
+<template name="zj-date">
+  <view class="zj-date {{size ? 'zj-date-' + size : ''}} {{ended ? 'zj-date-ended' : ''}} {{accent ? 'zj-date-accent' : ''}}" aria-hidden="true">
+    <text class="zj-date-month">{{month}}</text>
+    <text class="zj-date-day">{{day}}</text>
+    <text class="zj-date-week">{{week}}</text>
+  </view>
+</template>
+
+<template name="zj-match">
+  <view class="zj-match {{item.club ? '' : 'zj-match-community'}} {{tile ? 'zj-match-tile' : ''}}" style="--hue: {{item.hue}}" hover-class="zj-pressed" bindtap="openPage" data-page="{{item.page}}" data-params="{{item.params}}" aria-role="link" aria-label="{{item.title}}，{{item.when}}">
+    <template is="zj-date" data="{{month: item.month, day: item.day, week: item.week, ended: item.ended, size: tile ? 'sm' : ''}}" />
+    <view class="zj-match-body">
+      <view class="zj-tags">
+        <text wx:if="{{item.club}}" class="zj-tag zj-tag-club">社团活动</text>
+        <text wx:else class="zj-community-chip" style="--hue: {{item.hue}}">{{item.community}}</text>
+        <text wx:if="{{item.category}}" class="zj-tag zj-tag-line">{{item.category}}</text>
+        <text wx:if="{{item.promoted}}" class="zj-tag zj-tag-accent">精选</text>
+        <text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">演示资料</text>
+      </view>
+      <text class="zj-match-title">{{item.title}}</text>
+      <text class="zj-match-meta">{{item.when}}<block wx:if="{{item.location}}"> · {{item.location}}</block></text>
+      <view class="zj-tags">
+        <text class="zj-pill zj-pill-{{item.stateTone}}">{{item.stateLabel}}</text>
+        <text wx:if="{{item.signupLabel}}" class="zj-pill zj-pill-{{item.signupTone}}">{{item.signupLabel}}</text>
+        <text wx:if="{{item.soon}}" class="zj-countdown">{{item.soon}}</text>
+      </view>
+      <text wx:if="{{item.deadline}}" class="zj-small">{{item.deadline}}</text>
+    </view>
+  </view>
+</template>
+
+<template name="zj-notice">
+  <view class="zj-notice" hover-class="zj-pressed" bindtap="openPage" data-page="{{item.page}}" data-params="{{item.params}}" aria-role="link" aria-label="{{item.title}}">
+    <text class="zj-notice-date">{{item.date || '—'}}</text>
+    <view class="zj-notice-main">
+      <text class="zj-small">{{item.label}}<block wx:if="{{item.community}}"> · {{item.community}}</block></text>
+      <text class="zj-notice-title">{{item.title}}</text>
+    </view>
+    <text class="zj-arrow">›</text>
+  </view>
+</template>
+
+<template name="zj-cover">
+  <view class="zj-cover" style="--hue: {{hue}}">
+    <image wx:if="{{coverKey && img[coverKey]}}" class="zj-cover-image" src="{{img[coverKey]}}" mode="aspectFill" lazy-load binderror="imageError" data-key="{{coverKey}}" data-url="{{img[coverKey]}}" />
+    <text wx:else class="zj-cover-initial">{{initial}}</text>
+  </view>
+</template>
+
+<template name="zj-article">
+  <view class="zj-card" hover-class="zj-pressed" bindtap="openPage" data-page="{{item.page}}" data-params="{{item.params}}" aria-role="link" aria-label="{{item.title}}">
+    <image wx:if="{{item.coverKey && img[item.coverKey]}}" class="zj-card-image" src="{{img[item.coverKey]}}" mode="aspectFill" lazy-load binderror="imageError" data-key="{{item.coverKey}}" data-url="{{img[item.coverKey]}}" />
+    <view class="zj-card-body">
+      <view class="zj-tags">
+        <text class="zj-kind">{{item.label}}</text>
+        <text wx:if="{{item.community}}" class="zj-community-chip" style="--hue: {{item.hue}}">{{item.community}}</text>
+        <text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">演示资料</text>
+      </view>
+      <text class="zj-card-title">{{item.title}}</text>
+      <text wx:if="{{item.summary}}" class="zj-card-summary">{{item.summary}}</text>
+      <text class="zj-small">{{item.dateText}}</text>
+    </view>
+  </view>
+</template>
+
+<template name="zj-showcase">
+  <view class="zj-card" hover-class="zj-pressed" bindtap="openPage" data-page="{{item.page}}" data-params="{{item.params}}" aria-role="link" aria-label="{{item.title}}">
+    <view class="zj-cover zj-cover-square" style="--hue: {{item.hue}}">
+      <image wx:if="{{item.coverKey && img[item.coverKey]}}" class="zj-cover-image" src="{{img[item.coverKey]}}" mode="aspectFill" lazy-load binderror="imageError" data-key="{{item.coverKey}}" data-url="{{img[item.coverKey]}}" />
+      <text wx:else class="zj-cover-initial">{{item.video ? '▶' : item.initial}}</text>
+      <text wx:if="{{item.count > 1}}" class="zj-media-count">{{item.count}} 张</text>
+    </view>
+    <view class="zj-card-body">
+      <text class="zj-card-title">{{item.title}}</text>
+      <text class="zj-small">{{item.author}} · {{item.date}}</text>
+      <text wx:if="{{item.status !== 'visible'}}" class="zj-pill zj-pill-{{item.statusTone}}">{{item.statusLabel}}</text>
+    </view>
+  </view>
+</template>
+
+<template name="zj-honor">
+  <view class="zj-honor" style="--hue: {{item.hue}}" hover-class="zj-pressed" bindtap="openPage" data-page="{{item.page}}" data-params="{{item.params}}" aria-role="link" aria-label="{{item.title}}，{{item.placing}}">
+    <view class="zj-honor-top">
+      <text class="zj-trophy">🏆</text>
+      <text class="zj-placing">{{item.placing}}</text>
+    </view>
+    <image wx:if="{{item.coverKey && img[item.coverKey]}}" class="zj-honor-image" src="{{img[item.coverKey]}}" mode="aspectFill" lazy-load binderror="imageError" data-key="{{item.coverKey}}" data-url="{{img[item.coverKey]}}" />
+    <text class="zj-honor-title">{{item.title}}</text>
+    <text class="zj-honor-meta">{{item.competition}}</text>
+    <text class="zj-honor-meta">{{item.team}} · {{item.date}}</text>
+  </view>
+</template>
+
+<template name="zj-feed">
+  <template wx:if="{{item.kind === 'honor'}}" is="zj-honor" data="{{item: item, img: img}}" />
+  <template wx:elif="{{item.kind === 'showcase'}}" is="zj-showcase" data="{{item: item, img: img}}" />
+  <template wx:else is="zj-article" data="{{item: item, img: img}}" />
+</template>
+
+<template name="zj-community">
+  <view class="zj-card zj-community" hover-class="zj-pressed" bindtap="openPage" data-page="{{item.page}}" data-params="{{item.params}}" aria-role="link" aria-label="{{item.title}}社群">
+    <template is="zj-cover" data="{{hue: item.hue, initial: item.initial, coverKey: item.coverKey, img: img}}" />
+    <view class="zj-card-body">
+      <text class="zj-card-title">{{item.title}}</text>
+      <text wx:if="{{item.summary}}" class="zj-card-summary zj-clamp">{{item.summary}}</text>
+      <text class="zj-small">{{item.facts}}</text>
+      <text wx:if="{{item.officer}}" class="zj-tag zj-tag-accent">我是管理员</text>
+    </view>
+  </view>
+</template>
+
+<template name="zj-team">
+  <view class="zj-team" style="--hue: {{item.hue}}" hover-class="zj-pressed" bindtap="openPage" data-page="{{item.page}}" data-params="{{item.params}}" aria-role="link" aria-label="{{item.title}}">
+    <view class="zj-team-head">
+      <text class="zj-crest">{{item.initial}}</text>
+      <view class="zj-team-titles">
+        <text class="zj-card-title">{{item.title}}</text>
+        <view class="zj-tags">
+          <text wx:if="{{item.community}}" class="zj-community-chip" style="--hue: {{item.hue}}">{{item.community}}</text>
+          <text class="zj-pill zj-pill-{{item.statusTone}}">{{item.statusLabel}}</text>
+          <text wx:if="{{item.mine}}" class="zj-tag zj-tag-accent">我的队伍</text>
+        </view>
+      </view>
+    </view>
+    <text wx:if="{{item.summary}}" class="zj-card-summary zj-clamp">{{item.summary}}</text>
+    <view class="zj-team-foot">
+      <view class="zj-roster">
+        <text wx:for="{{item.roster}}" wx:key="*this" wx:for-item="letter" class="zj-roster-avatar">{{letter}}</text>
+      </view>
+      <text class="zj-small">队员 {{item.members}} · 荣誉 {{item.honors}}</text>
+    </view>
+    <view wx:if="{{item.call}}" class="zj-team-call">
+      <text class="zj-tag zj-tag-accent">选拔开放</text>
+      <text class="zj-team-call-title">{{item.call.title}}</text>
+      <text wx:if="{{item.call.deadline}}" class="zj-small">{{item.call.deadline}}</text>
+    </view>
+  </view>
+</template>
+
+<template name="zj-call">
+  <view class="zj-call {{item.kind === 'team' ? 'zj-call-team' : ''}}" style="--hue: {{item.hue}}" hover-class="zj-pressed" bindtap="openPage" data-page="{{item.page}}" data-params="{{item.params}}" aria-role="link" aria-label="{{item.kindLabel}}：{{item.title}}">
+    <text class="zj-kind">{{item.kindLabel}}<block wx:if="{{item.team}}"> · {{item.team}}</block></text>
+    <text class="zj-card-title">{{item.title}}</text>
+    <text wx:if="{{item.summary}}" class="zj-card-summary zj-clamp">{{item.summary}}</text>
+    <view class="zj-tags">
+      <text class="zj-pill zj-pill-{{item.stateTone}}">{{item.stateLabel}}</text>
+      <text wx:if="{{item.mine}}" class="zj-pill zj-pill-action">我的申请：{{item.mine}}</text>
+    </view>
+    <text wx:if="{{item.deadline}}" class="zj-small">{{item.deadline}}</text>
+  </view>
+</template>
+
+<template name="zj-application">
+  <view class="zj-application" hover-class="zj-pressed" bindtap="openTarget" data-url="{{item.href}}" data-web="{{item.web}}" aria-role="link" aria-label="{{item.title}}，{{item.statusLabel}}">
+    <view class="zj-row">
+      <text class="zj-small">{{item.category}}</text>
+      <text class="zj-pill zj-pill-{{item.tone}}">{{item.statusLabel}}</text>
+    </view>
+    <text class="zj-card-title">{{item.title}}</text>
+    <view class="zj-steps">
+      <view wx:for="{{item.steps}}" wx:key="index" wx:for-item="step" class="zj-step zj-step-{{step.state}}">
+        <text class="zj-step-dot">{{step.state === 'done' ? '✓' : step.index}}</text>
+        <text>{{step.label}}</text>
+      </view>
+    </view>
+    <text class="zj-small">{{item.next}}</text>
+  </view>
+</template>
+
+<template name="zj-section">
+  <view class="zj-section-head">
+    <view>
+      <text class="zj-section-title">{{title}}</text>
+      <text wx:if="{{count}}" class="zj-count">{{count}}</text>
+    </view>
+    <text wx:if="{{more}}" class="zj-more" bindtap="openPage" data-page="{{page}}" data-params="{{params}}" aria-role="link">{{more}} ›</text>
+  </view>
+</template>
+
+<template name="zj-empty">
+  <view class="zj-empty" aria-role="status">
+    <text class="zj-empty-icon">{{icon || '✦'}}</text>
+    <text class="zj-empty-title">{{title}}</text>
+    <text wx:if="{{body}}" class="zj-small">{{body}}</text>
+    <button wx:if="{{action}}" class="secondary zj-empty-action" bindtap="openPage" data-page="{{page}}" data-params="{{params}}">{{action}}</button>
+  </view>
+</template>
+
+<template name="zj-loading">
+  <view class="zj-skeleton" aria-role="status" aria-label="正在加载">
+    <view wx:for="{{[1, 2, 3]}}" wx:key="*this" class="zj-skeleton-row">
+      <view class="zj-skeleton-date"></view>
+      <view class="zj-skeleton-lines"><view></view><view></view><view></view></view>
+    </view>
+  </view>
+</template>
+
+<template name="zj-error">
+  <view class="error" aria-role="alert">
+    <text>{{error}}</text>
+    <button class="secondary zj-retry" bindtap="retry">重新加载</button>
+  </view>
+</template>
+
+<template name="zj-login">
+  <view class="zj-wall">
+    <text class="zj-wall-icon">🔒</text>
+    <text class="zj-empty-title">{{title}}</text>
+    <text class="zj-small">{{body}}</text>
+    <view class="actions">
+      <button class="primary" bindtap="login">登录</button>
+      <button class="secondary" bindtap="register">注册账号</button>
+    </view>
+  </view>
+</template>

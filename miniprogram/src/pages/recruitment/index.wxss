@@ -1,0 +1,1 @@
+.recruitment-tools { display: flex; flex-direction: column; gap: 14rpx; margin-top: 36rpx; }

@@ -1,24 +1,117 @@
 <page-meta page-style="{{themePageStyle}}" />
-<view class="page mini-page native-page account-page">
-  <view class="account-heading"><text class="title">我的紫荆</text></view>
-  <view wx:if="{{user}}" class="account-identity"><view class="account-avatar">{{initial}}</view><view class="account-identity-copy"><text class="account-name">{{user.name}}</text><text class="account-role">平台身份：{{role}}</text><text class="account-email" selectable>{{user.email}}</text></view></view>
-  <view wx:if="{{refreshing}}" class="account-refresh" aria-role="status"><view class="state-dot"></view><text class="muted">正在核对账号与管理权限</text></view>
-  <view wx:if="{{error}}" class="account-profile-error"><text class="error" aria-role="alert">{{error}}</text><button class="secondary" bindtap="refresh">重新获取账号资料</button></view>
-  <view wx:if="{{!user}}" class="account-login"><text class="section-title">登录后继续你的事务</text><text class="native-summary">网站与小程序使用同一紫荆账号，注册时验证清华邮箱。</text><view class="actions"><button class="primary" bindtap="login">登录账号</button><button class="secondary" bindtap="register">注册账号</button></view></view>
-  <block wx:if="{{user}}">
-    <view class="native-section account-applications"><view class="native-section-head"><text class="section-title">我的申请与投稿</text></view>
-      <view class="account-task-grid">
-        <button class="content-link account-task" bindtap="openPage" data-page="applications" hover-class="pressed"><text class="account-task-title">社群管理员申请</text><text class="account-task-detail">处理结果与名片授权</text></button>
-        <button class="content-link account-task" bindtap="openPage" data-page="staff" hover-class="pressed"><text class="account-task-title">骨干招新申请</text><text class="account-task-detail">继续填写与查看回执</text></button>
-        <button class="content-link account-task" bindtap="openPage" data-page="team" data-params="{{teamApplicationParams}}" hover-class="pressed"><text class="account-task-title">入队申请</text><text class="account-task-detail">选拔进度与退回意见</text></button>
-        <button class="content-link account-task" bindtap="openPage" data-page="team-honor-workspace" hover-class="pressed"><text class="account-task-title">荣誉投稿</text><text class="account-task-detail">草稿、材料与审核结果</text></button>
+<import src="../../templates/v2.wxml" />
+<view class="page mini-page account-v2 {{theme === 'dark' ? 'zj-dark' : ''}}">
+  <view class="account-card">
+    <view class="zj-stage-stripes"></view>
+    <view class="account-card-inner">
+      <text class="account-kicker">MY ZIJING · 我的</text>
+      <view class="account-identity">
+        <view class="account-avatar">{{initial}}</view>
+        <view class="account-who">
+          <text class="account-name">{{user ? user.name : '还未登录'}}</text>
+          <text wx:if="{{user}}" class="account-role">{{role}}</text>
+          <text wx:if="{{user}}" class="account-email" selectable>{{user.email}}</text>
+          <view wx:if="{{me.communities.length}}" class="account-offices">
+            <text wx:for="{{me.communities}}" wx:key="*this" class="account-office">{{item}}</text>
+          </view>
+        </view>
       </view>
-      <button class="content-link account-activity" bindtap="openPage" data-page="events" hover-class="pressed"><view><text class="native-entry-title">活动报名与回执</text><text class="native-summary">进入对应活动，查看本人报名回执。</text></view><text class="shortcut-sign" aria-hidden="true">›</text></button>
+      <view wx:if="{{me}}" class="zj-scoreboard">
+        <view class="zj-score"><text class="zj-score-value">{{me.todo.length}}</text><text class="zj-score-label">待办</text></view>
+        <view class="zj-score"><text class="zj-score-value">{{me.counts.signups}}</text><text class="zj-score-label">报名</text></view>
+        <view class="zj-score"><text class="zj-score-value">{{me.counts.applications}}</text><text class="zj-score-label">申请</text></view>
+      </view>
+      <view wx:if="{{!user}}" class="actions">
+        <button class="accent" bindtap="login">登录账号</button>
+        <button class="zj-stage-ghost" bindtap="register">注册账号</button>
+      </view>
     </view>
-    <view class="native-section account-memberships"><view class="native-section-head"><text class="section-title">社群与队伍</text></view><button class="content-link shortcut" bindtap="openPage" data-page="communities"><view class="shortcut-main"><text class="shortcut-title">联系社群管理员</text><text class="muted">进入对应社群查看管理员微信名片。</text></view><text class="shortcut-sign" aria-hidden="true">›</text></button><button class="content-link shortcut" bindtap="openPage" data-page="team" data-params="{{membershipParams}}"><view class="shortcut-main"><text class="shortcut-title">成员记录与公开简介</text><text class="muted">查看当前队伍与本人展示设置。</text></view><text class="shortcut-sign" aria-hidden="true">›</text></button></view>
-    <view class="native-section account-workbench"><view class="native-section-head"><text class="section-title">管理工作台</text></view><text class="muted">各工作台按当前任职核对可处理的社群、队伍与对象。</text><view class="account-workbench-list"><button wx:if="{{reviewCommunity}}" class="content-link account-workbench-entry" bindtap="openPage" data-page="review"><text>社群与管理员申请审核</text><text aria-hidden="true">›</text></button><button wx:if="{{reviewStaff}}" class="content-link account-workbench-entry" bindtap="openPage" data-page="staff"><text>骨干招新批次与审核</text><text aria-hidden="true">›</text></button><button class="content-link account-workbench-entry" bindtap="openPage" data-page="activity-manage"><text>活动问卷与报名</text><text aria-hidden="true">›</text></button><button class="content-link account-workbench-entry" bindtap="openPage" data-page="team" data-params="{{managedTeamParams}}"><text>我可管理的队伍</text><text aria-hidden="true">›</text></button></view></view>
+  </view>
+
+  <view wx:if="{{refreshing}}" class="account-refresh" aria-role="status"><view class="state-dot"></view><text class="muted">正在核对账号与管理权限</text></view>
+  <view wx:if="{{error}}"><text class="error" aria-role="alert">{{error}}</text><button class="secondary" bindtap="refresh">重新获取账号资料</button></view>
+  <text wx:if="{{!user}}" class="muted account-hint">网站与小程序使用同一紫荆账号，注册时验证清华邮箱。</text>
+
+  <block wx:if="{{user && me}}">
+    <view class="zj-section">
+      <template is="zj-section" data="{{title: '待办', count: me.todo.length}}" />
+      <view wx:if="{{me.todo.length}}" class="zj-list">
+        <view wx:for="{{me.todo}}" wx:key="key" class="account-todo" hover-class="zj-pressed" bindtap="openTodo" data-url="{{item.href}}" data-web="{{item.web}}" aria-role="link" aria-label="{{item.title}}">
+          <text class="account-todo-icon">{{item.kind === 'review' ? '◎' : '!'}}</text>
+          <view class="account-todo-main"><text class="account-todo-title">{{item.title}}</text><text class="zj-small">{{item.web ? '请在网页端完成 · ' : ''}}{{item.detail}}</text></view>
+          <text wx:if="{{item.count}}" class="zj-count">{{item.count}}</text>
+          <text wx:else class="zj-arrow">›</text>
+        </view>
+      </view>
+      <template wx:else is="zj-empty" data="{{title: '暂时没有需要处理的事项', body: '去日程看看最近的活动吧。', icon: '✓', action: '浏览日程', page: 'events'}}" />
+    </view>
+
+    <view class="zj-section">
+      <template is="zj-section" data="{{title: '我的赛程', more: '全部日程', page: 'events'}}" />
+      <view wx:if="{{me.upcoming.length}}"><block wx:for="{{me.upcoming}}" wx:key="key"><template is="zj-match" data="{{item, img}}" /></block></view>
+      <template wx:else is="zj-empty" data="{{title: '还没有报名记录', body: '报名开放的活动会标注「报名开放」。', icon: '🎫', action: '查看活动', page: 'events'}}" />
+    </view>
+
+    <view class="zj-section">
+      <template is="zj-section" data="{{title: '申请进度', count: me.applications.length}}" />
+      <view wx:if="{{me.applications.length}}" class="zj-list"><block wx:for="{{me.applications}}" wx:key="key"><template is="zj-application" data="{{item}}" /></block></view>
+      <template wx:else is="zj-empty" data="{{title: '还没有申请记录', body: '社群管理员、骨干招新、建队与入队申请都会记录在这里。', icon: '📮'}}" />
+      <view class="account-links">
+        <button class="shortcut" bindtap="openPage" data-page="applications"><view class="shortcut-main"><text class="shortcut-title">社群管理员申请</text><text class="muted">处理结果与名片授权</text></view><text class="shortcut-sign">›</text></button>
+        <button class="shortcut" bindtap="openPage" data-page="staff"><view class="shortcut-main"><text class="shortcut-title">骨干招新申请</text><text class="muted">继续填写与查看回执</text></view><text class="shortcut-sign">›</text></button>
+        <button class="shortcut" bindtap="openPage" data-page="team" data-params="{{teamApplicationParams}}"><view class="shortcut-main"><text class="shortcut-title">入队申请</text><text class="muted">选拔进度与退回意见</text></view><text class="shortcut-sign">›</text></button>
+        <button class="shortcut" bindtap="openPage" data-page="team-honor-workspace"><view class="shortcut-main"><text class="shortcut-title">荣誉投稿</text><text class="muted">草稿、材料与审核结果</text></view><text class="shortcut-sign">›</text></button>
+      </view>
+    </view>
+
+    <view class="zj-section">
+      <template is="zj-section" data="{{title: '我的队伍'}}" />
+      <view wx:if="{{me.memberships.length}}" class="zj-list">
+        <view wx:for="{{me.memberships}}" wx:key="id" class="account-team">
+          <view class="row"><text class="account-todo-title" bindtap="openTeam" data-slug="{{item.slug}}" aria-role="link">{{item.title}} ›</text><text class="zj-pill {{item.active ? 'zj-pill-success' : 'zj-pill-neutral'}}">{{item.status}}</text></view>
+          <view wx:if="{{item.active}}" class="account-team-actions">
+            <button wx:if="{{item.actions.editProfile}}" class="secondary" bindtap="openTeamPage" data-page="team-profiles" data-team="{{item.teamID}}">编辑我的简介</button>
+            <button wx:if="{{item.actions.submitHonor}}" class="secondary" bindtap="openTeamPage" data-page="team-honor-workspace" data-team="{{item.teamID}}">投稿荣誉</button>
+            <button wx:if="{{item.actions.leave}}" class="plain" bindtap="openPage" data-page="team" data-params="{{membershipParams}}">办理离队</button>
+          </view>
+        </view>
+      </view>
+      <template wx:else is="zj-empty" data="{{title: '暂无代表队成员记录', body: '入队由社群管理员人工选拔，录取不授予管理权限。', icon: '🏆', action: '查看选拔中心', page: 'recruitment'}}" />
+    </view>
+
+    <view class="zj-section">
+      <template is="zj-section" data="{{title: '管理台'}}" />
+      <text class="muted">按当前任职核对可处理的社群、队伍与对象。</text>
+      <view class="zj-list account-queues">
+        <view wx:for="{{queues}}" wx:key="key" class="account-queue" hover-class="zj-pressed" bindtap="openQueue" data-url="{{item.href}}" data-web="{{item.web}}" aria-role="link" aria-label="{{item.title}}">
+          <view class="account-todo-main"><text class="account-todo-title">{{item.title}}</text><text class="zj-small">{{item.web ? '请在网页端完成 · ' : ''}}{{item.scope}}</text></view>
+          <text wx:if="{{item.pending}}" class="zj-count">{{item.pending}}</text>
+          <text wx:elif="{{item.pending === 0}}" class="zj-pill zj-pill-success">已全部处理</text>
+          <text wx:else class="zj-arrow">›</text>
+        </view>
+        <view class="account-queue" hover-class="zj-pressed" bindtap="openPage" data-page="activity-manage" aria-role="link"><view class="account-todo-main"><text class="account-todo-title">活动问卷与报名</text><text class="zj-small">名单查看与统计</text></view><text class="zj-arrow">›</text></view>
+        <view class="account-queue" hover-class="zj-pressed" bindtap="openPage" data-page="team" data-params="{{managedTeamParams}}" aria-role="link"><view class="account-todo-main"><text class="account-todo-title">我可管理的队伍</text><text class="zj-small">招新、成员与审核</text></view><text class="zj-arrow">›</text></view>
+      </view>
+    </view>
   </block>
-  <view class="native-section account-appearance"><text class="section-title">外观</text><text class="native-summary">默认浅色，记住你的选择，不自动跟随系统。</text><view class="theme-choices"><button class="theme-choice {{theme === 'light' ? 'selected' : ''}}" bindtap="setVisualTheme" data-theme="light" disabled="{{themeUnavailable}}" aria-label="浅色主题{{theme === 'light' ? '，已选择' : ''}}"><view class="theme-swatch theme-swatch-light" aria-hidden="true"><view></view><view></view><view></view></view><view class="theme-choice-title"><text>浅色</text><text wx:if="{{theme === 'light'}}" class="theme-check">✓</text></view></button><button class="theme-choice {{theme === 'dark' ? 'selected' : ''}}" bindtap="setVisualTheme" data-theme="dark" disabled="{{themeUnavailable}}" aria-label="深色主题{{theme === 'dark' ? '，已选择' : ''}}"><view class="theme-swatch theme-swatch-dark" aria-hidden="true"><view></view><view></view><view></view></view><view class="theme-choice-title"><text>深色</text><text wx:if="{{theme === 'dark'}}" class="theme-check">✓</text></view></button></view><text wx:if="{{themeNotice}}" class="theme-message" aria-role="status">{{themeNotice}}</text><text wx:if="{{themeError}}" class="error" aria-role="alert">{{themeError}}</text></view>
-  <view class="native-section account-settings"><button class="content-link account-setting" bindtap="openWebsite" data-url="/privacy"><text>隐私说明</text><text aria-hidden="true">›</text></button><button class="content-link account-setting" bindtap="openWebsite" data-url="/contact"><text>联系与合作</text><text aria-hidden="true">›</text></button><button wx:if="{{user}}" class="content-link account-setting" bindtap="reset"><text>重设密码</text><text aria-hidden="true">›</text></button><button wx:if="{{user}}" class="plain account-logout" bindtap="logout">退出账号</button></view>
+
+  <view class="zj-section account-appearance">
+    <template is="zj-section" data="{{title: '外观'}}" />
+    <text class="muted">默认日场（浅色），记住你的选择，不自动跟随系统。</text>
+    <view class="theme-choices">
+      <button class="theme-choice {{theme === 'light' ? 'selected' : ''}}" bindtap="setVisualTheme" data-theme="light" disabled="{{themeUnavailable}}" aria-label="浅色主题{{theme === 'light' ? '，已选择' : ''}}"><view class="theme-swatch theme-swatch-light" aria-hidden="true"><view></view><view></view><view></view></view><view class="theme-choice-title"><text>日场</text><text wx:if="{{theme === 'light'}}" class="theme-check">✓</text></view></button>
+      <button class="theme-choice {{theme === 'dark' ? 'selected' : ''}}" bindtap="setVisualTheme" data-theme="dark" disabled="{{themeUnavailable}}" aria-label="深色主题{{theme === 'dark' ? '，已选择' : ''}}"><view class="theme-swatch theme-swatch-dark" aria-hidden="true"><view></view><view></view><view></view></view><view class="theme-choice-title"><text>夜场</text><text wx:if="{{theme === 'dark'}}" class="theme-check">✓</text></view></button>
+    </view>
+    <text wx:if="{{themeNotice}}" class="theme-message" aria-role="status">{{themeNotice}}</text>
+    <text wx:if="{{themeError}}" class="error" aria-role="alert">{{themeError}}</text>
+  </view>
+
+  <view class="zj-section account-links">
+    <button class="shortcut" bindtap="openWebsite" data-url="/privacy"><view class="shortcut-main"><text class="shortcut-title">隐私说明</text></view><text class="shortcut-sign">›</text></button>
+    <button class="shortcut" bindtap="openWebsite" data-url="/contact"><view class="shortcut-main"><text class="shortcut-title">联系与合作</text></view><text class="shortcut-sign">›</text></button>
+    <button wx:if="{{user}}" class="shortcut" bindtap="reset"><view class="shortcut-main"><text class="shortcut-title">重设密码</text></view><text class="shortcut-sign">›</text></button>
+    <button wx:if="{{queues.length}}" class="shortcut" bindtap="openAdmin"><view class="shortcut-main"><text class="shortcut-title">内容管理后台</text><text class="muted">复制网页链接</text></view><text class="shortcut-sign">⧉</text></button>
+    <button wx:if="{{user}}" class="plain account-logout" bindtap="logout">退出账号</button>
+  </view>
   <text class="bottom-note">竞在紫荆 / v{{version}}</text>
 </view>

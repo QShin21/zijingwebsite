@@ -9,10 +9,9 @@ import {
   teamHonorQuery,
   teamHonorSubmissionHref,
 } from "@/components/TeamHonorNavigation";
-import { ClubFrame } from "../../../../../_club/ClubPage";
 import styles from "@/components/team-pages/TeamPages.module.css";
-import { PageHeading } from "@/components/PageHeading";
-import { TeamTaskNav } from "@/components/team-pages/TeamPageParts";
+import { PageHero, StatusPill, Wrap, buttonClass } from "@/components/v2/ui";
+import layout from "@/components/v2/layout.module.css";
 export const dynamic = "force-dynamic";
 export default async function TeamHonorArchive({
   params,
@@ -38,39 +37,32 @@ export default async function TeamHonorArchive({
   )[0];
   if (!archive) notFound();
   return (
-    <ClubFrame className={styles.workspace}>
-      <PageHeading
+    <>
+      <PageHero
+        tone="stage"
+        eyebrow={`${game.title} · TROPHY ROOM`}
         title={archive.team.title + " · 荣誉档案"}
-        eyebrow={game.title}
         description={`${archive.records.length} 条已批准荣誉，按赛事日期汇总。现任队员可提交荣誉，经审核后收录至本档案。`}
-        parent={{ href: "/community/" + slug + "/showcase", label: "社群风采" }}
-        action={
-          canParticipate(user) && (
-            <Link
-              className="button"
-              href={teamHonorSubmissionHref({
-                team: archive.team.id,
-                game: game.id,
-              })}
-            >
-              提交队伍荣誉
+        back={{ href: "/community/" + slug + "/showcase", label: "社群风采" }}
+        actions={
+          <>
+            {canParticipate(user) && (
+              <Link className={buttonClass("accent")} href={teamHonorSubmissionHref({ team: archive.team.id, game: game.id })}>
+                提交队伍荣誉
+              </Link>
+            )}
+            <Link className={buttonClass("stage")} href={"/teams/honors?" + teamHonorQuery({ team: archive.team.id, game: game.id })}>
+              代表队与荣誉
             </Link>
-          )
+          </>
         }
+        meta={<StatusPill tone="success">{archive.records.length} 条已批准荣誉</StatusPill>}
       />
-      <TeamTaskNav
-        label="档案导航"
-        items={[
-          { href: "/community/" + slug + "/showcase", label: "返回社群风采" },
-          {
-            href:
-              "/teams/honors?" +
-              teamHonorQuery({ team: archive.team.id, game: game.id }),
-            label: "代表队与荣誉",
-          },
-        ]}
-      />
-      <TeamHonorArchiveContents archive={archive} user={user} />
-    </ClubFrame>
+      <Wrap className={layout.pageBody}>
+        <div className={styles.workspace}>
+          <TeamHonorArchiveContents archive={archive} user={user} />
+        </div>
+      </Wrap>
+    </>
   );
 }

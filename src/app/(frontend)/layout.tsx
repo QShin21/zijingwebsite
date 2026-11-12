@@ -1,33 +1,21 @@
-import { headers, cookies } from "next/headers";
-import { cms } from "@/lib/content";
-import { canParticipate } from "@/lib/rules";
+import { cookies } from "next/headers";
 import type { Metadata, Viewport } from "next";
 import { site } from "@/lib/content";
 import { serverURL } from "@/lib/environment";
-import {
-  DesignHeader,
-  DesignFooter,
-} from "@/components/visual-direction/DesignUI";
-import "./style.css";
-import "@/components/visual-direction/tokens.css";
-import "../(design)/design.css";
-import "./field.css";
-import "@/components/visual-direction/theme.css";
-import {
-  themeFromPreference,
-  themeCookieName,
-  themeColors,
-} from "@/components/visual-direction/theme";
+import { Footer, MobileTabs, TopBar } from "@/components/v2/Shell";
+import { request } from "@/components/v2/data";
+import { themeColors, themeCookieName, themeFromPreference } from "@/components/v2/theme";
+import shell from "@/components/v2/Shell.module.css";
+import "./tokens.css";
+import "./v2.css";
+
 export const dynamic = "force-dynamic";
+
 export async function generateViewport(): Promise<Viewport> {
-  const theme = themeFromPreference(
-    (await cookies()).get(themeCookieName)?.value,
-  );
-  return {
-    themeColor: themeColors[theme],
-    colorScheme: theme,
-  };
+  const theme = themeFromPreference((await cookies()).get(themeCookieName)?.value);
+  return { themeColor: themeColors[theme], colorScheme: theme };
 }
+
 export async function generateMetadata(): Promise<Metadata> {
   const s = await site();
   return {
@@ -40,64 +28,26 @@ export async function generateMetadata(): Promise<Metadata> {
         : { index: false, follow: false },
   };
 }
-const nav = [
-  { path: "/", label: "首页" },
-  { path: "/events", label: "活动" },
-  { path: "/community", label: "游戏社群" },
-  { path: "/teams", label: "代表队与荣誉" },
-  { path: "/news", label: "社团动态" },
-];
-export default async function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const s = await site();
-  const { user } = await (await cms()).auth({ headers: await headers() });
-  const signedIn = canParticipate(user);
-  const theme = themeFromPreference(
-    (await cookies()).get(themeCookieName)?.value,
-  );
-  const navigation = (s.navigation?.length ? s.navigation : nav).reduce<
-    { path: string; label: string }[]
-  >((items, item) => {
-    const path = item.path === "/honors" ? "/teams" : item.path;
-    if (!items.some((entry) => entry.path === path))
-      items.push({
-        path,
-        label: path === "/teams" ? "代表队与荣誉" : item.label,
-      });
-    return items;
-  }, []);
+
+export default async function Layout({ children }: { children: React.ReactNode }) {
+  const [s, { user }, store] = await Promise.all([site(), request(), cookies()]);
+  const theme = themeFromPreference(store.get(themeCookieName)?.value);
+  const viewer = user ? { name: user.name || "成员" } : null;
   return (
     <html lang="zh-CN" data-z-theme={theme}>
-      <body className="z-design field-design">
-        <a className="skip" href="#main">
+      <body>
+        <a className={shell.skip} href="#main">
           跳到正文
         </a>
         {process.env.APP_ENV !== "production" && (
-          <div className="environment">
-            开发 / 预览环境 · 内容以正式发布为准
-          </div>
+          <div className={shell.environment}>开发 / 预览环境 · 内容以正式发布为准</div>
         )}
-        <DesignHeader
-          preview={false}
-          name={s.name}
-          navigation={
-            signedIn
-              ? navigation
-              : [
-                  { path: "/events", label: "活动" },
-                  { path: "/announcements", label: "通知" },
-                ]
-          }
-          signedIn={signedIn}
-          theme={theme}
-        />
-        <main id="main" tabIndex={-1}>
+        <TopBar name={s.name} theme={theme} viewer={viewer} />
+        <main id="main" tabIndex={-1} className={shell.main}>
           {children}
         </main>
-        <DesignFooter preview={false} name={s.name} footer={s.footer} />
+        <Footer name={s.name} footer={s.footer} />
+        <MobileTabs signedIn={Boolean(viewer)} />
       </body>
     </html>
   );

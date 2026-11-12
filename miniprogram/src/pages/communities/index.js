@@ -2,75 +2,69 @@ function withVisualTheme(definition) {
   try { return require('../../lib/theme').page(definition); }
   catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
 }
-const cms = require('../../lib/cms');
-const http = require('../../lib/http');
+const v2 = require('../../lib/v2');
+const images = require('../../lib/v2-images');
 const session = require('../../lib/session');
 const navigation = require('../../lib/navigation');
-const { markCoverFailure } = require('../../lib/native-presentation');
-const { actions, protect } = require('../../lib/page');
-const identity = () => String((session.user() || {}).id || '');
+const { actions } = require('../../lib/page');
+
+// V2 社群目录 (GET /api/v2/communities). Guests see the login wall; the
+// server keeps the member-only rule regardless of this page.
 Page(withVisualTheme({
-  data: { loading: false, error: '', needsLogin: false, user: null, docs: [], page: 1, hasMore: false, search: '', appliedSearch: '',
-    clubLoading: false, clubError: '', staffBatches: [], promotions: [] },
+  data: { user: null, needsLogin: false, q: '', input: '', docs: [], page: 0, hasMore: false, total: 0, loading: false, loadingMore: false, error: '', loadMoreError: '', img: {} },
   ...actions,
   onLoad() {
-    this._visible = true; this._identity = identity(); wx.setNavigationBarTitle({ title: '游戏社群' });
-    this._unsubscribe = session.subscribe(() => {
-      if (this._identity !== identity()) { this._identity = identity(); this.invalidate(); this.resetPrivate(); }
+    // Account change (logout or switch): drop the previous account's directory and ignore its late replies.
+    this._unsubscribe = session.subscribe(user => {
+      this._ticket = (this._ticket || 0) + 1;
+      this._loaded = false;
+      this._identity = user ? String(user.id) : '';
+      this.setData({ user: user || null, needsLogin: !user, docs: [], page: 0, hasMore: false, total: 0, loading: false, loadingMore: false, error: '', loadMoreError: '', img: {} });
+      if (user && this._visible) this.load();
     });
   },
-  invalidate() { this._scope = (this._scope || 0) + 1; },
-  valid(scope, required = true) { return this._visible !== false && scope === (this._scope || 0) && this._identity === identity() && (!required || Boolean(identity())); },
-  resetPrivate() { this.setData({ user: session.user(), needsLogin: !session.user(), docs: [], page: 1, hasMore: false, loading: false, error: '', clubLoading: false, search: '', appliedSearch: '' }); },
+  onUnload() {
+    this._visible = false;
+    this._ticket = (this._ticket || 0) + 1;
+    if (this._unsubscribe) this._unsubscribe();
+  },
   onShow() {
     this._visible = true;
-    if (this._identity !== identity()) { this._identity = identity(); this.invalidate(); this.resetPrivate(); }
-    return this.load();
+    const user = session.user(), identity = user ? String(user.id) : '';
+    if (this._identity === identity && this._loaded) return;
+    this._identity = identity;
+    this.setData({ user, needsLogin: !user, docs: [], error: '' });
+    if (user) return this.load();
   },
-  onHide() { this._visible = false; this.invalidate(); this.setData({ loading: false, clubLoading: false }); },
-  onUnload() { this.onHide(); if (this._unsubscribe) this._unsubscribe(); },
+  onHide() { this._visible = false; this._ticket = (this._ticket || 0) + 1; this.setData({ loading: false, loadingMore: false }); },
+  onPullDownRefresh() { return (this.data.user ? this.load() : Promise.resolve()).then(() => wx.stopPullDownRefresh()); },
+  onReachBottom() { if (this.data.user && this.data.hasMore && !this.data.loading && !this.data.loadingMore) return this.load(true); },
   retry() { return this.load(); },
-  inputSearch(event) { this.setData({ search: event.detail.value }); },
-  searchGames() { this.setData({ appliedSearch: this.data.search.trim() }); return this.loadGames(); },
-  clearSearch() { this.setData({ search: '', appliedSearch: '' }); return this.loadGames(); },
-  onPullDownRefresh() { return this.load().finally(() => wx.stopPullDownRefresh()); },
-  onReachBottom() { if (this.data.hasMore && !this.data.loading) return this.load(true); },
-  load(more = false) { return more ? this.loadGames(true) : Promise.all([this.loadGames(), this.retryClub()]); },
-  async loadGames(more = false) {
-    if (more && (this.data.loading || !this.data.hasMore)) return;
-    if (!protect(this)) { this.resetPrivate(); return; }
-    const scope = this._scope || 0, ticket = this._loadTicket = (this._loadTicket || 0) + 1, page = more ? this.data.page + 1 : 1;
-    this.setData({ loading: true, error: '' });
+  register() { navigation.go('auth', { mode: 'register' }); },
+  typing(event) { this.setData({ input: String(event.detail.value || '').slice(0, 80) }); },
+  search() { if (this.data.loading) return; this.setData({ q: this.data.input.trim() }); return this.load(); },
+  clear() { this.setData({ q: '', input: '' }); return this.load(); },
+  apply() { navigation.go('applications', { apply: 1 }); },
+  async load(more) {
+    if (more && (this.data.loadingMore || !this.data.hasMore)) return;
+    const ticket = this._ticket = (this._ticket || 0) + 1;
+    const alive = () => ticket === this._ticket && this._visible !== false;
+    const page = more ? this.data.page + 1 : 1;
+    this.setData(more ? { loadingMore: true, loadMoreError: '' } : { loading: true, error: '' });
     try {
-      const result = await cms.list('games', { page, limit: 24, search: this.data.appliedSearch });
-      if (!this.valid(scope) || ticket !== this._loadTicket) return;
-      const docs = await cms.decorate(result.docs);
-      if (!this.valid(scope) || ticket !== this._loadTicket) return;
-      const combined = (more ? this.data.docs : []).concat(docs);
-      this.setData({ loading: false, docs: combined.filter((doc, index) => combined.findIndex(value => String(value.id) === String(doc.id)) === index), page: result.page || page, hasMore: Boolean(result.hasNextPage) });
-    } catch (cause) { if (this.valid(scope) && ticket === this._loadTicket) this.setData({ loading: false, error: cause.message }); }
+      const result = await v2.get('communities', { q: this.data.q, page, limit: 24 }, { required: true });
+      if (!alive()) return;
+      const seen = more ? this.data.docs.map(doc => doc.key) : [];
+      const fresh = result.docs.map(v2.community).filter(doc => !seen.includes(doc.key));
+      images.attach(this, fresh, alive);
+      this._loaded = true;
+      this.setData({ docs: more ? this.data.docs.concat(fresh) : fresh, page: result.page, hasMore: result.hasNextPage, total: result.totalDocs, loading: false, loadingMore: false });
+    } catch (cause) {
+      if (!alive()) return;
+      if (cause && cause.status === 401) { this.setData({ user: null, needsLogin: true, loading: false, loadingMore: false }); return; }
+      if (more) this.setData({ loadingMore: false, loadMoreError: (cause && cause.message) || '加载更多失败' });
+      else this.setData({ loading: false, error: (cause && cause.message) || '社群目录暂时无法加载' });
+    }
   },
-  async retryClub() {
-    if (this.data.clubLoading) return;
-    const scope = this._scope || 0, ticket = this._clubTicket = (this._clubTicket || 0) + 1;
-    this.setData({ clubLoading: true, clubError: '' });
-    try {
-      const result = await http.request('/api/miniapp/club', { auth: false });
-      if (!this.valid(scope, false) || ticket !== this._clubTicket) return;
-      const promotions = [];
-      for (const kind of ['event', 'notice', 'showcase']) for (const doc of result.promotions && result.promotions[kind] || [])
-        promotions.push({ ...doc, kindText: kind === 'event' ? '社团活动' : kind === 'notice' ? '社团通知' : '社团风采' });
-      this.setData({ staffBatches: result.staffBatches || [], promotions, clubLoading: false });
-    } catch (cause) { if (this.valid(scope, false) && ticket === this._clubTicket) this.setData({ clubLoading: false, clubError: cause.message }); }
-  },
-  openCommunity(event) { const doc = event.currentTarget.dataset.doc; if (doc && navigation.requireUser()) navigation.go('community', { id: doc.id, slug: doc.slug }); },
-  nativeCoverError(event) {
-    if (this._visible !== true) return;
-    const docs = markCoverFailure(this.data.docs, event.currentTarget.dataset);
-    if (docs !== this.data.docs) this.setData({ docs });
-  },
-  apply() { if (navigation.requireUser()) navigation.go('applications', { apply: 1 }); },
-  applications() { if (navigation.requireUser()) navigation.go('applications'); },
-  staff() { navigation.go('staff'); },
-  applyStaff(event) { navigation.go('signup', { kind: 'staff', id: event.currentTarget.dataset.id }); },
+  onShareAppMessage() { return { title: '紫荆游戏社群', path: '/pages/communities/index' }; },
 }));

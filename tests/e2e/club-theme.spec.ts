@@ -293,9 +293,9 @@ test("负责页面在四个视口无溢出、标题清晰并通过正文无障�
     for (const [name, route] of routes) {
       await navigate(page, route);
       await expect(page.locator("h1")).toHaveCount(1);
+      // V2: color-scheme is set on :root by data-z-theme and inherited by the page content.
       const scheme = await page
-        .locator('main [class*="ClubPages_page"]')
-        .first()
+        .locator("main")
         .evaluate((el) => getComputedStyle(el).colorScheme);
       expect(scheme).toBe(theme);
       if (name === "team-detail")
@@ -515,7 +515,7 @@ test("两套局部主题在实际页面即时切换，保留输入与同意状�
   });
   await name.fill("合成双主题申请人");
   await consent.check();
-  const frame = page.locator('main [class*="ClubPages_page"]').first();
+  const frame = page.locator("main");
   for (const value of ["dark", "light", "dark", "light"] as const) {
     await page.evaluate(
       (next) => document.documentElement.setAttribute("data-z-theme", next),
@@ -546,7 +546,7 @@ test("无显式主题属性时，系统深色仍使用局部浅色方案", async
     await page.evaluate(() =>
       document.documentElement.removeAttribute("data-z-theme"),
     );
-  const frame = page.locator('main [class*="ClubPages_page"]').first();
+  const frame = page.locator("main");
   expect(await frame.evaluate((el) => getComputedStyle(el).colorScheme)).toBe(
     "light",
   );

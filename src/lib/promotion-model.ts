@@ -21,5 +21,8 @@ export function promotionKey(collection: PromotionSource, id: number) {
 export function promotionVersion(value: Record<string, unknown>) {
   // Bind public content and the original questionnaire; no answers or private identity fields.
   const keys = ["title", "body", "game", "status", "category", "authorName", "signupForm", "images", "videoURL", "videoVersion"];
+  // Preserve reviewed legacy hashes while no new schedule exists. As soon as a
+  // schedule is supplied it is part of the approved content identity.
+  if (["startAt", "endAt", "location"].some(key => value[key] != null && value[key] !== "")) keys.push("startAt", "endAt", "location");
   return createHash("sha256").update(JSON.stringify(Object.fromEntries(keys.map(key => [key, value[key] ?? null])))).digest("hex");
 }

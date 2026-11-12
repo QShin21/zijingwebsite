@@ -1,6 +1,6 @@
 const { safeURL } = require('./format');
 const session = require('./session');
-const tabs = ['home', 'events', 'communities', 'explore', 'account'];
+const tabs = ['home', 'events', 'communities', 'teams', 'account'];
 function go(page, values = {}) {
   const suffix = Object.keys(values).filter(key => values[key] !== undefined).map(key =>
     `${encodeURIComponent(key)}=${encodeURIComponent(String(values[key]))}`).join('&');
@@ -19,11 +19,30 @@ function copy(value, label = '链接已复制') {
   if (!value) return;
   wx.setClipboardData({ data: String(value), success() { wx.showToast({ title: label, icon: 'none' }); } });
 }
+// Static /community/* segments are pages, never community slugs.
+const communityStatic = ['apply', 'review', 'promotions'];
 function website(path) {
   if (!path || typeof path !== 'string') return;
+  // Historical receipt/form anchors on the web apply pages (e.g. ApplicationItem.href) open the
+  // matching native apply page; the web href itself is left unchanged.
+  const applyAnchor = /^\/(teams|community)\/apply#([a-z-]+)$/.exec(path);
+  if (applyAnchor) {
+    if (applyAnchor[1] === 'teams' && ['team-applications-title', 'my-establishment-applications', 'establishment-form'].includes(applyAnchor[2])) return go('team-apply');
+    if (applyAnchor[1] === 'community' && ['my-applications-title', 'my-applications'].includes(applyAnchor[2])) return go('applications');
+    if (applyAnchor[1] === 'community' && applyAnchor[2] === 'application-form-title') return go('applications', { apply: 1 });
+  }
   if (path === '/join/members') return go('communities');
   if (path === '/join/staff') return go('staff');
-  if (path === '/join/teams' || path === '/teams/recruitment' || path === '/teams/manage') return go('team');
+  // V2 destinations: 代表队中心、选拔中心、我的与日程筛选。
+  if (path === '/teams') return go('teams');
+  if (path === '/join/teams' || path === '/teams/recruitment' || /^\/teams\/recruitment#/.test(path)) return go('recruitment');
+  if (path === '/teams/manage') return go('team');
+  if (/^\/account(?:[?#].*)?$/.test(path)) return go('account');
+  if (/^\/events\?scope=mine/.test(path)) return go('events');
+  const communityApply = /^\/community\/apply\?edit=([1-9]\d*)$/.exec(path);
+  if (communityApply) return go('applications', { apply: 1 });
+  const showcaseNew = /^\/community\/([a-z0-9-]+)\/showcase\/new$/.exec(path);
+  if (showcaseNew) return go('showcase-new', { slug: showcaseNew[1] });
   const honorWorkspace = /^\/teams\/honors(?:\?([^#]*))?$/.exec(path);
   if (honorWorkspace) {
     const values = {};
@@ -49,27 +68,48 @@ function website(path) {
   if (teamHonors) return go('team-honors', { team: teamHonors[1] });
   const staff = /^\/join\/staff\/batches\/([1-9]\d*)$/.exec(path);
   if (staff) return go('signup', { kind: 'staff', id: staff[1] });
+  // Activity seating: the reviewer workbench and the member anchor on V2 event pages. The
+  // seating page re-checks the session and the server re-checks review rights on every call.
+  const seatWorkbench = /^\/activities\/(events|community-posts)\/([1-9]\d{0,9})\/seating$/.exec(path);
+  if (seatWorkbench) return go('activity-seating', { kind: seatWorkbench[1], id: seatWorkbench[2], mode: 'review' });
+  const communitySeating = /^\/community\/([a-z0-9-]+)\/updates\/([1-9]\d{0,9})#activity-seating$/.exec(path);
+  if (communitySeating && !communityStatic.includes(communitySeating[1])) return go('activity-seating', { kind: 'community-posts', id: communitySeating[2] });
+  const eventSeating = /^\/events\/([a-z0-9-]+)#activity-seating$/.exec(path);
+  if (eventSeating) return go('detail', { collection: 'events', slug: eventSeating[1] });
   if (path === '/community/apply') return go('applications', { apply: 1 });
   if (path === '/community/review') return go('review');
   if (path === '/staff/manage') return go('staff');
   const communityHonor = /^\/community\/([a-z0-9-]+)\/showcase\/team-honors\/([1-9]\d*)$/.exec(path);
   if (communityHonor) return go('team-honors', { team: communityHonor[2] });
+  // 「加入社群」= 联系管理员：网页 /community/{slug}/join 与 #community-contacts 都进入名片区。
+  const communityJoin = /^\/community\/([a-z0-9-]+)(?:\/join|#community-contacts)$/.exec(path);
+  if (communityJoin) return go('community', { slug: communityJoin[1], area: 'contacts' });
   const communityArea = /^\/community\/([a-z0-9-]+)\/(updates|showcase)$/.exec(path);
-  if (communityArea) return go('community', { slug: communityArea[1], area: communityArea[2] });
+  if (communityArea && !communityStatic.includes(communityArea[1])) return go('community', { slug: communityArea[1], area: communityArea[2] });
   const communityContent = /^\/community\/([a-z0-9-]+)\/(updates|showcase)\/([1-9]\d*)$/.exec(path);
-  if (communityContent) return go('detail', { collection: communityContent[2] === 'updates' ? 'community-posts' : 'community-showcase', id: communityContent[3] });
+  if (communityContent && !communityStatic.includes(communityContent[1])) return go('detail', { collection: communityContent[2] === 'updates' ? 'community-posts' : 'community-showcase', id: communityContent[3] });
   const community = /^\/community\/([a-z0-9-]+)$/.exec(path);
-  if (community) return go('community', { slug: community[1] });
+  if (community && !communityStatic.includes(community[1])) return go('community', { slug: community[1] });
   const fixed = { '/about': 'about', '/contact': 'contact', '/privacy': 'privacy', '/join': 'join', '/join/members': 'join-members', '/join/teams': 'join-teams', '/join/staff': 'join-staff' };
   if (fixed[path]) return go('fixed', { key: fixed[path] });
   if (path === '/') return go('home');
   if (path === '/community') return go('communities');
   if (path === '/events') return go('events');
+  const teamHome = /^\/teams\/([a-z0-9-]*[a-z-][a-z0-9-]*)$/.exec(path);
+  if (teamHome && !['apply', 'honors', 'manage', 'recruitment', 'profiles'].includes(teamHome[1])) return go('team-home', { slug: teamHome[1] });
   const match = /^\/(events|teams|honors|news|gallery|recruitment|announcements)(?:\/([a-z0-9-]+))?$/.exec(path);
   if (match) {
     const collection = match[1] === 'gallery' ? 'albums' : match[1];
     return go(match[2] ? 'detail' : 'list', { collection, ...(match[2] ? { slug: match[2] } : {}) });
   }
+  // Any other site page has no native equivalent (old share links included): offer the web link.
+  if (/^\/(?!\/)/.test(path)) return copy(require('../config').origin + path, '请在网页端打开，链接已复制');
   if (safeURL(path)) return copy(path, '链接已复制，可在浏览器打开');
 }
-module.exports = { go, back, login, requireUser, content, copy, website };
+/** Server-declared destinations (ApplicationItem/TodoItem/ManageQueue): webOnly items are completed on the website. */
+function open(path, webOnly) {
+  if (!path || typeof path !== 'string' || !/^\/(?!\/)/.test(path)) return;
+  if (webOnly === true) return copy(require('../config').origin + path, '请在网页端完成，链接已复制');
+  return website(path);
+}
+module.exports = { go, back, login, requireUser, content, copy, website, open };

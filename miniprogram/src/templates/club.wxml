@@ -1,6 +1,23 @@
+<!-- V2 club templates (names, data and handlers unchanged). -->
 <template name="staff-batches">
-  <view wx:if="{{batches.length}}" class="section staff-batches"><view class="section-heading"><text class="section-title">正在招募社团骨干</text><button class="more" bindtap="openPage" data-page="staff">全部批次</button></view><text class="field-note">参与执行部与宣传部的社团工作。</text><button wx:for="{{batches}}" wx:key="id" class="content-link shortcut" bindtap="openPage" data-page="signup" data-params="{{item.params}}"><view class="shortcut-main"><view class="meta"><text class="badge">{{item.state}}</text></view><text class="shortcut-title">{{item.title}}</text></view><text class="shortcut-sign" aria-hidden="true">›</text></button></view>
+  <view wx:if="{{batches.length}}" class="zj-section">
+    <view class="zj-section-head"><view><text class="zj-section-title">正在招募社团骨干</text><text class="zj-small">参与执行部与宣传部的社团工作。</text></view><text class="zj-more" bindtap="openPage" data-page="staff" aria-role="link">全部批次 ›</text></view>
+    <view class="zj-list">
+      <view wx:for="{{batches}}" wx:key="id" class="zj-call" hover-class="zj-pressed" bindtap="openPage" data-page="signup" data-params="{{item.params}}" aria-role="link" aria-label="{{item.title}}">
+        <view class="zj-tags"><text class="zj-kind">骨干招新</text><text class="zj-pill zj-pill-success">{{item.state}}</text></view>
+        <text class="zj-card-title">{{item.title}}</text>
+        <text class="zj-card-action">查看批次并申请 ›</text>
+      </view>
+    </view>
+  </view>
 </template>
 <template name="promotion-cards">
-  <view class="record-list"><button wx:for="{{docs}}" wx:key="sourceKey" class="content-link content-record" bindtap="openWebsite" data-url="{{item.href}}" hover-class="pressed"><view class="meta-line"><text>{{item.gameTitle}}</text><text>社团展示</text></view><text class="card-title">{{item.snapshot.title}}</text><text wx:if="{{item.snapshot.body}}" class="card-summary">{{item.snapshot.body}}</text><text class="entry-link">查看社群原文</text></button></view>
+  <view class="zj-list">
+    <view wx:for="{{docs}}" wx:key="sourceKey" class="zj-call zj-promotion" hover-class="zj-pressed" bindtap="openWebsite" data-url="{{item.href}}" aria-role="link" aria-label="{{item.snapshot.title}}">
+      <view class="zj-tags"><text class="zj-tag zj-tag-accent">社团展示</text><text class="zj-kind">{{item.gameTitle}}</text></view>
+      <text class="zj-card-title">{{item.snapshot.title}}</text>
+      <text wx:if="{{item.snapshot.body}}" class="zj-card-summary zj-clamp">{{item.snapshot.body}}</text>
+      <text class="zj-card-action">查看社群原文 ›</text>
+    </view>
+  </view>
 </template>

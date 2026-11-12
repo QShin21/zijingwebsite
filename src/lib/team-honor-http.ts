@@ -1,6 +1,6 @@
 import { APIError, type Payload } from "payload";
 import type { TeamHonorRecord, User } from "../payload-types";
-import { boundedBody, siteRequestHeaders } from "./site-request";
+import { serverURL } from "./environment";
 import { canParticipate, canReviewShowcase, relationID } from "./rules";
 import { teamHonorService } from "./team-honor-service";
 import { honorError, honorWorkspace, saveHonorForm } from "./team-honor-web";
@@ -13,8 +13,46 @@ const noStore = {
 };
 const reply = (value: unknown, status = 200) =>
   Response.json(value, { status, headers: noStore });
+const nativeToken = (request: Request) =>
+  /^JWT [A-Za-z0-9._-]+$/.test(request.headers.get("authorization") || "");
 export function honorMutationHeaders(request: Request): Headers {
-  return siteRequestHeaders(request, true);
+  const origin = request.headers.get("origin"),
+    expected = new URL(serverURL).origin;
+  if (origin && origin !== expected)
+    throw new APIError("请求来源无效，请从网站或小程序重新操作", 403);
+  const token = nativeToken(request);
+  if (!token && origin !== expected)
+    throw new APIError(
+      "浏览器写入需要同源 Origin，小程序写入需要有效 JWT 凭据",
+      403,
+    );
+  const headers = new Headers(request.headers);
+  // A native request must authenticate its explicit token; ambient cookies cannot replace an invalid token.
+  if (token) headers.delete("cookie");
+  return headers;
+}
+async function boundedBody(request: Request, maximum: number) {
+  if (Number(request.headers.get("content-length")) > maximum)
+    throw new APIError("请求内容过长", 413);
+  const reader = request.body?.getReader();
+  if (!reader) throw new APIError("请求正文为空", 400);
+  const chunks: Uint8Array[] = [];
+  let length = 0;
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      length += value.byteLength;
+      if (length > maximum) {
+        await reader.cancel();
+        throw new APIError("请求内容过长", 413);
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  return Buffer.concat(chunks);
 }
 function object(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value))
@@ -62,7 +100,10 @@ export async function teamHonorHTTP(
     const mutate = request.method !== "GET";
     if (!["GET", "POST", "PATCH"].includes(request.method))
       return reply({ error: "方法不支持" }, 405);
-    const authHeaders = siteRequestHeaders(request, mutate);
+    const authHeaders = mutate
+      ? honorMutationHeaders(request)
+      : new Headers(request.headers);
+    if (nativeToken(request)) authHeaders.delete("cookie");
     const { user } = await p.auth({ headers: authHeaders });
     if (!canParticipate(user)) throw new APIError("请登录可用账号", 401);
     const actor = user!,

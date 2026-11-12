@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { APIError, type Access, type CollectionConfig, type CollectionAfterChangeHook, type Where } from "payload";
-import { canParticipate, canPublish, canReviewCommunityApplication, communityIDs, relationID, type Identity } from "../lib/rules";
+import { canParticipate, canReviewCommunityApplication, relationID, type Identity } from "../lib/rules";
 import { MAX_WECHAT_QR_TEXT_LENGTH, normalizeWechatQr, validApplicantName, validApplicantPhone } from "../lib/application-details";
 import { applicationContactConsentLabel, applicationContactConsentRequiredMessage } from "../lib/community-status";
 

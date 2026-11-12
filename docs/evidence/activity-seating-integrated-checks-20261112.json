@@ -1,0 +1,22 @@
+{
+  "sourceCommit": "d3a1446ee0677876cdea2e833a24d479ec047c8f",
+  "targetBaseline": "90c7c8dd7b529c0b889dd9d94d93b355731e0995",
+  "backendTests": 242,
+  "coreFrontendTests": 78,
+  "syntheticVMSmokeAssertions": 11,
+  "typecheck": 0,
+  "eslint": 0,
+  "tokens": 32,
+  "miniapp": {
+    "pages": 29,
+    "files": 199,
+    "bytes": 921904
+  },
+  "buildID": "JW8UJHtSHRD28t336BJdr",
+  "authChange": "Opus5.5 max generated WXSS only; WXML/JS unchanged",
+  "fullSuiteRerun": false,
+  "dynamicBrowserE2E": false,
+  "nativeWeChat": false,
+  "productionDBTouched": false,
+  "deployed": false
+}

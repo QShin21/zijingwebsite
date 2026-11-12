@@ -4,6 +4,8 @@ function withVisualTheme(definition) {
 }
 const cms = require('../../lib/cms');
 const http = require('../../lib/http');
+const v2 = require('../../lib/v2');
+const images = require('../../lib/v2-images');
 const session = require('../../lib/session');
 const navigation = require('../../lib/navigation');
 const files = require('../../lib/files');
@@ -15,7 +17,7 @@ const { hasContactImage } = require('../../lib/native-presentation');
 const areas = { updates: 'community-posts', showcase: 'community-showcase' };
 const identity = () => String((session.user() || {}).id || '');
 Page(withVisualTheme({
-  data: { loading: true, error: '', needsLogin: false, game: {}, area: 'contacts', introOpen: false, docs: [], page: 1,
+  data: { loading: true, error: '', needsLogin: false, game: {}, iconKey: '', img: {}, area: 'contacts', introOpen: false, docs: [], page: 1,
     hasMore: false, loadingMore: false, nodes: [], contentError: '', contacts: [], contactAvailable: false, contactsLoading: false, contactsError: '',
     clubLoading: false, clubError: '', staffBatches: [], promotions: [], honorPins: [], honorsLoading: false, honorsError: '' },
   ...actions,
@@ -23,14 +25,15 @@ Page(withVisualTheme({
     if (this._unsubscribe) this._unsubscribe();
     this._disposed = false; this._visible = false; this._resumeRead = false; this._context = (this._context || 0) + 1; this.invalidate();
     this._identity = identity(); this.resetPrivate(); this._options = options;
-    this.setData({ area: options.area === 'showcase' || options.area === 'updates' ? options.area : 'contacts' });
+    this.setData({ area: options.area === 'showcase' || options.area === 'updates' ? options.area : 'contacts',
+      showcaseParams: /^[a-z0-9-]{1,120}$/.test(String(options.slug || '')) ? { slug: String(options.slug) } : {} });
     this._unsubscribe = session.subscribe(() => {
       if (this._identity !== identity()) { this._identity = identity(); this._context = (this._context || 0) + 1; this._resumeRead = false; this.invalidate(); this.resetPrivate(); }
     });
   },
   invalidate() { this._scope = (this._scope || 0) + 1; },
   valid(scope) { return !this._disposed && this._visible !== false && scope === (this._scope || 0) && this._identity === identity() && Boolean(identity()); },
-  resetPrivate() { this.setData({ needsLogin: !session.user(), loading: false, error: '', game: {}, introOpen: false, docs: [], nodes: [], page: 1,
+  resetPrivate() { this.setData({ needsLogin: !session.user(), loading: false, error: '', game: {}, iconKey: '', img: {}, introOpen: false, docs: [], nodes: [], page: 1,
     hasMore: false, loadingMore: false, contentError: '', contacts: [], contactAvailable: false, contactsLoading: false, contactsError: '',
     clubLoading: false, clubError: '', staffBatches: [], promotions: [], honorPins: [], honorsLoading: false, honorsError: '' }); },
   onShow() {
@@ -48,15 +51,30 @@ Page(withVisualTheme({
     if (this._disposed || this._visible === false) return;
     if (!protect(this)) { this.invalidate(); this.resetPrivate(); return; }
     const scope = this._scope || 0, ticket = this._loadTicket = (this._loadTicket || 0) + 1;
+    const current = () => this.valid(scope) && ticket === this._loadTicket;
     this.setData({ loading: true, error: '' });
     try {
       const options = this._options || {};
       const game = await cms.detail('games', options.id, options.slug);
-      if (!this.valid(scope) || ticket !== this._loadTicket) return;
-      this.setData({ game, loading: false, nodes: render(game.body).nodes });
+      if (!current()) return;
+      this.setData({ game, loading: false, nodes: render(game.body).nodes, iconKey: '', img: {} });
       wx.setNavigationBarTitle({ title: game.title });
-      await Promise.all([this.loadArea(), this.retryContacts(), this.retryClub(), this.data.area === 'showcase' ? this.loadHonorPins() : Promise.resolve()]);
-    } catch (cause) { if (this.valid(scope) && ticket === this._loadTicket) this.setData({ loading: false, error: cause.message }); }
+      await Promise.all([
+        this.loadIcon(game.slug, current), this.loadArea(), this.retryContacts(), this.retryClub(),
+        this.data.area === 'showcase' ? this.loadHonorPins() : Promise.resolve(),
+      ]);
+    } catch (cause) { if (current()) this.setData({ loading: false, error: cause.message }); }
+  },
+  async loadIcon(slug, current) {
+    if (!slug) return;
+    let header;
+    try {
+      header = await v2.get('communities/' + encodeURIComponent(slug) + '/header', {}, { required: true });
+    } catch { return; }
+    if (!current()) return;
+    const icon = { coverSrc: header?.card?.cover?.src };
+    images.attach(this, [icon], current);
+    this.setData({ iconKey: icon.coverKey || '' });
   },
   async retryContacts() {
     if (this._disposed || this._visible === false) return;

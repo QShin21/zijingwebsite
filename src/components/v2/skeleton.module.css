@@ -1,0 +1,82 @@
+.loading {
+  min-height: 70vh;
+}
+.band {
+  background:
+    linear-gradient(100deg, transparent 52%, rgba(239, 214, 245, 0.06) 64%, transparent 76%),
+    radial-gradient(90% 130% at 88% 0%, var(--z-stage-2), transparent 62%),
+    var(--z-stage);
+  color: var(--z-stage-ink);
+}
+.bandInner {
+  display: grid;
+  gap: 12px;
+  width: min(100%, var(--z-max));
+  margin: 0 auto;
+  padding: clamp(36px, 6vw, 72px) var(--z-gutter) clamp(28px, 4vw, 48px);
+}
+.kicker {
+  width: 120px;
+  height: 14px;
+  border-radius: 8px;
+  background: var(--z-accent);
+  opacity: 0.6;
+}
+.title {
+  font-size: var(--z-text-h1);
+}
+.status {
+  color: var(--z-stage-muted);
+}
+.rows {
+  display: grid;
+  gap: 12px;
+  width: min(100%, var(--z-max));
+  margin: 0 auto;
+  padding: 32px var(--z-gutter);
+}
+.row {
+  display: flex;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid var(--z-line);
+  border-radius: var(--z-radius);
+  background: var(--z-surface);
+}
+.date,
+.lines span {
+  background: linear-gradient(90deg, var(--z-tint) 0%, var(--z-raised) 50%, var(--z-tint) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+.date {
+  flex: 0 0 auto;
+  width: 76px;
+  height: 88px;
+  border-radius: 14px;
+}
+.lines {
+  display: grid;
+  flex: 1 1 auto;
+  align-content: center;
+  gap: 10px;
+}
+.lines span {
+  height: 14px;
+  border-radius: 8px;
+}
+.lines span:first-child {
+  width: 30%;
+}
+.lines span:nth-child(2) {
+  width: 70%;
+  height: 20px;
+}
+.lines span:last-child {
+  width: 45%;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}

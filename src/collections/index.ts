@@ -39,6 +39,8 @@ import { protectLegacyTeamHonors } from "./team-honor-legacy";
 import { publicMediaRead } from "../lib/public-media-access";
 import { nicknameKey, validNickname } from "../lib/nickname";
 import { postImagesField, validatePostImages } from "./publication-images";
+import { guardTeamSlug, validateTeamSlug } from "../lib/team-slugs";
+import { userPermissionFields, userPermissionUnchanged } from "../lib/user-permissions";
 
 const text = (name: string, label: string, required = false): TextField => ({
   name,
@@ -276,6 +278,14 @@ export const audit: CollectionAfterChangeHook = async ({
   operation,
 }) => {
   if (req.context.skipAudit) return doc;
+  const permissionChange = collection.slug === "users" &&
+    (JSON.stringify(previousDoc?.roles) !== JSON.stringify(doc.roles) ||
+      JSON.stringify(previousDoc?.teams) !== JSON.stringify(doc.teams) ||
+      JSON.stringify(previousDoc?.communityOffices) !== JSON.stringify(doc.communityOffices));
+  const action = [
+    permissionChange ? "permissions-change" : null,
+    collection.slug === "users" && req.context.adminPasswordReset ? "admin-password-reset" : null,
+  ].filter(Boolean).join("+") || operation;
   // Internal privilege is narrowly limited to append-only audit/redirect records in this transaction.
   await req.payload.create({
     collection: "audit",
@@ -284,13 +294,7 @@ export const audit: CollectionAfterChangeHook = async ({
     context: { ...req.context, skipAudit: true },
     data: {
       actor: String(req.user?.id ?? "system"),
-      action:
-        collection.slug === "users" &&
-        (JSON.stringify(previousDoc?.roles) !== JSON.stringify(doc.roles) ||
-          JSON.stringify(previousDoc?.teams) !== JSON.stringify(doc.teams) ||
-          JSON.stringify(previousDoc?.communityOffices) !== JSON.stringify(doc.communityOffices))
-          ? "permissions-change"
-          : operation,
+      action,
       object: `${collection.slug}:${doc.id}`,
       status: doc._status ?? "updated",
     },
@@ -381,11 +385,12 @@ function content(
           return args;
         },
       ],
-      beforeChange: [guard(scoped, self), ...(slug === 'teams' ? [guardTeamLifecycle] : []), ...(slug === 'events' ? [validateSignupForm] : []), ...(hasPostImages ? [validatePostImages] : [])],
+      beforeChange: [guard(scoped, self), ...(slug === 'teams' ? [guardTeamSlug, guardTeamLifecycle] : []), ...(slug === 'events' ? [validateSignupForm] : []), ...(hasPostImages ? [validatePostImages] : [])],
       afterChange: [...(slug === "teams" ? [closeInactiveTeamRecruitments] : []), audit],
     },
     fields: [
-      ...common,
+      ...common.map(field => slug === "teams" && "name" in field && field.name === "slug" && field.type === "text"
+        ? { ...field, validate: validateTeamSlug } : field),
       ...(hasPostImages ? [postImagesField] : []),
       ...fields,
       {
@@ -401,7 +406,10 @@ function content(
 export const Users: CollectionConfig = {
   slug: "users",
   labels: { singular: "用户", plural: "用户" },
-  admin: { useAsTitle: "name" },
+  admin: {
+    useAsTitle: "name",
+    description: "社长、副社长可在用户详情中点击「更改密码」，填写至少 8 位新密码并保存，直接完成重置。",
+  },
   auth: {
     maxLoginAttempts: 5,
     lockTime: 600000,
@@ -425,8 +433,12 @@ export const Users: CollectionConfig = {
     beforeOperation: [({ args, operation, req }) => {
       if (["create", "update"].includes(operation)) {
         const input = args as unknown as { data?: Record<string, unknown> };
+        req.context.adminPasswordReset = false;
         req.context.legacyCommunitiesInput = input.data?.communities !== undefined && input.data?.communityOffices === undefined;
-        req.context.userSubmittedFields = Object.keys(input.data ?? {});
+        // Capture before field access removes read-only values from data.
+        req.context.userSubmittedPermissions = structuredClone(Object.fromEntries(
+          Object.entries(input.data ?? {}).filter(([key]) => userPermissionFields.some(field => field === key)),
+        ));
       }
       return args;
     }],
@@ -459,12 +471,20 @@ export const Users: CollectionConfig = {
           data.department = undefined;
         }
         if (operation === "update" && !req.context.system) {
-          if ((req.context.userSubmittedFields as string[] | undefined)?.some(key => ["roles", "communities", "communityOffices", "department", "accountStatus"].includes(key)) &&
-            !hasRole(req.user as Identity, "president"))
+          if (!hasRole(req.user as Identity, "president") &&
+            Object.entries(req.context.userSubmittedPermissions as Record<string, unknown> ?? {}).some(
+              ([key, value]) => !userPermissionUnchanged(key, value, originalDoc?.[key]),
+            ))
             throw new APIError("只有社长可以调整权限", 403);
-          if ((data.email !== undefined && data.email !== originalDoc?.email) ||
-            (data.password && !req.context.verifiedPasswordChange))
-            throw new APIError("修改账号身份或密码必须经过受控邮箱验证", 403);
+          if (data.email !== undefined && data.email !== originalDoc?.email)
+            throw new APIError("修改账号邮箱必须经过受控邮箱验证", 403);
+          if (data.password) {
+            if (!req.context.verifiedPasswordChange && !canPublish(req.user as Identity))
+              throw new APIError("修改密码需完成邮箱验证，或由社长、副社长在后台重置", 403);
+            if (typeof data.password !== "string" || data.password.length < 8)
+              throw new APIError("新密码至少需要 8 位", 400);
+            req.context.adminPasswordReset = canPublish(req.user as Identity) && !req.context.verifiedPasswordChange;
+          }
         }
         if (operation === "update" && originalDoc &&
           hasRole(originalDoc as Identity, "president") &&

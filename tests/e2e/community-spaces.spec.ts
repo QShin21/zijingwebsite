@@ -60,9 +60,11 @@ test("多管理员微信、只读活动、网页风采投稿审核及B站预览"
   expect((await page.request.post('/api/community-showcase', { headers: { Authorization: `JWT ${token}` }, data: {
     game, author: member.id, title: '禁止共享接口投稿', body: '仅网页动作可投稿', context: { webShowcaseWrite: true },
   } })).status()).toBe(403);
+  // V2: the showcase composer is a dedicated task page reached from the showcase area.
   await page.goto(`/community/${slug}/showcase`);
+  await page.getByRole("link", { name: "分享社群风采", exact: true }).first().click();
+  await expect(page).toHaveURL(new RegExp(`/community/${slug}/showcase/new$`));
   const compose = page.getByRole("region", { name: "分享社群风采", exact: true });
-  await compose.locator("summary").filter({ hasText: /^分享社群风采$/ }).click();
   await compose.getByRole("textbox", { name: "标题", exact: true }).fill("精彩活动图文记录");
   await compose.getByRole("textbox", { name: "精彩记录", exact: true }).fill("与伙伴们一起留下难忘的瞬间。");
   const photos = compose.locator('input[type="file"][name="images"]');
@@ -98,9 +100,8 @@ test('仅标题投稿与 MP4 审核、播放、拖动和隐藏权限', async ({ 
   // This shared community can also contain the first case's approved Bilibili card.
   await fixtureBilibiliPlayer(page);
   await page.goto('/login'); await page.getByLabel('昵称或邮箱').fill(member.name); await page.getByLabel('密码', { exact: true }).fill(password); await page.getByRole('button', { name: '登录', exact: true }).click(); await expect(page).toHaveURL(/\/account$/);
-  await page.goto(`/community/${slug}/showcase`);
+  await page.goto(`/community/${slug}/showcase/new`);
   const compose = page.getByRole('region', { name: '分享社群风采', exact: true });
-  await compose.locator('summary').filter({ hasText: /^分享社群风采$/ }).click();
   await compose.getByRole('textbox', { name: '标题', exact: true }).fill('只有标题也能投稿');
   await compose.getByRole('button', { name: '提交审核', exact: true }).click();
   await expect(compose.getByRole('status')).toHaveText('投稿已提交，请在“我的投稿”查看审核状态。');

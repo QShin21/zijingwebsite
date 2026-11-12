@@ -2,7 +2,7 @@
 const KEY = 'zijing_theme';
 const modes = ['light', 'dark'];
 const { tokens, chrome } = require('./design-tokens');
-const tabs = ['home', 'calendar', 'community', 'explore', 'user'];
+const tabs = ['home', 'calendar', 'community', 'teams', 'user'];
 let initialized = false, current = 'light', tabMode = '', listeners = [];
 function style(mode) {
   const palette = tokens[mode];

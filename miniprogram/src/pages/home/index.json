@@ -1,8 +1,9 @@
 {
-  "usingComponents": {},
-  "navigationBarBackgroundColor": "#fffdf9",
-  "navigationBarTextStyle": "black",
-  "backgroundColor": "#f7f5f0",
+  "usingComponents": {
+    "zj-stage": "/components/zj-stage/index"
+  },
+  "navigationStyle": "custom",
+  "backgroundColor": "#f2f1f5",
   "backgroundTextStyle": "dark",
   "navigationBarTitleText": "竞在紫荆"
 }

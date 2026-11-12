@@ -10,6 +10,8 @@ import {
 } from "./activity-seating-model";
 import { beijingInputTime, canParticipate, canPublish, communityIDs, relationID } from "./rules";
 import { normalizeImageBytes } from "./showcase-images";
+import { refreshViewer } from "./v2/identity";
+import { databaseCode } from "./workflow-transactions";
 
 type SeatActivity = {
   kind: SeatingKind;
@@ -18,7 +20,7 @@ type SeatActivity = {
   game: unknown;
   public: boolean;
   open: boolean;
-  endAt?: string | null;
+  endAt: number | null;
 };
 
 type SeatDatabase = {
@@ -48,6 +50,8 @@ export function canReviewActivitySeats(user: User | null, game: unknown) {
 export async function seatActivity(
   p: Payload, kind: SeatingKind, id: number, viewer: User | null = null,
 ): Promise<SeatActivity> {
+  viewer = await refreshViewer(p, viewer);
+  if (kind === "community-posts" && !viewer) throw new APIError("请先登录可用账号", 401);
   const access = { id, user: viewer, overrideAccess: false as const, depth: 0, disableErrors: true as const };
   if (kind === "events") {
     const event = await p.findByID({
@@ -57,26 +61,37 @@ export async function seatActivity(
     if (!event) throw new APIError("活动未公开或已移除", 404);
     const visible = event._status === "published" && !(process.env.APP_ENV === "production" && event.demo);
     return {
-      kind, id, title: event.title, game: event.game, public: visible, endAt: event.endAt,
-      open: visible && !event.archived && !["cancelled", "postponed", "ended"].includes(event.lifecycle || ""),
+      kind, id, title: event.title, game: event.game, public: visible, endAt: event.endAt ? Date.parse(event.endAt) : null,
+      open: visible && !event.archived &&
+        !["cancelled", "postponed", "ended"].includes(event.lifecycle || "") &&
+        (!event.endAt || Date.parse(event.endAt) > Date.now()),
     };
   }
   const post = await p.findByID({
     collection: kind, ...access,
-    select: { title: true, game: true, category: true, status: true },
+    select: { title: true, game: true, category: true, status: true, endAt: true },
   });
   if (!post || post.category !== "event") throw new APIError("活动未公开或已移除", 404);
-  const visible = post.status === "visible";
-  return { kind, id, title: post.title, game: post.game, public: visible, open: visible };
+  const gameID = relationID(post.game);
+  const game = typeof gameID === "number" ? await p.findByID({
+    collection: "games", id: gameID, user: null, overrideAccess: false, draft: false, depth: 0,
+    disableErrors: true, select: { _status: true, demo: true },
+  }) : null;
+  const visible = post.status === "visible" && game?._status === "published" &&
+    !(process.env.APP_ENV === "production" && game.demo);
+  return { kind, id, title: post.title, game: post.game, public: visible, endAt: post.endAt ? Date.parse(post.endAt) : null,
+    open: visible && (!post.endAt || Date.parse(post.endAt) > Date.now()) };
+
 }
 
-function requireMember(user: User | null) {
+async function requireMember(p: Payload, user: User | null) {
+  user = await refreshViewer(p, user);
   if (!user || !canParticipate(user)) throw new APIError("请先登录可用账号", 401);
   return user;
 }
 
-function requireReviewer(activity: SeatActivity, user: User | null) {
-  const actor = requireMember(user);
+async function requireReviewer(p: Payload, activity: SeatActivity, user: User | null) {
+  const actor = await requireMember(p, user);
   if (!canReviewActivitySeats(actor, activity.game)) throw new APIError("无权审核此活动的选座申请", 403);
   return actor;
 }
@@ -99,15 +114,61 @@ async function transaction<T>(p: Payload, work: (client: SeatDatabase) => Promis
   const client = await pool(p).connect();
   try {
     await client.query("BEGIN");
+    await client.query("SET LOCAL lock_timeout = '5s'");
     const result = await work(client);
     await client.query("COMMIT");
     return result;
   } catch (error) {
     await client.query("ROLLBACK");
+    if (["23505", "40001", "40P01", "55P03"].some(code => databaseCode(error, code)))
+      throw new APIError("选座信息已变化或正在处理，请刷新后重试", 409);
     throw error;
   } finally {
     client.release();
   }
+}
+
+// Use the transaction's own connection for fresh authorization. Calling Payload's
+// unrelated pool connection here would deadlock when concurrent requests fill it.
+async function lockedActivity(p: Payload, activity: SeatActivity, user: User | null, client: SeatDatabase) {
+  void p;
+  if (!user) throw new APIError("请先登录可用账号", 401);
+  await client.query("SELECT id FROM users WHERE id = $1 FOR SHARE", [user.id]);
+  const users = await client.query<{ id: number; name: string; accountStatus: User["accountStatus"]; roles: User["roles"]; communityOffices: User["communityOffices"] }>(`
+    SELECT u.id, u.name, u.account_status AS "accountStatus",
+      COALESCE((SELECT jsonb_agg(value ORDER BY "order") FROM users_roles WHERE parent_id = u.id), '[]') AS roles,
+      COALESCE((SELECT jsonb_agg(jsonb_build_object('game', game_id, 'status', status))
+        FROM users_community_offices WHERE _parent_id = u.id), '[]') AS "communityOffices"
+    FROM users u WHERE u.id = $1`, [user.id]);
+  const actor = users.rows[0] as User | undefined;
+  if (!actor || !canParticipate(actor)) throw new APIError("请先登录可用账号", 401);
+  const table = activity.kind === "events" ? "events" : "community_posts";
+  await client.query(`SELECT id FROM ${table} WHERE id = $1 FOR SHARE`, [activity.id]);
+  const fields = activity.kind === "events" ? "_status, demo, archived, lifecycle" : "status, category";
+  const records = await client.query<{ title: string; game_id: number | null; _status?: string; demo?: boolean; archived?: boolean; lifecycle?: string; status?: string; category?: string; end_at: Date | null }>(
+    `SELECT title, game_id, end_at, ${fields} FROM ${table} WHERE id = $1`, [activity.id]);
+  const record = records.rows[0];
+  if (!record || activity.kind === "community-posts" && record.category !== "event")
+    throw new APIError("活动未公开或已移除", 404);
+  let publicGame = true;
+  if (record.game_id) {
+    await client.query("SELECT id FROM games WHERE id = $1 FOR SHARE", [record.game_id]);
+    const games = await client.query<{ _status: string; demo: boolean }>("SELECT _status, demo FROM games WHERE id = $1", [record.game_id]);
+    publicGame = games.rows[0]?._status === "published" && !(process.env.APP_ENV === "production" && games.rows[0].demo);
+  } else if (activity.kind === "community-posts") publicGame = false;
+  // Standalone club events retain their existing public event contract. Community
+  // events additionally inherit the V2 parent-community visibility boundary.
+  const visible = activity.kind === "events"
+    ? record._status === "published" && !(process.env.APP_ENV === "production" && record.demo)
+    : record.status === "visible" && publicGame;
+  const current: SeatActivity = { ...activity, title: record.title, game: record.game_id, public: visible, endAt: record.end_at?.getTime() ?? null,
+    open: visible && !record.archived && !["cancelled", "postponed", "ended"].includes(record.lifecycle || "") &&
+      (!record.end_at || record.end_at.getTime() > Date.now()) };
+  return { activity: current, actor };
+}
+
+function assertLockedReviewer(activity: SeatActivity, actor: User) {
+  if (!canReviewActivitySeats(actor, activity.game)) throw new APIError("无权审核此活动的选座申请", 403);
 }
 
 function requestDTO(row: RequestRow): SeatRequest {
@@ -130,23 +191,35 @@ function availability(activity: SeatActivity, setting?: Pick<SeatScope, "enabled
   const serverTime = Date.now();
   const enabled = setting?.enabled === true;
   const openingTime = setting?.opens_at?.getTime() ?? null;
-  const end = activity.endAt ? Date.parse(activity.endAt) : Infinity;
-  const available = enabled && activity.open && serverTime < end && (openingTime === null || openingTime < end);
+  const beforeEnd = activity.endAt === null || serverTime < activity.endAt;
+  const validOpening = openingTime === null || activity.endAt === null || openingTime < activity.endAt;
+  const available = enabled && activity.open && beforeEnd && validOpening;
   const scheduled = available && openingTime !== null && openingTime > serverTime;
-  return {
-    enabled, open: available && !scheduled, scheduled,
-    opensAt: setting?.opens_at?.toISOString() ?? null, serverTime,
-  };
+  return { enabled, open: available && !scheduled, scheduled, opensAt: setting?.opens_at?.toISOString() ?? null, serverTime };
+}
+
+function openingDate(activity: SeatActivity, value: unknown) {
+  if (value == null || value === "") return null;
+  if (typeof value !== "string" || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}$/.test(value))
+    throw new APIError("请选择北京时间的开放日期和时间", 400);
+  const date = new Date(`${value}:00+08:00`);
+  if (!Number.isFinite(date.getTime()) || beijingInputTime(date.toISOString()) !== value)
+    throw new APIError("请选择有效的开放日期和时间", 400);
+  if (date.getTime() <= Date.now()) throw new APIError("定时开放时间须晚于当前时间", 400);
+  if (!activity.open || (activity.endAt !== null && date.getTime() >= activity.endAt))
+    throw new APIError("请选择活动结束前的开放时间", 400);
+  return date;
 }
 
 async function openScope(p: Payload, activity: SeatActivity, client: SeatDatabase) {
   const setting = await scope(p, activity, client);
-  if (!setting || !availability(activity, setting).open)
-    throw new APIError("当前活动暂未开放选座", 409);
+  if (!setting || !availability(activity, setting).open) throw new APIError("当前活动暂未开放选座", 409);
   return setting;
 }
 
 export async function seatingState(p: Payload, activity: SeatActivity, user: User | null): Promise<SeatingState> {
+  user = await refreshViewer(p, user);
+  activity = await seatActivity(p, activity.kind, activity.id, user);
   requirePublic(activity);
   const setting = await scope(p, activity);
   const loggedIn = Boolean(user && canParticipate(user));
@@ -179,40 +252,28 @@ export async function seatingState(p: Payload, activity: SeatActivity, user: Use
   return state;
 }
 
-function openingDate(activity: SeatActivity, value: unknown) {
-  if (value == null || value === "") return null;
-  if (typeof value !== "string" || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}$/.test(value))
-    throw new APIError("请选择北京时间的开放日期和时间", 400);
-  const date = new Date(`${value}:00+08:00`);
-  if (!Number.isFinite(date.getTime()) || beijingInputTime(date.toISOString()) !== value)
-    throw new APIError("请选择有效的开放日期和时间", 400);
-  if (date.getTime() <= Date.now())
-    throw new APIError("定时开放时间须晚于当前时间", 400);
-  if (!activity.open || (activity.endAt && date.getTime() >= Date.parse(activity.endAt)))
-    throw new APIError("请选择活动结束前的开放时间", 400);
-  return date;
-}
-
-export async function setSeating(
-  p: Payload, activity: SeatActivity, user: User | null, enabled: unknown, opening?: unknown,
-) {
-  requireReviewer(activity, user);
+export async function setSeating(p: Payload, activity: SeatActivity, user: User | null, enabled: unknown, opening?: unknown) {
+  await requireReviewer(p, activity, user);
   if (typeof enabled !== "boolean") throw new APIError("请指定选座启用状态", 400);
-  if (enabled) requirePublic(activity);
-  const opensAt = enabled ? openingDate(activity, opening) : null;
-  const column = scopeColumn(activity);
-  await pool(p).query(
-    `INSERT INTO activity_seatings (${column}, enabled, opens_at) VALUES ($1, $2, $3)
-     ON CONFLICT (${column}) DO UPDATE SET enabled = EXCLUDED.enabled, opens_at = EXCLUDED.opens_at`,
-    [activity.id, enabled, opensAt],
-  );
-  return availability(activity, { enabled, opens_at: opensAt });
+  return transaction(p, async client => {
+    const current = await lockedActivity(p, activity, user, client);
+    assertLockedReviewer(current.activity, current.actor);
+    if (enabled) requirePublic(current.activity);
+    const opensAt = enabled ? openingDate(current.activity, opening) : null;
+    const column = scopeColumn(current.activity);
+    await client.query(
+      `INSERT INTO activity_seatings (${column}, enabled, opens_at) VALUES ($1, $2, $3)
+       ON CONFLICT (${column}) DO UPDATE SET enabled = EXCLUDED.enabled, opens_at = EXCLUDED.opens_at`,
+      [current.activity.id, enabled, opensAt],
+    );
+    return availability(current.activity, { enabled, opens_at: opensAt });
+  });
 }
 
 export async function submitSeats(
   p: Payload, activity: SeatActivity, user: User | null, data: Record<string, unknown>,
 ) {
-  const actor = requireMember(user);
+  const actor = await requireMember(p, user);
   requirePublic(activity);
   const seats = data.seats;
   if (!Array.isArray(seats) || !seats.length || seats.length > seatLimit ||
@@ -228,7 +289,9 @@ export async function submitSeats(
     throw new APIError(`请上传 1 至 ${seatProofLimit} 张活动参与凭证`, 400);
 
   return transaction(p, async client => {
-    const setting = await openScope(p, activity, client);
+    const current = await lockedActivity(p, activity, actor, client);
+    requirePublic(current.activity);
+    const setting = await openScope(p, current.activity, client);
     const existing = await activeRequest(client, setting.id, actor.id);
     if (existing) return requestDTO(existing);
     const busy = await client.query(
@@ -239,7 +302,7 @@ export async function submitSeats(
     const result = await client.query<RequestRow>(
       `INSERT INTO activity_seat_requests (seating_id, member_id, member_name, phone, seats, status)
        VALUES ($1, $2, $3, $4, $5, 'pending') RETURNING ${rowFields}`,
-      [setting.id, actor.id, actor.name, phone, seats],
+      [setting.id, actor.id, current.actor.name, phone, seats],
     );
     const saved = result.rows[0];
     const attached = await client.query(
@@ -264,7 +327,9 @@ export async function submitSeats(
 export async function seatingWorkbench(
   p: Payload, activity: SeatActivity, user: User | null, status: SeatStatus, page: number,
 ): Promise<SeatingWorkbench> {
-  requireReviewer(activity, user);
+  user = await requireMember(p, user);
+  activity = await seatActivity(p, activity.kind, activity.id, user);
+  await requireReviewer(p, activity, user);
   const setting = await scope(p, activity);
   const view: SeatingWorkbench = { title: activity.title, ...availability(activity, setting), docs: [], page, hasNextPage: false };
   if (!setting) return view;
@@ -287,13 +352,15 @@ export async function seatingWorkbench(
 export async function decideSeats(
   p: Payload, activity: SeatActivity, user: User | null, id: unknown, status: unknown,
 ) {
-  const reviewer = requireReviewer(activity, user);
+  const reviewer = await requireReviewer(p, activity, user);
   if (typeof id !== "number" || !Number.isSafeInteger(id) || id <= 0 || id > 2147483647 ||
       (status !== "confirmed" && status !== "rejected"))
     throw new APIError("选座审核操作无效", 400);
   const decision: SeatDecision = status;
   return transaction(p, async client => {
-    const setting = await scope(p, activity, client);
+    const currentActivity = await lockedActivity(p, activity, reviewer, client);
+    assertLockedReviewer(currentActivity.activity, currentActivity.actor);
+    const setting = await scope(p, currentActivity.activity, client);
     if (!setting) throw new APIError("选座申请不存在", 404);
     const current = await client.query<{ status: SeatStatus }>(
       "SELECT status FROM activity_seat_requests WHERE seating_id = $1 AND id = $2",
@@ -316,7 +383,7 @@ export async function decideSeats(
 }
 
 export async function uploadSeatProof(p: Payload, activity: SeatActivity, user: User | null, file: File) {
-  const actor = requireMember(user);
+  const actor = await requireMember(p, user);
   requirePublic(activity);
   if (!availability(activity, await scope(p, activity)).open)
     throw new APIError("当前活动暂未开放选座", 409);
@@ -327,7 +394,9 @@ export async function uploadSeatProof(p: Payload, activity: SeatActivity, user: 
   if (picture.length > 2 * 1024 * 1024) throw new APIError("图片内容过大，请压缩后重新上传", 400);
   const id = randomUUID();
   return transaction(p, async client => {
-    const setting = await openScope(p, activity, client);
+    const current = await lockedActivity(p, activity, actor, client);
+    requirePublic(current.activity);
+    const setting = await openScope(p, current.activity, client);
     if (await activeRequest(client, setting.id, actor.id))
       throw new APIError("已有待审核或已确认的选座申请", 409);
     await client.query(
@@ -352,10 +421,12 @@ export async function uploadSeatProof(p: Payload, activity: SeatActivity, user: 
 export async function seatProof(
   p: Payload, activity: SeatActivity, user: User | null, id: string, remove = false,
 ) {
-  const actor = requireMember(user);
+  const actor = await requireMember(p, user);
+  activity = await seatActivity(p, activity.kind, activity.id, actor);
   if (!seatProofID.test(id)) throw new APIError("凭证不存在", 404);
   if (remove) return transaction(p, async client => {
-    const setting = await scope(p, activity, client);
+    const current = await lockedActivity(p, activity, actor, client);
+    const setting = await scope(p, current.activity, client);
     if (setting) await client.query(
       `DELETE FROM activity_seat_proofs WHERE seating_id = $1 AND id = $2
        AND member_id = $3 AND request_id IS NULL`,

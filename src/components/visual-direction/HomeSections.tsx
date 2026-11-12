@@ -7,6 +7,21 @@ import { Icon } from "@/components/Identity";
 import { DemoTag, designBase } from "./DesignUI";
 import styles from "./Home.module.css";
 
+const weekday = (value: string) =>
+  new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    weekday: "short",
+  }).format(new Date(value));
+
+/** Visual tone for the existing event state text; the text itself is unchanged. */
+export function stateTone(state: string) {
+  if (state === "进行中") return "live";
+  if (state === "已取消") return "danger";
+  if (state === "已延期") return "warning";
+  if (state === "已结束") return "past";
+  return "next";
+}
+
 export function DateStamp({ value }: { value?: string | null }) {
   const parts = dateParts(value);
   return parts && value ? (
@@ -19,6 +34,7 @@ export function DateStamp({ value }: { value?: string | null }) {
         {parts.year} / {parts.month}月
       </span>
       <strong>{parts.day}</strong>
+      <span className={styles.weekday}>{weekday(value)}</span>
     </time>
   ) : (
     <span className={styles.datePending}>时间待公布</span>
@@ -48,17 +64,26 @@ export function HomeEntries({
       <div className={styles.schedule}>
         {docs.map((doc) => (
           <article className={styles.scheduleRow} key={doc.id}>
-            <DateStamp value={doc.startAt} />
+            <div className={styles.stub}>
+              <DateStamp value={doc.startAt} />
+            </div>
             <div className={styles.entryCopy}>
               <DemoTag demo={doc.demo} />
               <h3>
                 <Link href={destination(doc, kind, preview)}>{doc.title}</Link>
               </h3>
               <p>{doc.summary || "查看活动安排、参与条件与报名方式。"}</p>
-              {doc.location && <p className={styles.meta}>{doc.location}</p>}
+              {doc.location && (
+                <p className={styles.meta}>地点 / {doc.location}</p>
+              )}
             </div>
             <div className={styles.entryAction}>
-              <span className={styles.state}>{eventState(doc)}</span>
+              <span
+                className={styles.state}
+                data-tone={stateTone(eventState(doc))}
+              >
+                {eventState(doc)}
+              </span>
               <Link
                 className="z-text-link"
                 href={destination(doc, kind, preview)}

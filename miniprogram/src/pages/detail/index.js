@@ -13,6 +13,18 @@ const video = require('../../lib/video');
 const reading = require('../../lib/native-reading');
 const { actions, error } = require('../../lib/page');
 const socialCollections = ['community-posts', 'community-showcase'];
+const seatLabels = { pending: '待审核', confirmed: '已确认', rejected: '已驳回' };
+const seatLabel = value => { const parts = String(value).split('-'); return parts[0] + '排' + parts[1] + '座'; };
+// Keep only what the detail entry renders: no proof ids, occupancy map or phone numbers in page data.
+function seatSummary(info) {
+  if (!info || !(info.enabled || info.mine || info.canReview)) return null;
+  const mine = info.mine && seatLabels[info.mine.status]
+    ? { status: info.mine.status, label: seatLabels[info.mine.status], seats: (info.mine.seats || []).map(seatLabel).join('、') } : null;
+  const rows = Array.isArray(info.rows) ? info.rows : [];
+  const total = rows.reduce((sum, row) => sum + (Number(row && row.count) || 0), 0);
+  return { enabled: Boolean(info.enabled), open: Boolean(info.open), scheduled: Boolean(info.scheduled), openingLabel: info.opensAt ? format.date(info.opensAt) : '', loggedIn: Boolean(info.loggedIn), canReview: Boolean(info.canReview), mine,
+    layout: rows.length && total ? rows.length + ' 排 · ' + total + ' 座' : '', limit: Number(info.seatLimit) || 10 };
+}
 Page(withVisualTheme({
   data: { loading: true, error: '', needsLogin: false, collection: '', doc: {}, nodes: [], links: [], photos: [],
     related: [], previewImages: [], registration: '', seatInfo: null, coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', reading: {} },
@@ -66,9 +78,11 @@ Page(withVisualTheme({
         registration: ['events', 'recruitment'].includes(collection) ? format.registrationState(doc) : '' });
       wx.setNavigationBarTitle({ title: doc.title || '内容详情' });
       if (collection === 'events' || (collection === 'community-posts' && doc.category === 'event')) {
-        void http.request('/api/activities/'+collection+'/'+doc.id+'/seating', { raw: true })
-          .then(seatInfo => { if (ticket === this._ticket) this.setData({ seatInfo }); })
-          .catch(() => {});
+        // Seat entry (public occupancy + own status only). Independent of the signup read; a
+        // failure stays quiet so the detail page never blocks on seating.
+        http.request('/api/activities/' + collection + '/' + doc.id + '/seating', { raw: true })
+          .then(info => { if (ticket === this._ticket) this.setData({ seatInfo: seatSummary(info) }); })
+          .catch(() => { /* Seating is optional on this page; the seating page reports errors. */ });
         try { const signupInfo = await http.request('/api/activities/'+collection+'/'+doc.id+'/signup'); if(ticket===this._ticket)this.setData({signupInfo,registration:signupInfo.form.enabled?'':this.data.registration,
           signupStartText: signupInfo.form.start ? format.date(signupInfo.form.start) : '', signupEndText: signupInfo.form.end ? format.date(signupInfo.form.end) : ''}); }
         catch { if(ticket===this._ticket)this.setData({signupFailed:true}); }
@@ -77,9 +91,11 @@ Page(withVisualTheme({
   },
   signup() { if(navigation.requireUser())navigation.go('signup',{kind:this.data.collection,id:this.data.doc.id}); },
   seating(event) {
-    const mode = event.currentTarget.dataset.mode;
-    if (mode === 'review' && !navigation.requireUser()) return;
-    navigation.go('activity-seating', { kind: this.data.collection, id: this.data.doc.id, mode });
+    const mode = event.currentTarget.dataset.mode === 'review' ? 'review' : undefined;
+    const id = this.data.doc.id;
+    if (!this.data.seatInfo || !/^[1-9]\d*$/.test(String(id))) return;
+    if (mode === 'review' && (!this.data.seatInfo.canReview || !navigation.requireUser())) return;
+    navigation.go('activity-seating', { kind: this.data.collection, id, mode });
   },
   teamPage(event) {
     const page = event.currentTarget.dataset.page, id = this.data.doc.id;

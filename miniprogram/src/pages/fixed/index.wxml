@@ -1,22 +1,57 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
 <import src="../../templates/native-content.wxml" />
-<view class="page mini-page native-page reading-page fixed-page fixed-page-{{key}}">
-  <button class="plain back" bindtap="back">返回</button>
-  <view class="reading-page-heading"><view class="reading-heading-copy"><text class="title">{{(doc && doc.title) || title}}</text><text wx:if="{{doc.summary}}" class="subtitle">{{doc.summary}}</text><text wx:if="{{reading.date.known}}" class="fixed-published">发布于 {{reading.date.text}}</text></view><template wx:if="{{!coverImage || coverImageFailed}}" is="native-reading-mark" /></view>
+<view class="page mini-page fixed-v2 fixed-page-{{key}} {{theme === 'dark' ? 'zj-dark' : ''}}">
+  <view class="zj-hero">
+    <view class="zj-stage-stripes"></view>
+    <view class="zj-hero-inner">
+      <button class="zj-hero-back" bindtap="back">‹ 返回</button>
+      <text class="zj-hero-kicker">{{key === 'join' || isJoin ? 'JOIN · 加入紫荆' : key === 'privacy' ? 'PRIVACY · 隐私说明' : key === 'contact' ? 'CONTACT · 联系' : 'ABOUT · 关于紫荆'}}</text>
+      <text class="zj-hero-title">{{(doc && doc.title) || title}}</text>
+      <text wx:if="{{doc.summary}}" class="zj-hero-lead">{{doc.summary}}</text>
+      <text wx:if="{{reading.date.known}}" class="zj-hero-meta">发布于 {{reading.date.text}}</text>
+    </view>
+  </view>
   <template is="feedback" data="{{loading, error, needsLogin}}" />
   <block wx:if="{{!loading && !error && !needsLogin}}">
-    <view wx:if="{{coverImage}}" class="reading-media fixed-cover-record"><image wx:if="{{!coverImageFailed}}" class="photo" src="{{coverImage.url}}" mode="widthFix" aria-label="{{coverImage.alt || doc.title}}" binderror="readingImageError" data-url="{{coverImage.url}}" /><view wx:else class="fixed-media-failed"><text class="muted">封面暂时无法显示。</text><button class="plain" bindtap="retry">重新加载内容</button></view><text wx:if="{{coverImage.credit}}" class="reading-credit">{{coverImage.credit}}</text></view>
-    <view wx:if="{{key === 'join'}}" class="join-options">
-      <button class="content-link fixed-join-option" bindtap="openWebsite" data-url="/join/members"><view class="fixed-join-mark fixed-join-mark-community" aria-hidden="true"><view></view><view></view></view><view class="reading-record-copy"><text class="shortcut-title">寻找游戏社群</text><text class="muted">联系管理员，申请加入微信群。</text><text class="native-entry-action">查看游戏社群</text></view></button>
-      <button class="content-link fixed-join-option" bindtap="openWebsite" data-url="/join/teams"><view class="fixed-join-mark fixed-join-mark-team" aria-hidden="true"><view></view><view></view></view><view class="reading-record-copy"><text class="shortcut-title">参加代表队选拔</text><text class="muted">了解队伍招新与参与条件。</text><text class="native-entry-action">查看代表队选拔</text></view></button>
-      <button class="content-link fixed-join-option" bindtap="openWebsite" data-url="/join/staff"><view class="fixed-join-mark fixed-join-mark-staff" aria-hidden="true"><view></view><view></view></view><view class="reading-record-copy"><text class="shortcut-title">参与社团工作</text><text class="muted">查看执行部与宣传部骨干招新。</text><text class="native-entry-action">查看骨干招新</text></view></button>
+    <view wx:if="{{coverImage}}" class="fixed-cover-record">
+      <image wx:if="{{!coverImageFailed}}" class="fixed-cover" src="{{coverImage.url}}" mode="widthFix" aria-label="{{coverImage.alt || doc.title}}" binderror="readingImageError" data-url="{{coverImage.url}}" />
+      <view wx:else class="zj-alert"><text class="zj-small">封面暂时无法显示。</text><button class="secondary" bindtap="retry">重新加载内容</button></view>
+      <text wx:if="{{coverImage.credit}}" class="zj-credit">{{coverImage.credit}}</text>
     </view>
-    <view wx:if="{{contacts.length}}" class="contact-directory"><view wx:for="{{contacts}}" wx:key="label" class="fixed-contact"><text class="section-title">{{item.label}}</text><text class="body" selectable>{{item.text}}</text><button class="secondary" bindtap="copy" data-value="{{item.url || item.text}}">复制联系方式</button></view></view>
-    <view wx:if="{{!doc}}" class="empty"><text class="state-title">资料待发布</text><text class="muted">经确认的资料发布后会出现在这里。</text></view>
-    <view wx:if="{{nodes.length}}" class="body reading-body"><rich-text nodes="{{nodes}}" user-select /></view>
-    <view wx:for="{{doc.sections}}" wx:key="heading" class="reading-section"><text class="section-title">{{item.heading}}</text><text class="body" selectable>{{item.text}}</text></view>
+
+    <view wx:if="{{key === 'join'}}" class="fixed-paths">
+      <view class="fixed-path" hover-class="zj-pressed" bindtap="openWebsite" data-url="/join/members" aria-role="link" aria-label="寻找游戏社群">
+        <text class="fixed-path-index">01</text>
+        <view class="fixed-path-copy"><text class="fixed-path-title">寻找游戏社群</text><text class="zj-small">联系管理员，申请加入微信群。</text><text class="zj-card-action">查看游戏社群 ›</text></view>
+      </view>
+      <view class="fixed-path" hover-class="zj-pressed" bindtap="openWebsite" data-url="/join/teams" aria-role="link" aria-label="参加代表队选拔">
+        <text class="fixed-path-index">02</text>
+        <view class="fixed-path-copy"><text class="fixed-path-title">参加代表队选拔</text><text class="zj-small">了解队伍招新与参与条件。</text><text class="zj-card-action">查看代表队选拔 ›</text></view>
+      </view>
+      <view class="fixed-path" hover-class="zj-pressed" bindtap="openWebsite" data-url="/join/staff" aria-role="link" aria-label="参与社团工作">
+        <text class="fixed-path-index">03</text>
+        <view class="fixed-path-copy"><text class="fixed-path-title">参与社团工作</text><text class="zj-small">查看执行部与宣传部骨干招新。</text><text class="zj-card-action">查看骨干招新 ›</text></view>
+      </view>
+    </view>
+
+    <view wx:if="{{contacts.length}}" class="zj-list fixed-contacts">
+      <view wx:for="{{contacts}}" wx:key="label" class="zj-record">
+        <text class="zj-record-title">{{item.label}}</text>
+        <text class="body" selectable>{{item.text}}</text>
+        <view class="zj-record-actions"><button class="secondary" bindtap="copy" data-value="{{item.url || item.text}}">复制联系方式</button></view>
+      </view>
+    </view>
+    <view wx:if="{{!doc}}" class="zj-empty"><text class="zj-empty-icon">✦</text><text class="zj-empty-title">资料待发布</text><text class="zj-small">经确认的资料发布后会出现在这里。</text></view>
+    <view wx:if="{{nodes.length}}" class="fixed-body"><rich-text nodes="{{nodes}}" user-select /></view>
+    <view wx:for="{{doc.sections}}" wx:key="heading" class="zj-sheet fixed-section">
+      <text class="zj-sheet-title">{{item.heading}}</text>
+      <text class="body" selectable>{{item.text}}</text>
+    </view>
     <template is="native-reading-links" data="{{links}}" />
-    <view wx:if="{{isJoin}}" class="section fixed-batches"><view class="section-heading"><text class="section-title">相关招新批次</text></view><template is="native-content-records" data="{{docs:batches, emptyTitle:'暂无已发布的招新批次', emptyHint:'新批次发布后会出现在这里，可稍后下拉刷新。'}}" /></view>
+    <view wx:if="{{isJoin}}" class="zj-section">
+      <view class="zj-section-head"><text class="zj-section-title">相关招新批次</text></view>
+      <template is="native-content-records" data="{{docs:batches, emptyTitle:'暂无已发布的招新批次', emptyHint:'新批次发布后会出现在这里，可稍后下拉刷新。'}}" />
+    </view>
   </block>
 </view>

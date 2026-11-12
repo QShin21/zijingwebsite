@@ -1,180 +1,132 @@
 import Link from "next/link";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import type { Where } from "payload";
-import { bySlug, cms } from "@/lib/content";
-import {
-  canParticipate,
-  canReviewPromotion,
-  canReviewShowcase,
-  managesGame,
-} from "@/lib/rules";
-import { CommunityPager, pageNumber } from "@/components/CommunityPager";
+import { getShowcase } from "@/lib/v2";
+import { bySlug } from "@/lib/content";
+import { canReviewPromotion, canReviewShowcase, managesGame } from "@/lib/rules";
 import { ShowcaseCard } from "@/components/ShowcaseCard";
 import { TeamHonorPins } from "@/components/TeamHonorArchives";
-import {
-  CommunityEmpty,
-  CommunityPageHeader,
-} from "@/components/community-pages/CommunityPages";
-import { ClubFrame } from "../../../_club/ClubPage";
-import styles from "@/components/community-pages/CommunityPages.module.css";
-export default async function Showcase({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ page?: string; view?: string; message?: string }>;
-}) {
+import { pageNumber, read, request, single, type Search } from "@/components/v2/data";
+import { ButtonLink, EmptyState, LinkTabs, Notice, Pager, Wrap } from "@/components/v2/ui";
+import { ShowcaseTile } from "@/components/v2/cards";
+import { empty } from "@/components/v2/copy";
+import layout from "@/components/v2/layout.module.css";
+import styles from "@/components/v2/community.module.css";
+import legacy from "@/components/community-pages/CommunityPages.module.css";
+
+export default async function Showcase({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Search }) {
   const { slug } = await params;
-  const query = await searchParams;
-  const game = await bySlug("games", slug);
+  const search = await searchParams;
+  const [game, { payload, user }] = await Promise.all([bySlug("games", slug), request()]);
   if (!game) notFound();
-  const p = await cms();
-  const { user } = await p.auth({ headers: await headers() });
   const manager = canReviewShowcase(user, game.id);
-  const view =
-    query.view === "mine" && canParticipate(user)
-      ? "mine"
-      : query.view === "review" && manager
-        ? "review"
-        : "public";
-  const page = pageNumber(query.page);
-  const where: Where = { game: { equals: game.id } };
-  if (view === "public") where.status = { equals: "visible" };
-  if (view === "mine") where.author = { equals: user!.id };
-  if (view === "review")
-    where.status = { in: ["pending", "rejected", "hidden"] };
-  const posts = await p.find({
-    collection: "community-showcase",
-    overrideAccess: false,
-    user: view === "public" ? null : user,
-    depth: 0,
-    where,
-    sort: "-createdAt",
-    limit: 6,
-    page,
-    select: {
-      title: true,
-      body: true,
-      images: true,
-      videoURL: true,
-      status: true,
-      authorName: true,
-      createdAt: true,
-      ...(view !== "public" ? { reviewNote: true } : {}),
-    },
-  });
+  const requested = single(search.view);
+  const view = requested === "mine" && user ? "mine" : requested === "review" && manager ? "review" : "public";
+  const page = pageNumber(search.page);
   const base = `/community/${slug}/showcase`;
+  const message = single(search.message);
+
+  // Public gallery comes from the V2 projection; private views keep the review workflow.
+  const publicPage = view === "public" ? await read(getShowcase, { slug, view: "public", page, limit: 12 }, base) : null;
+  const where: Where = { game: { equals: game.id } };
+  if (view === "mine") where.author = { equals: user!.id };
+  if (view === "review") where.status = { in: ["pending", "rejected", "hidden"] };
+  const posts =
+    view === "public"
+      ? null
+      : await payload.find({
+          collection: "community-showcase",
+          overrideAccess: false,
+          user,
+          depth: 0,
+          where,
+          sort: "-createdAt",
+          limit: 6,
+          page,
+          select: { title: true, body: true, images: true, videoURL: true, status: true, authorName: true, createdAt: true, reviewNote: true },
+        });
+
   return (
-    <ClubFrame className={`${styles.page} ${styles.body}`}>
-      <CommunityPageHeader
-        title={
-          view === "review"
-            ? "风采投稿审核"
-            : view === "mine"
-              ? "我的风采投稿"
-              : "社群风采"
-        }
-        description={
-          view === "review"
-            ? "核对社群经历与媒体内容，为投稿留下明确的处理意见。"
-            : view === "mine"
-              ? "查看你分享的活动记录与审核状态。"
-              : "照片、视频和代表队荣誉，记录一起参与的校园生活。"
-        }
-        action={
-          canParticipate(user) ? (
-            <Link className="button light" href={`${base}/new`}>
-              分享社群风采
-            </Link>
-          ) : undefined
-        }
-      />
-      <nav className={styles.tabs} aria-label="风采筛选">
-        <Link href={base} aria-current={view === "public" ? "page" : undefined}>
-          公开风采
-        </Link>
-        {canParticipate(user) && (
-          <Link
-            href={`${base}?view=mine`}
-            aria-current={view === "mine" ? "page" : undefined}
-          >
-            我的投稿
-          </Link>
-        )}
-        {manager && (
-          <Link
-            href={`${base}?view=review`}
-            aria-current={view === "review" ? "page" : undefined}
-          >
-            审核投稿
-          </Link>
-        )}
-      </nav>
-      <p role="status">{query.message}</p>
-      {view === "public" && page === 1 && (
-        <TeamHonorPins payload={p} game={game.id} />
-      )}
-      <div className={view === "review" ? undefined : styles.contentWorkspace}>
-        <section aria-label={view === "public" ? "公开风采记录" : "投稿记录"}>
-          <div className={styles.feed}>
-            {posts.docs.map((post) => (
-              <ShowcaseCard
-                key={post.id}
-                post={post}
-                manager={manager}
-                privateView={view !== "public"}
-                href={
-                  post.status === "visible" ? `${base}/${post.id}` : undefined
-                }
-                returnQuery={new URLSearchParams({
-                  view,
-                  ...(query.page ? { page: String(page) } : {}),
-                }).toString()}
-                promotionHref={
-                  post.status === "visible" &&
-                  (managesGame(user, game.id) || canReviewPromotion(user))
-                    ? "/community/promotions?source=community-showcase&id=" +
-                      post.id
-                    : undefined
-                }
-              />
-            ))}
-          </div>
-          {!posts.docs.length && (
-            <CommunityEmpty
-              title={
-                view === "public"
-                  ? "暂无已发布的风采"
-                  : view === "mine"
-                    ? "你还没有风采投稿"
-                    : "当前没有待处理的投稿"
-              }
-            >
-              <p>
-                {view === "public"
-                  ? "欢迎分享活动记录，投稿审核通过后会在这里公开。"
-                  : view === "mine"
-                    ? "通过分享入口记录活动，再从这里查看审核状态。"
-                    : "新的投稿会按现有权限在此展示。"}
-              </p>
-            </CommunityEmpty>
-          )}
-          <CommunityPager
-            page={page}
-            pages={posts.totalPages}
-            base={base}
-            query={view !== "public" ? `&view=${view}` : ""}
+    <Wrap className={layout.pageBody}>
+      <div className={layout.sidebarLayout}>
+        <div>
+          <h1 className={styles.pageTitle}>{view === "review" ? "风采投稿审核" : view === "mine" ? "我的风采投稿" : "社群风采"}</h1>
+          <LinkTabs
+            label="风采筛选"
+            items={[
+              { href: base, label: "公开风采", current: view === "public" },
+              ...(user ? [{ href: `${base}?view=mine`, label: "我的投稿", current: view === "mine" }] : []),
+              ...(manager ? [{ href: `${base}?view=review`, label: "审核投稿", current: view === "review" }] : []),
+            ]}
           />
-        </section>
-        {view !== "review" && (
-          <aside className={styles.publishAside}>
-            <h2>记录一次共同经历</h2>
-            <p>分享你有权发布的活动照片与视频；社群管理员审核后展示。</p>
-            <Link href={`${base}/new`}>前往分享入口</Link>
-          </aside>
-        )}
+          {message && <Notice>{message}</Notice>}
+          {view === "public" && page === 1 && <TeamHonorPins payload={payload} game={game.id} />}
+          {publicPage &&
+            (publicPage.docs.length ? (
+              <div className={layout.grid3}>
+                {publicPage.docs.map((item) => (
+                  <ShowcaseTile key={item.key} item={item} />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title={empty.showcase.title}
+                icon="image"
+                actions={
+                  <ButtonLink href={`${base}/new`} tone="ghost" size="small">
+                    分享社群风采
+                  </ButtonLink>
+                }
+              >
+                {empty.showcase.body}
+              </EmptyState>
+            ))}
+          {publicPage && <Pager page={publicPage.page} totalPages={publicPage.totalPages} path={base} />}
+          {posts && (
+            <>
+              <div className={legacy.feed}>
+                {posts.docs.map((post) => (
+                  <ShowcaseCard
+                    key={post.id}
+                    post={post}
+                    manager={manager}
+                    privateView
+                    href={post.status === "visible" ? `${base}/${post.id}` : undefined}
+                    returnQuery={new URLSearchParams({ view, ...(search.page ? { page: String(page) } : {}) }).toString()}
+                    promotionHref={
+                      post.status === "visible" && (managesGame(user, game.id) || canReviewPromotion(user))
+                        ? "/community/promotions?source=community-showcase&id=" + post.id
+                        : undefined
+                    }
+                  />
+                ))}
+              </div>
+              {!posts.docs.length && (
+                <EmptyState title={view === "mine" ? "你还没有风采投稿" : "当前没有待处理的投稿"} icon="inbox">
+                  {view === "mine" ? "通过分享入口记录活动，再从这里查看审核状态。" : "新的投稿会按现有权限在此展示。"}
+                </EmptyState>
+              )}
+              <Pager page={page} totalPages={posts.totalPages} path={base} query={{ view }} />
+            </>
+          )}
+        </div>
+        <aside className={`${layout.panel} ${layout.sticky}`}>
+          <h2 className={layout.panelTitle}>记录一次共同经历</h2>
+          <p className={styles.asideText}>分享你有权发布的活动照片与视频；社群管理员审核后展示。</p>
+          <p style={{ marginTop: 14 }}>
+            <ButtonLink href={`${base}/new`} icon="plus" size="small">
+              分享社群风采
+            </ButtonLink>
+          </p>
+          {manager && (
+            <p style={{ marginTop: 10 }}>
+              <Link className="text-link" href={`${base}?view=review`}>
+                进入审核
+              </Link>
+            </p>
+          )}
+        </aside>
       </div>
-    </ClubFrame>
+    </Wrap>
   );
 }

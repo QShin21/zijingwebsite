@@ -10,6 +10,8 @@ import { seatProofBytes, seatStatusLabels, type SeatStatus, type SeatingKind } f
 export const seatResponseHeaders = {
   "Cache-Control": "private, no-store",
   "X-Content-Type-Options": "nosniff",
+  "Vary": "Cookie, Authorization",
+  "Referrer-Policy": "no-referrer",
 };
 export const seatReply = (data: unknown, status = 200) =>
   Response.json(data, { status, headers: seatResponseHeaders });
@@ -36,7 +38,7 @@ export async function seatingHTTP<T extends SeatRouteContext>(
 }
 
 export async function seatingJSON(request: Request): Promise<Record<string, unknown>> {
-  if (!request.headers.get("content-type")?.startsWith("application/json"))
+  if (!/^application\/json(?:;|$)/i.test(request.headers.get("content-type") ?? ""))
     throw new APIError("请提交 JSON 请求", 415);
   const body = await boundedBody(request, 8192);
   try {
@@ -63,4 +65,9 @@ export function seatingReviewFilter(query: URLSearchParams) {
   if (!Object.hasOwn(seatStatusLabels, status)) throw new APIError("审核状态无效", 400);
   const page = Math.max(1, Math.min(100000, Math.floor(Number(query.get("page"))) || 1));
   return { status: status as SeatStatus, page };
+}
+
+export function seatingFields(data: Record<string, unknown>, allowed: string[]) {
+  if (Object.keys(data).some(key => !allowed.includes(key)))
+    throw new APIError("请求含不允许的身份、状态或字段", 400);
 }

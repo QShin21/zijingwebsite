@@ -10,11 +10,15 @@ const actions = {
   openContent(event) { navigation.content(event.currentTarget.dataset.doc); },
   openPage(event) { navigation.go(event.currentTarget.dataset.page, event.currentTarget.dataset.params || {}); },
   openWebsite(event) { navigation.website(event.currentTarget.dataset.url); },
+  // Server-declared destinations: data-web carries ApplicationItem/TodoItem/ManageQueue.webOnly.
+  openTarget(event) { const { url, web } = event.currentTarget.dataset; navigation.open(url, web === true); },
   copy(event) { navigation.copy(event.currentTarget.dataset.value); },
   previewImage(event) {
     const url = event.currentTarget.dataset.url;
     if (url) wx.previewImage({ current: url, urls: this.data.previewImages || [url] });
   },
+  // V2 card images: one re-sign for an expired ticket, then the text fallback.
+  imageError(event) { require('./v2-images').failed(this, event); },
 };
 function protect(page) {
   const user = session.user();

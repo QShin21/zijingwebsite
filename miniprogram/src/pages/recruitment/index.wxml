@@ -1,0 +1,32 @@
+<page-meta page-style="{{themePageStyle}}" />
+<import src="../../templates/v2.wxml" />
+<view class="page mini-page {{theme === 'dark' ? 'zj-dark' : ''}}">
+  <view class="page-heading">
+    <text class="eyebrow">TRYOUTS · 选拔中心</text>
+    <text class="title">选拔中心</text>
+    <text class="subtitle">代表队选拔与骨干招新。提交后可随时查看本人回执，由管理员人工处理。</text>
+  </view>
+  <template wx:if="{{loading}}" is="zj-loading" />
+  <template wx:elif="{{error}}" is="zj-error" data="{{error}}" />
+  <block wx:else>
+    <view class="zj-section">
+      <template is="zj-section" data="{{title: '骨干招新', count: staff.length}}" />
+      <view wx:if="{{staff.length}}" class="zj-list"><block wx:for="{{staff}}" wx:key="key"><template is="zj-call" data="{{item}}" /></block></view>
+      <template wx:else is="zj-empty" data="{{title: '当前没有骨干招新批次', body: '新的批次发布后会出现在这里。', icon: '🚩'}}" />
+    </view>
+    <view class="zj-section">
+      <template is="zj-section" data="{{title: '代表队选拔', count: calls.length}}" />
+      <template wx:if="{{!user}}" is="zj-login" data="{{title: '登录后查看代表队选拔', body: '代表队招新批次与本人申请仅向社团成员展示。'}}" />
+      <view wx:elif="{{calls.length}}" class="zj-list"><block wx:for="{{calls}}" wx:key="key"><template is="zj-call" data="{{item}}" /></block></view>
+      <template wx:else is="zj-empty" data="{{title: '当前没有开放的代表队选拔', body: '可以先浏览代表队与往期安排。', icon: '🏆', action: '浏览代表队', page: 'teams'}}" />
+    </view>
+    <view wx:if="{{mine.length}}" class="zj-section">
+      <template is="zj-section" data="{{title: '我的申请进度'}}" />
+      <view class="zj-list"><block wx:for="{{mine}}" wx:key="key"><template is="zj-application" data="{{item}}" /></block></view>
+    </view>
+    <view class="recruitment-tools">
+      <button wx:if="{{user}}" class="secondary" bindtap="workspace">入队申请与成员记录（含撤回、离队）</button>
+      <button class="secondary" bindtap="staffPage">骨干招新与我的回执</button>
+    </view>
+  </block>
+</view>

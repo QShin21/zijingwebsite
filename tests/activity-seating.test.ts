@@ -3,7 +3,8 @@ import "dotenv/config";
 import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, expect, it, vi } from "vitest";
 import sharp from "sharp";
-import { getPayload, type Payload } from "payload";
+import { createLocalReq, getPayload, logoutOperation, type Payload } from "payload";
+import { sql, type PostgresAdapter } from "@payloadcms/db-postgres";
 import config from "../src/payload.config";
 import { serverURL } from "@/lib/environment";
 import { beijingInputTime } from "@/lib/rules";
@@ -21,6 +22,7 @@ type Activity = { kind: SeatingKind; id: number };
 let p: Payload;
 let president: Actor, reviewer: Actor, otherReviewer: Actor, first: Actor, second: Actor;
 let event: Activity, post: Activity;
+let mainScope: number;
 let picture: Uint8Array<ArrayBuffer>;
 const users: number[] = [], games: number[] = [], activities: Activity[] = [];
 const suffix = randomBytes(5).toString("hex");
@@ -40,7 +42,7 @@ async function actor(name: string, roles: User["roles"], scope?: number) {
   const password = randomBytes(24).toString("hex");
   const user = await p.create({
     collection: "users", overrideAccess: true, context: { system: true },
-    data: { email, password, name, roles, communityOffices: scope ? [{ game: scope, status: "active" }] : undefined },
+    data: { email, password, name: name + "-" + suffix, roles, communityOffices: scope ? [{ game: scope, status: "active" }] : undefined },
   });
   users.push(user.id);
   const login = await p.login({ collection: "users", data: { email, password } });
@@ -96,13 +98,16 @@ async function review(activity: Activity, who: Actor) {
 }
 
 beforeAll(async () => {
-  if (process.env.APP_ENV !== "development" ||
-      !["localhost", "127.0.0.1"].includes(new URL(process.env.DATABASE_URL!).hostname))
+  const database = new URL(process.env.DATABASE_URL!);
+  if (process.env.APP_ENV !== "development" || process.env.DB_PUSH !== "false" ||
+      !["localhost", "127.0.0.1"].includes(database.hostname) ||
+      !["/zijing_v2_backend_synthetic", "/zijing_rebuild_contracts_synthetic"].includes(database.pathname))
     throw new Error("Activity seating checks require an isolated loopback database");
   p = await getPayload({ config, key: "activity-seating-" + suffix });
   locator.cms.mockResolvedValue(p);
   president = await actor("president", ["president"]);
   const scope = await game("home"), other = await game("other");
+  mainScope = scope;
   reviewer = await actor("reviewer", ["member"], scope);
   otherReviewer = await actor("other-reviewer", ["member"], other);
   first = await actor("first", ["member"]);
@@ -142,9 +147,9 @@ it("有权人员按活动启用 381 个座位，普通成员和外社群任职�
   expect((await put(event, reviewer, true, "https://elsewhere.invalid")).status).toBe(403);
   expect((await put(event, reviewer, true, origin)).status).toBe(200);
   expect((await map(event)).open).toBe(true);
-  expect((await map(post)).enabled).toBe(false);
+  expect((await map(post, first)).enabled).toBe(false);
   expect((await put(post, president, true)).status).toBe(200);
-  expect((await map(post)).open).toBe(true);
+  expect((await map(post, first)).open).toBe(true);
 });
 
 it("校验凭证与座位上限，并发重叠选座只保留完整的一份申请", async () => {
@@ -222,8 +227,203 @@ it("社群活动接受 10 张凭证与 10 个座位，启停独立于站点活�
   const { mine } = await saved.json();
   expect((await decide(post, reviewer, mine.id, "confirmed")).status).toBe(200);
   expect((await map(post, first)).mine?.status).toBe("confirmed");
-  expect(Object.values((await map(post)).occupancy)).toEqual(Array(10).fill("confirmed"));
+  expect(Object.values((await map(post, first)).occupancy)).toEqual(Array(10).fill("confirmed"));
   expect((await upload(post, first)).status).toBe(409);
+});
+
+async function extraActivity(label: string, kind: SeatingKind = 'events'): Promise<Activity> {
+  const doc = kind === 'events' ? await p.create({ collection: kind, user: president.user, overrideAccess: false,
+    data: { title: '合成选座边界-' + label, slug: 'seat-check-' + label + '-' + suffix, game: mainScope, _status: 'published' } })
+    : await p.create({ collection: kind, user: president.user, overrideAccess: true,
+      data: { title: '合成社群选座-' + label, game: mainScope, author: president.user.id, category: 'event', body: '合成边界资料' } });
+  const activity = { kind, id: doc.id };
+  activities.push(activity);
+  expect((await put(activity, president, true)).status).toBe(200);
+  return activity;
+}
+
+it('new 社群登录、父社群可见性及结束时间约束覆盖座位图、上传和提交', async () => {
+  const activity = await extraActivity('visibility', 'community-posts');
+  expect((await route.GET(request(activity, 'GET'), context(activity))).status).toBe(401);
+  const proof = await added(activity, second);
+  await p.db.drizzle.execute(sql`UPDATE community_posts SET end_at = now() - interval '1 hour' WHERE id = ${activity.id}`);
+  expect((await map(activity, second)).open).toBe(false);
+  expect((await upload(activity, second)).status).toBe(409);
+  expect((await submit(activity, second, ['1-1'], [proof])).status).toBe(409);
+  await p.db.drizzle.execute(sql`UPDATE community_posts SET end_at = NULL WHERE id = ${activity.id}`);
+  await p.db.drizzle.execute(sql`UPDATE games SET _status = 'draft' WHERE id = ${mainScope}`);
+  try {
+    expect((await route.GET(request(activity, 'GET', second), context(activity))).status).toBe(404);
+    expect((await upload(activity, second)).status).toBe(404);
+    expect((await submit(activity, second, ['1-1'], [proof])).status).toBe(404);
+  } finally { await p.db.drizzle.execute(sql`UPDATE games SET _status = 'published' WHERE id = ${mainScope}`); }
+  await p.db.drizzle.execute(sql`UPDATE games SET demo = true WHERE id = ${mainScope}`);
+  vi.stubEnv('APP_ENV', 'production');
+  try {
+    expect((await route.GET(request(activity, 'GET', second), context(activity))).status).toBe(404);
+  } finally {
+    vi.unstubAllEnvs();
+    await p.db.drizzle.execute(sql`UPDATE games SET demo = false WHERE id = ${mainScope}`);
+  }
+  expect((await map(activity, second)).occupancy).toEqual({});
+  expect((await map(activity, second)).drafts).toContain(proof);
+});
+
+it('保留 main 的独立任职审核合同，但撤任立即失去手机号与凭证访问', async () => {
+  const activity = await extraActivity('office');
+  const scoped = await actor('limited-' + suffix, ['member'], mainScope);
+  await p.update({ collection: 'users', id: scoped.user.id, overrideAccess: true, context: { system: true }, data: {
+    communityOffices: [{ game: mainScope, status: 'active', publishContent: false, reviewShowcase: false,
+      handleJoins: false, viewSignups: false, exportSignups: false, contactConsent: false }],
+  } });
+  expect((await put(activity, scoped, true)).status).toBe(200);
+  const proof = await added(activity, first);
+  const submitted = await submit(activity, first, ['2-1'], [proof]);
+  const saved = (await submitted.json()).mine;
+  expect((await review(activity, scoped)).status).toBe(200);
+  expect((await image(activity, proof, scoped)).status).toBe(200);
+  await p.update({ collection: 'users', id: scoped.user.id, overrideAccess: true, context: { system: true },
+    data: { communityOffices: [{ game: mainScope, status: 'revoked' }] } });
+  expect((await review(activity, scoped)).status).toBe(403);
+  expect((await image(activity, proof, scoped)).status).toBe(404);
+  expect((await decide(activity, scoped, saved.id, 'confirmed')).status).toBe(403);
+  expect((await map(activity, first)).mine?.status).toBe('pending');
+  expect((await put(activity, president, false)).status).toBe(200);
+  expect((await decide(activity, president, saved.id, 'confirmed')).status).toBe(200);
+  expect((await map(activity, first)).mine?.status).toBe('confirmed');
+});
+
+it('显式 Authorization 不回退 Cookie 身份，封禁和注销后不再读取私有凭证', async () => {
+  const activity = await extraActivity('auth');
+  for (const authorization of ['JWT invalid', 'jwt invalid', 'Bearer invalid', 'JWT malformed token']) {
+    const req = request(activity, 'GET', undefined, undefined, '?mode=review');
+    req.headers.set('Authorization', authorization); req.headers.set('Cookie', 'payload-token=' + president.token);
+    expect((await route.GET(req, context(activity))).status).toBe(401);
+  }
+  const mixed = request(activity, 'GET', first, undefined, '?mode=review');
+  mixed.headers.set('Cookie', 'payload-token=' + president.token);
+  expect((await route.GET(mixed, context(activity))).status).toBe(403);
+  const owner = await actor('auth-owner-' + suffix, ['member']);
+  const proof = await added(activity, owner);
+  const own = await image(activity, proof, owner);
+  expect(own.status).toBe(200); expect(own.headers.get('cache-control')).toContain('no-store');
+  expect(own.headers.get('vary')).toBe('Cookie, Authorization');
+  await p.update({ collection: 'users', id: owner.user.id, overrideAccess: true, context: { system: true }, data: { accountStatus: 'suspended' } });
+  expect((await image(activity, proof, owner)).status).toBe(401);
+  expect((await submit(activity, owner, ['3-1'], [proof])).status).toBe(401);
+  await p.update({ collection: 'users', id: owner.user.id, overrideAccess: true, context: { system: true }, data: { accountStatus: 'active' } });
+  const auth = await p.auth({ headers: new Headers({ authorization: 'JWT ' + owner.token }) });
+  expect(auth.user).toBeTruthy();
+  const req = await createLocalReq({ user: auth.user! }, p);
+  await logoutOperation({ collection: p.collections.users, req, allSessions: false });
+  expect((await image(activity, proof, owner)).status).toBe(401);
+});
+
+it('并发上传不超过十张，同一账号并发提交仅生成一份完整申请', async () => {
+  const activity = await extraActivity('parallel');
+  const owner = await actor('parallel-' + suffix, ['member']);
+  const uploads = await Promise.all(Array.from({ length: 11 }, () => upload(activity, owner)));
+  expect(uploads.filter(response => response.status === 201)).toHaveLength(10);
+  expect(uploads.filter(response => response.status === 409)).toHaveLength(1);
+  const proofs = (await map(activity, owner)).drafts;
+  expect(proofs).toHaveLength(10);
+  const results = await Promise.all([
+    submit(activity, owner, ['4-1'], [proofs[0]]), submit(activity, owner, ['4-2'], [proofs[1]]),
+  ]);
+  expect(results.map(response => response.status)).toEqual([200, 200]);
+  const receipts = await Promise.all(results.map(response => response.json()));
+  expect(receipts[0]).toEqual(receipts[1]);
+  expect(Object.keys((await map(activity)).occupancy)).toHaveLength(1);
+  const counts = await p.db.drizzle.execute(sql`SELECT count(*)::int n FROM activity_seat_requests r JOIN activity_seatings s ON s.id = r.seating_id WHERE s.event_id = ${activity.id}`);
+  expect(counts.rows[0].n).toBe(1);
+});
+
+// Keep an uncommitted mutation on a separate connection. The tested request reads
+// the previous committed state, waits on FOR SHARE, then must honor the change.
+async function requestAcrossMutation(mutation: string, values: unknown[], table: string, work: () => Promise<Response>) {
+  const pool = (p.db as unknown as PostgresAdapter).pool;
+  const client = await pool.connect();
+  let pending: Promise<Response> | undefined;
+  try {
+    await client.query('BEGIN'); await client.query(mutation, values);
+    pending = work();
+    let waiting = false;
+    for (let attempt = 0; attempt < 100; attempt++) {
+      const waits = await pool.query("SELECT count(*)::int n FROM pg_stat_activity WHERE datname = current_database() AND wait_event_type = 'Lock' AND query LIKE $1", [`SELECT id FROM ${table} WHERE id = $1 FOR SHARE%`]);
+      if (waits.rows[0].n) { waiting = true; break; }
+      await new Promise(resolve => setTimeout(resolve, 20));
+    }
+    expect(waiting).toBe(true);
+    await client.query('COMMIT');
+    return await pending;
+  } finally {
+    await client.query('ROLLBACK'); client.release();
+    if (pending) await pending;
+  }
+}
+
+it('等待活动锁期间结束活动，提交复查后拒绝且不吞凭证', async () => {
+  const activity = await extraActivity('queued-end');
+  const proof = await added(activity, second);
+  const result = await requestAcrossMutation("UPDATE events SET lifecycle = 'ended' WHERE id = $1", [activity.id], 'events',
+    () => submit(activity, second, ['5-1'], [proof]));
+  expect(result.status).toBe(409);
+  expect((await map(activity, second)).occupancy).toEqual({});
+  expect((await map(activity, second)).drafts).toContain(proof);
+});
+
+it('等待账号锁期间停用账号，上传在锁后复核身份且不保存图片', async () => {
+  const activity = await extraActivity('queued-suspend');
+  const owner = await actor('queued-' + suffix, ['member']);
+  const result = await requestAcrossMutation("UPDATE users SET account_status = 'suspended' WHERE id = $1", [owner.user.id], 'users',
+    () => upload(activity, owner));
+  expect(result.status).toBe(401);
+  const rows = await p.db.drizzle.execute(sql`SELECT count(*)::int n FROM activity_seat_proofs WHERE member_id = ${owner.user.id}`);
+  expect(rows.rows[0].n).toBe(0);
+});
+
+it('未知JSON字段、无效座位与过期凭证不能产生部分申请', async () => {
+  const activity = await extraActivity('validation');
+  const proof = await added(activity, first);
+  const spoof = await route.POST(request(activity, 'POST', first, { seats: ['6-1'], proofs: [proof], phone: '13800138000', member: second.user.id }), context(activity));
+  expect(spoof.status).toBe(400);
+  expect((await submit(activity, first, ['1-1', '1-1'], [proof])).status).toBe(400);
+  expect((await submit(activity, first, ['999-1'], [proof])).status).toBe(400);
+  await p.db.drizzle.execute(sql`UPDATE activity_seat_proofs SET created_at = now() - interval '2 days' WHERE id = ${proof}::uuid`);
+  expect((await submit(activity, first, ['6-1'], [proof])).status).toBe(409);
+  expect((await image(activity, proof, first)).status).toBe(404);
+  expect((await map(activity)).occupancy).toEqual({});
+});
+
+
+it('等待座位行锁自然跨过截止时间也必须拒绝，保留未消费凭证', async () => {
+  const activity = await extraActivity('natural-deadline');
+  const proof = await added(activity, first);
+  const pool = (p.db as unknown as PostgresAdapter).pool;
+  const client = await pool.connect();
+  let pending: Promise<Response> | undefined;
+  try {
+    await client.query('BEGIN');
+    await client.query('SELECT id FROM activity_seatings WHERE event_id = $1 FOR UPDATE', [activity.id]);
+    const result = await pool.query("UPDATE events SET end_at = now() + interval '2 seconds' WHERE id = $1 RETURNING end_at", [activity.id]);
+    const end = result.rows[0].end_at.getTime();
+    pending = submit(activity, first, ['7-1'], [proof]);
+    let waiting = false;
+    for (let attempt = 0; attempt < 80; attempt++) {
+      const waits = await pool.query("SELECT count(*)::int n FROM pg_stat_activity WHERE datname = current_database() AND wait_event_type = 'Lock' AND query LIKE 'SELECT id, enabled, opens_at FROM activity_seatings WHERE%FOR UPDATE'");
+      if (waits.rows[0].n) { waiting = true; break; }
+      await new Promise(resolve => setTimeout(resolve, 20));
+    }
+    expect(waiting).toBe(true);
+    await new Promise(resolve => setTimeout(resolve, Math.max(0, end - Date.now() + 50)));
+    await client.query('COMMIT');
+    expect((await pending).status).toBe(409);
+    expect((await map(activity, first)).drafts).toContain(proof);
+    expect((await map(activity)).occupancy).toEqual({});
+  } finally {
+    await client.query('ROLLBACK'); client.release();
+    if (pending) await pending;
+  }
 });
 
 it("按北京时间到点开放，开放前禁止上传和提交，停用后清除定时", async () => {

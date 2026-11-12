@@ -1,14 +1,30 @@
 # 部署、迁移与恢复
 
-## 2026-11-12 选座定时开放
+## 2026-11-12 网页社群图标入口
+
+北京时间 16:41:46，`new@324b467` 已部署到 `home.thuzijing.top`，构建 `iPpEtsO3NwkGpYO1zhdC1`。首页和社群列表的卡片只提供浏览入口，图标编辑入口集中在社群页头。改动文件 lint、生产构建、隔离候选和公网就绪检查通过。应用沿用现有数据库结构，回退脚本为 `/srv/zijingwebsite/backups/community-card-entry-20261112-324b467/rollback.sh`。
+
+## 2026-11-12 小程序默认游戏图标
+
+北京时间 16:12:49，`new@ac32f08` 已部署到 `home.thuzijing.top`，构建 `541kHp3fQc20q2pdNbuzz`。五张默认图标已放入站点的媒体目录，公网请求返回 512 × 512 PNG，内容与发布文件一致。小程序 0.5.5 刷新首页或社群列表即可使用本站图标。
+
+此版本沿用现有数据库结构。候选使用上一轮的隔离恢复库，上一版本及回退脚本保留在服务器。公网就绪、首页、后台登录页及小程序状态接口返回 200。见 [部署记录](evidence/miniapp-default-icons-deployment-20261112.json)。
+
+## 2026-11-12 社群图标与后台改密
+
+应用提交 `b1d7486b257b78b57bd4fc994da42dccfec02ce4` 于北京时间 15:51:55 部署到 `home.thuzijing.top`，运行构建为 `IsTigo95Y8jZwGzhxpi9h`。公网首页、后台登录页、小程序状态接口及两项健康检查均返回 200，静态资源清单与发布构建一致。
+
+同机备份恢复核对 75 张表、4,748 条记录。隔离升级前后 74 张原有表的数据一致。线上应用 `20261112_020000_community_icons` 后，21 张业务表的 739 条记录和媒体核对一致。保留上一版本及回退脚本 `/srv/zijingwebsite/backups/icons-admin-reset-20261112-b1d7486/rollback.sh`，应用回退保留新增的图标数据。线上核验采用只读请求。见 [部署记录](evidence/icons-admin-reset-deployment-20261112.json)。
+
+## 2026-11-12 历史发布：选座定时开放
 
 应用提交 `fb020cd` 于北京时间 13:58:48 部署到 `home.thuzijing.top`。服务器恢复副本验证了开放前拒绝提交、到点开放和选座提交。线上核对 16 张业务表，包括既有选座申请、座位占用和凭证。小程序 0.5.4 已上传开发版。详见[发布记录](evidence/activity-seat-schedule-deployment-20261112.json)。
 
-## 2026-11-12 活动选座
+## 2026-11-12 历史发布：活动选座
 
 应用提交 `d3a1446ee0677876cdea2e833a24d479ec047c8f` 于北京时间 13:27:14 部署到 `home.thuzijing.top`。公网返回了构建 `kk0HK-b4qmNuiNPdilfqE` 对应的资源，健康检查、社群活动选座状态和审核权限边界验证通过。完整选座、图片核验、驳回与通过流程在服务器恢复副本使用合成账号验证。
 
-同机备份恢复核对 69 张表、3,963 条记录。增量迁移添加四张选座表，恢复副本的 68 张原业务表数据一致。正式库切换前后核对 12 张业务表，包括 278 份既有活动答卷。回退脚本位于 `/srv/zijingwebsite/backups/activity-seating-20261112-d3a1446/rollback.sh`。详见[部署记录](evidence/activity-seating-deployment-20261112.json)。
+同机备份恢复核对 69 张表、3,963 条记录。增量迁移添加四张选座表，恢复副本的 68 张原业务表数据一致。正式库切换前后核对 12 张业务表，包括 278 份既有活动答卷。回退脚本位于 `/srv/zijingwebsite/backups/activity-seating-20261112-d3a1446/rollback.sh`。详见[部署记录](evidence/activity-seating-deployment-20261112.json)。小程序 0.5.3 的历史开发版上传见[上传记录](evidence/miniprogram-053-upload-20261112.json)。
 
 ## 2026-11-10 代表队招新发布与荣誉投稿入口
 

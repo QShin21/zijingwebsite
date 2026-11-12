@@ -8,6 +8,8 @@ import sharp from "sharp";
 import path from "node:path";
 import { Collections } from "./collections";
 import { Site } from "./globals/Site";
+import { PendingUploads } from "./collections/PendingUploads";
+import { CommunityIcons } from "./collections/CommunityIcons";
 import { email } from "./lib/email";
 import {serverURL} from './lib/environment';
 if (!process.env.PAYLOAD_SECRET) throw new Error("PAYLOAD_SECRET is required");
@@ -24,7 +26,7 @@ export default buildConfig({
     },
   },
   i18n: { supportedLanguages: { zh }, fallbackLanguage: "zh" },
-  collections: Collections,
+  collections: [...Collections, PendingUploads, CommunityIcons],
   globals: [Site],
   editor: lexicalEditor({
     features: ({ defaultFeatures }) =>

@@ -1,22 +1,14 @@
 @import "../../templates/business.wxss";
 @import "../../styles/native-forms.wxss";
-.membership-loading { padding: 12px 0 24px; }
-.membership-read-error { margin-bottom: 24px; }
-.mini-page.native-form-page.team-members-page > .native-receipt { margin-bottom: 16px; }
-.membership-scope { padding: 16px; margin: 0 0 24px; background: var(--z-surface); border-left: 3px solid var(--z-secondary-border); }
-.scope-title { display: block; font-size: 15px; line-height: 1.65; font-weight: 600; margin-bottom: 8px; }
-.mini-page.native-form-page.team-members-page .membership-heading { flex-wrap: wrap; gap: 8px 16px; margin-bottom: 0; }
-.mini-page.native-form-page.team-members-page .membership-list { margin-top: 8px; }
-.mini-page.native-form-page.team-members-page .membership-record:first-child { border-top: 0; }
-.mini-page.native-form-page.team-members-page .membership-record > .record-meta { align-items: center; margin-top: 0; }
-.membership-name { display: block; margin-top: 12px; font-size: 18px; line-height: 1.5; font-weight: 600; overflow-wrap: anywhere; word-break: break-word; }
-.membership-dates { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 16px; }
-.membership-dates > view { flex: 1; min-width: 112px; }
-.date-label { display: block; color: var(--z-muted); font-size: 12px; line-height: 1.6; }
-.date-value { display: block; margin-top: 4px; font-size: 15px; line-height: 1.6; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.mini-page.native-form-page.team-members-page .membership-record > .disclosure { margin-top: 12px; }
-.mini-page.native-form-page.team-members-page .membership-revoke { margin-top: 12px; border-left: 3px solid var(--z-danger-border); }
-.revoke-guidance { display: block; margin-top: 8px; color: var(--z-muted); font-size: 14px; line-height: 1.75; }
-.mini-page.native-form-page.team-members-page textarea { min-height: 160px; height: 160px; }
-.mini-page.native-form-page.team-members-page .membership-revoke > .danger { width: 100%; }
-.mini-page.native-form-page.team-members-page .membership-load-more { width: 100%; margin-top: 24px; }
+
+/* V2 team members: member cards with tenure chips and a guarded revoke panel. */
+.team-members-v2 { padding-top: 0; }
+.members-label { display: block; font-weight: 900; }
+.members-who { display: flex; align-items: center; gap: 16rpx; flex: 1; min-width: 0; }
+.members-avatar { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 72rpx; height: 72rpx; border-radius: 50%; background: linear-gradient(135deg, var(--z-primary), var(--z-stage2)); color: #fff; font-size: 30rpx; font-weight: 900; }
+.members-dates { display: flex; gap: 12rpx; }
+.members-date { flex: 1; display: flex; flex-direction: column; gap: 4rpx; padding: 12rpx 16rpx; border-radius: 18rpx; background: var(--z-raised); border: 1rpx solid var(--z-line); font-size: 25rpx; font-weight: 800; }
+.members-date-label { color: var(--z-primary); font-size: 21rpx; font-weight: 900; }
+.mini-page .members-disclosure { display: flex; justify-content: space-between; width: 100%; padding: 10rpx 0; }
+.members-revoke { display: flex; flex-direction: column; gap: 8rpx; padding: 24rpx; border: 1rpx solid var(--z-danger-line); border-radius: 24rpx; background: var(--z-danger-bg); }
+.mini-page .members-more { display: block; width: 100%; margin-top: 16rpx; }

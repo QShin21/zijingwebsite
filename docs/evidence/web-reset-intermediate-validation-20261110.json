@@ -1,0 +1,121 @@
+{
+  "status": "INTERMEDIATE_CHECKS_FINISHED_NOT_FINAL_DELIVERY",
+  "checkedAt": "2026-11-10T16:31:31.984004+00:00",
+  "sourceBaselineCommit": "58f0de98b349ab13343780a4e05f2d6d55249cef",
+  "validatedState": "Partial Claude Opus 5.5 max frontend rewrite stopped by provider usage cap",
+  "sourceManifest": ".data/web-reset-validation-20261110/INPUTS.json",
+  "manifestSHA256": "c29bca972e55f50ce72111ddbea986c483167fcb0dcebb9ccc8bf974048a8423",
+  "sourceChangesDuringChecks": [],
+  "checks": [
+    {
+      "name": "repository-typecheck",
+      "exitCode": 0
+    },
+    {
+      "name": "isolated-snapshot-typecheck",
+      "exitCode": 0
+    },
+    {
+      "name": "current-frontend-contracts-and-logic",
+      "files": 20,
+      "passed": 282,
+      "failed": 0,
+      "exitCode": 0
+    },
+    {
+      "name": "changed-code-eslint",
+      "files": 12,
+      "exitCode": 0
+    },
+    {
+      "name": "all-repository-eslint",
+      "exitCode": 1,
+      "errors": 4,
+      "baselineUnchangedFiles": [
+        "src/collections/community-operations.ts",
+        "tests/club-operations.test.ts"
+      ]
+    },
+    {
+      "name": "production-build",
+      "status": "passed",
+      "exitCode": 0,
+      "buildID": "-aG6giK0QfRpCz3WzCq6R",
+      "compilerWarning": true,
+      "warningDetails": "Build output says Compiled with warnings but includes no diagnostic text; final compilation and all steps succeeded."
+    },
+    {
+      "name": "git-diff-check",
+      "exitCode": 0
+    }
+  ],
+  "oldErrors": [
+    {
+      "file": "src/collections/community-operations.ts",
+      "rule": "@typescript-eslint/no-unused-vars",
+      "names": [
+        "canPublish",
+        "communityIDs"
+      ],
+      "unchangedFromHEAD": true
+    },
+    {
+      "file": "tests/club-operations.test.ts",
+      "rule": "@typescript-eslint/no-unused-vars",
+      "names": [
+        "updateCommunityCard"
+      ],
+      "unchangedFromHEAD": true
+    },
+    {
+      "file": "tests/club-operations.test.ts",
+      "rule": "no-unassigned-vars",
+      "names": [
+        "otherGame"
+      ],
+      "unchangedFromHEAD": true
+    }
+  ],
+  "newErrorsDetectedSoFar": [],
+  "limits": [
+    "Frontend rewrite is incomplete; these passes are not final functional/visual acceptance.",
+    "Full baseline test failures remain separately recorded.",
+    "No source edits, commits, pushes or deployment by this validation step."
+  ],
+  "backendIdentity": {
+    "filesCompared": 131,
+    "modified": [],
+    "unchanged": 131,
+    "scope": "tracked API/Server Actions/service/ACL/CMS/schema files against HEAD"
+  },
+  "logs": [
+    {
+      "path": ".data/web-reset-validation-20261110/build.log",
+      "sha256": "f1ceb7e17abbc4c9ca7e6bf76a7730b3d1f0a9f66712ad2a3c80d088c1298894"
+    },
+    {
+      "path": ".data/web-reset-validation-20261110/changed-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".data/web-reset-validation-20261110/contracts.log",
+      "sha256": "35a9308b9d8bc0705bfe5d84c4070f4ead413de34cf8b83db568813dd166e251"
+    },
+    {
+      "path": ".data/web-reset-validation-20261110/lint.log",
+      "sha256": "4a7b7e3145e4162c3c3c2a83675d55786ecde0369a96daaaeda4feb73f3a0d34"
+    },
+    {
+      "path": ".data/web-reset-validation-20261110/sync-current.log",
+      "sha256": "2052f9018f606f05cb81efbfded6e812f7c159a860866527ab55ebdd356c249a"
+    },
+    {
+      "path": ".data/web-reset-validation-20261110/typecheck-isolated.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".data/web-reset-validation-20261110/typecheck.log",
+      "sha256": "8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92"
+    }
+  ]
+}

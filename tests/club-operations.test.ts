@@ -6,11 +6,11 @@ import { getPayload, type Payload } from "payload";
 import config from "../src/payload.config";
 import type { User } from "../src/payload-types";
 import { canAppoint, canReviewPromotion, canPublish, communityIDs, managesGame } from "../src/lib/rules";
-import { decideCommunityApplication, editCommunityApplication, updateCommunityCard } from "../src/lib/community-operations";
+import { decideCommunityApplication, editCommunityApplication } from "../src/lib/community-operations";
 import { activity, submitSignup, saveSignupForm } from "../src/lib/activity-signups";
 import { normalizeSignup } from "../src/lib/signup-schema";
 let p: Payload, president: User, vice: User, execution: User, publicity: User, member: User, outsider: User;
-let game: number, post: number, otherGame: number | undefined, qr: string;
+let game: number, post: number, qr: string;
 const suffix = randomBytes(5).toString("hex"), users: number[] = [], applications: number[] = [];
 beforeAll(async () => {
   if (process.env.APP_ENV !== "development" || !["127.0.0.1", "localhost"].includes(new URL(process.env.DATABASE_URL!).hostname)) throw new Error("Isolated development database required");
@@ -32,7 +32,6 @@ afterAll(async () => {
   if (post) await p.delete({ collection: "community-posts", id: post, overrideAccess: true });
   for (const id of applications) await p.delete({ collection: "community-applications", id, overrideAccess: true });
   await p.delete({ collection: "games", id: game, overrideAccess: true });
-  if (otherGame) await p.delete({ collection: "games", id: otherGame, overrideAccess: true });
   for (const id of users) await p.delete({ collection: "users", id, overrideAccess: true, context: { system: true } });
   await p.destroy();
 });

@@ -1,25 +1,4 @@
-.community-search { margin-bottom: 28px; }
-.community-search .field-label { font-size: 14px; font-weight: 400; }
-.community-search .search { gap: 8px; margin: 8px 0 0; }
-.community-search-result { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 16px; margin-top: 8px; }
-.community-search-result .muted { min-width: 0; }
-.communities-loading { padding: 12px 0 20px; }
-.community-directory-error { margin-bottom: 20px; }
-.community-directory { margin-top: 16px; }
-.mini-page.native-page .community-project { display: block; width: 100%; margin-bottom: 16px; padding: 16px; background: var(--z-surface); border: 1px solid var(--z-line); border-radius: 12px; }
-.community-project-main { display: flex; align-items: flex-start; gap: 16px; }
-.community-project-copy { flex: 1; min-width: 0; }
-.community-project-title { display: block; font-size: 19px; line-height: 1.4; font-weight: 600; word-break: break-word; }
-.community-project-summary { display: block; margin-top: 8px; color: var(--z-subtitle); font-size: 14px; line-height: 1.75; word-break: break-word; }
-.community-project-image, .community-project-mark { display: block; flex-shrink: 0; width: 104px; height: 112px; border-radius: 8px; background: var(--z-media); }
-.community-project-mark { background: var(--z-secondary-bg); }
-.community-project-mark .native-field-graphic { opacity: .38; }
-.community-project-copy .native-inline-meta { margin-top: 8px; }
-.community-project-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; color: var(--z-link); font-size: 15px; line-height: 1.6; }
-.community-project-foot > text:last-child { flex-shrink: 0; font-size: 22px; }
-.mini-page.native-page .communities-load-more { width: 100%; margin-top: 8px; }
-.communities-organize { padding-top: 24px; border-top: 1px solid var(--z-line); }
-.mini-page.native-page .communities-organize .actions { align-items: center; }
-.mini-page.native-page .communities-organize .actions > button { flex: 0 1 auto; min-width: 0; }
-.communities-staff .native-section-head { margin-bottom: 8px; }
-@media (max-width: 359px) { .community-project-main { gap: 12px; } .community-project-image, .community-project-mark { width: 88px; height: 104px; } .community-project-title { font-size: 18px; } }
+.mini-page .communities-more { display: block; width: 100%; margin-top: 20rpx; }
+.communities-organize { display: flex; flex-direction: column; gap: 14rpx; margin-top: 48rpx; padding: 36rpx 32rpx; border-radius: 40rpx; background: linear-gradient(150deg, var(--z-stage2), var(--z-stage)); color: var(--z-stage-ink); }
+.communities-organize-title { font-size: 34rpx; font-weight: 900; }
+.communities-organize .communities-organize-body { color: var(--z-stage-muted); }

@@ -1,0 +1,110 @@
+.rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.rail li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 6px;
+  border: 1px solid var(--z-stage-line);
+  border-radius: var(--z-radius-pill);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--z-stage-muted);
+  font-size: 14px;
+  font-weight: 800;
+}
+.rail li > span {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--z-stage-ink);
+  font-family: var(--z-num);
+  font-size: 13px;
+}
+.rail li[data-done] {
+  color: var(--z-stage-ink);
+}
+.rail li[data-done] > span {
+  background: rgba(240, 192, 96, 0.28);
+  color: var(--z-accent);
+}
+.rail li[aria-current="step"] {
+  border-color: var(--z-accent);
+  background: var(--z-accent);
+  color: var(--z-accent-ink);
+}
+.rail li[aria-current="step"] > span {
+  background: var(--z-accent-ink);
+  color: var(--z-accent);
+}
+.body {
+  padding-top: clamp(20px, 3vw, 32px);
+  padding-bottom: clamp(48px, 7vw, 96px);
+}
+.grid {
+  display: grid;
+  gap: 24px;
+  align-items: start;
+}
+.main {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.aside {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.note {
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+  border: 1px solid var(--z-line);
+  border-radius: var(--z-radius);
+  background: var(--z-surface);
+}
+.note h2 {
+  font-size: 17px;
+}
+.noteBody {
+  display: grid;
+  gap: 8px;
+  color: var(--z-muted);
+  font-size: 14px;
+  line-height: 1.75;
+}
+.noteBody ul,
+.noteBody ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 1.2em;
+  list-style: disc;
+}
+.noteLinks {
+  display: grid;
+  gap: 6px;
+}
+.noteLinks a {
+  color: var(--z-action);
+  font-size: 14px;
+  font-weight: 800;
+}
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+  .aside {
+    position: sticky;
+    top: calc(var(--z-topbar) + 20px);
+  }
+}

@@ -3,7 +3,9 @@ import { APIError } from "payload";
 import { serverURL } from "./environment";
 
 export function siteRequestHeaders(request: Request, write = false) {
-  const token = /^JWT [A-Za-z0-9._-]+$/.test(request.headers.get("authorization") || "");
+  const authorization = request.headers.get("authorization");
+  const token = /^JWT [A-Za-z0-9._-]+$/.test(authorization || "");
+  if (authorization !== null && !token) throw new APIError("登录凭据无效，请重新登录", 401);
   if (write) {
     const origin = request.headers.get("origin");
     const expected = new URL(serverURL).origin;

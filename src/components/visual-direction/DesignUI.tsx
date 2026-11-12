@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import beianIcon from "./beian.png";
 import { DesignNavigation } from "./DesignNavigation";
+import { CourtMotif } from "./CourtMotif";
 import { BrandMark, Icon } from "@/components/Identity";
 import { Picture } from "@/components/Content";
 import type { Content } from "@/lib/content";
@@ -40,10 +41,12 @@ export function DesignHeader({
             prefetch={signedIn ? undefined : false}
             className={chrome.brand}
           >
-            <BrandMark />
-            <span>
+            <span className={chrome.brandTile}>
+              <BrandMark />
+            </span>
+            <span className={chrome.brandText}>
               {name}
-              <small>ZIJING ESPORTS</small>
+              <small aria-hidden="true">ZIJING ESPORTS</small>
             </span>
           </Link>
           <DesignNavigation
@@ -63,66 +66,75 @@ export function DesignFooter({
   preview = true,
 }: { name?: string; footer?: string | null; preview?: boolean } = {}) {
   return (
-    <footer className={chrome.footer}>
-      <div className={chrome.footerTop}>
-        <div className={chrome.footerIdentity}>
-          <strong>{name}</strong>
-          <p>{footer || "在校园里，为共同的热爱相遇。"}</p>
-        </div>
-        <nav aria-label="页脚" className={chrome.footerNav}>
-          <div>
-            <p>认识紫荆</p>
-            <Link href="/about" prefetch={false}>
-              关于社团
-            </Link>
-            <Link href="/contact" prefetch={false}>
-              联系与合作
-            </Link>
+    <footer className={`${chrome.footer} hc-stage`}>
+      <div className={chrome.footerInner}>
+        <div className={chrome.footerTop}>
+          <div className={chrome.footerIdentity}>
+            <p className={chrome.footerKicker}>紫荆主场</p>
+            <strong>{name}</strong>
+            <p>{footer || "在校园里，为共同的热爱相遇。"}</p>
           </div>
-          <div>
-            <p>参与与帮助</p>
-            <Link href="/account" prefetch={false}>
-              个人中心
-            </Link>
-            <Link href="/privacy" prefetch={false}>
-              隐私说明
-            </Link>
-          </div>
-        </nav>
-      </div>
-      <div className={chrome.footerBottom}>
-        <div className={chrome.footerLegal}>
-          <p>
-            © {new Date().getFullYear()} {name}
-          </p>
-          <nav aria-label="网站备案" className={chrome.footerRecords}>
-            <a
-              href="https://beian.miit.gov.cn/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              京ICP备2025135109号-2
-            </a>
-            <a
-              href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802050680"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Image
-                src={beianIcon}
-                alt=""
-                width={18}
-                height={20}
-                unoptimized
-              />
-              京公网安备11010802050680号
-            </a>
+          <nav aria-label="页脚" className={chrome.footerNav}>
+            <div>
+              <p>认识紫荆</p>
+              <Link href="/about" prefetch={false}>
+                关于社团
+              </Link>
+              <Link href="/contact" prefetch={false}>
+                联系与合作
+              </Link>
+            </div>
+            <div>
+              <p>参与与帮助</p>
+              <Link href="/account" prefetch={false}>
+                个人中心
+              </Link>
+              <Link href="/privacy" prefetch={false}>
+                隐私说明
+              </Link>
+            </div>
           </nav>
         </div>
-        {preview && <p>隔离设计预览，内容与权限沿用真实业务</p>}
-        <a href={preview ? "#design-main" : "#main"}>
-          回到页首 <Icon name="diagonal" />
-        </a>
+        <div className={chrome.footerCourt}>
+          <CourtMotif crop />
+        </div>
+        <div className={chrome.footerBottom}>
+          <div className={chrome.footerLegal}>
+            <p>
+              © {new Date().getFullYear()} {name}
+            </p>
+            <nav aria-label="网站备案" className={chrome.footerRecords}>
+              <a
+                href="https://beian.miit.gov.cn/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                京ICP备2025135109号-2
+              </a>
+              <a
+                href="https://beian.mps.gov.cn/#/query/webSearch?code=11010802050680"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Image
+                  src={beianIcon}
+                  alt=""
+                  width={18}
+                  height={20}
+                  unoptimized
+                />
+                京公网安备11010802050680号
+              </a>
+            </nav>
+          </div>
+          {preview && <p>隔离设计预览，内容与权限沿用真实业务</p>}
+          <a
+            className={chrome.toTop}
+            href={preview ? "#design-main" : "#main"}
+          >
+            回到页首 <Icon name="diagonal" />
+          </a>
+        </div>
       </div>
     </footer>
   );
@@ -131,6 +143,7 @@ export function SectionHeading({
   title,
   href,
   action = "查看全部",
+  index,
 }: {
   index?: string;
   en?: string;
@@ -140,6 +153,11 @@ export function SectionHeading({
 }) {
   return (
     <div className="z-section-heading">
+      {index && (
+        <span className="z-folio" aria-hidden="true">
+          {index}
+        </span>
+      )}
       <h2>{title}</h2>
       {href && (
         <Link className="z-text-link" href={href}>

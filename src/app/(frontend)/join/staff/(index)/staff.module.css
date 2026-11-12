@@ -1,0 +1,105 @@
+.block {
+  display: grid;
+  gap: 16px;
+}
+.blockHead {
+  display: grid;
+  gap: 6px;
+}
+.blockHead h2 {
+  font-size: var(--z-text-h2);
+}
+.blockHead p,
+.muted {
+  color: var(--z-muted);
+  font-size: 14px;
+}
+.receipts {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.receipt {
+  display: grid;
+  gap: 8px;
+  padding: 18px 20px;
+  border: 1px solid var(--z-line);
+  border-left: 6px solid var(--z-action);
+  border-radius: var(--z-radius);
+  background: var(--z-surface);
+}
+.receiptTop,
+.batchTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.receipt h3 a:hover {
+  color: var(--z-action);
+}
+.action {
+  color: var(--z-action);
+  font-size: 14px;
+  font-weight: 800;
+}
+.batch {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 22px;
+  border: 1px solid var(--z-line);
+  border-top: 6px solid var(--z-line-strong);
+  border-radius: var(--z-radius);
+  background: var(--z-surface);
+  transition: transform var(--z-duration) var(--z-ease), box-shadow var(--z-duration) var(--z-ease);
+}
+.batch[data-open] {
+  border-top-color: var(--z-accent);
+}
+.batch:hover {
+  box-shadow: var(--z-shadow);
+  transform: translateY(-2px);
+}
+.batch h3 {
+  font-size: 20px;
+}
+.batch:hover h3 {
+  color: var(--z-action);
+}
+.stretch::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.description {
+  color: var(--z-muted);
+  font-size: 14px;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+.deadline {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  padding: 6px 14px 6px 6px;
+  border-radius: var(--z-radius-pill);
+  background: var(--z-stage);
+  color: var(--z-stage-ink);
+  font-size: 14px;
+  font-weight: 800;
+}
+.deadline span {
+  padding: 2px 10px;
+  border-radius: var(--z-radius-pill);
+  background: var(--z-accent);
+  color: var(--z-accent-ink);
+  font-size: 12px;
+}

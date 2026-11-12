@@ -1,6 +1,11 @@
 {
   "navigationBarTitleText": "活动选座",
+  "enablePullDownRefresh": true,
   "usingComponents": {
     "privacy-consent": "/components/privacy-consent/index"
-  }
+  },
+  "navigationBarBackgroundColor": "#f2f1f5",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#f2f1f5",
+  "backgroundTextStyle": "dark"
 }

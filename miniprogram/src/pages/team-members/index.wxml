@@ -1,29 +1,44 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
-<view class="page mini-page native-page native-form-page business-page team-members-page">
-  <button class="plain back" bindtap="back">返回工作台</button>
-  <view class="page-heading"><text class="task-context">{{teamDoc.title || '当前队伍'}}</text><text class="title">成员关系</text><text class="subtitle">查看当前成员与历史关系，依据实际情况记录撤销原因。</text></view>
-  <template is="feedback" data="{{needsLogin}}" />
-  <text wx:if="{{busy}}" class="native-receipt" aria-role="status">本次确认或保存尚未完成，完成后会核对最新记录。</text>
-  <view wx:if="{{loading}}" class="membership-loading" aria-role="status"><text class="muted">正在核对管理权限与成员记录…</text><view wx:if="{{!allowed}}" class="loading-lines" aria-hidden="true"><view class="loading-line" /><view class="loading-line short" /><view class="loading-line" /></view></view>
-  <view wx:if="{{error}}" class="membership-read-error"><text class="error" aria-role="alert">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{loading || busy}}">重试读取记录</button></view>
-  <text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text><text wx:if="{{done}}" class="result-message" aria-role="status">{{done}}</text>
-  <view wx:if="{{!needsLogin && !loading && !error && !allowed}}" class="empty"><text class="state-title">当前暂无此队伍的成员管理权限</text><text class="muted">可刷新核对当前社群或队伍任职的授权。</text><button class="secondary" bindtap="retry" disabled="{{busy}}">重新核对权限</button></view>
-  <block wx:if="{{allowed && !needsLogin}}">
-    <view class="membership-scope"><text class="scope-title">当前资格以成员关系为准</text><text class="muted">公开简介与历史阵容单独维护。撤销后保留历史记录，仅限现任队员的权限随之停止。</text></view>
-    <view class="section-head membership-heading"><text class="section-title">成员记录</text><button class="plain" bindtap="retry" disabled="{{loading || busy}}">刷新核对</button></view>
-    <view class="record-list membership-list">
-      <view wx:for="{{docs}}" wx:key="id" class="task-record membership-record">
-        <view class="record-meta"><text class="badge">{{item.statusText}}</text><text>关系 {{item.id}}</text></view><text class="membership-name">{{item.title}}</text>
-        <view class="membership-dates"><view wx:if="{{item.joinedText}}"><text class="date-label">入队</text><text class="date-value">{{item.joinedText}}</text></view><view wx:if="{{item.endText}}"><text class="date-label">关系结束</text><text class="date-value">{{item.endText}}</text></view></view>
-        <block wx:if="{{item.actions.revoke}}">
-          <button class="plain disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy}}" aria-expanded="{{expandedId === item.id}}"><text>{{expandedId === item.id ? '收起关系处理' : '处理这条成员关系'}}</text><text class="disclosure-mark">{{expandedId === item.id ? '−' : '＋'}}</text></button>
-          <view wx:if="{{expandedId === item.id}}" class="review-actions membership-revoke"><text class="section-title">撤销本队成员关系</text><text class="revoke-guidance">记录会保留。微信群成员情况需另行联系管理员处理。</text><view class="field"><text class="field-label">具体撤销原因 · 必填</text><textarea cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{item.noteDraft}}" bindinput="note" data-id="{{item.id}}" maxlength="1000" placeholder="请说明需要撤销的具体原因" disabled="{{busy}}" /><text class="field-note">最多 1000 字，保存前会再次确认。</text></view><button class="danger" bindtap="revoke" data-id="{{item.id}}" disabled="{{loading || busy}}">撤销本队成员关系</button></view>
-        </block>
-        <text wx:else class="task-note">当前暂无可执行撤销操作。</text>
-      </view>
+<view class="page mini-page team-members-v2 {{theme === 'dark' ? 'zj-dark' : ''}}">
+  <view class="zj-hero">
+    <view class="zj-stage-stripes"></view>
+    <view class="zj-hero-inner">
+      <button class="zj-hero-back" bindtap="back">‹ 返回工作台</button>
+      <text class="zj-hero-kicker">{{teamDoc.title || '当前队伍'}} · 成员</text>
+      <text class="zj-hero-title">成员关系</text>
+      <text class="zj-hero-lead">查看当前成员与历史关系，依据实际情况记录撤销原因。</text>
     </view>
-    <view wx:if="{{!docs.length && !loading && !error}}" class="empty"><text class="state-title">暂无本队成员关系记录</text><text class="muted">录取申请后会产生对应成员记录。</text></view>
-    <button wx:if="{{hasMore}}" class="secondary membership-load-more" bindtap="onReachBottom" disabled="{{loading || busy}}">加载更多成员记录</button>
+  </view>
+  <template is="feedback" data="{{needsLogin}}" />
+  <text wx:if="{{busy}}" class="zj-callout" aria-role="status">本次确认或保存尚未完成，完成后会核对最新记录。</text>
+  <view wx:if="{{loading}}" class="zj-skeleton" aria-role="status" aria-label="正在核对管理权限与成员记录"><view wx:if="{{!allowed}}" class="zj-skeleton-row"><view class="zj-skeleton-date"></view><view class="zj-skeleton-lines"><view></view><view></view><view></view></view></view></view>
+  <view wx:if="{{error}}" class="zj-alert"><text class="zj-small" aria-role="alert">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{loading || busy}}">重试读取记录</button></view>
+  <text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text>
+  <text wx:if="{{done}}" class="zj-callout zj-callout-success" aria-role="status">{{done}}</text>
+  <view wx:if="{{!needsLogin && !loading && !error && !allowed}}" class="zj-empty"><text class="zj-empty-icon">🔒</text><text class="zj-empty-title">当前暂无此队伍的成员管理权限</text><text class="zj-small">可刷新核对当前社群或队伍任职的授权。</text><button class="secondary" bindtap="retry" disabled="{{busy}}">重新核对权限</button></view>
+  <block wx:if="{{allowed && !needsLogin}}">
+    <view class="zj-callout"><text class="members-label">当前资格以成员关系为准</text><text>公开简介与历史阵容单独维护。撤销后保留历史记录，仅限现任队员的权限随之停止。</text></view>
+    <view class="zj-section-head"><text class="zj-section-title">成员记录</text><button class="plain zj-more" bindtap="retry" disabled="{{loading || busy}}">刷新核对</button></view>
+    <view wx:for="{{docs}}" wx:key="id" class="zj-record members-record">
+      <view class="zj-record-head">
+        <view class="members-who"><text class="members-avatar">{{item.title[0]}}</text><text class="zj-record-title">{{item.title}}</text></view>
+        <text class="zj-pill zj-pill-action">{{item.statusText}}</text>
+      </view>
+      <text class="zj-small">关系 {{item.id}}</text>
+      <view class="members-dates"><view wx:if="{{item.joinedText}}" class="members-date"><text class="members-date-label">入队</text><text>{{item.joinedText}}</text></view><view wx:if="{{item.endText}}" class="members-date"><text class="members-date-label">关系结束</text><text>{{item.endText}}</text></view></view>
+      <block wx:if="{{item.actions.revoke}}">
+        <button class="plain members-disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy}}" aria-expanded="{{expandedId === item.id}}"><text>{{expandedId === item.id ? '收起关系处理' : '处理这条成员关系'}}</text><text>{{expandedId === item.id ? '−' : '＋'}}</text></button>
+        <view wx:if="{{expandedId === item.id}}" class="members-revoke">
+          <text class="zj-sheet-title">撤销本队成员关系</text>
+          <text class="zj-form-hint">记录会保留。微信群成员情况需另行联系管理员处理。</text>
+          <view class="field"><text class="field-label">具体撤销原因 · 必填</text><textarea cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{item.noteDraft}}" bindinput="note" data-id="{{item.id}}" maxlength="1000" placeholder="请说明需要撤销的具体原因" disabled="{{busy}}" /><text class="zj-form-hint">最多 1000 字，保存前会再次确认。</text></view>
+          <button class="danger" bindtap="revoke" data-id="{{item.id}}" disabled="{{loading || busy}}">撤销本队成员关系</button>
+        </view>
+      </block>
+      <text wx:else class="zj-form-hint">当前暂无可执行撤销操作。</text>
+    </view>
+    <view wx:if="{{!docs.length && !loading && !error}}" class="zj-empty"><text class="zj-empty-icon">👥</text><text class="zj-empty-title">暂无本队成员关系记录</text><text class="zj-small">录取申请后会产生对应成员记录。</text></view>
+    <button wx:if="{{hasMore}}" class="secondary members-more" bindtap="onReachBottom" disabled="{{loading || busy}}">加载更多成员记录</button>
   </block>
 </view>

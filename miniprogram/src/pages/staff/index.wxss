@@ -1,43 +1,13 @@
 @import "../../templates/business.wxss";
 @import "../../styles/native-forms.wxss";
 
-.native-form-page.staff-page .page-heading { margin-bottom: 24px; padding-bottom: 0; border: 0; }
-.native-form-page.staff-page .page-heading .title { max-width: 10em; }
-.staff-page .staff-process { display: flex; align-items: flex-start; gap: 8px; margin-top: 24px; }
-.staff-page .staff-process-step { flex: 1; min-width: 0; padding-top: 10px; border-top: 2px solid var(--z-line); color: var(--z-subtitle); font-size: 14px; line-height: 1.6; }
-.staff-page .staff-process-step text { display: block; }
-.staff-page .staff-step-number { margin-bottom: 4px; color: var(--z-primary); font-size: 12px; font-weight: 600; }
-.native-form-page.staff-page .own-staff { margin: 24px 0 32px; padding: 20px 16px 4px; border-left: 3px solid var(--z-primary); border-radius: 0 8px 8px 0; background: var(--z-surface); }
-.native-form-page.staff-page .own-staff .section-head { gap: 8px 12px; margin-bottom: 12px; }
-.native-form-page.staff-page .own-staff .section-head > button { flex-shrink: 0; }
-.staff-page .own-staff .section-head .muted { margin-top: 4px; }
-.native-form-page.staff-page .own-staff .record-list { margin-top: 8px; }
-.mini-page.native-form-page.staff-page .own-receipt { padding: 16px 0 20px; }
-.native-form-page.staff-page .own-receipt:last-child { border-bottom: 0; }
-.staff-page .own-receipt-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; color: var(--z-muted); font-size: 12px; line-height: 1.6; }
-.staff-page .own-receipt-title { display: block; margin-top: 10px; color: var(--z-text); font-size: 17px; font-weight: 600; line-height: 1.55; word-break: break-word; }
-.staff-page .own-receipt-updated { display: block; margin-top: 8px; color: var(--z-muted); font-size: 12px; line-height: 1.65; }
-.staff-page .receipt-link { display: block; margin-top: 12px; color: var(--z-link); font-size: 15px; line-height: 1.6; }
-.native-form-page.staff-page .staff-batches { margin-top: 32px; padding-top: 0; border-top: 0; }
-.native-form-page.staff-page .staff-batches > .muted { margin-top: 8px; }
-.native-form-page.staff-page .staff-batches .record-list { margin-top: 20px; }
-.native-form-page.staff-page .staff-batch { padding: 24px 0; }
-.staff-page .batch-deadline { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-bottom: 12px; color: var(--z-muted); font-size: 12px; line-height: 1.65; }
-.staff-page .deadline-value { color: var(--z-primary); font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; }
-.native-form-page.staff-page .staff-batch > .section-title { font-size: 20px; line-height: 1.5; }
-.staff-page .staff-batch > .badge { margin-top: 12px; }
-.native-form-page.staff-page .staff-batch > .body { margin-top: 16px; }
-.native-form-page.staff-page .staff-batch .actions { margin-top: 20px; }
-.native-form-page.staff-page .staff-review-link { width: 100%; margin-top: 8px; text-align: center; }
-.native-form-page.staff-page .staff-more { width: 100%; text-align: center; margin-top: 8px; }
-.native-form-page.staff-page .staff-own-empty, .native-form-page.staff-page .staff-history { margin-top: 32px; padding-top: 24px; }
-.native-form-page.staff-page .staff-own-empty .task-note { padding: 12px 0 16px; }
-.native-form-page.staff-page .staff-history .card-title { font-size: 17px; }
-.native-form-page.staff-page .staff-history .entry-link { font-size: 15px; }
-.native-form-page.staff-page .staff-history .meta { font-size: 12px; }
-@media (max-width: 359px) {
-  .native-form-page.staff-page .own-staff { padding-right: 12px; padding-left: 12px; }
-  .native-form-page.staff-page .own-staff .section-head { flex-wrap: wrap; }
-  .native-form-page.staff-page .own-staff .section-head > view { flex-basis: 100%; }
-  .native-form-page.staff-page .own-staff .section-head > button { padding-top: 8px; padding-bottom: 8px; }
-}
+/* V2 staff recruitment: process rail on the stage, batch call cards, own receipts. */
+.staff-v2 { padding-top: 0; }
+.staff-process { display: flex; gap: 10rpx; margin-top: 10rpx; }
+.staff-process-step { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6rpx; padding: 14rpx 6rpx; border: 1rpx solid var(--z-stage-line); border-radius: 20rpx; background: rgba(255, 255, 255, .06); font-size: 22rpx; font-weight: 800; text-align: center; }
+.staff-step-number { display: flex; align-items: center; justify-content: center; width: 44rpx; height: 44rpx; border-radius: 50%; background: var(--z-accent); color: var(--z-on-accent); font-size: 24rpx; font-weight: 900; }
+.staff-deadline { display: flex; align-items: center; gap: 14rpx; padding: 14rpx 18rpx; border-radius: 20rpx; background: var(--z-stage); color: var(--z-stage-ink); }
+.staff-deadline-label { color: var(--z-accent); font-size: 22rpx; font-weight: 900; }
+.staff-deadline-value { font-size: 28rpx; font-weight: 800; }
+.mini-page .staff-review-link { align-self: flex-start; }
+.mini-page .staff-more { display: block; width: 100%; margin-top: 16rpx; }

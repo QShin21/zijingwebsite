@@ -1,67 +1,58 @@
 @import "../../templates/business.wxss";
 @import "../../styles/native-forms.wxss";
 
-.mini-page.signup-page .signup-heading { padding-bottom: 20px; }
-.signup-page .signup-heading .record-meta { margin-top: 12px; align-items: center; }
-.mini-page.signup-page .signup-tools { margin-bottom: 20px; }
-.mini-page.signup-page .signup-tools > button { flex: 0 1 auto; text-align: left; }
-.signup-page .signup-intro { margin: 16px 0; }
-.signup-page .signup-privacy { margin: 20px 0 24px; padding-bottom: 20px; border-bottom: 1px solid var(--z-line); }
-.mini-page.signup-page .signup-privacy .task-note { padding: 0; font-size: 14px; }
-.signup-page .signup-privacy .muted { margin-top: 8px; }
-.signup-page .answer-progress { margin: 24px 0; }
-.signup-page .signup-stages { display: flex; gap: 12px; margin-bottom: 24px; }
-.signup-page .signup-stage { display: block; flex: 1; min-width: 0; padding-top: 8px; border-top: 2px solid var(--z-line); color: var(--z-muted); font-size: 12px; line-height: 1.65; }
-.signup-page .signup-stage.current { border-top-color: var(--z-primary); color: var(--z-primary); font-weight: 600; }
-.signup-page .progress-label { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 12px; margin-bottom: 12px; }
-.signup-page .progress-label > .muted { font-size: 14px; }
-.signup-page .question-page-label, .signup-page .question-position { display: block; margin: 24px 0 12px; color: var(--z-muted); font-size: 14px; line-height: 1.6; }
-.signup-page .question-page-label { margin-bottom: 0; }
-.signup-page .question-section { min-width: 0; margin-top: 24px; padding: 24px 0 0; border-top: 1px solid var(--z-line); font-size: 16px; line-height: 1.75; }
-.mini-page.signup-page .question-section .label { margin: 0 0 12px; font-size: 16px; line-height: 1.65; }
-.signup-page .question-help { margin-bottom: 16px; white-space: pre-wrap; }
-.signup-page .choice { display: flex; align-items: flex-start; gap: 12px; min-width: 0; min-height: 48px; padding: 12px 0; border-bottom: 1px solid var(--z-line); color: var(--z-text); font-size: 16px; line-height: 1.75; word-break: break-word; }
-.signup-page .choice radio, .signup-page .choice checkbox { flex-shrink: 0; }
-.signup-page .scale-choices { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.signup-page .scale-choice { display: flex; align-items: center; justify-content: flex-start; gap: 4px; min-height: 48px; min-width: 56px; padding: 12px 8px; border: 1px solid var(--z-control-border); border-radius: 8px; background: var(--z-control); font-size: 16px; line-height: 1.5; }
-.signup-page .scale-choice radio { flex-shrink: 0; }
-.signup-page .subquestion { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--z-line); }
-.signup-page .entry-row { margin-top: 20px; padding: 16px; border: 1px solid var(--z-line); border-radius: 8px; background: var(--z-surface); }
-.mini-page.signup-page .entry-row > .row { align-items: center; gap: 8px 12px; padding-bottom: 12px; border-bottom: 1px solid var(--z-line); }
-.mini-page.signup-page .entry-row > .row > .section-title { flex: 1; min-width: 64px; font-size: 17px; }
-.mini-page.signup-page .entry-row > .row > button { min-width: 92px; padding: 12px 8px; }
-.mini-page.signup-page .entry-row > view > .label { margin: 20px 0 8px; font-size: 15px; }
-.mini-page.signup-page .question-section.invalid { padding: 16px; border: 2px solid var(--z-error-border); border-radius: 8px; }
-.signup-page .question-error { display: block; margin-top: 12px; color: var(--z-error-text); font-size: 14px; line-height: 1.8; word-break: break-word; }
-.mini-page.signup-page .question-section .clear-answer { margin-top: 16px; padding: 12px 0; border-color: transparent; background: transparent; color: var(--z-link); font-size: 15px; }
-.signup-page .branch-notice { white-space: pre-wrap; }
-.signup-page .question-editor { margin: 24px 0; padding: 16px; border: 1px solid var(--z-line); border-radius: 8px; background: var(--z-surface); }
-.signup-page .question-editor .question-position { margin: 0 0 16px; color: var(--z-primary); font-weight: 600; }
-.signup-page .question-editor .selection-label { align-items: center; justify-content: space-between; }
-.signup-page .question-editor .selection-label .field-label { margin: 0; }
-.mini-page.signup-page .question-editor .compact-actions { gap: 8px; margin-top: 16px; }
-.mini-page.signup-page .question-editor .compact-actions > button { flex: 1 1 auto; min-width: 64px; padding: 12px 8px; }
-.signup-page .date-time-fields { display: flex; gap: 12px; }
-.mini-page.signup-page .date-time-fields picker { flex: 1; min-width: 0; padding: 0; border: 0; background: transparent; }
-.signup-page .editor-save-note { margin: 0 0 16px; }
-.signup-page .review-answers { margin-top: 24px; }
-.signup-page .review-intro { margin-bottom: 16px; }
-.mini-page.signup-page .answer { padding: 16px 0; font-size: 16px; line-height: 1.8; }
-.signup-page .answer > text { display: block; overflow-wrap: anywhere; word-break: break-word; }
-.mini-page.signup-page .signup-submit .action-bar > .primary { flex-grow: 2; }
-.signup-page .signup-receipt > .actions { margin-top: 20px; }
-.mini-page.signup-page .signup-receipt > .section-title { color: var(--z-primary); font-size: 22px; }
-.mini-page.signup-page .signup-receipt > .task-context { margin-bottom: 8px; }
-.mini-page.signup-page .signup-confirmed > .badge { margin-top: 12px; }
-.mini-page.signup-page .signup-confirmed > .record-meta { margin: 12px 0 16px; }
-.mini-page.signup-page .signup-confirmed > button { margin-top: 16px; }
-.mini-page.signup-page .signup-recovery > .muted { margin: 8px 0 16px; }
-.signup-page .signup-unavailable { padding-top: 0; }
-.mini-page.signup-page .record-heading > .section-title { flex: 1; min-width: 0; font-size: 17px; }
-.mini-page.signup-page .record-heading > .record-id { flex-shrink: 0; margin-bottom: 0; }
+/* V2 sign-up flow: stage progress card, question cards, receipt card, sticky dock. */
+.signup-v2 { padding-top: 0; }
+.signup-message { margin-top: 0; }
+.signup-tools { display: flex; flex-wrap: wrap; gap: 12rpx; margin-bottom: 20rpx; }
+.signup-switch { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; padding: 18rpx 0; }
+.signup-switch .field-label { margin: 0; }
+.signup-datetime { display: flex; gap: 12rpx; }
+.signup-datetime picker { flex: 1; min-width: 0; }
+.signup-questions-head { margin-top: 32rpx; }
+.signup-editor-index { color: var(--z-primary); font-size: 26rpx; font-weight: 900; }
+.mini-page .signup-wide { display: block; width: 100%; margin-top: 18rpx; }
+.signup-dock-note { flex-basis: 100%; }
+.mini-page .signup-disclosure { display: flex; justify-content: space-between; width: 100%; padding: 14rpx 0; }
+.signup-answer .zj-kv-label { width: 200rpx; }
+.signup-pager { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; margin-top: 24rpx; }
+.signup-pager-status { font-weight: 900; }
+.signup-receipt-wrap { display: flex; flex-direction: column; }
+.signup-receipt { border: 3rpx solid var(--z-success-line); background: var(--z-success-bg); }
+.signup-receipt-kicker { color: var(--z-success); }
+.signup-receipt-status { color: var(--z-success); font-size: 48rpx; font-weight: 900; line-height: 1.2; }
+.signup-feedback-label { display: block; font-weight: 900; }
+.signup-privacy { display: flex; flex-direction: column; gap: 6rpx; margin: 16rpx 0 24rpx; }
+.signup-progress { display: flex; flex-direction: column; gap: 14rpx; margin: 8rpx 0 24rpx; padding: 28rpx; border-radius: 32rpx; background: linear-gradient(150deg, var(--z-stage2), var(--z-stage)); color: var(--z-stage-ink); }
+.signup-stages { display: flex; gap: 10rpx; }
+.signup-stage { flex: 1; min-width: 0; padding: 10rpx 6rpx; border-radius: 999rpx; background: rgba(255, 255, 255, .08); color: var(--z-stage-muted); font-size: 22rpx; font-weight: 800; text-align: center; }
+.signup-stage.current { background: var(--z-accent); color: var(--z-on-accent); }
+.signup-stage.done { background: rgba(240, 192, 96, .22); color: var(--z-accent); }
+.signup-progress-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16rpx; }
+.signup-progress-title { font-size: 32rpx; font-weight: 900; }
+.signup-progress-count { color: var(--z-accent); font-size: 36rpx; font-weight: 800; }
+.signup-progress-hint { color: var(--z-stage-muted); font-size: 24rpx; }
+.signup-page-label { display: block; margin: 8rpx 0 16rpx; color: var(--z-primary); font-size: 26rpx; font-weight: 900; }
+.signup-questions { display: flex; flex-direction: column; gap: 18rpx; }
+.signup-v2 .branch-notice { white-space: pre-wrap; }
+.mini-page .signup-draft { flex-basis: 100%; }
+
+/* questionnaire-question template */
+.signup-v2 .question-section { min-width: 0; padding: 28rpx; border: 1rpx solid var(--z-line); border-radius: 32rpx; background: var(--z-surface); font-size: 30rpx; line-height: 1.75; }
+.signup-v2 .question-section.invalid { border: 4rpx solid var(--z-danger); }
+.mini-page.signup-v2 .question-section .label { margin: 0 0 14rpx; font-size: 31rpx; font-weight: 900; line-height: 1.55; }
+.signup-v2 .question-help { display: block; margin-bottom: 16rpx; color: var(--z-muted); font-size: 26rpx; white-space: pre-wrap; }
+.signup-v2 .choice { display: flex; align-items: flex-start; gap: 16rpx; min-width: 0; min-height: 48px; margin-top: 12rpx; padding: 20rpx 22rpx; border: 3rpx solid var(--z-line); border-radius: 24rpx; background: var(--z-raised); color: var(--z-text); font-size: 29rpx; line-height: 1.7; word-break: break-word; }
+.signup-v2 .choice radio, .signup-v2 .choice checkbox { flex-shrink: 0; }
+.signup-v2 .scale-choices { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 12rpx; }
+.signup-v2 .scale-choice { display: flex; align-items: center; gap: 6rpx; min-height: 48px; min-width: 56px; padding: 16rpx 18rpx; border: 3rpx solid var(--z-line); border-radius: 20rpx; background: var(--z-raised); font-size: 28rpx; font-weight: 800; }
+.signup-v2 .subquestion { margin-top: 24rpx; padding-top: 20rpx; border-top: 1rpx solid var(--z-line); }
+.signup-v2 .entry-row { margin-top: 20rpx; padding: 22rpx; border: 1rpx solid var(--z-line); border-radius: 24rpx; background: var(--z-raised); }
+.mini-page.signup-v2 .entry-row > .row { align-items: center; gap: 12rpx; padding-bottom: 14rpx; border-bottom: 1rpx solid var(--z-line); }
+.mini-page.signup-v2 .entry-row > .row > .section-title { flex: 1; min-width: 64px; font-size: 30rpx; }
+.signup-v2 .question-error { display: block; margin-top: 12rpx; color: var(--z-danger); font-size: 26rpx; font-weight: 800; line-height: 1.7; word-break: break-word; }
+.mini-page.signup-v2 .question-section .clear-answer { margin-top: 14rpx; padding: 10rpx 0; border-color: transparent; background: transparent; color: var(--z-link); font-size: 26rpx; }
 @media (max-width: 359px) {
-  .signup-page .signup-stages { gap: 8px; }
-  .signup-page .date-time-fields { gap: 8px; }
-  .mini-page.signup-page .date-time-fields .picker-value { padding-left: 8px; padding-right: 8px; font-size: 15px; }
-  .mini-page.signup-page .record-heading > .section-title { flex-basis: 100%; }
+  .signup-stage { font-size: 11px; }
+  .signup-datetime { gap: 8rpx; }
 }

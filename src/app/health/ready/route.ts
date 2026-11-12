@@ -12,6 +12,12 @@ const honorIndexes = [
   { name: "team_honor_records_created_at_idx", table: "team_honor_records", column: "created_at" },
   { name: "payload_locked_documents_rels_team_honor_records_id_idx", table: "payload_locked_documents_rels", column: "team_honor_records_id" },
 ];
+const seatingIndexes = [
+  { name: "activity_seatings_event_id_key", table: "activity_seatings", columns: ["event_id"], partial: false },
+  { name: "activity_seatings_post_id_key", table: "activity_seatings", columns: ["post_id"], partial: false },
+  { name: "activity_seat_claims_pkey", table: "activity_seat_claims", columns: ["seating_id", "seat"], partial: false },
+  { name: "activity_seat_requests_active_idx", table: "activity_seat_requests", columns: ["seating_id", "member_id"], partial: true },
+];
 type IndexMetadata = {
   name: string;
   table_name: string;
@@ -57,12 +63,19 @@ export async function GET() {
     await db.pool.query("SELECT version_post_images FROM _announcements_v LIMIT 0");
     const imagesMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261110_000000_publication_images"]);
     if (imagesMigration.rowCount !== 1) throw new Error("Required publication images migration unavailable");
-    await db.pool.query("SELECT id, opens_at FROM activity_seatings LIMIT 0");
-    await db.pool.query("SELECT request_id FROM activity_seat_claims LIMIT 0");
-    await db.pool.query("SELECT status FROM activity_seat_requests LIMIT 0");
-    await db.pool.query("SELECT picture FROM activity_seat_proofs LIMIT 0");
-    const seatingMigrations = await db.pool.query("SELECT name FROM payload_migrations WHERE name=ANY($1::text[])", [["20261112_000000_activity_seating", "20261112_010000_activity_seating_schedule"]]);
-    if (seatingMigrations.rowCount !== 2) throw new Error("Required activity seating migrations unavailable");
+    await db.pool.query("SELECT id,event_id,post_id,enabled,opens_at FROM activity_seatings LIMIT 0");
+    await db.pool.query("SELECT seating_id,seat,request_id FROM activity_seat_claims LIMIT 0");
+    await db.pool.query("SELECT seating_id,member_id,status,phone,seats FROM activity_seat_requests LIMIT 0");
+    await db.pool.query("SELECT id,seating_id,member_id,request_id,picture FROM activity_seat_proofs LIMIT 0");
+    const seatingMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261112_000000_activity_seating"]);
+    if (seatingMigration.rowCount !== 1) throw new Error("Required activity seating migration unavailable");
+    const scheduleMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261112_010000_activity_seating_schedule"]);
+    if (scheduleMigration.rowCount !== 1) throw new Error("Required seating schedule migration unavailable");
+    await db.pool.query("SELECT start_at,end_at,location FROM community_posts LIMIT 0");
+    await db.pool.query("SELECT owner_id,expires_at FROM pending_uploads LIMIT 0");
+    await db.pool.query("SELECT kind,enabled FROM site_home_sections LIMIT 0");
+    const v2Migrations = await db.pool.query("SELECT name FROM payload_migrations WHERE name=ANY($1::text[])", [["20261111_000000_v2_media_schedule", "20261112_000000_v2_home_sections"]]);
+    if (v2Migrations.rowCount !== 2) throw new Error("Required V2 migrations unavailable");
     const indexes = await db.pool.query<IndexMetadata>(`
       SELECT idx.relname name, src.relname table_name, i.indisvalid valid,
         i.indisready ready, i.indisunique is_unique, pg_get_expr(i.indpred,i.indrelid) predicate,
@@ -72,12 +85,17 @@ export async function GET() {
       FROM pg_index i JOIN pg_class src ON src.oid=i.indrelid
         JOIN pg_class idx ON idx.oid=i.indexrelid JOIN pg_namespace ns ON ns.oid=src.relnamespace
       WHERE ns.nspname='public' AND idx.relname=ANY($1::text[])
-    `, [honorIndexes.map(index => index.name)]);
+    `, [[...honorIndexes, ...seatingIndexes].map(index => index.name)]);
     if (!honorIndexes.every(required => indexes.rows.some(index =>
       index.name === required.name && index.table_name === required.table &&
       index.valid && index.ready && !index.is_unique && index.predicate === null &&
       Array.isArray(index.columns) && index.columns.length === 1 && index.columns[0] === required.column)))
       throw new Error("Required honor indexes unavailable");
+    if (!seatingIndexes.every(required => indexes.rows.some(index =>
+      index.name === required.name && index.table_name === required.table && index.valid && index.ready && index.is_unique &&
+      JSON.stringify(index.columns) === JSON.stringify(required.columns) && (required.partial
+        ? /^\(?status\s*<>\s*'rejected'::text\)?$/.test(index.predicate?.trim() ?? "")
+        : index.predicate === null)))) throw new Error("Required seating uniqueness constraints unavailable");
     return Response.json({ status: "ready", schema: "club-operations-1" });
   } catch {
     return Response.json({ status: "unavailable" }, { status: 503 });

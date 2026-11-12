@@ -1,0 +1,440 @@
+{
+  "status": "V2_BACKEND_IMPLEMENTED_TESTED_BUILD_PASS_BASELINE_FAILURES_UNCHANGED_UI_ACCEPTANCE_PENDING",
+  "checkedAt": "2026-11-11T06:06:34.899911+00:00",
+  "branch": "new",
+  "baselineCommit": "58f0de98b349ab13343780a4e05f2d6d55249cef",
+  "designAuthority": "Claude Code Opus 5.5 max; docs/REBUILD_V2_SOL_BACKEND_BRIEF.md",
+  "implementationModel": "gpt-6.1-sol",
+  "reasoningEffort": "max",
+  "checks": [
+    {
+      "name": "typecheck",
+      "command": "pnpm typecheck",
+      "exitCode": 0
+    },
+    {
+      "name": "repository-eslint",
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "errors": 0
+    },
+    {
+      "name": "git-diff-check",
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    {
+      "name": "focused-backend-and-retained-services",
+      "files": 15,
+      "passed": 209,
+      "failed": 0,
+      "exitCode": 0,
+      "note": "Before the final own-property dispatch hardening; the final full run includes all five new rejection cases."
+    },
+    {
+      "name": "full-vitest-final-fresh-isolated-postgres",
+      "files": 104,
+      "passedFiles": 91,
+      "failedFiles": 13,
+      "totalTests": 1877,
+      "passed": 1768,
+      "failed": 43,
+      "skipped": 66,
+      "exitCode": 1
+    },
+    {
+      "name": "new-v2-files-in-final-full-run",
+      "files": 12,
+      "passed": 182,
+      "failed": 0,
+      "perFile": [
+        {
+          "file": "tests/v2-legacy-team-profile-confirmation-http.test.ts",
+          "passed": 6
+        },
+        {
+          "file": "tests/v2-backend.integration.test.ts",
+          "passed": 12
+        },
+        {
+          "file": "tests/v2-legacy-team-signup.test.ts",
+          "passed": 31
+        },
+        {
+          "file": "tests/v2-legacy-signup-methods.test.ts",
+          "passed": 20
+        },
+        {
+          "file": "tests/v2-http.test.ts",
+          "passed": 43
+        },
+        {
+          "file": "tests/v2-legacy-staff-flows.test.ts",
+          "passed": 18
+        },
+        {
+          "file": "tests/v2-calendar.test.ts",
+          "passed": 5
+        },
+        {
+          "file": "tests/v2-read-projections.test.ts",
+          "passed": 7
+        },
+        {
+          "file": "tests/v2-home-selection.test.ts",
+          "passed": 1
+        },
+        {
+          "file": "tests/v2-legacy-http-contract.test.ts",
+          "passed": 6
+        },
+        {
+          "file": "tests/v2-legacy-questionnaire.test.ts",
+          "passed": 5
+        },
+        {
+          "file": "tests/v2-core.test.ts",
+          "passed": 28
+        }
+      ]
+    },
+    {
+      "name": "production-build-final-synthetic",
+      "exitCode": 0,
+      "buildID": "Wir3lUpPWqBzHIli5Ghqd",
+      "warnings": false,
+      "finishedAt": "2026-11-11T06:03:56.966Z"
+    },
+    {
+      "name": "payload-generated-types",
+      "exitCode": 0,
+      "generatedFileExactlyMatches": true,
+      "note": "Generated in the disposable snapshot; no schema changes after generation."
+    },
+    {
+      "name": "browser-visual-interaction",
+      "status": "未运行"
+    },
+    {
+      "name": "official-wechat-devtools",
+      "status": "未运行"
+    }
+  ],
+  "baselineComparison": {
+    "evidence": "docs/evidence/web-reset-final-validation-20261111.json",
+    "comparisonLog": ".data/web-reset-final-validation-20261111/full.clean.log",
+    "baselineFailureSignatures": 47,
+    "currentFailureSignatures": 47,
+    "newFailureSignatures": [],
+    "resolvedFailureSignatures": [],
+    "remainingFailingTestsByFile": {
+      "tests/club-operations.test.ts": 1,
+      "tests/club-recovery.test.ts": 2,
+      "tests/miniapp-club-api.test.ts": 3,
+      "tests/miniapp-community-flows.test.ts": 5,
+      "tests/miniapp-community-write-lifecycle.test.ts": 17,
+      "tests/preflight-environment.test.ts": 3,
+      "tests/rebuild-native.test.ts": 3,
+      "tests/registration-retention-review.test.ts": 7,
+      "tests/signup-authority-regressions.test.ts": 2
+    }
+  },
+  "knownFullSuiteLimits": [
+    "Retired manual-join client flows remain in historical expectations.",
+    "tsx CLI subprocesses cannot open Unix IPC sockets in this executor.",
+    "Four existing HTTP suites reject the contracts profile and require dedicated disposable QA profiles."
+  ],
+  "sourceManifestSHA256": "11cd98df30cf3a1ade42fe7a9c17d654c9f605da16de4b0a0ae69bb3a2a44a77",
+  "sourceManifest": [
+    {
+      "path": "src/app/(frontend)/api/v2/[...path]/route.ts",
+      "sha256": "edf76a088dfb10b172102c36f42fe1240ab737656cd54932d94bcef6f19a119b",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/app/(frontend)/community/actions.ts",
+      "sha256": "188d4edd39974e09908f3dd24c6786e6d38040741737cce173ef33676b457399",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/collections/PendingUploads.ts",
+      "sha256": "effe46df7b6920bdc380b4493f92c69fc4190f72a445558c6b08c19b5da6516c",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/collections/community-operations.ts",
+      "sha256": "5a53e27ed2b1a3ee1ccc6ea20564e8095686d6638d9bd8e1cb217507a9669e22",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/globals/Site.ts",
+      "sha256": "92d543b3e33c60ca00a6ae93f83f2b63a7e35ff6bb6a58c7504deb382ccd4c12",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/content-promotions.ts",
+      "sha256": "b6632b8278f1e005c9951754289f6768d9e39690abaa4009f5c2058e292e7db9",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/page-access.ts",
+      "sha256": "1017b00b51aa539870f4c1ffb5115f3f3afe7ea2085c18ee84986ee433480c21",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/promotion-model.ts",
+      "sha256": "bbbe4a3868d5bd7f4c4d3f42016c7622a1c01f6dda5156b630e0280f352637fb",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/showcase-images.ts",
+      "sha256": "ee161cb24f2ddee408a5375e3c8c150cb62cfb02c9b52398f82758ffc69b284b",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/account.ts",
+      "sha256": "d537b89be660f11cd8364904cc57efcba2a05c8ebf4e66a529c11606a192a0bc",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/community.ts",
+      "sha256": "2081cd2cecb741498a98ff403f74f931dafc731a4f542f2eb62bda19a2160f4f",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/events.ts",
+      "sha256": "b18a36e634fde366bfb9d386c1b062996ae16130f8e542a73cea947ffeb2ac95",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/feed.ts",
+      "sha256": "03d7c021b8bfc9f02421ef9ec0da0dba0171076993252efa5b01c416ba229ae3",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/home.ts",
+      "sha256": "10aa1646a841f145eb0b01caad9be3defeb261a68a26b49cac91ac3eb268fa2e",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/http.ts",
+      "sha256": "7ef621b1f8e6dc4f15cda1da5f4a3bace0fe4657cc965f8fd428cb9a6d78141d",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/identity.ts",
+      "sha256": "d2649c238d87d593e2c7768e416907f701085edb198b3d93148eaa74523d1d5d",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/images.ts",
+      "sha256": "e8e0ebd037a57d3dc71687764e2d3812881d674369c6bac7600a4d3ff0790c9a",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/index.ts",
+      "sha256": "b02deda139cae93fd7521d1b179e73d77f77367519669fdc895552ac0b2a8a31",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/pages.ts",
+      "sha256": "889afd9a40056ccafb5ab7ac6cfcea56ff73f4918d7a73cf6a78c95b8c514908",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/recruitment.ts",
+      "sha256": "d2b3ff59a1ec691f6ee386f587608ea56d7336f9eab9d5524b3ddfba70e2192a",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/schedule.ts",
+      "sha256": "58b925f8c0b2df8c1fea55cd3a0e5f7169f843d35ba63377e0e8d3b5d8f60ca7",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/shared.ts",
+      "sha256": "f46ab9ab2085ad61732747e5c68aca522b57fb3c75e2ed90c6deccc95a2fb13c",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/teams.ts",
+      "sha256": "9758d56b94dcc94c8c892dc2a01b45ba01fb87862eb93a2604216d943490eb6b",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/types.ts",
+      "sha256": "523fcb50ba9fc68bb22143c2c9c0f12424f6b45ea2c0c023210ec894f9a691d9",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/lib/v2/writes.ts",
+      "sha256": "732f22f1b5313e23cad206d76eb7ddc33fed7a912401ed4bb31d88aab4665922",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/migrations/20261111_000000_v2_media_schedule.ts",
+      "sha256": "e572b6f1825539e421b443211bab4ea1358e964133bd738fbea1356436914d29",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/migrations/index.ts",
+      "sha256": "8e4fd9c1161dcb569eec40e5e9a106fa090fe82272b3894990ae7afbf1900704",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/payload-types.ts",
+      "sha256": "68c90c68f468b471f138e764d1920d8c487c900fb496310397363fa737ba194c",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/payload.config.ts",
+      "sha256": "fb8867518c84a7da3a537a46ee5b30b0ecfa7b712fae1c6883102c5914bbc5a5",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "src/proxy.ts",
+      "sha256": "187b58c08e6e340bcaeb65f93f33b6d87b060a16ac3c3ccc25282072804776f6",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "tests/club-operations.test.ts",
+      "sha256": "30b774a464e5ccd9195b27a9464b43015e41c9afaabf4ec7c32e80b044792c2c",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "tests/community-presentation-adapters.test.ts",
+      "sha256": "43fd478652915c95e96dd95b7ec409f8941b41263b081925ca97af12dc50b845",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "tests/fixtures/web-reset-contract-baseline-20261110.json",
+      "sha256": "0a6da565bbeaadb2c55cec4bc29d8484ccfa85eb4016fcd3c569d38dd445c6ac",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "tests/v2-backend.integration.test.ts",
+      "sha256": "c5df124fcc31eca03e883d1f090122df61254c9a17a9e5bff3b4bc80569eb562",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "tests/v2-calendar.test.ts",
+      "sha256": "2eae9c0aa29aaa3f4c0852831efbfb0eb81a4f5b1bb485598135880b6fbf8df8",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "tests/v2-core.test.ts",
+      "sha256": "a3aec29840214e7f9ebdd201509494846deda26112824feebf937b1040a9daca",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "tests/v2-home-selection.test.ts",
+      "sha256": "5298e13183431ccf4abf390f78c15d8dd00c2af0ad0841fd38019d49d4ebbede",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "tests/v2-http.test.ts",
+      "sha256": "46f9fc803706131d8605bc4ee79fc59e8270c20e840fb506a4ff3f988e5b9ff4",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "tests/v2-legacy-http-contract.test.ts",
+      "sha256": "4b754bb066adba0ec147766bbea6b9566e46b40600f31c2d772d623727bca800",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "tests/v2-legacy-questionnaire.test.ts",
+      "sha256": "052695dfb0512971d060ca023ce8e31d3f6a36f059cddbdb0f9b88c756d107f6",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "tests/v2-legacy-signup-methods.test.ts",
+      "sha256": "5c53867871238b872921fa323c8afed4a1f4111c7fb691a74adc0a9946f2d214",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "tests/v2-legacy-staff-flows.test.ts",
+      "sha256": "c4e61810cefefc4c761b1bc9bb4f27173b3b8c71ed382c58507d5b32a100f992",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "tests/v2-legacy-team-profile-confirmation-http.test.ts",
+      "sha256": "fdcf026e3755c506c1887eeb969a2d6cfcba9f1415ae62f878457e47321253ca",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "tests/v2-legacy-team-signup.test.ts",
+      "sha256": "a5c87a11e5d11965180b8fdf8f34429c6d9262bf9b7f4572b407ce209a118ebf",
+      "testedSnapshotMatch": true
+    },
+    {
+      "path": "tests/v2-read-projections.test.ts",
+      "sha256": "c98f7fb40e5c3037494386ffdc51dc99be645035fc353e2fee3065aaba9436b2",
+      "testedSnapshotMatch": true
+    }
+  ],
+  "sourceChangesSinceFinalTestSnapshot": [],
+  "isolation": {
+    "appEnv": "development",
+    "database": "zijing_rebuild_contracts_synthetic",
+    "host": "127.0.0.1",
+    "port": 55617,
+    "dbPush": false,
+    "productionAccess": false,
+    "realEmail": false,
+    "realS3": false,
+    "realAI": false,
+    "databaseProcessesStopped": true,
+    "rootEnvRead": false
+  },
+  "logs": [
+    {
+      "path": ".data/rebuild-v2-backend-20261111/evidence/full.log",
+      "sha256": "1540adc021ce03d5edba4dbcee1e15a9840d23ca6035c914891c1fdbcd234a7a"
+    },
+    {
+      "path": ".data/rebuild-v2-backend-20261111/evidence/focused.log",
+      "sha256": "166f9f39d4859329937a3214203d75d7f42a6a019d5e59a4ddb49e939df28241"
+    },
+    {
+      "path": ".data/rebuild-v2-backend-20261111/evidence/build.log",
+      "sha256": "f0699a8312446b27996a020e4598567a539244df436e80db053d5524e34946dc"
+    },
+    {
+      "path": ".data/rebuild-v2-backend-20261111/evidence/typecheck.log",
+      "sha256": "8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92"
+    },
+    {
+      "path": ".data/rebuild-v2-backend-20261111/evidence/lint.log",
+      "sha256": "050c69da23536758722729aeda55a8d0fb9d557495ef6d33d70873a3b64a71c1"
+    },
+    {
+      "path": ".data/rebuild-v2-backend-20261111/evidence/diffcheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".data/rebuild-v2-backend-20261111/evidence/generate-types.log",
+      "sha256": "e5de1c1cafd94e530c1cb10236b353cf1903e069e117ae304b4663b4378a95f3"
+    }
+  ],
+  "scope": [
+    "M1-M3 and A1-A21 plus A10b implemented.",
+    "No frontend-owned file edited by this backend task.",
+    "No dependency additions, no destructive migration, no production data access.",
+    "No commit, push or deployment by this worker."
+  ],
+  "limitations": [
+    "legacyRoster has no dedicated schema source and remains empty; authorized historical rosters remain in seasons.",
+    "Merged calendar/feed candidates capped at 500 per source; home calendar/recruitment at 50, feed honor aggregate first 50.",
+    "Additive migration down intentionally refuses destructive removal.",
+    "UI acceptance remains separate; the final suite is not all green."
+  ],
+  "artifactIndex": {
+    "status": "docs/REBUILD_V2_BACKEND_STATUS.md",
+    "contractNotes": "docs/REBUILD_V2_CONTRACT_CHANGES.md",
+    "types": "src/lib/v2/types.ts",
+    "serviceEntry": "src/lib/v2/index.ts",
+    "httpEntry": "src/app/(frontend)/api/v2/[...path]/route.ts",
+    "migration": "src/migrations/20261111_000000_v2_media_schedule.ts",
+    "localRunnersAndLogs": ".data/rebuild-v2-backend-20261111/evidence"
+  }
+}

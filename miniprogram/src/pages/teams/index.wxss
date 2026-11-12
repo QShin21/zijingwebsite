@@ -1,0 +1,2 @@
+.teams-tools { display: flex; flex-direction: column; gap: 14rpx; margin-top: 32rpx; }
+.mini-page .teams-more { display: block; width: 100%; margin-top: 20rpx; }

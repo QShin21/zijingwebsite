@@ -1,0 +1,154 @@
+{
+  "status": "FINAL_WORKTREE_CHECKED_NO_NEW_BACKEND_REGRESSIONS_UI_ACCEPTANCE_SEPARATE",
+  "checkedAt": "2026-11-10T21:14:41.589283+00:00",
+  "baselineCommit": "58f0de98b349ab13343780a4e05f2d6d55249cef",
+  "model": "gpt-6.1-sol",
+  "reasoning": "max",
+  "sourceManifestSHA256": "da7afffc094db6286c5bd5c3a5db3e8c0952a6914fe96cfafe9dd8bd4173dbc5",
+  "sourceChangesDuringChecks": [],
+  "checks": [
+    {
+      "name": "typecheck",
+      "exitCode": 0
+    },
+    {
+      "name": "targeted-contracts-and-logic",
+      "files": 20,
+      "passed": 282,
+      "failed": 0,
+      "exitCode": 0
+    },
+    {
+      "name": "changed-code-eslint",
+      "files": 13,
+      "exitCode": 0
+    },
+    {
+      "name": "repository-eslint",
+      "exitCode": 1,
+      "errors": 4,
+      "newErrors": 0
+    },
+    {
+      "name": "production-build",
+      "exitCode": 0,
+      "buildID": "cE7N-uXuMW5i_SjALsU5V",
+      "warnings": false
+    },
+    {
+      "name": "all-vitest-with-new-isolated-pg",
+      "files": 92,
+      "passedFiles": 79,
+      "failedFiles": 13,
+      "totalTests": 1694,
+      "passed": 1585,
+      "failed": 43,
+      "skipped": 66,
+      "exitCode": 1
+    },
+    {
+      "name": "git-diff-check",
+      "exitCode": 0
+    }
+  ],
+  "backendIdentity": {
+    "filesCompared": 131,
+    "modified": [],
+    "unchanged": 131
+  },
+  "baselineComparison": {
+    "newFailureSignatures": [],
+    "resolvedFailureSignatures": [
+      "tests/community-presentation-adapters.test.ts > community structured presentation adapters, synthetic service boundaries > asks for saved-record verification after an unexpected error without exposing details or replaying",
+      "tests/community-presentation-adapters.test.ts > community structured presentation adapters, synthetic service boundaries > keeps authority and the submitted CAS revision, and navigates only after a confirmed decision",
+      "tests/community-presentation-adapters.test.ts > community structured presentation adapters, synthetic service boundaries > rejects stale video edits before saving media and cleans only a newly uploaded failed transaction",
+      "tests/community-presentation-adapters.test.ts > community structured presentation adapters, synthetic service boundaries > retains a rejected contact file and its explicit consent choice",
+      "tests/community-presentation-adapters.test.ts > community structured presentation adapters, synthetic service boundaries > returns a stale decision as feedback without redirecting or invalidating its form"
+    ],
+    "remainingFailingTestsByFile": {
+      "tests/club-operations.test.ts": 1,
+      "tests/club-recovery.test.ts": 2,
+      "tests/miniapp-club-api.test.ts": 3,
+      "tests/miniapp-community-flows.test.ts": 5,
+      "tests/miniapp-community-write-lifecycle.test.ts": 17,
+      "tests/preflight-environment.test.ts": 3,
+      "tests/rebuild-native.test.ts": 3,
+      "tests/registration-retention-review.test.ts": 7,
+      "tests/signup-authority-regressions.test.ts": 2
+    }
+  },
+  "oldLintErrors": [
+    {
+      "file": "src/collections/community-operations.ts",
+      "names": [
+        "canPublish",
+        "communityIDs"
+      ],
+      "unchangedFromHEAD": true
+    },
+    {
+      "file": "tests/club-operations.test.ts",
+      "names": [
+        "updateCommunityCard",
+        "otherGame"
+      ],
+      "unchangedFromHEAD": true
+    }
+  ],
+  "knownFullSuiteLimits": [
+    "Retired manual join flows still appear in older test expectations.",
+    "tsx CLI subprocesses fail on prohibited Unix IPC sockets in this executor.",
+    "Four HTTP suites require their dedicated QA database profiles and reject contracts profile."
+  ],
+  "isolation": {
+    "appEnv": "development",
+    "database": "zijing_rebuild_contracts_synthetic",
+    "host": "127.0.0.1",
+    "port": 55617,
+    "dbPush": false,
+    "realEmail": false,
+    "realAI": false,
+    "realS3": false,
+    "productionAccess": false,
+    "databaseProcessesStopped": true
+  },
+  "logs": [
+    {
+      "path": ".data/web-reset-final-validation-20261111/build.log",
+      "sha256": "21bf4dabe51de7f8495ab6707f2199f5e3886f8b9aed41bfc20c884ceb6e8f55"
+    },
+    {
+      "path": ".data/web-reset-final-validation-20261111/changed-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".data/web-reset-final-validation-20261111/contracts.log",
+      "sha256": "0ba480cca170660b28679459ba5b7829d8b521dd62f54c2c0f0e65e01ca721ac"
+    },
+    {
+      "path": ".data/web-reset-final-validation-20261111/full.clean.log",
+      "sha256": "6a8df8754a8ab1b9d16abb68ecd6022732bc0196ea33b0c5c0b05a67b3f4b9f8"
+    },
+    {
+      "path": ".data/web-reset-final-validation-20261111/full.log",
+      "sha256": "02c5c0a3fd917d80c88a9cead6e3f7fff6a167b7e1e7b78cbc54d8ffa150c254"
+    },
+    {
+      "path": ".data/web-reset-final-validation-20261111/lint.log",
+      "sha256": "4a7b7e3145e4162c3c3c2a83675d55786ecde0369a96daaaeda4feb73f3a0d34"
+    },
+    {
+      "path": ".data/web-reset-final-validation-20261111/sync-current.log",
+      "sha256": "2052f9018f606f05cb81efbfded6e812f7c159a860866527ab55ebdd356c249a"
+    },
+    {
+      "path": ".data/web-reset-final-validation-20261111/typecheck.log",
+      "sha256": "8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92"
+    }
+  ],
+  "limits": [
+    "This evidence covers static, server and build checks, not browser visual or interactive acceptance.",
+    "Full Vitest and repository lint are not all green.",
+    "No commit, push or deployment by this worker."
+  ]
+}

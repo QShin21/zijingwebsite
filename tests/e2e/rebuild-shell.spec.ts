@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import sharp from "sharp";
 import { memberTest } from "./member-layout-fixture";
+import { mobileTabs } from "./navigation-helpers";
 
 const consentLabel = "我同意展示我的微信名片作为进群联系方式";
 const consentError = "由于入社流程规定，必须展示管理联系方式";
@@ -44,8 +45,8 @@ test("rebuild uses light SSR on a dark system before hydration and keeps native 
     const background = await page.locator("body").evaluate((body) => getComputedStyle(body).backgroundColor);
     const components = background.match(/[\d.]+/g)!.map(Number);
     expect(Math.min(...components.slice(0, 3)), "the default page surface remains visibly light").toBeGreaterThan(220);
-    await page.getByLabel("打开导航", { exact: true }).click();
-    await page.getByRole("navigation", { name: "移动导航" }).getByRole("link", { name: "通知", exact: true }).click();
+    // V2 has no hamburger: the server-rendered bottom tabs work without JavaScript.
+    await mobileTabs(page).getByRole("link", { name: "公告", exact: true }).click();
     await expect(page).toHaveURL(/\/announcements$/);
     await expect(page.locator("main h1")).toHaveCount(1);
   } finally { await context.close(); }
@@ -73,7 +74,7 @@ memberTest("rebuild theme control preserves text, files, consent and exact error
   await page.getByRole("button", { name: "提交审核", exact: true }).click();
   await expect(form.getByRole("alert")).toHaveText(consentError);
   await expect(consent).toBeFocused();
-  await page.getByRole("button", { name: "切换到深色主题", exact: true }).click();
+  await page.getByRole("button", { name: /切换到夜场（深色）主题$/ }).click();
   await expect(page.locator("html")).toHaveAttribute("data-z-theme", "dark");
   await expect(page.getByRole("textbox", { name: "姓名", exact: true })).toHaveValue("合成重构申请人");
   await expect(reason).toHaveValue(text);
@@ -92,7 +93,7 @@ memberTest("rebuild theme control preserves text, files, consent and exact error
     await expect(nextPage.locator('meta[name="color-scheme"]')).toHaveAttribute("content", "dark");
   } finally { await reopened.close(); }
   await consent.check();
-  await page.getByRole("button", { name: "切换到浅色主题", exact: true }).click();
+  await page.getByRole("button", { name: /切换到日场（浅色）主题$/ }).click();
   await expect(consent).toBeChecked();
   await expect(reason).toHaveValue(text);
   expect(await file.evaluate((input) => (input as HTMLInputElement).files?.[0]?.name)).toBe("synthetic-rebuild-card.png");

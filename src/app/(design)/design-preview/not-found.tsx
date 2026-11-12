@@ -15,7 +15,7 @@ export default function Missing() {
         </>
       }
     >
-      <Link className="z-button" href="/design-preview">
+      <Link className="button" href="/design-preview">
         返回预览首页
       </Link>
     </PageState>

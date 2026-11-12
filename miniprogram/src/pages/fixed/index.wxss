@@ -1,32 +1,12 @@
-@import "../../styles/native-reading.wxss";
-.fixed-published { display: block; margin-top: 16px; color: var(--z-muted); font-size: 12px; line-height: 1.65; }
-.fixed-cover-record { margin-top: 24px; margin-bottom: 28px; }
-.fixed-media-failed { padding: 16px; border: 1px solid var(--z-line); border-radius: 8px; background: var(--z-surface); }
-.fixed-media-failed .plain { margin-top: 8px; }
-.fixed-page .reading-section { margin-top: 32px; }
-.fixed-page .reading-section .section-title { font-size: 20px; }
-.fixed-page .reading-section .body { margin-top: 12px; }
-.contact-directory { margin: 24px 0 32px; }
-.fixed-contact { margin-top: 16px; padding: 20px; border-radius: 8px; background: var(--z-surface); }
-.fixed-contact:first-child { margin-top: 0; }
-.fixed-contact .body { margin: 12px 0 20px; }
-.fixed-contact .secondary { width: 100%; }
-.join-options { margin: 12px 0 28px; }
-.mini-page.native-page .fixed-join-option { display: flex; align-items: flex-start; gap: 20px; padding: 24px 0; border-bottom: 1px solid var(--z-line); }
-.mini-page.native-page .fixed-join-option:first-child { padding-top: 8px; }
-.mini-page.native-page .fixed-join-option:last-child { border-bottom: 0; }
-.fixed-join-option .shortcut-title { margin: 0; font-size: 19px; }
-.fixed-join-option .muted { margin-top: 8px; }
-.fixed-join-option .native-entry-action { margin-top: 8px; }
-.fixed-join-mark { position: relative; flex-shrink: 0; width: 36px; height: 40px; margin-top: 4px; }
-.fixed-join-mark > view { position: absolute; width: 20px; height: 20px; border: 2px solid var(--z-primary); border-radius: 6px; }
-.fixed-join-mark > view + view { top: 12px; left: 12px; border: 1px solid var(--z-secondary-border); background: var(--z-page); }
-.fixed-join-mark-team > view { width: 26px; height: 28px; border-radius: 2px; }
-.fixed-join-mark-team > view + view { width: 12px; height: 16px; top: 6px; left: 7px; border: 0; border-bottom: 2px solid var(--z-secondary-border); }
-.fixed-join-mark-staff > view { width: 10px; height: 28px; top: 3px; left: 4px; border-radius: 2px; }
-.fixed-join-mark-staff > view + view { top: 3px; left: 20px; width: 10px; height: 28px; background: transparent; }
-.fixed-page .fixed-batches { padding-top: 24px; border-top: 1px solid var(--z-line); }
-@media (max-width: 359px) {
-  .mini-page.native-page .fixed-join-option { gap: 16px; }
-  .fixed-contact { padding: 16px; }
-}
+/* V2 fixed pages: hero band, join path cards, contact records, reading body. */
+.fixed-v2 { padding-top: 0; }
+.fixed-cover-record { margin-bottom: 24rpx; }
+.fixed-cover { display: block; width: 100%; border-radius: 32rpx; background: var(--z-media); }
+.fixed-paths { display: flex; flex-direction: column; gap: 18rpx; }
+.fixed-path { display: flex; align-items: flex-start; gap: 22rpx; padding: 28rpx; border: 1rpx solid var(--z-line); border-radius: 32rpx; background: var(--z-surface); }
+.fixed-path-index { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 84rpx; height: 84rpx; border-radius: 24rpx; background: var(--z-stage); color: var(--z-accent); font-size: 32rpx; font-weight: 900; }
+.fixed-path-copy { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6rpx; }
+.fixed-path-title { font-size: 33rpx; font-weight: 900; }
+.fixed-contacts { margin-top: 20rpx; }
+.fixed-body { margin-top: 24rpx; padding: 32rpx 28rpx; border: 1rpx solid var(--z-line); border-radius: 32rpx; background: var(--z-surface); font-size: 31rpx; line-height: 1.9; word-break: break-word; }
+.fixed-section .body { margin-top: 12rpx; }

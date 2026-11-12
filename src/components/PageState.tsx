@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import styles from "./PageState.module.css";
 
+/** V2 full-width state stage (error, permission, not found, unavailable). */
 export function PageState({
   label,
   title,
@@ -18,18 +19,20 @@ export function PageState({
 }) {
   return (
     <section className={styles.state} aria-labelledby="page-state-title">
-      <div className={styles.main}>
-        <p className={styles.label}>{label}</p>
-        <h1 id="page-state-title">{title}</h1>
-        <p className={styles.description} role={alert ? "alert" : undefined}>
-          {description}
-        </p>
-        <div className={styles.actions}>{children}</div>
+      <div className={styles.inner}>
+        <div className={styles.main}>
+          <p className={styles.label}>{label}</p>
+          <h1 id="page-state-title">{title}</h1>
+          <p className={styles.description} role={alert ? "alert" : undefined}>
+            {description}
+          </p>
+          <div className={styles.actions}>{children}</div>
+        </div>
+        <aside className={styles.help}>
+          <h2>接下来可以做什么</h2>
+          {help}
+        </aside>
       </div>
-      <aside className={styles.help}>
-        <h2>接下来可以做什么</h2>
-        {help}
-      </aside>
     </section>
   );
 }

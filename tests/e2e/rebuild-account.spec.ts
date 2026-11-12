@@ -63,7 +63,7 @@ test("登录错误就地聚焦，密码显隐和主题切换保留输入", async
   await page.getByRole("button", { name: "显示密码", exact: true }).click();
   await expect(password).toHaveAttribute("type", "text");
   await page.getByRole("button", { name: "隐藏密码", exact: true }).click();
-  await page.getByRole("button", { name: "切换到深色主题" }).click();
+  await page.getByRole("button", { name: /切换到夜场（深色）主题$/ }).click();
   await expect(identifier).toHaveValue("合成不存在账号-20261013");
   await expect(password).toHaveValue("Synthetic-Invalid-Password-20261013!");
   await page.getByRole("button", { name: "登录", exact: true }).click();
@@ -137,37 +137,38 @@ test("注册与恢复校验保留输入，不发送真实邮件", async ({ page 
 
 test("本人事务与权限入口、深链和退出完整导航", async ({ page }, testInfo) => {
   await signIn(page, "member");
-  await expect(
-    page.getByRole("heading", { name: "我的紫荆", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "我的活动报名", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "我的进群记录", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "管理工作台", exact: true }),
-  ).toHaveCount(0);
-  const views = page.getByRole("navigation", { name: "申请记录视图", exact: true });
-  const history = views.getByRole("link", { name: "查看全部申请", exact: true });
-  await expect(history).toHaveAttribute("href", "/account?view=history#applications-title");
-  await history.click();
-  await expect(page).toHaveURL(url => url.pathname === "/account" && url.search === "?view=history" && url.hash === "#applications-title");
-  await expect(history).toHaveAttribute("aria-current", "page");
-  await expect(
-    page.getByRole("heading", { name: "申请记录", exact: true }),
-  ).toHaveAttribute("id", "applications-title");
-  await expect(page.getByRole("heading", { name: "申请记录", exact: true })).toBeVisible();
-  await expect(page.getByRole("region", { name: "申请记录", exact: true })).toBeVisible();
-  const ongoing = views.getByRole("link", { name: "进行中", exact: true });
-  await expect(ongoing).toHaveAttribute("href", "/account#applications-title");
-  await ongoing.click();
-  await expect(page).toHaveURL(url => url.pathname === "/account" && url.search === "" && url.hash === "#applications-title");
-  await expect(ongoing).toHaveAttribute("aria-current", "page");
+  const member = (await users()).find((user) => user.role === "member")!;
+  // V2 "我的": identity header (h1 = nickname), dashboard regions and the account aside.
+  await expect(page.locator("main h1")).toHaveCount(1);
+  await expect(page.locator("main h1")).toHaveText(member.name);
+  await expect(page.getByRole("region", { name: /^待办/ })).toBeVisible();
+  for (const name of ["我的赛程", "申请进度", "我的队伍"])
+    await expect(page.getByRole("region", { name, exact: true })).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "账号", exact: true })).toBeVisible();
+  // The removed web join-record list stays closed (docs/WEB_RESET_FINAL_VALIDATION_20261111.md).
+  await expect(page.getByRole("heading", { name: "我的进群记录", exact: true })).toHaveCount(0);
+  // Members receive no management queues; only authorised roles see 管理台.
+  await expect(page.getByRole("region", { name: "管理台", exact: true })).toHaveCount(0);
+  const views = page.getByRole("navigation", { name: "我的记录", exact: true });
+  const applications = views.getByRole("link", { name: /^我的申请/ });
+  await expect(applications).toHaveAttribute("href", "/account?view=applications");
+  await applications.click();
+  await expect(page).toHaveURL(url => url.pathname === "/account" && url.search === "?view=applications");
+  await expect(applications).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("heading", { name: "全部申请", exact: true })).toHaveAttribute("id", "applications-title");
+  const overview = views.getByRole("link", { name: "总览", exact: true });
+  await expect(overview).toHaveAttribute("href", "/account");
+  await overview.click();
+  await expect(page).toHaveURL(url => url.pathname === "/account" && url.search === "");
+  await expect(overview).toHaveAttribute("aria-current", "page");
   await page.goBack();
-  await expect(page).toHaveURL(url => url.pathname === "/account" && url.search === "?view=history" && url.hash === "#applications-title");
-  await expect(page.getByRole("region", { name: "申请记录", exact: true })).toBeVisible();
+  await expect(page).toHaveURL(url => url.pathname === "/account" && url.search === "?view=applications");
+  await expect(views.getByRole("link", { name: /^我的申请/ })).toHaveAttribute("aria-current", "page");
+  // Historic notification deep link resolves to the full application list and its heading anchor.
+  await page.goto("/account?view=history#applications-title");
+  await expect(views.getByRole("link", { name: /^我的申请/ })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("heading", { name: "全部申请", exact: true })).toBeInViewport();
+  await page.goto("/account");
   await accessible(page);
   await page.screenshot({
     path: testInfo.outputPath("account-desktop.png"),
@@ -200,12 +201,10 @@ test("本人事务与权限入口、深链和退出完整导航", async ({ page 
 
 test("长文、旧荣誉链接与管理角色仍走原授权", async ({ page }, testInfo) => {
   await signIn(page, "president");
-  await expect(
-    page.getByRole("heading", { name: "管理工作台", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: "骨干招新管理", exact: false }),
-  ).toBeVisible();
+  await expect(page.getByRole("region", { name: "管理台", exact: true })).toBeVisible();
+  const staffQueue = page.getByRole("link", { name: "骨干招新申请", exact: true });
+  await expect(staffQueue).toBeVisible();
+  await expect(staffQueue).toHaveAttribute("href", "/staff/manage");
   for (const route of [
     "/about",
     "/contact",

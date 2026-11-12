@@ -1,14 +1,10 @@
 @import "../../templates/business.wxss";
 @import "../../styles/native-forms.wxss";
 
-.activity-manage-page .managed-scope-note { margin: 8px 0 24px; }
-.activity-manage-page .managed-list-head { align-items: baseline; gap: 12px; margin: 24px 0 8px; }
-.activity-manage-page .managed-list-head > .muted { flex-shrink: 0; font-size: 14px; }
-.mini-page.activity-manage-page .managed-activity { display: block; padding: 20px 0; border-bottom: 1px solid var(--z-line); border-radius: 0; }
-.activity-manage-page .managed-state { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-.activity-manage-page .managed-title { display: block; margin-top: 10px; color: var(--z-text); font-size: 18px; line-height: 1.55; font-weight: 600; word-break: break-word; }
-.activity-manage-page .managed-capability { display: block; margin-top: 12px; color: var(--z-link); font-size: 15px; line-height: 1.6; }
-.activity-manage-page .managed-activity > .muted { margin-top: 8px; font-size: 14px; }
-.mini-page.activity-manage-page .managed-activity[disabled] { background: transparent; border-color: var(--z-line); }
-.activity-manage-page .managed-activity[disabled] .managed-capability { color: var(--z-muted); }
-.activity-manage-page .managed-empty { padding-top: 16px; }
+/* V2 activity workbench: scope segments, activity records with capability line. */
+.activity-manage-v2 { padding-top: 0; }
+.mini-page .manage-item { display: flex; flex-direction: column; align-items: stretch; width: 100%; margin-bottom: 0; text-align: left; font-weight: 400; }
+.manage-readonly { opacity: .7; }
+.manage-capability { align-self: flex-start; padding: 4rpx 16rpx; border-radius: 999rpx; background: var(--z-tint); color: var(--z-primary); font-size: 24rpx; font-weight: 800; }
+.manage-pager { display: flex; align-items: center; justify-content: space-between; gap: 14rpx; margin-top: 24rpx; }
+.manage-page { font-weight: 900; }

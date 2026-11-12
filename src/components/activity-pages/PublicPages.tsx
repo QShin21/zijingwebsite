@@ -304,6 +304,7 @@ export async function PublicList({
       </nav>
       <header className={styles.hero}>
         <div>
+          <p className={styles.eyebrow}>紫荆主场 · {meta.title}</p>
           <h1>{meta.headline}</h1>
           <p>{meta.description}</p>
         </div>

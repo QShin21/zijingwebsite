@@ -54,7 +54,7 @@ test("五类问卷入口双轴居中，短屏/滚动/关闭与Escape返回焦点
   const cases = [
     { path: `/activities/events/${qaEvent}/manage`, kind: "activity" },
     { path: `/activities/community-posts/${qaPost}/manage`, kind: "activity" },
-    { path: `/community/integration-${suffix}/updates`, kind: "composer" },
+    { path: `/community/integration-${suffix}/updates/new`, kind: "composer" },
     { path: "/staff/manage", kind: "create" },
     { path: "/staff/manage", kind: "staff" },
   ];
@@ -62,8 +62,9 @@ test("五类问卷入口双轴居中，短屏/滚动/关闭与Escape返回焦点
     await page.setViewportSize(viewport); await page.goto(item.path);
     let scope = page.locator("main");
     if (item.kind === "composer") {
-      scope = page.locator("details").filter({ has: page.getByText("发布活动与通知", { exact: true }) });
-      await scope.locator(":scope > summary").click(); await scope.getByLabel("启用填写问卷报名", { exact: true }).check();
+      // V2: the composer is its own task page, already expanded.
+      scope = page.getByRole("region", { name: "活动与通知发布表单", exact: true });
+      await scope.getByLabel("启用填写问卷报名", { exact: true }).check();
       await scope.getByRole("button", { name: /从模板开始/ }).click();
       const starter = scope.locator("dialog.questionnaire-starter-dialog"); await starter.getByRole("button", { name: "预览「活动报名」", exact: true }).click();
       await starter.getByRole("button", { name: "替换并进入编辑", exact: true }).click();

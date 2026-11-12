@@ -1,0 +1,246 @@
+{
+  "sourceCommit": "58f0de98b349ab13343780a4e05f2d6d55249cef",
+  "capturedAt": "2026-11-10",
+  "scope": "Existing web entrypoints and shared HTTP contract; additive changes permitted. This inventory is not proof of behavior preservation.",
+  "pages": [
+    "src/app/(frontend)/[...path]/page.tsx",
+    "src/app/(frontend)/account/page.tsx",
+    "src/app/(frontend)/account/reset/page.tsx",
+    "src/app/(frontend)/activities/(index)/page.tsx",
+    "src/app/(frontend)/activities/[kind]/[id]/fill/page.tsx",
+    "src/app/(frontend)/activities/[kind]/[id]/manage/page.tsx",
+    "src/app/(frontend)/activities/[kind]/[id]/signups/page.tsx",
+    "src/app/(frontend)/announcements/(index)/page.tsx",
+    "src/app/(frontend)/announcements/[slug]/page.tsx",
+    "src/app/(frontend)/community/(index)/page.tsx",
+    "src/app/(frontend)/community/[slug]/page.tsx",
+    "src/app/(frontend)/community/[slug]/showcase/[id]/page.tsx",
+    "src/app/(frontend)/community/[slug]/showcase/new/page.tsx",
+    "src/app/(frontend)/community/[slug]/showcase/page.tsx",
+    "src/app/(frontend)/community/[slug]/showcase/team-honors/[team]/page.tsx",
+    "src/app/(frontend)/community/[slug]/updates/[id]/page.tsx",
+    "src/app/(frontend)/community/[slug]/updates/new/page.tsx",
+    "src/app/(frontend)/community/[slug]/updates/page.tsx",
+    "src/app/(frontend)/community/apply/page.tsx",
+    "src/app/(frontend)/community/promotions/page.tsx",
+    "src/app/(frontend)/community/review/page.tsx",
+    "src/app/(frontend)/events/(index)/page.tsx",
+    "src/app/(frontend)/events/[slug]/page.tsx",
+    "src/app/(frontend)/gallery/(index)/page.tsx",
+    "src/app/(frontend)/gallery/[slug]/page.tsx",
+    "src/app/(frontend)/join/staff/(index)/page.tsx",
+    "src/app/(frontend)/join/staff/batches/[id]/page.tsx",
+    "src/app/(frontend)/login/page.tsx",
+    "src/app/(frontend)/page.tsx",
+    "src/app/(frontend)/preview/[collection]/[id]/page.tsx",
+    "src/app/(frontend)/register/page.tsx",
+    "src/app/(frontend)/staff/manage/page.tsx",
+    "src/app/(frontend)/teams/(index)/page.tsx",
+    "src/app/(frontend)/teams/apply/page.tsx",
+    "src/app/(frontend)/teams/honors/[id]/page.tsx",
+    "src/app/(frontend)/teams/honors/page.tsx",
+    "src/app/(frontend)/teams/manage/[id]/page.tsx",
+    "src/app/(frontend)/teams/manage/page.tsx",
+    "src/app/(frontend)/teams/profiles/[teamID]/page.tsx",
+    "src/app/(frontend)/teams/recruitment/[id]/page.tsx",
+    "src/app/(frontend)/teams/recruitment/page.tsx"
+  ],
+  "routes": [
+    {
+      "file": "src/app/(frontend)/api/activities/[kind]/[id]/signup/route.ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "POST",
+        "PUT"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/api/activities/manage/route.ts",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/api/miniapp/[...path]/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/api/private-team-honor-videos/[filename]/route.ts",
+      "methods": [
+        "GET",
+        "HEAD"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/api/questionnaires/generate/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/api/showcase-videos/[filename]/route.ts",
+      "methods": [
+        "GET",
+        "HEAD"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/api/staff/batches/[id]/application/route.ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "POST"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/api/team-core/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/api/team-honor-archives/[team]/route.ts",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/api/team-honor-evidence/[id]/video/route.ts",
+      "methods": [
+        "GET",
+        "HEAD"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/api/team-honors/[id]/route.ts",
+      "methods": [
+        "GET",
+        "PATCH",
+        "POST"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/api/team-honors/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/api/team-profiles/[teamID]/route.ts",
+      "methods": [
+        "GET",
+        "PUT"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/community/[slug]/contacts/route.ts",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/community/applications/[id]/qr/route.ts",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "file": "src/app/(payload)/api/[...slug]/route.ts",
+      "methods": [
+        "DELETE",
+        "GET",
+        "OPTIONS",
+        "PATCH",
+        "POST",
+        "PUT"
+      ]
+    },
+    {
+      "file": "src/app/health/live/route.ts",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "file": "src/app/health/ready/route.ts",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/api/v2/[...path]/route.ts",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "file": "src/app/(frontend)/account/actions.ts",
+      "exports": [
+        "beginRegistrationAction",
+        "loginAction",
+        "logoutAction",
+        "registerAction",
+        "requestPasswordCodeAction",
+        "resetAction",
+        "sendCodeAction",
+        "signInAction",
+        "signOutAction",
+        "updatePasswordAction"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/community/actions.ts",
+      "exports": [
+        "applyAction",
+        "banAction",
+        "decideAction",
+        "decideCommunityResultAction",
+        "moderateAction",
+        "publishCommunityAction",
+        "publishCommunityResultAction",
+        "replaceShowcaseVideoAction",
+        "replaceShowcaseVideoResultAction",
+        "reviewShowcaseAction",
+        "reviewShowcaseResultAction",
+        "submitShowcaseAction",
+        "updateCommunityCardAction",
+        "updateCommunityCardResultAction",
+        "updateCommunityPostImagesAction",
+        "withdrawApplicationAction"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/community/promotions/actions.ts",
+      "exports": [
+        "promotionAction"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/staff/manage/actions.ts",
+      "exports": [
+        "reviewStaffApplicationAction",
+        "saveStaffBatchAction"
+      ]
+    },
+    {
+      "file": "src/app/(frontend)/teams/honors/actions.ts",
+      "exports": [
+        "changeTeamHonorAction",
+        "changeTeamHonorResultAction",
+        "hideLegacyTeamHonorAction",
+        "hideLegacyTeamHonorResultAction",
+        "saveTeamHonorAction"
+      ]
+    }
+  ]
+}

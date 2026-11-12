@@ -13,6 +13,8 @@ import { APIError } from "payload";
 import type { User } from "@/payload-types";
 import { publicationImageLimit } from "@/lib/publication-images";
 import { applicationContactConsentRequiredMessage } from "@/lib/community-status";
+import { beijingScheduleTime, communitySchedule, updateCommunityPostSchedule } from "@/lib/v2/schedule";
+import { reviewShowcase, submitShowcase } from "@/lib/v2/writes";
 
 const value = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 const numeric = (form: FormData, key: string) => {
@@ -91,6 +93,8 @@ async function createCommunityPost(
       title: value(form, "title"),
       body: value(form, "body"),
       category,
+      ...communitySchedule({ startAt: beijingScheduleTime(value(form, "startAt")),
+        endAt: beijingScheduleTime(value(form, "endAt")), location: value(form, "location") }, category),
       signupForm,
       postImages,
       signupImages,
@@ -151,8 +155,7 @@ export async function submitShowcaseAction(form: FormData) {
   try {
     const images = await Promise.all(files.map(async file => ({ source: `data:${file.type};base64,${Buffer.from(await file.arrayBuffer()).toString("base64")}`, caption: value(form, "caption") })));
     if (videoFile) uploaded = await saveVideo(videoFile);
-    await p.create({ collection: "community-showcase", overrideAccess: false, user, context: { webShowcaseWrite: true },
-      data: { game: numeric(form, "game"), author: user.id, title: value(form, "title"), body: value(form, "body"), videoURL: uploaded || value(form, "videoURL"), images } });
+    await submitShowcase(p, user, { game: numeric(form, "game"), title: value(form, "title"), body: value(form, "body"), videoURL: uploaded || value(form, "videoURL"), images });
     return { success: true };
   } catch (error) { if (uploaded) await discardVideo(uploaded); return { error: applicationError(error) }; }
 }
@@ -163,10 +166,19 @@ export async function reviewShowcaseAction(form: FormData) {
   const path = `${await gamePath(Number(post.game))}/showcase`;
   const status = value(form, "status");
   if (!["visible", "rejected", "hidden"].includes(status)) problem(path, "审核决定无效");
-  try { await p.update({ collection: "community-showcase", id: post.id, overrideAccess: false, user, context: { webShowcaseWrite: true },
-    data: { status: status as "visible" | "rejected" | "hidden", reviewNote: value(form, "reviewNote") } }); }
+  try { await reviewShowcase(p, user, { id: post.id, decision: status, reviewNote: value(form, "reviewNote"), revision: value(form, "revision") }); }
   catch { problem(path, "审核未成功，请刷新后重试"); }
   redirect(`${path}?view=review&message=${encodeURIComponent("审核已保存")}`);
+}
+export async function updateCommunityPostScheduleAction(form: FormData) {
+  const { p, user } = await current();
+  try {
+    const saved = await updateCommunityPostSchedule(p, user, { id: numeric(form, "id"), revision: value(form, "revision"),
+      startAt: value(form, "startAt"), endAt: value(form, "endAt"), location: value(form, "location") });
+    const path = `${await gamePath(Number(saved.game))}/updates`;
+    revalidatePath(path); revalidatePath("/events"); revalidatePath("/");
+    return { ok: true, message: "活动日程已更新。" };
+  } catch (error) { return { ok: false, message: applicationError(error) }; }
 }
 export async function replaceShowcaseVideoAction(form: FormData) {
   const { p, user } = await current(), id = numeric(form, "id");
@@ -266,8 +278,7 @@ export async function reviewShowcaseResultAction(form: FormData) {
   const status = value(form, "status");
   if (!["visible", "rejected", "hidden"].includes(status)) return { ok: false, message: "审核决定无效，请重新选择。" };
   try {
-    await p.update({ collection: "community-showcase", id: post.id, overrideAccess: false, user, context: { webShowcaseWrite: true },
-      data: { status: status as "visible" | "rejected" | "hidden", reviewNote: value(form, "reviewNote") } });
+    await reviewShowcase(p, user, { id: post.id, decision: status, reviewNote: value(form, "reviewNote"), revision: value(form, "revision") });
     const path = `${await gamePath(Number(post.game))}/showcase`;
     revalidatePath(path);
     const requested = new URLSearchParams(value(form, "returnQuery")), query = new URLSearchParams();

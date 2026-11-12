@@ -1,8 +1,8 @@
 {
   "usingComponents": {},
-  "navigationBarBackgroundColor": "#fffdf9",
+  "navigationBarBackgroundColor": "#f2f1f5",
   "navigationBarTextStyle": "black",
-  "backgroundColor": "#f7f5f0",
+  "backgroundColor": "#f2f1f5",
   "backgroundTextStyle": "dark",
   "navigationBarTitleText": "内容详情"
 }

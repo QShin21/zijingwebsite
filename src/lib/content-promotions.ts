@@ -9,20 +9,20 @@ import { publicationImageRevision } from "./publication-image-storage";
 import { promotionKey, promotionSource, promotionVersion, supportedPromotionKinds, type PromotionAction, type PromotionHistory, type PromotionKind, type PromotionSnapshot, type PromotionSource } from "./promotion-model";
 
 export async function readPromotionSource(p: Payload, collection: PromotionSource, id: number, req?: PayloadRequest) {
-  const common = { title: true, body: true, game: true, status: true, authorName: true } as const;
+  const common = { title: true, body: true, game: true, status: true, authorName: true, author: true, createdAt: true, updatedAt: true } as const;
   const doc = await p.findByID({ collection, id, overrideAccess: false, user: null,
     ...(req ? { req: { ...req, user: null } } : {}), depth: 0,
     context: { ...req?.context, readSignupImages: true },
     select: collection === "community-posts"
-      ? { ...common, category: true, signupForm: true, postImages: true, signupImages: true }
+      ? { ...common, category: true, signupForm: true, postImages: true, signupImages: true, startAt: true, endAt: true, location: true }
       : { ...common, images: true, videoURL: true } }).catch(() => null);
   if (!doc || doc.status !== "visible") throw new APIError("原内容尚未发布或已隐藏", 409);
   const kind: PromotionKind = collection === "community-showcase" ? "showcase" : ("category" in doc && doc.category === "event" ? "event" : "notice");
   if (!supportedPromotionKinds.includes(kind)) throw new APIError("该类升推尚未开放", 400);
   const gameID = Number(relationID(doc.game));
   const game = await p.findByID({ collection: "games", id: gameID, overrideAccess: false, user: null,
-    ...(req ? { req: { ...req, user: null } } : {}), draft: false, depth: 0, select: { title: true, slug: true, _status: true } }).catch(() => null);
-  if (!game || game._status !== "published") throw new APIError("原社群尚未开放", 409);
+    ...(req ? { req: { ...req, user: null } } : {}), draft: false, depth: 0, select: { title: true, slug: true, _status: true, demo: true } }).catch(() => null);
+  if (!game || game._status !== "published" || process.env.APP_ENV === "production" && game.demo) throw new APIError("原社群尚未开放", 409);
   const videoURL = "videoURL" in doc ? doc.videoURL || null : null;
   const videoVersion = videoURL ? await controlledVideoVersion(videoURL) : null;
   const value = { ...doc, game: gameID, videoVersion } as unknown as Record<string, unknown>;
@@ -135,22 +135,39 @@ export const promotionSourceDeleted: CollectionAfterDeleteHook = async ({ req, d
   await sourceChanged(req, promotionSource(collection.slug), doc.id, true);
   return doc;
 };
-export async function promotedContent(p: Payload, kind: PromotionKind, limit = 6) {
-  if (!supportedPromotionKinds.includes(kind) || limit <= 0) return [];
-  const items: { id: number; sourceKey: string; href: string; gameTitle: string; snapshot: PromotionSnapshot }[] = [];
-  // Keep reads bounded even when the directory requests every approved item.
+type ApprovedPromotionSource = { id: number; sourceKey: string;
+  source: Awaited<ReturnType<typeof readPromotionSource>>; snapshot: PromotionSnapshot };
+
+/** Check one page at a time. Lightweight consumers must not retain image storage
+ * from every source in a 500-item calendar/feed projection.
+ */
+async function collectApprovedSources<T extends object>(p: Payload, kind: PromotionKind, limit: number, project: (item: ApprovedPromotionSource) => T): Promise<T[]> {
+  const items: T[] = [];
+  if (!supportedPromotionKinds.includes(kind) || limit <= 0) return items;
   for (let page = 1; items.length < limit; page++) {
     const result = await p.find({ collection: "content-promotions", overrideAccess: false, user: null, context: { publicPromotionProjection: true },
       depth: 0, page, limit: 20, sort: ["-approvedAt", "-id"], where: { and: [{ kind: { equals: kind } }, { status: { equals: "approved" } }] },
       select: { sourceCollection: true, sourceID: true, approvedVersion: true, approvedSnapshot: true } });
-    const candidates = await Promise.all(result.docs.map(async item => {
+    const candidates = await Promise.all(result.docs.map(async (item): Promise<T | null> => {
       const source = await readPromotionSource(p, promotionSource(item.sourceCollection), item.sourceID).catch(() => null);
       if (!source || source.version !== item.approvedVersion || source.kind !== kind || !item.approvedSnapshot) return null;
-      return { id: item.id, sourceKey: promotionKey(item.sourceCollection, item.sourceID), href: source.href, gameTitle: source.game.title,
-        snapshot: item.approvedSnapshot as unknown as PromotionSnapshot };
+      return project({ id: item.id, sourceKey: promotionKey(item.sourceCollection, item.sourceID), source,
+        snapshot: item.approvedSnapshot as unknown as PromotionSnapshot });
     }));
-    items.push(...candidates.filter(item => item !== null).slice(0, limit - items.length));
+    for (const item of candidates) if (item && items.length < limit) items.push(item);
     if (!result.hasNextPage || !result.docs.length) break;
   }
   return items;
+}
+/** Small internal view, retaining the exact document from the approval-version
+ * check. Home asks for six, never the 500-item calendar/feed candidate budget.
+ */
+export async function approvedPromotionSources(p: Payload, kind: PromotionKind, limit = 6) {
+  const bounded = Number.isFinite(limit) ? Math.min(6, Math.max(0, Math.floor(limit))) : 0;
+  return collectApprovedSources(p, kind, bounded, item => item);
+}
+export async function promotedContent(p: Payload, kind: PromotionKind, limit = 6) {
+  return collectApprovedSources(p, kind, limit, ({ id, sourceKey, source, snapshot }) => ({
+    id, sourceKey, href: source.href, gameTitle: source.game.title, snapshot,
+  }));
 }
