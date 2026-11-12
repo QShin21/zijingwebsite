@@ -121,11 +121,13 @@ try {
       await db.query('UPDATE events SET post_images=$1 WHERE id=$2', [JSON.stringify([{ source: dataImage, alt: 'Synthetic old publication' }]), event]);
       checkpoints.push({ baseline: migrations[i].name, before: await census() });
       if (mainSeating) {
-        // main deployed seating before either V2 migration. Keep its original name
-        // and rows, then apply the missing V2 migrations without recreating it.
+        // Production deployed seating and scheduled opening before either V2
+        // migration. Preserve both migrations and their existing rows.
         const index = migrations.findIndex(m => m.name === '20261112_000000_activity_seating');
         assert.ok(index > i); await apply(index);
-        const setting = await insert('activity_seatings', { event_id: event, enabled: true });
+        const scheduleIndex = migrations.findIndex(m => m.name === '20261112_010000_activity_seating_schedule');
+        assert.ok(scheduleIndex > index); await apply(scheduleIndex);
+        const setting = await insert('activity_seatings', { event_id: event, enabled: true, opens_at: new Date('2026-01-01T00:00:00Z') });
         const oldRequest = await insert('activity_seat_requests', { seating_id: setting, member_id: member,
           member_name: 'Synthetic historical member', phone: '13900000000', seats: ['1-1', '1-2'], status: 'pending' });
         await db.query("INSERT INTO activity_seat_claims(seating_id,seat,request_id) VALUES($1,'1-1',$2),($1,'1-2',$2)", [setting, oldRequest]);
@@ -136,7 +138,7 @@ try {
         await insert('activity_seat_requests', { seating_id: otherSetting, member_id: manager,
           member_name: 'Synthetic historical manager', phone: '13900000001', seats: ['2-1'], status: 'rejected',
           reviewer_id: member, reviewed_at: new Date('2026-11-01T01:00:00Z') });
-        checkpoints.push({ baseline: 'main-7f56e08-with-activity-seating-before-v2', before: await census() });
+        checkpoints.push({ baseline: 'main-fb020cd-with-scheduled-seating-before-v2', before: await census() });
       }
     }
   }
@@ -223,7 +225,7 @@ try {
     assert.equal((await db.query('SELECT account FROM users WHERE id=$1', [newUser.id])).rows[0].account, null);
     await fs.writeFile(process.env.V2_COMPAT_EVIDENCE!, JSON.stringify({
       at: new Date().toISOString(), result: 'PASS', productionAccess: false, databasePush: false,
-      source: mainSeating ? 'new 90c7c8d plus main d3a1446 seating integration; synthetic main-to-new upgrade' : 'new checkout with compatibility fixes',
+      source: mainSeating ? 'new 5806c32 with scheduled seating; synthetic main-fb020cd-to-new upgrade' : 'new checkout with compatibility fixes',
       migrationsApplied: appliedNames, schemaReadCollections, mainSeatingHistoryPreserved: mainSeating,
       preservedCheckpoints: checkpoints.slice(1).map(c => ({ baseline: c.baseline, tables: Object.keys(c.before).length, rows: Object.values(c.before).reduce((n, t) => n + t.count, 0), unchangedOriginalColumnsSHA256: true })),
       preNicknameAccountAndAuthColumnsPreserved: true, invalidOrDuplicateNicknamesFailWithoutChanges: true, legacyPasswordLogin: true,

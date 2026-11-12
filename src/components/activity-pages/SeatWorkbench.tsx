@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { beijingInputTime } from "@/lib/rules";
 import {
   seatAPI,
   seatLabel,
@@ -158,6 +159,7 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
   const [notice, setNotice] = useState("");
   const [confirming, setConfirming] = useState<number | null>(null);
   const [zoom, setZoom] = useState(0);
+  const [openingTime, setOpeningTime] = useState<string | null>(null);
   const lock = useRef(false);
   const ticket = useRef(0);
   const alive = useRef(true);
@@ -239,12 +241,21 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
     }
   }
 
-  function toggleEnabled() {
-    if (!data) return;
-    const enabled = !data.enabled;
+  function setEnabled(enabled: boolean) {
     void act(enabled ? "正在开启选座" : "正在关闭选座", async () => {
-      const result = await seatRequest<{ enabled: boolean }>(endpoint, seatJSON("PUT", { enabled }));
-      return result.enabled ? "选座已开启，成员可以提交申请。" : "选座已关闭：不再接收新申请，已有申请仍可在此审核。";
+      await seatRequest(endpoint, seatJSON("PUT", { enabled }));
+      setOpeningTime(null);
+      return enabled ? "选座已开启，成员可以提交申请。" : "选座已关闭：已有申请仍可审核。";
+    });
+  }
+
+  function schedule(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const opensAt = openingTime ?? beijingInputTime(data?.opensAt);
+    void act("正在保存开放时间", async () => {
+      await seatRequest(endpoint, seatJSON("PUT", { enabled: true, opensAt }));
+      setOpeningTime(null);
+      return "已保存定时开放。";
     });
   }
 
@@ -263,18 +274,28 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
         <section className={styles.control} aria-label="选座设置">
           <div className={styles.controlText}>
             <p>
-              <StatusPill tone={data.enabled ? "live" : "neutral"}>{data.enabled ? "选座开放中" : "选座未开启"}</StatusPill>
+              <StatusPill tone={data.open ? "live" : "neutral"}>{data.scheduled ? "等待开放" : data.open ? "选座开放中" : data.enabled ? "选座已关闭" : "选座未开启"}</StatusPill>
             </p>
             <p>
-              {data.enabled
+              {data.scheduled
+                ? "开放时间到达后，成员可以在活动页选座并提交凭证。"
+                : data.enabled
                 ? "成员可以在活动页选座并提交凭证。关闭后不再接收新申请，已提交的申请仍在此审核。"
                 : "开启后成员可在活动页选择 1–10 个座位并提交手机号与凭证；未公开的活动不能开启。"}
             </p>
-            {data.enabled && layout && !layout.open && <p>活动已结束、取消或暂未公开，成员端当前不能提交新申请。</p>}
+            {data.scheduled && <p>将于北京时间 {formatDateTime(data.opensAt)} 开放选座。</p>}
+            {data.enabled && layout && !layout.open && !data.scheduled && <p>活动已结束、取消或暂未公开，成员端当前不能提交新申请。</p>}
+            <form className={styles.schedule} onSubmit={schedule}>
+              <label className={styles.field}>定时开放（北京时间）
+                <input type="datetime-local" value={openingTime ?? beijingInputTime(data.opensAt)} required disabled={disabled} onChange={event => setOpeningTime(event.currentTarget.value)} />
+              </label>
+              <button type="submit" className={buttonClass("primary")} disabled={disabled}>保存开放时间</button>
+            </form>
           </div>
-          <button type="button" className={buttonClass(data.enabled ? "ghost" : "primary")} disabled={disabled} onClick={toggleEnabled}>
-            {data.enabled ? "关闭选座" : "开启选座"}
-          </button>
+          <div className={work.actions}>
+            {(!data.enabled || data.scheduled) && <button type="button" className={buttonClass("primary")} disabled={disabled} onClick={() => setEnabled(true)}>{data.scheduled ? "立即开放" : "开启选座"}</button>}
+            {data.enabled && <button type="button" className={buttonClass("ghost")} disabled={disabled} onClick={() => setEnabled(false)}>关闭选座</button>}
+          </div>
         </section>
       )}
 

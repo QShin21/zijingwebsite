@@ -49,11 +49,12 @@
     </view>
 
     <view wx:if="{{seatInfo}}" class="zj-sheet detail-seating">
-      <view class="zj-record-head"><text class="zj-sheet-title">活动选座</text><text class="zj-pill {{seatInfo.open ? 'zj-pill-live' : 'zj-pill-neutral'}}">{{seatInfo.open ? '选座开放' : seatInfo.enabled ? '选座关闭' : '未启用'}}</text></view>
+      <view class="zj-record-head"><text class="zj-sheet-title">活动选座</text><text class="zj-pill {{seatInfo.open ? 'zj-pill-live' : 'zj-pill-neutral'}}">{{seatInfo.scheduled ? '等待开放' : seatInfo.open ? '选座开放' : seatInfo.enabled ? '选座关闭' : '未启用'}}</text></view>
+      <text wx:if="{{seatInfo.scheduled}}" class="zj-form-hint">将于北京时间 {{seatInfo.openingLabel}} 开放选座。</text>
       <text wx:if="{{seatInfo.mine}}" class="zj-callout {{seatInfo.mine.status === 'confirmed' ? 'zj-callout-success' : seatInfo.mine.status === 'rejected' ? 'zj-callout-warning' : ''}}">我的申请 · {{seatInfo.mine.label}}：{{seatInfo.mine.seats}}</text>
       <text wx:if="{{seatInfo.layout}}" class="zj-small">{{seatInfo.layout}}</text>
       <text wx:if="{{seatInfo.open && !seatInfo.mine}}" class="zj-form-hint">{{seatInfo.loggedIn ? '' : '登录后'}}可选 1–{{seatInfo.limit}} 个座位，提交手机号与活动参与凭证；审核通过后座位锁定。</text>
-      <text wx:elif="{{seatInfo.enabled && !seatInfo.open}}" class="zj-form-hint">选座已关闭，不再接收新的申请。</text>
+      <text wx:elif="{{seatInfo.enabled && !seatInfo.open && !seatInfo.scheduled}}" class="zj-form-hint">选座已关闭，不再接收新的申请。</text>
       <text wx:elif="{{!seatInfo.enabled && seatInfo.canReview}}" class="zj-form-hint">本活动尚未开启选座，可在选座工作台开启。</text>
       <view class="zj-record-actions">
         <button wx:if="{{seatInfo.enabled || seatInfo.mine}}" class="primary" bindtap="seating">{{seatInfo.mine ? '查看选座申请' : '查看座位图'}}</button>

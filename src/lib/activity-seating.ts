@@ -6,9 +6,9 @@ import type { User } from "@/payload-types";
 import {
   seatKeys, seatLimit, seatPhonePattern, seatProofBytes, seatProofID, seatProofLimit, seatRows,
   type SeatDecision, type SeatRequest, type SeatStatus, type SeatingKind, type SeatingState,
-  type SeatingWorkbench,
+  type SeatingAvailability, type SeatingWorkbench,
 } from "./activity-seating-model";
-import { canParticipate, canPublish, communityIDs, relationID } from "./rules";
+import { beijingInputTime, canParticipate, canPublish, communityIDs, relationID } from "./rules";
 import { normalizeImageBytes } from "./showcase-images";
 import { refreshViewer } from "./v2/identity";
 import { databaseCode } from "./workflow-transactions";
@@ -29,7 +29,7 @@ type SeatDatabase = {
   ): Promise<{ rows: T[]; rowCount: number | null }>;
 };
 
-type SeatScope = { id: number; enabled: boolean };
+type SeatScope = { id: number; enabled: boolean; opens_at: Date | null };
 type ActiveStatus = Exclude<SeatStatus, "rejected">;
 type RequestRow = {
   id: number;
@@ -104,7 +104,7 @@ const scopeColumn = (activity: SeatActivity) => activity.kind === "events" ? "ev
 
 async function scope(p: Payload, activity: SeatActivity, client?: SeatDatabase) {
   const result = await ((client ?? pool(p)) as SeatDatabase).query<SeatScope>(
-    `SELECT id, enabled FROM activity_seatings WHERE ${scopeColumn(activity)} = $1${client ? " FOR UPDATE" : ""}`,
+    `SELECT id, enabled, opens_at FROM activity_seatings WHERE ${scopeColumn(activity)} = $1${client ? " FOR UPDATE" : ""}`,
     [activity.id],
   );
   return result.rows[0];
@@ -187,9 +187,33 @@ async function activeRequest(client: SeatDatabase, seatingID: number, memberID: 
   return result.rows[0];
 }
 
+function availability(activity: SeatActivity, setting?: Pick<SeatScope, "enabled" | "opens_at">): SeatingAvailability {
+  const serverTime = Date.now();
+  const enabled = setting?.enabled === true;
+  const openingTime = setting?.opens_at?.getTime() ?? null;
+  const beforeEnd = activity.endAt === null || serverTime < activity.endAt;
+  const validOpening = openingTime === null || activity.endAt === null || openingTime < activity.endAt;
+  const available = enabled && activity.open && beforeEnd && validOpening;
+  const scheduled = available && openingTime !== null && openingTime > serverTime;
+  return { enabled, open: available && !scheduled, scheduled, opensAt: setting?.opens_at?.toISOString() ?? null, serverTime };
+}
+
+function openingDate(activity: SeatActivity, value: unknown) {
+  if (value == null || value === "") return null;
+  if (typeof value !== "string" || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}$/.test(value))
+    throw new APIError("请选择北京时间的开放日期和时间", 400);
+  const date = new Date(`${value}:00+08:00`);
+  if (!Number.isFinite(date.getTime()) || beijingInputTime(date.toISOString()) !== value)
+    throw new APIError("请选择有效的开放日期和时间", 400);
+  if (date.getTime() <= Date.now()) throw new APIError("定时开放时间须晚于当前时间", 400);
+  if (!activity.open || (activity.endAt !== null && date.getTime() >= activity.endAt))
+    throw new APIError("请选择活动结束前的开放时间", 400);
+  return date;
+}
+
 async function openScope(p: Payload, activity: SeatActivity, client: SeatDatabase) {
   const setting = await scope(p, activity, client);
-  if (!activity.open || !setting?.enabled || activity.endAt !== null && activity.endAt <= Date.now()) throw new APIError("当前活动暂未开放选座", 409);
+  if (!setting || !availability(activity, setting).open) throw new APIError("当前活动暂未开放选座", 409);
   return setting;
 }
 
@@ -200,7 +224,7 @@ export async function seatingState(p: Payload, activity: SeatActivity, user: Use
   const setting = await scope(p, activity);
   const loggedIn = Boolean(user && canParticipate(user));
   const state: SeatingState = {
-    enabled: Boolean(setting?.enabled), open: Boolean(setting?.enabled && activity.open), loggedIn,
+    ...availability(activity, setting), loggedIn,
     canReview: canReviewActivitySeats(user, activity.game), title: activity.title, rows: seatRows,
     seatLimit, proofLimit: seatProofLimit, proofBytes: seatProofBytes, occupancy: {}, mine: null, drafts: [],
   };
@@ -228,20 +252,21 @@ export async function seatingState(p: Payload, activity: SeatActivity, user: Use
   return state;
 }
 
-export async function setSeating(p: Payload, activity: SeatActivity, user: User | null, enabled: unknown) {
+export async function setSeating(p: Payload, activity: SeatActivity, user: User | null, enabled: unknown, opening?: unknown) {
   await requireReviewer(p, activity, user);
   if (typeof enabled !== "boolean") throw new APIError("请指定选座启用状态", 400);
   return transaction(p, async client => {
     const current = await lockedActivity(p, activity, user, client);
     assertLockedReviewer(current.activity, current.actor);
     if (enabled) requirePublic(current.activity);
+    const opensAt = enabled ? openingDate(current.activity, opening) : null;
     const column = scopeColumn(current.activity);
     await client.query(
-      `INSERT INTO activity_seatings (${column}, enabled) VALUES ($1, $2)
-       ON CONFLICT (${column}) DO UPDATE SET enabled = EXCLUDED.enabled`,
-      [current.activity.id, enabled],
+      `INSERT INTO activity_seatings (${column}, enabled, opens_at) VALUES ($1, $2, $3)
+       ON CONFLICT (${column}) DO UPDATE SET enabled = EXCLUDED.enabled, opens_at = EXCLUDED.opens_at`,
+      [current.activity.id, enabled, opensAt],
     );
-    return { enabled };
+    return availability(current.activity, { enabled, opens_at: opensAt });
   });
 }
 
@@ -306,7 +331,7 @@ export async function seatingWorkbench(
   activity = await seatActivity(p, activity.kind, activity.id, user);
   await requireReviewer(p, activity, user);
   const setting = await scope(p, activity);
-  const view: SeatingWorkbench = { title: activity.title, enabled: Boolean(setting?.enabled), docs: [], page, hasNextPage: false };
+  const view: SeatingWorkbench = { title: activity.title, ...availability(activity, setting), docs: [], page, hasNextPage: false };
   if (!setting) return view;
   const limit = 20;
   const { rows } = await pool(p).query<ReviewRow>(
@@ -360,7 +385,7 @@ export async function decideSeats(
 export async function uploadSeatProof(p: Payload, activity: SeatActivity, user: User | null, file: File) {
   const actor = await requireMember(p, user);
   requirePublic(activity);
-  if (!activity.open || !(await scope(p, activity))?.enabled)
+  if (!availability(activity, await scope(p, activity)).open)
     throw new APIError("当前活动暂未开放选座", 409);
   if (!file.size || file.size > seatProofBytes) throw new APIError("单张凭证图片最多 8 MB", 400);
   const picture = await normalizeImageBytes(Buffer.from(await file.arrayBuffer())).catch(() => {

@@ -749,3 +749,5 @@ a.proofThumb:focus-visible {
     border-style: dashed;
   }
 }
+
+.schedule { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }

@@ -28,7 +28,7 @@ const step = zoom => zooms[zoom].size + GAP;
 const boardWidth = (rows, zoom) => Math.max(...rows.map(row => row.offset + row.count)) * step(zoom) + 24;
 // Everything private or account-bound that must disappear when the account changes.
 const cleared = () => ({ rows: [], chips: [], selected: [], phone: '', drafts: [], mine: null, docs: [], counts: null, busy: '', error: '', notice: '',
-  editable: false, loggedIn: false, canReview: false, enabled: false, open: false, title: '', loadError: '' });
+  editable: false, loggedIn: false, canReview: false, enabled: false, open: false, scheduled: false, opensAt: null, openingLabel: '', openingDate: '', openingTime: '', title: '', loadError: '' });
 
 function seatCell(id, number, taken, picked, accent) {
   const style = taken || (picked ? 'selected' : 'available');
@@ -53,7 +53,7 @@ function reviewDoc(row) {
 
 Page(withVisualTheme({
   data: { review: false, kind: '', title: '', loading: true, busy: '', error: '', loadError: '', notice: '', needsLogin: false,
-    enabled: false, open: false, loggedIn: false, canReview: false, editable: false, counts: null,
+    enabled: false, open: false, scheduled: false, opensAt: null, openingLabel: '', openingDate: '', openingTime: '', loggedIn: false, canReview: false, editable: false, counts: null,
     rows: [], boardWidth: 0, zoom: 1, zoomLabel: zooms[1].label, selected: [], chips: [], phone: '', drafts: [], mine: null,
     seatLimit: 10, proofLimit: 10, proofMB: 8,
     filters, status: 'pending', statusLabel: labels.pending, pageNumber: 1, hasNextPage: false, docs: [] },
@@ -73,7 +73,7 @@ Page(withVisualTheme({
       const member = memberOf(user);
       if (member === this._member) return;
       // Another account: drop in-flight replies and every private value of the previous one.
-      this._member = member; this._revision++; this._read++; this._state = null; this._seats = null;
+      this._member = member; this._revision++; this._read++; this._state = null; this._seats = null; clearTimeout(this._openingTimer);
       this.setData({ ...cleared(), loading: false, needsLogin: false });
       if (!this._closed) this.load();
     });
@@ -87,6 +87,7 @@ Page(withVisualTheme({
   },
   onHide() {
     this._hidden = true;
+    clearTimeout(this._openingTimer);
     if (this.data.loading) { this._read++; this._stale = true; this.setData({ loading: false }); }
   },
   onUnload() {
@@ -131,18 +132,29 @@ Page(withVisualTheme({
   },
   showState(data) {
     this._state = data;
+    clearTimeout(this._openingTimer);
+    if (data.scheduled && data.opensAt && !this._hidden) {
+      const revision = this._revision;
+      const delay = Math.min(2147483647, Math.max(0, Date.parse(data.opensAt) - data.serverTime) + 200);
+      this._openingTimer = setTimeout(() => { if (this.current(revision) && !this._hidden && !this.data.busy) this.load(); }, delay);
+    }
     const mine = mineView(data.mine);
     const editable = Boolean(data.enabled && data.open && data.loggedIn && (!mine || mine.status === 'rejected'));
     // Seats taken by someone else since the last read drop out of the local selection.
     const selected = editable ? this.data.selected.filter(id => !data.occupancy[id]) : [];
-    this.setData({ title: data.title || '活动选座', enabled: Boolean(data.enabled), open: Boolean(data.open), loggedIn: Boolean(data.loggedIn),
+    this.setData({ title: data.title || '活动选座', enabled: Boolean(data.enabled), open: Boolean(data.open), scheduled: data.scheduled === true, opensAt: data.opensAt || null, openingLabel: data.opensAt ? format.date(data.opensAt) : '', loggedIn: Boolean(data.loggedIn),
       canReview: Boolean(data.canReview), editable, mine, drafts: editable ? (data.drafts || []).filter(id => proofPattern.test(String(id))) : [],
       seatLimit: data.seatLimit, proofLimit: data.proofLimit, proofMB: Math.round(data.proofBytes / 1024 / 1024),
       selected, chips: chipsFor(selected), counts: counts(data),
       rows: data.enabled ? this.layout(data, selected, this.data.zoom) : [], boardWidth: data.enabled ? boardWidth(data.rows, this.data.zoom) : 0 });
   },
   showReview(data) {
-    this.setData({ title: data.title || '选座工作台', enabled: Boolean(data.enabled), docs: (data.docs || []).map(reviewDoc), hasNextPage: Boolean(data.hasNextPage) });
+    const opensAt = data.opensAt || null;
+    const fields = opensAt !== this.data.opensAt ? format.beijingParts(opensAt) : null;
+    this.setData({ title: data.title || '选座工作台', enabled: Boolean(data.enabled), open: Boolean(data.open),
+      scheduled: data.scheduled === true, opensAt, openingLabel: opensAt ? format.date(opensAt) : '',
+      ...(fields ? { openingDate: fields.date, openingTime: fields.time } : {}),
+      docs: (data.docs || []).map(reviewDoc), hasNextPage: Boolean(data.hasNextPage) });
   },
   layout(state, selected, zoom) {
     const index = {};
@@ -256,13 +268,23 @@ Page(withVisualTheme({
     this.setData({ pageNumber: this.data.pageNumber + delta, error: '', notice: '' });
     return this.load();
   },
-  setEnabled() {
+  changeOpeningDate(event) { this.setData({ openingDate: event.detail.value }); },
+  changeOpeningTime(event) { this.setData({ openingTime: event.detail.value }); },
+  setEnabled(event) {
     if (!this.data.review) return;
-    const enabled = !this.data.enabled;
-    return this.work(enabled ? '正在开启选座' : '正在关闭选座', async revision => {
-      const result = await http.request(this._endpoint, { method: 'PUT', required: true, raw: true, data: { enabled } });
-      if (this.current(revision)) this.setData({ enabled: Boolean(result && result.enabled),
-        notice: result && result.enabled ? '选座已开启，成员可以提交申请。' : '选座已关闭：不再接收新申请，已有申请仍可审核。' });
+    const enabled = event && event.currentTarget && typeof event.currentTarget.dataset.enabled === 'boolean'
+      ? event.currentTarget.dataset.enabled : !this.data.enabled;
+    return this.saveOpening({ enabled }, enabled ? '选座已开启，成员可以提交申请。' : '选座已关闭：已有申请仍可审核。');
+  },
+  scheduleOpening() {
+    const { openingDate, openingTime } = this.data;
+    if (!openingDate || !openingTime) { this.setData({ error: '请选择开放日期和时间' }); return; }
+    return this.saveOpening({ enabled: true, opensAt: openingDate + 'T' + openingTime }, '已保存定时开放。');
+  },
+  saveOpening(data, notice) {
+    return this.work('正在保存', async revision => {
+      await http.request(this._endpoint, { method: 'PUT', required: true, raw: true, data });
+      if (this.current(revision)) this.setData({ notice });
     }, true);
   },
   decide(event) {

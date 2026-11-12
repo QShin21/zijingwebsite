@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { formatDateTime } from "@/components/v2/format";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent } from "react";
 import {
   seatAPI,
@@ -283,6 +284,18 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
     return () => controller.abort();
   }, [load]);
 
+  useEffect(() => {
+    if (!state?.scheduled || !state.opensAt) return;
+    const controller = new AbortController();
+    const delay = Math.min(2147483647, Math.max(0, Date.parse(state.opensAt) - state.serverTime) + 200);
+    const timer = setTimeout(() => {
+      void load(controller.signal).catch(cause => {
+        if (!controller.signal.aborted && alive.current) setError(cause instanceof Error ? cause.message : "选座信息读取失败");
+      });
+    }, delay);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [state?.scheduled, state?.opensAt, state?.serverTime, load]);
+
   // Pick the widest zoom that fits once the map first appears; members can still change it.
   useEffect(() => {
     if (fitted.current || !state?.enabled || !mapRef.current) return;
@@ -428,7 +441,7 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
         </div>
         <div className={styles.headActions}>
           <span className={styles.openState} data-open={state.open ? "true" : undefined}>
-            {state.open ? "选座开放" : state.enabled ? "选座已关闭" : "选座未启用"}
+            {state.scheduled ? "等待开放" : state.open ? "选座开放" : state.enabled ? "选座已关闭" : "选座未启用"}
           </span>
           {state.enabled && (
             <button type="button" className={buttonClass("ghost", "small")} disabled={Boolean(busy)} onClick={() => void run("正在刷新座位", async () => undefined, true)}>
@@ -456,7 +469,8 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
         </div>
       )}
 
-      {state.enabled && !state.open && <p className={styles.note}>当前活动选座已关闭，不再接收新的申请；已提交的申请仍由管理员处理。</p>}
+      {state.scheduled && <p className={styles.note} role="status">将于北京时间 {formatDateTime(state.opensAt)} 开放选座。</p>}
+      {state.enabled && !state.open && !state.scheduled && <p className={styles.note}>当前活动选座已关闭，不再接收新的申请；已提交的申请仍由管理员处理。</p>}
       {!state.enabled && state.canReview && <p className={styles.note}>本活动尚未开启选座，可在选座工作台开启。</p>}
       {state.open && !state.loggedIn && (
         <Link className={buttonClass("accent")} href={`/login?returnTo=${encodeURIComponent(`${returnTo}#activity-seating`)}`}>

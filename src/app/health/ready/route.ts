@@ -63,12 +63,14 @@ export async function GET() {
     await db.pool.query("SELECT version_post_images FROM _announcements_v LIMIT 0");
     const imagesMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261110_000000_publication_images"]);
     if (imagesMigration.rowCount !== 1) throw new Error("Required publication images migration unavailable");
-    await db.pool.query("SELECT id,event_id,post_id,enabled FROM activity_seatings LIMIT 0");
+    await db.pool.query("SELECT id,event_id,post_id,enabled,opens_at FROM activity_seatings LIMIT 0");
     await db.pool.query("SELECT seating_id,seat,request_id FROM activity_seat_claims LIMIT 0");
     await db.pool.query("SELECT seating_id,member_id,status,phone,seats FROM activity_seat_requests LIMIT 0");
     await db.pool.query("SELECT id,seating_id,member_id,request_id,picture FROM activity_seat_proofs LIMIT 0");
     const seatingMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261112_000000_activity_seating"]);
     if (seatingMigration.rowCount !== 1) throw new Error("Required activity seating migration unavailable");
+    const scheduleMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261112_010000_activity_seating_schedule"]);
+    if (scheduleMigration.rowCount !== 1) throw new Error("Required seating schedule migration unavailable");
     await db.pool.query("SELECT start_at,end_at,location FROM community_posts LIMIT 0");
     await db.pool.query("SELECT owner_id,expires_at FROM pending_uploads LIMIT 0");
     await db.pool.query("SELECT kind,enabled FROM site_home_sections LIMIT 0");

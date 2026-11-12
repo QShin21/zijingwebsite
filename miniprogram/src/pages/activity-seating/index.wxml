@@ -8,8 +8,8 @@
       <text class="zj-hero-kicker">{{review ? 'SEATING · 选座工作台' : 'SEATING · 活动选座'}}</text>
       <text class="zj-hero-title">{{title || (review ? '选座工作台' : '活动选座')}}</text>
       <view wx:if="{{title}}" class="zj-hero-meta">
-        <text wx:if="{{review}}" class="zj-pill {{enabled ? 'zj-pill-live' : 'zj-pill-neutral'}}">{{enabled ? '选座开放中' : '选座未开启'}}</text>
-        <text wx:else class="zj-pill {{open ? 'zj-pill-live' : 'zj-pill-neutral'}}">{{open ? '选座开放' : enabled ? '选座已关闭' : '选座未启用'}}</text>
+        <text wx:if="{{review}}" class="zj-pill {{enabled ? 'zj-pill-live' : 'zj-pill-neutral'}}">{{scheduled ? '等待开放' : open ? '选座开放中' : enabled ? '选座已关闭' : '选座未开启'}}</text>
+        <text wx:else class="zj-pill {{open ? 'zj-pill-live' : 'zj-pill-neutral'}}">{{scheduled ? '等待开放' : open ? '选座开放' : enabled ? '选座已关闭' : '选座未启用'}}</text>
         <text wx:if="{{!review && enabled && counts}}">{{counts.rows}} 排 · {{counts.total}} 座 · 剩余 {{counts.free}}</text>
         <text wx:if="{{review}}">核对手机号与凭证：通过锁定，驳回释放</text>
       </view>
@@ -25,10 +25,20 @@
 
     <block wx:if="{{review}}">
       <view class="zj-sheet seat-control">
-        <view class="zj-record-head"><text class="zj-sheet-title">选座设置</text><text class="zj-pill {{enabled ? 'zj-pill-live' : 'zj-pill-neutral'}}">{{enabled ? '开放中' : '未开启'}}</text></view>
-        <text class="zj-form-hint">{{enabled ? '成员可在活动页选座并提交凭证。关闭后不再接收新申请，已提交的申请仍在此审核。' : '开启后成员可选择 1–10 个座位并提交手机号与凭证；未公开的活动不能开启。'}}</text>
+        <view class="zj-record-head"><text class="zj-sheet-title">选座设置</text><text class="zj-pill {{enabled ? 'zj-pill-live' : 'zj-pill-neutral'}}">{{scheduled ? '等待开放' : open ? '开放中' : enabled ? '已关闭' : '未开启'}}</text></view>
+        <text class="zj-form-hint">{{scheduled ? '开放时间到达后，成员可在活动页选座并提交凭证。' : enabled ? '成员可在活动页选座并提交凭证。关闭后不再接收新申请，已提交的申请仍在此审核。' : '开启后成员可选择 1–10 个座位并提交手机号与凭证；未公开的活动不能开启。'}}</text>
+        <text wx:if="{{scheduled}}" class="zj-form-hint">将于北京时间 {{openingLabel}} 开放选座。</text>
+        <view class="field seat-opening">
+          <text class="field-label">定时开放（北京时间）</text>
+          <view class="seat-toolbar">
+            <picker mode="date" value="{{openingDate}}" bindchange="changeOpeningDate" disabled="{{busy || loading}}" aria-label="开放日期"><view class="seat-picker">{{openingDate || '选择日期'}}</view></picker>
+            <picker mode="time" value="{{openingTime}}" bindchange="changeOpeningTime" disabled="{{busy || loading}}" aria-label="开放时间"><view class="seat-picker">{{openingTime || '选择时间'}}</view></picker>
+            <button class="primary" bindtap="scheduleOpening" disabled="{{busy || loading}}">保存开放时间</button>
+          </view>
+        </view>
         <view class="zj-record-actions">
-          <button class="{{enabled ? 'secondary' : 'primary'}}" bindtap="setEnabled" disabled="{{busy || loading}}">{{enabled ? '关闭选座' : '开启选座'}}</button>
+          <button wx:if="{{!enabled || scheduled}}" class="primary" bindtap="setEnabled" data-enabled="{{true}}" disabled="{{busy || loading}}">{{scheduled ? '立即开放' : '开启选座'}}</button>
+          <button wx:if="{{enabled}}" class="secondary" bindtap="setEnabled" data-enabled="{{false}}" disabled="{{busy || loading}}">关闭选座</button>
           <button class="secondary" bindtap="openMap" disabled="{{busy}}">查看座位图</button>
         </view>
       </view>
@@ -108,7 +118,8 @@
         <text class="seat-arena-hint">左右滑动查看整排座位{{editable ? '；点选可选座位，再点一次取消' : ''}}。</text>
       </view>
 
-      <text wx:if="{{enabled && !open}}" class="zj-callout">当前活动选座已关闭，不再接收新的申请；已提交的申请仍由管理员处理。</text>
+      <text wx:if="{{scheduled}}" class="zj-callout" aria-role="status">将于北京时间 {{openingLabel}} 开放选座。</text>
+      <text wx:elif="{{enabled && !open}}" class="zj-callout">当前活动选座已关闭，不再接收新的申请；已提交的申请仍由管理员处理。</text>
       <view wx:if="{{!enabled && !mine && !canReview}}" class="zj-empty" aria-role="status">
         <text class="zj-empty-icon">◎</text>
         <text class="zj-empty-title">本活动暂未开启选座</text>

@@ -1,14 +1,7 @@
 const http = require('./http');
 const { defaultTeamForm } = require('./generated/team-recruitment-form');
 
-const beijingOffset = 8 * 60 * 60 * 1000;
-
-function parts(value) {
-  const timestamp = Date.parse(value);
-  if (!Number.isFinite(timestamp)) return { date: '', time: '', value: '' };
-  const local = new Date(timestamp + beijingOffset).toISOString();
-  return { date: local.slice(0, 10), time: local.slice(11, 16), value };
-}
+const { beijingParts: parts } = require('./format');
 
 function changeTime(previous, key, part, selection) {
   if (part === 'clear') return parts('');

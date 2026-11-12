@@ -22,7 +22,7 @@ function seatSummary(info) {
     ? { status: info.mine.status, label: seatLabels[info.mine.status], seats: (info.mine.seats || []).map(seatLabel).join('、') } : null;
   const rows = Array.isArray(info.rows) ? info.rows : [];
   const total = rows.reduce((sum, row) => sum + (Number(row && row.count) || 0), 0);
-  return { enabled: Boolean(info.enabled), open: Boolean(info.open), loggedIn: Boolean(info.loggedIn), canReview: Boolean(info.canReview), mine,
+  return { enabled: Boolean(info.enabled), open: Boolean(info.open), scheduled: Boolean(info.scheduled), openingLabel: info.opensAt ? format.date(info.opensAt) : '', loggedIn: Boolean(info.loggedIn), canReview: Boolean(info.canReview), mine,
     layout: rows.length && total ? rows.length + ' 排 · ' + total + ' 座' : '', limit: Number(info.seatLimit) || 10 };
 }
 Page(withVisualTheme({

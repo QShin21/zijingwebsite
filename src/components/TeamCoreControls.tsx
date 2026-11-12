@@ -11,6 +11,7 @@ import {
   type SignupForm,
 } from "@/lib/signup-schema";
 import { sanitizeDraft, formatAnswer } from "@/lib/questionnaire-model";
+import { beijingInputTime } from "@/lib/rules";
 
 class UnconfirmedTeamRequest extends Error {
   constructor() {
@@ -386,11 +387,6 @@ export function TeamCoreEstablishmentForm({
     </form>
   );
 }
-function beijingInputTime(value: string) {
-  const date = new Date(Date.parse(value) + 8 * 60 * 60 * 1000);
-  return Number.isFinite(date.getTime()) ? date.toISOString().slice(0, 16) : "";
-}
-
 export function TeamCoreRecruitmentEditor({
   teamID,
   defaultForm,
