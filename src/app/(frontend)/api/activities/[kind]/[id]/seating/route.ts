@@ -36,6 +36,11 @@ export function POST(request: Request, context: SeatRouteContext) {
       seatingFields(data, ["action", "seats", "blocked"]);
       return seatReply(await setSeatBlocks(p, await seatActivity(p, kind, id, user), user, data.seats, data.blocked));
     }
+    if (data.action === "edit") {
+      seatingFields(data, ["action", "id", "revision", "seats", "phone", "proofs"]);
+      const mine = await editPendingSeats(p, await seatActivity(p, kind, id, user), user, data);
+      return seatReply({ mine });
+    }
     seatingFields(data, ["seats", "phone", "proofs"]);
     const mine = await submitSeats(p, await seatActivity(p, kind, id, user), user, data);
     return seatReply({ mine });

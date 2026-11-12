@@ -16,13 +16,13 @@ it("小程序预填待审核申请，保存调整后的座位、手机号和凭�
     mine: { id: 42, revision: 0, status: "pending", seats: ["1-1"] },
     mineDetails: { phone: "13800138000", proofs: [original], canEdit: true } };
   const http = {
-    request: vi.fn(async (_path: string, options: { method?: string; data?: { id: number; revision: number; seats: string[]; phone: string; proofs: string[] } }) => {
+    request: vi.fn(async (_path: string, options: { method?: string; data?: { action?: string; id: number; revision: number; seats: string[]; phone: string; proofs: string[] } }) => {
       if (options.method === "DELETE") {
         state.mine = { ...state.mine, revision: state.mine.revision + 1, status: "cancelled" };
         state.occupancy = { "1-2": "confirmed" };
         return { mine: structuredClone(state.mine) };
       }
-      if (options.method === "PATCH" && options.data) {
+      if (options.method === "POST" && options.data?.action === "edit") {
         state.mine = { ...state.mine, revision: state.mine.revision + 1, seats: options.data.seats };
         state.mineDetails = { ...state.mineDetails, phone: options.data.phone, proofs: options.data.proofs };
         state.drafts = [];
@@ -62,8 +62,8 @@ it("小程序预填待审核申请，保存调整后的座位、手机号和凭�
   await invoke(page, "chooseProofs");
   invoke(page, "phoneInput", { detail: { value: "13900139000" } });
   await invoke(page, "submit");
-  const write = http.request.mock.calls.find(([, options]) => options.method === "PATCH")?.[1].data;
-  expect(write).toMatchObject({ id: 42, revision: 0, seats: ["1-3"], phone: "13900139000", proofs: [replacement] });
+  const write = http.request.mock.calls.find(([, options]) => options.method === "POST" && options.data?.action === "edit")?.[1].data;
+  expect(write).toMatchObject({ action: "edit", id: 42, revision: 0, seats: ["1-3"], phone: "13900139000", proofs: [replacement] });
   expect(page.data).toMatchObject({ editing: false, notice: "修改已保存，申请继续等待审核。" });
   await invoke(page, "cancelRequest");
   const cancel = http.request.mock.calls.find(([, options]) => options.method === "DELETE")?.[1].data;

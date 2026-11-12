@@ -550,7 +550,7 @@ it("待审核申请人修改座位、手机号和凭证，冲突不释放原座�
   expect((await image(activity, original, first)).status).toBe(200);
   expect((await block(activity, reviewer, ["1-3"], false)).status).toBe(200);
   expect((await put(activity, reviewer, false)).status).toBe(200);
-  const changed = await edit(activity, first, body);
+  const changed = await route.POST(request(activity, "POST", first, { action: "edit", ...body }), context(activity));
   expect(changed.status).toBe(200);
   expect((await changed.json()).mine).toMatchObject({ id: mine.id, status: "pending", revision: 1, seats: ["1-2", "1-3"] });
   const saved = await map(activity, first);

@@ -308,9 +308,9 @@ Page(withVisualTheme({
     if (!drafts.length || drafts.length > this.data.proofLimit) { this.setData({ error: '请选择 1 至 ' + this.data.proofLimit + ' 张活动参与凭证' }); return; }
     const editing = this.data.editing;
     const data = { seats: selected, phone, proofs: drafts };
-    if (editing) { data.id = this._state.mine.id; data.revision = this.data.editRevision; }
+    if (editing) { data.action = 'edit'; data.id = this._state.mine.id; data.revision = this.data.editRevision; }
     return this.work(editing ? '正在保存修改' : '正在提交选座', async revision => {
-      const result = await http.request(this._endpoint, { method: editing ? 'PATCH' : 'POST', required: true, raw: true, data });
+      const result = await http.request(this._endpoint, { method: 'POST', required: true, raw: true, data });
       if (!this.current(revision)) return false;
       this.setData({ selected: [], chips: [], phone: '', drafts: [], editing: false, editProofs: [], editRevision: null, editable: false, mine: mineView(result && result.mine), notice: editing ? '修改已保存，申请继续等待审核。' : '选座申请已提交，座位进入待审核。' });
     }, true);
