@@ -4,16 +4,24 @@ import { site } from "@/lib/content";
 import { serverURL } from "@/lib/environment";
 import { Footer, MobileTabs, TopBar } from "@/components/v2/Shell";
 import { request } from "@/components/v2/data";
-import { themeColors, themeCookieName, themeFromPreference } from "@/components/v2/theme";
+import {
+  themeColors,
+  themeCookieName,
+  themeFromPreference,
+  themeScheme,
+} from "@/components/v2/theme";
 import shell from "@/components/v2/Shell.module.css";
 import "./tokens.css";
 import "./v2.css";
+import "./pixel-campus.css";
 
 export const dynamic = "force-dynamic";
 
 export async function generateViewport(): Promise<Viewport> {
-  const theme = themeFromPreference((await cookies()).get(themeCookieName)?.value);
-  return { themeColor: themeColors[theme], colorScheme: theme };
+  const theme = themeFromPreference(
+    (await cookies()).get(themeCookieName)?.value,
+  );
+  return { themeColor: themeColors[theme], colorScheme: themeScheme(theme) };
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -29,8 +37,16 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Layout({ children }: { children: React.ReactNode }) {
-  const [s, { user }, store] = await Promise.all([site(), request(), cookies()]);
+export default async function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [s, { user }, store] = await Promise.all([
+    site(),
+    request(),
+    cookies(),
+  ]);
   const theme = themeFromPreference(store.get(themeCookieName)?.value);
   const viewer = user ? { name: user.name || "成员" } : null;
   return (
@@ -40,7 +56,9 @@ export default async function Layout({ children }: { children: React.ReactNode }
           跳到正文
         </a>
         {process.env.APP_ENV !== "production" && (
-          <div className={shell.environment}>开发 / 预览环境 · 内容以正式发布为准</div>
+          <div className={shell.environment}>
+            开发 / 预览环境 · 内容以正式发布为准
+          </div>
         )}
         <TopBar name={s.name} theme={theme} viewer={viewer} />
         <main id="main" tabIndex={-1} className={shell.main}>

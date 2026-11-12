@@ -1,0 +1,45 @@
+{
+  "pixel-campus.jpg": {
+    "origin": "本聊天前期生成并经用户选择的像素校园概念资产 work/pixel-campus-refined.jpg",
+    "kind": "既有 AI 概念插画，非真实校园照片",
+    "change": "原样复用；CSS 仅处理位置与文字遮罩",
+    "originalGenerationPrompt": "前期生成的精确提示词未保存在当前本地资产旁，未重新生成或伪造提示词。"
+  },
+  "fusion-pixel.woff2": {
+    "origin": "前期已下载的 Fusion Pixel 12px 简体中文字体，work/fusion-pixel-12.zip",
+    "license": "SIL Open Font License 1.1",
+    "licenseFile": "FONT-LICENSE.txt"
+  },
+  "campus-summer.webp": {
+    "origin": "image_gen 编辑既有 pixel-campus.jpg",
+    "kind": "AI 像素概念插画，非真实照片",
+    "change": "保持二校门构图，分别派生绿荫夏夜与积雪暖阳；正式网页以1920px WebP压缩复用",
+    "theme": "summer",
+    "generationRequest": "保持宽幅 2:1、二校门在右、左侧安静留给标题；成熟清晰像素画、保留清华园匾额。夏季翠绿银杏、深蓝青夜空、月光象牙色校门、少量暖琥珀路径灯与青绿倒影；不加人物、UI、标志或拼贴。"
+  },
+  "campus-winter.webp": {
+    "origin": "image_gen 编辑既有 pixel-campus.jpg",
+    "kind": "AI 像素概念插画，非真实照片",
+    "change": "保持二校门构图，分别派生绿荫夏夜与积雪暖阳；正式网页以1920px WebP压缩复用",
+    "theme": "winter",
+    "generationRequest": "保持宽幅 2:1、二校门在右、左侧安静留给标题；成熟清晰像素画、保留清华园匾额。雪覆檐口与路径、裸枝银杏与松树，冬日下午暖阳、蜂蜜桃色高光、浅蓝天与奶油色及灰蓝绿阴影；不加人物、UI、标志或拼贴。"
+  },
+  "esports-fistbump.jpg": {
+    "origin": "本聊天前期收集的真实赛事照片 work/night-team-sources/fistbump-web.jpg",
+    "sourceArticle": "https://www.gdec.net.cn/2026/actives/newsdetail?id=1320&lang=zh",
+    "kind": "真实赛场摄影，样板展示素材",
+    "change": "复用已压缩的本地照片，不改人物和内容；页面保持3:2画幅"
+  },
+  "esports-match.jpg": {
+    "origin": "本聊天前期收集的真实赛事照片 work/night-team-sources/match-web.jpg",
+    "sourceArticle": "https://www.gdec.net.cn/2026/actives/newsdetail?id=1320&lang=zh",
+    "kind": "真实赛场摄影，样板展示素材",
+    "change": "复用已压缩的本地照片，不改人物和内容；页面保持3:2画幅"
+  },
+  "esports-trophy.jpg": {
+    "origin": "本聊天前期收集的真实赛事照片 work/night-team-sources/trophy-web.jpg",
+    "sourceArticle": "https://www.gdec.net.cn/2026/actives/newsdetail?id=1320&lang=zh",
+    "kind": "真实赛场摄影，样板展示素材",
+    "change": "复用已压缩的本地照片，不改人物和内容；页面保持3:2画幅"
+  }
+}

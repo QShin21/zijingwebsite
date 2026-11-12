@@ -1,0 +1,645 @@
+.hero {
+  border-bottom: 1px solid var(--z-line-strong);
+}
+.cover {
+  position: relative;
+  isolation: isolate;
+  min-height: 500px;
+  overflow: hidden;
+  background: var(--z-paper);
+}
+.scene {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  background: var(--z-campus-image) 68% 54% / cover no-repeat;
+}
+.cover::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: var(--z-cover-shade);
+  pointer-events: none;
+}
+.heroInner {
+  max-width: var(--z-max);
+  margin: auto;
+  padding: 64px var(--z-gutter) 72px;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+}
+.heroCopy {
+  position: relative;
+  width: min(100%, 520px);
+}
+.heroCopy h1 {
+  font-family: var(--z-pixel);
+  font-size: clamp(40px, 5.4vw, 72px);
+  font-weight: 400;
+  line-height: 1.3;
+  margin: 0 0 20px;
+  max-width: 10em;
+  text-wrap: balance;
+}
+.heroCopy h1 em {
+  color: var(--z-accent);
+  font-style: normal;
+}
+.heroCopy > p {
+  font-size: 16px;
+  line-height: 1.9;
+  max-width: 28em;
+  margin: 0 0 28px;
+}
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: center;
+}
+.heroActions > a:first-child {
+  min-height: 56px;
+  padding-inline: 24px;
+  font-size: 23px;
+}
+.myShortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+.myShortcuts a {
+  padding: 4px 12px;
+  background: var(--z-surface);
+  border: 1px solid var(--z-line-strong);
+  font-size: 13px;
+}
+.myShortcuts strong {
+  padding-left: 8px;
+  color: var(--z-action);
+}
+.artCredit {
+  position: absolute;
+  right: 20px;
+  bottom: 12px;
+  padding: 3px 8px;
+  font-size: 10px;
+  background: #1d173dcc;
+  color: #fff2dd;
+}
+.customImage {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+}
+.customImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cover[data-custom] .scene {
+  display: none;
+}
+.cover[data-custom]::after {
+  background: linear-gradient(
+    90deg,
+    var(--z-paper),
+    color-mix(in srgb, var(--z-paper) 80%, transparent) 32%,
+    transparent 85%
+  );
+}
+.fireflies {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+}
+.fireflies i {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #f3dba1;
+  opacity: 0.6;
+  left: 46%;
+  top: 28%;
+  box-shadow: 8px 8px 0 #f3dba144;
+  animation: pixelDrift 7s steps(8, end) infinite alternate;
+  animation-play-state: paused;
+}
+.fireflies i:nth-child(2n) {
+  background: #b1e1d4;
+  width: 3px;
+  height: 3px;
+}
+.fireflies i:nth-child(2) {
+  left: 61%;
+  top: 48%;
+  animation-delay: -3s;
+}
+.fireflies i:nth-child(3) {
+  left: 82%;
+  top: 68%;
+  animation-delay: -5s;
+}
+.fireflies i:nth-child(4) {
+  left: 35%;
+  top: 78%;
+  animation-delay: -2s;
+}
+.fireflies i:nth-child(5) {
+  left: 92%;
+  top: 18%;
+  animation-delay: -4s;
+}
+.fireflies i:nth-child(6) {
+  left: 70%;
+  top: 86%;
+  animation-delay: -6s;
+}
+.fireflies i:nth-child(7) {
+  left: 16%;
+  top: 18%;
+  animation-delay: -1s;
+}
+.fireflies i:nth-child(8) {
+  left: 53%;
+  top: 66%;
+  animation-delay: -2s;
+}
+.cover[data-running="true"] .fireflies i {
+  animation-play-state: running;
+}
+@keyframes pixelDrift {
+  to {
+    transform: translate(12px, -24px);
+    opacity: 0.15;
+  }
+}
+.newsWrap {
+  background: var(--z-surface);
+  border-block: 1px solid var(--z-line);
+}
+.news {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 56px;
+  max-width: var(--z-max);
+  margin: auto;
+  padding: 6px var(--z-gutter);
+}
+.newsLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--z-mint);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.newsItem {
+  min-width: 0;
+  flex: 1;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.newsItem:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.controls span {
+  margin-right: 6px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--z-muted);
+}
+.controls button {
+  display: grid;
+  place-items: center;
+  min-width: 36px;
+  min-height: 40px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--z-ink);
+  cursor: pointer;
+}
+.controls button:hover {
+  border-color: var(--z-line-strong);
+  background: var(--z-tint);
+}
+.controls button:active {
+  background: var(--z-action);
+  color: var(--z-action-ink);
+  transform: translateY(2px);
+}
+.paths {
+  max-width: var(--z-max);
+  padding-inline: var(--z-gutter);
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.paths > a {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 24px 20px;
+  border-right: 1px solid var(--z-line);
+}
+.paths > a:first-child {
+  padding-left: 0;
+}
+.paths > a:last-child {
+  border: 0;
+}
+.paths > a > svg:first-child {
+  color: var(--z-accent);
+  flex-shrink: 0;
+}
+.paths > a > svg:last-child {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.paths strong {
+  display: block;
+  font-family: var(--z-pixel);
+  font-size: 23px;
+  font-weight: 400;
+}
+.paths small {
+  display: block;
+  color: var(--z-muted);
+  font-size: 12px;
+  padding-top: 4px;
+}
+.paths a:hover strong {
+  color: var(--z-action);
+}
+.games {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 26px 0;
+  border-bottom: 1px solid var(--z-line-strong);
+}
+.gameIntro {
+  flex: 0 0 160px;
+}
+.gameIntro h2 {
+  font-family: var(--z-pixel);
+  font-size: 26px;
+  line-height: 1.35;
+  margin: 0 0 8px;
+}
+.gameIntro > a {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--z-mint);
+  font-size: 12px;
+}
+.gameList {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+}
+.game {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 8px 4px;
+}
+.game > span {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 62px;
+  background: var(--z-raised);
+  border: 1px solid var(--z-line);
+  box-shadow:
+    inset 0 3px 0 #ffffff0c,
+    0 3px 0 var(--z-line);
+  transition:
+    transform 120ms,
+    background 120ms;
+}
+.game strong {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.game:hover > span {
+  transform: translateY(-4px);
+  background: var(--z-tint);
+  border-color: var(--z-action);
+}
+.game:active > span {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+.reel {
+  border: 1px solid var(--z-line-strong);
+  background: color-mix(in srgb, var(--z-mint) 5%, var(--z-surface));
+  overflow: hidden;
+}
+.reelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px 14px;
+}
+.reelHead h2 {
+  font-size: 24px;
+  white-space: nowrap;
+}
+.photo {
+  display: block;
+  aspect-ratio: 3/2;
+  overflow: hidden;
+  background: var(--z-raised);
+}
+.photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter 180ms;
+}
+.photo:hover img {
+  filter: brightness(1.12);
+}
+.photoFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 100%;
+  padding: 20px;
+  font-size: 13px;
+}
+.reelCaption {
+  padding: 12px 14px;
+}
+.reelCaption > a:first-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.reelCaption > a:last-child:not(:first-child) {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--z-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+:global(:root[data-z-theme="simple"]) .cover {
+  min-height: 0;
+}
+:global(:root[data-z-theme="simple"]) .scene,
+:global(:root[data-z-theme="simple"]) .fireflies,
+:global(:root[data-z-theme="simple"]) .artCredit {
+  display: none;
+}
+:global(:root[data-z-theme="simple"]) .cover::after {
+  background: none;
+}
+:global(:root[data-z-theme="simple"]) .heroInner {
+  min-height: 0;
+  padding-block: 44px;
+}
+:global(:root[data-z-theme="simple"]) .heroCopy {
+  width: 100%;
+}
+:global(:root[data-z-theme="simple"]) .heroCopy h1 {
+  font-size: 40px;
+}
+:global(:root[data-z-theme="simple"]) .heroCopy h1 br {
+  display: none;
+}
+:global(:root[data-z-theme="simple"]) .game > span {
+  box-shadow: none;
+}
+@media (max-width: 900px) {
+  .cover,
+  .heroInner {
+    min-height: 470px;
+  }
+  .heroInner {
+    padding-block: 50px;
+  }
+  .scene {
+    background-position: 62% center;
+  }
+  .heroCopy {
+    width: 65%;
+  }
+  .paths > a {
+    gap: 12px;
+    padding: 20px 14px;
+  }
+  .paths strong {
+    font-size: 20px;
+  }
+  .paths > a > svg:last-child {
+    display: none;
+  }
+  .games {
+    gap: 20px;
+  }
+  .gameIntro {
+    flex-basis: 140px;
+  }
+  .gameList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .game {
+    gap: 6px;
+    padding: 0;
+  }
+  .game > span {
+    width: 56px;
+    height: 50px;
+  }
+  .game svg {
+    width: 32px;
+    height: 32px;
+  }
+}
+@media (max-width: 600px) {
+  .cover,
+  .heroInner {
+    min-height: 520px;
+  }
+  .scene {
+    background-position: 64% center;
+  }
+  .heroInner {
+    align-items: flex-start;
+    padding-block: 42px 52px;
+  }
+  .heroCopy {
+    width: 100%;
+  }
+  .heroCopy h1 {
+    font-size: 46px;
+    max-width: 7em;
+  }
+  .heroCopy > p {
+    font-size: 14px;
+    max-width: 20em;
+  }
+  .heroActions {
+    gap: 14px;
+  }
+  .heroActions > a:first-child {
+    font-size: 20px;
+    min-height: 50px;
+    padding-inline: 18px;
+  }
+  .paths {
+    gap: 0;
+    padding-block: 8px;
+  }
+  .paths > a {
+    display: grid;
+    justify-items: center;
+    padding: 12px 4px;
+    gap: 8px;
+    text-align: center;
+  }
+  .paths > a:first-child {
+    padding-left: 4px;
+  }
+  .paths strong {
+    font-size: 17px;
+  }
+  .paths small {
+    font-size: 10px;
+  }
+  .paths svg {
+    width: 22px;
+    height: 22px;
+  }
+  .news {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .newsLabel {
+    font-size: 12px;
+  }
+  .newsItem {
+    flex-basis: 55%;
+  }
+  .news .controls {
+    margin-left: auto;
+  }
+  .games {
+    display: block;
+    padding-block: 22px;
+  }
+  .gameIntro {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .gameIntro h2 {
+    margin: 0;
+    font-size: 23px;
+  }
+  .gameIntro h2 br {
+    display: none;
+  }
+  .gameIntro > a {
+    font-size: 11px;
+  }
+  .gameList {
+    gap: 20px 10px;
+  }
+  .game > span {
+    width: 64px;
+    height: 58px;
+  }
+  .game svg {
+    width: 38px;
+    height: 38px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fireflies {
+    display: none;
+  }
+  .game:hover > span,
+  .controls button:active {
+    transform: none;
+  }
+}
+
+/* A few stepped corner pixels tie the functional strips to the game emblems. */
+.gameIntro {
+  position: relative;
+}
+.gameIntro::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  right: 5px;
+  top: 5px;
+  background: var(--z-coral);
+  box-shadow:
+    -8px 8px 0 var(--z-mint),
+    0 16px 0 var(--z-accent);
+}
+.reel {
+  position: relative;
+}
+.reel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  background: var(--z-mint);
+  box-shadow:
+    4px 0 0 var(--z-mint),
+    0 4px 0 var(--z-mint);
+  pointer-events: none;
+}
+:global(:root[data-z-theme="simple"]) .gameIntro::after,
+:global(:root[data-z-theme="simple"]) .reel::before {
+  display: none;
+}
+@media (max-width: 600px) {
+  .gameIntro::after {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .paths strong {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  .paths small {
+    font-size: 10px;
+  }
+}

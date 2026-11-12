@@ -454,8 +454,17 @@
   aspect-ratio: 16 / 10;
   overflow: hidden;
   background:
-    repeating-radial-gradient(ellipse at 50% 118%, transparent 0 34px, rgba(241, 238, 246, 0.1) 35px 36px, transparent 37px 40px),
-    linear-gradient(135deg, hsl(var(--hue) 65% 34%), hsl(calc(var(--hue) + 30) 70% 16%));
+    repeating-radial-gradient(
+      ellipse at 50% 118%,
+      transparent 0 34px,
+      rgba(241, 238, 246, 0.1) 35px 36px,
+      transparent 37px 40px
+    ),
+    linear-gradient(
+      135deg,
+      hsl(var(--hue) 65% 34%),
+      hsl(calc(var(--hue) + 30) 70% 16%)
+    );
 }
 .cover img {
   position: absolute;
@@ -539,8 +548,16 @@
   overflow: hidden;
   border-radius: 16px;
   background:
-    repeating-linear-gradient(115deg, transparent 0 8px, rgba(255, 255, 255, 0.08) 8px 16px),
-    linear-gradient(135deg, hsl(var(--hue, 262) 65% 38%), hsl(calc(var(--hue, 262) + 30) 70% 18%));
+    repeating-linear-gradient(
+      115deg,
+      transparent 0 8px,
+      rgba(255, 255, 255, 0.08) 8px 16px
+    ),
+    linear-gradient(
+      135deg,
+      hsl(var(--hue, 262) 65% 38%),
+      hsl(calc(var(--hue, 262) + 30) 70% 18%)
+    );
   color: #fff;
   font-size: 24px;
   font-weight: 900;
@@ -614,7 +631,11 @@
   border: 1px solid var(--z-stage-line);
   border-radius: var(--z-radius);
   background:
-    radial-gradient(120% 90% at 100% 0%, hsl(var(--hue, 262) 70% 40% / 0.55), transparent 60%),
+    radial-gradient(
+      120% 90% at 100% 0%,
+      hsl(var(--hue, 262) 70% 40% / 0.55),
+      transparent 60%
+    ),
     linear-gradient(165deg, var(--z-stage-2), var(--z-stage));
   color: var(--z-stage-ink);
   transition:
@@ -703,8 +724,17 @@
   display: grid;
   place-items: center;
   background:
-    repeating-radial-gradient(ellipse at 50% 118%, transparent 0 34px, rgba(241, 238, 246, 0.1) 35px 36px, transparent 37px 40px),
-    linear-gradient(135deg, hsl(var(--hue) 65% 34%), hsl(calc(var(--hue) + 30) 70% 16%));
+    repeating-radial-gradient(
+      ellipse at 50% 118%,
+      transparent 0 34px,
+      rgba(241, 238, 246, 0.1) 35px 36px,
+      transparent 37px 40px
+    ),
+    linear-gradient(
+      135deg,
+      hsl(var(--hue) 65% 34%),
+      hsl(calc(var(--hue) + 30) 70% 16%)
+    );
 }
 .mediaCount {
   position: absolute;
@@ -813,7 +843,9 @@
   border-radius: 16px;
   background: var(--z-surface);
   color: var(--z-muted);
-  transition: border-color var(--z-duration) var(--z-ease), transform var(--z-duration) var(--z-ease);
+  transition:
+    border-color var(--z-duration) var(--z-ease),
+    transform var(--z-duration) var(--z-ease);
 }
 .todo li:hover,
 .queues li:hover {
@@ -919,50 +951,44 @@
   }
 }
 
-/* ===== V3 黑曜竞技场 card overrides ===== */
-/* Scoreboard date plates: obsidian, condensed numerals, gold top rule. */
+/* Shared campus content: distinguish function with colour and frame, without excess height. */
 .date {
-  border-radius: 8px;
-  background: linear-gradient(180deg, #1c1430, var(--z-stage));
-  box-shadow: inset 0 0 0 1px rgba(241, 238, 246, 0.12);
+  border-radius: 0;
+  background: var(--z-tint);
+  color: var(--z-ink);
+  box-shadow: none;
+  font-family: var(--z-pixel);
 }
 .date::before {
-  height: 3px;
-  background: linear-gradient(90deg, var(--z-accent), #f6d98b);
-}
-.date_lg {
-  border-radius: 12px;
+  height: 2px;
+  background: var(--z-accent);
 }
 .date_accent {
-  background: linear-gradient(160deg, #f6d98b, var(--z-accent));
+  background: var(--z-accent);
+  color: var(--z-accent-ink);
 }
-/* Match cards: broadcast lower third with a steel hairline and a purple edge on hover. */
 .match {
-  border-radius: 10px;
-  background:
-    linear-gradient(90deg, color-mix(in srgb, var(--z-action) 7%, transparent), transparent 42%),
-    var(--z-surface);
-  box-shadow: 0 1px 0 rgba(20, 18, 28, 0.04);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--z-mint) 4%, var(--z-surface));
+  box-shadow: none;
 }
 .match:hover {
   border-color: var(--z-action);
-  box-shadow: var(--z-shadow), inset 3px 0 0 var(--z-action);
+  box-shadow: none;
+  transform: none;
 }
 .match_spotlight {
-  border-color: rgba(240, 192, 96, 0.45);
-  background:
-    linear-gradient(135deg, rgba(102, 8, 116, 0.16), transparent 55%),
-    var(--z-surface);
-  box-shadow: var(--z-shadow-strong), inset 0 0 0 1px rgba(240, 192, 96, 0.25);
+  border-color: var(--z-line-strong);
+  background: color-mix(in srgb, var(--z-accent) 6%, var(--z-surface));
+  box-shadow: none;
 }
-/* Content tiles: crisp plates with a steel frame instead of soft rounded cards. */
 .article,
 .community,
 .showcase,
 .team,
 .call,
 .application {
-  border-radius: 10px;
+  border-radius: 0;
 }
 .article:hover,
 .community:hover,
@@ -970,54 +996,71 @@
 .team:hover,
 .call:hover {
   border-color: var(--z-action);
-  box-shadow: var(--z-shadow), inset 0 -3px 0 var(--z-accent);
+  box-shadow: none;
 }
-/* Community covers: hue-tinted arena panel + ring ornament + hex crest (no stripes, no flat letter squares). */
 .cover {
-  background:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 200' preserveAspectRatio='xMidYMax slice'><g fill='none' stroke='%23f1eaf8'><ellipse cx='160' cy='182' rx='190' ry='44' stroke-opacity='.18' stroke-width='1.5'/><ellipse cx='160' cy='182' rx='182' ry='42' stroke-width='6' stroke-dasharray='1.5 16' stroke-opacity='.16'/><ellipse cx='160' cy='182' rx='120' ry='28' stroke-opacity='.3'/></g><path d='M140 -10 L180 -10 L230 170 L90 170 Z' fill='%23ffffff' fill-opacity='.06'/></svg>")
-      center bottom / cover no-repeat,
-    radial-gradient(80% 110% at 70% 10%, hsl(var(--hue) 70% 42% / 0.75), transparent 70%),
-    linear-gradient(170deg, hsl(var(--hue) 45% 16%), #0b0a11 88%);
+  background: var(--z-tint);
+  border-bottom: 1px solid var(--z-line);
 }
-.coverInitial {
-  display: grid;
-  place-items: center;
-  width: clamp(68px, 9vw, 92px);
-  aspect-ratio: 1.1;
-  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-  background: linear-gradient(160deg, rgba(241, 238, 246, 0.22), rgba(11, 10, 17, 0.55));
-  color: #fff;
-  font-size: clamp(30px, 4.2vw, 44px);
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
-  box-shadow: inset 0 0 0 2px rgba(240, 192, 96, 0.55);
-}
+.coverInitial,
 .teamCrest {
   border-radius: 0;
-  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-  background:
-    radial-gradient(90% 90% at 30% 15%, hsl(var(--hue, 290) 70% 52% / 0.9), transparent 70%),
-    linear-gradient(160deg, hsl(var(--hue, 290) 45% 22%), #0b0a11);
-  font-family: var(--z-num), var(--z-sans);
+  clip-path: polygon(
+    8px 0,
+    calc(100% - 8px) 0,
+    calc(100% - 8px) 8px,
+    100% 8px,
+    100% calc(100% - 8px),
+    calc(100% - 8px) calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    8px 100%,
+    8px calc(100% - 8px),
+    0 calc(100% - 8px),
+    0 8px,
+    8px 8px
+  );
+  background: var(--z-action);
+  color: var(--z-action-ink);
+  font-family: var(--z-pixel);
+  text-shadow: none;
 }
-/* Trophy cards: gold rim light, deep plum field. */
-.cover { background: radial-gradient(ellipse at 50% 35%, hsl(var(--hue) 45% 35% / .5), transparent 75%), linear-gradient(150deg, #171922, #0b0c12); }
-.gameIcon { display: grid; place-items: center; width: 44%; aspect-ratio: 1; color: #fff; }
-.cover .gameIcon img { position: static; width: 100%; height: 100%; object-fit: contain; border-radius: 20%; filter: drop-shadow(0 10px 18px #0005); }
+.gameIcon {
+  display: grid;
+  place-items: center;
+  width: 44%;
+  aspect-ratio: 1;
+  color: var(--z-action);
+}
+.cover .gameIcon img {
+  position: static;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 0;
+}
 .honor {
-  border-color: rgba(240, 192, 96, 0.28);
-  background:
-    radial-gradient(110% 80% at 100% 0%, rgba(240, 192, 96, 0.18), transparent 55%),
-    radial-gradient(120% 90% at 0% 100%, hsl(var(--hue, 290) 60% 30% / 0.45), transparent 60%),
-    linear-gradient(165deg, #1c1430, var(--z-stage));
+  background: var(--z-surface);
+  border-color: var(--z-line-strong);
 }
 .honor:hover {
-  box-shadow: 0 20px 48px rgba(102, 8, 116, 0.35), inset 0 0 0 1px rgba(240, 192, 96, 0.5);
-  transform: translateY(-3px);
+  transform: none;
+  box-shadow: none;
+  border-color: var(--z-action);
 }
-@media (prefers-reduced-motion: reduce) {
-  .match:hover,
-  .honor:hover {
-    transform: none;
-  }
+
+.match[data-community]::before {
+  width: 1px;
+  border-radius: 0;
+}
+.dateDay {
+  font-family: var(--z-pixel);
+  font-weight: 400;
+}
+
+.matchArrow,
+.matchCover {
+  border-radius: 0;
+}
+.matchArrow {
+  border: 1px solid var(--z-line);
 }

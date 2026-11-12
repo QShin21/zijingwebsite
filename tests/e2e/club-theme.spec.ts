@@ -10,7 +10,10 @@ import config from "../../src/payload.config";
 import { profileFixture, saveLoadedProfile } from "../team-profiles-fixture";
 import { defaultTeamForm, saveTeamRecruitment } from "../../src/lib/team-core";
 import { teamHonorService } from "../../src/lib/team-honor-service";
-import tokens from "../../src/design/tokens.json" with { type: "json" };
+import {
+  themeFromPreference,
+  themeScheme,
+} from "../../src/components/v2/theme";
 
 const rgb = (hex: string) =>
   `rgb(${[1, 3, 5].map((offset) => parseInt(hex.slice(offset, offset + 2), 16)).join(", ")})`;
@@ -19,8 +22,7 @@ let p: Payload, f: Awaited<ReturnType<typeof profileFixture>>;
 let batchID: number, honorID: number;
 const extraGames: number[] = [];
 const evidence = process.env.CLUB_EVIDENCE_DIR || ".data/club-theme-evidence";
-const theme: "light" | "dark" =
-  process.env.CLUB_STYLE_THEME === "dark" ? "dark" : "light";
+const theme = themeFromPreference(process.env.CLUB_STYLE_THEME || "winter");
 const integrated = process.env.CLUB_THEME_INTEGRATED === "true";
 const metrics: {
   route: string;
@@ -238,7 +240,7 @@ async function screenshot(page: Page, name: string) {
     document.querySelector("[data-cloud-evidence]")?.remove();
     const label = document.createElement("div");
     label.dataset.cloudEvidence = "true";
-    label.textContent = `cloud browser · ${selectedTheme === "light" ? "浅色" : "深色"} · 合成验收资料 · 非线上站点`;
+    label.textContent = `cloud browser · ${selectedTheme === "winter" || selectedTheme === "simple" ? "浅色" : "深色"} · 合成验收资料 · 非线上站点`;
     label.style.cssText =
       "padding:10px 14px;background:#222738;color:#eef0f7;font:12px/1.6 Arial,sans-serif;border:1px solid #4b5164;border-radius:6px;margin-top:16px";
     document.querySelector("main")?.prepend(label);
@@ -297,7 +299,7 @@ test("负责页面在四个视口无溢出、标题清晰并通过正文无障�
       const scheme = await page
         .locator("main")
         .evaluate((el) => getComputedStyle(el).colorScheme);
-      expect(scheme).toBe(theme);
+      expect(scheme).toBe(themeScheme(theme));
       if (name === "team-detail")
         await expect(page.locator("#team-members [role=status]")).toHaveCount(
           0,
@@ -505,7 +507,7 @@ test("简介实际请求的加载、网络失败和重试状态可用", async ({
   await expect(page.getByLabel("公开昵称", { exact: true })).toBeVisible();
 });
 
-test("两套局部主题在实际页面即时切换，保留输入与同意状态", async ({ page }) => {
+test("四档主题在实际页面即时切换，保留输入与同意状态", async ({ page }) => {
   await login(page);
   await navigate(page, "/community/apply");
   const name = page.getByRole("textbox", { name: "姓名", exact: true });
@@ -516,13 +518,13 @@ test("两套局部主题在实际页面即时切换，保留输入与同意状�
   await name.fill("合成双主题申请人");
   await consent.check();
   const frame = page.locator("main");
-  for (const value of ["dark", "light", "dark", "light"] as const) {
+  for (const value of ["classic", "summer", "winter", "simple"] as const) {
     await page.evaluate(
       (next) => document.documentElement.setAttribute("data-z-theme", next),
       value,
     );
     expect(await frame.evaluate((el) => getComputedStyle(el).colorScheme)).toBe(
-      value,
+      themeScheme(value),
     );
     await expect(name).toHaveValue("合成双主题申请人");
     await expect(consent).toBeChecked();
@@ -537,7 +539,7 @@ test("两套局部主题在实际页面即时切换，保留输入与同意状�
   }
 });
 
-test("无显式主题属性时，系统深色仍使用局部浅色方案", async ({ page }) => {
+test("无显式主题属性时，默认使用清华经典方案", async ({ page }) => {
   await login(page);
   if (integrated) await page.context().clearCookies({ name: "zijing_theme" });
   await page.emulateMedia({ colorScheme: "dark" });
@@ -548,25 +550,31 @@ test("无显式主题属性时，系统深色仍使用局部浅色方案", async
     );
   const frame = page.locator("main");
   expect(await frame.evaluate((el) => getComputedStyle(el).colorScheme)).toBe(
-    "light",
+    "dark",
   );
 });
 
 test("真实提交等待与中断状态保持可读，已填资料不丢失", async ({ page }) => {
   await login(page);
   await navigate(page, "/community/apply");
-  await page.getByRole("textbox", { name: "姓名", exact: true }).fill("合成主题验证申请人");
-  await page.getByRole("textbox", { name: "手机号", exact: true }).fill("+999000000000");
+  await page
+    .getByRole("textbox", { name: "姓名", exact: true })
+    .fill("合成主题验证申请人");
+  await page
+    .getByRole("textbox", { name: "手机号", exact: true })
+    .fill("+999000000000");
   const image = await sharp({
     create: { width: 80, height: 80, channels: 3, background: "#9575b4" },
   })
     .png()
     .toBuffer();
-  await page.getByLabel(/^微信名片二维码（(?:必填|更换时上传)）$/).setInputFiles({
-    name: "synthetic-card.png",
-    mimeType: "image/png",
-    buffer: image,
-  });
+  await page
+    .getByLabel(/^微信名片二维码（(?:必填|更换时上传)）$/)
+    .setInputFiles({
+      name: "synthetic-card.png",
+      mimeType: "image/png",
+      buffer: image,
+    });
   await page
     .getByRole("combobox", { name: "游戏社群（必选）", exact: true })
     .selectOption(String(f.game.id));
@@ -597,12 +605,14 @@ test("真实提交等待与中断状态保持可读，已填资料不丢失", as
       exact: true,
     });
     await expect(pending).toBeDisabled();
-    await expect(page.getByRole("textbox", { name: "姓名", exact: true })).toBeDisabled();
+    await expect(
+      page.getByRole("textbox", { name: "姓名", exact: true }),
+    ).toBeDisabled();
     expect(
       await page
         .getByRole("textbox", { name: "姓名", exact: true })
         .evaluate((el) => getComputedStyle(el).backgroundColor),
-    ).toBe(rgb(tokens[theme]["disabled-bg"]));
+    ).toBe(rgb(themeScheme(theme) === "dark" ? "#383243" : "#e0e2d8"));
     expect(await pending.evaluate((el) => getComputedStyle(el).opacity)).toBe(
       "1",
     );
@@ -621,11 +631,11 @@ test("真实提交等待与中断状态保持可读，已填资料不丢失", as
     page.getByRole("link", { name: "在新窗口核对我的申请", exact: true }),
   ).toHaveAttribute("target", "_blank");
   await screenshot(page, "community-submit-interrupted-390");
-  await expect(page.getByRole("textbox", { name: "姓名", exact: true })).toHaveValue(
-    "合成主题验证申请人",
-  );
-  await expect(page.getByRole("textbox", { name: "手机号", exact: true })).toHaveValue(
-    "+999000000000",
-  );
+  await expect(
+    page.getByRole("textbox", { name: "姓名", exact: true }),
+  ).toHaveValue("合成主题验证申请人");
+  await expect(
+    page.getByRole("textbox", { name: "手机号", exact: true }),
+  ).toHaveValue("+999000000000");
   await page.unroute("**/community/apply");
 });

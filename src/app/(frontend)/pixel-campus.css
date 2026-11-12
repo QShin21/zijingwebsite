@@ -1,0 +1,216 @@
+@font-face {
+  font-family: FusionPixel;
+  src: url("/pixel-campus/fusion-pixel.woff2") format("woff2");
+  font-display: swap;
+}
+:root {
+  color-scheme: dark;
+  --z-pixel: FusionPixel, "PingFang SC", sans-serif;
+  --z-paper: #211d32;
+  --z-surface: #30283f;
+  --z-raised: #282338;
+  --z-ink: #faf1db;
+  --z-muted: #c8bfd3;
+  --z-action: #e8c77f;
+  --z-action-hover: #f4d99d;
+  --z-action-ink: #282032;
+  --z-tint: #39304a;
+  --z-accent: #e8c77f;
+  --z-accent-ink: #282032;
+  --z-mint: #a1d9ca;
+  --z-coral: #eda895;
+  --z-line: #51465f;
+  --z-line-strong: #80708f;
+  --z-field: #282338;
+  --z-field-border: #9985ab;
+  --z-focus: #b3e7d9;
+  --z-success: #a5e2ca;
+  --z-success-bg: #233d38;
+  --z-success-line: #527d70;
+  --z-info: #b0d5fa;
+  --z-info-bg: #24364b;
+  --z-info-line: #56799b;
+  --z-warning: #efd39d;
+  --z-warning-bg: #453723;
+  --z-warning-line: #997c4d;
+  --z-danger: #ffb7ac;
+  --z-danger-bg: #4b282f;
+  --z-danger-line: #a06871;
+  --z-disabled-bg: #383243;
+  --z-disabled-ink: #bdb3c7;
+  --z-stage: var(--z-raised);
+  --z-stage-2: var(--z-surface);
+  --z-stage-ink: var(--z-ink);
+  --z-stage-muted: var(--z-muted);
+  --z-stage-line: var(--z-line);
+  --z-bar: var(--z-surface);
+  --z-header-bg: var(--z-surface);
+  --z-header-ink: var(--z-ink);
+  --z-footer-bg: var(--z-surface);
+  --z-footer-ink: var(--z-ink);
+  --z-purple: var(--z-action);
+  --z-hover: var(--z-action-hover);
+  --z-lilac: var(--z-action);
+  --z-media: var(--z-raised);
+  --z-button-base: #8c6b3d;
+  --z-radius: 2px;
+  --z-radius-small: 0px;
+  --z-radius-sheet: 2px;
+  --z-radius-pill: 2px;
+  --z-shadow: none;
+  --z-shadow-strong: none;
+  --z-max: 1248px;
+  --z-gutter: clamp(16px, 3vw, 40px);
+  --z-text-h1: clamp(32px, 4.6vw, 56px);
+  --z-text-h2: clamp(24px, 2.4vw, 30px);
+  --z-topbar: 84px;
+  --z-campus-image: url("/pixel-campus/pixel-campus.jpg");
+  --z-cover-shade: linear-gradient(
+    90deg,
+    rgba(26, 21, 44, 0.95),
+    rgba(26, 21, 44, 0.62) 36%,
+    rgba(26, 21, 44, 0) 67%
+  );
+}
+:root[data-z-theme="summer"] {
+  --z-paper: #14242f;
+  --z-surface: #203640;
+  --z-raised: #1a3039;
+  --z-ink: #edf5e9;
+  --z-muted: #bad0d2;
+  --z-action: #9ce0c8;
+  --z-action-hover: #c2f0de;
+  --z-action-ink: #142c2b;
+  --z-tint: #2b4650;
+  --z-accent: #edcc84;
+  --z-accent-ink: #23302c;
+  --z-line: #3e5a66;
+  --z-line-strong: #668d99;
+  --z-field: #1a3039;
+  --z-field-border: #7ca3ae;
+  --z-focus: #edcc84;
+  --z-button-base: #466e64;
+  --z-campus-image: url("/pixel-campus/campus-summer.webp");
+  --z-cover-shade: linear-gradient(
+    90deg,
+    #112b35ed,
+    #112b3590 38%,
+    #112b3500 70%
+  );
+}
+:root[data-z-theme="winter"],
+:root[data-z-theme="simple"] {
+  color-scheme: light;
+  --z-paper: #f6f3eb;
+  --z-surface: #eee9de;
+  --z-raised: #fffdf8;
+  --z-ink: #293c34;
+  --z-muted: #5e6d62;
+  --z-action: #326252;
+  --z-action-hover: #244d40;
+  --z-action-ink: #fffdf5;
+  --z-tint: #e6ebdf;
+  --z-accent: #94612a;
+  --z-accent-ink: #fffdf5;
+  --z-mint: #356b5c;
+  --z-coral: #a45946;
+  --z-line: #d1d3c5;
+  --z-line-strong: #9ba995;
+  --z-field: #fffdf8;
+  --z-field-border: #89977f;
+  --z-focus: #326252;
+  --z-button-base: #1d4537;
+  --z-success: #246343;
+  --z-success-bg: #e1efdf;
+  --z-success-line: #82a68a;
+  --z-info: #24597f;
+  --z-info-bg: #e1ecf2;
+  --z-info-line: #87a7be;
+  --z-warning: #80530d;
+  --z-warning-bg: #f6eacb;
+  --z-warning-line: #c6a66d;
+  --z-danger: #9f3429;
+  --z-danger-bg: #f8e5df;
+  --z-danger-line: #d6a39a;
+  --z-disabled-bg: #e0e2d8;
+  --z-disabled-ink: #687362;
+  --z-campus-image: url("/pixel-campus/campus-winter.webp");
+  --z-cover-shade: linear-gradient(
+    90deg,
+    #f6f1e4f2,
+    #f6f1e4a8 36%,
+    #f6f1e400 70%
+  );
+}
+:root[data-z-theme="simple"] {
+  --z-paper: #fafaf8;
+  --z-surface: #fff;
+  --z-raised: #f3f4f0;
+  --z-ink: #26342e;
+  --z-muted: #616b65;
+  --z-line: #dce0d9;
+  --z-line-strong: #a5aea5;
+  --z-accent: #326252;
+  --z-pixel: var(--z-sans);
+}
+h1,
+h2 {
+  font-family: var(--z-pixel);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+::selection {
+  background: var(--z-action);
+  color: var(--z-action-ink);
+}
+input,
+textarea {
+  caret-color: var(--z-action);
+}
+select {
+  color-scheme: inherit;
+}
+:focus-visible {
+  outline: 2px solid var(--z-focus);
+  outline-offset: 4px;
+}
+:root[data-z-theme="simple"] *,
+:root[data-z-theme="simple"] *::before,
+:root[data-z-theme="simple"] *::after {
+  animation: none !important;
+  scroll-behavior: auto !important;
+}
+@media (max-width: 1023px) {
+  :root {
+    --z-topbar: 72px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Retained complex forms share the same tactile control, without changing submit logic. */
+.button {
+  border-radius: 0;
+  box-shadow:
+    inset 0 2px 0 #fff2,
+    0 3px 0 var(--z-button-base);
+}
+.button:not(:disabled):not([aria-disabled="true"]):hover {
+  box-shadow:
+    inset 0 2px 0 #fff2,
+    0 4px 0 var(--z-button-base);
+}
+.button:not(:disabled):not([aria-disabled="true"]):active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--z-button-base);
+}
+:root[data-z-theme="simple"] .button {
+  box-shadow: none;
+  transform: none;
+}

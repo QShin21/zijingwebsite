@@ -94,7 +94,9 @@
   color: var(--z-muted);
   font-size: 15px;
   font-weight: 800;
-  transition: color var(--z-duration) var(--z-ease), background-color var(--z-duration) var(--z-ease);
+  transition:
+    color var(--z-duration) var(--z-ease),
+    background-color var(--z-duration) var(--z-ease);
 }
 .topLink:hover {
   background: var(--z-tint);
@@ -134,7 +136,9 @@
   color: var(--z-ink);
   font-size: 14px;
   font-weight: 800;
-  transition: border-color var(--z-duration) var(--z-ease), background-color var(--z-duration) var(--z-ease);
+  transition:
+    border-color var(--z-duration) var(--z-ease),
+    background-color var(--z-duration) var(--z-ease);
 }
 .iconButton:hover {
   border-color: var(--z-action);
@@ -165,7 +169,9 @@
   background: var(--z-accent);
   color: var(--z-accent-ink);
   font-weight: 900;
-  transition: transform var(--z-duration) var(--z-ease), box-shadow var(--z-duration) var(--z-ease);
+  transition:
+    transform var(--z-duration) var(--z-ease),
+    box-shadow var(--z-duration) var(--z-ease);
 }
 .joinPill:hover {
   transform: translateY(-1px);
@@ -259,9 +265,14 @@
 .footer {
   position: relative;
   overflow: hidden;
-  padding: 56px var(--z-gutter) calc(var(--z-tabbar) + env(safe-area-inset-bottom) + 24px);
+  padding: 56px var(--z-gutter)
+    calc(var(--z-tabbar) + env(safe-area-inset-bottom) + 24px);
   background:
-    repeating-linear-gradient(115deg, transparent 0 22px, rgba(255, 255, 255, 0.025) 22px 44px),
+    repeating-linear-gradient(
+      115deg,
+      transparent 0 22px,
+      rgba(255, 255, 255, 0.025) 22px 44px
+    ),
     radial-gradient(120% 140% at 100% 0%, var(--z-stage-2), transparent 60%),
     var(--z-stage);
   color: var(--z-stage-ink);
@@ -375,101 +386,213 @@
   }
 }
 
-/* ===== V3 黑曜竞技场: obsidian broadcast HUD (top bar, tab bar, footer) in both themes. ===== */
+/* Pixel campus shell. */
 .bar {
-  border-bottom: 1px solid var(--z-stage-line);
-  background: var(--z-bar);
-  color: var(--z-stage-ink);
-  box-shadow: inset 0 -1px 0 rgba(240, 192, 96, 0.08);
+  background: var(--z-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 2px solid var(--z-line-strong);
+}
+.barInner {
+  height: 84px;
+  gap: 20px;
+}
+.brand {
+  gap: 12px;
+}
+.brand:hover .mark {
+  transform: translateY(-2px);
+}
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 .wordmark strong {
-  color: var(--z-stage-ink);
-  letter-spacing: 0.04em;
+  font-family: var(--z-pixel);
+  font-size: 30px;
+  font-weight: 400;
+  white-space: nowrap;
+  letter-spacing: 0;
 }
 .wordmark small {
-  color: var(--z-stage-muted);
-  letter-spacing: 0.26em;
+  font-family: var(--z-sans);
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: 0;
+  border-left: 1px solid var(--z-line-strong);
+  padding-left: 14px;
+}
+.topLinks {
+  gap: 0;
 }
 .topLink {
-  color: var(--z-stage-muted);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-.topLink:hover {
-  background: rgba(241, 238, 246, 0.07);
-  color: var(--z-stage-ink);
+  padding: 8px 11px;
+  font-size: 14px;
+  border-radius: 0;
+  color: var(--z-ink);
+  white-space: nowrap;
 }
 .topLink[aria-current="page"] {
-  color: var(--z-stage-ink);
+  color: var(--z-action);
 }
 .topLink[aria-current="page"]::after {
-  right: 22px;
-  bottom: -12px;
-  left: 22px;
-  height: 3px;
+  width: 6px;
+  height: 6px;
+  left: calc(50% - 3px);
+  bottom: -5px;
   border-radius: 0;
   background: var(--z-accent);
-  box-shadow: 0 0 14px rgba(240, 192, 96, 0.55);
 }
-.iconButton {
-  border-color: var(--z-stage-line);
-  background: rgba(241, 238, 246, 0.05);
-  color: var(--z-stage-ink);
+.themePicker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  width: 152px;
+  border: 1px solid var(--z-field-border);
+  background: var(--z-raised);
 }
-.iconButton:hover {
-  border-color: rgba(214, 155, 227, 0.6);
-  background: rgba(214, 155, 227, 0.12);
+.themePicker > svg:first-child {
+  position: absolute;
+  left: 12px;
+  pointer-events: none;
+  color: var(--z-action);
 }
-.loginLink {
-  color: var(--z-stage-ink);
+.themePicker > svg:last-child {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
 }
-.loginLink:hover {
-  color: #e6bdef;
+.themePicker select {
+  appearance: none;
+  width: 100%;
+  height: 100%;
+  padding: 0 28px 0 38px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--z-ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
 }
-/* Primary CTA on the HUD: Tsinghua purple plate with a gold edge. */
+.themePicker:focus-within {
+  outline: 2px solid var(--z-focus);
+  outline-offset: 3px;
+}
+.themePicker select:focus {
+  outline: none;
+}
 .joinPill {
-  border-radius: 6px;
-  background: linear-gradient(135deg, #7a1189, #4e0559);
-  color: #ffffff;
-  box-shadow: inset 0 0 0 1px rgba(240, 192, 96, 0.55);
-  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  border: 1px solid var(--z-line-strong);
+  border-radius: 0;
+  background: var(--z-accent);
+  color: var(--z-accent-ink);
+  padding: 0 14px;
+  font-size: 13px;
+  box-shadow:
+    inset 0 2px 0 #fff4,
+    0 3px 0 var(--z-button-base);
 }
 .joinPill:hover {
-  box-shadow: inset 0 0 0 1px rgba(240, 192, 96, 0.9), 0 10px 26px rgba(102, 8, 116, 0.5);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 2px 0 #fff4,
+    0 4px 0 var(--z-button-base);
 }
-.avatarLink {
-  border-color: var(--z-stage-line);
-  background: rgba(241, 238, 246, 0.05);
-  color: var(--z-stage-ink);
-}
-.avatarLink:hover {
-  border-color: var(--z-accent);
-}
-.avatar {
-  background: linear-gradient(135deg, #8a1a9b, #2b1240);
-  box-shadow: 0 0 0 2px rgba(240, 192, 96, 0.6);
-}
-.tabs {
-  border-top: 1px solid var(--z-stage-line);
-  background: var(--z-bar);
-}
-.tab {
-  color: var(--z-stage-muted);
-}
-.tab[aria-current="page"] {
-  color: var(--z-stage-ink);
-}
-.tab[aria-current="page"] .tabIcon {
-  background: rgba(214, 155, 227, 0.16);
-  box-shadow: inset 0 -2px 0 var(--z-accent);
+.joinPill:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--z-button-base);
 }
 .footer {
-  background:
-    radial-gradient(70% 120% at 85% 0%, rgba(102, 8, 116, 0.42), transparent 62%),
-    linear-gradient(180deg, var(--z-stage-2), var(--z-stage) 46%);
-  border-top: 1px solid var(--z-stage-line);
+  padding-top: 32px;
+  background: var(--z-surface);
+  color: var(--z-ink);
+  border-top: 2px solid var(--z-line-strong);
+}
+.footerBrand strong {
+  font-size: 16px;
 }
 .footerKicker {
-  color: var(--z-accent);
-  letter-spacing: 0.32em;
+  font-family: var(--z-pixel);
+  font-size: 25px;
+  letter-spacing: 0;
+  color: var(--z-ink);
+}
+.footerBrand p:last-child,
+.footerNav p,
+.footerLegal {
+  color: var(--z-muted);
+}
+.footerLegal {
+  margin-top: 24px;
+  border-color: var(--z-line);
+  font-size: 12px;
+}
+.tabs {
+  background: var(--z-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+@media (max-width: 1199px) {
+  .wordmark small {
+    display: none;
+  }
+  .barInner {
+    gap: 12px;
+  }
+  .topLink {
+    padding-inline: 8px;
+  }
+}
+@media (max-width: 1023px) {
+  .barInner {
+    height: 72px;
+  }
+  .wordmark strong {
+    font-size: 27px;
+  }
+}
+@media (max-width: 639px) {
+  .barActions {
+    gap: 4px;
+  }
+  .loginLink {
+    display: none;
+  }
+  .wordmark strong {
+    font-size: 24px;
+  }
+  .themePicker {
+    width: 138px;
+  }
+  .brand {
+    gap: 6px;
+  }
+  .mark svg {
+    width: 24px;
+  }
+  .barInner {
+    gap: 8px;
+  }
+}
+@media (max-width: 360px) {
+  .wordmark {
+    display: flex;
+  }
+  .wordmark strong {
+    font-size: 21px;
+  }
+  .themePicker {
+    width: 128px;
+  }
+  .themePicker select {
+    padding-left: 30px;
+    font-size: 12px;
+  }
+  .themePicker > svg:first-child {
+    left: 8px;
+    width: 16px;
+  }
 }

@@ -1,12 +1,24 @@
-import tokens from "@/design/tokens.json";
-
-export type ThemeName = "light" | "dark";
+export const themes = {
+  classic: "清华经典",
+  summer: "清凉夏夜",
+  winter: "温煦冬日",
+  simple: "简约",
+} as const;
+export type ThemeName = keyof typeof themes;
 export const themeCookieName = "zijing_theme";
-// Browser chrome color follows the V2 top bar (paper in both modes).
 export const themeColors: Record<ThemeName, string> = {
-  light: tokens.light.paper,
-  dark: tokens.dark.paper,
+  classic: "#30273f",
+  summer: "#1b333d",
+  winter: "#f3eee3",
+  simple: "#ffffff",
 };
 export function themeFromPreference(value: string | undefined): ThemeName {
-  return value === "dark" ? "dark" : "light";
+  if (value === "light") return "winter";
+  if (value === "dark") return "classic";
+  return value && Object.hasOwn(themes, value)
+    ? (value as ThemeName)
+    : "classic";
+}
+export function themeScheme(theme: ThemeName): "light" | "dark" {
+  return theme === "winter" || theme === "simple" ? "light" : "dark";
 }

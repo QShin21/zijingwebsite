@@ -28,15 +28,27 @@
 .heroStage {
   padding: clamp(36px, 6vw, 72px) 0 clamp(28px, 4vw, 48px);
   background:
-    repeating-linear-gradient(115deg, transparent 0 26px, rgba(255, 255, 255, 0.03) 26px 52px),
+    repeating-linear-gradient(
+      115deg,
+      transparent 0 26px,
+      rgba(255, 255, 255, 0.03) 26px 52px
+    ),
     radial-gradient(90% 120% at 85% 0%, var(--z-stage-2), transparent 62%),
     var(--z-stage);
   color: var(--z-stage-ink);
 }
 .heroStage[data-hue] {
   background:
-    repeating-linear-gradient(115deg, transparent 0 26px, rgba(255, 255, 255, 0.04) 26px 52px),
-    linear-gradient(125deg, hsl(var(--hue) 65% 32%), hsl(calc(var(--hue) + 30) 70% 14%));
+    repeating-linear-gradient(
+      115deg,
+      transparent 0 26px,
+      rgba(255, 255, 255, 0.04) 26px 52px
+    ),
+    linear-gradient(
+      125deg,
+      hsl(var(--hue) 65% 32%),
+      hsl(calc(var(--hue) + 30) 70% 14%)
+    );
 }
 .heroInner {
   display: grid;
@@ -560,107 +572,114 @@ a.communityChip:hover {
   white-space: pre-wrap;
 }
 
-/* ===== V3 黑曜竞技场 overrides: layer hierarchy, broadcast type, angular plates. ===== */
-/* Inner-page stage: obsidian floor with the original arena-ring ornament (no stripes). */
-.heroStage {
-  background:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400' preserveAspectRatio='xMaxYMax slice'><path d='M548 -20 L604 -20 L700 300 L420 300 Z' fill='%23d69be3' fill-opacity='.08'/><g fill='none' stroke='%23f1eaf8'><ellipse cx='560' cy='338' rx='430' ry='98' stroke-opacity='.14' stroke-width='2'/><ellipse cx='560' cy='338' rx='410' ry='92' stroke-width='9' stroke-dasharray='2 30' stroke-opacity='.12'/><ellipse cx='560' cy='338' rx='320' ry='72' stroke-opacity='.2'/><ellipse cx='560' cy='338' rx='220' ry='48' stroke='%23d69be3' stroke-opacity='.42' stroke-width='2'/></g><ellipse cx='560' cy='338' rx='120' ry='24' fill='%23660874' fill-opacity='.35'/></svg>")
-      right bottom / min(980px, 110%) auto no-repeat,
-    radial-gradient(60% 120% at 88% 0%, rgba(102, 8, 116, 0.5), transparent 64%),
-    linear-gradient(180deg, var(--z-stage-2), var(--z-stage) 72%);
-  border-bottom: 1px solid var(--z-stage-line);
-}
+.heroStage,
 .heroStage[data-hue] {
-  background:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400' preserveAspectRatio='xMaxYMax slice'><g fill='none' stroke='%23f1eaf8'><ellipse cx='560' cy='338' rx='430' ry='98' stroke-opacity='.14' stroke-width='2'/><ellipse cx='560' cy='338' rx='410' ry='92' stroke-width='9' stroke-dasharray='2 30' stroke-opacity='.12'/><ellipse cx='560' cy='338' rx='260' ry='58' stroke-opacity='.26'/></g></svg>")
-      right bottom / min(980px, 110%) auto no-repeat,
-    radial-gradient(60% 130% at 90% 0%, hsl(var(--hue) 62% 38% / 0.55), transparent 66%),
-    linear-gradient(180deg, hsl(var(--hue) 40% 12%), var(--z-stage) 78%);
+  background: var(--z-surface);
+  color: var(--z-ink);
+  border-bottom: 1px solid var(--z-line-strong);
 }
 .eyebrow {
-  font-family: var(--z-num), var(--z-sans);
-  font-size: 12px;
-  letter-spacing: 0.28em;
+  display: none;
 }
-.eyebrow::before {
-  width: 28px;
-  height: 2px;
-  background: var(--z-accent);
+.section {
+  margin: 32px 0;
+  gap: 16px;
 }
-.heroStage .eyebrow {
-  color: var(--z-stage-muted);
-}
-.heroStage h1 {
-  letter-spacing: -0.01em;
-  text-shadow: 0 2px 24px rgba(8, 7, 13, 0.6);
-}
-/* Section heads: tracked heading with a short gold rule, condensed counts. */
 .sectionHead {
   padding-bottom: 12px;
-  border-bottom: 1px solid var(--z-line);
+  border-bottom: 1px solid var(--z-line-strong);
 }
 .sectionHead h2 {
-  position: relative;
-  padding-left: 16px;
-}
-.sectionHead h2::before {
-  content: "";
-  position: absolute;
-  top: 0.18em;
-  bottom: 0.18em;
-  left: 0;
-  width: 4px;
-  background: linear-gradient(180deg, var(--z-accent), var(--z-action));
+  font-family: var(--z-pixel);
+  font-weight: 400;
 }
 .count {
-  border-radius: 4px;
-  background: var(--z-stage);
-  color: var(--z-accent);
+  border-radius: 0;
+  background: var(--z-tint);
+  color: var(--z-action);
 }
-/* Buttons: angular plates instead of soft pills. */
 .button {
-  border-radius: 6px;
-  letter-spacing: 0.02em;
+  border: 2px solid color-mix(in srgb, var(--z-ink) 40%, var(--z-action));
+  border-radius: 0;
+  font-family: var(--z-pixel);
+  font-size: 17px;
+  font-weight: 400;
+  box-shadow:
+    inset 0 2px 0 #fff3,
+    0 4px 0 var(--z-button-base);
+  transition:
+    transform 100ms,
+    box-shadow 100ms,
+    background-color 120ms;
+}
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 2px 0 #fff3,
+    0 5px 0 var(--z-button-base);
+}
+.button:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1px 0 #0002,
+    0 1px 0 var(--z-button-base);
+}
+.button[aria-disabled="true"],
+.button:disabled {
+  transform: none;
+  box-shadow: none;
+  opacity: 0.6;
+}
+.small {
+  font-family: var(--z-sans);
+  font-size: 14px;
 }
 .primary {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--z-action) 88%, #ffffff), var(--z-action));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  background: var(--z-action);
+  color: var(--z-action-ink);
 }
 .accent {
-  background: linear-gradient(135deg, #f6d98b, var(--z-accent));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: var(--z-accent);
+  color: var(--z-accent-ink);
 }
+.ghost,
 .stage {
-  border-color: rgba(241, 238, 246, 0.24);
-  background: rgba(241, 238, 246, 0.06);
-  backdrop-filter: blur(8px);
+  border-color: var(--z-line-strong);
+  background: var(--z-raised);
+  color: var(--z-ink);
+  box-shadow:
+    inset 0 2px 0 #fff1,
+    0 3px 0 var(--z-line);
 }
-/* Link tabs: broadcast underline tabs, current tab marked in gold. */
-.tabs {
-  gap: 4px;
-  padding: 0;
-  border-bottom: 1px solid var(--z-line);
+.ghost:hover,
+.stage:hover {
+  border-color: var(--z-action);
+  background: var(--z-tint);
+  box-shadow: 0 4px 0 var(--z-line);
 }
-.tab {
-  min-height: 46px;
-  margin-bottom: -1px;
-  padding: 8px 16px;
-  border: 0;
-  border-bottom: 3px solid transparent;
+.communityChip {
+  background: color-mix(in srgb, var(--z-mint) 12%, var(--z-surface));
+  color: var(--z-mint);
+  border: 1px solid var(--z-line);
+}
+.pillDot,
+.chipDot {
   border-radius: 0;
-  background: transparent;
-  font-weight: 700;
 }
-.tab:hover {
-  color: var(--z-ink);
-  border-bottom-color: var(--z-line-strong);
+.pill_live .pillDot {
+  animation: none;
 }
-.tab[aria-current="page"] {
-  border-bottom-color: var(--z-accent);
-  background: transparent;
-  color: var(--z-ink);
-  font-weight: 900;
+:global(:root[data-z-theme="simple"]) .button {
+  box-shadow: none;
+  transform: none;
+  border-width: 1px;
+  font-family: var(--z-sans);
+  font-size: 15px;
 }
-.tabCount {
-  border-radius: 4px;
+
+@media (prefers-reduced-motion: reduce) {
+  .button:hover,
+  .button:active {
+    transform: none;
+  }
 }

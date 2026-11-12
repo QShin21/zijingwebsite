@@ -1,19 +1,12 @@
 import { test, expect } from "@playwright/test";
 import { memberTest } from "./member-layout-fixture";
 import sharp from "sharp";
-import tokens from "../../src/design/tokens.json" with { type: "json" };
+
 import { mobileTabs } from "./navigation-helpers";
 
 const rgb = (hex: string) =>
   `rgb(${[1, 3, 5].map((offset) => parseInt(hex.slice(offset, offset + 2), 16)).join(", ")})`;
-/** tokens.json stores translucent bar colours as compact rgba(); browsers serialise with spaces. */
-const css = (value: string) => value.replace(/\s+/g, "").replace(/,/g, ", ").replace(/, \./g, ", 0.");
-
-// V2 theme toggle: the accessible name starts with the visible state word, then the action.
-const toDark = /切换到夜场（深色）主题$/;
-const toLight = /切换到日场（浅色）主题$/;
-
-test("system dark without a preference renders light HTML, metadata and native navigation before JavaScript", async ({
+test("system dark without a preference renders classic HTML, metadata and native navigation before JavaScript", async ({
   browser,
   baseURL,
 }) => {
@@ -27,30 +20,40 @@ test("system dark without a preference renders light HTML, metadata and native n
     const page = await context.newPage();
     const response = await page.goto("/events");
     expect(response?.status()).toBe(200);
-    expect(await response!.text()).toContain('data-z-theme="light"');
-    await expect(page.locator("html")).toHaveAttribute("data-z-theme", "light");
+    expect(await response!.text()).toContain('data-z-theme="classic"');
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-z-theme",
+      "classic",
+    );
     await expect(page.locator('meta[name="color-scheme"]')).toHaveAttribute(
       "content",
-      "light",
+      "dark",
     );
     await expect(page.locator("body")).toHaveCSS(
       "background-color",
-      rgb(tokens.light.paper),
+      rgb("#211d32"),
     );
     await expect(page.getByRole("banner")).toHaveCSS(
       "background-color",
-      css(tokens.light.bar),
+      rgb("#30283f"),
     );
-    await mobileTabs(page).getByRole("link", { name: "公告", exact: true }).click();
+    await mobileTabs(page)
+      .getByRole("link", { name: "公告", exact: true })
+      .click();
     await expect(page).toHaveURL(/\/announcements$/);
-    await expect(page.locator("html")).toHaveAttribute("data-z-theme", "light");
-    await expect(mobileTabs(page).getByRole("link", { name: "公告", exact: true })).toHaveAttribute("aria-current", "page");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-z-theme",
+      "classic",
+    );
+    await expect(
+      mobileTabs(page).getByRole("link", { name: "公告", exact: true }),
+    ).toHaveAttribute("aria-current", "page");
   } finally {
     await context.close();
   }
 });
 
-test("an invalid preference falls back to light even on a dark system", async ({
+test("an invalid preference falls back to classic even on a dark system", async ({
   browser,
   baseURL,
 }) => {
@@ -61,8 +64,13 @@ test("an invalid preference falls back to light even on a dark system", async ({
     ]);
     const page = await context.newPage();
     await page.goto("/events");
-    await expect(page.locator("html")).toHaveAttribute("data-z-theme", "light");
-    await expect(page.getByRole("button", { name: toDark })).toHaveAttribute("aria-pressed", "false");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-z-theme",
+      "classic",
+    );
+    await expect(page.getByRole("combobox", { name: "界面风格" })).toHaveValue(
+      "classic",
+    );
   } finally {
     await context.close();
   }
@@ -77,10 +85,19 @@ memberTest(
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/community/apply");
     // Member tabs mark the community domain as current on its inner routes.
-    await expect(mobileTabs(page).getByRole("link", { name: "社群", exact: true })).toHaveAttribute("aria-current", "page");
-    await expect(page.locator("html")).toHaveAttribute("data-z-theme", "light");
-    await page.getByRole("textbox", { name: "姓名", exact: true }).fill("合成主题申请人");
-    await page.getByRole("textbox", { name: "手机号", exact: true }).fill("00000000000");
+    await expect(
+      mobileTabs(page).getByRole("link", { name: "社群", exact: true }),
+    ).toHaveAttribute("aria-current", "page");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-z-theme",
+      "classic",
+    );
+    await page
+      .getByRole("textbox", { name: "姓名", exact: true })
+      .fill("合成主题申请人");
+    await page
+      .getByRole("textbox", { name: "手机号", exact: true })
+      .fill("00000000000");
     const buffer = await sharp({
       create: { width: 160, height: 160, channels: 3, background: "#6839ae" },
     })
@@ -105,11 +122,16 @@ memberTest(
     const alert = page.locator("form.application-form").getByRole("alert");
     await expect(alert).toHaveText("由于入社流程规定，必须展示管理联系方式");
     await expect(consent).toBeFocused();
-    await page.getByRole("button", { name: toDark }).click();
-    await expect(page.locator("html")).toHaveAttribute("data-z-theme", "dark");
-    await expect(page.getByRole("textbox", { name: "姓名", exact: true })).toHaveValue(
-      "合成主题申请人",
+    await page
+      .getByRole("combobox", { name: "界面风格" })
+      .selectOption("summer");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-z-theme",
+      "summer",
     );
+    await expect(
+      page.getByRole("textbox", { name: "姓名", exact: true }),
+    ).toHaveValue("合成主题申请人");
     await expect(consent).not.toBeChecked();
     await expect(alert).toHaveText("由于入社流程规定，必须展示管理联系方式");
     expect(
@@ -120,13 +142,18 @@ memberTest(
     const preference = (await context.cookies()).find(
       (cookie) => cookie.name === "zijing_theme",
     );
-    expect(preference?.value).toBe("dark");
+    expect(preference?.value).toBe("summer");
     expect(preference?.sameSite).toBe("Lax");
     expect(preference?.path).toBe("/");
     await page.goto("/account");
-    await expect(page.locator("html")).toHaveAttribute("data-z-theme", "dark");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-z-theme",
+      "summer",
+    );
     await page.reload();
-    await expect(page.getByRole("button", { name: toLight })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("combobox", { name: "界面风格" })).toHaveValue(
+      "summer",
+    );
     const reopened = await browser.newContext({
       baseURL,
       colorScheme: "light",
@@ -136,22 +163,29 @@ memberTest(
       await reopened.addCookies([preference!]);
       const nextPage = await reopened.newPage();
       const response = await nextPage.goto("/events");
-      expect(await response!.text()).toContain('data-z-theme="dark"');
+      expect(await response!.text()).toContain('data-z-theme="summer"');
       await expect(nextPage.locator("body")).toHaveCSS(
         "background-color",
-        rgb(tokens.dark.paper),
+        rgb("#14242f"),
       );
     } finally {
       await reopened.close();
     }
-    await expect(mobileTabs(page).getByRole("link", { name: "我的", exact: true })).toHaveAttribute("aria-current", "page");
-    await page.getByRole("button", { name: toLight }).click();
+    await expect(
+      mobileTabs(page).getByRole("link", { name: "我的", exact: true }),
+    ).toHaveAttribute("aria-current", "page");
+    await page
+      .getByRole("combobox", { name: "界面风格" })
+      .selectOption("winter");
     await page.reload();
-    await expect(page.locator("html")).toHaveAttribute("data-z-theme", "light");
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-z-theme",
+      "winter",
+    );
     expect(
       (await context.cookies()).find((cookie) => cookie.name === "zijing_theme")
         ?.value,
-    ).toBe("light");
+    ).toBe("winter");
     expect(errors).toEqual([]);
   },
 );
