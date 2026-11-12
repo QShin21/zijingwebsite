@@ -1,0 +1,40 @@
+{
+  "sourceRevision": "bf86300f90a0daffe0ec56479d310a64212a1188",
+  "branch": "main",
+  "deployedAt": "2026-11-12T19:39:58+08:00",
+  "origin": "https://home.thuzijing.top",
+  "releaseDirectory": "/srv/zijingwebsite/releases/seat-edit-20261112-bf86300",
+  "buildID": "ajZqV_Gz8oAI5cIXnuwwv",
+  "previousRevision": "b002cf7dd3d0d5d7189dff664209f22270f6743a",
+  "migration": "20261112_040000_activity_seat_revision",
+  "seatCountsAtBackupAndAfterMigration": { "requests": 124, "claims": 228, "proofs": 170, "blocks": 23 },
+  "backup": {
+    "storage": "server-local",
+    "directory": "/srv/zijingwebsite/backups/seat-edit-20261112-bf86300",
+    "snapshot": "/srv/zijingwebsite/backups/seat-edit-20261112-bf86300/database/zijing-2026-11-12T11-39-41.942Z",
+    "rollbackScript": "/srv/zijingwebsite/backups/seat-edit-20261112-bf86300/rollback.sh",
+    "restoreVerified": false
+  },
+  "checks": {
+    "isolatedHistoricalSchemaAndSeatingDataPreserved": true,
+    "isolatedDatabaseCases": 3,
+    "miniappLogicCases": 3,
+    "healthReadyCases": 35,
+    "changedFilesLint": "passed",
+    "productionBuildAndTypecheck": "passed",
+    "publicHttp": { "/events": 200, "/health/live": 200, "/health/ready": 200, "buildManifest": 200 },
+    "productionAuthenticatedWorkflow": "not exercised",
+    "ci": "skipped"
+  },
+  "miniProgram": {
+    "version": "0.5.8",
+    "sourceTree": "e7b5dbdcc05cbaca3803a8dc2443d9185556848a",
+    "uploadedAt": "2026-11-12T19:40:29+08:00",
+    "platformStatus": "developmentVersionUploaded",
+    "officialTool": "WeChat Developer Tools CLI",
+    "sizeBytes": 810296,
+    "reviewSubmitted": false,
+    "publicReleaseExecuted": false,
+    "realDeviceVerified": false
+  }
+}

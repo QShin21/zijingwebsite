@@ -1,5 +1,11 @@
 # 部署、迁移与恢复
 
+## 2026-11-12 待审核选座申请修改
+
+北京时间 19:39:58，`main@bf86300` 已部署到 `home.thuzijing.top`，构建 `ajZqV_Gz8oAI5cIXnuwwv`。新增迁移 `20261112_040000_activity_seat_revision` 为申请记录增加版本字段。迁移前备份与迁移后检查的选座申请、占用、凭证及未开放座位计数分别为 124、228、170、23。公网健康检查、活动页和构建清单返回 200。
+
+服务器同机备份及应用回退脚本位于 `/srv/zijingwebsite/backups/seat-edit-20261112-bf86300`。微信开发者工具已上传 0.5.8 开发版，尚未提交审核。详见[发布记录](evidence/activity-seat-edit-deployment-20261112.json)。
+
 ## 2026-11-12 活动未开放座位
 
 北京时间 17:56:37，`main@b002cf7` 已部署到 `home.thuzijing.top`，构建 `CwRcJ2O2oroQeRGYySeUZ`。增量迁移 `20261112_030000_activity_seat_blocks` 已登记；迁移前后的选座申请、占用和凭证计数分别保持 6、14、6。公网首页、活动页、小程序状态接口、健康检查和构建清单返回 200。
