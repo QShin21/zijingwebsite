@@ -205,3 +205,7 @@ SSE 通过 Nginx 公网 HTTPS 验证，响应禁止缓冲，每 15 秒心跳、6
 应用 `00c485fe1e2ae538f556892429e08bfb49da1f46` 已部署至 `home.thuzijing.top`，无新增迁移。完整数据库、源码、媒体、环境和旧构建保存在 `/srv/zijingwebsite/backups/questionnaire-responses-mini-20261012`。完整 pg_restore 到隔离库后逐表核对 58 张表；候选 3101 端口用隔离账号完成新版 JWT 问卷提交/读取/PATCH/冲突/权限/关闭验证，测试对象已清理。线上 127 份源码、58 张表内容、媒体、私有环境、Nginx 和 FreeKill 配置/进程保留检查通过。
 
 该备份目录的 `rollback.sh` 恢复旧应用和构建，保留现有生产数据库。旧版本支持信息组读取，但缺少本轮本人作答 PATCH；回退时需同步处理小程序修改入口与服务端能力。没有实际执行生产回滚。网站就绪 200，FreeKill HTTPS 200 / WebSocket 101，均检查可信证书；完整 CI、原生上传与验证边界见 [本次记录](QUESTIONNAIRE_RESPONSE_EDITING.md)。
+
+## 2026-11-12 管理员增加申请座位
+
+应用 `d67eb92d44fb2a21d079cd0c0c8c29fd1904b10c` 已部署，增量迁移 `20261112_080000_activity_seat_addition` 建立增加记录表。服务器本地备份与迁移后统计均为 131 份选座申请、225 个座位占用、178 个凭证和 23 个未开放座位；就绪及公网静态资源检查通过。备份保留在 `/srv/zijingwebsite/backups/seat-add-20261112-d67eb92`，本轮未执行恢复演练。详见[部署记录](evidence/activity-seat-addition-deployment-20261112.json)。
