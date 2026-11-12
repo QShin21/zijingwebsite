@@ -265,8 +265,10 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
   }
 
   function decide(request: number, status: SeatDecision) {
+    const record = data?.docs.find(value => value.id === request);
+    if (!record) return;
     void act(status === "confirmed" ? "正在通过申请" : "正在驳回申请", async () => {
-      await seatRequest(endpoint, seatJSON("POST", { action: "review", id: request, status }));
+      await seatRequest(endpoint, seatJSON("POST", { action: "review", id: request, status, revision: record.revision }));
       return status === "confirmed" ? "已通过并锁定座位。" : "已驳回并释放座位。";
     });
   }

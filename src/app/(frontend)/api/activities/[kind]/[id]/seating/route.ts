@@ -1,5 +1,5 @@
 
-import { decideSeats, seatActivity, seatingState, seatingWorkbench, setSeatBlocks, setSeating, submitSeats } from "@/lib/activity-seating";
+import { decideSeats, editPendingSeats, seatActivity, seatingState, seatingWorkbench, setSeatBlocks, setSeating, submitSeats } from "@/lib/activity-seating";
 import { seatingHTTP, seatingJSON, seatingFields, seatingReviewFilter, seatReply, type SeatRouteContext } from "@/lib/activity-seating-http";
 
 export const runtime = "nodejs";
@@ -29,8 +29,8 @@ export function POST(request: Request, context: SeatRouteContext) {
   return seatingHTTP(request, context, async (p, kind, id, user) => {
     const data = await seatingJSON(request);
     if (data.action === "review") {
-      seatingFields(data, ["action", "id", "status"]);
-      return seatReply(await decideSeats(p, await seatActivity(p, kind, id, user), user, data.id, data.status));
+      seatingFields(data, ["action", "id", "status", "revision"]);
+      return seatReply(await decideSeats(p, await seatActivity(p, kind, id, user), user, data.id, data.status, data.revision));
     }
     if (data.action === "block") {
       seatingFields(data, ["action", "seats", "blocked"]);
@@ -38,6 +38,15 @@ export function POST(request: Request, context: SeatRouteContext) {
     }
     seatingFields(data, ["seats", "phone", "proofs"]);
     const mine = await submitSeats(p, await seatActivity(p, kind, id, user), user, data);
+    return seatReply({ mine });
+  });
+}
+
+export function PATCH(request: Request, context: SeatRouteContext) {
+  return seatingHTTP(request, context, async (p, kind, id, user) => {
+    const data = await seatingJSON(request);
+    seatingFields(data, ["id", "revision", "seats", "phone", "proofs"]);
+    const mine = await editPendingSeats(p, await seatActivity(p, kind, id, user), user, data);
     return seatReply({ mine });
   });
 }

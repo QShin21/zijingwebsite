@@ -67,7 +67,7 @@ export async function GET() {
     await db.pool.query("SELECT id,event_id,post_id,enabled,opens_at FROM activity_seatings LIMIT 0");
     await db.pool.query("SELECT seating_id,seat,request_id FROM activity_seat_claims LIMIT 0");
     await db.pool.query("SELECT seating_id,seat,blocked_by,created_at FROM activity_seat_blocks LIMIT 0");
-    await db.pool.query("SELECT seating_id,member_id,status,phone,seats FROM activity_seat_requests LIMIT 0");
+    await db.pool.query("SELECT seating_id,member_id,status,phone,seats,revision FROM activity_seat_requests LIMIT 0");
     await db.pool.query("SELECT id,seating_id,member_id,request_id,picture FROM activity_seat_proofs LIMIT 0");
     const seatingMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261112_000000_activity_seating"]);
     if (seatingMigration.rowCount !== 1) throw new Error("Required activity seating migration unavailable");
@@ -75,6 +75,8 @@ export async function GET() {
     if (scheduleMigration.rowCount !== 1) throw new Error("Required seating schedule migration unavailable");
     const blockMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261112_030000_activity_seat_blocks"]);
     if (blockMigration.rowCount !== 1) throw new Error("Required seat blocks migration unavailable");
+    const revisionMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261112_040000_activity_seat_revision"]);
+    if (revisionMigration.rowCount !== 1) throw new Error("Required seat request revision migration unavailable");
     await db.pool.query("SELECT start_at,end_at,location FROM community_posts LIMIT 0");
     await db.pool.query("SELECT owner_id,expires_at FROM pending_uploads LIMIT 0");
     await db.pool.query("SELECT kind,enabled FROM site_home_sections LIMIT 0");

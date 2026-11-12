@@ -41,6 +41,7 @@ export type SeatRequest = {
   id: number;
   seats: string[];
   status: SeatStatus;
+  revision: number;
   createdAt: string;
   reviewedAt: string | null;
 };
@@ -70,6 +71,7 @@ export type SeatingState = SeatingAvailability & {
   occupancy: Partial<Record<string, Exclude<SeatStatus, "rejected">>>;
   blockedSeats: string[];
   mine: SeatRequest | null;
+  mineDetails: { phone: string; proofs: string[]; canEdit: boolean } | null;
   drafts: string[];
 };
 
