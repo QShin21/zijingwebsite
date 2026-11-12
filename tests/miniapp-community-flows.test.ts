@@ -23,6 +23,7 @@ type NativePage = {
   joinAction(event: Event): Promise<void>; retryJoin(): Promise<void>; area(event: Event): Promise<void>; contactAdmins(): void;
   loadArea(more?: boolean): Promise<void>; staff(): void; applyStaff(event: Event): void;
   contactImageError(event: Event): void; showcaseImageError(event: Event): void; nativeCoverError(event: Event): void;
+  imageError(event: Event): void; openPage(event: Event): void; staffPage(): void;
 };
 type RequestOptions = { method?: string; required?: boolean; auth?: boolean; data?: Record<string, unknown> };
 type RequestCall = { path: string; options: RequestOptions };
@@ -44,6 +45,15 @@ const application = (status = 'pending', extra: Record<string, unknown> = {}): R
 });
 const joined = (extra: Record<string, unknown> = {}): Row => ({ id: 23, updatedAt: 'synthetic-join-v1', status: 'requested', memberName: '合成测试成员', actions: {}, ...extra });
 const pageResult = (docs: unknown[], page = 1, hasNextPage = false) => ({ docs, page, hasNextPage, totalPages: hasNextPage ? 2 : page, totalDocs: docs.length });
+/** V2 CommunityCard (src/lib/v2/types.ts) with synthetic values. */
+const communityCard = (id: number, coverSrc = '') => ({
+  community: { id, slug: 'synthetic-' + id, title: '合成测试社群', hue: (id * 137) % 360 }, summary: null,
+  cover: coverSrc ? { src: coverSrc, width: null, height: null, alt: '' } : null, demo: false,
+  counts: { upcomingEvents: 1, teams: 0, showcase: 0 }, viewer: { isOfficer: false } });
+/** V2 RecruitmentCard for an open staff batch. */
+const staffCall = (id: number) => ({ key: 'staff:' + id, ref: { type: 'staffBatch', id }, href: '/join/staff/batches/' + id, kind: 'staff',
+  title: '合成测试骨干批次', summary: null, team: null, community: null, opensAt: null, deadline: '2026-11-20T15:59:00.000Z',
+  state: 'open', stateLabel: '申请开放', viewerApplication: null });
 function deferred<T>() {
   let resolve!: (value: T) => void;
   let reject!: (error: Error) => void;
@@ -68,22 +78,30 @@ function harness(name: string, options: HarnessOptions = {}) {
     if (path.endsWith('/contacts')) return [];
     throw new Error('Unexpected synthetic request: ' + path);
   }) };
-  const session = { user: () => current, subscribe: (callback: (value: User | null) => void) => {
+  const session = { user: () => current, token: () => (current ? 'synthetic-jwt' : null), subscribe: (callback: (value: User | null) => void) => {
     callbacks.push(callback); return () => { callbacks = callbacks.filter(value => value !== callback); };
   }, reviewer: () => { throw new Error('Client roles must not decide server permissions'); } };
-  const navigation = { go: vi.fn(), back: vi.fn(), login: vi.fn(), content: vi.fn(), website: vi.fn(), copy: vi.fn(), requireUser: () => Boolean(current) };
+  const navigation = { go: vi.fn(), back: vi.fn(), login: vi.fn(), content: vi.fn(), website: vi.fn(), copy: vi.fn(), open: vi.fn(), requireUser: () => Boolean(current) };
   const wx = { previewImage: vi.fn(), setNavigationBarTitle: vi.fn(), stopPullDownRefresh: vi.fn(),
     nextTick: vi.fn((_callback: () => void) => {}), pageScrollTo: vi.fn(),
     showModal: vi.fn((value: ModalOptions) => { modals.push(value); if (options.modalAuto !== false) value.success({ confirm: true }); }) };
+  // Real V2 client modules (lib/v2.js projections, lib/v2-images.js signing) on the synthetic transport.
+  const config = { origin: 'https://synthetic.invalid' };
+  const v2Module = { exports: {} };
+  runInNewContext(source('lib/v2.js'), { module: v2Module, require: (path: string) => { if (path === './http') return http; throw new Error('Unmocked module ' + path); } });
+  const imagesModule = { exports: {} };
+  runInNewContext(source('lib/v2-images.js'), { module: imagesModule,
+    require: (path: string) => ({ '../config': config, './http': http, './session': session } as Record<string, unknown>)[path] });
   const pageModule = { exports: {} };
   runInNewContext(source('lib/page.js'), { module: pageModule, wx,
-    require: (path: string) => path === './navigation' ? navigation : session });
+    require: (path: string) => path === './navigation' ? navigation : path === './v2-images' ? imagesModule.exports : session });
   const files = { choose: vi.fn(async () => ['wxfile://synthetic-chosen.png']), readImage: vi.fn(async () => qr), localImage: vi.fn(async (value: string) => value ? 'wxfile://synthetic-private.png' : '') };
   const privacy = { authorize: vi.fn(async () => {}), openContract: vi.fn(async () => {}) };
   const cms = { list: vi.fn(options.cmsList || (async () => pageResult([{ id: 9, title: '合成测试社群' }]))),
     detail: vi.fn(options.cmsDetail || (async () => ({ id: 9, slug: 'synthetic', title: '合成测试社群', body: null }))),
     decorate: async (docs: unknown[]) => docs, social: vi.fn(options.cmsSocial || (async () => pageResult([]))) };
-  const modules: Record<string, unknown> = { cms, http, session, files, privacy, page: pageModule.exports, navigation,
+  const modules: Record<string, unknown> = { cms, http, session, files, privacy, page: pageModule.exports, navigation, config,
+    v2: v2Module.exports, 'v2-images': imagesModule.exports,
     'native-presentation': createRequire(import.meta.url)('../miniprogram/src/lib/native-presentation.js'),
     format: { date: (value: string) => value || '' }, richtext: { render: () => ({ nodes: [] }) }, video: { source: (value: string) => value && value.endsWith('.mp4') ? value : '' } };
   let native!: NativePage;
@@ -92,11 +110,16 @@ function harness(name: string, options: HarnessOptions = {}) {
   native.setData = (values: Record<string, unknown>) => {
     for (const [key, value] of Object.entries(values)) {
       const match = /^docs\[(\d+)\]\.(\w+)$/.exec(key);
-      if (match) native.data.docs[Number(match[1])][match[2]] = value;
-      else native.data[key] = value;
+      if (match) { native.data.docs[Number(match[1])][match[2]] = value; continue; }
+      if (!key.includes('.') || key.includes('[')) { native.data[key] = value; continue; }
+      // WeChat dotted path keys ('img.key') write nested objects.
+      const parts = key.split('.');
+      let node = native.data as Record<string, unknown>;
+      for (const part of parts.slice(0, -1)) node = (node[part] && typeof node[part] === 'object' ? node[part] : (node[part] = {})) as Record<string, unknown>;
+      node[parts[parts.length - 1]] = value;
     }
   };
-  native.onLoad(name === 'community' ? { id: '9', area: 'updates' } : name === 'community-joins' ? { id: '9', title: '合成测试社群' } : {});
+  if (typeof native.onLoad === 'function') native.onLoad(name === 'community' ? { id: '9', area: 'updates' } : name === 'community-joins' ? { id: '9', title: '合成测试社群' } : {});
   return { page: native, calls, http, wx, cms, files, privacy, navigation, modals,
     changeUser(value: User | null) { current = value; callbacks.slice().forEach(callback => callback(value)); } };
 }
@@ -239,15 +262,26 @@ describe('Native authorized workbench and manual joins — synthetic VM only', (
     expect(h.page.data.contactAvailable).toBe(true);
     expect(h.calls.some(call => call.options.method === 'POST')).toBe(false);
   });
-  it('项目目录原生封面失败保留当前媒体来源，离页后不改数据', async () => {
-    const h = harness('communities'); await h.page.onShow();
-    const row = { id: 9, collection: 'games', coverImage: { url: '/synthetic/current', credit: '合成来源' } };
-    h.page.setData({ docs: [row] });
-    h.page.nativeCoverError(event({ id: 9, collection: 'games', url: row.coverImage.url }));
-    expect(h.page.data.docs).toEqual([{ ...row, nativeCoverError: true }]);
-    h.page.setData({ docs: [row] }); h.page.onHide();
-    h.page.nativeCoverError(event({ id: 9, collection: 'games', url: row.coverImage.url }));
-    expect(h.page.data.docs).toEqual([row]);
+  it('项目目录 V2 封面失败显示文字封面并保留社群卡片数据；旧地址与离页后的错误事件不改数据', async () => {
+    // V2 directory (GET /api/v2/communities): public media covers load directly; a failed cover falls back to the crest.
+    const coverURL = 'https://synthetic.invalid/api/media/file/synthetic-cover.webp';
+    const h = harness('communities', { request: path => path.startsWith('/api/v2/communities')
+      ? { ...pageResult([communityCard(9, '/api/media/file/synthetic-cover.webp')]), totalDocs: 1 }
+      : Promise.reject(new Error('Unexpected synthetic request: ' + path)) });
+    await h.page.onShow();
+    const [doc] = h.page.data.docs as unknown as Record<string, unknown>[];
+    const key = doc.coverKey as string, img = () => (h.page.data.img as Record<string, unknown>)[key];
+    await vi.waitFor(() => expect(img()).toBe(coverURL));
+    const before = JSON.stringify(h.page.data.docs);
+    h.page.imageError(event({ key, url: 'https://synthetic.invalid/api/media/file/old-cover.webp' }));
+    expect(img()).toBe(coverURL);
+    h.page.imageError(event({ key, url: coverURL }));
+    expect(img()).toBe('');
+    expect(JSON.stringify(h.page.data.docs)).toBe(before);
+    h.page.setData({ ['img.' + key]: coverURL }); h.page.onHide();
+    h.page.imageError(event({ key, url: coverURL }));
+    expect(img()).toBe(coverURL);
+    expect(h.calls.some(call => call.options.method === 'POST')).toBe(false);
   });
   it('locates contact cards without a write and ignores deferred scrolling after the page is hidden', async () => {
     const h = harness('community'); await h.page.onShow();
@@ -334,7 +368,20 @@ describe('Native authorized workbench and manual joins — synthetic VM only', (
     denied = false; await h.page.load(); expect(h.page.data.allowed).toBe(true); expect(h.page.data.docs).toHaveLength(1);
   });
 
-  it.each(['community', 'communities'])('routes %s staff entries to the same batch and uses approved club projection', async name => {
+  it('V2 选拔中心 staff entries route to the same batch from the server recruitment center without promotion reads', async () => {
+    // V2 IA: the communities directory no longer hosts staff entries; 选拔中心 does (GET /api/v2/recruitment).
+    const h = harness('recruitment', { request: path => path.startsWith('/api/v2/recruitment')
+      ? { staff: [staffCall(44)], teams: null, mine: null }
+      : Promise.reject(new Error('Unexpected synthetic request: ' + path)) });
+    await h.page.onShow(); h.page.staffPage();
+    const call = (h.page.data.staff as unknown as Record<string, unknown>[])[0];
+    expect(call).toMatchObject({ title: '合成测试骨干批次', page: 'signup', params: { kind: 'staff', id: 44 } });
+    h.page.openPage(event({ page: call.page, params: call.params }));
+    expect(h.navigation.go).toHaveBeenCalledWith('staff'); expect(h.navigation.go).toHaveBeenCalledWith('signup', { kind: 'staff', id: 44 });
+    expect(h.calls.some(request => request.path.startsWith('/api/content-promotions'))).toBe(false);
+  });
+
+  it.each(['community'])('routes %s staff entries to the same batch and uses approved club projection', async name => {
     const h = harness(name, { request: path => path.endsWith('/contacts') ? [] : path.endsWith('/join')
       ? { record: null, actions: {}, canHandle: false } : { staffBatches: [{ id: 44, title: '合成测试骨干批次', state: '申请开放' }], promotions: { event: [{ sourceKey: 'community-posts:31', snapshot: { title: '合成活动' } }] } } });
     await h.page.onShow(); h.page.staff(); h.page.applyStaff(event({ id: 44 }));

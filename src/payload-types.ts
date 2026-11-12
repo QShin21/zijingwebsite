@@ -49,6 +49,7 @@ export interface Config {
     pages: Page;
     redirects: Redirect;
     audit: Audit;
+    'pending-uploads': PendingUpload;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -85,6 +86,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     audit: AuditSelect<false> | AuditSelect<true>;
+    'pending-uploads': PendingUploadsSelect<false> | PendingUploadsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -432,6 +434,15 @@ export interface CommunityPost {
     | boolean
     | null;
   category: 'event' | 'notice';
+  /**
+   * 按后台 Asia/Shanghai 时区输入；数据库保存 UTC。旧帖留空表示时间待定。
+   */
+  startAt?: string | null;
+  /**
+   * 按后台 Asia/Shanghai 时区输入；数据库保存 UTC。旧帖留空表示时间待定。
+   */
+  endAt?: string | null;
+  location?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1232,6 +1243,22 @@ export interface Audit {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pending-uploads".
+ */
+export interface PendingUpload {
+  id: number;
+  owner: number | User;
+  purpose: 'showcase';
+  data: string;
+  width: number;
+  height: number;
+  expiresAt: string;
+  consumedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1369,6 +1396,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'audit';
         value: number | Audit;
+      } | null)
+    | ({
+        relationTo: 'pending-uploads';
+        value: number | PendingUpload;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1580,6 +1611,9 @@ export interface CommunityPostsSelect<T extends boolean = true> {
   signupForm?: T;
   signupImages?: T;
   category?: T;
+  startAt?: T;
+  endAt?: T;
+  location?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2106,6 +2140,21 @@ export interface AuditSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pending-uploads_select".
+ */
+export interface PendingUploadsSelect<T extends boolean = true> {
+  owner?: T;
+  purpose?: T;
+  data?: T;
+  width?: T;
+  height?: T;
+  expiresAt?: T;
+  consumedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -2166,6 +2215,9 @@ export interface Site {
         id?: string | null;
       }[]
     | null;
+  /**
+   * V2 网站不使用此字段
+   */
   navigation?:
     | {
         label: string;
@@ -2183,9 +2235,23 @@ export interface Site {
         id?: string | null;
       }[]
     | null;
+  /**
+   * 旧版首页配置保留；V2 请使用下方的 V2 主场区块。
+   */
   modules?:
     | {
         kind: 'join' | 'events' | 'teams' | 'honors' | 'news' | 'albums' | 'about';
+        enabled?: boolean | null;
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * 可调整 V2 主场区块的顺序、标题与启停。未配置的区块按默认顺序追加；隐藏须明确取消启用。内容权限不受此配置影响。
+   */
+  homeSections?:
+    | {
+        kind: 'upcoming' | 'open' | 'notices' | 'promoted' | 'communities' | 'highlights' | 'about';
         enabled?: boolean | null;
         title?: string | null;
         id?: string | null;
@@ -2225,6 +2291,14 @@ export interface SiteSelect<T extends boolean = true> {
         id?: T;
       };
   modules?:
+    | T
+    | {
+        kind?: T;
+        enabled?: T;
+        title?: T;
+        id?: T;
+      };
+  homeSections?:
     | T
     | {
         kind?: T;

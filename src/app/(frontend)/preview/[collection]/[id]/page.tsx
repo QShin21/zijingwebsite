@@ -4,8 +4,8 @@ import type { CollectionSlug } from "payload";
 import { cms, type Content } from "@/lib/content";
 import { Detail } from "@/components/Content";
 import { canSubmitClubContent } from "@/lib/rules";
-import Link from "next/link";
-import styles from "@/components/account-pages/AccountPages.module.css";
+import { buttonClass } from "@/components/v2/ui";
+import work from "@/components/v2/work.module.css";
 export const dynamic = "force-dynamic";
 export const metadata = {
   title: "内容预览",
@@ -49,14 +49,15 @@ export default async function Preview({
   if (!doc) notFound();
   return (
     <>
-      <aside className={styles.preview} aria-label="预览状态">
-        <strong>草稿预览 · 仅当前授权人员可见</strong>
-        此页面用于核对内容，不代表已发布。公开列表继续读取已发布内容。
-        <div>
-          <Link href={`/admin/collections/${collection}/${id}`}>
-            返回内容编辑 →
-          </Link>
-        </div>
+      <aside className={work.previewBanner} aria-label="预览状态">
+        <span className={work.previewBadge}>DRAFT</span>
+        <p>
+          <strong>草稿预览 · 仅当前授权人员可见。</strong>
+          此页面用于核对内容，不代表已发布；公开列表继续读取已发布内容。
+        </p>
+        <a className={buttonClass("ghost", "small")} href={`/admin/collections/${collection}/${id}`}>
+          返回内容编辑
+        </a>
       </aside>
       <Detail doc={doc as unknown as Content} collection={collection} />
     </>

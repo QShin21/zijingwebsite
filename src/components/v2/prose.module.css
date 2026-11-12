@@ -1,0 +1,53 @@
+.prose {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+  font-size: 17px;
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+}
+.prose h2 {
+  margin-top: 16px;
+  font-size: clamp(22px, 2.2vw, 28px);
+}
+.prose h3 {
+  margin-top: 8px;
+  font-size: 20px;
+}
+.prose a {
+  color: var(--z-action);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+.prose ul,
+.prose ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 1.4em;
+}
+.prose ul {
+  list-style: disc;
+}
+.prose ol {
+  list-style: decimal;
+}
+.prose li::marker {
+  color: var(--z-action);
+  font-weight: 800;
+}
+.prose blockquote {
+  margin: 0;
+  padding: 12px 18px;
+  border-left: 4px solid var(--z-action);
+  border-radius: 0 12px 12px 0;
+  background: var(--z-tint);
+}
+.prose hr {
+  margin: 8px 0;
+}
+.plain {
+  white-space: pre-wrap;
+}

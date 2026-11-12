@@ -1,0 +1,94 @@
+.feed > :nth-child(7n + 1) {
+  grid-column: span 2;
+}
+@media (max-width: 640px) {
+  .feed > :nth-child(7n + 1) {
+    grid-column: auto;
+  }
+}
+.restricted {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 16px 20px;
+  border-radius: var(--z-radius);
+  background: var(--z-tint);
+  font-weight: 700;
+}
+.reading {
+  display: grid;
+  gap: 24px;
+}
+.cover,
+.images figure {
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--z-radius);
+  background: var(--z-media);
+}
+.cover img,
+.images img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.images {
+  display: grid;
+  gap: 12px;
+}
+.photos {
+  display: grid;
+  gap: 16px;
+}
+.photos h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  font-size: 24px;
+}
+.photos h2 span {
+  color: var(--z-muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: 12px;
+}
+.photoGrid figure {
+  margin: 0;
+}
+.photoGrid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--z-radius-small);
+  object-fit: cover;
+  background: var(--z-media);
+}
+.photoGrid figcaption {
+  padding: 6px 2px;
+  color: var(--z-muted);
+  font-size: 13px;
+}
+.muted {
+  color: var(--z-muted);
+}
+.related {
+  display: grid;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--z-line);
+}
+.related h2 {
+  font-size: 20px;
+}
+.teamLink {
+  color: var(--z-action);
+  font-weight: 800;
+}

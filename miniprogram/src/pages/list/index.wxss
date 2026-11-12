@@ -1,23 +1,12 @@
-@import "../../styles/native-reading.wxss";
-.list-page .filter-group { margin: 24px 0 28px; padding: 0; border: 0; }
-.list-page .filter-label { margin-bottom: 8px; font-size: 14px; line-height: 1.6; font-weight: 500; }
-.list-page .search { gap: 8px; margin: 0; }
-.list-page .search button { padding-left: 16px; padding-right: 16px; }
-.list-page .archive-filters { align-items: flex-start; margin-top: 16px; gap: 12px; }
-.list-page .filter-field { flex: 1; min-width: 120px; }
-.list-page .filter-field .picker-value { font-size: 15px; }
-.list-page .filter-group .chips { margin: 16px 0 0; }
-.list-page .filter-group .chip { padding: 10px 14px; margin: 0 8px 8px 0; font-size: 15px; }
-.mini-page.native-page .list-clear { margin-top: 4px; }
-.list-page .list-result-heading { margin-bottom: 20px; }
-.list-count { display: block; color: var(--z-muted); font-size: 12px; line-height: 1.65; }
-.list-context { margin: 24px 0; }
-.mini-page.native-page .list-team-entry { display: flex; align-items: center; gap: 16px; padding: 20px; background: var(--z-secondary-bg); border-radius: 8px; }
-.list-team-entry .section-title { color: var(--z-secondary-text); font-size: 18px; }
-.list-team-entry .muted { margin-top: 8px; }
-.list-entry-sign { flex-shrink: 0; color: var(--z-link); font-size: 24px; }
-.mini-page.native-page .list-more { width: 100%; margin-top: 24px; }
-.list-page .result-caption { margin-top: 24px; }
-@media (max-width: 359px) {
-  .mini-page.native-page .list-team-entry { padding: 16px; }
-}
+/* V2 list: hero band, search + pickers, V2 record templates. */
+.list-v2 { padding-top: 0; }
+.list-team-entry { margin-bottom: 20rpx; }
+.list-filters { display: flex; flex-direction: column; gap: 6rpx; margin-bottom: 8rpx; }
+.list-pickers { display: flex; gap: 14rpx; }
+.list-pickers picker { flex: 1; min-width: 0; }
+.list-picker { display: flex; flex-direction: column; gap: 4rpx; padding: 16rpx 22rpx; border: 3rpx solid var(--z-line); border-radius: 24rpx; background: var(--z-surface); }
+.list-picker-value { color: var(--z-primary); font-size: 28rpx; font-weight: 800; }
+.mini-page .list-clear { align-self: flex-start; }
+.list-result-heading { margin-top: 28rpx; }
+.mini-page .list-more { display: block; width: 100%; margin-top: 20rpx; }
+.list-end { text-align: center; }

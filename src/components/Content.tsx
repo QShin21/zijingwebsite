@@ -22,7 +22,8 @@ import {
 } from "@/lib/rules";
 import { kindLabels } from "@/lib/presentation";
 import { Icon, type IconName } from "./Identity";
-import { PageHeading } from "./PageHeading";
+import { PageHero, StatusPill, Wrap } from "./v2/ui";
+import layout from "./v2/layout.module.css";
 import styles from "./account-pages/ReadingPages.module.css";
 
 export function Empty({
@@ -475,23 +476,26 @@ export async function Detail({
     const teamState = publicTeamState(metadata?.get(doc.id), doc.archived);
     const hasIntroduction = Boolean(doc.body || doc.sections?.length);
     return (
-      <div className={styles.teamArchive}>
-        <PageHeading
-          title={doc.title}
+      <div data-collection="teams">
+        <PageHero
+          tone="stage"
           eyebrow={linkedGame?.title || "代表队档案"}
+          title={doc.title}
           description={doc.summary}
-          parent={{ href: "/teams", label: "代表队与荣誉" }}
-        >
-          <div className={styles.metadata}>
-            {linkedGame && (
-              <Link href={`/community/${linkedGame.slug}`}>
-                所属社群：{linkedGame.title}
-              </Link>
-            )}
-            {teamState && <span className={styles.status}>{teamState}</span>}
-            {doc.demo && <span>演示资料 · 非真实社团记录</span>}
-          </div>
-        </PageHeading>
+          back={{ href: "/teams", label: "代表队与荣誉" }}
+          meta={
+            <>
+              {teamState && <StatusPill tone="success">{teamState}</StatusPill>}
+              {doc.demo && <StatusPill tone="warning">演示资料 · 非真实社团记录</StatusPill>}
+              {linkedGame && (
+                <Link className={styles.heroLink} href={`/community/${linkedGame.slug}`}>
+                  所属社群：{linkedGame.title}
+                </Link>
+              )}
+            </>
+          }
+        />
+        <Wrap className={`${layout.pageBody} ${styles.teamArchive}`}>
         <nav className={styles.sectionIndex} aria-label="代表队档案栏目">
           {hasIntroduction && <a href="#team-introduction">队伍介绍</a>}
           <a href="#public-members">公开成员</a>
@@ -654,50 +658,37 @@ export async function Detail({
             <Cards docs={history[2].docs} collection="events" />
           </section>
         )}
+        </Wrap>
       </div>
     );
   }
   const publishedAt = doc.publishedAt;
   return (
-    <div className={styles.contentDetail} data-collection={collection}>
-      <PageHeading
+    <div data-collection={collection}>
+      <PageHero
+        tone="stage"
+        eyebrow={doc.demo ? "演示资料 · 非真实社团记录" : collection === "news" ? "社团动态" : names[collection] || "内容预览"}
         title={doc.title}
-        eyebrow={
-          doc.demo
-            ? "演示资料 · 非真实社团记录"
-            : collection === "news"
-              ? "社团动态"
-              : names[collection] || "内容预览"
-        }
         description={doc.summary}
-        parent={{
-          href: routeFor[collection] ? `/${routeFor[collection]}` : "/account",
-          label: names[collection] || "档案",
-        }}
-      >
-        {doc.archived && <span className={styles.status}>历史归档</span>}
-        <div className={styles.metadata}>
-          {publishedAt && (
-            <time dateTime={publishedAt}>发布于 {formatDate(publishedAt)}</time>
-          )}
-          {linkedGame && (
-            <Link href={`/community/${linkedGame.slug}`}>
-              所属社群：{linkedGame.title}
-            </Link>
-          )}
-          {collection === "news" && (
-            <span>
-              {doc._status === "published" ? "社团公开内容" : "内容预览"}
-            </span>
-          )}
-          {(doc.date || doc.startAt) && (
-            <span>时间 · {formatDate(doc.date || doc.startAt)}</span>
-          )}
-          {collection === "events" && <span>{eventState(doc)}</span>}
-          {collection === "recruitment" && <span>{state}</span>}
-          {doc.competition && <span>{doc.competition}</span>}
-        </div>
-      </PageHeading>
+        back={{ href: routeFor[collection] ? `/${routeFor[collection]}` : "/account", label: names[collection] || "档案" }}
+        meta={
+          <>
+            {doc.archived && <StatusPill>历史归档</StatusPill>}
+            {collection === "events" && <StatusPill tone="info">{eventState(doc)}</StatusPill>}
+            {collection === "recruitment" && <StatusPill tone={state === "报名开放" ? "live" : "neutral"}>{state}</StatusPill>}
+            {collection === "news" && <StatusPill>{doc._status === "published" ? "社团公开内容" : "内容预览"}</StatusPill>}
+            {publishedAt && <time className={styles.heroMeta} dateTime={publishedAt}>发布于 {formatDate(publishedAt)}</time>}
+            {(doc.date || doc.startAt) && <span className={styles.heroMeta}>时间 · {formatDate(doc.date || doc.startAt)}</span>}
+            {doc.competition && <span className={styles.heroMeta}>{doc.competition}</span>}
+            {linkedGame && (
+              <Link className={styles.heroLink} href={`/community/${linkedGame.slug}`}>
+                所属社群：{linkedGame.title}
+              </Link>
+            )}
+          </>
+        }
+      />
+      <Wrap className={`${layout.pageBody} ${styles.contentDetail}`}>
       {doc.cover && (
         <div className={styles.cover}>
           <Picture id={doc.cover} priority />
@@ -881,6 +872,7 @@ export async function Detail({
           )}
         </aside>
       </div>
+      </Wrap>
     </div>
   );
 }

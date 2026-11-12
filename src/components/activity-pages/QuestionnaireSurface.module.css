@@ -1,1029 +1,140 @@
+/* V2 questionnaire surfaces: answer flow, designer frame, results & export. */
 .surface {
-  color: var(--z-ink);
-  background: transparent;
-  min-width: 0;
-  font-size: 16px;
-  line-height: 1.7;
-  --questionnaire-accent: var(--z-action);
-  --questionnaire-soft: var(--z-tint);
-}
-.surface :is(h1, h2, h3, h4, legend, label) {
-  color: var(--z-ink);
-}
-.surface :is(a, button, input, select, textarea, summary):focus-visible {
-  outline: 3px solid var(--z-focus);
-  outline-offset: 3px;
-}
-.surface :is(input, select, textarea) {
-  color: var(--z-ink);
-  background: var(--z-field);
-  border: 1px solid var(--z-field-border);
-  border-radius: 6px;
-  padding: 10px 12px;
-  min-width: 0;
-  max-width: 100%;
-  font-size: 16px;
-}
-.surface :is(input[type="radio"], input[type="checkbox"]) {
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  accent-color: var(--z-action);
-  flex-shrink: 0;
-}
-.surface label {
   display: grid;
-  gap: 7px;
-  font-size: 14px;
-}
-.surface :global(.signup-choice) {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: flex-start;
-  gap: 9px;
-}
-.surface button,
-.surface :global(.button) {
-  min-height: 44px;
-  padding: 9px 14px;
-  border: 1px solid var(--z-field-border);
-  border-radius: 6px;
-  color: var(--z-ink);
-  background: var(--z-surface);
-  font-size: 14px;
-  line-height: 1.5;
-  box-shadow: none;
-  white-space: normal;
-}
-.surface :global(.button:not(.light)) {
-  background: var(--z-action);
-  color: var(--z-action-ink);
-  border-color: var(--z-action);
-}
-.surface button[aria-pressed="true"],
-.surface button[aria-current] {
-  background: var(--z-tint);
-  color: var(--z-action);
-  border-color: var(--z-action);
-}
-.surface :is(input, select, textarea, button):disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.surface :global(.muted),
-.surface small,
-.surface :global(.designer-eyebrow),
-.surface :global(.questionnaire-counter) {
-  color: var(--z-muted);
-}
-.surface :global(.designer-eyebrow) {
-  font-size: 13px;
-  letter-spacing: 0;
-}
-.surface :global(.signup-tools),
-.surface :global(.reaction-bar) {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-}
-.surface :global(.signup-times) {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+  min-width: 0;
+  color: var(--z-ink);
 }
-.surface :global(.designer-heading) {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 20px;
-  border-bottom: 1px solid var(--z-line);
-  padding-bottom: 20px;
-}
-.surface :global(.designer-heading h2) {
-  font-size: 26px;
-  margin: 0 0 8px;
-}
-.surface :global(.designer-heading p) {
-  margin: 0;
-}
-.surface :global(.designer-heading .signup-tools) {
-  align-self: start;
-}
-.surface :global(.designer-tabs) {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  border: 0;
-  background: transparent;
-  margin: 24px 0;
-  padding: 0;
-}
-.surface :global(.designer-workspace) {
+/* Layout follows the nearest container (sign-up panel or main), not the viewport. */
+.answerLayout {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
   gap: 20px;
   align-items: start;
-  background: transparent;
-}
-.surface :global(.designer-outline),
-.surface :global(.designer-palette) {
-  position: sticky;
-  top: 88px;
-  padding: 16px;
-  border: 1px solid var(--z-line);
-  border-radius: 6px;
-  background: var(--z-paper);
-  max-height: calc(100dvh - 110px);
-  overflow: auto;
-}
-.surface :global(.designer-outline h3),
-.surface :global(.designer-palette h3) {
-  font-size: 16px;
-  margin: 0 0 12px;
-}
-.surface :global(.designer-outline ol) {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.surface :global(.designer-outline button),
-.surface :global(.designer-palette button) {
-  text-align: left;
-  width: 100%;
-  margin-bottom: 6px;
-}
-.surface :global(.designer-canvas) {
-  min-width: 0;
-  display: grid;
-  gap: 16px;
-}
-.surface :global(.designer-question) {
-  border: 1px solid var(--z-line);
-  background: var(--z-surface);
-  border-radius: 8px;
-  padding: 0;
-  box-shadow: none;
-}
-.surface :global(.designer-question.is-active) {
-  border-color: var(--z-action);
-}
-.surface :global(.designer-question-toggle) {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  text-align: left;
-  width: 100%;
-  background: transparent;
-  border: 0;
-  padding: 16px;
-}
-.surface :global(.question-editor-fields),
-.surface :global(.designer-form-settings) {
-  display: grid;
-  gap: 18px;
-  padding: 20px;
-  min-width: 0;
-  background: var(--z-surface);
-}
-.surface :global(.questionnaire-settings),
-.surface :global(.question-logic),
-.surface :global(.condition-editor),
-.surface :global(.jump-rule),
-.surface :global(.questionnaire-group-editor) {
-  min-width: 0;
-  background: var(--z-paper);
-  border-color: var(--z-line);
-  color: var(--z-ink);
-  border-radius: 6px;
-  box-shadow: none;
-}
-.surface :global(.condition-row) {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.surface :global(.condition-row) > * {
-  flex: 1 1 100px;
-}
-.surface :global(.designer-empty),
-.surface :global(.blueprint-preview) {
-  padding: 24px;
-  border: 1px dashed var(--z-line);
-  background: var(--z-surface);
-  color: var(--z-muted);
-  border-radius: 8px;
-}
-.surface :global(.designer-footer) {
-  margin-top: 24px;
-  padding: 18px 0 0;
-  border-top: 1px solid var(--z-line);
-  background: transparent;
-}
-.surface :global(.designer-validation),
-.surface :global(.questionnaire-error),
-.surface :global(.required-mark) {
-  color: var(--z-danger);
-}
-.surface :global(.designer-validation) {
-  padding: 14px;
-  background: var(--z-danger-bg);
-  border: 1px solid var(--z-danger);
-  border-radius: 6px;
-}
-.surface :global(.designer-starts) {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-.surface :global(.designer-starts button) {
-  text-align: left;
-  background: var(--z-paper);
-  border-color: var(--z-line);
-  padding: 16px;
-}
-.surface :global(.start-icon) {
-  color: var(--z-action);
-  background: var(--z-tint);
-  box-shadow: none;
-}
-.surface :global(.questionnaire-dialog),
-.surface :global(.questionnaire-starter-dialog) {
-  color: var(--z-ink);
-  background: var(--z-surface);
-  border: 1px solid var(--z-line);
-  border-radius: 8px;
-  padding: 24px;
-  max-width: calc(100vw - 32px);
-  max-height: calc(100dvh - 40px);
-  box-shadow: none;
-}
-.surface dialog::backdrop {
-  background: color-mix(in srgb, var(--z-ink) 45%, transparent);
-}
-.surface :global(.dialog-top) {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  align-items: start;
-  border-bottom: 1px solid var(--z-line);
-  margin-bottom: 20px;
-}
-.surface :global(.template-grid) {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-.surface :global(.template-card) {
-  border: 1px solid var(--z-line);
-  border-radius: 6px;
-  background: var(--z-paper);
-  padding: 18px;
-}
-.surface :global(.template-tags span),
-.surface :global(.ai-model-label) {
-  background: var(--z-tint);
-  color: var(--z-action);
-  border-color: var(--z-line);
-}
-.surface :global(.ai-examples),
-.surface :global(.ai-refinement),
-.surface :global(.blueprint-apply) {
-  background: var(--z-paper);
-  border-color: var(--z-line);
-}
-.surface :global(.questionnaire-draft),
-.surface :global(.questionnaire-description) {
-  background: var(--z-paper);
-  color: var(--z-muted);
-  border: 1px solid var(--z-line);
-  border-radius: 6px;
-  padding: 16px;
-}
-.surface :global(.questionnaire-progress) {
-  background: transparent;
-  border-bottom: 1px solid var(--z-line);
-  color: var(--z-muted);
-  padding: 18px 0;
-}
-.surface progress {
-  accent-color: var(--z-action);
-  max-width: 100%;
-}
-.surface :global(.questionnaire-step) {
-  font-size: 21px;
-  margin: 24px 0;
-}
-.surface :global(.signup-question) {
-  min-width: 0;
-  margin: 0 0 26px;
-  padding: 16px 0 0;
-  border: 0;
-  border-top: 1px solid var(--z-line);
-  border-radius: 0;
-  background: transparent;
-}
-.surface :global(.signup-question legend) {
-  font-size: 16px;
-  font-weight: 600;
-  padding-right: 8px;
-}
-.surface :global(.signup-question) > :is(input, select, textarea) {
-  width: 100%;
-}
-.surface :global(.questionnaire-option),
-.surface :global(.questionnaire-scale label),
-.surface :global(.questionnaire-ranking li) {
-  border: 1px solid var(--z-field-border);
-  border-radius: 6px;
-  padding: 10px 12px;
-  margin: 8px 0;
-  background: var(--z-surface);
-  color: var(--z-ink);
-}
-.surface :global(.questionnaire-option:has(input:checked)),
-.surface :global(.questionnaire-scale label:has(input:checked)) {
-  background: var(--z-tint);
-  border-color: var(--z-action);
-  color: var(--z-ink);
-}
-.surface :global(.questionnaire-group-entry) {
-  border: 1px solid var(--z-line);
-  border-radius: 6px;
-  padding: 16px;
-  background: var(--z-surface);
-}
-.surface :global(.questionnaire-group-fields) {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-.surface :global(.questionnaire-matrix-wrap) {
-  max-width: 100%;
-  overflow-x: auto;
-}
-.surface table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-.surface :is(th, td) {
-  color: var(--z-ink);
-  background: transparent;
-  padding: 10px;
-  border: 1px solid var(--z-line);
-  text-align: left;
-}
-.surface :global(.questionnaire-review) {
-  display: grid;
-  margin: 20px 0;
-}
-.surface :global(.questionnaire-review) > div {
-  display: block;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--z-line);
-  background: transparent;
-}
-.surface dt {
-  font-size: 14px;
-  color: var(--z-muted);
-}
-.surface dd {
-  margin: 4px 0 0;
-  color: var(--z-ink);
-  white-space: pre-wrap;
-}
-.surface :global(.questionnaire-invalid) {
-  border-color: var(--z-danger);
-}
-.surface :global(.questionnaire-stat) {
-  padding: 20px 0;
-  background: transparent;
-  border: 0;
-  border-top: 1px solid var(--z-line);
-  border-radius: 0;
-  overflow-x: auto;
-}
-.surface :global(.questionnaire-stat h4) {
-  font-size: 18px;
-}
-.errorSummary {
-  padding: 16px;
-  margin-bottom: 24px;
-  border-left: 3px solid var(--z-danger);
-  background: var(--z-danger-bg);
-  color: var(--z-danger);
-  border-radius: 6px;
-}
-.errorSummary p {
-  margin: 0 0 8px;
-}
-.errorSummary ul {
-  margin: 0;
-  padding-left: 20px;
-}
-.errorSummary button {
-  min-height: 44px;
-  background: transparent;
-  border: 0;
-  color: var(--z-danger);
-  padding: 4px 0;
-  text-align: left;
-  text-decoration: underline;
-}
-@media (max-width: 1080px) {
-  .surface :global(.designer-workspace) {
-    grid-template-columns: 160px minmax(0, 1fr);
-  }
-  .surface :global(.designer-palette) {
-    position: static;
-    grid-column: 1/-1;
-    max-height: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .surface :global(.designer-palette h3) {
-    width: 100%;
-  }
-  .surface :global(.designer-palette button) {
-    width: auto;
-  }
-}
-@media (max-width: 680px) {
-  .surface :global(.designer-workspace),
-  .surface :global(.signup-times),
-  .surface :global(.questionnaire-group-fields),
-  .surface :global(.designer-starts),
-  .surface :global(.template-grid) {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .surface :global(.designer-outline) {
-    position: static;
-    max-height: 220px;
-  }
-  .surface :global(.question-editor-fields),
-  .surface :global(.designer-form-settings) {
-    padding: 16px;
-  }
-  .surface :global(.designer-heading h2) {
-    font-size: 23px;
-  }
-}
-
-.surface :global(.designer-question.signup-question) {
-  border: 1px solid var(--z-line);
-  background: var(--z-surface);
-  border-radius: 8px;
-  padding: 0;
-  margin: 0;
-}
-.surface :global(.designer-question.signup-question.is-active) {
-  border-color: var(--z-action);
-  box-shadow: none;
-}
-
-.surface :global(.designer-outline .designer-palette) {
-  position: static;
-  max-height: none;
-  margin-top: 16px;
-  padding: 12px 0 0;
-  border: 0;
-  border-top: 1px solid var(--z-line);
-  background: transparent;
-  display: block;
-}
-.surface :global(.designer-outline .designer-palette button) {
-  width: 100%;
-}
-
-/* Task layouts: a persistent progress area for filling, a focused canvas for editing. */
-.surface.answerLayout {
-  display: grid;
-  grid-template-columns: minmax(180px, 0.28fr) minmax(0, 1fr);
-  gap: var(--z-space-8);
-  align-items: start;
-  margin: var(--z-space-6) 0 0;
-  max-width: none;
 }
 .answerRail {
-  min-width: 0;
-  position: sticky;
-  top: var(--z-space-24);
-  padding-right: var(--z-space-6);
-  border-right: 1px solid var(--z-line);
-}
-.answerRail ol {
   display: grid;
-  gap: var(--z-space-3);
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--z-radius);
+  background:
+    repeating-linear-gradient(115deg, transparent 0 22px, rgba(255, 255, 255, 0.03) 22px 44px),
+    linear-gradient(150deg, var(--z-stage-2), var(--z-stage));
+  color: var(--z-stage-ink);
 }
 .answerRail :global(.questionnaire-progress) {
-  margin: var(--z-space-6) 0;
-  padding: var(--z-space-4) 0;
-  border-top: 1px solid var(--z-line);
-  border-bottom: 1px solid var(--z-line);
-  border-radius: 0;
-  display: grid;
-  gap: var(--z-space-2);
-  font-size: var(--z-text-small);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--z-stage-ink);
 }
-.answerRail :global(.questionnaire-progress) strong {
-  color: var(--z-ink);
-}
-.answerRail :global(.questionnaire-progress) small {
-  font-size: var(--z-text-caption);
-  line-height: 1.7;
+.answerRail :global(.questionnaire-progress) progress {
+  accent-color: var(--z-accent);
 }
 .answerRail :global(.questionnaire-draft) {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  display: grid;
-  gap: var(--z-space-3);
-}
-.answerRail :global(.questionnaire-draft) button {
-  text-align: left;
+  border-color: var(--z-stage-line);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--z-stage-ink);
 }
 .answerMain {
+  display: grid;
+  gap: 16px;
   min-width: 0;
 }
-.surface .answerMain :global(.questionnaire-step) {
-  margin: 0 0 var(--z-space-6);
-  padding-bottom: var(--z-space-4);
-  border-bottom: 1px solid var(--z-line);
-  font-size: 24px;
-}
-.surface .answerMain :global(.signup-question) {
-  margin: 0;
-  padding: var(--z-space-6) 0;
-  border: 0;
-  border-bottom: 1px solid var(--z-line);
-  background: transparent;
-  border-radius: 0;
-  display: grid;
-  gap: var(--z-space-3);
-}
-.surface .answerMain :global(.signup-question) legend {
-  padding: 0;
-  font-size: var(--z-text-body);
-  font-weight: 650;
-}
-.surface .answerMain :global(.signup-question) :global(.muted):empty,
-.surface :global(.questionnaire-error):empty {
-  display: none;
-}
-.surface .answerMain :global(.signup-question) :global(.muted) {
-  margin: 0;
-  font-size: var(--z-text-small);
-}
-.surface .answerMain :global(.questionnaire-invalid) {
-  border-bottom-color: var(--z-danger);
-}
-.surface :global(.signup-question):focus,
-.surface :global(.questionnaire-step):focus {
-  outline: 3px solid var(--z-focus);
-  outline-offset: 4px;
-}
-.surface :global(.questionnaire-review) {
-  margin: 0 0 var(--z-space-6);
-}
-.surface :global(.questionnaire-review) > div {
-  display: grid;
-  grid-template-columns: minmax(120px, 0.4fr) minmax(0, 1fr);
-  gap: var(--z-space-4);
-  padding: var(--z-space-4) 0;
-}
-.surface :global(.questionnaire-review) dd {
-  margin: 0;
-}
-.surface :global(.questionnaire-description) {
-  margin: var(--z-space-4) 0;
-  border: 0;
-  border-left: 3px solid var(--z-action);
-  background: var(--z-surface);
-}
-.surface :global(.questionnaire-description) h4 {
-  margin: 0 0 var(--z-space-2);
-  font-size: 18px;
-}
-.surface :global(.questionnaire-option) {
-  margin: 0;
-  min-height: 48px;
-}
-.surface :global(.questionnaire-matrix) fieldset {
-  background: transparent;
-  border-color: var(--z-line);
-  border-radius: var(--z-radius-small);
-}
-.surface :global(.questionnaire-matrix) fieldset > div {
-  display: grid;
-  gap: var(--z-space-2);
-}
-.surface :global(.questionnaire-group-entry) {
-  margin: var(--z-space-4) 0;
-}
-.surface :global(.questionnaire-group-entry) legend {
-  font-size: var(--z-text-small);
-}
-.surface :global(.questionnaire-group-entry) > button {
-  margin-top: var(--z-space-4);
-}
 .answerFooter {
-  padding: var(--z-space-6) 0 0;
+  position: sticky;
+  z-index: 3;
+  bottom: calc(var(--z-tabbar) + env(safe-area-inset-bottom) + 8px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 1px solid var(--z-line);
+  border-radius: var(--z-radius);
+  background: var(--z-bar);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--z-shadow);
 }
-.answerFooter :global(.signup-tools) {
-  justify-content: flex-end;
+.errorSummary {
+  padding: 12px 16px;
+  border: 1px solid var(--z-danger-line);
+  border-radius: var(--z-radius-small);
+  background: var(--z-danger-bg);
+  color: var(--z-danger);
+  font-weight: 700;
+}
+.errorSummary a {
+  color: inherit;
+  text-decoration: underline;
 }
 .resultMessage {
-  margin: var(--z-space-4) 0;
-  padding: var(--z-space-4);
-  color: var(--z-info);
-  background: var(--z-info-bg);
-  border-left: 3px solid var(--z-info-line);
+  padding: 12px 16px;
   border-radius: var(--z-radius-small);
+  background: var(--z-info-bg);
+  color: var(--z-info);
+  font-size: 14px;
+  font-weight: 700;
+}
+.resultMessage:empty {
+  display: none;
 }
 .saving {
   color: var(--z-muted);
-  font-size: var(--z-text-small);
-  margin: var(--z-space-3) 0;
-}
-.surface :global(.designer-heading) {
-  gap: var(--z-space-4);
-  margin-bottom: var(--z-space-4);
-}
-.surface :global(.designer-heading) > div:first-child {
-  max-width: 42em;
-}
-.surface :global(.designer-enable) {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--z-space-3) var(--z-space-6);
-  align-items: center;
-  margin-bottom: var(--z-space-4);
-}
-.surface :global(.designer-enable) > span {
-  font-size: var(--z-text-small);
-  color: var(--z-muted);
-}
-.surface :global(.designer-source-tools) {
-  padding: 0;
-  margin: 0 0 var(--z-space-4);
-  border-top: 1px solid var(--z-line);
-  border-bottom: 1px solid var(--z-line);
-}
-.surface :global(.designer-source-tools) > summary {
-  min-height: 48px;
-  align-content: center;
-  cursor: pointer;
-  font-size: var(--z-text-small);
-  color: var(--z-action);
-}
-.surface :global(.designer-starts) {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0;
-  margin-bottom: var(--z-space-4);
-  border-top: 1px solid var(--z-line);
-}
-.surface :global(.designer-starts) > button {
-  min-height: 100px;
-  border: 0;
-  border-radius: 0;
-  border-right: 1px solid var(--z-line);
-  background: transparent;
-  padding: var(--z-space-4);
-  display: grid;
-  gap: var(--z-space-2);
-  align-content: start;
-}
-.surface :global(.designer-starts) > button:last-child {
-  border-right: 0;
-}
-.surface :global(.designer-starts) > button:hover {
-  background: var(--z-tint);
-  color: var(--z-ink);
-}
-.surface :global(.designer-export) {
-  margin-bottom: var(--z-space-4);
-}
-.surface :global(.designer-export) button {
-  color: var(--z-action);
-}
-.surface :global(.designer-tabs) {
-  gap: var(--z-space-4);
-  margin: var(--z-space-6) 0;
-  border-bottom: 1px solid var(--z-line);
-}
-.surface :global(.designer-tabs) > button {
-  border: 0;
-  border-bottom: 3px solid transparent;
-  padding: var(--z-space-3) 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--z-muted);
-}
-.surface :global(.designer-tabs) > button[aria-pressed="true"] {
-  color: var(--z-ink);
-  border-bottom-color: var(--z-action);
-  background: transparent;
-  font-weight: 650;
-}
-.surface :global(.designer-workspace) {
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: var(--z-space-8);
-}
-.surface :global(.designer-outline) {
-  padding: 0 var(--z-space-4) 0 0;
-  border: 0;
-  border-right: 1px solid var(--z-line);
-  border-radius: 0;
-  background: transparent;
-}
-.surface :global(.designer-outline) ol {
-  gap: var(--z-space-2);
-}
-.surface :global(.designer-outline) li button {
-  display: flex;
-  gap: var(--z-space-3);
-  padding: var(--z-space-3);
-  border: 1px solid transparent;
-  background: transparent;
-}
-.surface :global(.designer-outline) li button[aria-current="step"] {
-  background: var(--z-tint);
-  color: var(--z-ink);
-  border-color: var(--z-action);
-}
-.surface :global(.designer-outline) small {
-  color: var(--z-muted);
-  font-size: var(--z-text-caption);
-}
-.surface :global(.designer-question.signup-question) {
-  border: 0;
-  border-top: 1px solid var(--z-line);
-  border-bottom: 1px solid var(--z-line);
-  border-radius: 0;
-  background: transparent;
-}
-.surface :global(.designer-question.signup-question.is-active) {
-  border: 1px solid var(--z-line);
-  border-left: 3px solid var(--z-action);
-  border-radius: var(--z-radius-small);
-  background: var(--z-surface);
-}
-.surface :global(.designer-question.signup-question) > legend {
-  padding: 0 var(--z-space-2);
-  color: var(--z-muted);
-  font-size: var(--z-text-small);
-}
-.surface :global(.designer-question-toggle) {
-  align-items: start;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  padding: var(--z-space-4);
-  color: var(--z-ink);
-}
-.surface :global(.designer-question-toggle) small {
-  color: var(--z-muted);
-}
-.surface :global(.designer-question) > :global(.signup-tools) {
-  padding: var(--z-space-4);
-  border-top: 1px solid var(--z-line);
-}
-.surface :global(.question-editor-fields) {
-  padding: var(--z-space-6);
-  gap: var(--z-space-6);
-  background: transparent;
-}
-.surface :global(.questionnaire-settings) {
-  margin: 0;
-  padding: var(--z-space-4);
-  border: 1px solid var(--z-line);
-  background: var(--z-paper);
-}
-.surface :global(.question-logic) {
-  background: transparent;
-  display: grid;
-  gap: var(--z-space-4);
-}
-.surface :global(.questionnaire-settings) > summary {
-  min-height: 44px;
-  align-content: center;
-}
-.surface :global(.designer-form-settings) {
-  max-width: none;
-  padding: 0;
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-  gap: var(--z-space-8);
-  background: transparent;
-  align-items: start;
-}
-.surface :global(.designer-form-settings) > :only-child {
-  grid-column: 1 / -1;
-}
-.surface :global(.designer-settings-section) {
-  display: grid;
-  gap: var(--z-space-4);
-}
-.surface :global(.designer-settings-section) > header {
-  padding-bottom: var(--z-space-4);
-  border-bottom: 1px solid var(--z-line);
-}
-.surface :global(.designer-settings-section) h3 {
-  font-size: 20px;
-  margin: 0 0 var(--z-space-2);
-}
-.surface :global(.designer-settings-section) p {
-  font-size: var(--z-text-small);
-  margin: 0;
-  color: var(--z-muted);
-}
-.surface :global(.designer-footer) {
-  display: flex;
-  gap: var(--z-space-4);
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-}
-.surface :global(.designer-footer) p {
-  margin: 0;
-  font-size: var(--z-text-small);
-  color: var(--z-muted);
-}
-.surface :global(.designer-empty) {
-  text-align: left;
-  border-style: solid;
-  background: transparent;
-}
-.surface :global(.questionnaire-dialog),
-.surface :global(.questionnaire-starter-dialog) {
-  box-shadow: var(--z-shadow);
-}
-.surface :global(.blueprint-heading) h3,
-.surface :global(.template-card) h3 {
-  color: var(--z-ink);
-}
-.surface :global(.ai-examples) button,
-.surface :global(.template-filters) button {
-  color: var(--z-ink);
-  background: var(--z-surface);
-}
-.resultsLayout {
-  display: grid;
-  grid-template-columns: minmax(240px, 0.32fr) minmax(0, 1fr);
-  gap: var(--z-space-8);
-  align-items: start;
-}
-.resultsFilter {
-  display: grid;
-  gap: var(--z-space-4);
-  padding-right: var(--z-space-6);
-  border-right: 1px solid var(--z-line);
-}
-.resultsFilter h3 {
-  font-size: 18px;
-  margin: 0;
-}
-.resultsMain {
-  min-width: 0;
+  font-size: 13px;
+  font-weight: 700;
 }
 .resultsHeader {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: var(--z-space-4);
-  padding-bottom: var(--z-space-4);
-  border-bottom: 1px solid var(--z-line);
-  margin-bottom: var(--z-space-6);
+  gap: 10px 16px;
 }
 .resultsHeader h2 {
-  margin: 0;
-  font-size: 24px;
+  font-size: 22px;
 }
-.resultsHeader p {
-  margin: 0;
-  color: var(--z-muted);
-  font-size: var(--z-text-small);
+.resultsLayout {
+  display: grid;
+  gap: 20px;
+  align-items: start;
 }
+.resultsFilter,
 .exportPanel {
-  margin-top: var(--z-space-6);
-  border-top: 1px solid var(--z-line);
-  padding-top: var(--z-space-3);
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--z-line);
+  border-radius: var(--z-radius);
+  background: var(--z-surface);
 }
-.exportPanel summary {
-  min-height: 44px;
-  cursor: pointer;
-  align-content: center;
-  font-weight: 600;
-}
-.exportPanel label {
-  margin: var(--z-space-4) 0;
-}
-.exportPanel p {
-  font-size: var(--z-text-small);
-  color: var(--z-muted);
+.resultsMain {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
 }
 .resultsEmpty {
-  padding: var(--z-space-8) 0;
-}
-.resultsEmpty h3 {
-  font-size: 22px;
-  margin: 0 0 var(--z-space-3);
-}
-.resultsEmpty p {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 32px 20px;
+  border: 1.5px dashed var(--z-line-strong);
+  border-radius: var(--z-radius);
   color: var(--z-muted);
-  margin: 0;
+  text-align: center;
 }
-.surface :global(.questionnaire-stat) table {
-  table-layout: auto;
-}
-.surface :global(.questionnaire-stat) th:first-child {
-  width: 45%;
-}
-.surface :global(.questionnaire-stat) progress {
-  width: 96px;
-  height: 8px;
-}
-.surface progress::-webkit-progress-bar {
-  background: var(--z-line);
-}
-.surface progress::-webkit-progress-value {
-  background: var(--z-action);
-}
-.surface progress::-moz-progress-bar {
-  background: var(--z-action);
-}
-.surface :global(.questionnaire-branch-notice) {
-  color: var(--z-info);
-  background: var(--z-info-bg);
-  border-left: 3px solid var(--z-info-line);
-  padding: var(--z-space-4);
-}
-@container (max-width:800px) {
-  .surface.answerLayout {
-    grid-template-columns: minmax(0, 1fr);
+@container (min-width: 760px) {
+  .answerLayout {
+    grid-template-columns: 240px minmax(0, 1fr);
   }
   .answerRail {
-    position: static;
-    border-right: 0;
-    padding-right: 0;
+    position: sticky;
+    top: calc(var(--z-topbar) + 20px);
   }
-  .answerRail ol {
-    display: flex;
-    flex-wrap: wrap;
-  }
-  .answerRail :global(.questionnaire-progress) {
-    margin: var(--z-space-4) 0;
+  .resultsLayout {
+    grid-template-columns: 280px minmax(0, 1fr);
   }
 }
-@media (max-width: 800px) {
-  .surface.answerLayout,
-  .resultsLayout,
-  .surface :global(.designer-form-settings) {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .answerRail {
-    position: static;
-    border: 0;
-    padding: 0;
-  }
-  .answerRail ol {
-    display: flex;
-    flex-wrap: wrap;
-  }
-  .resultsFilter {
-    border: 0;
-    border-bottom: 1px solid var(--z-line);
-    padding: 0 0 var(--z-space-6);
-  }
-  .surface :global(.designer-workspace) {
-    grid-template-columns: 168px minmax(0, 1fr);
-    gap: var(--z-space-4);
-  }
-}
-@media (max-width: 600px) {
-  .surface :global(.designer-workspace),
-  .surface :global(.designer-starts),
-  .surface :global(.questionnaire-review) > div {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .surface :global(.designer-outline) {
-    position: static;
-    max-height: 280px;
-    padding: 0 0 var(--z-space-4);
-    border: 0;
-    border-bottom: 1px solid var(--z-line);
-  }
-  .surface :global(.designer-starts) > button {
-    min-height: 72px;
-    border-right: 0;
-    border-bottom: 1px solid var(--z-line);
-  }
-  .surface :global(.question-editor-fields) {
-    padding: var(--z-space-4);
-  }
-  .surface :global(.questionnaire-review) > div {
-    gap: var(--z-space-2);
+@media (min-width: 1024px) {
+  .answerFooter {
+    bottom: 16px;
   }
 }

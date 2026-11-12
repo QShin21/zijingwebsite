@@ -9,7 +9,8 @@ import { PromotedContent } from "@/components/PromotedContent";
 import { promotedContent } from "@/lib/content-promotions";
 import { StaffRecruitmentNotice } from "@/components/StaffRecruitmentNotice";
 import { routeFor, eventState } from "@/lib/rules";
-import { DateStamp, HomeEntries } from "./HomeSections";
+import { DateStamp, HomeEntries, stateTone } from "./HomeSections";
+import { CourtMotif } from "./CourtMotif";
 import styles from "./Home.module.css";
 
 const defaults = [
@@ -21,6 +22,31 @@ const defaults = [
   "albums",
   "about",
 ];
+const folio = (value: number) => String(value).padStart(2, "0");
+/** The masthead dateline is the request date in Beijing time, not an issue number. */
+function dateline(now = new Date()) {
+  return {
+    label: new Intl.DateTimeFormat("zh-CN", {
+      timeZone: "Asia/Shanghai",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "long",
+    }).format(now),
+    iso: new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Shanghai",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(now),
+  };
+}
+type HomeModule = {
+  kind: string;
+  title?: string | null;
+  docs: Content[];
+  about: Content | null;
+};
 export async function FieldHome({
   preview = false,
 }: { preview?: boolean } = {}) {
@@ -44,7 +70,7 @@ export async function FieldHome({
     seen.add(m.kind);
     return true;
   });
-  const data = await Promise.all(
+  const data: HomeModule[] = await Promise.all(
     modules.map(async (m) => {
       if (m.kind === "join")
         return { ...m, docs: [] as Content[], about: null };
@@ -78,228 +104,280 @@ export async function FieldHome({
     }),
   );
   const lead = data.find((m) => m.kind === "events")?.docs[0];
+  const leadHref = lead
+    ? preview
+      ? `${designBase}/activity/${lead.id}`
+      : `/events/${lead.slug}`
+    : "";
   const communityHref = preview ? designBase + "/apply" : "/community/apply";
-  const contentSections = data
-    .map((m) => {
-      if (m.kind === "join")
-        return (
-          <section
-            className={styles.participation}
-            key={m.kind}
-            data-section={m.kind}
-          >
-            <div className={styles.sectionIntro}>
-              <p className={styles.sectionLabel}>参与紫荆</p>
-              <h2>{m.title || "找到适合你的参与方式"}</h2>
-              <p>
-                认识同好、并肩比赛，或一起把活动办起来。每种参与都有清楚的入口与流程。
-              </p>
-            </div>
-            <div className={styles.participationLinks}>
-              {[
-                [
-                  "/join/members",
-                  "加入游戏社群",
-                  "联系管理员，由管理员人工拉入微信群",
-                ],
-                [
-                  "/teams/recruitment",
-                  "报名代表队",
-                  "查看选拔要求与当前招新批次",
-                ],
-                [
-                  "/join/staff",
-                  "参与骨干招新",
-                  "了解职责，提交申请并查看本人回执",
-                ],
-              ].map(([href, title, note]) => (
-                <Link href={href} key={href}>
-                  <div>
-                    <h3>{title}</h3>
-                    <p>{note}</p>
-                  </div>
-                  <Icon name="arrow" />
-                </Link>
-              ))}
-            </div>
-          </section>
-        );
-      if (m.kind === "about")
-        return m.about ? (
-          <section className={styles.about} key={m.kind} data-section={m.kind}>
-            <SectionHeading
-              title={m.title || "关于紫荆"}
-              href="/about"
-              action="了解社团"
-            />
-            <Prose doc={m.about} />
-          </section>
-        ) : null;
-      // A missing dataset does not become a promotional placeholder or fabricated statistic.
-      if (!m.docs.length && m.kind !== "events") return null;
+  const today = dateline();
+  // Same visibility rules as before: a missing dataset never becomes a
+  // promotional placeholder or a fabricated statistic.
+  const chapters = data.filter((m) =>
+    m.kind === "join"
+      ? true
+      : m.kind === "about"
+        ? Boolean(m.about)
+        : m.docs.length > 0 || m.kind === "events",
+  );
+  const [first, ...rest] = chapters;
+  const communityNumber = first ? 2 : 1;
+  const renderChapter = (m: HomeModule, number: number) => {
+    if (m.kind === "join")
       return (
-        <section className={styles.section} key={m.kind} data-section={m.kind}>
-          <SectionHeading
-            title={
-              m.title || (m.kind === "events" ? "活动日程" : names[m.kind])
-            }
-            href={"/" + routeFor[m.kind]}
-            action={m.kind === "events" ? "全部活动" : "查看全部"}
-          />
-          <HomeEntries
-            docs={m.docs}
-            kind={m.kind}
-            games={games.docs}
-            preview={preview}
-          />
-          {m.kind === "events" && <PromotedContent kind="event" items={promotedEvents} />}
-          {!m.docs.length && !(m.kind === "events" && promotedEvents.length) && (
-            <EmptyState
-              title="下一场活动，敬请期待"
-              description="活动发布后，这里会列出时间、参与方式与报名入口。"
-              href="/events"
-              action="查看活动列表"
-            />
-          )}
+        <section
+          className={styles.participation}
+          key={m.kind}
+          data-section={m.kind}
+        >
+          <div className={styles.sectionIntro}>
+            <p className={styles.chapterMark}>
+              <span className={styles.chapterNumber} aria-hidden="true">
+                {folio(number)}
+              </span>
+              参与紫荆
+            </p>
+            <h2>{m.title || "找到适合你的参与方式"}</h2>
+            <p>
+              认识同好、并肩比赛，或一起把活动办起来。每种参与都有清楚的入口与流程。
+            </p>
+          </div>
+          <div className={styles.participationLinks}>
+            {[
+              [
+                "/join/members",
+                "加入游戏社群",
+                "联系管理员，由管理员人工拉入微信群",
+              ],
+              [
+                "/teams/recruitment",
+                "报名代表队",
+                "查看选拔要求与当前招新批次",
+              ],
+              [
+                "/join/staff",
+                "参与骨干招新",
+                "了解职责，提交申请并查看本人回执",
+              ],
+            ].map(([href, title, note]) => (
+              <Link className="hc-arrow" href={href} key={href}>
+                <div>
+                  <h3>{title}</h3>
+                  <p>{note}</p>
+                </div>
+                <Icon name="arrow" />
+              </Link>
+            ))}
+          </div>
         </section>
       );
-    })
-    .filter(Boolean);
+    if (m.kind === "about")
+      return m.about ? (
+        <section className={styles.about} key={m.kind} data-section={m.kind}>
+          <SectionHeading
+            index={folio(number)}
+            title={m.title || "关于紫荆"}
+            href="/about"
+            action="了解社团"
+          />
+          <div className={styles.aboutBody}>
+            <Prose doc={m.about} />
+          </div>
+        </section>
+      ) : null;
+    return (
+      <section
+        className={styles.section}
+        key={m.kind}
+        data-section={m.kind}
+        data-kind={m.kind}
+      >
+        <SectionHeading
+          index={folio(number)}
+          title={m.title || (m.kind === "events" ? "活动日程" : names[m.kind])}
+          href={"/" + routeFor[m.kind]}
+          action={m.kind === "events" ? "全部活动" : "查看全部"}
+        />
+        <HomeEntries
+          docs={m.docs}
+          kind={m.kind}
+          games={games.docs}
+          preview={preview}
+        />
+        {m.kind === "events" && (
+          <PromotedContent kind="event" items={promotedEvents} />
+        )}
+        {!m.docs.length && !(m.kind === "events" && promotedEvents.length) && (
+          <EmptyState
+            title="下一场活动，敬请期待"
+            description="活动发布后，这里会列出时间、参与方式与报名入口。"
+            href="/events"
+            action="查看活动列表"
+          />
+        )}
+      </section>
+    );
+  };
   return (
     <div className={styles.home}>
-      <section className={styles.cover} aria-labelledby="home-title">
-        <div className={styles.coverCopy}>
-          <p className={styles.sectionLabel}>{s.name}</p>
-          <h1 id="home-title">{s.heroTitle || "竞在紫荆"}</h1>
-          <p className={styles.coverDescription}>
-            {s.heroSubtitle ||
-              "在游戏社群里找到队友，在活动与比赛中一起上场。把共同的热爱，变成校园里的相遇。"}
+      <section
+        className={`${styles.stage} hc-stage`}
+        aria-labelledby="home-title"
+      >
+        <div className={styles.stageBar}>
+          <p>{s.name}</p>
+          <p>
+            今日主场 · <time dateTime={today.iso}>{today.label}</time>
           </p>
-          <div className={styles.coverActions}>
-            <Link className="z-button" href="/community">
-              寻找游戏社群 <Icon name="arrow" />
-            </Link>
-            <Link className="z-text-link" href="/events">
-              看看有什么活动 <Icon name="diagonal" />
-            </Link>
-          </div>
-          {s.heroButtonURL &&
-            publicHref(s.heroButtonURL, "/community") !== "/community" && (
-              <Link
-                className="z-text-link"
-                href={publicHref(s.heroButtonURL, "/join")}
-              >
-                {s.heroButtonLabel || "了解参与方式"}
-                <Icon name="diagonal" />
-              </Link>
-            )}
-          <nav className={styles.coverRoutes} aria-label="参与入口">
-            <Link href="/community">
-              社群交流 <Icon name="diagonal" />
-            </Link>
-            <Link href="/teams/recruitment">
-              代表队招新 <Icon name="diagonal" />
-            </Link>
-            <Link href="/account">
-              我的事务 <Icon name="diagonal" />
-            </Link>
-          </nav>
         </div>
-        {s.heroImage ? (
-          <figure className={styles.coverPhoto}>
-            <Picture
-              id={
-                typeof s.heroImage === "number" ? s.heroImage : s.heroImage.id
-              }
-              priority
-            />
-            <figcaption>{s.name} · 社团影像</figcaption>
-          </figure>
-        ) : (
-          <aside
-            className={styles.coverStory}
-            aria-label={lead ? "活动速览" : "社群参与方式"}
-          >
-            <div className={styles.coverTop}>
-              <span>{lead ? "活动速览" : "找到同好，一起上场"}</span>
-              <Icon name={lead ? "calendar" : "arrow"} />
-            </div>
-            {lead ? (
-              <>
-                <div className={styles.coverDate}>
-                  <DateStamp value={lead.startAt} />
-                  <span className={styles.state}>{eventState(lead)}</span>
-                </div>
-                <DemoTag demo={lead.demo} />
-                <h2>
+        <div className={styles.stageBody}>
+          <div className={styles.stageCopy}>
+            <p className="hc-kicker">紫荆主场</p>
+            <h1 id="home-title">{s.heroTitle || "竞在紫荆"}</h1>
+            <p className={styles.stageLead}>
+              {s.heroSubtitle ||
+                "在游戏社群里找到队友，在活动与比赛中一起上场。把共同的热爱，变成校园里的相遇。"}
+            </p>
+            <div className={styles.stageActions}>
+              <Link className="z-button" href="/community">
+                寻找游戏社群 <Icon name="arrow" />
+              </Link>
+              <Link className="z-text-link" href="/events">
+                看看有什么活动 <Icon name="diagonal" />
+              </Link>
+              {s.heroButtonURL &&
+                publicHref(s.heroButtonURL, "/community") !== "/community" && (
                   <Link
-                    href={
-                      preview
-                        ? `${designBase}/activity/${lead.id}`
-                        : `/events/${lead.slug}`
-                    }
+                    className="z-text-link"
+                    href={publicHref(s.heroButtonURL, "/join")}
                   >
-                    {lead.title}
+                    {s.heroButtonLabel || "了解参与方式"}
+                    <Icon name="diagonal" />
                   </Link>
-                </h2>
-                <p>{lead.summary || "查看活动安排、参与条件与报名方式。"}</p>
-                {lead.location && (
-                  <p className={styles.meta}>地点 / {lead.location}</p>
                 )}
-                <Link
-                  className={styles.coverAction}
-                  href={
-                    preview
-                      ? `${designBase}/activity/${lead.id}`
-                      : `/events/${lead.slug}`
+            </div>
+          </div>
+          <div className={styles.stageVisual}>
+            <CourtMotif className={styles.stageCourt} />
+            {s.heroImage ? (
+              <figure className={styles.stagePhoto}>
+                <Picture
+                  id={
+                    typeof s.heroImage === "number"
+                      ? s.heroImage
+                      : s.heroImage.id
                   }
-                >
-                  查看活动与报名 <Icon name="arrow" />
-                </Link>
-              </>
+                  priority
+                />
+                <figcaption>{s.name} · 社团影像</figcaption>
+              </figure>
             ) : (
-              <>
-                <h2>
-                  从一场游戏，
-                  <br />
-                  到一群伙伴。
-                </h2>
-                <p>
-                  在社群里交流，在赛场上并肩。先找到你喜欢的游戏，再联系社群管理员。
-                </p>
-                <Link className={styles.coverAction} href="/community">
-                  浏览游戏社群 <Icon name="arrow" />
-                </Link>
-              </>
+              <aside
+                className={styles.ticket}
+                aria-label={lead ? "活动速览" : "社群参与方式"}
+              >
+                <div className={styles.ticketTop}>
+                  <span>{lead ? "活动速览" : "找到同好，一起上场"}</span>
+                  <Icon name={lead ? "calendar" : "arrow"} />
+                </div>
+                {lead ? (
+                  <>
+                    <div className={styles.ticketDate}>
+                      <DateStamp value={lead.startAt} />
+                      <span
+                        className={styles.state}
+                        data-tone={stateTone(eventState(lead))}
+                      >
+                        {eventState(lead)}
+                      </span>
+                    </div>
+                    <div className={styles.ticketBody}>
+                      <DemoTag demo={lead.demo} />
+                      <h2>
+                        <Link href={leadHref}>{lead.title}</Link>
+                      </h2>
+                      <p>
+                        {lead.summary || "查看活动安排、参与条件与报名方式。"}
+                      </p>
+                      {lead.location && (
+                        <p className={styles.meta}>地点 / {lead.location}</p>
+                      )}
+                    </div>
+                    <Link
+                      className={`${styles.ticketAction} hc-arrow`}
+                      href={leadHref}
+                    >
+                      查看活动与报名 <Icon name="arrow" />
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <div className={styles.ticketBody}>
+                      <h2>
+                        从一场游戏，
+                        <br />
+                        到一群伙伴。
+                      </h2>
+                      <p>
+                        在社群里交流，在赛场上并肩。先找到你喜欢的游戏，再联系社群管理员。
+                      </p>
+                    </div>
+                    <Link
+                      className={`${styles.ticketAction} hc-arrow`}
+                      href="/community"
+                    >
+                      浏览游戏社群 <Icon name="arrow" />
+                    </Link>
+                  </>
+                )}
+              </aside>
             )}
-          </aside>
-        )}
+          </div>
+        </div>
+        <nav className={styles.stageRoutes} aria-label="参与入口">
+          <Link className="hc-arrow" href="/community">
+            社群交流 <Icon name="diagonal" />
+          </Link>
+          <Link className="hc-arrow" href="/teams/recruitment">
+            代表队招新 <Icon name="diagonal" />
+          </Link>
+          <Link className="hc-arrow" href="/account">
+            我的事务 <Icon name="diagonal" />
+          </Link>
+        </nav>
       </section>
       <div className={styles.notices}>
         <StaffRecruitmentNotice home />
       </div>
-      {contentSections[0]}
+      {first && renderChapter(first, 1)}
       {!modules.some((m) => m.kind === "events") && (
         <PromotedContent kind="event" items={promotedEvents} />
       )}
       <section className={styles.communitySection} id="communities">
         <div className={styles.sectionIntro}>
-          <p className={styles.sectionLabel}>游戏社群</p>
+          <p className={styles.chapterMark}>
+            <span className={styles.chapterNumber} aria-hidden="true">
+              {folio(communityNumber)}
+            </span>
+            游戏社群
+          </p>
           <h2>找到你的游戏社群</h2>
           <p>
             从熟悉的游戏开始，认识下一位队友。查看社群介绍，联系管理员，申请加入微信群。
           </p>
-          <Link className="z-text-link" href="/community">
-            所有游戏社群 <Icon name="arrow" />
-          </Link>
-          <Link className={styles.secondaryLink} href={communityHref}>
-            发起新社群申请 <Icon name="diagonal" />
-          </Link>
+          <div className={styles.introLinks}>
+            <Link className="z-text-link" href="/community">
+              所有游戏社群 <Icon name="arrow" />
+            </Link>
+            <Link className={styles.secondaryLink} href={communityHref}>
+              发起新社群申请 <Icon name="diagonal" />
+            </Link>
+          </div>
         </div>
-        <div className={styles.communityRows}>
+        <div className={styles.communityGrid}>
           {games.docs.map((g) => (
             <Link
-              className={styles.communityRow}
+              className={`${styles.communityCard} hc-arrow`}
               href={(preview ? designBase : "") + "/community/" + g.slug}
               key={g.id}
             >
@@ -325,7 +403,7 @@ export async function FieldHome({
         <PromotedContent kind="notice" />
         <PromotedContent kind="showcase" />
       </div>
-      {contentSections.slice(1)}
+      {rest.map((m, index) => renderChapter(m, communityNumber + 1 + index))}
     </div>
   );
 }

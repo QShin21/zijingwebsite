@@ -160,6 +160,9 @@ async function reviewHarness(contactConsent: unknown, complete = true, authorize
     '@/components/SubmitButton': { SubmitButton: 'button' }, '@/components/Content': { Pagination: 'nav' },
     '@/components/activity-pages/ActionForm': { ActionForm: 'form' },
     '@/components/community-pages/CommunityPages': { CommunityPageHeader: 'header', CommunityEmpty: 'section' },
+    // V2 page frame: host stand-ins keep the decision subtree (buttons, consent text) in the walked element tree.
+    '@/components/v2/TaskFrame': { TaskFrame: 'div', TaskNote: 'section' },
+    '@/components/v2/ui': { EmptyState: 'section', KeyValues: 'dl', Pager: 'nav', Section: 'section', StatusPill: 'span' },
     '@/lib/content': { cms: async () => ({ auth: async () => ({ user }), find }) }, '@/lib/rules': rules, '@/lib/community-status': shared,
     '../actions': { decideCommunityResultAction: vi.fn() },
     '../../_club/ClubPage': { ClubFrame: 'div' },

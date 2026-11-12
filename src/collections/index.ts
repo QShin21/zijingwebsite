@@ -39,6 +39,7 @@ import { protectLegacyTeamHonors } from "./team-honor-legacy";
 import { publicMediaRead } from "../lib/public-media-access";
 import { nicknameKey, validNickname } from "../lib/nickname";
 import { postImagesField, validatePostImages } from "./publication-images";
+import { guardTeamSlug, validateTeamSlug } from "../lib/team-slugs";
 
 const text = (name: string, label: string, required = false): TextField => ({
   name,
@@ -381,11 +382,12 @@ function content(
           return args;
         },
       ],
-      beforeChange: [guard(scoped, self), ...(slug === 'teams' ? [guardTeamLifecycle] : []), ...(slug === 'events' ? [validateSignupForm] : []), ...(hasPostImages ? [validatePostImages] : [])],
+      beforeChange: [guard(scoped, self), ...(slug === 'teams' ? [guardTeamSlug, guardTeamLifecycle] : []), ...(slug === 'events' ? [validateSignupForm] : []), ...(hasPostImages ? [validatePostImages] : [])],
       afterChange: [...(slug === "teams" ? [closeInactiveTeamRecruitments] : []), audit],
     },
     fields: [
-      ...common,
+      ...common.map(field => slug === "teams" && "name" in field && field.name === "slug" && field.type === "text"
+        ? { ...field, validate: validateTeamSlug } : field),
       ...(hasPostImages ? [postImagesField] : []),
       ...fields,
       {

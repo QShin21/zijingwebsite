@@ -1,0 +1,105 @@
+.form {
+  display: grid;
+  gap: 16px;
+  padding: clamp(18px, 3vw, 28px);
+  border: 1px solid var(--z-line);
+  border-top: 6px solid var(--z-action);
+  border-radius: var(--z-radius);
+  background: var(--z-surface);
+}
+.history {
+  display: grid;
+  gap: 16px;
+}
+.historyHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.historyHead h2 {
+  font-size: var(--z-text-h2);
+}
+.historyHead span,
+.meta {
+  color: var(--z-muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+.timeline {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0 0 0 22px;
+  list-style: none;
+}
+.timeline::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 6px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--z-line);
+}
+.record {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  padding: 18px 20px;
+  border: 1px solid var(--z-line);
+  border-radius: var(--z-radius);
+  background: var(--z-surface);
+}
+.record::before {
+  content: "";
+  position: absolute;
+  top: 22px;
+  left: -22px;
+  width: 15px;
+  height: 15px;
+  border: 3px solid var(--z-paper);
+  border-radius: 50%;
+  background: var(--z-action);
+}
+.record[data-state="approved"]::before {
+  background: var(--z-success);
+}
+.record[data-state="returned"]::before {
+  background: var(--z-warning);
+}
+.record[data-state="rejected"]::before,
+.record[data-state="withdrawn"]::before {
+  background: var(--z-line-strong);
+}
+.recordHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+.recordHead h3 {
+  font-size: 18px;
+}
+.disclosure {
+  border: 1px solid var(--z-line);
+  border-radius: var(--z-radius-small);
+  background: var(--z-raised);
+}
+.disclosure summary {
+  padding: 10px 14px;
+  font-weight: 800;
+}
+.disclosure p {
+  padding: 0 14px 14px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}

@@ -1,0 +1,72 @@
+[
+  {
+    "route": "/events",
+    "status": 200,
+    "location": null,
+    "bytes": 46521,
+    "ok": true
+  },
+  {
+    "route": "/announcements",
+    "status": 200,
+    "location": null,
+    "bytes": 40506,
+    "ok": true
+  },
+  {
+    "route": "/login",
+    "status": 200,
+    "location": null,
+    "bytes": 35943,
+    "ok": true
+  },
+  {
+    "route": "/register",
+    "status": 200,
+    "location": null,
+    "bytes": 37859,
+    "ok": true
+  },
+  {
+    "route": "/account/reset",
+    "status": 200,
+    "location": null,
+    "bytes": 36929,
+    "ok": true
+  },
+  {
+    "route": "/privacy",
+    "status": 200,
+    "location": null,
+    "bytes": 37687,
+    "ok": true
+  },
+  {
+    "route": "/",
+    "status": 307,
+    "location": "/events",
+    "bytes": 7,
+    "ok": true
+  },
+  {
+    "route": "/community",
+    "status": 307,
+    "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fcommunity",
+    "bytes": 118,
+    "ok": true
+  },
+  {
+    "route": "/teams",
+    "status": 307,
+    "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fteams",
+    "bytes": 114,
+    "ok": true
+  },
+  {
+    "route": "/account",
+    "status": 307,
+    "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Faccount",
+    "bytes": 116,
+    "ok": true
+  }
+]

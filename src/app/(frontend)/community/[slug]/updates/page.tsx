@@ -1,113 +1,87 @@
 import Link from "next/link";
-import { headers } from "next/headers";
-import { notFound } from "next/navigation";
-import { bySlug, cms } from "@/lib/content";
-import { managesGame, formatDate } from "@/lib/rules";
-import { CommunityPager, pageNumber } from "@/components/CommunityPager";
+import { getCommunityPosts, type ArticleCard, type EventCard } from "@/lib/v2";
 import { StaffRecruitmentNotice } from "@/components/StaffRecruitmentNotice";
-import {
-  CommunityEmpty,
-  CommunityPageHeader,
-} from "@/components/community-pages/CommunityPages";
-import { ClubFrame } from "../../../_club/ClubPage";
-import styles from "@/components/community-pages/CommunityPages.module.css";
+import { pageNumber, read, request, single, type Search } from "@/components/v2/data";
+import { ButtonLink, EmptyState, LinkTabs, Notice, Pager, Wrap } from "@/components/v2/ui";
+import { MatchCard, NoticeRow } from "@/components/v2/cards";
+import { managesGame } from "@/lib/rules";
+import { bySlug } from "@/lib/content";
+import layout from "@/components/v2/layout.module.css";
+import styles from "@/components/v2/community.module.css";
 
-export default async function Updates({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ page?: string; message?: string }>;
-}) {
+export default async function Updates({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Search }) {
   const { slug } = await params;
-  const query = await searchParams;
-  const game = await bySlug("games", slug);
-  if (!game) notFound();
-  const p = await cms();
-  const { user } = await p.auth({ headers: await headers() });
-  const page = pageNumber(query.page);
-  const entries = await p.find({
-    collection: "community-posts",
-    overrideAccess: false,
-    user: null,
-    depth: 0,
-    where: { game: { equals: game.id } },
-    sort: "-createdAt",
-    limit: 10,
-    page,
-    select: {
-      title: true,
-      body: true,
-      category: true,
-      createdAt: true,
-      authorName: true,
-    },
-  });
+  const search = await searchParams;
+  const category = single(search.category) === "notice" ? "notice" : "event";
+  const page = pageNumber(search.page);
+  const base = `/community/${slug}/updates`;
+  const [result, game, { user }] = await Promise.all([
+    read(getCommunityPosts, { slug, category, page, limit: 12 }, base),
+    bySlug("games", slug),
+    request(),
+  ]);
+  const canPublish = Boolean(game && managesGame(user, game.id));
+  const message = single(search.message);
   return (
-    <ClubFrame className={`${styles.page} ${styles.body}`}>
-      <CommunityPageHeader
-        title="活动与通知"
-        description="社群的近期安排、参与方式与日常通知。"
-        action={
-          managesGame(user, game.id) ? (
-            <Link
-              className="button light"
-              href={`/community/${slug}/updates/new`}
-            >
-              发布活动与通知
-            </Link>
-          ) : undefined
-        }
-      />
-      <p role="status">{query.message}</p>
-      <StaffRecruitmentNotice />
-      <div className={styles.contentWorkspace}>
-        <section aria-label="社群活动与通知列表">
-          <ul className={styles.readingList}>
-            {entries.docs.map((post) => (
-              <li className={styles.readingRow} key={post.id}>
-                <div className={styles.date}>
-                  <time dateTime={post.createdAt}>
-                    {formatDate(post.createdAt)}
-                  </time>
-                  <span>
-                    {post.category === "event" ? "社群活动" : "社群通知"}
-                  </span>
-                </div>
-                <div>
-                  <h2>
-                    <Link href={`/community/${slug}/updates/${post.id}`}>
-                      {post.title}
-                    </Link>
-                  </h2>
-                  <p className={styles.excerpt}>{post.body}</p>
-                  <Link href={`/community/${slug}/updates/${post.id}`}>
-                    {post.category === "event" ? "查看活动与报名" : "阅读通知"}
-                  </Link>
-                </div>
-              </li>
-            ))}
-          </ul>
-          {!entries.docs.length && (
-            <CommunityEmpty title="暂无活动与通知">
-              <p>
-                社群的活动安排发布后会在这里展示。你也可以查看已公开的社群风采。
-              </p>
-              <Link href={`/community/${slug}/showcase`}>查看社群风采</Link>
-            </CommunityEmpty>
-          )}
-          <CommunityPager
-            page={page}
-            pages={entries.totalPages}
-            base={`/community/${slug}/updates`}
+    <Wrap className={layout.pageBody}>
+      <div className={layout.sidebarLayout}>
+        <div>
+          <h1 className={styles.pageTitle}>活动与通知</h1>
+          {message && <Notice>{message}</Notice>}
+          <StaffRecruitmentNotice />
+          <LinkTabs
+            label="内容类别"
+            items={[
+              { href: base, label: "社群活动", current: category === "event" },
+              { href: `${base}?category=notice`, label: "社群通知", current: category === "notice" },
+            ]}
           />
-        </section>
-        <aside className={styles.publishAside}>
-          <h2>找到一起参与的同学</h2>
-          <p>联系管理员申请加入微信群，在社群里了解日常安排与交流方式。</p>
-          <Link href={`/community/${slug}#community-contacts`}>查看管理员名片</Link>
+          {result.docs.length ? (
+            category === "event" ? (
+              <div className={styles.postList}>
+                {(result.docs as EventCard[]).map((event) => (
+                  <MatchCard key={event.key} event={event} />
+                ))}
+              </div>
+            ) : (
+              <ul className={`${layout.list} ${layout.panel}`}>
+                {(result.docs as ArticleCard[]).map((notice) => (
+                  <NoticeRow key={notice.key} article={notice} />
+                ))}
+              </ul>
+            )
+          ) : (
+            <EmptyState
+              title={category === "event" ? "暂无社群活动" : "暂无社群通知"}
+              icon={category === "event" ? "calendar" : "megaphone"}
+              actions={
+                <ButtonLink href={`/community/${slug}/showcase`} tone="ghost" size="small">
+                  查看社群风采
+                </ButtonLink>
+              }
+            >
+              社群的活动安排与通知发布后会在这里展示。
+            </EmptyState>
+          )}
+          <Pager page={result.page} totalPages={result.totalPages} path={base} query={{ category: category === "notice" ? "notice" : undefined }} />
+        </div>
+        <aside className={`${layout.panel} ${layout.sticky}`}>
+          <h2 className={layout.panelTitle}>找到一起参与的同学</h2>
+          <p className={styles.asideText}>联系管理员申请加入微信群，在社群里了解日常安排与交流方式。</p>
+          <p>
+            <Link className="text-link" href={`/community/${slug}#community-contacts`}>
+              查看管理员名片
+            </Link>
+          </p>
+          {canPublish && (
+            <p style={{ marginTop: 16 }}>
+              <ButtonLink href={`${base}/new`} icon="plus" size="small">
+                发布活动或通知
+              </ButtonLink>
+            </p>
+          )}
         </aside>
       </div>
-    </ClubFrame>
+    </Wrap>
   );
 }

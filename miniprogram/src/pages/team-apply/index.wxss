@@ -1,31 +1,15 @@
 @import "../../templates/business.wxss";
 @import "../../styles/native-forms.wxss";
-.application-loading { padding: 12px 0 24px; }
-.application-read-error { margin-bottom: 24px; }
-.application-form-error { margin: 12px 0 24px; }
-.mini-page.native-form-page.team-apply-page .application-form-error > .error { margin: 0 0 12px; }
-.mini-page.native-form-page.team-apply-page .application-form-error > .secondary { width: 100%; }
-.mini-page.native-form-page.team-apply-page .application-tools { align-items: center; margin-top: 0; }
-.mini-page.native-form-page.team-apply-page .application-tools > .plain { text-align: left; }
-.team-application-editor { margin-top: 24px; }
-.application-context { padding: 20px 16px; background: var(--z-secondary-bg); color: var(--z-secondary-text); border-radius: 8px; }
-.mini-page.native-form-page.team-apply-page .application-context .task-context { display: block; margin: 0 0 8px; color: var(--z-secondary-text); }
-.application-context > .muted { margin-top: 8px; }
-.application-fields { margin-top: 24px; }
-.application-picker { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.application-picker > text:first-child { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-.picker-sign { flex-shrink: 0; color: var(--z-muted); }
-.mini-page.native-form-page.team-apply-page .plan-field { margin-top: 28px; }
-.plan-guidance { display: block; margin-bottom: 12px; color: var(--z-muted); font-size: 14px; line-height: 1.75; }
-.mini-page.native-form-page.team-apply-page textarea { height: 240px; min-height: 240px; }
-.mini-page.native-form-page.team-apply-page .privacy-link { text-align: left; }
-.mini-page.native-form-page.team-apply-page .form-footer > .primary { margin-top: 12px; }
-.mini-page.native-form-page.team-apply-page .application-history { margin-top: 32px; }
-.mini-page.native-form-page.team-apply-page .application-history > .section-head { flex-wrap: wrap; gap: 8px 16px; margin-bottom: 0; }
-.mini-page.native-form-page.team-apply-page .application-history .record-list { margin-top: 8px; }
-.mini-page.native-form-page.team-apply-page .application-record:first-child { border-top: 0; }
-.mini-page.native-form-page.team-apply-page .application-record > .record-meta { align-items: center; margin-top: 0; }
-.application-record-title { display: block; margin-top: 12px; font-size: 18px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; word-break: break-word; }
-.record-update { display: block; color: var(--z-muted); font-size: 13px; line-height: 1.7; margin-top: 8px; }
-.mini-page.native-form-page.team-apply-page .submitted-plan { margin-top: 8px; padding: 0 0 16px; }
-.mini-page.native-form-page.team-apply-page .application-load-more { width: 100%; margin-top: 24px; }
+
+/* V2 team establishment application. */
+.team-apply-v2 { padding-top: 0; }
+.team-apply-tools { display: flex; flex-wrap: wrap; gap: 12rpx; margin-bottom: 12rpx; }
+.team-apply-tools > button { flex: 1; min-width: 220rpx; }
+.team-apply-editor { border-top: 8rpx solid var(--z-primary); }
+.team-apply-context { align-self: flex-start; }
+.team-apply-picker { display: flex; align-items: center; justify-content: space-between; }
+.team-apply-plan { height: 320rpx; }
+.team-apply-label { display: block; font-weight: 900; }
+.mini-page .team-apply-disclosure { display: flex; justify-content: space-between; width: 100%; padding: 10rpx 0; }
+.team-apply-plan-text { padding: 18rpx; border-radius: 20rpx; background: var(--z-raised); }
+.mini-page .team-apply-more { display: block; width: 100%; margin-top: 16rpx; }

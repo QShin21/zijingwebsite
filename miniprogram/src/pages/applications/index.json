@@ -2,9 +2,9 @@
   "usingComponents": {
     "privacy-consent": "/components/privacy-consent/index"
   },
-  "navigationBarBackgroundColor": "#fffdf9",
+  "navigationBarBackgroundColor": "#f5f4fa",
   "navigationBarTextStyle": "black",
-  "backgroundColor": "#f7f5f0",
+  "backgroundColor": "#f5f4fa",
   "backgroundTextStyle": "dark",
   "navigationBarTitleText": "管理员申请"
 }

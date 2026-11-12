@@ -81,9 +81,10 @@ test("活动网页申请/撤回/退回/重提/审核/改稿复审及主动升降
     await staff.goto("/community/promotions?view=review"); await record.getByRole("button", { name: "通过升推", exact: true }).click();
     await openReviewedContent(staff, pending.id, "审核通过，已升推。");
     await expect(staffSource).toContainText("已升推");
-    await page.goto("/"); const projected = page.locator('[data-section="promoted-event"] [data-promotion-source="community-posts:' + post + '"]');
+    // V2 主场: approved promotions render in the independent 社团精选 block (HomeResponse.promoted), not only in upcoming.
+    await page.goto("/"); const projected = page.locator('main [data-section="promoted"] [data-promotion-source="community-posts:' + post + '"]').first();
     await expect(projected.getByRole("link", { name: "合成网页升推活动", exact: true })).toHaveAttribute("href", sourcePath);
-    await expect(page.locator('[data-section="events"] [data-promotion-source="community-posts:' + post + '"]')).toBeVisible();
+    await expect(projected).toBeVisible();
     await participant.reload(); await expect(participant.getByText("已报名", { exact: false }).first()).toBeVisible();
     expect((await p.findByID({ collection: "community-posts", id: post, overrideAccess: true, depth: 0 })).game).toBe(game);
     expect((await participant.request.get("/api/event-signups/" + receipt.id, { headers: origin })).status()).toBe(200);
@@ -125,7 +126,7 @@ test("公告网页申请由宣传部骨干审核，社团首页链接原公告�
     await staff.locator('[data-promotion-record="' + pending.id + '"]').getByRole("button", { name: "通过升推", exact: true }).click();
     await openReviewedContent(staff, pending.id, "审核通过，已升推。");
     await expect(staff.locator('[data-promotion-source="community-posts:' + notice.id + '"]')).toContainText("已升推");
-    await page.goto("/"); const projected = page.locator('[data-section="promoted-notice"] [data-promotion-source="community-posts:' + notice.id + '"]');
+    await page.goto("/"); const projected = page.locator('main [data-section="promoted"] [data-promotion-source="community-posts:' + notice.id + '"]').first();
     await expect(projected.getByRole("link", { name: "合成网页升推公告", exact: true })).toHaveAttribute("href", sourcePath);
     await projected.getByRole("link", { name: "合成网页升推公告", exact: true }).click(); await expect(page).toHaveURL(new RegExp("/updates/" + notice.id + "$"));
     await expect(page.getByRole("button", { name: "核对并提交" })).toHaveCount(0);
@@ -162,7 +163,7 @@ test("风采本地批准后网页申请升推，隐藏关闭首页且重新公�
     await staff.locator('[data-promotion-record="' + pending.id + '"]').getByRole("button", { name: "通过升推", exact: true }).click();
     await openReviewedContent(staff, pending.id, "审核通过，已升推。");
     await expect(staff.locator('[data-promotion-source="community-showcase:' + source.id + '"]')).toContainText("已升推");
-    await page.goto("/"); const projected = page.locator('[data-section="promoted-showcase"] [data-promotion-source="community-showcase:' + source.id + '"]');
+    await page.goto("/"); const projected = page.locator('main [data-section="promoted"] [data-promotion-source="community-showcase:' + source.id + '"]').first();
     await expect(projected.getByRole("link", { name: "合成网页升推风采", exact: true })).toHaveAttribute("href", detail);
     await projected.getByRole("link", { name: "合成网页升推风采", exact: true }).click();
     await expect(page).toHaveURL(url => url.pathname === detail && url.search === "" && url.hash === "");
@@ -227,6 +228,6 @@ test("外链风采保留社群展示，在同一风采上传受控视频后才�
     await staff.goto("/community/promotions?view=review"); await staff.locator('[data-promotion-record="' + pending.id + '"]').getByRole("button", { name: "通过升推", exact: true }).click();
     await openReviewedContent(staff, pending.id, "审核通过，已升推。");
     await expect(staff.locator('[data-promotion-source="community-showcase:' + source.id + '"]')).toContainText("已升推");
-    await page.goto("/"); await expect(page.locator('[data-section="promoted-showcase"] [data-promotion-source="community-showcase:' + source.id + '"]')).toBeVisible();
+    await page.goto("/"); await expect(page.locator('main [data-section="promoted"] [data-promotion-source="community-showcase:' + source.id + '"]').first()).toBeVisible();
   } finally { await staffContext.close(); }
 });

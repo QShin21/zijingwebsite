@@ -1,0 +1,203 @@
+/*
+ * 紫荆主场 · Home Court — website identity layer (frontend reset 2026-11-11).
+ *
+ * The generated tokens in tokens.css stay the single source for the shared
+ * roles (paper, ink, action, status, focus, disabled …) that the native mini
+ * program and the token contrast tests also read. This file only adds the
+ * website roles those tokens do not cover: the deep aubergine "stage", the
+ * scoreboard figures, editorial rules and the chapter counter. Nothing here
+ * changes behaviour, data or permissions.
+ */
+:root {
+  --hc-stage: #2a1631;
+  --hc-stage-raised: #3b2143;
+  --hc-stage-ink: #f8f1ea;
+  --hc-stage-muted: #cfc0cd;
+  --hc-stage-accent: #e9bce0;
+  --hc-stage-line: rgba(248, 241, 234, 0.2);
+  --hc-stage-line-strong: rgba(248, 241, 234, 0.42);
+  --hc-stage-dot: rgba(248, 241, 234, 0.075);
+  --hc-ticket: var(--z-surface);
+  --hc-ticket-ink: var(--z-ink);
+  --hc-ticket-muted: var(--z-muted);
+  --hc-ticket-accent: var(--z-action);
+  --hc-rule: var(--z-ink);
+  --hc-wash: color-mix(in srgb, var(--z-action) 5%, var(--z-paper));
+  --hc-figure:
+    "Bahnschrift", "DIN Alternate", "DIN Condensed", "Roboto Condensed",
+    "Arial Narrow", var(--z-sans);
+  --hc-track: 0.01em;
+  --hc-radius: 12px;
+  --hc-radius-stage: 20px;
+  --hc-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+:root[data-z-theme="dark"] {
+  --hc-stage: #2b1733;
+  --hc-stage-raised: #3b2143;
+  --hc-stage-line: rgba(248, 241, 234, 0.18);
+  --hc-stage-dot: rgba(248, 241, 234, 0.06);
+  --hc-ticket: #3b2143;
+  --hc-ticket-ink: #f6eef3;
+  --hc-ticket-muted: #cfc0cd;
+  --hc-ticket-accent: #e9bce0;
+  --hc-rule: #a59dab;
+  --hc-wash: color-mix(in srgb, var(--z-action) 7%, var(--z-paper));
+}
+
+/* Base: CJK-friendly tracking, crisp hierarchy, one chapter counter per page. */
+.z-design {
+  font-kerning: normal;
+  text-underline-offset: 0.24em;
+}
+.z-design :is(h1, h2, h3, h4) {
+  letter-spacing: var(--hc-track);
+}
+.z-design h1 {
+  font-weight: 800;
+}
+.z-design :is(p, li, dd) {
+  text-wrap: pretty;
+}
+.z-design main {
+  counter-reset: hc-chapter;
+}
+.z-design ::selection {
+  background: color-mix(in srgb, var(--z-action) 22%, var(--z-paper));
+  color: var(--z-ink);
+}
+
+/* Scoreboard figures: page folios, dates and counts. */
+.hc-folio,
+.hc-figure {
+  font-family: var(--hc-figure);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.hc-folio {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--z-action);
+  font-size: 15px;
+  line-height: 1;
+}
+.hc-folio::after {
+  content: "";
+  width: 24px;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+/* Kicker: the short label that opens a page or a chapter. */
+.hc-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  color: var(--z-action);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+}
+.hc-kicker::before {
+  content: "";
+  flex: none;
+  width: 18px;
+  height: 3px;
+  background: currentColor;
+}
+
+/* Stage: the deep aubergine surface used by the home masthead and footer. */
+.hc-stage {
+  position: relative;
+  isolation: isolate;
+  color: var(--hc-stage-ink);
+  background-color: var(--hc-stage);
+  background-image: radial-gradient(
+    var(--hc-stage-dot) 1px,
+    transparent 1.4px
+  );
+  background-size: 22px 22px;
+}
+.hc-stage :is(h1, h2, h3, strong) {
+  color: var(--hc-stage-ink);
+}
+.hc-stage :where(a, button, summary):focus-visible {
+  outline-color: var(--hc-stage-accent);
+}
+.hc-stage .z-button {
+  color: var(--hc-stage);
+  background: var(--hc-stage-ink);
+  border-color: var(--hc-stage-ink);
+}
+/* Same specificity as the base hover in design.css, declared later, so the
+   stage keeps dark-on-ivory text while hovered. */
+.hc-stage .z-button:not(:disabled):not([aria-disabled="true"]):hover {
+  color: var(--hc-stage);
+  background: #ffffff;
+  border-color: #ffffff;
+}
+.hc-stage .z-text-link {
+  color: var(--hc-stage-ink);
+}
+.hc-stage .z-text-link:hover {
+  color: var(--hc-stage-accent);
+}
+
+/* Court motif: an original tactics-board drawing, never content. */
+.hc-court {
+  display: block;
+  color: var(--hc-stage-line-strong);
+  pointer-events: none;
+}
+.hc-court .hc-court-run {
+  stroke-dasharray: 2 9;
+}
+.hc-court .hc-court-mark {
+  color: var(--hc-stage-accent);
+}
+
+/* Arrow nudge for links that carry an arrow icon. */
+.z-design :is(.z-button, .z-text-link, .hc-arrow) .icon {
+  transition: transform var(--z-duration) var(--hc-ease);
+}
+.z-design :is(.z-button, .z-text-link, .hc-arrow):hover .icon {
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .z-design :is(.z-button, .z-text-link, .hc-arrow) .icon,
+  .z-design :is(.z-button, .z-text-link, .hc-arrow):hover .icon {
+    transition: none;
+    transform: none;
+  }
+}
+@media (forced-colors: active) {
+  .hc-stage {
+    background-image: none;
+    border: 1px solid CanvasText;
+  }
+  .hc-court {
+    color: GrayText;
+  }
+  .hc-kicker::before,
+  .hc-folio::after {
+    background: CanvasText;
+  }
+}
+@media print {
+  .hc-stage {
+    color: #000;
+    background: none;
+    border: 1px solid #000;
+  }
+  .hc-stage :is(h1, h2, h3, strong) {
+    color: #000;
+  }
+  .hc-court {
+    display: none;
+  }
+}

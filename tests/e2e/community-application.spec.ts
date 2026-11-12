@@ -97,11 +97,12 @@ test("完整申请、备案提示、私有二维码、社长查看全部资料�
   await card.getByRole("button", { name: "退回补充", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("审核结果已保存");
   await page.context().clearCookies(); await login(page, applicant);
-  const history = page.getByRole("navigation", { name: "申请记录视图", exact: true }).getByRole("link", { name: "查看全部申请", exact: true });
-  await expect(history).toHaveAttribute("href", "/account?view=history#applications-title");
+  // V2 "我的": record tabs replace the old 申请记录视图; the full list is its own region.
+  const history = page.getByRole("navigation", { name: "我的记录", exact: true }).getByRole("link", { name: /^我的申请/ });
+  await expect(history).toHaveAttribute("href", "/account?view=applications");
   await history.click();
-  await expect(page).toHaveURL(url => url.pathname === "/account" && url.search === "?view=history" && url.hash === "#applications-title");
-  const applicationLink = page.getByRole("region", { name: "申请记录", exact: true }).getByRole("link", { name: gameName, exact: true });
+  await expect(page).toHaveURL(url => url.pathname === "/account" && url.search === "?view=applications");
+  const applicationLink = page.getByRole("region", { name: "全部申请", exact: true }).getByRole("link", { name: gameName, exact: true });
   await expect(applicationLink).toHaveAttribute("href", `/community/apply?edit=${application.id}`);
   await applicationLink.click();
   await expect(page).toHaveURL(url => url.pathname === "/community/apply" && url.search === `?edit=${application.id}` && url.hash === "");

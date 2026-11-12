@@ -1,25 +1,32 @@
 <page-meta page-style="{{themePageStyle}}" />
-<import src="../../templates/common.wxml" />
-<import src="../../templates/native.wxml" />
-<view class="page mini-page native-page communities-page">
-  <view class="native-tab-heading"><text class="title">找到你的游戏社群</text><text class="subtitle">认识一起玩的同学，查看社群近况与加入方式。</text></view>
-  <template is="feedback" data="{{needsLogin}}" />
-  <block wx:if="{{!needsLogin}}">
-    <view class="community-search"><text class="field-label">查找游戏或社群</text><view class="search"><input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{search}}" bindinput="inputSearch" bindconfirm="searchGames" placeholder="输入名称关键词" aria-label="搜索游戏或社群名称" confirm-type="search" maxlength="80" /><button class="secondary" bindtap="searchGames">查找</button></view><view wx:if="{{appliedSearch}}" class="community-search-result"><text class="muted">名称包含“{{appliedSearch}}”</text><button class="plain" bindtap="clearSearch">清除搜索</button></view></view>
-    <view class="native-section-head"><text class="section-title">{{appliedSearch ? '搜索结果' : '游戏项目'}}</text><text class="native-inline-meta" wx:if="{{docs.length}}">已加载 {{docs.length}} 个</text></view>
-    <view wx:if="{{loading}}" class="communities-loading" aria-role="status"><text class="muted">正在读取社群…</text><view wx:if="{{!docs.length}}" class="loading-lines" aria-hidden="true"><view class="loading-line"></view><view class="loading-line short"></view></view></view>
-    <view wx:if="{{error}}" class="native-feedback community-directory-error"><text class="error" aria-role="alert">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{loading}}">重试社群列表</button></view>
-    <view class="community-directory">
-      <button wx:for="{{docs}}" wx:key="id" class="content-link community-project" bindtap="openCommunity" data-doc="{{item}}" hover-class="pressed">
-        <view class="community-project-main"><image wx:if="{{item.coverImage && !item.nativeCoverError}}" class="community-project-image" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt || item.title}}" binderror="nativeCoverError" data-id="{{item.id}}" data-collection="{{item.collection}}" data-url="{{item.coverImage.url}}" /><view wx:else class="community-project-mark" aria-hidden="true"><template is="native-field-graphic" /></view><view class="community-project-copy"><text class="community-project-title">{{item.title}}</text><text wx:if="{{item.summary}}" class="community-project-summary">{{item.summary}}</text><text wx:if="{{item.demo}}" class="native-inline-meta">演示资料</text></view></view>
-        <text wx:if="{{item.nativeCoverError}}" class="native-media-error">封面暂时无法显示，仍可进入社群。</text><text wx:if="{{item.coverImage.credit}}" class="native-media-credit">{{item.coverImage.credit}}</text><view class="community-project-foot"><text>查看社群与加入方式</text><text aria-hidden="true">›</text></view>
-      </button>
+<import src="../../templates/v2.wxml" />
+<view class="page mini-page {{theme === 'dark' ? 'zj-dark' : ''}}">
+  <view class="page-heading">
+    <text class="eyebrow">COMMUNITIES · 游戏社群</text>
+    <text class="title">找到同好，从这里开场</text>
+    <text class="subtitle">选择你玩的游戏，看看活动与风采，再联系管理员人工拉你进群。</text>
+  </view>
+  <template wx:if="{{!user}}" is="zj-login" data="{{title: '登录后查看游戏社群', body: '社群名片与活动仅向社团成员展示。'}}" />
+  <block wx:else>
+    <view class="search" role="search">
+      <input value="{{input}}" placeholder="搜索游戏名称或介绍" confirm-type="search" maxlength="80" bindinput="typing" bindconfirm="search" cursor-spacing="24" aria-label="搜索社群" />
+      <button class="primary" bindtap="search">查找</button>
     </view>
-    <view wx:if="{{!loading && !docs.length && !error}}" class="empty"><text class="state-title">{{appliedSearch ? '没有找到这个名称' : '暂未开放游戏社群'}}</text><text class="muted">{{appliedSearch ? '试试游戏简称，或清除搜索查看全部社群。' : '已公开的社群会出现在这里，也可申请参与组织。'}}</text><button wx:if="{{appliedSearch}}" class="secondary" bindtap="clearSearch">查看全部社群</button></view>
-    <button wx:if="{{hasMore}}" class="secondary communities-load-more" bindtap="onReachBottom" disabled="{{loading}}" loading="{{loading}}">加载更多社群</button>
-    <view class="native-section communities-organize"><text class="section-title">想组织一个社群？</text><text class="native-summary">申请新建游戏社群，或参与已有社群管理。</text><view class="actions"><button class="secondary" bindtap="apply">申请社群管理员</button><button class="plain" bindtap="applications">我的申请</button></view></view>
+    <view wx:if="{{q}}" class="row"><text class="result-caption">“{{q}}”的匹配结果 · {{total}} 个</text><button class="plain" bindtap="clear">全部社群</button></view>
+    <template wx:if="{{loading}}" is="zj-loading" />
+    <template wx:elif="{{error}}" is="zj-error" data="{{error}}" />
+    <block wx:elif="{{docs.length}}">
+      <view class="zj-grid2">
+        <block wx:for="{{docs}}" wx:key="key"><template is="zj-community" data="{{item, img}}" /></block>
+      </view>
+      <text wx:if="{{loadMoreError && !loading}}" class="error">{{loadMoreError}}</text>
+      <button wx:if="{{hasMore || loadMoreError}}" class="secondary communities-more" bindtap="onReachBottom" disabled="{{loadingMore}}">{{loadingMore ? '加载中…' : (loadMoreError ? '重试加载更多' : '加载更多')}}</button>
+    </block>
+    <template wx:else is="zj-empty" data="{{title: q ? '没有找到匹配的社群' : '社群正在筹备', body: q ? '换一个游戏名称或关键词试试。' : '想组织新的游戏社群，可以提交组织申请。', icon: '🎮'}}" />
+    <view class="communities-organize">
+      <text class="communities-organize-title">把热爱的游戏，组织成社群</text>
+      <text class="zj-small communities-organize-body">参与已有社群的组织工作，或为还没出现的游戏发起申请。</text>
+      <button class="accent" bindtap="apply">申请成为社群管理员</button>
+    </view>
   </block>
-  <view class="native-section communities-staff"><view class="native-section-head"><text class="section-title">参与社团工作</text><button class="more" bindtap="staff">骨干招新</button></view><text class="muted">查看执行部、宣传部招新批次及本人申请。</text><button wx:for="{{staffBatches}}" wx:key="id" class="content-link shortcut" bindtap="applyStaff" data-id="{{item.id}}"><view class="shortcut-main"><text class="badge">{{item.state}}</text><text class="shortcut-title">{{item.title}}</text><text wx:if="{{item.description}}" class="muted">{{item.description}}</text></view><text class="shortcut-sign" aria-hidden="true">›</text></button></view>
-  <view wx:if="{{promotions.length}}" class="native-section"><view class="native-section-head"><text class="section-title">来自游戏社群</text></view><template is="native-promotions" data="{{docs:promotions, compact:false}}" /></view>
-  <text wx:if="{{clubLoading}}" class="result-caption" aria-role="status">正在读取招新与推荐…</text><view wx:if="{{clubError}}" class="native-section native-feedback"><text class="error">{{clubError}}</text><button class="secondary" bindtap="retryClub" disabled="{{clubLoading}}">重试社团信息</button></view>
 </view>

@@ -1,35 +1,21 @@
-.community-heading { padding: 0 0 24px; }
-.community-kind { display: block; color: var(--z-primary); font-size: 14px; line-height: 1.5; margin-bottom: 8px; }
-.community-heading-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 20px; margin-top: 20px; }
-.mini-page.native-page .community-heading-actions .primary { min-width: 148px; }
-.mini-page.native-page .intro-toggle { font-size: 15px; }
-.community-intro { padding-top: 16px; border-top: 1px solid var(--z-line); }
-.community-tabs { display: block; width: 100%; margin-bottom: 20px; white-space: nowrap; border-bottom: 1px solid var(--z-line); }
-.mini-page.native-page .community-tab { display: inline-flex; vertical-align: bottom; align-items: center; justify-content: center; width: calc(33.333% - 6px); min-width: 80px; margin-right: 8px; padding: 12px 0; border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: transparent; color: var(--z-subtitle); font-size: 15px; }
-.mini-page.native-page .community-tab:last-child { margin-right: 0; }
-.mini-page.native-page .community-tab.active { border-bottom-color: var(--z-primary); color: var(--z-primary); font-weight: 600; }
-.contact-panel .native-section-head { margin-bottom: 8px; }
-.contact-loading { padding: 20px 0; }
-.contact-feedback { margin-top: 16px; }
-.contact { margin-top: 20px; padding: 20px 16px; border: 1px solid var(--z-line); border-radius: 12px; background: var(--z-surface); }
-.contact-name { display: block; font-size: 18px; font-weight: 600; line-height: 1.5; word-break: break-word; }
-.contact-permission { display: block; font-size: 12px; color: var(--z-muted); line-height: 1.6; margin-top: 4px; }
-.community-page .contact-qr { display: block; width: 180px; height: 180px; max-width: 100%; margin: 20px auto 8px; padding: 12px; background: white; border-radius: 8px; }
-.qr-caption { display: block; text-align: center; color: var(--z-link); font-size: 14px; line-height: 1.6; }
-.contact-remark { display: block; margin-top: 12px; color: var(--z-muted); font-size: 14px; line-height: 1.65; text-align: center; }
-.contact-image-missing { margin-top: 20px; }
-.community-organize { padding-top: 24px; border-top: 1px solid var(--z-line); }
-.mini-page.native-page .community-organize > button { margin-top: 16px; }
-.community-content-heading { margin-top: 24px; }
-.honor-pins { margin: 20px 0; padding: 16px; border: 1px solid var(--z-line); border-radius: 8px; background: var(--z-surface); }
-.honor-pins .shortcut:last-child { border-bottom: 0; }
-.honor-pins .native-meta { margin-top: 8px; }
-.community-record { padding: 20px 0; border-bottom: 1px solid var(--z-line); }
-.community-record .native-entry-title { margin-top: 8px; font-size: 18px; }
-.community-record .body { margin-top: 12px; }
-.mini-page.native-page .community-load-more { width: 100%; margin-top: 24px; }
-.community-opportunities { padding-top: 24px; border-top: 1px solid var(--z-line); }
-.community-opportunities .native-section-head { margin-bottom: 0; }
-.community-staff .native-section-head { flex-wrap: wrap; gap: 0 12px; margin-bottom: 8px; }
-.community-staff .native-section-head .section-title { flex-basis: 120px; }
-.community-contact-note { display: block; margin-top: 8px; color: var(--z-muted); font-size: 14px; line-height: 1.75; word-break: break-word; }
+/* V2 community home: hue band, segmented areas, contact cards, showcase records. */
+.community-v2 { padding-top: 0; }
+.community-identity { display: flex; align-items: center; gap: 22rpx; }
+.community-crest { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 120rpx; height: 120rpx; border: 3rpx solid rgba(255, 255, 255, .28); border-radius: 36rpx; background: rgba(255, 255, 255, .12); color: #fff; font-size: 56rpx; font-weight: 900; }
+.community-titles { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6rpx; }
+.community-actions { display: flex; flex-wrap: wrap; gap: 14rpx; margin-top: 8rpx; }
+.community-contact-note { color: rgba(255, 255, 255, .82); font-size: 24rpx; }
+.community-intro { margin-top: 0; font-size: 30rpx; line-height: 1.85; }
+.community-tabs { margin-top: 24rpx; }
+.community-contacts { display: flex; flex-direction: column; gap: 18rpx; }
+.community-contact { display: flex; flex-direction: column; align-items: center; gap: 12rpx; padding: 28rpx; border: 1rpx solid var(--z-line); border-radius: 32rpx; background: var(--z-surface); }
+.community-contact-head { display: flex; align-items: center; gap: 18rpx; align-self: stretch; }
+.community-contact-avatar { display: flex; align-items: center; justify-content: center; width: 80rpx; height: 80rpx; border-radius: 50%; background: linear-gradient(135deg, var(--z-primary), var(--z-stage2)); color: #fff; font-size: 34rpx; font-weight: 900; }
+.community-qr-caption { text-align: center; }
+.community-organize { margin-top: 28rpx; gap: 14rpx; }
+.honor-pins { gap: 14rpx; margin-bottom: 20rpx; }
+.community-pin { margin-top: 6rpx; }
+.showcase-photo { display: flex; flex-direction: column; gap: 6rpx; }
+.showcase-image { display: block; width: 100%; border-radius: 24rpx; background: var(--z-media); }
+.showcase-video { width: 100%; height: 380rpx; border-radius: 24rpx; }
+.mini-page .community-load-more, .mini-page .community-wide { display: block; width: 100%; margin-top: 18rpx; }

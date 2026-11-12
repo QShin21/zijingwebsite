@@ -2,7 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Pure local presentation generation. No environment, database or network access.
+// Pure local presentation generation (V2 "紫荆赛场"). No environment, database or network access.
+// Outputs: website token CSS, native mini program tokens and, with --native-config,
+// the native launch/tab colors in app.json and every page JSON.
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const source = JSON.parse(
   fs.readFileSync(path.join(root, "src/design/tokens.json"), "utf8"),
@@ -13,42 +15,61 @@ const declarations = (values) =>
   Object.entries(values)
     .map(([key, value]) => `  --z-${key}: ${value};`)
     .join("\n");
-const aliases = {
-  "stage-bg": "paper",
-  "stage-ink": "ink",
-  "stage-muted": "muted",
-  "stage-action": "action",
-  "stage-action-ink": "action-ink",
-};
-const withAliases = (values) => ({
-  ...values,
-  ...Object.fromEntries(
-    Object.entries(aliases).map(([key, target]) => [key, `var(--z-${target})`]),
-  ),
-});
-const css = `/* Generated from src/design/tokens.json. Run node scripts/build-design-tokens.mjs. */\n:root {\n  color-scheme: light;\n${declarations(withAliases(source.light))}\n${declarations(source.shared)}\n}\n:root[data-z-theme="dark"] {\n  color-scheme: dark;\n${declarations(withAliases(source.dark))}\n}\n`;
+const css = `/* Generated from src/design/tokens.json. Run node scripts/build-design-tokens.mjs. */\n:root {\n  color-scheme: light;\n${declarations(source.light)}\n${declarations(source.shared)}\n}\n:root[data-z-theme="dark"] {\n  color-scheme: dark;\n${declarations(source.dark)}\n}\n`;
+// Native names: V2 names first, then the names still referenced by retained
+// native pages and templates (mapped onto the V2 palette).
 const nativeAliases = {
   page: "paper",
-  text: "ink",
   surface: "surface",
+  raised: "raised",
+  text: "ink",
+  muted: "muted",
+  primary: "action",
+  primaryHover: "action-hover",
+  onPrimary: "action-ink",
+  tint: "tint",
+  accent: "accent",
+  onAccent: "accent-ink",
+  line: "line",
+  lineStrong: "line-strong",
+  field: "field",
+  fieldBorder: "field-border",
+  focus: "focus",
+  stage: "stage",
+  stage2: "stage-2",
+  stageInk: "stage-ink",
+  stageMuted: "stage-muted",
+  stageLine: "stage-line",
+  overlay: "overlay",
+  shadow: "shadow",
+  danger: "danger",
+  dangerBg: "danger-bg",
+  dangerLine: "danger-line",
+  success: "success",
+  successBg: "success-bg",
+  successLine: "success-line",
+  warning: "warning",
+  warningBg: "warning-bg",
+  warningLine: "warning-line",
+  info: "info",
+  infoBg: "info-bg",
+  infoLine: "info-line",
+  disabledText: "disabled-ink",
+  disabledBg: "disabled-bg",
+  disabledBorder: "line",
   control: "field",
   controlBorder: "field-border",
-  brand: "purple",
-  secondaryText: "purple",
+  brand: "action",
+  secondaryText: "action",
   subtitle: "muted",
-  line: "line",
   media: "media",
-  muted: "muted",
-  badgeText: "purple",
+  badgeText: "action",
   badgeBg: "tint",
   badgeBorder: "line",
-  primary: "action",
-  onPrimary: "action-ink",
   secondaryBg: "tint",
   secondaryBorder: "field-border",
-  link: "purple",
+  link: "action",
   dangerText: "danger",
-  dangerBg: "danger-bg",
   dangerBorder: "danger-line",
   positive: "success",
   positiveBorder: "success-line",
@@ -58,37 +79,29 @@ const nativeAliases = {
   errorBg: "danger-bg",
   errorBorder: "danger-line",
   errorText: "danger",
-  selectedText: "purple",
+  selectedText: "action",
   selectedBg: "tint",
   fieldBg: "field",
-  fieldBorder: "field-border",
   body: "ink",
-  focus: "focus",
   halo: "tint",
-  heroBorder: "line",
-  heroStart: "paper",
-  heroMiddle: "paper",
-  heroEnd: "paper",
-  heroDescription: "muted",
+  heroBorder: "stage-line",
+  heroStart: "stage",
+  heroMiddle: "stage-2",
+  heroEnd: "stage",
+  heroDescription: "stage-muted",
   orbitOuter: "line",
   orbitMiddle: "muted",
-  orbitInner: "purple",
-  letter: "purple",
+  orbitInner: "action",
+  letter: "action",
   artShadow: "media",
   joinBg: "tint",
   teamStart: "surface",
   teamEnd: "surface",
-  disabledText: "disabled-ink",
-  disabledBg: "disabled-bg",
-  disabledBorder: "line",
   imageBorder: "line",
-  shadow: "shadow",
   videoSurface: "dark",
   warningText: "warning",
-  warningBg: "warning-bg",
   warningBorder: "warning-line",
   infoText: "info",
-  infoBg: "info-bg",
   infoBorder: "info-line",
 };
 const tokens = {},
@@ -106,8 +119,8 @@ for (const mode of ["light", "dark"]) {
   };
   chrome[mode] = {
     frontColor: mode === "light" ? "#000000" : "#ffffff",
-    background: palette["header-bg"],
-    tabBg: palette["header-bg"],
+    background: palette.paper,
+    tabBg: palette.surface,
     tabText: palette.muted,
     tabSelected: palette.action,
     borderStyle: mode === "light" ? "black" : "white",
@@ -116,7 +129,7 @@ for (const mode of ["light", "dark"]) {
 }
 const native = `// Generated from src/design/tokens.json. Do not edit by hand.\nmodule.exports = ${JSON.stringify({ tokens, chrome }, null, 2)};\n`;
 const outputs = new Map([
-  ["src/components/visual-direction/tokens.css", css],
+  ["src/app/(frontend)/tokens.css", css],
   ["miniprogram/src/lib/design-tokens.js", native],
 ]);
 if (configureNative) {
@@ -142,8 +155,11 @@ if (configureNative) {
     const config = JSON.parse(
       fs.readFileSync(path.join(root, relative), "utf8"),
     );
-    config.navigationBarBackgroundColor = chrome.light.background;
-    config.navigationBarTextStyle = "black";
+    // Pages with a custom stage header keep their own navigation style.
+    if (config.navigationStyle !== "custom") {
+      config.navigationBarBackgroundColor = chrome.light.background;
+      config.navigationBarTextStyle = "black";
+    }
     config.backgroundColor = tokens.light.page;
     outputs.set(relative, JSON.stringify(config, null, 2) + "\n");
   }

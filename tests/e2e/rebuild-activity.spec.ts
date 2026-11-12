@@ -56,7 +56,7 @@ test("activity detail to questionnaire: validation, theme retention, failed writ
   await expect(page.getByRole("alert", { name: "请核对以下题目" })).toContainText("合成报名姓名");
   await expect(page.locator("fieldset.signup-question")).toBeFocused();
   await page.getByLabel("合成报名姓名", { exact: true }).fill("合成填写保留");
-  await page.getByRole("button", { name: "切换到深色主题", exact: true }).click();
+  await page.getByRole("button", { name: /切换到夜场（深色）主题$/ }).click();
   await expect(page.getByLabel("合成报名姓名", { exact: true })).toHaveValue("合成填写保留");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
   await page.evaluate(() => window.scrollTo(0, 0));
@@ -77,7 +77,7 @@ test("activity detail to questionnaire: validation, theme retention, failed writ
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: shots + "/receipt-mobile-dark.png", fullPage: true });
   const denied = await page.request.get(endpoint + "?mode=entries"); expect(denied.status()).toBe(403);
-  await page.getByRole("button", { name: "切换到浅色主题", exact: true }).click();
+  await page.getByRole("button", { name: /切换到日场（浅色）主题$/ }).click();
   expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
 });
 test("staff batch business refusal preserves fields then saves the same draft record", async ({ page }) => {

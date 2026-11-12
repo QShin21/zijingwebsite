@@ -1,0 +1,147 @@
+{
+  "checkedAt": "2026-11-11T19:08:53.056Z",
+  "branch": "new",
+  "status": "IMPLEMENTED_PARTIAL_CONTRACT_INTEGRATION_BLOCKED_BY_OPUS_QUOTA",
+  "commitPushDeploy": false,
+  "frontendAuthority": "Claude Code claude-opus-5-5 --effort max",
+  "claudeSession": "75c334c7-a792-4d9c-b7c4-b8ddbbc46772",
+  "quotaResetUTC": "2026-11-11T22:30:00Z",
+  "checks": {
+    "typecheck": 0,
+    "eslint": 0,
+    "tokensCheck": 0,
+    "gitDiffCheck": 0,
+    "miniappStatic": {
+      "exitCode": 0,
+      "pages": 28,
+      "files": 195,
+      "bytes": 865677
+    },
+    "focusedFrontend": {
+      "files": 14,
+      "passed": 311,
+      "failed": 1,
+      "unhandledErrors": 1,
+      "note": "Interrupted signed-image integration left old JWT-download test harness; not all-pass"
+    },
+    "earlierFullSynthetic": {
+      "passed": 1769,
+      "failed": 44,
+      "skipped": 66,
+      "newFailureSignatures": 4,
+      "fixedBaselineSignatures": 3,
+      "note": "Before last contract integration; four V2 communities VM harness regressions pending"
+    },
+    "syntheticMigration": 0,
+    "syntheticProductionBuild": {
+      "exitCode": 0,
+      "buildID": "CvNTGMeb8KMV2Hy9NXtds"
+    },
+    "syntheticHTTP": {
+      "checkedAt": "2026-11-11T19:08:53.056Z",
+      "synthetic": true,
+      "visualAcceptance": false,
+      "results": [
+        {
+          "path": "/",
+          "status": 200,
+          "location": null,
+          "bytes": 35860,
+          "h1Count": 1
+        },
+        {
+          "path": "/events",
+          "status": 200,
+          "location": null,
+          "bytes": 33151,
+          "h1Count": 1
+        },
+        {
+          "path": "/teams",
+          "status": 307,
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fteams",
+          "bytes": 114,
+          "h1Count": 0
+        },
+        {
+          "path": "/announcements",
+          "status": 200,
+          "location": null,
+          "bytes": 31095,
+          "h1Count": 2
+        },
+        {
+          "path": "/gallery",
+          "status": 307,
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fgallery",
+          "bytes": 116,
+          "h1Count": 0
+        },
+        {
+          "path": "/about",
+          "status": 200,
+          "location": null,
+          "bytes": 28340,
+          "h1Count": 1
+        },
+        {
+          "path": "/privacy",
+          "status": 200,
+          "location": null,
+          "bytes": 31112,
+          "h1Count": 1
+        },
+        {
+          "path": "/login",
+          "status": 200,
+          "location": null,
+          "bytes": 28103,
+          "h1Count": 1
+        },
+        {
+          "path": "/community",
+          "status": 307,
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fcommunity",
+          "bytes": 118,
+          "h1Count": 0
+        },
+        {
+          "path": "/account",
+          "status": 307,
+          "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Faccount",
+          "bytes": 116,
+          "h1Count": 0
+        },
+        {
+          "path": "/api/v2/calendar?signupOpen=1",
+          "status": 200,
+          "location": null,
+          "bytes": 69,
+          "h1Count": 0
+        }
+      ]
+    },
+    "visualBrowserAxe": "BLOCKED_NOT_PASSED",
+    "wechatCompiler": "UNAVAILABLE_NOT_RUN"
+  },
+  "pending": [
+    "Native events signupOpen integration",
+    "Native webOnly queue handling",
+    "Historical application hash routing and tests",
+    "Signed-image harness migration and security/lifecycle tests",
+    "Four V2 communities VM harness regressions",
+    "Final whole integrated tests and rendered visual/native checks"
+  ],
+  "logs": [
+    "typecheck-20261111-1910.log",
+    "lint-20261111-1910.log",
+    "tokens-20261111-1910.log",
+    "diffcheck-20261111-1910.log",
+    "miniapp-check-20261111-1910.log",
+    "focused-20261111-1910.log",
+    "full-tests-20261111-1851.log.clean",
+    "build-20261111-1915.log",
+    "http-smoke-20261111.log"
+  ],
+  "note": "Labels identify run artifacts, not exact UTC timestamps. checkedAt uses actual completion timestamp. Build and HTTP are not browser visual acceptance."
+}

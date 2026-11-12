@@ -1,0 +1,6 @@
+.showcase-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18rpx; }
+.showcase-item { display: flex; flex-direction: column; gap: 10rpx; }
+.showcase-preview { width: 100%; height: 260rpx; border-radius: 24rpx; background: var(--z-media); }
+.mini-page .showcase-caption { height: 80rpx; font-size: 26rpx; }
+.mini-page .showcase-remove { padding: 8rpx 0; color: var(--z-danger); font-size: 26rpx; }
+.mini-page .showcase-add { display: flex; align-items: center; justify-content: center; height: 260rpx; border: 3rpx dashed var(--z-line-strong); border-radius: 24rpx; background: var(--z-tint); color: var(--z-primary); font-weight: 900; }

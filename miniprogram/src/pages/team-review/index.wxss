@@ -1,38 +1,25 @@
 @import "../../templates/business.wxss";
 @import "../../styles/native-forms.wxss";
-.workspace-loading { padding: 12px 0 24px; }
-.workspace-read-error { margin-bottom: 24px; }
-.workspace-scope { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin: 0 0 24px; padding: 12px 0; border-bottom: 1px solid var(--z-line); }
-.scope-status, .operation-state, .workspace-shortcuts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-.mini-page.native-form-page.team-review-page .queue-heading { flex-wrap: wrap; gap: 8px 16px; margin-bottom: 12px; }
-.mini-page.native-form-page.team-review-page .queue-filter { margin: 0 0 20px; }
-.mini-page.native-form-page.team-review-page .queue-filter .field-label { font-size: 14px; font-weight: 400; color: var(--z-muted); }
-.queue-picker { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.picker-sign { flex-shrink: 0; color: var(--z-muted); }
-.mini-page.native-form-page.team-review-page .application-queue { margin-top: 0; }
-.mini-page.native-form-page.team-review-page .review-record:first-child { border-top: 0; padding-top: 12px; }
-.mini-page.native-form-page.team-review-page .review-record:last-child, .mini-page.native-form-page.team-review-page .batch-record:last-child { border-bottom: 0; }
-.mini-page.native-form-page.team-review-page .review-record > .record-meta { align-items: center; margin-top: 0; }
-.review-record-title { display: block; margin-top: 12px; font-size: 18px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; word-break: break-word; }
-.record-update { display: block; color: var(--z-muted); font-size: 13px; line-height: 1.7; margin-top: 8px; }
-.mini-page.native-form-page.team-review-page .review-record > .disclosure { margin-top: 12px; }
-.mini-page.native-form-page.team-review-page .submitted-material > .material-title { margin-top: 8px; }
-.mini-page.native-form-page.team-review-page .submitted-material > .body { margin-top: 12px; }
-.mini-page.native-form-page.team-review-page .answer { overflow-wrap: anywhere; }
-.review-guidance { display: block; margin-top: 8px; color: var(--z-muted); font-size: 14px; line-height: 1.75; }
-.mini-page.native-form-page.team-review-page textarea { min-height: 160px; height: 160px; }
-.mini-page.native-form-page.team-review-page .review-actions .actions { flex-direction: column; }
-.mini-page.native-form-page.team-review-page .review-actions .actions > button { width: 100%; }
-.mini-page.native-form-page.team-review-page .workspace-load-more { width: 100%; margin-top: 24px; }
-.mini-page.native-form-page.team-review-page .website-create { text-align: left; margin-top: 8px; }
-.mini-page.native-form-page.team-review-page .batch-record:first-child { border-top: 0; }
-.mini-page.native-form-page.team-review-page .recruitment-editor { margin-top: 0; }
-.recruitment-pickers { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.recruitment-pickers picker { flex: 1 0 108px; }
-.recruitment-pickers picker .queue-picker { min-height: 44px; }
-.batch-dates { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 16px; }
-.batch-dates > view { flex: 1; min-width: 112px; }
-.date-label { display: block; color: var(--z-muted); font-size: 12px; line-height: 1.6; }
-.date-value { display: block; margin-top: 4px; color: var(--z-body); font-size: 15px; line-height: 1.6; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.operation-state { margin: 16px 0; }
-.mini-page.native-form-page.team-review-page .website-workbench { margin-top: 12px; text-align: left; }
+
+/* V2 team workbench: batch editor sheet, review queue, batches and lifecycle sheet. */
+.team-review-v2 { padding-top: 0; }
+.team-review-editor { border-top: 8rpx solid var(--z-primary); }
+.team-review-pickers { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.team-review-pickers picker { flex: 1; min-width: 200rpx; }
+.team-review-shortcuts { display: flex; gap: 12rpx; margin-bottom: 8rpx; }
+.team-review-shortcuts > button { flex: 1; }
+.team-review-filter { display: flex; align-items: center; justify-content: space-between; gap: 14rpx; padding: 16rpx 22rpx; margin-bottom: 16rpx; border: 1rpx solid var(--z-line); border-radius: 24rpx; background: var(--z-surface); }
+.team-review-filter-value { display: flex; gap: 10rpx; color: var(--z-primary); font-weight: 800; }
+.team-review-open { border-color: var(--z-primary); box-shadow: 0 16rpx 48rpx rgba(28, 18, 64, .12); }
+.mini-page .team-review-disclosure { display: flex; justify-content: space-between; width: 100%; padding: 10rpx 0; }
+.team-review-detail { display: flex; flex-direction: column; gap: 16rpx; }
+.team-review-block { display: flex; flex-direction: column; gap: 8rpx; padding: 22rpx; border-radius: 24rpx; background: var(--z-raised); border: 1rpx solid var(--z-line); }
+.team-review-answer .zj-kv-label { width: 200rpx; }
+.team-review-label { display: block; font-weight: 900; }
+.team-review-decision { display: flex; flex-direction: column; gap: 8rpx; padding: 24rpx; border-radius: 24rpx; background: var(--z-tint); }
+.mini-page .team-review-more { display: block; width: 100%; margin: 14rpx 0; }
+.team-review-batches { margin-top: 12rpx; }
+.team-review-dates { display: flex; gap: 12rpx; }
+.team-review-date { flex: 1; display: flex; flex-direction: column; gap: 4rpx; padding: 12rpx 16rpx; border-radius: 18rpx; background: var(--z-stage); color: var(--z-stage-ink); font-size: 25rpx; font-weight: 800; }
+.team-review-date-label { color: var(--z-accent); font-size: 21rpx; font-weight: 900; }
+.team-review-lifecycle { margin-top: 28rpx; gap: 12rpx; }

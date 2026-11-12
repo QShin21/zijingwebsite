@@ -1,36 +1,139 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
 <import src="../../templates/native-content.wxml" />
-<view class="page mini-page native-page reading-page detail-page detail-page-{{collection}}">
-  <button class="plain back" bindtap="back">返回</button>
+<view class="page mini-page detail-v2 detail-page-{{collection}} {{theme === 'dark' ? 'zj-dark' : ''}}">
+  <view class="zj-hero">
+    <view class="zj-stage-stripes"></view>
+    <view class="zj-hero-inner">
+      <button class="zj-hero-back" bindtap="back">‹ 返回</button>
+      <block wx:if="{{!loading && !error && !needsLogin}}">
+        <view class="zj-hero-meta">
+          <text class="zj-hero-kicker">{{reading.label}}</text>
+          <text wx:if="{{doc.game.title}}" class="zj-pill zj-pill-action">{{doc.game.title}}</text>
+          <text wx:if="{{collection === 'honors' && doc.verified}}" class="zj-pill zj-pill-live">已核验</text>
+          <text wx:if="{{doc.demo}}" class="zj-pill zj-pill-warning">演示资料</text>
+        </view>
+        <text class="zj-hero-title">{{doc.title}}</text>
+        <text wx:if="{{doc.summary}}" class="zj-hero-lead">{{doc.summary}}</text>
+        <view wx:if="{{!reading.scheduled || doc.authorName}}" class="zj-hero-meta"><text wx:if="{{!reading.scheduled}}">{{reading.dateLabel}} {{dateText}}</text><text wx:if="{{doc.authorName}}">{{doc.authorName}}</text></view>
+        <view wx:if="{{reading.scheduled}}" class="detail-when">
+          <text class="detail-when-label">开始</text>
+          <text class="detail-when-value">{{dateText}}</text>
+          <text wx:if="{{doc.statusText}}" class="zj-pill zj-pill-live">{{doc.statusText}}</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
   <template is="feedback" data="{{loading, error, needsLogin}}" />
   <block wx:if="{{!loading && !error && !needsLogin}}">
-    <view class="detail-heading">
-      <view class="detail-heading-top"><view class="native-meta"><text>{{reading.label}}</text><text wx:if="{{doc.game.title}}">{{doc.game.title}}</text><text wx:if="{{collection === 'honors' && doc.verified}}" class="native-status">已核验</text><text wx:if="{{doc.demo}}" class="native-status">演示资料</text></view><template wx:if="{{!coverImage || coverImageFailed}}" is="native-reading-mark" /></view>
-      <text class="title detail-title">{{doc.title}}</text>
-      <text wx:if="{{doc.summary}}" class="subtitle detail-summary">{{doc.summary}}</text>
-      <view wx:if="{{!reading.scheduled || doc.authorName}}" class="detail-byline"><text wx:if="{{!reading.scheduled}}">{{reading.dateLabel}} {{dateText}}</text><text wx:if="{{doc.authorName}}">{{doc.authorName}}</text></view>
-      <view wx:if="{{reading.scheduled || endDateText || doc.location || doc.statusText || registrationStartText || registrationEndText}}" class="object-facts">
-        <view wx:if="{{reading.scheduled}}" class="fact-row"><text class="fact-label">活动开始</text><text class="fact-value">{{dateText}}</text></view>
-        <view wx:if="{{endDateText}}" class="fact-row"><text class="fact-label">活动结束</text><text class="fact-value">{{endDateText}}</text></view>
-        <view wx:if="{{doc.location}}" class="fact-row"><text class="fact-label">地点 / 方式</text><text class="fact-value">{{doc.location}}</text></view>
-        <view wx:if="{{doc.statusText}}" class="fact-row"><text class="fact-label">当前状态</text><text class="fact-value">{{doc.statusText}}</text></view>
-        <view wx:if="{{registrationStartText}}" class="fact-row"><text class="fact-label">报名开始</text><text class="fact-value">{{registrationStartText}}</text></view>
-        <view wx:if="{{registrationEndText}}" class="fact-row"><text class="fact-label">报名截止</text><text class="fact-value">{{registrationEndText}}</text></view>
+    <view wx:if="{{reading.scheduled || endDateText || doc.location || doc.statusText || registrationStartText || registrationEndText}}" class="zj-sheet">
+      <text class="zj-sheet-title">活动信息</text>
+      <view class="zj-kv">
+        <view wx:if="{{reading.scheduled}}" class="zj-kv-row"><text class="zj-kv-label">活动开始</text><text class="zj-kv-value">{{dateText}}</text></view>
+        <view wx:if="{{endDateText}}" class="zj-kv-row"><text class="zj-kv-label">活动结束</text><text class="zj-kv-value">{{endDateText}}</text></view>
+        <view wx:if="{{doc.location}}" class="zj-kv-row"><text class="zj-kv-label">地点 / 方式</text><text class="zj-kv-value">{{doc.location}}</text></view>
+        <view wx:if="{{doc.statusText}}" class="zj-kv-row"><text class="zj-kv-label">当前状态</text><text class="zj-kv-value">{{doc.statusText}}</text></view>
+        <view wx:if="{{registrationStartText}}" class="zj-kv-row"><text class="zj-kv-label">报名开始</text><text class="zj-kv-value">{{registrationStartText}}</text></view>
+        <view wx:if="{{registrationEndText}}" class="zj-kv-row"><text class="zj-kv-label">报名截止</text><text class="zj-kv-value">{{registrationEndText}}</text></view>
       </view>
     </view>
-    <view wx:if="{{signupInfo.form.enabled || signupInfo.signup || signupInfo.canManage || signupInfo.canViewSignups || signupFailed}}" class="signup-callout"><view class="section-heading"><text class="section-title">活动报名</text><text wx:if="{{signupInfo.state}}" class="native-status">{{signupInfo.state}}</text></view><text wx:if="{{signupInfo.signup}}" class="body">已提交报名，可查看本人回执。</text><text wx:elif="{{signupFailed}}" class="muted">报名状态尚未读取，进入报名页重新查询。</text><text wx:if="{{signupStartText}}" class="field-note">问卷开放：{{signupStartText}}</text><text wx:if="{{signupEndText}}" class="field-note">问卷截止：{{signupEndText}}</text><text wx:if="{{doc.requirements}}" class="body">{{doc.requirements}}</text><button class="primary" bindtap="signup">{{signupInfo.signup ? '查看报名回执' : signupFailed ? '查询报名状态' : signupInfo.form.enabled ? '查看并填写报名' : '查看报名与问卷管理'}}</button></view>
-    <view wx:if="{{registration}}" class="participation-section"><view class="section-heading"><text class="section-title">参与方式</text><text class="native-status">{{registration}}</text></view><text wx:if="{{doc.requirements}}" class="body">{{doc.requirements}}</text><text wx:if="{{doc.channelText}}" class="body" selectable>{{doc.channelText}}</text><image wx:if="{{qr && !qrFailed}}" class="qr-image" src="{{qr.url}}" mode="aspectFit" show-menu-by-longpress binderror="readingImageError" data-role="qr" data-url="{{qr.url}}" /><view wx:if="{{qrFailed}}" class="detail-media-failed"><text class="muted">报名二维码暂时无法显示，可重新加载内容或使用已公布的其他渠道。</text><button class="plain" bindtap="retry">重新加载内容</button></view><text wx:if="{{doc.contact}}" class="body" selectable>联系人：{{doc.contact}}</text><text wx:if="{{doc.channelCheckedAt}}" class="field-note">渠道核验时间：{{doc.channelCheckedAt}}</text><button wx:if="{{registration === '报名开放'}}" class="primary participation-action" bindtap="register">复制报名渠道</button><text wx:if="{{doc.registrationURL}}" class="field-note">复制外部报名链接后，可在浏览器打开。</text></view>
-    <view wx:if="{{doc.competition || doc.placing}}" class="competition-record"><text wx:if="{{doc.competition}}" class="section-title">{{doc.competition}}</text><text wx:if="{{doc.division}}" class="field-note">{{doc.division}}</text><text wx:if="{{doc.placing}}" class="honor-placing">{{doc.placing}}</text><button wx:if="{{doc.sourceURL}}" class="plain" bindtap="copy" data-value="{{doc.sourceURL}}">复制公开证明来源</button></view>
-    <view wx:if="{{coverImage}}" class="reading-media detail-cover-record"><image wx:if="{{!coverImageFailed}}" class="photo detail-cover" mode="widthFix" src="{{coverImage.url}}" aria-label="{{coverImage.alt || doc.title}}" binderror="readingImageError" data-role="cover" data-url="{{coverImage.url}}" /><view wx:else class="detail-media-failed"><template is="native-reading-mark" /><text class="muted">封面暂时无法显示。</text><button class="plain" bindtap="retry">重新加载内容</button></view><text wx:if="{{coverImage.credit}}" class="reading-credit">{{coverImage.credit}}</text></view>
-    <view wx:if="{{nodes.length || social}}" class="body reading-body"><rich-text wx:if="{{nodes.length}}" nodes="{{nodes}}" user-select /><text wx:elif="{{social}}" class="reading-text" selectable>{{doc.body}}</text></view>
-    <view wx:if="{{collection === 'teams'}}" class="team-quick-links"><view class="section-heading"><text class="section-title">队伍入口</text></view><button class="content-link shortcut" bindtap="openWebsite" data-url="/teams/recruitment"><view class="shortcut-main"><text class="shortcut-title">招新与本人队伍记录</text><text class="muted">查看选拔批次、本人申请与成员关系。</text></view><text class="shortcut-sign" aria-hidden="true">›</text></button><view class="actions"><button class="plain" bindtap="teamPage" data-page="team-profiles">公开简介与我的设置</button><button class="plain" bindtap="teamPage" data-page="team-honors">队伍荣誉档案</button></view></view>
-    <view wx:if="{{doc.members.length}}" class="section detail-roster"><view class="section-heading"><text class="section-title">赛季阵容</text></view><text class="field-note">历史公开阵容；当前成员关系请在本人队伍记录中查看。</text><view wx:for="{{doc.members}}" wx:key="displayName" class="roster-row"><text class="roster-name">{{item.displayName}}</text><text wx:if="{{item.position}}" class="muted">{{item.position}}</text></view></view>
-    <view wx:if="{{doc.positions.length}}" class="section"><view class="section-heading"><text class="section-title">招募岗位</text></view><view wx:for="{{doc.positions}}" wx:key="name" class="position-record"><text class="position-title">{{item.name}}</text><view wx:if="{{item.duties}}" class="position-fact"><text class="position-label">职责</text><text class="body">{{item.duties}}</text></view><view wx:if="{{item.requirements}}" class="position-fact"><text class="position-label">要求</text><text class="body">{{item.requirements}}</text></view><view wx:if="{{item.commitment}}" class="position-fact"><text class="position-label">投入</text><text class="body">{{item.commitment}}</text></view><view wx:if="{{item.arrangement}}" class="position-fact"><text class="position-label">安排</text><text class="body">{{item.arrangement}}</text></view></view></view>
-    <view wx:if="{{photos.length}}" class="section detail-photos"><view class="section-heading"><text class="section-title">照片</text></view><view wx:for="{{photos}}" wx:key="url" class="reading-media photo-record"><button wx:if="{{!item.failed}}" class="image-button" hover-class="pressed" bindtap="previewImage" data-url="{{item.url}}" aria-label="{{item.caption || item.alt || '预览图片'}}"><image class="photo" src="{{item.url}}" mode="widthFix" aria-label="{{item.caption || item.alt}}" binderror="readingImageError" data-role="photo" data-url="{{item.url}}" data-index="{{index}}" /></button><view wx:else class="detail-media-failed"><text class="muted">图片暂时无法显示。</text><button class="plain" bindtap="retry">重新加载内容</button></view><text wx:if="{{item.caption || item.alt}}" class="reading-caption">{{item.caption || item.alt}}</text><text wx:if="{{item.credit}}" class="reading-credit">{{item.credit}}</text></view></view>
-    <view wx:if="{{videoSource || doc.videoURL}}" class="section detail-video-record"><view class="section-heading"><text class="section-title">视频</text></view><video wx:if="{{videoSource}}" class="detail-video" src="{{videoSource}}" controls="{{true}}" autoplay="{{false}}" object-fit="contain" binderror="videoError" /><text wx:if="{{videoError}}" class="error">视频加载失败，请重试或复制链接。</text><button wx:if="{{doc.videoURL}}" class="plain" bindtap="copy" data-value="{{videoSource || doc.videoURL}}">复制视频链接</button></view>
+
+    <view wx:if="{{signupInfo.form.enabled || signupInfo.signup || signupInfo.canManage || signupInfo.canViewSignups || signupFailed}}" class="zj-sheet detail-signup">
+      <view class="zj-record-head"><text class="zj-sheet-title">活动报名</text><text wx:if="{{signupInfo.state}}" class="zj-pill zj-pill-success">{{signupInfo.state}}</text></view>
+      <text wx:if="{{signupInfo.signup}}" class="zj-callout zj-callout-success">已提交报名，可查看本人回执。</text>
+      <text wx:elif="{{signupFailed}}" class="zj-form-hint">报名状态尚未读取，进入报名页重新查询。</text>
+      <text wx:if="{{signupStartText}}" class="zj-form-hint">问卷开放：{{signupStartText}}</text>
+      <text wx:if="{{signupEndText}}" class="zj-form-hint">问卷截止：{{signupEndText}}</text>
+      <text wx:if="{{doc.requirements}}" class="zj-callout">{{doc.requirements}}</text>
+    </view>
+
+    <view wx:if="{{registration}}" class="zj-sheet">
+      <view class="zj-record-head"><text class="zj-sheet-title">参与方式</text><text class="zj-pill zj-pill-action">{{registration}}</text></view>
+      <text wx:if="{{doc.requirements}}" class="body">{{doc.requirements}}</text>
+      <text wx:if="{{doc.channelText}}" class="body" selectable>{{doc.channelText}}</text>
+      <image wx:if="{{qr && !qrFailed}}" class="qr-image" src="{{qr.url}}" mode="aspectFit" show-menu-by-longpress binderror="readingImageError" data-role="qr" data-url="{{qr.url}}" />
+      <view wx:if="{{qrFailed}}" class="zj-alert"><text class="zj-small">报名二维码暂时无法显示，可重新加载内容或使用已公布的其他渠道。</text><button class="secondary" bindtap="retry">重新加载内容</button></view>
+      <text wx:if="{{doc.contact}}" class="body" selectable>联系人：{{doc.contact}}</text>
+      <text wx:if="{{doc.channelCheckedAt}}" class="zj-form-hint">渠道核验时间：{{doc.channelCheckedAt}}</text>
+      <text wx:if="{{doc.registrationURL}}" class="zj-form-hint">复制外部报名链接后，可在浏览器打开。</text>
+    </view>
+
+    <view wx:if="{{doc.competition || doc.placing}}" class="zj-honor detail-trophy">
+      <view class="zj-honor-top"><text class="zj-trophy">🏆</text><text wx:if="{{doc.placing}}" class="zj-placing">{{doc.placing}}</text></view>
+      <text wx:if="{{doc.competition}}" class="zj-honor-title">{{doc.competition}}</text>
+      <text wx:if="{{doc.division}}" class="zj-honor-meta">{{doc.division}}</text>
+      <button wx:if="{{doc.sourceURL}}" class="zj-stage-ghost" bindtap="copy" data-value="{{doc.sourceURL}}">复制公开证明来源</button>
+    </view>
+
+    <view wx:if="{{coverImage}}" class="detail-cover-record">
+      <image wx:if="{{!coverImageFailed}}" class="detail-cover" mode="widthFix" src="{{coverImage.url}}" aria-label="{{coverImage.alt || doc.title}}" binderror="readingImageError" data-role="cover" data-url="{{coverImage.url}}" />
+      <view wx:else class="zj-alert"><template is="native-reading-mark" /><text class="zj-small">封面暂时无法显示。</text><button class="secondary" bindtap="retry">重新加载内容</button></view>
+      <text wx:if="{{coverImage.credit}}" class="zj-credit">{{coverImage.credit}}</text>
+    </view>
+
+    <view wx:if="{{nodes.length || social}}" class="detail-body">
+      <template wx:if="{{!coverImage}}" is="native-reading-mark" />
+      <rich-text wx:if="{{nodes.length}}" nodes="{{nodes}}" user-select />
+      <text wx:elif="{{social}}" class="reading-text" selectable>{{doc.body}}</text>
+    </view>
+
+    <view wx:if="{{collection === 'teams'}}" class="zj-section">
+      <view class="zj-section-head"><text class="zj-section-title">队伍入口</text></view>
+      <button class="shortcut" bindtap="openWebsite" data-url="/teams/recruitment"><view class="shortcut-main"><text class="shortcut-title">招新与本人队伍记录</text><text class="muted">查看选拔批次、本人申请与成员关系。</text></view><text class="shortcut-sign" aria-hidden="true">›</text></button>
+      <view class="actions"><button class="secondary" bindtap="teamPage" data-page="team-profiles">公开简介与我的设置</button><button class="secondary" bindtap="teamPage" data-page="team-honors">队伍荣誉档案</button></view>
+    </view>
+
+    <view wx:if="{{doc.members.length}}" class="zj-section">
+      <view class="zj-section-head"><view><text class="zj-section-title">赛季阵容</text><text class="zj-small">历史公开阵容；当前成员关系请在本人队伍记录中查看。</text></view></view>
+      <view class="zj-panel">
+        <view wx:for="{{doc.members}}" wx:key="displayName" class="zj-kv-row"><text class="zj-kv-value">{{item.displayName}}</text><text wx:if="{{item.position}}" class="zj-pill zj-pill-action">{{item.position}}</text></view>
+      </view>
+    </view>
+
+    <view wx:if="{{doc.positions.length}}" class="zj-section">
+      <view class="zj-section-head"><text class="zj-section-title">招募岗位</text></view>
+      <view wx:for="{{doc.positions}}" wx:key="name" class="zj-record">
+        <text class="zj-record-title">{{item.name}}</text>
+        <view class="zj-kv">
+          <view wx:if="{{item.duties}}" class="zj-kv-row"><text class="zj-kv-label">职责</text><text class="zj-kv-value">{{item.duties}}</text></view>
+          <view wx:if="{{item.requirements}}" class="zj-kv-row"><text class="zj-kv-label">要求</text><text class="zj-kv-value">{{item.requirements}}</text></view>
+          <view wx:if="{{item.commitment}}" class="zj-kv-row"><text class="zj-kv-label">投入</text><text class="zj-kv-value">{{item.commitment}}</text></view>
+          <view wx:if="{{item.arrangement}}" class="zj-kv-row"><text class="zj-kv-label">安排</text><text class="zj-kv-value">{{item.arrangement}}</text></view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{photos.length}}" class="zj-section">
+      <view class="zj-section-head"><text class="zj-section-title">照片</text><text class="zj-count">{{photos.length}}</text></view>
+      <view class="zj-gallery">
+        <view wx:for="{{photos}}" wx:key="url" class="detail-photo">
+          <button wx:if="{{!item.failed}}" class="image-button" hover-class="zj-pressed" bindtap="previewImage" data-url="{{item.url}}" aria-label="{{item.caption || item.alt || '预览图片'}}"><image class="zj-gallery-image" src="{{item.url}}" mode="aspectFill" aria-label="{{item.caption || item.alt}}" binderror="readingImageError" data-role="photo" data-url="{{item.url}}" data-index="{{index}}" /></button>
+          <view wx:else class="zj-alert"><text class="zj-small">图片暂时无法显示。</text><button class="secondary" bindtap="retry">重新加载内容</button></view>
+          <text wx:if="{{item.caption || item.alt}}" class="zj-small">{{item.caption || item.alt}}</text>
+          <text wx:if="{{item.credit}}" class="zj-credit">{{item.credit}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{videoSource || doc.videoURL}}" class="zj-section">
+      <view class="zj-section-head"><text class="zj-section-title">视频</text></view>
+      <video wx:if="{{videoSource}}" class="detail-video" src="{{videoSource}}" controls="{{true}}" autoplay="{{false}}" object-fit="contain" binderror="videoError" />
+      <text wx:if="{{videoError}}" class="error">视频加载失败，请重试或复制链接。</text>
+      <button wx:if="{{doc.videoURL}}" class="secondary" bindtap="copy" data-value="{{videoSource || doc.videoURL}}">复制视频链接</button>
+    </view>
+
     <template is="native-reading-links" data="{{links}}" />
-    <view wx:if="{{related.length}}" class="section detail-related"><view class="section-heading"><text class="section-title">赛季与荣誉</text></view><template is="native-content-records" data="{{docs:related}}" /></view>
-    <view wx:if="{{collection === 'teams'}}" class="section"><button class="secondary detail-workspace" bindtap="teamPage" data-page="team-honor-workspace">该队荣誉投稿与审核</button></view>
+
+    <view wx:if="{{related.length}}" class="zj-section">
+      <view class="zj-section-head"><text class="zj-section-title">赛季与荣誉</text></view>
+      <template is="native-content-records" data="{{docs:related}}" />
+    </view>
+    <view wx:if="{{collection === 'teams'}}" class="zj-section"><button class="secondary detail-workspace" bindtap="teamPage" data-page="team-honor-workspace">该队荣誉投稿与审核</button></view>
+
+    <view wx:if="{{signupInfo.form.enabled || signupInfo.signup || signupInfo.canManage || signupInfo.canViewSignups || signupFailed || registration === '报名开放'}}" class="zj-dock">
+      <button wx:if="{{signupInfo.form.enabled || signupInfo.signup || signupInfo.canManage || signupInfo.canViewSignups || signupFailed}}" class="primary" bindtap="signup">{{signupInfo.signup ? '查看报名回执' : signupFailed ? '查询报名状态' : signupInfo.form.enabled ? '查看并填写报名' : '查看报名与问卷管理'}}</button>
+      <button wx:if="{{registration === '报名开放'}}" class="accent participation-action" bindtap="register">复制报名渠道</button>
+    </view>
   </block>
 </view>

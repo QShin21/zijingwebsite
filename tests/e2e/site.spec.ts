@@ -93,8 +93,9 @@ test("后台登录、创建活动草稿、预览、发布、访客查看、撤�
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "浏览器验收 · 活动发布全链路",
   );
+  // V2 draft banner: the edit link is a ghost button without the trailing arrow glyph.
   const edit = preview.getByRole("link", {
-    name: "返回内容编辑 →",
+    name: "返回内容编辑",
     exact: true,
   });
   await expect(edit).toHaveAttribute(
@@ -125,21 +126,20 @@ test("后台登录、创建活动草稿、预览、发布、访客查看、撤�
       exact: true,
     }),
   ).toBeVisible();
+  // V2: "/" is a guest page (主场), so guests are no longer redirected to /events.
   await publicPage.goto("/");
-  await expect(publicPage).toHaveURL(/\/events$/);
+  await expect(publicPage).toHaveURL(/\/$/);
   await expect(
-    publicPage.getByRole("link", {
-      name: "浏览器验收 · 活动发布全链路",
-      exact: true,
-    }),
+    publicPage
+      .getByRole("region", { name: "接下来的赛程", exact: true })
+      .getByRole("link", { name: "浏览器验收 · 活动发布全链路", exact: true }),
   ).toBeVisible();
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
   await expect(
-    page.locator('[data-section="events"]').getByRole("link", {
-      name: "浏览器验收 · 活动发布全链路",
-      exact: true,
-    }),
+    page
+      .getByRole("region", { name: "接下来的赛程", exact: true })
+      .getByRole("link", { name: "浏览器验收 · 活动发布全链路", exact: true }),
   ).toBeVisible();
   const renamed = await page.request.patch(`/api/events/${eventID}`, {
     headers: { Origin: browserTestOrigin },
@@ -299,17 +299,20 @@ test("公开页可访问性、CSP 与实际加载指标", async ({ page }) => {
 test("三类招新、历史批次和所有公开栏目", async ({ page }) => {
   for (const kind of ["members", "teams", "staff"]) {
     await page.goto(`/join/${kind}`);
-    await expect(
-      page.getByRole("heading", {
-        name: kind === "staff" ? "历史招新资料" : "招新批次与历史记录",
-        exact: true,
-      }),
-    ).toBeVisible();
-    await page
-      .getByRole("heading", { name: `演示 · ${kind} 招新批次`, exact: true })
-      .getByRole("link", { name: `演示 · ${kind} 招新批次`, exact: true })
-      .click();
+    // V2 routes: /join/members|teams list legacy batches in 往期招新记录; /join/staff keeps 历史招新资料 cards.
+    const archive = page.getByRole("region", {
+      name: kind === "staff" ? "历史招新资料" : "往期招新记录",
+      exact: true,
+    });
+    await expect(archive).toBeVisible();
+    const title = `演示 · ${kind} 招新批次`;
+    const entry =
+      kind === "staff"
+        ? archive.getByRole("heading", { name: title, exact: true }).getByRole("link", { name: title, exact: true })
+        : archive.getByRole("link", { name: title, exact: true });
+    await entry.click();
     await expect(page).toHaveURL(new RegExp(`/recruitment/demo-${kind}$`));
+    // Legacy batch detail keeps the closed state and never offers external sign-up.
     await expect(page.getByRole("heading", { name: "已关闭" })).toBeVisible();
     await expect(page.getByRole("link", { name: /前往外部报名/ })).toHaveCount(
       0,
@@ -423,57 +426,57 @@ test("首页配置即时更新、回顾关联、相册分页和长中文标题",
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "演示 · 首页后台配置验证",
     );
-    const eventSection = page.locator('[data-section="events"]');
-    await expect(eventSection).toHaveCount(1);
-    await expect(
-      eventSection.getByRole("heading", { name: "活动日程", exact: true }),
-    ).toHaveCount(1);
-    const moduleHeadings = page.locator(
-      '[data-section="events"] h2, [data-section="join"] h2',
+    // V2 主场: CMS hero title and featured events drive the stage; blocks follow site.homeSections.
+    await expect(page.getByRole("link", { name: title }).first()).toBeVisible();
+    const upcoming = page.getByRole("region", { name: "接下来的赛程", exact: true });
+    await expect(upcoming).toHaveCount(1);
+    const blocks = () =>
+      page.locator("main [data-section]").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("data-section")));
+    // The legacy modules field no longer changes the V2 page.
+    await p.updateGlobal({
+      slug: "site",
+      overrideAccess: false,
+      user,
+      data: { modules: [{ kind: "events", enabled: false }, { kind: "join", enabled: false }] },
+    });
+    await page.reload();
+    await expect(upcoming).toHaveCount(1);
+    // Real V2 config: order, titles and visibility; omitted blocks append in default order.
+    await p.updateGlobal({
+      slug: "site",
+      overrideAccess: false,
+      user,
+      data: {
+        homeSections: [
+          { kind: "notices", enabled: true, title: "演示 · 首页公告区" },
+          { kind: "upcoming", enabled: true, title: "演示 · 首页赛程区" },
+          { kind: "highlights", enabled: false },
+        ],
+      },
+    });
+    await page.reload();
+    expect((await blocks()).slice(0, 2)).toEqual(["notices", "upcoming"]);
+    expect(await blocks()).not.toContain("highlights");
+    await expect(page.getByRole("region", { name: "演示 · 首页公告区", exact: true })).toHaveCount(1);
+    await expect(page.getByRole("region", { name: "演示 · 首页赛程区", exact: true })).toHaveCount(1);
+    await expect(upcoming).toHaveCount(0);
+    await p.updateGlobal({
+      slug: "site",
+      overrideAccess: false,
+      user,
+      data: {
+        homeSections: (["upcoming", "open", "notices", "promoted", "communities", "highlights", "about"] as const).map((kind) => ({
+          kind,
+          enabled: false,
+        })),
+      },
+    });
+    await page.reload();
+    // Every configurable block hidden; the stage (CMS hero) is not a configurable block.
+    expect(await blocks()).toEqual([]);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "演示 · 首页后台配置验证",
     );
-    await expect(moduleHeadings).toHaveText([
-      "活动日程",
-      "找到适合你的参与方式",
-    ]);
-    await expect(page.locator('[data-section="news"]')).toHaveCount(0);
-    await p.updateGlobal({
-      slug: "site",
-      overrideAccess: false,
-      user,
-      data: {
-        modules: [
-          { kind: "join", enabled: true, title: "演示 · 首页参与入口" },
-          { kind: "events", enabled: true, title: "演示 · 首页活动日程" },
-          { kind: "events", enabled: true, title: "演示 · 重复活动模块" },
-          { kind: "news", enabled: false },
-        ],
-      },
-    });
-    await page.reload();
-    await expect(eventSection).toHaveCount(1);
-    await expect(moduleHeadings).toHaveText([
-      "演示 · 首页参与入口",
-      "演示 · 首页活动日程",
-    ]);
-    await expect(page.locator('[data-section="news"]')).toHaveCount(0);
-    await p.updateGlobal({
-      slug: "site",
-      overrideAccess: false,
-      user,
-      data: {
-        modules: [
-          { kind: "join", enabled: false },
-          { kind: "events", enabled: false },
-          { kind: "news", enabled: false },
-        ],
-      },
-    });
-    await page.reload();
-    await expect(moduleHeadings).toHaveCount(0);
-    await expect(page.locator('[data-section="news"]')).toHaveCount(0);
-    await expect(
-      page.getByRole("link", { name: title, exact: true }),
-    ).toHaveCount(0);
     await page.setViewportSize({ width: 390, height: 900 });
     await page.goto(`/events/${event.slug}`);
     expect(
@@ -513,6 +516,7 @@ test("首页配置即时更新、回顾关联、相册分页和长中文标题",
       data: {
         heroTitle: settings.heroTitle ?? null,
         modules: settings.modules,
+        homeSections: settings.homeSections,
         featuredEvents: settings.featuredEvents,
       },
     });
@@ -542,11 +546,17 @@ for (const width of [360, 390, 768, 1440])
     ).toBe(true);
     await page.keyboard.press("Tab");
     await expect(page.getByRole("link", { name: "跳到正文" })).toBeFocused();
-    if (width < 1050) {
-      await page.locator("summary").click();
+    if (width < 1024) {
+      // V2: fixed bottom tabs below 1024px replace the old disclosure menu.
       await page
-        .getByRole("navigation", { name: "移动导航" })
-        .getByRole("link", { name: "活动", exact: true })
+        .getByRole("navigation", { name: "主要栏目" })
+        .getByRole("link", { name: "日程", exact: true })
+        .click();
+      await expect(page).toHaveURL(/events/);
+    } else {
+      await page
+        .getByRole("navigation", { name: "主导航" })
+        .getByRole("link", { name: "日程", exact: true })
         .click();
       await expect(page).toHaveURL(/events/);
     }

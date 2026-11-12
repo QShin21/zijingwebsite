@@ -1,18 +1,35 @@
 <page-meta page-style="{{themePageStyle}}" />
-<import src="../../templates/common.wxml" />
-<import src="../../templates/native.wxml" />
-<view class="page mini-page native-page events-page">
-  <view class="events-heading"><text class="title">活动与通知</text><text class="subtitle">看看下一场，一起上场。</text></view>
-  <view class="events-modes"><button class="events-mode {{mode === 'events' ? 'active' : ''}}" bindtap="changeMode" data-mode="events" aria-label="社团活动{{mode === 'events' ? '，已选择' : ''}}">社团活动</button><button class="events-mode {{mode === 'announcements' ? 'active' : ''}}" bindtap="changeMode" data-mode="announcements" aria-label="社团通知{{mode === 'announcements' ? '，已选择' : ''}}">社团通知</button></view>
-  <view class="events-filters"><text class="events-search-label">搜索{{mode === 'events' ? '活动' : '通知'}}</text><view class="search"><input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{search}}" bindinput="input" bindconfirm="search" placeholder="输入标题关键词" aria-label="搜索活动或通知标题" confirm-type="search" maxlength="80" /><button class="secondary" bindtap="search">搜索</button></view><block wx:if="{{mode === 'events'}}"><text class="events-type-label">活动类型</text><scroll-view scroll-x class="events-types"><button wx:for="{{types}}" wx:key="*this" class="events-type {{type === item ? 'active' : ''}}" bindtap="changeType" data-type="{{item}}" aria-label="{{item}}{{type === item ? '，已选择' : ''}}">{{item}}</button></scroll-view></block></view>
-  <template is="feedback" data="{{loading, error}}" />
-  <block wx:if="{{!loading && !error}}">
-    <view class="events-results-heading"><text class="section-title">{{mode === 'events' ? (type === '全部' ? '活动日程' : type) : '通知列表'}}</text><text class="events-result-count">已加载 {{docs.length}} 条</text></view>
-    <template wx:if="{{mode === 'events'}}" is="native-events" data="{{docs, featured:false, compact:false, showNotices:false, emptyTitle:search || type !== '全部' ? '没有找到符合条件的活动' : '活动日程正在准备', emptyHint:search || type !== '全部' ? '可调整活动类型或标题关键词，再试一次。' : '新活动发布后会出现在这里，可稍后下拉刷新。'}}" />
-    <template wx:else is="native-index" data="{{docs, compact:false, emptyTitle:search ? '没有找到相关通知' : '暂时没有新通知', emptyHint:search ? '可换一个标题关键词，再试一次。' : '新的社团通知发布后会出现在这里。'}}" />
+<import src="../../templates/v2.wxml" />
+<view class="page mini-page {{theme === 'dark' ? 'zj-dark' : ''}}">
+  <view class="page-heading">
+    <text class="eyebrow">SCHEDULE · 日程</text>
+    <text class="title">日程</text>
+    <text class="subtitle">{{user ? '社团活动与各社群活动汇成一条时间线。' : '社团活动与精选社群活动，登录后查看全部与本人报名。'}}</text>
+  </view>
+  <view class="zj-segments" aria-role="tablist">
+    <button class="zj-segment {{scope === 'all' ? 'active' : ''}}" bindtap="setScope" data-scope="all" aria-selected="{{scope === 'all'}}">全部</button>
+    <button class="zj-segment {{scope === 'club' ? 'active' : ''}}" bindtap="setScope" data-scope="club" aria-selected="{{scope === 'club'}}">社团</button>
+    <button class="zj-segment {{scope === 'community' ? 'active' : ''}}" bindtap="setScope" data-scope="community" aria-selected="{{scope === 'community'}}">社群</button>
+    <button class="zj-segment {{scope === 'mine' ? 'active' : ''}}" bindtap="setScope" data-scope="mine" aria-selected="{{scope === 'mine'}}">已报名</button>
+  </view>
+  <view class="chips">
+    <button class="chip {{range === 'upcoming' ? 'active' : ''}}" bindtap="setRange" data-range="upcoming">即将开始</button>
+    <button class="chip {{range === 'past' ? 'active' : ''}}" bindtap="setRange" data-range="past">已结束</button>
+    <button class="chip {{signupOpen ? 'active' : ''}}" bindtap="toggleSignupOpen" aria-role="checkbox" aria-checked="{{signupOpen}}" disabled="{{loading}}">可报名</button>
+  </view>
+  <template wx:if="{{loading}}" is="zj-loading" />
+  <view wx:elif="{{error}}">
+    <template is="zj-error" data="{{error}}" />
+    <button wx:if="{{needsLogin}}" class="primary" bindtap="login">登录后查看</button>
+  </view>
+  <block wx:elif="{{groups.length}}">
+    <view wx:for="{{groups}}" wx:for-item="group" wx:key="key">
+      <view class="zj-day-head"><text>{{group.label}}</text></view>
+      <block wx:for="{{group.items}}" wx:key="key"><template is="zj-match" data="{{item, img}}" /></block>
+    </view>
+    <text wx:if="{{loadMoreError && !loading}}" class="error">{{loadMoreError}}</text>
+    <button wx:if="{{hasMore || loadMoreError}}" class="secondary zj-more-button" bindtap="onReachBottom" disabled="{{loadingMore}}">{{loadingMore ? '加载中…' : (loadMoreError ? '重试加载更多' : '加载更多')}}</button>
   </block>
-  <view wx:if="{{loadMoreError && !loading}}" class="native-feedback"><text class="state-title">更多内容暂未加载</text><text class="error">{{loadMoreError}}</text><text class="native-section-note">已加载的内容仍可查看，请重试继续加载。</text></view>
-  <button wx:if="{{hasMore && !loading}}" class="secondary events-load-more" bindtap="onReachBottom" loading="{{loadingMore}}" disabled="{{loadingMore}}">{{loadMoreError ? '重试加载更多' : '加载更多'}}</button><text wx:if="{{docs.length && !hasMore && !loading}}" class="result-caption events-results-end">已展示全部结果</text>
-  <view wx:if="{{!loading && !error && promoted.length}}" class="native-section events-promotions"><view class="native-section-head"><text class="section-title">社群推荐</text></view><template is="native-promotions" data="{{docs:promoted, compact:false}}" /></view>
-  <view wx:if="{{clubError}}" class="native-section native-feedback"><text class="state-title">社群推荐暂未读取</text><text class="error">{{clubError}}</text><button class="secondary" bindtap="retryClub">重新加载推荐</button></view>
+  <template wx:elif="{{scope === 'mine'}}" is="zj-empty" data="{{title: '还没有报名记录', body: '报名开放的活动会标注「报名开放」。', icon: '🎫', action: '查看全部活动', page: 'events'}}" />
+  <template wx:else is="zj-empty" data="{{title: range === 'past' ? '暂无已结束的活动' : '近期暂无安排', body: '新的活动确认后会出现在这里。', icon: '📅'}}" />
 </view>

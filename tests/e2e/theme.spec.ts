@@ -2,10 +2,16 @@ import { test, expect } from "@playwright/test";
 import { memberTest } from "./member-layout-fixture";
 import sharp from "sharp";
 import tokens from "../../src/design/tokens.json" with { type: "json" };
-import { mobileMenu } from "./navigation-helpers";
+import { mobileTabs } from "./navigation-helpers";
 
 const rgb = (hex: string) =>
   `rgb(${[1, 3, 5].map((offset) => parseInt(hex.slice(offset, offset + 2), 16)).join(", ")})`;
+/** tokens.json stores translucent bar colours as compact rgba(); browsers serialise with spaces. */
+const css = (value: string) => value.replace(/\s+/g, "").replace(/,/g, ", ").replace(/, \./g, ", 0.");
+
+// V2 theme toggle: the accessible name starts with the visible state word, then the action.
+const toDark = /切换到夜场（深色）主题$/;
+const toLight = /切换到日场（浅色）主题$/;
 
 test("system dark without a preference renders light HTML, metadata and native navigation before JavaScript", async ({
   browser,
@@ -33,15 +39,12 @@ test("system dark without a preference renders light HTML, metadata and native n
     );
     await expect(page.getByRole("banner")).toHaveCSS(
       "background-color",
-      rgb(tokens.light["header-bg"]),
+      css(tokens.light.bar),
     );
-    await page.getByLabel("打开导航", { exact: true }).click();
-    await page
-      .getByRole("navigation", { name: "移动导航" })
-      .getByRole("link", { name: "通知", exact: true })
-      .click();
+    await mobileTabs(page).getByRole("link", { name: "公告", exact: true }).click();
     await expect(page).toHaveURL(/\/announcements$/);
     await expect(page.locator("html")).toHaveAttribute("data-z-theme", "light");
+    await expect(mobileTabs(page).getByRole("link", { name: "公告", exact: true })).toHaveAttribute("aria-current", "page");
   } finally {
     await context.close();
   }
@@ -59,9 +62,7 @@ test("an invalid preference falls back to light even on a dark system", async ({
     const page = await context.newPage();
     await page.goto("/events");
     await expect(page.locator("html")).toHaveAttribute("data-z-theme", "light");
-    await expect(
-      page.getByRole("button", { name: "切换到深色主题", exact: true }),
-    ).toHaveAttribute("aria-pressed", "false");
+    await expect(page.getByRole("button", { name: toDark })).toHaveAttribute("aria-pressed", "false");
   } finally {
     await context.close();
   }
@@ -75,10 +76,8 @@ memberTest(
     await page.setViewportSize({ width: 390, height: 1000 });
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/community/apply");
-    await expect(mobileMenu(page)).toHaveAttribute(
-      "data-enhanced",
-      "true",
-    );
+    // Member tabs mark the community domain as current on its inner routes.
+    await expect(mobileTabs(page).getByRole("link", { name: "社群", exact: true })).toHaveAttribute("aria-current", "page");
     await expect(page.locator("html")).toHaveAttribute("data-z-theme", "light");
     await page.getByRole("textbox", { name: "姓名", exact: true }).fill("合成主题申请人");
     await page.getByRole("textbox", { name: "手机号", exact: true }).fill("00000000000");
@@ -106,9 +105,7 @@ memberTest(
     const alert = page.locator("form.application-form").getByRole("alert");
     await expect(alert).toHaveText("由于入社流程规定，必须展示管理联系方式");
     await expect(consent).toBeFocused();
-    await page
-      .getByRole("button", { name: "切换到深色主题", exact: true })
-      .click();
+    await page.getByRole("button", { name: toDark }).click();
     await expect(page.locator("html")).toHaveAttribute("data-z-theme", "dark");
     await expect(page.getByRole("textbox", { name: "姓名", exact: true })).toHaveValue(
       "合成主题申请人",
@@ -129,9 +126,7 @@ memberTest(
     await page.goto("/account");
     await expect(page.locator("html")).toHaveAttribute("data-z-theme", "dark");
     await page.reload();
-    await expect(
-      page.getByRole("button", { name: "切换到浅色主题", exact: true }),
-    ).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("button", { name: toLight })).toHaveAttribute("aria-pressed", "true");
     const reopened = await browser.newContext({
       baseURL,
       colorScheme: "light",
@@ -149,13 +144,8 @@ memberTest(
     } finally {
       await reopened.close();
     }
-    await expect(mobileMenu(page)).toHaveAttribute(
-      "data-enhanced",
-      "true",
-    );
-    await page
-      .getByRole("button", { name: "切换到浅色主题", exact: true })
-      .click();
+    await expect(mobileTabs(page).getByRole("link", { name: "我的", exact: true })).toHaveAttribute("aria-current", "page");
+    await page.getByRole("button", { name: toLight }).click();
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("data-z-theme", "light");
     expect(

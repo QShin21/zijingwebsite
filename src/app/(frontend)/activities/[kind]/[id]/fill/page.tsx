@@ -1,33 +1,35 @@
-import { ActivitySignup } from "@/components/ActivitySignup";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import styles from "@/components/activity-pages/ActivityPages.module.css";
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ kind: string; id: string }>;
-}) {
+import { ActivitySignup } from "@/components/ActivitySignup";
+import { TaskFrame, TaskNote } from "@/components/v2/TaskFrame";
+
+export const metadata = { title: "活动报名" };
+
+export default async function Page({ params }: { params: Promise<{ kind: string; id: string }> }) {
   const { kind, id } = await params;
-  if (
-    !["events", "community-posts"].includes(kind) ||
-    !Number.isSafeInteger(Number(id)) ||
-    Number(id) <= 0
-  )
-    notFound();
+  if (!["events", "community-posts"].includes(kind) || !Number.isSafeInteger(Number(id)) || Number(id) <= 0) notFound();
   return (
-    <div className={`${styles.page} ${styles.staff} ${styles.taskPage}`}>
-      <nav className={styles.breadcrumbs} aria-label="报名页面导航">
-        <Link href="/events">浏览活动</Link>
-        <span aria-hidden="true">/</span>
-        <span>填写问卷</span>
-      </nav>
-      <header className={styles.hero}>
-        <div>
-          <h1>活动报名与本人回执</h1>
-          <p>填写后核对提交，已报名同学可在这里查看记录并按开放规则修改。</p>
-        </div>
-      </header>
+    <TaskFrame
+      eyebrow="SIGN UP · 活动报名"
+      title="活动报名与本人回执"
+      description="填写后核对提交，已报名同学可在这里查看记录并按开放规则修改。"
+      back={{ href: "/events", label: "日程" }}
+      steps={["填写资料", "核对提交", "查看回执"]}
+      aside={
+        <>
+          <TaskNote title="报名须知" links={[{ href: "/account?view=signups", label: "我的全部报名" }, { href: "/privacy", label: "隐私说明" }]}>
+            <ul>
+              <li>每个账号保留一份报名记录，提交后生成本人回执。</li>
+              <li>报名开放期间可按规则修改作答；截止后回执只读。</li>
+              <li>答案仅供本人和有权限的活动管理者查看。</li>
+            </ul>
+          </TaskNote>
+          <TaskNote title="结果未确认？">
+            <p>网络中断时请先到「我的报名」核对，避免重复提交。</p>
+          </TaskNote>
+        </>
+      }
+    >
       <ActivitySignup kind={kind} id={Number(id)} />
-    </div>
+    </TaskFrame>
   );
 }

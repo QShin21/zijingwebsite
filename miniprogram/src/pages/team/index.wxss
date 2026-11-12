@@ -1,29 +1,21 @@
-.mini-page.native-page.team-page .team-heading { padding: 8px 0 24px; margin-bottom: 20px; border: 0; }
-.team-navigation { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 28px; }
-.mini-page.native-page.team-page .team-tab { min-width: 0; padding: 12px 8px; background: var(--z-surface); border-color: var(--z-line); }
-.mini-page.native-page.team-page .team-tab.selected { background: var(--z-selected-bg); border-color: var(--z-primary); color: var(--z-selected-text); font-weight: 600; }
-.mini-page.native-page.team-page .team-tab[disabled] { background: var(--z-disabled-bg); color: var(--z-disabled-text); border-color: var(--z-disabled-border); }
-.team-view-intro { margin-bottom: 16px; }
-.team-loading { padding: 16px 0 24px; }
-.team-read-error { margin: 16px 0 24px; }
-.mini-page.native-page.team-page .team-result-heading { margin: 8px 0 0; }
-.team-record { padding: 24px 0; border-bottom: 1px solid var(--z-line); }
-.team-record:first-child { padding-top: 16px; }
-.team-record:last-child { border-bottom: 0; }
-.team-record-title { display: block; margin-top: 12px; font-size: 18px; line-height: 1.5; font-weight: 600; overflow-wrap: anywhere; word-break: break-word; }
-.recruitment-dates { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 16px; }
-.recruitment-dates > view { flex: 1; min-width: 112px; }
-.date-label { display: block; color: var(--z-muted); font-size: 12px; line-height: 1.6; }
-.date-value { display: block; margin-top: 4px; color: var(--z-body); font-size: 15px; line-height: 1.6; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.mini-page.native-page.team-page .team-record-action { margin-top: 20px; width: 100%; }
-.review-feedback { padding: 16px; margin-top: 16px; background: var(--z-secondary-bg); color: var(--z-secondary-text); border-left: 3px solid var(--z-primary); font-size: 15px; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
-.feedback-label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
-.membership-note { display: block; color: var(--z-muted); font-size: 14px; line-height: 1.75; margin-top: 12px; }
-.mini-page.native-page.team-page .record-disclosure { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; text-align: left; margin-top: 12px; }
-.disclosure-mark { flex-shrink: 0; }
-.team-record-links { padding-left: 16px; border-left: 2px solid var(--z-secondary-border); }
-.mini-page.native-page.team-page .team-record-links .plain { display: block; width: 100%; text-align: left; }
-.mini-page.native-page.team-page .team-load-more { width: 100%; margin-top: 24px; }
-.team-organization { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--z-line); }
-.team-organization-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
-.mini-page.native-page.team-page .team-organization-actions > .plain { text-align: left; }
+/* V2 team affairs: scrollable tabs, record cards with date chips, stage organization block. */
+.team-v2 { padding-top: 0; }
+.team-tabs { width: 100%; white-space: nowrap; margin-bottom: 12rpx; }
+.team-tabs-inner { display: inline-flex; gap: 12rpx; padding: 4rpx 0 8rpx; }
+.mini-page .team-tab { flex-shrink: 0; padding: 14rpx 28rpx; border: 3rpx solid var(--z-line); border-radius: 999rpx; background: var(--z-surface); color: var(--z-muted); font-size: 26rpx; font-weight: 800; }
+.mini-page .team-tab.active { border-color: var(--z-text); background: var(--z-text); color: var(--z-page); }
+.team-intro { display: flex; flex-direction: column; gap: 6rpx; margin: 16rpx 0 8rpx; }
+.team-result { margin-top: 12rpx; }
+.team-dates { display: flex; gap: 12rpx; }
+.team-date { flex: 1; display: flex; flex-direction: column; gap: 4rpx; padding: 14rpx 18rpx; border-radius: 20rpx; background: var(--z-stage); color: var(--z-stage-ink); }
+.team-date-end { border-top: 6rpx solid var(--z-accent); }
+.team-date-label { color: var(--z-accent); font-size: 22rpx; font-weight: 900; }
+.team-date-value { font-size: 26rpx; font-weight: 800; }
+.team-label { display: block; font-weight: 900; }
+.mini-page .team-wide { display: block; width: 100%; margin-top: 8rpx; }
+.mini-page .team-disclosure { display: flex; justify-content: space-between; width: 100%; padding: 10rpx 0; }
+.team-links { display: flex; flex-direction: column; gap: 12rpx; }
+.team-organization { display: flex; flex-direction: column; gap: 12rpx; margin-top: 40rpx; padding: 32rpx; border-radius: 40rpx; background: repeating-linear-gradient(115deg, transparent 0, transparent 22rpx, rgba(255, 255, 255, .03) 22rpx, rgba(255, 255, 255, .03) 44rpx), linear-gradient(150deg, var(--z-stage2), var(--z-stage)); color: var(--z-stage-ink); }
+.team-organization-title { color: var(--z-stage-ink); }
+.team-organization-note { color: var(--z-stage-muted); font-size: 25rpx; }
+.team-organization-actions { display: flex; flex-direction: column; gap: 12rpx; }

@@ -1,53 +1,126 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
 <import src="../../templates/native.wxml" />
-<view class="page mini-page native-page community-page">
-  <button class="plain back" bindtap="back">返回</button>
+<view class="page mini-page community-v2 {{theme === 'dark' ? 'zj-dark' : ''}}">
+  <view class="zj-hero zj-hero-hue community-hero" style="--hue: {{game.id ? game.id * 137 % 360 : 262}}">
+    <view class="zj-hero-inner">
+      <button class="zj-hero-back" bindtap="back">‹ 返回</button>
+      <block wx:if="{{!loading && !error && !needsLogin}}">
+        <view class="community-identity">
+          <text class="community-crest">{{game.title ? game.title[0] : '紫'}}</text>
+          <view class="community-titles">
+            <text class="zj-hero-kicker">游戏社群</text>
+            <text class="zj-hero-title">{{game.title}}</text>
+          </view>
+        </view>
+        <text wx:if="{{game.summary}}" class="zj-hero-lead">{{game.summary}}</text>
+        <view class="community-actions">
+          <button wx:if="{{contactsLoading}}" class="zj-stage-ghost" disabled="{{true}}" loading="{{true}}">正在读取名片</button>
+          <button wx:elif="{{contactsError}}" class="zj-stage-ghost" bindtap="retryContacts">重试管理员名片</button>
+          <button wx:elif="{{contactAvailable}}" class="accent" bindtap="contactAdmins">联系管理员</button>
+          <button wx:else class="zj-stage-ghost" bindtap="retryContacts">刷新管理员名片</button>
+          <button wx:if="{{nodes.length}}" class="zj-stage-ghost intro-toggle" bindtap="toggleIntro">{{introOpen ? '收起社群介绍' : '完整社群介绍'}}</button>
+        </view>
+        <text wx:if="{{!contactsLoading && contactsError}}" class="community-contact-note">暂时无法读取联系方式，重试后再联系管理员。</text>
+        <text wx:elif="{{!contactsLoading && !contactAvailable && contacts.length}}" class="community-contact-note">名片图片暂不可用，请刷新后联系管理员。</text>
+        <text wx:elif="{{!contactsLoading && !contactAvailable}}" class="community-contact-note">暂无授权名片，当前没有可展示的联系方式。可稍后刷新。</text>
+      </block>
+    </view>
+  </view>
   <template is="feedback" data="{{loading, error, needsLogin}}" />
   <block wx:if="{{!loading && !error && !needsLogin}}">
-    <view class="community-heading">
-      <text class="community-kind">游戏社群</text><text class="title">{{game.title}}</text>
-      <text wx:if="{{game.summary}}" class="subtitle">{{game.summary}}</text>
-      <view class="community-heading-actions"><button wx:if="{{contactsLoading}}" class="secondary" disabled="{{true}}" loading="{{true}}">正在读取名片</button><button wx:elif="{{contactsError}}" class="secondary" bindtap="retryContacts">重试管理员名片</button><button wx:elif="{{contactAvailable}}" class="primary" bindtap="contactAdmins">联系管理员</button><button wx:else class="plain" bindtap="retryContacts">刷新管理员名片</button><button wx:if="{{nodes.length}}" class="plain intro-toggle" bindtap="toggleIntro">{{introOpen ? '收起社群介绍' : '完整社群介绍'}}</button></view>
-      <text wx:if="{{!contactsLoading && contactsError}}" class="community-contact-note">暂时无法读取联系方式，重试后再联系管理员。</text><text wx:elif="{{!contactsLoading && !contactAvailable && contacts.length}}" class="community-contact-note">名片图片暂不可用，请刷新后联系管理员。</text><text wx:elif="{{!contactsLoading && !contactAvailable}}" class="community-contact-note">暂无授权名片，当前没有可展示的联系方式。可稍后刷新。</text>
-      <view wx:if="{{introOpen && nodes.length}}" class="body community-intro"><rich-text nodes="{{nodes}}" user-select /></view>
+    <view wx:if="{{introOpen && nodes.length}}" class="zj-sheet community-intro"><text class="zj-sheet-title">社群介绍</text><rich-text nodes="{{nodes}}" user-select /></view>
+    <view class="zj-segments community-tabs" aria-role="tablist">
+      <button class="zj-segment {{area === 'contacts' ? 'active' : ''}}" bindtap="area" data-area="contacts" aria-label="联系管理员{{area === 'contacts' ? '，已选择' : ''}}">联系管理员</button>
+      <button class="zj-segment {{area === 'updates' ? 'active' : ''}}" bindtap="area" data-area="updates" aria-label="活动与通知{{area === 'updates' ? '，已选择' : ''}}">活动与通知</button>
+      <button class="zj-segment {{area === 'showcase' ? 'active' : ''}}" bindtap="area" data-area="showcase" aria-label="社群风采{{area === 'showcase' ? '，已选择' : ''}}">社群风采</button>
     </view>
-    <scroll-view scroll-x class="community-tabs"><button class="community-tab {{area === 'contacts' ? 'active' : ''}}" bindtap="area" data-area="contacts" aria-label="联系管理员{{area === 'contacts' ? '，已选择' : ''}}">联系管理员</button><button class="community-tab {{area === 'updates' ? 'active' : ''}}" bindtap="area" data-area="updates" aria-label="活动与通知{{area === 'updates' ? '，已选择' : ''}}">活动与通知</button><button class="community-tab {{area === 'showcase' ? 'active' : ''}}" bindtap="area" data-area="showcase" aria-label="社群风采{{area === 'showcase' ? '，已选择' : ''}}">社群风采</button></scroll-view>
+
     <block wx:if="{{area === 'contacts'}}">
-      <view id="community-contacts" class="native-section contact-panel">
-        <view class="native-section-head"><text class="section-title">联系管理员</text><button class="more" bindtap="retryContacts" disabled="{{contactsLoading}}">刷新名片</button></view>
-        <text class="muted">微信名片由在任管理员本人授权展示。点按预览，按微信提供的图片菜单操作。</text>
-        <view wx:if="{{contactsLoading}}" class="contact-loading" aria-role="status"><text class="muted">正在读取授权名片…</text><view class="loading-lines" aria-hidden="true"><view class="loading-line"></view><view class="loading-line short"></view></view></view>
-        <view wx:if="{{contactsError}}" class="contact-feedback"><text class="error" aria-role="alert">{{contactsError}}</text><button class="secondary" bindtap="retryContacts" disabled="{{contactsLoading}}">重试管理员名片</button></view>
-        <view wx:if="{{!contacts.length && !contactsLoading && !contactsError}}" class="native-feedback contact-feedback"><text class="state-title">暂无授权名片</text><text class="muted">当前没有可展示的管理员联系方式。可稍后刷新，也可申请参与社群组织。</text></view>
-        <view wx:for="{{contacts}}" wx:key="id" class="contact">
-          <view class="contact-heading"><text class="contact-name">{{item.name}}</text><text class="contact-permission">在任管理员 · 已授权展示</text></view>
-          <button class="image-button" hover-class="pressed" wx:if="{{item.image && !item.imageError}}" bindtap="previewImage" data-url="{{item.image}}" aria-label="预览{{item.name}}的微信名片"><image class="contact-qr" mode="aspectFit" src="{{item.image}}" show-menu-by-longpress aria-label="{{item.name}}的微信名片" binderror="contactImageError" data-id="{{item.id}}" data-url="{{item.image}}" /></button>
-          <text wx:else class="muted contact-image-missing">{{item.imageError ? '名片图片加载失败，请刷新重试。' : '名片图片暂时无法显示，请刷新重试。'}}</text>
-          <text wx:if="{{item.image && !item.imageError}}" class="qr-caption">点按预览微信名片</text><text class="contact-remark">添加好友时，请备注昵称和游戏项目。</text>
+      <view id="community-contacts" class="zj-section">
+        <view class="zj-section-head"><view><text class="zj-section-title">联系管理员</text><text class="zj-small">微信名片由在任管理员本人授权展示。点按预览，按微信提供的图片菜单操作。</text></view><button class="plain zj-more" bindtap="retryContacts" disabled="{{contactsLoading}}">刷新名片</button></view>
+        <view wx:if="{{contactsLoading}}" class="zj-skeleton" aria-role="status" aria-label="正在读取授权名片"><view class="zj-skeleton-row"><view class="zj-skeleton-date"></view><view class="zj-skeleton-lines"><view></view><view></view><view></view></view></view></view>
+        <view wx:if="{{contactsError}}" class="zj-alert"><text class="zj-small" aria-role="alert">{{contactsError}}</text><button class="secondary" bindtap="retryContacts" disabled="{{contactsLoading}}">重试管理员名片</button></view>
+        <view wx:if="{{!contacts.length && !contactsLoading && !contactsError}}" class="zj-empty"><text class="zj-empty-icon">🪪</text><text class="zj-empty-title">暂无授权名片</text><text class="zj-small">当前没有可展示的管理员联系方式。可稍后刷新，也可申请参与社群组织。</text></view>
+        <view class="community-contacts">
+          <view wx:for="{{contacts}}" wx:key="id" class="community-contact">
+            <view class="community-contact-head"><text class="community-contact-avatar">{{item.name[0]}}</text><view><text class="zj-card-title">{{item.name}}</text><text class="zj-small">在任管理员 · 已授权展示</text></view></view>
+            <button class="image-button" hover-class="zj-pressed" wx:if="{{item.image && !item.imageError}}" bindtap="previewImage" data-url="{{item.image}}" aria-label="预览{{item.name}}的微信名片"><image class="contact-qr" mode="aspectFit" src="{{item.image}}" show-menu-by-longpress aria-label="{{item.name}}的微信名片" binderror="contactImageError" data-id="{{item.id}}" data-url="{{item.image}}" /></button>
+            <text wx:else class="zj-small">{{item.imageError ? '名片图片加载失败，请刷新重试。' : '名片图片暂时无法显示，请刷新重试。'}}</text>
+            <text wx:if="{{item.image && !item.imageError}}" class="zj-small community-qr-caption">点按预览微信名片</text>
+            <text class="zj-callout">添加好友时，请备注昵称和游戏项目。由管理员人工邀请进群；查看或保存名片不代表已入群。</text>
+          </view>
         </view>
       </view>
-      <view class="native-section community-organize"><text class="section-title">参与组织这个社群</text><text class="native-summary">申请和修改重提时，需要本人主动同意展示微信名片作为进群联系方式；默认不勾选，获批后仍可关闭展示。</text><button class="secondary" bindtap="apply">申请社群管理员</button></view>
+      <view class="zj-sheet community-organize">
+        <text class="zj-sheet-title">参与组织这个社群</text>
+        <text class="zj-small">申请和修改重提时，需要本人主动同意展示微信名片作为进群联系方式；默认不勾选，获批后仍可关闭展示。</text>
+        <button class="secondary" bindtap="apply">申请社群管理员</button>
+      </view>
     </block>
+
     <block wx:else>
-      <view class="native-section-head community-content-heading"><text class="section-title">{{area === 'updates' ? '社群近况' : '共同经历'}}</text><button class="more" bindtap="retryContent" disabled="{{loadingMore}}">刷新</button></view>
-      <view wx:if="{{area === 'showcase'}}" class="honor-pins">
-        <view class="native-section-head"><text class="section-title">代表队荣誉</text><button class="more" bindtap="loadHonorPins" disabled="{{honorsLoading}}">刷新档案</button></view>
-        <text class="muted">社群风采中的置顶档案，按现有公开记录展示。</text><text wx:if="{{honorsLoading}}" class="result-caption" aria-role="status">正在读取已核验档案…</text>
-        <view wx:if="{{honorsError}}"><text class="error">{{honorsError}}</text><button class="secondary" bindtap="loadHonorPins" disabled="{{honorsLoading}}">重试荣誉档案</button></view>
-        <button wx:for="{{honorPins}}" wx:key="id" class="content-link shortcut" bindtap="openHonorArchive" data-id="{{item.id}}"><view class="shortcut-main"><text class="shortcut-title">{{item.title}}</text><text class="native-result">{{item.latestTitle}}</text><view class="native-meta"><text wx:if="{{item.latestDate}}">{{item.latestDate}}</text><text>{{item.count}} 项已核验荣誉</text></view></view><text class="shortcut-sign" aria-hidden="true">›</text></button>
-        <text wx:if="{{!honorPins.length && !honorsLoading && !honorsError}}" class="result-caption">该社群暂无已公开的代表队荣誉。</text>
+      <view class="zj-section-head"><text class="zj-section-title">{{area === 'updates' ? '社群近况' : '共同经历'}}</text><button class="plain zj-more" bindtap="retryContent" disabled="{{loadingMore}}">刷新</button></view>
+      <button wx:if="{{area === 'showcase'}}" class="accent community-showcase-new" bindtap="openPage" data-page="showcase-new" data-params="{{showcaseParams}}">＋ 投稿风采</button>
+      <view wx:if="{{area === 'showcase'}}" class="zj-sheet honor-pins">
+        <view class="zj-record-head"><text class="zj-sheet-title">代表队荣誉</text><button class="plain" bindtap="loadHonorPins" disabled="{{honorsLoading}}">刷新档案</button></view>
+        <text class="zj-small">社群风采中的置顶档案，按现有公开记录展示。</text>
+        <text wx:if="{{honorsLoading}}" class="zj-small" aria-role="status">正在读取已核验档案…</text>
+        <view wx:if="{{honorsError}}" class="zj-alert"><text class="zj-small">{{honorsError}}</text><button class="secondary" bindtap="loadHonorPins" disabled="{{honorsLoading}}">重试荣誉档案</button></view>
+        <view wx:for="{{honorPins}}" wx:key="id" class="zj-honor community-pin" hover-class="zj-pressed" bindtap="openHonorArchive" data-id="{{item.id}}" aria-role="link" aria-label="{{item.title}}">
+          <view class="zj-honor-top"><text class="zj-trophy">🏆</text><text class="zj-placing">{{item.count}} 项</text></view>
+          <text class="zj-honor-title">{{item.title}}</text>
+          <text class="zj-honor-meta">{{item.latestTitle}}<block wx:if="{{item.latestDate}}"> · {{item.latestDate}}</block></text>
+        </view>
+        <text wx:if="{{!honorPins.length && !honorsLoading && !honorsError}}" class="zj-small">该社群暂无已公开的代表队荣誉。</text>
       </view>
-      <view wx:if="{{contentError}}"><text class="error">{{contentError}}</text><button class="secondary" bindtap="retryContent" disabled="{{loadingMore}}">重试社群内容</button></view><text wx:if="{{loadingMore}}" class="result-caption" aria-role="status">正在读取社群内容…</text>
-      <view wx:for="{{docs}}" wx:key="id" class="community-record">
-        <button wx:if="{{area === 'updates'}}" class="content-link community-update" bindtap="openContent" data-doc="{{item}}" hover-class="pressed"><view class="native-meta"><text>{{item.dateText}}</text><text>{{item.kindText}}</text><text wx:if="{{item.authorName}}">{{item.authorName}}</text></view><text class="native-entry-title">{{item.title}}</text><text class="native-summary">{{item.body}}</text><text class="native-entry-action">查看详情{{item.category === 'event' ? '与报名' : ''}}</text></button>
-        <view wx:else class="showcase-record"><view class="native-meta"><text>{{item.dateText}}</text><text wx:if="{{item.authorName}}">{{item.authorName}}</text></view><text class="native-entry-title">{{item.title}}</text><text class="body">{{item.body}}</text><view wx:for="{{item.localImages}}" wx:for-item="photo" wx:key="source"><button class="image-button" hover-class="pressed" wx:if="{{photo.source && !photo.imageError}}" bindtap="previewImage" data-url="{{photo.source}}" aria-label="预览图片"><image class="photo" src="{{photo.source}}" mode="widthFix" binderror="showcaseImageError" data-id="{{item.id}}" data-url="{{photo.source}}" /></button><view wx:elif="{{photo.imageError}}" class="native-media-fallback"><view class="native-media-field"><template is="native-field-graphic" /></view><text class="native-media-error">这张图片暂时无法显示，可刷新社群内容重试。</text></view><text wx:if="{{photo.caption}}" class="field-note">{{photo.caption}}</text></view><video id="showcase-video-{{index}}" wx:if="{{item.videoSource}}" class="showcase-video" src="{{item.videoSource}}" controls="{{true}}" autoplay="{{false}}" object-fit="contain" show-center-play-btn="{{true}}" binderror="videoError" data-index="{{index}}" /><text wx:if="{{item.videoError}}" class="error">视频暂时无法播放，请检查网络或使用下方链接。</text><text wx:if="{{item.videoURL && !item.videoSource}}" class="field-note">此内容使用外部视频页面，可复制链接到浏览器打开。</text><button wx:if="{{item.videoURL}}" class="plain" bindtap="copy" data-value="{{item.videoSource || item.videoURL}}">复制视频链接</button></view>
+      <view wx:if="{{contentError}}" class="zj-alert"><text class="zj-small">{{contentError}}</text><button class="secondary" bindtap="retryContent" disabled="{{loadingMore}}">重试社群内容</button></view>
+      <text wx:if="{{loadingMore}}" class="zj-small" aria-role="status">正在读取社群内容…</text>
+      <view class="zj-list">
+        <view wx:for="{{docs}}" wx:key="id" class="community-record">
+          <view wx:if="{{area === 'updates'}}" class="zj-record" hover-class="zj-pressed" bindtap="openContent" data-doc="{{item}}" aria-role="link" aria-label="{{item.title}}">
+            <view class="zj-tags"><text class="zj-kind">{{item.kindText}}</text><text class="zj-small">{{item.dateText}}</text><text wx:if="{{item.authorName}}" class="zj-small">{{item.authorName}}</text></view>
+            <text class="zj-record-title">{{item.title}}</text>
+            <text class="zj-card-summary zj-clamp">{{item.body}}</text>
+            <text class="zj-card-action">查看详情{{item.category === 'event' ? '与报名' : ''}} ›</text>
+          </view>
+          <view wx:else class="zj-record showcase-record">
+            <view class="zj-tags"><text class="zj-kind">风采</text><text class="zj-small">{{item.dateText}}</text><text wx:if="{{item.authorName}}" class="zj-small">{{item.authorName}}</text></view>
+            <text class="zj-record-title">{{item.title}}</text>
+            <text class="body">{{item.body}}</text>
+            <view wx:for="{{item.localImages}}" wx:for-item="photo" wx:key="source" class="showcase-photo">
+              <button class="image-button" hover-class="zj-pressed" wx:if="{{photo.source && !photo.imageError}}" bindtap="previewImage" data-url="{{photo.source}}" aria-label="预览图片"><image class="showcase-image" src="{{photo.source}}" mode="widthFix" binderror="showcaseImageError" data-id="{{item.id}}" data-url="{{photo.source}}" /></button>
+              <view wx:elif="{{photo.imageError}}" class="zj-alert"><text class="zj-small">这张图片暂时无法显示，可刷新社群内容重试。</text></view>
+              <text wx:if="{{photo.caption}}" class="zj-small">{{photo.caption}}</text>
+            </view>
+            <video id="showcase-video-{{index}}" wx:if="{{item.videoSource}}" class="showcase-video" src="{{item.videoSource}}" controls="{{true}}" autoplay="{{false}}" object-fit="contain" show-center-play-btn="{{true}}" binderror="videoError" data-index="{{index}}" />
+            <text wx:if="{{item.videoError}}" class="error">视频暂时无法播放，请检查网络或使用下方链接。</text>
+            <text wx:if="{{item.videoURL && !item.videoSource}}" class="zj-small">此内容使用外部视频页面，可复制链接到浏览器打开。</text>
+            <button wx:if="{{item.videoURL}}" class="secondary" bindtap="copy" data-value="{{item.videoSource || item.videoURL}}">复制视频链接</button>
+          </view>
+        </view>
       </view>
-      <view wx:if="{{!docs.length && !loadingMore && !contentError}}" class="empty"><text class="state-title">该社群还没有公开内容</text><text class="muted">新的活动、通知与风采发布后会出现在这里。</text></view><button wx:if="{{hasMore}}" class="secondary community-load-more" loading="{{loadingMore}}" disabled="{{loadingMore}}" bindtap="onReachBottom">加载更多</button>
+      <view wx:if="{{!docs.length && !loadingMore && !contentError}}" class="zj-empty"><text class="zj-empty-icon">✦</text><text class="zj-empty-title">该社群还没有公开内容</text><text class="zj-small">新的活动、通知与风采发布后会出现在这里。</text></view>
+      <button wx:if="{{hasMore}}" class="secondary community-load-more" loading="{{loadingMore}}" disabled="{{loadingMore}}" bindtap="onReachBottom">加载更多</button>
     </block>
-    <view class="native-section community-opportunities"><view class="native-section-head"><text class="section-title">一起上场</text></view><button class="content-link shortcut" bindtap="openWebsite" data-url="/teams/recruitment"><view class="shortcut-main"><text class="shortcut-title">代表队招新与本人记录</text><text class="muted">查看队伍选拔、入队申请及成员关系。</text></view><text class="shortcut-sign" aria-hidden="true">›</text></button><button class="plain" bindtap="honorWorkspace" disabled="{{loading || joinBusy}}">本社群荣誉投稿与审核</button></view>
-    <view class="native-section community-staff"><view class="native-section-head"><text class="section-title">社团骨干招新</text><button class="more" bindtap="staff">批次与我的申请</button></view><text class="muted">各社群入口使用同一批次申请与回执。</text><button wx:for="{{staffBatches}}" wx:key="id" class="content-link shortcut" bindtap="applyStaff" data-id="{{item.id}}"><view class="shortcut-main"><text class="badge">{{item.state}}</text><text class="shortcut-title">{{item.title}}</text><text wx:if="{{item.description}}" class="muted">{{item.description}}</text></view><text class="shortcut-sign" aria-hidden="true">›</text></button></view>
-    <view wx:if="{{promotions.length}}" class="native-section"><view class="native-section-head"><text class="section-title">社群推荐</text></view><template is="native-promotions" data="{{docs:promotions, compact:true}}" /></view>
-    <text wx:if="{{clubLoading}}" class="result-caption" aria-role="status">正在读取招新与推荐…</text><view wx:if="{{clubError}}" class="native-section native-feedback"><text class="error">{{clubError}}</text><button class="secondary" bindtap="retryClub" disabled="{{clubLoading}}">重试社团信息</button></view>
+
+    <view class="zj-section">
+      <view class="zj-section-head"><text class="zj-section-title">一起上场</text></view>
+      <view class="zj-call" hover-class="zj-pressed" bindtap="openWebsite" data-url="/teams/recruitment" aria-role="link"><text class="zj-kind">代表队选拔</text><text class="zj-card-title">代表队招新与本人记录</text><text class="zj-small">查看队伍选拔、入队申请及成员关系。</text></view>
+      <button class="secondary community-wide" bindtap="honorWorkspace" disabled="{{loading || joinBusy}}">本社群荣誉投稿与审核</button>
+    </view>
+    <view class="zj-section">
+      <view class="zj-section-head"><view><text class="zj-section-title">社团骨干招新</text><text class="zj-small">各社群入口使用同一批次申请与回执。</text></view><text class="zj-more" bindtap="staff" aria-role="link">批次与我的申请 ›</text></view>
+      <view class="zj-list">
+        <view wx:for="{{staffBatches}}" wx:key="id" class="zj-call" hover-class="zj-pressed" bindtap="applyStaff" data-id="{{item.id}}" aria-role="link" aria-label="{{item.title}}">
+          <view class="zj-tags"><text class="zj-kind">骨干招新</text><text class="zj-pill zj-pill-success">{{item.state}}</text></view>
+          <text class="zj-card-title">{{item.title}}</text>
+          <text wx:if="{{item.description}}" class="zj-card-summary zj-clamp">{{item.description}}</text>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{promotions.length}}" class="zj-section"><view class="zj-section-head"><text class="zj-section-title">社群推荐</text></view><template is="native-promotions" data="{{docs:promotions, compact:true}}" /></view>
+    <text wx:if="{{clubLoading}}" class="zj-small" aria-role="status">正在读取招新与推荐…</text>
+    <view wx:if="{{clubError}}" class="zj-alert"><text class="zj-small">{{clubError}}</text><button class="secondary" bindtap="retryClub" disabled="{{clubLoading}}">重试社团信息</button></view>
   </block>
 </view>

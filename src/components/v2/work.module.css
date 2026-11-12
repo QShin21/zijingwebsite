@@ -1,0 +1,292 @@
+/* V2 workbench building blocks for management and review pages (teams, staff, community). */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.stats li {
+  display: grid;
+  gap: 4px;
+  padding: 16px 18px;
+  border: 1px solid var(--z-line);
+  border-radius: var(--z-radius);
+  background: var(--z-surface);
+}
+.stats strong {
+  color: var(--z-ink);
+  font-family: var(--z-num);
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 900;
+  line-height: 1;
+}
+.stats span {
+  color: var(--z-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+.stats li[data-hot] {
+  border-color: transparent;
+  background: var(--z-stage);
+  color: var(--z-stage-ink);
+}
+.stats li[data-hot] strong {
+  color: var(--z-accent);
+}
+.stats li[data-hot] span {
+  color: var(--z-stage-muted);
+}
+.scope {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--z-line);
+  border-radius: var(--z-radius);
+  background: var(--z-surface);
+}
+.scope h2 {
+  font-size: 17px;
+}
+.scope form {
+  display: grid;
+  gap: 10px;
+}
+.scope label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 800;
+}
+.scope select {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid var(--z-line-strong);
+  border-radius: var(--z-radius-small);
+  background: var(--z-raised);
+  color: var(--z-ink);
+  font: inherit;
+}
+.scope p {
+  color: var(--z-muted);
+  font-size: 13px;
+}
+.records {
+  display: grid;
+  gap: 14px;
+}
+.record {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  padding: 18px 20px 18px 24px;
+  overflow: hidden;
+  border: 1px solid var(--z-line);
+  border-radius: var(--z-radius);
+  background: var(--z-surface);
+  transition: border-color var(--z-duration) var(--z-ease), box-shadow var(--z-duration) var(--z-ease);
+}
+.record::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 6px;
+  background: var(--z-action);
+}
+.record:hover {
+  border-color: var(--z-line-strong);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--z-ink) 8%, transparent);
+}
+.record[data-state="pending"]::before,
+.record[data-state="submitted"]::before,
+.record[data-state="reviewing"]::before {
+  background: var(--z-accent);
+}
+.record[data-state="approved"]::before,
+.record[data-state="active"]::before,
+.record[data-state="open"]::before,
+.record[data-state="established"]::before {
+  background: var(--z-success);
+}
+.record[data-state="returned"]::before,
+.record[data-state="resting"]::before,
+.record[data-state="draft"]::before {
+  background: var(--z-warning);
+}
+.record[data-state="rejected"]::before,
+.record[data-state="withdrawn"]::before,
+.record[data-state="archived"]::before,
+.record[data-state="closed"]::before,
+.record[data-state="revoked"]::before {
+  background: var(--z-line-strong);
+}
+.recordHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 14px;
+}
+.recordHead h3 {
+  font-size: 19px;
+  line-height: 1.35;
+}
+.recordHead h3 a:hover {
+  color: var(--z-action);
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  color: var(--z-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+.split {
+  display: grid;
+  gap: 14px;
+}
+.submission,
+.decision {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--z-radius-small);
+}
+.submission {
+  background: var(--z-raised);
+}
+.decision {
+  border: 1.5px dashed var(--z-line-strong);
+}
+.submission h4,
+.decision h4 {
+  color: var(--z-muted);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+.chipLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1.5px solid var(--z-line);
+  border-radius: var(--z-radius-pill);
+  font-size: 14px;
+  font-weight: 800;
+  transition: border-color var(--z-duration) var(--z-ease), background-color var(--z-duration) var(--z-ease);
+}
+.chipLink:hover {
+  border-color: var(--z-action);
+  background: var(--z-tint);
+}
+.panel {
+  display: grid;
+  gap: 16px;
+  padding: clamp(18px, 3vw, 26px);
+  border: 1px solid var(--z-line);
+  border-top: 6px solid var(--z-action);
+  border-radius: var(--z-radius);
+  background: var(--z-surface);
+}
+.panel > h2 {
+  font-size: var(--z-text-h2);
+}
+.flow {
+  display: grid;
+  gap: clamp(28px, 4vw, 44px);
+}
+.status {
+  margin: 0;
+}
+.status:empty {
+  display: none;
+}
+.disclosure {
+  border: 1px solid var(--z-line);
+  border-radius: var(--z-radius-small);
+  background: var(--z-raised);
+}
+.disclosure > summary {
+  min-height: 44px;
+  padding: 10px 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.disclosure > :not(summary) {
+  margin: 0 14px 14px;
+}
+.filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 12px;
+}
+.filter label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 800;
+}
+.filter select,
+.filter input {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1.5px solid var(--z-line-strong);
+  border-radius: var(--z-radius-small);
+  background: var(--z-raised);
+  color: var(--z-ink);
+  font: inherit;
+}
+/* Draft preview banner: sits above the stage hero on /preview pages. */
+.previewBanner {
+  position: sticky;
+  z-index: 5;
+  top: var(--z-topbar);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 12px var(--z-gutter);
+  border-bottom: 1px solid var(--z-line);
+  background: var(--z-warning-bg);
+  color: var(--z-warning);
+}
+.previewBanner p {
+  flex: 1 1 260px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.previewBadge {
+  padding: 2px 10px;
+  border-radius: var(--z-radius-pill);
+  background: var(--z-warning);
+  color: var(--z-paper);
+  font-family: var(--z-num);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+@media (min-width: 900px) {
+  .split {
+    grid-template-columns: minmax(0, 1.25fr) minmax(280px, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .record,
+  .chipLink {
+    transition: none;
+  }
+}

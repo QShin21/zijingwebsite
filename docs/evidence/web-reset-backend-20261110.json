@@ -1,0 +1,111 @@
+{
+  "status": "BASELINE_RECORD_FINAL_WORKTREE_RETEST_RECORDED_SEPARATELY",
+  "sourceCommit": "58f0de98b349ab13343780a4e05f2d6d55249cef",
+  "auditDate": "2026-11-10",
+  "workerModelRequested": "gpt-6.1-sol",
+  "workerReasoningRequested": "max",
+  "productBackendChanges": [],
+  "schemaChanges": [],
+  "deployment": false,
+  "entrypoints": {
+    "pages": 41,
+    "routes": 18,
+    "serverActionModules": 5,
+    "serverActionExports": 34
+  },
+  "dependencyInstall": {
+    "frozenLockfile": true,
+    "lockfileChanged": false,
+    "node": "24.22.1",
+    "pnpm": "11.25.0",
+    "repositoryDeclaredPnpm": "11.19.0"
+  },
+  "checks": [
+    {
+      "name": "backend-pure-and-mocked-baseline",
+      "files": 17,
+      "passed": 208,
+      "failed": 0,
+      "exitCode": 0,
+      "log": "/workspace/shared/zijing-backend-targeted.log"
+    },
+    {
+      "name": "web-entrypoint-contract-baseline",
+      "files": 1,
+      "passed": 64,
+      "failed": 0,
+      "exitCode": 0
+    },
+    {
+      "name": "full-baseline-with-synthetic-postgresql",
+      "files": 92,
+      "passedFiles": 78,
+      "failedFiles": 14,
+      "tests": 1694,
+      "passed": 1580,
+      "failed": 48,
+      "skipped": 66,
+      "exitCode": 1,
+      "log": "/workspace/shared/zijing-backend-full-baseline.clean.log",
+      "logSHA256": "a678b6d831820ff01ce4d7c092c0a0f7bc3d4200732007a715d723af59447e35"
+    },
+    {
+      "name": "community-presentation-harness-and-web-contracts-after-test-only-fix",
+      "files": 2,
+      "passed": 69,
+      "failed": 0,
+      "exitCode": 0
+    },
+    {
+      "name": "changed-backend-tests-eslint",
+      "exitCode": 0
+    },
+    {
+      "name": "git-diff-check",
+      "exitCode": 0
+    }
+  ],
+  "baselineFailures": {
+    "tests/club-operations.test.ts": 1,
+    "tests/club-recovery.test.ts": 2,
+    "tests/community-presentation-adapters.test.ts": 5,
+    "tests/miniapp-club-api.test.ts": 3,
+    "tests/miniapp-community-flows.test.ts": 5,
+    "tests/miniapp-community-write-lifecycle.test.ts": 17,
+    "tests/preflight-environment.test.ts": 3,
+    "tests/rebuild-native.test.ts": 3,
+    "tests/registration-retention-review.test.ts": 7,
+    "tests/signup-authority-regressions.test.ts": 2
+  },
+  "baselineSuiteGuards": [
+    "community-contact-consent-http: consent profile required",
+    "miniapp-post-edit-http: post-edit profile required",
+    "miniapp-team-honor-http: native/integration profile required",
+    "miniapp-team-profile-confirmation-http: native/integration profile required"
+  ],
+  "knownReasons": [
+    "retired manual-WeChat-join interfaces are still expected by older tests",
+    "tsx CLI creates Unix-domain IPC sockets; current sandbox rejects these with EPERM",
+    "community presentation VM harness omitted newer publication-images dependency; test-only fixture correction added"
+  ],
+  "isolation": {
+    "dedicatedDatabase": "zijing_rebuild_contracts_synthetic",
+    "host": "127.0.0.1",
+    "port": 55617,
+    "unixSocketsDisabled": true,
+    "sameCommandNamespace": true,
+    "realEmail": false,
+    "realS3": false,
+    "realAI": false,
+    "databaseProcessStopped": true
+  },
+  "verificationLimits": [
+    "These are baseline results before frontend redesign, not final UI acceptance.",
+    "No browser E2E in backend worker; frontend worker owns browser acceptance.",
+    "Static entrypoint presence does not establish all functional behavior."
+  ],
+  "testOnlyChanges": [
+    "community-presentation-adapters VM supplies actual publicationImageLimit constant; all five original assertions preserved"
+  ],
+  "finalWorktreeVerification": "docs/evidence/web-reset-final-validation-20261111.json"
+}

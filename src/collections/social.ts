@@ -8,6 +8,7 @@ import { canParticipate, canPublish, communityIDs, canReviewShowcase, canSubmitC
 import { CommunityApplications, CommunityJoins } from "./community-operations";
 import { promotionSourceChanged, promotionSourceDeleted } from "../lib/content-promotions";
 import { postImagesField, validatePostImages } from "./publication-images";
+import { validateCommunitySchedule } from "../lib/v2/schedule";
 
 const relation = (name: string, to: "games" | "users") =>
   ({ name, type: "relationship" as const, relationTo: to, required: true, maxDepth: 0,
@@ -115,7 +116,16 @@ function social(slug: string, title: string, kind: "local" | "showcase"): Collec
     ] },
   );
   if (kind === "local") fields.push(postImagesField, ...signupFields);
-  if (kind === "local") fields.push({ name: "category", type: "select", options: ["event", "notice"], required: true });
+  if (kind === "local") fields.push(
+    { name: "category", type: "select", options: ["event", "notice"], required: true },
+    ...(["startAt", "endAt"] as const).map(name => ({
+      name, label: name === "startAt" ? "活动开始时间" : "活动结束时间", type: "date" as const,
+      admin: { condition: (_data: unknown, siblingData: Record<string, unknown>) => siblingData.category === "event",
+        date: { pickerAppearance: "dayAndTime" as const }, description: "按后台 Asia/Shanghai 时区输入；数据库保存 UTC。旧帖留空表示时间待定。" },
+    })),
+    { name: "location", label: "活动地点", type: "text", maxLength: 120,
+      admin: { condition: (_data, siblingData) => siblingData.category === "event" } },
+  );
   return {
     slug, labels: { singular: title, plural: title }, admin: { useAsTitle: "title" },
     access: {
@@ -130,7 +140,7 @@ function social(slug: string, title: string, kind: "local" | "showcase"): Collec
       update: kind === "showcase" ? (args) => args.req.context.webShowcaseWrite === true ? (canPublish(args.req.user as Identity) || { game: { in: communityIDs(args.req.user as Identity, "reviewShowcase") } }) : false : moderatorWhere,
       delete: ({ req }) => canPublish(req.user as Identity) && (kind !== "showcase" || req.context.webShowcaseWrite === true),
     },
-    hooks: { beforeChange: [participationGuard(kind), ...(kind === "local" ? [validatePostImages, validateSignupForm] : [])],
+    hooks: { beforeChange: [participationGuard(kind), ...(kind === "local" ? [validateCommunitySchedule, validatePostImages, validateSignupForm] : [])],
       afterChange: [promotionSourceChanged], afterDelete: [promotionSourceDeleted] },
     fields,
   };

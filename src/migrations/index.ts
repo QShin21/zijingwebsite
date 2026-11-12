@@ -1,4 +1,6 @@
+import * as v2HomeSections from "./20261112_000000_v2_home_sections";
 import * as publicationImages from "./20261110_000000_publication_images";
+import * as v2MediaSchedule from "./20261111_000000_v2_media_schedule";
 import * as activitySignups from './20261011_160000_activity_signups';
 import * as clubOperations from './20261011_180000_club_operations';
 import * as contentPromotions from './20261012_030000_content_promotions';
@@ -70,4 +72,6 @@ export const migrations = [
   { up: teamCore.up, down: teamCore.down, name: '20261012_160000_team_core' },
   { up: teamMemberProfiles.up, down: teamMemberProfiles.down, name: '20261012_170000_team_member_profiles' },
   { up: publicationImages.up, down: publicationImages.down, name: '20261110_000000_publication_images' },
+  { up: v2MediaSchedule.up, down: v2MediaSchedule.down, name: '20261111_000000_v2_media_schedule' },
+  { up: v2HomeSections.up, down: v2HomeSections.down, name: "20261112_000000_v2_home_sections" },
 ];

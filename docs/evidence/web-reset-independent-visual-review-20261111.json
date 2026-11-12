@@ -1,0 +1,315 @@
+{
+  "status": "BROWSER_VISUAL_BLOCKED_STATIC_REVIEW_ONLY",
+  "browser_blocker": "Official browser denies file://; supports http/https only. Existing local HTTP inaccessible across execution network isolation. No bypass attempted.",
+  "critical_business_files_changed": [],
+  "static_ssr_snapshots": [
+    {
+      "file": "register.html",
+      "bytes": 394786,
+      "sha256": "43eb3866af754bd632c1afbc04c9e2372bf8bbfd8094ad5f2684535339d8384b",
+      "main": 1,
+      "h1": 1,
+      "controls": [
+        {
+          "tag": "input",
+          "name": "emailPrefix",
+          "type": null
+        },
+        {
+          "tag": "input",
+          "name": "emailDomain",
+          "type": null
+        },
+        {
+          "tag": "input",
+          "name": "name",
+          "type": null
+        },
+        {
+          "tag": "input",
+          "name": "password",
+          "type": "password"
+        },
+        {
+          "tag": "input",
+          "name": "confirm",
+          "type": "password"
+        },
+        {
+          "tag": "input",
+          "name": "code",
+          "type": null
+        }
+      ]
+    },
+    {
+      "file": "privacy.html",
+      "bytes": 523428,
+      "sha256": "9483b6dd4410214f6ec7f9ccd5a7d64395a4c432f309008a8f3e29e844b32f67",
+      "main": 1,
+      "h1": 1,
+      "controls": []
+    },
+    {
+      "file": "login.html",
+      "bytes": 392255,
+      "sha256": "64cd3e984515c3508cc4f88e7f3eea608d9f46f7ce5a97eb60cf81aea12431f1",
+      "main": 1,
+      "h1": 1,
+      "controls": [
+        {
+          "tag": "input",
+          "name": "returnTo",
+          "type": "hidden"
+        },
+        {
+          "tag": "input",
+          "name": "identifier",
+          "type": null
+        },
+        {
+          "tag": "input",
+          "name": "password",
+          "type": "password"
+        }
+      ]
+    },
+    {
+      "file": "account-reset-dark.html",
+      "bytes": 393394,
+      "sha256": "75f732e64a32ddbe55aab0a7e4dc82fbd77b7db61571c3d12b4df33d07e4de94",
+      "main": 1,
+      "h1": 1,
+      "controls": [
+        {
+          "tag": "input",
+          "name": "email",
+          "type": "email"
+        },
+        {
+          "tag": "input",
+          "name": "email",
+          "type": "hidden"
+        },
+        {
+          "tag": "input",
+          "name": "code",
+          "type": null
+        },
+        {
+          "tag": "input",
+          "name": "password",
+          "type": "password"
+        },
+        {
+          "tag": "input",
+          "name": "confirm",
+          "type": "password"
+        }
+      ]
+    },
+    {
+      "file": "events.html",
+      "bytes": 520520,
+      "sha256": "94fdb31f4bce6eba74d2f22864455caf6dac25827bf55e9618c12de2a8c9c71e",
+      "main": 1,
+      "h1": 2,
+      "controls": [
+        {
+          "tag": "select",
+          "name": "game",
+          "type": null
+        },
+        {
+          "tag": "select",
+          "name": "type",
+          "type": null
+        },
+        {
+          "tag": "select",
+          "name": "time",
+          "type": null
+        }
+      ]
+    },
+    {
+      "file": "privacy-dark.html",
+      "bytes": 523427,
+      "sha256": "5441678c6ded5bc190d2a414b2effb9bba121437818ec8cef34222298b6c184b",
+      "main": 1,
+      "h1": 1,
+      "controls": []
+    },
+    {
+      "file": "register-dark.html",
+      "bytes": 394785,
+      "sha256": "2fd4cf25c7d49521f6fffd3b2f766b602a069d4e2459837326e58eaca7f4d68a",
+      "main": 1,
+      "h1": 1,
+      "controls": [
+        {
+          "tag": "input",
+          "name": "emailPrefix",
+          "type": null
+        },
+        {
+          "tag": "input",
+          "name": "emailDomain",
+          "type": null
+        },
+        {
+          "tag": "input",
+          "name": "name",
+          "type": null
+        },
+        {
+          "tag": "input",
+          "name": "password",
+          "type": "password"
+        },
+        {
+          "tag": "input",
+          "name": "confirm",
+          "type": "password"
+        },
+        {
+          "tag": "input",
+          "name": "code",
+          "type": null
+        }
+      ]
+    },
+    {
+      "file": "account-reset.html",
+      "bytes": 393395,
+      "sha256": "8e962984edd1cc603b93fc9b76d3cfe01269034665a7776f867f7722a6deb159",
+      "main": 1,
+      "h1": 1,
+      "controls": [
+        {
+          "tag": "input",
+          "name": "email",
+          "type": "email"
+        },
+        {
+          "tag": "input",
+          "name": "email",
+          "type": "hidden"
+        },
+        {
+          "tag": "input",
+          "name": "code",
+          "type": null
+        },
+        {
+          "tag": "input",
+          "name": "password",
+          "type": "password"
+        },
+        {
+          "tag": "input",
+          "name": "confirm",
+          "type": "password"
+        }
+      ]
+    },
+    {
+      "file": "events-dark.html",
+      "bytes": 520519,
+      "sha256": "b32e3b4bd46d4209b07f1cb3d8e8a62bcd821f0ef89ace64a4b99d9df883f85d",
+      "main": 1,
+      "h1": 2,
+      "controls": [
+        {
+          "tag": "select",
+          "name": "game",
+          "type": null
+        },
+        {
+          "tag": "select",
+          "name": "type",
+          "type": null
+        },
+        {
+          "tag": "select",
+          "name": "time",
+          "type": null
+        }
+      ]
+    },
+    {
+      "file": "design-preview.html",
+      "bytes": 392610,
+      "sha256": "ca5832d5bcc10c5f2738565aaed76029495501ca930bc79be21f50c1d56940f8",
+      "main": 1,
+      "h1": 1,
+      "controls": [
+        {
+          "tag": "input",
+          "name": "returnTo",
+          "type": "hidden"
+        },
+        {
+          "tag": "input",
+          "name": "identifier",
+          "type": null
+        },
+        {
+          "tag": "input",
+          "name": "password",
+          "type": "password"
+        }
+      ]
+    },
+    {
+      "file": "login-dark.html",
+      "bytes": 392254,
+      "sha256": "cf5a65b98cc44c516ff7b4b4f764878faa7ea07e0a52ad612efc2c304b6a2dd0",
+      "main": 1,
+      "h1": 1,
+      "controls": [
+        {
+          "tag": "input",
+          "name": "returnTo",
+          "type": "hidden"
+        },
+        {
+          "tag": "input",
+          "name": "identifier",
+          "type": null
+        },
+        {
+          "tag": "input",
+          "name": "password",
+          "type": "password"
+        }
+      ]
+    },
+    {
+      "file": "design-preview-dark.html",
+      "bytes": 392609,
+      "sha256": "19d5bcb791cea3860e32b22c1b0e279edaee3d4cb5bdf7960d85b3256a7004a0",
+      "main": 1,
+      "h1": 1,
+      "controls": [
+        {
+          "tag": "input",
+          "name": "returnTo",
+          "type": "hidden"
+        },
+        {
+          "tag": "input",
+          "name": "identifier",
+          "type": null
+        },
+        {
+          "tag": "input",
+          "name": "password",
+          "type": "password"
+        }
+      ]
+    }
+  ],
+  "scope": "Six SSR routes, light/dark static snapshots with scripts removed; not rendered visual or functional E2E validation.",
+  "snapshot_caveat": "Streaming SSR events HTML contains Suspense fallback and hidden final fragment; scripts were removed for static export, so two h1 elements in raw HTML are not evidence of a live DOM defect. These snapshots are forensic artifacts only and not approved screenshots or deliverables."
+}

@@ -23,7 +23,8 @@ Page(withVisualTheme({
     if (this._unsubscribe) this._unsubscribe();
     this._disposed = false; this._visible = false; this._resumeRead = false; this._context = (this._context || 0) + 1; this.invalidate();
     this._identity = identity(); this.resetPrivate(); this._options = options;
-    this.setData({ area: options.area === 'showcase' || options.area === 'updates' ? options.area : 'contacts' });
+    this.setData({ area: options.area === 'showcase' || options.area === 'updates' ? options.area : 'contacts',
+      showcaseParams: /^[a-z0-9-]{1,120}$/.test(String(options.slug || '')) ? { slug: String(options.slug) } : {} });
     this._unsubscribe = session.subscribe(() => {
       if (this._identity !== identity()) { this._identity = identity(); this._context = (this._context || 0) + 1; this._resumeRead = false; this.invalidate(); this.resetPrivate(); }
     });

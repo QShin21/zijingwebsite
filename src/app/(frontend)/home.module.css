@@ -1,0 +1,243 @@
+.asideLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  color: var(--z-accent);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+.spotlight {
+  animation: rise 700ms var(--z-ease) both;
+}
+.heroImage {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--z-stage-line);
+  border-radius: var(--z-radius-sheet);
+  box-shadow: var(--z-shadow-strong);
+  transform: rotate(-1.2deg);
+}
+.heroImage img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.joinCard {
+  padding: 22px;
+  border: 1px solid var(--z-stage-line);
+  border-radius: var(--z-radius-sheet);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--z-stage-ink);
+  backdrop-filter: blur(10px);
+}
+.joinCard ol {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.joinCard li {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.joinCard a {
+  font-size: 18px;
+  font-weight: 900;
+}
+.joinCard a:hover {
+  color: var(--z-accent);
+}
+.joinCard p {
+  color: var(--z-stage-muted);
+  font-size: 14px;
+}
+.joinIndex {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--z-accent);
+  color: var(--z-accent-ink);
+  font-family: var(--z-num);
+  font-size: 17px;
+  font-weight: 900;
+}
+.scoreboard {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 460px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.scoreboard a {
+  display: grid;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--z-stage-line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  transition: border-color var(--z-duration) var(--z-ease), background-color var(--z-duration) var(--z-ease);
+}
+.scoreboard a:hover {
+  border-color: var(--z-accent);
+  background: rgba(255, 255, 255, 0.1);
+}
+.scoreboard span {
+  color: var(--z-stage-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+.scoreboard strong {
+  font-family: var(--z-num);
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.split {
+  margin: clamp(32px, 5vw, 56px) 0;
+}
+/* Personal row (member shortcuts / guest join steps) sits above the CMS-ordered blocks. */
+.personal {
+  margin: clamp(28px, 4vw, 44px) 0 0;
+}
+.muted {
+  color: var(--z-muted);
+}
+.mePanel {
+  background:
+    radial-gradient(90% 120% at 100% 0%, var(--z-tint), transparent 70%),
+    var(--z-surface);
+}
+.quick {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.quick a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--z-line);
+  border-radius: 14px;
+  background: var(--z-surface);
+  font-weight: 800;
+  transition: border-color var(--z-duration) var(--z-ease), transform var(--z-duration) var(--z-ease);
+}
+.quick a:hover {
+  border-color: var(--z-action);
+  transform: translateX(3px);
+}
+.quick svg {
+  color: var(--z-action);
+}
+.quick strong {
+  margin-left: auto;
+  min-width: 32px;
+  padding: 0 8px;
+  border-radius: var(--z-radius-pill);
+  background: var(--z-accent);
+  color: var(--z-accent-ink);
+  font-family: var(--z-num);
+  text-align: center;
+}
+.joinPanel {
+  border-color: transparent;
+  background:
+    repeating-linear-gradient(115deg, transparent 0 22px, rgba(255, 255, 255, 0.03) 22px 44px),
+    linear-gradient(150deg, var(--z-stage-2), var(--z-stage));
+  color: var(--z-stage-ink);
+}
+.joinPanel h2 a {
+  color: var(--z-accent);
+}
+.joinSteps {
+  display: grid;
+  gap: 14px;
+  margin: 12px 0 18px;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+.joinSteps li {
+  position: relative;
+  padding-left: 46px;
+  counter-increment: step;
+}
+.joinSteps li::before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--z-accent);
+  color: var(--z-accent-ink);
+  font-family: var(--z-num);
+  font-weight: 900;
+}
+.joinSteps p {
+  color: var(--z-stage-muted);
+  font-size: 14px;
+}
+.joinActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.highlights > :first-child {
+  grid-row: span 2;
+}
+.about {
+  display: grid;
+  gap: 20px;
+  align-items: center;
+  margin: clamp(32px, 5vw, 56px) 0 clamp(48px, 7vw, 88px);
+  padding: clamp(24px, 4vw, 40px);
+  border-radius: var(--z-radius-sheet);
+  background:
+    radial-gradient(70% 140% at 0% 0%, var(--z-tint), transparent 70%),
+    var(--z-surface);
+  border: 1px solid var(--z-line);
+}
+.about p {
+  max-width: 46em;
+  margin-top: 10px;
+  color: var(--z-muted);
+}
+.aboutKicker {
+  color: var(--z-action) !important;
+  font-family: var(--z-num);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+}
+.aboutLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+}
+@media (min-width: 900px) {
+  .about {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}

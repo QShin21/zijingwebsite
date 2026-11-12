@@ -1,25 +1,15 @@
-.mini-page.team-honors-page .page-heading { padding: 8px 0 24px; margin-bottom: 24px; border-bottom: 2px solid var(--z-primary); }
-.mini-page.team-honors-page .eyebrow { margin-bottom: 12px; font-size: 13px; line-height: 1.6; }
-.mini-page.team-honors-page .archive-actions { margin-top: 16px; }
-.archive-year-line { display: flex; align-items: baseline; gap: 12px; margin: 32px 0 4px; }
-.archive-year { display: block; font-size: 36px; line-height: 1.2; letter-spacing: -1px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.archive-year-label { color: var(--z-muted); font-size: 12px; line-height: 1.6; }
-.archive-record { padding: 24px 0 28px; border-bottom: 1px solid var(--z-line); }
-.archive-record-head { display: flex; align-items: flex-start; gap: 16px; }
-.archive-date-rail { flex-shrink: 0; width: 60px; padding-top: 4px; color: var(--z-muted); font-size: 14px; line-height: 1.6; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.mini-page.team-honors-page .archive-date-rail .field-note { margin-top: 4px; font-size: 12px; }
-.archive-record-main { flex: 1; min-width: 0; }
-.mini-page.team-honors-page .honor-title { margin: 8px 0; font-size: 20px; line-height: 1.45; }
-.mini-page.team-honors-page .honor-placing { margin: 12px 0 0; font-size: 24px; line-height: 1.4; word-break: break-word; }
-.archive-record-main .badge { margin-top: 12px; }
-.archive-record-body { margin-top: 16px; }
-.mini-page.team-honors-page .archive-record-body .body { margin-top: 0; }
-.mini-page.team-honors-page .archive-author { margin-top: 12px; font-size: 12px; }
-.archive-record-body .evidence { margin-top: 20px; }
-.mini-page.team-honors-page .photo { margin-top: 0; }
-.mini-page.team-honors-page .honor-video { height: 184px; margin-top: 20px; border-radius: 8px; }
-.mini-page.team-honors-page .archive-retry { margin-top: 16px; width: 100%; }
-.mini-page.team-honors-page .archive-source { margin-top: 12px; text-align: left; }
-.mini-page.team-honors-page .archive-footer { border-top: 0; padding-top: 0; }
-.mini-page.team-honors-page .archive-footer > button { flex-basis: 100%; }
-@media (max-width: 359px) { .archive-record-head { gap: 12px; } .archive-date-rail { width: 56px; } .mini-page.team-honors-page .honor-title { font-size: 19px; } .mini-page.team-honors-page .honor-video { height: 162px; } }
+/* V2 team hall of fame: year heads + trophy cards. */
+.team-honors-v2 { padding-top: 0; }
+.honors-actions { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 8rpx; }
+.honors-timeline { display: flex; flex-direction: column; gap: 18rpx; }
+.honors-year { font-size: 36rpx; }
+.honors-date { display: flex; flex-direction: column; }
+.honors-date-value { color: var(--z-stage-ink); font-size: 30rpx; font-weight: 900; }
+.honors-date-label { color: var(--z-stage-muted); font-size: 21rpx; font-weight: 800; }
+.honors-description { color: var(--z-stage-ink); font-size: 27rpx; line-height: 1.75; white-space: pre-wrap; }
+.honors-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12rpx; }
+.honors-picture { display: flex; flex-direction: column; gap: 6rpx; }
+.honors-image { width: 100%; height: 240rpx; border-radius: 20rpx; background: rgba(255, 255, 255, .06); }
+.honor-video { width: 100%; height: 360rpx; border-radius: 20rpx; }
+.honors-footer { margin-top: 24rpx; }
+.honors-footer > button { width: 100%; }

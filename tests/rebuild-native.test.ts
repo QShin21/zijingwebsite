@@ -8,15 +8,20 @@ const app = JSON.parse(read('app.json')) as { pages: string[]; tabBar: { list: {
 
 function navigationHarness(depth = 1) {
   const wx = { switchTab: vi.fn(), navigateTo: vi.fn(), navigateBack: vi.fn(), setClipboardData: vi.fn() };
-  const module = { exports: {} as { back(): void; website(path: string): void } };
-  runInNewContext(read('lib/navigation.js'), { module, wx, getCurrentPages: () => Array.from({ length: depth }, () => ({})), require: (name: string) => name === './session' ? { user: () => null } : { safeURL: () => false } });
+  const module = { exports: {} as { back(): void; website(path: string): void; open(path: string, webOnly: boolean): void } };
+  runInNewContext(read('lib/navigation.js'), { module, wx, getCurrentPages: () => Array.from({ length: depth }, () => ({})),
+    require: (name: string) => name === './session' ? { user: () => null } : name === '../config' ? { origin: 'https://synthetic.invalid' } : { safeURL: () => false } });
   return { navigation: module.exports, wx };
 }
 
 describe('Native rebuild: route and rendering contracts, not an official WeChat compiler', () => {
-  it('keeps every existing native route and the five native tabs', () => {
-    expect(app.pages).toHaveLength(25);
-    expect(app.tabBar.list.map(tab => tab.pagePath)).toEqual(['home', 'events', 'communities', 'explore', 'account'].map(name => 'pages/' + name + '/index'));
+  it('keeps every existing native route (explore as a redirect) and the five V2 tabs', () => {
+    expect(app.pages).toHaveLength(28);
+    for (const route of ['detail', 'list', 'fixed', 'community', 'signup', 'team', 'team-honors', 'staff', 'explore'])
+      expect(app.pages).toContain('pages/' + route + '/index');
+    for (const route of ['teams', 'team-home', 'recruitment', 'showcase-new']) expect(app.pages).toContain('pages/' + route + '/index');
+    expect(app.tabBar.list.map(tab => tab.pagePath)).toEqual(['home', 'events', 'communities', 'teams', 'account'].map(name => 'pages/' + name + '/index'));
+    expect(app.tabBar.list.map(tab => (tab as unknown as { text: string }).text)).toEqual(['主场', '日程', '社群', '代表队', '我的']);
     for (const route of app.pages) {
       const markup = read(route + '.wxml');
       expect(markup).toContain('<page-meta page-style="{{themePageStyle}}"');
@@ -49,6 +54,37 @@ describe('Native rebuild: route and rendering contracts, not an official WeChat 
     expect(read('templates/questionnaire.wxml')).toContain('themePrimary');
     expect(read('pages/signup/index.wxml')).toContain('question,busy,theme,themePrimary,themeMuted');
   });
+  it('V2 tab pages use the shared V2 templates and API client; the stage effect pauses off-screen', () => {
+    for (const route of ['home', 'events', 'communities', 'teams', 'account']) {
+      expect(read('pages/' + route + '/index.wxml'), route).toContain('<import src="../../templates/v2.wxml" />');
+    }
+    expect(read('lib/home.js')).toContain("v2.get('home')");
+    expect(read('pages/events/index.js')).toContain("v2.get('calendar'");
+    expect(read('pages/communities/index.js')).toContain("v2.get('communities'");
+    expect(read('pages/account/index.js')).toContain("v2.get('me'");
+    const stage = read('components/zj-stage/index.js');
+    expect(stage).toContain('createIntersectionObserver');
+    expect(stage).toMatch(/hide\(\) \{[^}]*this\.stop\(\)/);
+    expect(stage).not.toMatch(/wx\.request|http\./);
+    expect(JSON.parse(read('pages/home/index.json'))).toMatchObject({ navigationStyle: 'custom', usingComponents: { 'zj-stage': '/components/zj-stage/index' } });
+  });
+  it('rebuilt inner pages use the V2 hero frame and no longer use the retired thin-line page classes', () => {
+    const inner = ['detail', 'list', 'fixed', 'auth', 'community', 'signup', 'applications', 'review', 'staff', 'staff-review', 'activity-manage',
+      'team', 'team-apply', 'team-review', 'team-members', 'team-honors', 'team-profiles', 'team-honor-workspace', 'team-honor-edit', 'showcase-new'];
+    for (const route of inner) {
+      const markup = read('pages/' + route + '/index.wxml');
+      expect(markup, route).toMatch(/class="zj-hero[" ]/);
+      expect(markup, route).not.toMatch(/class="page mini-page native-page|business-page native-page|class="plain back"/);
+    }
+    for (const template of ['common', 'native', 'native-content', 'club']) expect(read('templates/' + template + '.wxml'), template).toContain('zj-');
+  });
+  it('maps V2 website paths to the new native destinations', () => {
+    const h = navigationHarness();
+    h.navigation.website('/teams'); expect(h.wx.switchTab).toHaveBeenCalledWith({ url: '/pages/teams/index' });
+    h.navigation.website('/teams/recruitment'); expect(h.wx.navigateTo).toHaveBeenCalledWith({ url: '/pages/recruitment/index' });
+    h.navigation.website('/teams/synthetic-team'); expect(h.wx.navigateTo).toHaveBeenCalledWith({ url: '/pages/team-home/index?slug=synthetic-team' });
+    h.navigation.website('/community/synthetic-game/showcase/new'); expect(h.wx.navigateTo).toHaveBeenCalledWith({ url: '/pages/showcase-new/index?slug=synthetic-game' });
+  });
   it('returns to home when a native detail is opened alone or back fails', () => {
     const single = navigationHarness(); single.navigation.back();
     expect(single.wx.switchTab).toHaveBeenCalledWith({ url: '/pages/home/index' });
@@ -65,6 +101,42 @@ describe('Native rebuild: route and rendering contracts, not an official WeChat 
     ['/teams/honors?view=review&team=52&game=11', '/pages/team-honor-workspace/index?view=review&team=52&game=11'],
   ])('maps the existing website deep link %s to its native flow', (path, url) => {
     const h = navigationHarness(); h.navigation.website(path); expect(h.wx.navigateTo).toHaveBeenCalledWith({ url });
+  });
+  it.each([
+    ['/teams/apply#team-applications-title', '/pages/team-apply/index'],
+    ['/teams/apply#my-establishment-applications', '/pages/team-apply/index'],
+    ['/community/apply#my-applications-title', '/pages/applications/index'],
+    ['/community/apply#my-applications', '/pages/applications/index'],
+    ['/community/apply#application-form-title', '/pages/applications/index?apply=1'],
+  ])('normalizes the historical receipt anchor %s (ApplicationItem.href) to its native apply page', (path, url) => {
+    const h = navigationHarness(); h.navigation.website(path);
+    expect(h.wx.navigateTo).toHaveBeenCalledWith({ url }); expect(h.wx.setClipboardData).not.toHaveBeenCalled();
+  });
+  it('decides web-only destinations from the server webOnly field; unmapped site paths still offer the web link', () => {
+    const h = navigationHarness();
+    h.navigation.open('/community/promotions?view=review', true);
+    expect(h.wx.setClipboardData).toHaveBeenLastCalledWith(expect.objectContaining({ data: 'https://synthetic.invalid/community/promotions?view=review' }));
+    // webOnly:false follows the native mapping (no client-side path whitelist).
+    h.navigation.open('/teams/apply#team-applications-title', false);
+    expect(h.wx.navigateTo).toHaveBeenLastCalledWith({ url: '/pages/team-apply/index' });
+    // Old share links without a native page keep working by copying the web link.
+    for (const path of ['/activities', '/admin', '/community/promotions']) {
+      h.navigation.website(path);
+      expect(h.wx.setClipboardData).toHaveBeenLastCalledWith(expect.objectContaining({ data: 'https://synthetic.invalid' + path }));
+    }
+    // Static /community segments are never treated as community slugs.
+    expect(h.wx.navigateTo).not.toHaveBeenCalledWith({ url: '/pages/community/index?slug=promotions' });
+    h.navigation.open('//cross-origin.invalid/x', true);
+    expect(h.wx.setClipboardData).toHaveBeenCalledTimes(4);
+  });
+  it('native queues, todos and applications take webOnly from the server contract (no key or path whitelist)', () => {
+    const account = read('pages/account/index.js');
+    expect(account).toContain('queue.webOnly === true'); expect(account).toContain('item.webOnly === true');
+    expect(account).not.toContain("['promotions', 'activities', 'cms']");
+    expect(read('lib/navigation.js')).not.toContain('activities|admin|community\\/promotions');
+    expect(read('lib/v2.js')).toContain('web: item.webOnly === true');
+    expect(read('templates/v2.wxml')).toMatch(/class="zj-application"[^>]*bindtap="openTarget"[^>]*data-web="\{\{item\.web\}\}"/);
+    expect(read('pages/account/index.wxml')).toMatch(/bindtap="openTodo"[^>]*data-web="\{\{item\.web\}\}"/);
   });
 });
 

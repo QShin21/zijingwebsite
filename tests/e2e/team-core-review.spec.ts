@@ -66,11 +66,12 @@ async function login(page: Page, user: User) {
   });
   expect(response.status(), await response.text()).toBe(200);
   await page.goto("/account");
+  // V2 "我的": the h1 is the signed-in nickname; account facts live in the "账号" aside.
   await expect(
-    page.getByRole("heading", { name: "我的紫荆", level: 1, exact: true }),
+    page.getByRole("heading", { name: user.name, level: 1, exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("region", { name: "账号资料", exact: true })
+    page.getByRole("complementary", { name: "账号", exact: true })
       .getByText(user.name, { exact: true }),
   ).toBeVisible();
 }

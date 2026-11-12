@@ -14,11 +14,9 @@ export async function proxy(request: NextRequest) {
     catch { return NextResponse.json({ error: "暂时无法验证登录状态，请稍后重试" }, { status: 503, headers: { "Cache-Control": "private, no-store" } }); }
     if (!canParticipate(user)) {
       if (privateAPI || /\/(contacts|qr)$/.test(path)) return NextResponse.json({ error: "请先登录" }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
-      const target = new URL(path === "/" ? "/events" : "/login", request.url);
-      if (path !== "/") {
-        target.searchParams.set("message", "请登录后访问此栏目");
-        target.searchParams.set("returnTo", path + request.nextUrl.search);
-      }
+      const target = new URL("/login", request.url);
+      target.searchParams.set("message", "请登录后访问此栏目");
+      target.searchParams.set("returnTo", path + request.nextUrl.search);
       const response = NextResponse.redirect(target);
       response.headers.set("Cache-Control", "private, no-store");
       return response;

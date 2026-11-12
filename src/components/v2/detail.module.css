@@ -1,0 +1,153 @@
+.when {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 20px;
+  margin-top: 8px;
+}
+.when > div {
+  display: grid;
+  gap: 6px;
+}
+.whenTime,
+.whenPlace {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 800;
+}
+.whenPlace {
+  color: var(--z-stage-muted);
+  font-size: 15px;
+}
+.whenTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.teamLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border: 1px solid var(--z-stage-line);
+  border-radius: var(--z-radius-pill);
+  font-size: 13px;
+  font-weight: 800;
+}
+.teamLink:hover {
+  border-color: var(--z-accent);
+  color: var(--z-accent);
+}
+.grid {
+  display: grid;
+  gap: 28px;
+  align-items: start;
+}
+.main {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.mainTitle {
+  font-size: 24px;
+}
+.cover {
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--z-radius-sheet);
+  background: var(--z-media);
+}
+.cover img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: 12px;
+}
+.gallery figure {
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--z-radius-small);
+  background: var(--z-media);
+}
+.gallery img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 4 / 3;
+}
+.related {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+.related h2 {
+  font-size: 22px;
+}
+.aside {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.panel {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--z-line);
+  border-radius: var(--z-radius);
+  background: var(--z-surface);
+}
+.panel h2 {
+  font-size: 19px;
+}
+.requirements {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: var(--z-radius-small);
+  background: var(--z-tint);
+}
+.requirements h3 {
+  font-size: 15px;
+}
+.qr {
+  width: min(240px, 100%);
+  margin: 0;
+  padding: 10px;
+  border-radius: var(--z-radius-small);
+  background: #fff;
+}
+.qr img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.muted {
+  color: var(--z-muted);
+  font-size: 14px;
+}
+.contact {
+  color: var(--z-muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+.manage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr) 360px;
+  }
+  .aside {
+    position: sticky;
+    top: calc(var(--z-topbar) + 20px);
+  }
+}

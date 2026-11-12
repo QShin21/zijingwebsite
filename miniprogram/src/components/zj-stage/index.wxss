@@ -1,0 +1,4 @@
+:host { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 1; display: block; }
+.zj-stage-canvas-wrap { position: absolute; left: 0; top: 0; right: 0; bottom: 0; opacity: 0; transition: opacity .9s ease; }
+.zj-stage-ready { opacity: 1; }
+.zj-stage-canvas { width: 100%; height: 100%; }

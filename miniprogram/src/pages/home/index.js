@@ -2,15 +2,16 @@ function withVisualTheme(definition) {
   try { return require('../../lib/theme').page(definition); }
   catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
 }
-// Keep startup independent of compiled business modules so errors remain visible.
+// V2 主场. Startup stays independent of business modules so failures remain visible.
 Page(withVisualTheme({
-  data: { loading: true, error: '', site: {}, user: null, modules: [], announcements: [], heroErrorURL: '' },
+  data: { loading: true, error: '', user: null, home: null, img: {}, statusBar: 20, navHeight: 44, modules: [],
+    links: { join: { key: 'join' }, about: { key: 'about' }, announcements: { collection: 'announcements' }, news: { collection: 'news' } } },
   onShow: function () { this._nativeVisible = true; return this.load(); },
   onHide: function () { this._nativeVisible = false; this._ticket = (this._ticket || 0) + 1; },
   onUnload: function () { this._nativeVisible = false; },
   onPullDownRefresh: function () { return this.load().then(function () { wx.stopPullDownRefresh(); }); },
   load: function () {
-    this.setData({ loading: true, error: '', heroErrorURL: '' });
+    this.setData({ loading: true, error: '' });
     return Promise.resolve().then(function () {
       return require('../../lib/home').load(this);
     }.bind(this)).catch(function () {
@@ -19,25 +20,10 @@ Page(withVisualTheme({
   },
   retry: function () { return this.load(); },
   login: function () { wx.navigateTo({ url: '/pages/auth/index?mode=login' }); },
-  openWebsite: function (event) { require('../../lib/navigation').website(event.currentTarget.dataset.url); },
-  openContent: function (event) { require('../../lib/navigation').content(event.currentTarget.dataset.doc); },
-  openModule: function (event) { require('../../lib/navigation').go('list', { collection: event.currentTarget.dataset.kind }); },
+  register: function () { wx.navigateTo({ url: '/pages/auth/index?mode=register' }); },
   openPage: function (event) { require('../../lib/navigation').go(event.currentTarget.dataset.page, event.currentTarget.dataset.params || {}); },
-  retryClub: function () { return require('../../lib/home').loadClub(this); },
-  nativeCoverError: function (event) {
-    if (!this._nativeVisible) return;
-    const mark = require('../../lib/native-presentation').markCoverFailure;
-    let changed = false;
-    const modules = this.data.modules.map(function (module) {
-      const docs = mark(module.docs, event.currentTarget.dataset);
-      if (docs === module.docs) return module;
-      changed = true; return { ...module, docs };
-    });
-    if (changed) this.setData({ modules });
-  },
-  homeHeroError: function (event) {
-    const url = event.currentTarget.dataset.url;
-    if (this._nativeVisible && url && this.data.hero && this.data.hero.url === url) this.setData({ heroErrorURL: url });
-  },
+  openWebsite: function (event) { require('../../lib/navigation').website(event.currentTarget.dataset.url); },
+  // V2 card images: one re-sign for an expired ticket, then the text fallback.
+  imageError: function (event) { require('../../lib/v2-images').failed(this, event); },
   onShareAppMessage: function () { return { title: '竞在紫荆', path: '/pages/home/index' }; },
 }));

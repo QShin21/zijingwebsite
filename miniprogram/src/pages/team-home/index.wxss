@@ -1,0 +1,12 @@
+.team-hero { position: relative; overflow: hidden; margin: 0 -32rpx; padding: 40rpx 32rpx 44rpx; border-radius: 0 0 48rpx 48rpx; background: radial-gradient(60% 120% at 100% 0%, hsla(calc(var(--hue) + 40), 85%, 55%, .4), transparent 60%), linear-gradient(130deg, var(--z-stage2), var(--z-stage) 70%); color: var(--z-stage-ink); }
+.team-hero-inner { position: relative; z-index: 2; }
+.team-identity { display: flex; align-items: center; gap: 24rpx; }
+.team-crest { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 144rpx; height: 144rpx; border-radius: 40rpx; background: linear-gradient(135deg, hsl(var(--hue), 70%, 45%), hsl(calc(var(--hue) + 30), 70%, 20%)); color: #fff; font-size: 64rpx; font-weight: 900; box-shadow: 0 0 0 12rpx rgba(197, 240, 74, .12); }
+.team-titles { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10rpx; }
+.team-title { font-size: 60rpx; font-weight: 900; line-height: 1.05; word-break: break-word; }
+.team-summary { display: block; margin-top: 18rpx; color: var(--z-stage-muted); font-size: 27rpx; line-height: 1.7; }
+.team-membership { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; margin-top: 24rpx; padding: 20rpx 24rpx; border-radius: 24rpx; background: var(--z-tint); font-weight: 800; }
+.team-profile { display: flex; gap: 22rpx; padding: 24rpx; border: 1rpx solid var(--z-line); border-radius: 28rpx; background: var(--z-surface); }
+.team-avatar { flex-shrink: 0; width: 112rpx; height: 112rpx; border-radius: 50%; background: var(--z-media); }
+.team-avatar-initial { display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--z-primary), var(--z-stage2)); color: #fff; font-size: 44rpx; font-weight: 900; }
+.team-profile-main { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 8rpx; }

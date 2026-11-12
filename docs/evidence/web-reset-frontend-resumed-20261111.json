@@ -1,0 +1,115 @@
+{
+  "recorded_at_utc": "2026-11-10T21:12:13.771264+00:00",
+  "model": "claude-opus-5-5",
+  "effort": "max",
+  "claude_exit_code": 0,
+  "permission_denials": [],
+  "source_sha256": {
+    "src/app/(design)/design.css": "867e8dad246e1b295947df28b56c035f3759fd3ba55edfed00785bb7917e4705",
+    "src/app/(design)/layout.tsx": "33b15053751aa2484aa69b0335db461a120a4f27d3ec42de1c810dccc56f8a25",
+    "src/app/(frontend)/_club/ClubPages.module.css": "88dc8aa52038da434f9a7cf0e9505d4fb68d318d8b6c349327eba88ba2789ba1",
+    "src/app/(frontend)/community/(index)/page.tsx": "a879472a5acc6773864181617573c46f5ebc1d351320e198056b7430937a3bdd",
+    "src/app/(frontend)/field.css": "748f9623a779d515bebc03033c51924dff069767d85f95f5de18c6bb1501b180",
+    "src/app/(frontend)/join/staff/(index)/page.tsx": "945a2becfad5b80c2250fad038c18e318c1247569d7c7b2a1f39f7e1bdf50f3d",
+    "src/app/(frontend)/layout.tsx": "48d5b773c4de6408b694827e255d3e1e1a351b811bd062c81a7e8b014c403ca8",
+    "src/components/PageHeading.module.css": "8c7849a6547948afcfc620b9b6bdef0eee6fdf18bdf377ffe2ba724a2c9a29a2",
+    "src/components/PageState.module.css": "4aa0e0823ab0d6010ed197779b88a16588b2342729c327110805ec261debd4e6",
+    "src/components/PageState.tsx": "decade1b2595c176eb6a49ec7f391dcfa76dc1d5549a44a0246f1c9302bd13c7",
+    "src/components/account-pages/AccountPages.module.css": "ac6bb3564dc24a2395d51bc5eb0af0d2e461c315db2805d8b5510d01d587594b",
+    "src/components/account-pages/ReadingPages.module.css": "e45c1323159a777a4027b8e21224418b12776f1ffc078ff9d9d256e1ccbceb73",
+    "src/components/activity-pages/ActivityPages.module.css": "5360caf869fa901e336c571edcac83b8fec01346320d1a630010bc9674029d5d",
+    "src/components/activity-pages/ApplicationFlow.module.css": "20e61a905d38f46505f158a4cc399bc50449b880ea5a323ec351dbf57b4ffedf",
+    "src/components/activity-pages/PublicPages.tsx": "8d405f6c5b06c7e40e4025809f9a0bede1df388ea1a1eaa04850a82e8165fc5c",
+    "src/components/activity-pages/QuestionnaireSurface.module.css": "9cc78267b77b86f19d18ec6802619d9fd5e06ad6eea0feebe53920a0b15acf80",
+    "src/components/activity-pages/Workspace.module.css": "ccbcbf515d7815ae1c69a1830cf2a8a9c833e82b00ab04ef3fc5a0a4d96106ef",
+    "src/components/community-pages/CommunityPages.module.css": "df9f1150fc4ae37c4d5b6309cee0cbc6f22f64ff230fba60adf69d118e3990b5",
+    "src/components/team-pages/TeamPages.module.css": "6749d19abed8ee2c388120e7caef2f3fa00203a021127976ce863a0bfca0e0ba",
+    "src/components/team-profiles/TeamProfiles.module.css": "f1805c8c215a7388f13a0a99701109982c7b71e1eb1098f2120eae97604adb0b",
+    "src/components/visual-direction/CourtMotif.tsx": "f9a1a79ad2d6c31d624a081f8c5f73181b8c88f99aba395bcc92bf9904179e28",
+    "src/components/visual-direction/DesignNavigation.tsx": "afa4e869cac612f6721002f79f578a7e4046ecded80872bd34e576a043ce2c10",
+    "src/components/visual-direction/DesignUI.tsx": "34dbb01ac636a92b7a34cf95632685623b8a5035c07d99bfccbea5f6bcb6e067",
+    "src/components/visual-direction/Home.module.css": "ba38c381d96b9065a162a770533482980c2b44a58659c12333363c3f65a8efdb",
+    "src/components/visual-direction/Home.tsx": "a890e5e1ad1d8945b36263b81bdb7346bc72ad769550a3c4b0e2226095bdf006",
+    "src/components/visual-direction/HomeSections.tsx": "e1346fd62f8e6a867ddd9ec0e9e8ab6bd54148a3cdda99dcc73dd25007f5b83f",
+    "src/components/visual-direction/PromotedContent.module.css": "6a5e82abd8c729107149c0e3ecfe51275fa4f4019c6092fe3ae650c6465c8824",
+    "src/components/visual-direction/SiteChrome.module.css": "2abb59fba45f6cf744ec8695a4bc84a0fe3804d3aded3912151ca2058f7ac049",
+    "src/components/visual-direction/home-court.css": "f199740f95cf3b42fef6772367f5ee90c23637d17cac47431e04a3dafadcc782"
+  },
+  "http_smoke": [
+    {
+      "route": "/events",
+      "status": 200,
+      "location": null,
+      "bytes": 46521,
+      "ok": true
+    },
+    {
+      "route": "/announcements",
+      "status": 200,
+      "location": null,
+      "bytes": 40506,
+      "ok": true
+    },
+    {
+      "route": "/login",
+      "status": 200,
+      "location": null,
+      "bytes": 35943,
+      "ok": true
+    },
+    {
+      "route": "/register",
+      "status": 200,
+      "location": null,
+      "bytes": 37859,
+      "ok": true
+    },
+    {
+      "route": "/account/reset",
+      "status": 200,
+      "location": null,
+      "bytes": 36929,
+      "ok": true
+    },
+    {
+      "route": "/privacy",
+      "status": 200,
+      "location": null,
+      "bytes": 37687,
+      "ok": true
+    },
+    {
+      "route": "/",
+      "status": 307,
+      "location": "/events",
+      "bytes": 7,
+      "ok": true
+    },
+    {
+      "route": "/community",
+      "status": 307,
+      "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fcommunity",
+      "bytes": 118,
+      "ok": true
+    },
+    {
+      "route": "/teams",
+      "status": 307,
+      "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Fteams",
+      "bytes": 114,
+      "ok": true
+    },
+    {
+      "route": "/account",
+      "status": 307,
+      "location": "/login?message=%E8%AF%B7%E7%99%BB%E5%BD%95%E5%90%8E%E8%AE%BF%E9%97%AE%E6%AD%A4%E6%A0%8F%E7%9B%AE&returnTo=%2Faccount",
+      "bytes": 116,
+      "ok": true
+    }
+  ],
+  "http_runner_exit_code": 0,
+  "browser_status": "unverified: separate CUA browser cannot connect to command-local loopback; previous Chromium startup denied AF_UNIX",
+  "not_committed": true,
+  "not_pushed": true,
+  "not_deployed": true
+}

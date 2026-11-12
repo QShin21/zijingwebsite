@@ -1,0 +1,196 @@
+{
+  "task": "V2 backend follow-ups S1-S8, 2026-11-12 brief",
+  "at": "2026-11-11T19:05:53.918224+00:00",
+  "scope": {
+    "branch": "new",
+    "backendAndTestsOnly": true,
+    "committed": false,
+    "pushed": false,
+    "deployed": false,
+    "productionRead": false,
+    "productionWrite": false,
+    "externalNotifications": false
+  },
+  "taskStatus": {
+    "S1": "implemented: strict signupOpen flag filters before pagination; existing ACL and candidate budget unchanged",
+    "S2": "implemented: shared lightweight header projection plus HTTP route",
+    "S3": "implemented: object/version/account/session-bound 60-second bearer image tickets, live ACL and no-store",
+    "S4": "implemented: ApplicationItem/ManageQueue/TodoItem.webOnly; native href hash normalization handed to frontend",
+    "S5": "implemented: field validator plus draft/autosave beforeChange guard; synthetic read-only audit only",
+    "S6": "implemented: independent approved-version-bound promotion slots, maximum six per kind; guest showcase null",
+    "S7": "implemented: additive homeSections CMS schema/migration and normalized ordered sections contract",
+    "S8": "no backend change required; existing applications contract preserved"
+  },
+  "database": {
+    "isolatedSyntheticOnly": true,
+    "initializedFreshForThisTask": true,
+    "reusedOnlyOwnSyntheticFixturesBetweenReruns": true,
+    "host": "127.0.0.1",
+    "port": 55617,
+    "database": "zijing_rebuild_contracts_synthetic",
+    "directory": ".data/rebuild-qa-20261013/contracts/backend-followups-pg-v1",
+    "unixSockets": false,
+    "dbStoppedAfterRun": true,
+    "allMigrationsApplied": true,
+    "legacyModulesPreservationTestPassed": true
+  },
+  "validation": {
+    "runnerChecks": {
+      "at": "2026-11-11T19:05:05.823Z",
+      "freshSyntheticDatabase": true,
+      "loopbackOnly": true,
+      "unixSockets": false,
+      "failure": null,
+      "checks": [
+        {
+          "args": [
+            "sync",
+            "contracts"
+          ],
+          "exitCode": 0
+        },
+        {
+          "args": [
+            "migrate",
+            "contracts"
+          ],
+          "exitCode": 0
+        },
+        {
+          "args": [
+            "exec",
+            "contracts",
+            "node",
+            "node_modules/payload/bin.js",
+            "generate:types"
+          ],
+          "exitCode": 0
+        },
+        {
+          "args": [
+            "vitest",
+            "contracts",
+            "tests/v2-backend.integration.test.ts",
+            "tests/v2-calendar.test.ts",
+            "tests/v2-contract-followups.test.ts",
+            "tests/v2-home-promotions.test.ts",
+            "tests/v2-home-selection.test.ts",
+            "tests/v2-http.test.ts",
+            "tests/v2-image-tickets.test.ts",
+            "tests/v2-core.test.ts",
+            "tests/v2-read-projections.test.ts",
+            "tests/content-promotions.test.ts",
+            "tests/promotion-list.test.ts",
+            "tests/v2-legacy-http-contract.test.ts",
+            "tests/v2-legacy-questionnaire.test.ts",
+            "tests/v2-legacy-signup-methods.test.ts",
+            "tests/v2-legacy-staff-flows.test.ts",
+            "tests/v2-legacy-team-signup.test.ts",
+            "tests/v2-legacy-team-profile-confirmation-http.test.ts"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "success": true
+    },
+    "vitest": {
+      "files": 17,
+      "passed": 245,
+      "failed": 0,
+      "skipped": 0,
+      "allCommandsFinalCode": 0,
+      "log": ".data/rebuild-qa-20261013/contracts/logs/backend-followups-20261112-final.log",
+      "logSha256": "88becabb5f1019a9293df48d99b2ab8da2ac047205dcfc5bd3224c8575142370",
+      "actualPayloadPostgresFile": "tests/v2-backend.integration.test.ts",
+      "actualPayloadPostgresTestsInThatFile": 17,
+      "unitTestsUseExplicitSubstitutes": true,
+      "legacyServerContractFiles": 6
+    },
+    "typecheck": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit",
+      "exitCode": 0
+    },
+    "targetedEslint": {
+      "exitCode": 0,
+      "scope": [
+        "src/lib/v2/types.ts",
+        "src/lib/v2/events.ts",
+        "src/lib/v2/community.ts",
+        "src/lib/v2/account.ts",
+        "src/lib/v2/home.ts",
+        "src/lib/v2/home-sections.ts",
+        "src/lib/v2/images.ts",
+        "src/lib/v2/http.ts",
+        "src/lib/v2/index.ts",
+        "src/lib/team-slugs.ts",
+        "src/lib/content-promotions.ts",
+        "src/collections/index.ts",
+        "src/globals/Site.ts",
+        "src/migrations/20261112_000000_v2_home_sections.ts",
+        "src/migrations/index.ts",
+        "src/payload-types.ts",
+        "tests/v2-calendar.test.ts",
+        "tests/v2-contract-followups.test.ts",
+        "tests/v2-home-selection.test.ts",
+        "tests/v2-home-promotions.test.ts",
+        "tests/v2-http.test.ts",
+        "tests/v2-image-tickets.test.ts",
+        "tests/v2-backend.integration.test.ts"
+      ]
+    },
+    "generatedTypesMatchSource": true,
+    "diffCheck": {
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    "fullSuite": "not run in this follow-up; old full-suite results remain historical",
+    "productionBuild": "not run in this follow-up; frontend integration owns final aggregate build",
+    "browser": "not run in this backend follow-up",
+    "wechatNativeTool": "not run"
+  },
+  "reservedSlugAudit": {
+    "at": "2026-11-11T19:05:05.730Z",
+    "syntheticOnly": true,
+    "queryReadOnly": true,
+    "collisions": []
+  },
+  "reviewFixes": [
+    "Await image service rejection in HTTP try/catch so authorization errors become safe HTTP responses.",
+    "Collection beforeChange enforces reserved slugs even when Payload skips draft/autosave field validation.",
+    "Approved source projector executes inside each page item read; 500-item consumers retain only light output, not full base64 source documents.",
+    "Full-source helper is hard-capped at six."
+  ],
+  "limits": [
+    "Calendar preserves existing maximum 500 candidates per source; counts describe the bounded aggregate.",
+    "Home promoted slots show latest up to six per kind, not all historical promotions simultaneously.",
+    "Image ticket is a short-lived bearer capability; forwarding within lifetime can work, though logout/revocation/current ACL are rechecked.",
+    "Already downloaded/displayed pixels cannot be recalled.",
+    "Production collision audit and any authorized slug rename/migration remain unexecuted.",
+    "Client integration and visual/native acceptance remain separate."
+  ],
+  "sha256": {
+    "src/lib/v2/types.ts": "0f54d59dc8e5fb6b64c53a97d7d87dc0d6892f4973488255bf9c785e91cc1eb4",
+    "src/lib/v2/events.ts": "15e08bf418fe8da218e7333f58e28617a677288a0b493b9c94d9ed1e8184241e",
+    "src/lib/v2/community.ts": "37a849693fa6c58c473b842d91653917e4efa6e83285bd65057e4b612296fa0c",
+    "src/lib/v2/account.ts": "1b063ef64997c142b8659936fac16a330904b508731656d0d3e9a366305fd3b1",
+    "src/lib/v2/home.ts": "589ecac3ac45c7b66739e8aea7b48fa6d904a3a95c780ac3c1610bc6166352ec",
+    "src/lib/v2/home-sections.ts": "9036ff6078e6ec87f6149bee6b444a8b5a8d64209467180679896103e8df726e",
+    "src/lib/v2/images.ts": "e2fa53577d93cb207434a098e8c4e321b639cf55389ec4bce2315feb3ee474b5",
+    "src/lib/v2/http.ts": "d2c9362e8ed085d81d6f027d6fbdc28e8365781fc9e2c6300c3c59d8e188b30a",
+    "src/lib/v2/index.ts": "ab5f2f6870bda8fb109a9ed72511bdb2a108e94c977ad1dd17401dbf866bd2a4",
+    "src/lib/team-slugs.ts": "37f33e85118ee37f3f061e404ec522d7de81595f757cfe0e729f60c8ea980547",
+    "src/lib/content-promotions.ts": "3444f3404432ab0d4ab385f8ffa67501c3faaf5d580083d54f75161b1bab60d8",
+    "src/collections/index.ts": "4935ab23ab03ab6ff46af04b707e109b524250b626f88b1312210a583090cc5a",
+    "src/globals/Site.ts": "2836b632ec43d253d06e245bbca340aafc0dae6fcb27f1d0af6cc33b127e9224",
+    "src/migrations/20261112_000000_v2_home_sections.ts": "93e070c4acb2806a5d6e425dae0e4a9fe38cd773003332ce4de1a1d08d390073",
+    "src/migrations/index.ts": "6997fb52d897f103ea9305956d2931f471a676b1000daffce693fbf217e68300",
+    "src/payload-types.ts": "f9bd58b93aa6c5fe0ef0c64b3caa4068312b9d8914ccab26d05ab18db28b8546",
+    "tests/v2-calendar.test.ts": "919bc835be47c214429a597077036fab0dc83bbd02f7463a16bda9ddcf2705ea",
+    "tests/v2-contract-followups.test.ts": "6fcf2f9b7bec69f2d2deb4ae63f08ddd65fa1092e29bbe066fc9bdedaadac39a",
+    "tests/v2-home-selection.test.ts": "3440fca8cbb8dd7e69d7b48bb4a09fda66947dc63a5cb0570bea5203a144f2cf",
+    "tests/v2-home-promotions.test.ts": "1a4cc8cbb1cfc0fb37011b9d59d5c2d44e118213244291fe63acd7c6e9a2024e",
+    "tests/v2-http.test.ts": "d633041b3bc5234692b4dae301b18bb1ccb7cf426e0d267bf986e00f33493771",
+    "tests/v2-image-tickets.test.ts": "49a92850696b22995569136e8b45f886e8e6c4b70c19d2473810263c14a61d65",
+    "tests/v2-backend.integration.test.ts": "f205a06aa52e7278189ac6abbe48d9f687cfc7eca63f718303d1b4fe22a3093d"
+  }
+}

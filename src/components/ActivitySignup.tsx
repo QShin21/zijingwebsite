@@ -15,6 +15,11 @@ import { activityRequest } from "./activity-pages/client-request";
 import pageStyles from "./activity-pages/ActivityPages.module.css";
 import workStyles from "./activity-pages/QuestionnaireSurface.module.css";
 import workspace from "./activity-pages/Workspace.module.css";
+import { PageHero, StatusPill, Wrap } from "./v2/ui";
+import layout from "./v2/layout.module.css";
+
+/** V2 body spacing for the manager/signups workspace below its stage hero. */
+const managerBody = layout.pageBody;
 type Receipt = {
   id: number;
   createdAt: string;
@@ -203,7 +208,8 @@ export function ActivitySignup({
           <Link href="/account">我的事务</Link>
         </div>
       )}
-      {(info.canManage || info.canViewSignups) && (
+      {/* Compact panels sit beside the V2 event detail, whose server-rendered 活动管理 panel already links here. */}
+      {!compact && (info.canManage || info.canViewSignups) && (
         <div className={styles.actions}>
           {info.canManage && (
             <Link href={`/activities/${kind}/${id}/manage`}>管理报名问卷</Link>
@@ -457,33 +463,26 @@ export function SignupManager({
     }
   }
   return (
-    <section
-      className={`${pageStyles.page} ${workStyles.surface} ${workspace.manager}`}
-      aria-busy={busy}
-    >
-      <nav className={pageStyles.breadcrumbs} aria-label="问卷管理导航">
-        <Link href="/activities">问卷工作台</Link>
-        <span aria-hidden="true">/</span>
-        <span>{readOnly ? "报名与统计" : "编辑问卷"}</span>
-      </nav>
-      <header className={pageStyles.hero}>
-        <div>
-          <h1>{info?.title || "活动报名管理"}</h1>
-          <p>
-            {readOnly
-              ? "查看本人获准读取的报名资料，整理名单与统计。"
-              : "制作问卷、整理报名，并分享同一个活动填写入口。"}
-          </p>
-        </div>
-        {info && (
-          <span
-            className={pageStyles.status}
-            data-open={info.state === "报名开放"}
-          >
-            {info.state}
-          </span>
-        )}
-      </header>
+    <div aria-busy={busy}>
+      <PageHero
+        tone="stage"
+        eyebrow={readOnly ? "SIGN-UP DESK · 报名与统计" : "SIGN-UP DESK · 编辑问卷"}
+        title={info?.title || "活动报名管理"}
+        description={readOnly ? "查看本人获准读取的报名资料，整理名单与统计。" : "制作问卷、整理报名，并分享同一个活动填写入口。"}
+        back={{ href: "/activities", label: "问卷工作台" }}
+        meta={
+          info && (
+            <>
+              <StatusPill tone={info.state === "报名开放" ? "live" : "neutral"}>{info.state}</StatusPill>
+              <StatusPill>{kind === "events" ? "站点活动" : "社群活动"}</StatusPill>
+              <StatusPill tone={info.canManage ? "action" : "neutral"}>{info.canManage ? "可编辑问卷" : "问卷只读"}</StatusPill>
+              <StatusPill tone={info.canViewSignups ? "info" : "neutral"}>{info.canViewSignups ? "可读取报名" : "报名资料未授权"}</StatusPill>
+              <StatusPill tone={info.canExportSignups ? "info" : "neutral"}>{info.canExportSignups ? "可导出" : "导出未授权"}</StatusPill>
+            </>
+          )
+        }
+      />
+      <Wrap width="max" className={`${workStyles.surface} ${workspace.manager} ${managerBody}`}>
       {!info && !message && <p role="status">正在读取问卷与当前权限…</p>}
       {!info && message && (
         <>
@@ -511,14 +510,7 @@ export function SignupManager({
       {info && (
         <>
           <div className={workspace.objectBar}>
-            <div className={pageStyles.meta}>
-              <span>{kind === "events" ? "站点活动" : "社群活动"}</span>
-              <span>{info.canManage ? "可编辑问卷" : "问卷只读"}</span>
-              <span>
-                {info.canViewSignups ? "可读取报名" : "报名资料未授权"}
-              </span>
-              <span>{info.canExportSignups ? "可导出" : "导出未授权"}</span>
-            </div>
+            <p className={pageStyles.meta}>同一个填写入口用于报名、修改作答与查看本人回执。</p>
             <div className="signup-tools">
               <Link href={`/activities/${kind}/${id}/fill`}>打开填写页</Link>
               <button
@@ -801,6 +793,7 @@ export function SignupManager({
           )}
         </>
       )}
-    </section>
+      </Wrap>
+    </div>
   );
 }

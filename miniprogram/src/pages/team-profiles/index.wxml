@@ -1,22 +1,90 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
-<view class="page mini-page native-page native-form-page business-page team-profiles-page">
-  <button class="plain back" bindtap="back">返回队伍</button><view class="page-heading"><text class="task-context">本人选择 · 队内展示</text><text class="title">队员简介</text><text class="subtitle">用公开昵称介绍自己，由本人选择是否在本代表队展示。</text></view>
-  <template is="feedback" data="{{loading,error,needsLogin}}" />
-  <view wx:if="{{operationError || message || locked || conflict || confirmationPending}}" class="profile-feedback"><text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text><text wx:if="{{message}}" class="result-message" aria-role="status">{{message}}</text><text wx:if="{{locked}}" class="task-note">编辑已锁定，保留的输入可继续预览。重新加载后需再次主动选择展示。</text><text wx:if="{{conflict}}" class="task-note">当前输入可继续预览，请重新加载已保存资料后核对修改。</text><text wx:if="{{confirmationPending}}" class="task-note">保存结果待核对，本页内容可预览。成功刷新当前周期前不会再次保存。</text><button wx:if="{{confirmationPending}}" class="secondary" bindtap="retry" disabled="{{busy || loading}}">刷新核对保存状态</button><button wx:if="{{locked || conflict}}" class="secondary" bindtap="reload" disabled="{{busy || loading}}">重新加载已保存资料</button></view>
-  <view wx:if="{{loaded && !needsLogin && !editing}}" class="business-summary profile-own"><text class="section-title">我的展示资料</text><text wx:if="{{eligible && !locked}}" class="muted">{{draft.visible ? '你已选择展示自己的简介，可编辑或关闭展示。' : '你的简介当前未选择展示。填写、预览并确认保存后生效。'}}</text><text wx:if="{{!eligible && !locked}}" class="muted">入队审核通过且仍在队后，可以填写自己的队内简介。</text><button wx:if="{{eligible && !locked}}" class="primary section" bindtap="edit" disabled="{{busy || loading}}">编辑我的队内简介</button></view>
-  <view wx:if="{{editing}}" class="profile-editor">
-    <view class="business-summary profile-editor-intro"><text class="task-context">本人资料 / {{previewing ? '保存前核对' : '编辑'}}</text><text class="section-title">{{previewing ? '核对将展示的内容' : '我的队内简介'}}</text><text class="muted">只填写愿意公开的内容，无需填写真实姓名、学号、联系方式或报名答案。</text></view>
-    <block wx:if="{{!previewing}}">
-      <view class="task-section"><text class="task-section-title">公开昵称</text><view class="field"><text class="field-label">昵称 · 必填</text><input cursor-spacing="24" value="{{draft.displayName}}" maxlength="40" bindinput="input" data-field="displayName" disabled="{{busy || loading || locked || confirmationPending}}" /><text class="field-note">最多 40 字，展示时用于识别你的简介。</text></view></view>
-      <view class="task-section"><text class="task-section-title">选择补充介绍</text><text class="muted">以下内容均为选填，填写后会随简介一起展示；不希望展示的字段请留空。</text><view class="field"><text class="field-label">位置 / 游戏角色（可选公开）</text><input cursor-spacing="24" value="{{draft.position}}" maxlength="60" bindinput="input" data-field="position" disabled="{{busy || loading || locked || confirmationPending}}" /></view><view class="field"><text class="field-label">简短介绍（可选公开）</text><textarea cursor-spacing="24" value="{{draft.biography}}" maxlength="400" auto-height bindinput="input" data-field="biography" disabled="{{busy || loading || locked || confirmationPending}}" /><text class="field-note">最多 400 字，可介绍擅长的位置与共同游戏的习惯。</text></view>
-        <view class="field"><text class="field-label">头像（可选公开）</text><view class="avatar-editor"><image wx:if="{{draftAvatar}}" class="preview-avatar" src="{{draftAvatar}}" mode="aspectFill" aria-label="本人简介头像预览" /><view><button class="secondary" bindtap="chooseAvatar" disabled="{{busy || loading || locked || confirmationPending}}">{{draft.hasAvatar ? '更换头像' : '选择头像'}}</button><button wx:if="{{draft.hasAvatar}}" class="plain" bindtap="removeAvatar" disabled="{{busy || loading || locked || confirmationPending}}">移除头像</button></view></view><text class="field-note">2 MB 以内的 PNG、JPEG 或 WebP 静态图片。保存时清除图片元数据；取消选择不会清空文字。</text><button class="plain" bindtap="openPrivacy" disabled="{{busy}}">查看微信隐私指引</button></view>
-      </view>
-      <view class="task-section"><text class="task-section-title">本人展示选择</text><label class="consent profile-consent"><view><text>在本代表队页面展示我的简介</text><text class="field-note">公开昵称及以上主动填写的介绍、头像一并展示。</text></view><switch color="{{themePrimary}}" checked="{{draft.visible}}" bindchange="consent" disabled="{{busy || loading || locked || confirmationPending}}" aria-label="在本代表队页面展示我的简介" /></label><text class="muted">取消展示后预览并保存即可隐藏。离队或资格撤销后退出简介名单；重新入队需再次确认。</text></view>
-      <view class="form-footer"><button class="primary" bindtap="preview" disabled="{{busy || loading}}">预览简介与展示选择</button><button class="plain" bindtap="cancel" disabled="{{busy || loading}}">取消修改</button></view>
-    </block>
-    <view wx:else class="profile-preview"><view class="profile-preview-header"><image wx:if="{{draftAvatar}}" class="preview-avatar" src="{{draftAvatar}}" mode="aspectFill" aria-label="简介预览头像" /><view><text class="profile-display-name">{{draft.displayName}}</text><text wx:if="{{draft.position}}" class="muted">{{draft.position}}</text></view></view><text wx:if="{{draft.biography}}" class="body biography" selectable>{{draft.biography}}</text><view class="preview-selection"><text class="material-title">本次保存的展示选择</text><text class="badge">{{draft.visible ? '展示简介' : '隐藏简介'}}</text><text class="task-note">{{confirmationPending ? '保存结果尚需刷新核对当前周期，当前不能再次保存。' : draft.visible ? '确认保存后，上方昵称与已填写内容将展示在本代表队简介页。' : '确认保存后，这份简介将从展示名单隐藏。'}}</text></view><view class="action-bar"><button class="secondary" bindtap="returnToEdit" disabled="{{busy}}">返回修改</button><button class="primary" bindtap="save" disabled="{{busy || loading || locked || conflict || confirmationPending}}" loading="{{busy}}">确认保存简介</button></view><button class="plain" bindtap="cancel" disabled="{{busy || loading}}">取消修改</button></view>
+<view class="page mini-page team-profiles-v2 {{theme === 'dark' ? 'zj-dark' : ''}}">
+  <view class="zj-hero">
+    <view class="zj-stage-stripes"></view>
+    <view class="zj-hero-inner">
+      <button class="zj-hero-back" bindtap="back">‹ 返回队伍</button>
+      <text class="zj-hero-kicker">本人选择 · 队内展示</text>
+      <text class="zj-hero-title">队员简介</text>
+      <text class="zj-hero-lead">用公开昵称介绍自己，由本人选择是否在本代表队展示。</text>
+    </view>
   </view>
-  <view wx:if="{{loaded && !loading && !needsLogin}}" class="task-section profile-roster"><view class="section-head"><text class="section-title">本队公开简介</text><button class="plain" bindtap="retry" disabled="{{busy || loading}}">刷新资料</button></view><text class="muted">仅展示仍在队且本人选择公开的资料。</text><view wx:if="{{!profiles.length}}" class="empty"><text class="state-title">暂无选择展示的队员简介</text><text class="muted">本人保存并选择展示后，会出现在这里。</text></view><view class="record-list"><view wx:for="{{profiles}}" wx:key="id" class="task-record profile-card"><view class="profile-roster-header"><image wx:if="{{item.avatarPath}}" class="avatar" src="{{item.avatarPath}}" mode="aspectFill" aria-label="{{item.displayName}}的头像" /><view><text class="section-title">{{item.displayName}}</text><text wx:if="{{item.position}}" class="muted">{{item.position}}</text></view></view><text wx:if="{{item.biography}}" class="body biography" selectable>{{item.biography}}</text></view></view><text wx:if="{{imageError}}" class="task-note">{{imageError}}</text></view>
+  <template is="feedback" data="{{loading,error,needsLogin}}" />
+  <view wx:if="{{operationError || message || locked || conflict || confirmationPending}}" class="profiles-feedback">
+    <text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text>
+    <text wx:if="{{message}}" class="zj-callout zj-callout-success" aria-role="status">{{message}}</text>
+    <text wx:if="{{locked}}" class="zj-callout zj-callout-warning">编辑已锁定，保留的输入可继续预览。重新加载后需再次主动选择展示。</text>
+    <text wx:if="{{conflict}}" class="zj-callout zj-callout-warning">当前输入可继续预览，请重新加载已保存资料后核对修改。</text>
+    <text wx:if="{{confirmationPending}}" class="zj-callout zj-callout-warning">保存结果待核对，本页内容可预览。成功刷新当前周期前不会再次保存。</text>
+    <button wx:if="{{confirmationPending}}" class="secondary" bindtap="retry" disabled="{{busy || loading}}">刷新核对保存状态</button>
+    <button wx:if="{{locked || conflict}}" class="secondary" bindtap="reload" disabled="{{busy || loading}}">重新加载已保存资料</button>
+  </view>
+
+  <view wx:if="{{loaded && !needsLogin && !editing}}" class="zj-sheet profiles-own">
+    <text class="zj-sheet-title">我的展示资料</text>
+    <text wx:if="{{eligible && !locked}}" class="zj-pill {{draft.visible ? 'zj-pill-success' : 'zj-pill-neutral'}}">{{draft.visible ? '当前展示中' : '当前未展示'}}</text>
+    <text wx:if="{{eligible && !locked}}" class="zj-form-hint">{{draft.visible ? '你已选择展示自己的简介，可编辑或关闭展示。' : '你的简介当前未选择展示。填写、预览并确认保存后生效。'}}</text>
+    <text wx:if="{{!eligible && !locked}}" class="zj-form-hint">入队审核通过且仍在队后，可以填写自己的队内简介。</text>
+    <button wx:if="{{eligible && !locked}}" class="primary" bindtap="edit" disabled="{{busy || loading}}">编辑我的队内简介</button>
+  </view>
+
+  <view wx:if="{{editing}}" class="profiles-editor">
+    <view class="profiles-steps"><text class="profiles-step {{!previewing ? 'current' : 'done'}}">1 编辑</text><text class="profiles-step {{previewing ? 'current' : ''}}">2 保存前核对</text></view>
+    <text class="zj-callout">只填写愿意公开的内容，无需填写真实姓名、学号、联系方式或报名答案。</text>
+    <block wx:if="{{!previewing}}">
+      <view class="zj-sheet">
+        <text class="zj-sheet-title">公开昵称</text>
+        <view class="field"><text class="field-label">昵称 · 必填</text><input cursor-spacing="24" value="{{draft.displayName}}" maxlength="40" bindinput="input" data-field="displayName" disabled="{{busy || loading || locked || confirmationPending}}" /><text class="zj-form-hint">最多 40 字，展示时用于识别你的简介。</text></view>
+      </view>
+      <view class="zj-sheet">
+        <text class="zj-sheet-title">选择补充介绍</text>
+        <text class="zj-form-hint">以下内容均为选填，填写后会随简介一起展示；不希望展示的字段请留空。</text>
+        <view class="field"><text class="field-label">位置 / 游戏角色（可选公开）</text><input cursor-spacing="24" value="{{draft.position}}" maxlength="60" bindinput="input" data-field="position" disabled="{{busy || loading || locked || confirmationPending}}" /></view>
+        <view class="field"><text class="field-label">简短介绍（可选公开）</text><textarea cursor-spacing="24" value="{{draft.biography}}" maxlength="400" auto-height bindinput="input" data-field="biography" disabled="{{busy || loading || locked || confirmationPending}}" /><text class="zj-form-hint">最多 400 字，可介绍擅长的位置与共同游戏的习惯。</text></view>
+        <view class="field">
+          <text class="field-label">头像（可选公开）</text>
+          <view class="profiles-avatar-editor">
+            <image wx:if="{{draftAvatar}}" class="profiles-avatar" src="{{draftAvatar}}" mode="aspectFill" aria-label="本人简介头像预览" />
+            <text wx:else class="profiles-avatar profiles-avatar-empty">{{draft.displayName ? draft.displayName[0] : '?'}}</text>
+            <view class="profiles-avatar-actions"><button class="secondary" bindtap="chooseAvatar" disabled="{{busy || loading || locked || confirmationPending}}">{{draft.hasAvatar ? '更换头像' : '选择头像'}}</button><button wx:if="{{draft.hasAvatar}}" class="plain" bindtap="removeAvatar" disabled="{{busy || loading || locked || confirmationPending}}">移除头像</button></view>
+          </view>
+          <text class="zj-form-hint">2 MB 以内的 PNG、JPEG 或 WebP 静态图片。保存时清除图片元数据；取消选择不会清空文字。</text>
+          <button class="plain" bindtap="openPrivacy" disabled="{{busy}}">查看微信隐私指引</button>
+        </view>
+      </view>
+      <view class="zj-sheet">
+        <text class="zj-sheet-title">本人展示选择</text>
+        <label class="consent profiles-consent"><view><text>在本代表队页面展示我的简介</text><text class="zj-form-hint">公开昵称及以上主动填写的介绍、头像一并展示。</text></view><switch color="{{themePrimary}}" checked="{{draft.visible}}" bindchange="consent" disabled="{{busy || loading || locked || confirmationPending}}" aria-label="在本代表队页面展示我的简介" /></label>
+        <text class="zj-form-hint">取消展示后预览并保存即可隐藏。离队或资格撤销后退出简介名单；重新入队需再次确认。</text>
+      </view>
+      <view class="zj-dock"><button class="primary" bindtap="preview" disabled="{{busy || loading}}">预览简介与展示选择</button><button class="plain" bindtap="cancel" disabled="{{busy || loading}}">取消修改</button></view>
+    </block>
+    <view wx:else class="profiles-preview">
+      <view class="profiles-card">
+        <image wx:if="{{draftAvatar}}" class="profiles-avatar" src="{{draftAvatar}}" mode="aspectFill" aria-label="简介预览头像" />
+        <text wx:else class="profiles-avatar profiles-avatar-empty">{{draft.displayName ? draft.displayName[0] : '?'}}</text>
+        <view class="profiles-card-main"><text class="zj-card-title">{{draft.displayName}}</text><text wx:if="{{draft.position}}" class="zj-pill zj-pill-action">{{draft.position}}</text><text wx:if="{{draft.biography}}" class="zj-card-summary biography" selectable>{{draft.biography}}</text></view>
+      </view>
+      <view class="zj-sheet">
+        <view class="zj-record-head"><text class="field-label">本次保存的展示选择</text><text class="zj-pill {{draft.visible ? 'zj-pill-success' : 'zj-pill-neutral'}}">{{draft.visible ? '展示简介' : '隐藏简介'}}</text></view>
+        <text class="zj-form-hint">{{confirmationPending ? '保存结果尚需刷新核对当前周期，当前不能再次保存。' : draft.visible ? '确认保存后，上方昵称与已填写内容将展示在本代表队简介页。' : '确认保存后，这份简介将从展示名单隐藏。'}}</text>
+      </view>
+      <view class="zj-dock"><button class="secondary" bindtap="returnToEdit" disabled="{{busy}}">返回修改</button><button class="primary" bindtap="save" disabled="{{busy || loading || locked || conflict || confirmationPending}}" loading="{{busy}}">确认保存简介</button><button class="plain" bindtap="cancel" disabled="{{busy || loading}}">取消修改</button></view>
+    </view>
+  </view>
+
+  <view wx:if="{{loaded && !loading && !needsLogin}}" class="zj-section">
+    <view class="zj-section-head"><view><text class="zj-section-title">本队公开简介</text><text class="zj-small">仅展示仍在队且本人选择公开的资料。</text></view><button class="plain zj-more" bindtap="retry" disabled="{{busy || loading}}">刷新资料</button></view>
+    <view wx:if="{{!profiles.length}}" class="zj-empty"><text class="zj-empty-icon">👤</text><text class="zj-empty-title">暂无选择展示的队员简介</text><text class="zj-small">本人保存并选择展示后，会出现在这里。</text></view>
+    <view class="zj-list">
+      <view wx:for="{{profiles}}" wx:key="id" class="profiles-card">
+        <image wx:if="{{item.avatarPath}}" class="profiles-avatar" src="{{item.avatarPath}}" mode="aspectFill" aria-label="{{item.displayName}}的头像" />
+        <text wx:else class="profiles-avatar profiles-avatar-empty">{{item.displayName[0]}}</text>
+        <view class="profiles-card-main"><text class="zj-card-title">{{item.displayName}}</text><text wx:if="{{item.position}}" class="zj-pill zj-pill-action">{{item.position}}</text><text wx:if="{{item.biography}}" class="zj-card-summary biography" selectable>{{item.biography}}</text></view>
+      </view>
+    </view>
+    <text wx:if="{{imageError}}" class="zj-form-hint">{{imageError}}</text>
+  </view>
 </view>
 <privacy-consent id="privacyConsent" />

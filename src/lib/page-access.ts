@@ -1,6 +1,6 @@
-const publicPaths = ["/events", "/announcements", "/login", "/register", "/account/reset", "/privacy"];
+const publicPaths = ["/events", "/announcements", "/login", "/register", "/account/reset", "/privacy", "/about", "/contact", "/join/staff"];
 export function isGuestPage(path: string) {
-  return publicPaths.some(root => path === root || path.startsWith(`${root}/`));
+  return path === "/" || path === "/join" || publicPaths.some(root => path === root || path.startsWith(`${root}/`));
 }
 
 // Retired URLs remain closed for guests and authenticated callers, including old clients.

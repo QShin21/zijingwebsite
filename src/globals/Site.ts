@@ -1,6 +1,7 @@
 import type { GlobalConfig } from "payload";
 import { publisher } from "../access";
 import { safeURL } from "../lib/rules";
+import { defaultHomeSections, validateHomeSections } from "../lib/v2/home-sections";
 export const Site: GlobalConfig = {
   slug: "site",
   label: "站点与首页",
@@ -74,6 +75,7 @@ export const Site: GlobalConfig = {
       name: "navigation",
       label: "导航（留空使用栏目导航）",
       type: "array",
+      admin: { description: "V2 网站不使用此字段" },
       fields: [
         { name: "label", label: "标题", type: "text", required: true },
         {
@@ -100,6 +102,7 @@ export const Site: GlobalConfig = {
       name: "modules",
       label: "首页模块（拖拽调整顺序）",
       type: "array",
+      admin: { description: "旧版首页配置保留；V2 请使用下方的 V2 主场区块。" },
       fields: [
         {
           name: "kind",
@@ -123,6 +126,20 @@ export const Site: GlobalConfig = {
           defaultValue: true,
         },
         { name: "title", label: "模块标题", type: "text" },
+      ],
+    },
+    {
+      name: "homeSections",
+      label: "V2 主场区块（拖拽调整顺序）",
+      type: "array",
+      maxRows: defaultHomeSections.length,
+      validate: validateHomeSections,
+      admin: { description: "可调整 V2 主场区块的顺序、标题与启停。未配置的区块按默认顺序追加；隐藏须明确取消启用。内容权限不受此配置影响。" },
+      fields: [
+        { name: "kind", label: "区块", type: "select", required: true,
+          options: defaultHomeSections.map(section => ({ label: section.title, value: section.kind })) },
+        { name: "enabled", label: "启用", type: "checkbox", defaultValue: true },
+        { name: "title", label: "标题（留空使用默认标题）", type: "text", maxLength: 60 },
       ],
     },
     {

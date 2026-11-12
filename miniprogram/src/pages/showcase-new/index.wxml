@@ -1,0 +1,57 @@
+<page-meta page-style="{{themePageStyle}}" />
+<import src="../../templates/v2.wxml" />
+<view class="page mini-page showcase-new-v2 {{theme === 'dark' ? 'zj-dark' : ''}}">
+  <view class="zj-hero">
+    <view class="zj-stage-stripes"></view>
+    <view class="zj-hero-inner">
+      <button class="zj-hero-back" bindtap="back">‹ 返回</button>
+      <text class="zj-hero-kicker">SHOWCASE · 风采投稿</text>
+      <text class="zj-hero-title">记录一次共同经历</text>
+      <text class="zj-hero-lead">分享你有权发布的活动照片与视频链接，社群管理员审核后展示。</text>
+    </view>
+  </view>
+  <template wx:if="{{needsLogin}}" is="zj-login" data="{{title: '登录后投稿风采', body: '投稿会记录作者，并由社群管理员审核。'}}" />
+  <view wx:elif="{{done}}" class="zj-sheet showcase-new-done">
+    <text class="zj-pill zj-pill-action">已提交</text>
+    <text class="zj-sheet-title">投稿已提交，等待审核</text>
+    <text class="zj-form-hint">审核结果会显示在社群风采「我的投稿」中。</text>
+    <view class="zj-dock"><button class="primary" bindtap="openMine">查看我的投稿</button></view>
+  </view>
+  <block wx:else>
+    <view class="zj-sheet">
+      <text class="zj-sheet-title">1 · 标题与故事</text>
+      <view class="field">
+        <text class="field-label">标题 · 必填</text>
+        <input value="{{title}}" maxlength="120" placeholder="例如：秋季联赛小组赛高光" placeholder-style="color:{{themeMuted}}" bindinput="field" data-field="title" cursor-spacing="24" disabled="{{busy}}" />
+      </view>
+      <view class="field">
+        <text class="field-label">正文</text>
+        <textarea value="{{body}}" maxlength="5000" placeholder="写下这次活动的故事" placeholder-style="color:{{themeMuted}}" bindinput="field" data-field="body" cursor-spacing="24" disabled="{{busy}}" />
+      </view>
+    </view>
+    <view class="zj-sheet">
+      <text class="zj-sheet-title">2 · 照片与视频</text>
+      <view class="field">
+        <text class="field-label">视频链接（可选）</text>
+        <input value="{{videoURL}}" maxlength="2000" placeholder="HTTPS 视频链接或 B 站嵌入代码" placeholder-style="color:{{themeMuted}}" bindinput="field" data-field="videoURL" cursor-spacing="24" disabled="{{busy}}" />
+      </view>
+      <view class="field">
+        <text class="field-label">照片（最多 6 张，单张不超过 2 MB）</text>
+        <view class="showcase-grid">
+          <view wx:for="{{images}}" wx:key="upload" class="showcase-item">
+            <image class="showcase-preview" src="{{item.preview}}" mode="aspectFill" />
+            <input class="showcase-caption" value="{{item.caption}}" maxlength="200" placeholder="图片说明（可选）" placeholder-style="color:{{themeMuted}}" bindinput="caption" data-index="{{index}}" cursor-spacing="24" disabled="{{busy}}" />
+            <button class="plain showcase-remove" bindtap="remove" data-index="{{index}}" disabled="{{busy}}" aria-label="移除第 {{index + 1}} 张图片">移除</button>
+          </view>
+          <button wx:if="{{images.length < 6}}" class="showcase-add" bindtap="choose" disabled="{{busy || uploading > 0}}">{{uploading ? '正在上传 ' + uploading + ' 张…' : '＋ 添加照片'}}</button>
+        </view>
+      </view>
+      <text class="zj-callout">仅上传你有权发布的照片；图片先保存为 24 小时内有效的临时文件，提交后由社群管理员审核展示。</text>
+    </view>
+    <text wx:if="{{error}}" class="error" aria-role="alert">{{error}}</text>
+    <view class="zj-dock">
+      <button class="primary" bindtap="submit" loading="{{busy}}" disabled="{{busy || uploading > 0 || !slug}}">{{busy ? '正在提交…' : '提交审核'}}</button>
+    </view>
+  </block>
+</view>
+<privacy-consent id="privacyConsent" />

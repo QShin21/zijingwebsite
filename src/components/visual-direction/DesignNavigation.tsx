@@ -8,6 +8,7 @@ import { ThemeSwitch } from "./ThemeSwitch";
 import type { ThemeName } from "./theme";
 import styles from "./SiteChrome.module.css";
 type NavItem = { path: string; label: string };
+const folio = (index: number) => String(index + 1).padStart(2, "0");
 export function DesignNavigation({
   signedIn,
   navigation,
@@ -120,35 +121,40 @@ export function DesignNavigation({
           </summary>
           <nav aria-label="移动导航">
             <p className={styles.menuLabel}>浏览紫荆</p>
-            {items.map((item) => (
+            {items.map((item, index) => (
               <Link
                 key={item.path}
                 href={item.path}
                 aria-current={active(item.path) ? "page" : undefined}
                 onClick={close}
               >
-                {item.label}
+                <span className={styles.menuIndex} aria-hidden="true">
+                  {folio(index)}
+                </span>
+                <span className={styles.menuText}>{item.label}</span>
                 <Pending />
               </Link>
             ))}
             <p className={styles.menuLabel}>我的参与</p>
             {signedIn && (
               <Link href="/join" onClick={close}>
-                参与与招新
+                <span className={styles.menuText}>参与与招新</span>
               </Link>
             )}
             {preview && (
               <Link href="/design-preview/system" onClick={close}>
-                设计系统样张
+                <span className={styles.menuText}>设计系统样张</span>
               </Link>
             )}
             {!signedIn && (
               <Link href="/register" onClick={close}>
-                注册账号
+                <span className={styles.menuText}>注册账号</span>
               </Link>
             )}
             <Link href={signedIn ? "/account" : "/login"} onClick={close}>
-              {signedIn ? "我的账号" : "登录"}
+              <span className={styles.menuText}>
+                {signedIn ? "我的账号" : "登录"}
+              </span>
             </Link>
           </nav>
         </details>
