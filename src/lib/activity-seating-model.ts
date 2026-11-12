@@ -1,7 +1,7 @@
 
 export type SeatingKind = "events" | "community-posts";
-export type SeatStatus = "pending" | "confirmed" | "rejected";
-export type SeatDecision = Exclude<SeatStatus, "pending">;
+export type SeatStatus = "pending" | "confirmed" | "rejected" | "cancelled";
+export type SeatDecision = "confirmed" | "rejected";
 export const seatLimit = 10;
 export const seatProofLimit = 10;
 export const seatProofBytes = 8 * 1024 * 1024;
@@ -9,6 +9,7 @@ export const seatStatusLabels: Record<SeatStatus, string> = {
   pending: "待审核",
   confirmed: "已确认",
   rejected: "已驳回",
+  cancelled: "已取消",
 };
 
 export const seatRows = [
@@ -68,7 +69,7 @@ export type SeatingState = SeatingAvailability & {
   seatLimit: number;
   proofLimit: number;
   proofBytes: number;
-  occupancy: Partial<Record<string, Exclude<SeatStatus, "rejected">>>;
+  occupancy: Partial<Record<string, "pending" | "confirmed">>;
   blockedSeats: string[];
   mine: SeatRequest | null;
   mineDetails: { phone: string; proofs: string[]; canEdit: boolean } | null;

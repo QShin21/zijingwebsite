@@ -238,6 +238,7 @@ export function SeatReceipt({ mine, editable }: { mine: Pick<SeatRequest, "seats
       {mine.status === "rejected" && (
         <p className={styles.hint}>{editable ? "申请已驳回，座位已释放；可以重新选座并提交凭证。" : "申请已驳回，座位已释放。"}</p>
       )}
+      {mine.status === "cancelled" && <p className={styles.hint}>{editable ? "申请已取消，座位已释放；可以重新选座。" : "申请已取消，座位已释放。"}</p>}
     </div>
   );
 }
@@ -254,6 +255,7 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
   const [selected, setSelected] = useState<string[]>([]);
   const [editing, setEditing] = useState(false);
   const [editProofs, setEditProofs] = useState<string[]>([]);
+  const [confirmCancel, setConfirmCancel] = useState(false);
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
@@ -347,7 +349,7 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
   }
   if (!state.enabled && !state.canReview && !state.mine) return null;
   const activeEdit = editing && state.mine?.status === "pending" && state.mineDetails?.canEdit === true;
-  const editable = Boolean(activeEdit || (state.open && state.loggedIn && (!state.mine || state.mine.status === "rejected")));
+  const editable = Boolean(activeEdit || (state.open && state.loggedIn && (!state.mine || state.mine.status === "rejected" || state.mine.status === "cancelled")));
   const visibleProofs = activeEdit ? editProofs : state.drafts;
   const total = state.rows.reduce((sum, row) => sum + row.count, 0);
 
@@ -379,6 +381,7 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
     if (!alive.current || !(cause instanceof SeatRequestError) || (cause.status !== 401 && cause.status !== 403)) return;
     setState((current) => current && { ...current, loggedIn: false, canReview: false, mine: null, mineDetails: null, drafts: [] });
     setEditing(false);
+    setConfirmCancel(false);
     setEditProofs([]);
     editVersion.current = null;
     setSelected([]);
@@ -451,6 +454,23 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
     setError("");
   }
 
+  function cancelRequest() {
+    if (!state?.mine || state.mine.status !== "pending") return;
+    const { id: requestID, revision } = state.mine;
+    void run("正在取消申请", async () => {
+      const { mine } = await seatRequest<{ mine: SeatRequest }>(endpoint, seatJSON("DELETE", { id: requestID, revision }));
+      if (!alive.current) return;
+      setState(current => current && { ...current, mine, mineDetails: null, drafts: [] });
+      editVersion.current = null;
+      setEditing(false);
+      setEditProofs([]);
+      setConfirmCancel(false);
+      setSelected([]);
+      setPhone("");
+      setNotice("申请已取消，全部座位已释放。");
+    }, true);
+  }
+
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!state || lock.current) return;
@@ -507,6 +527,17 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
       {state.mine && <SeatReceipt mine={state.mine} editable={editable} />}
       {state.mine?.status === "pending" && state.mineDetails?.canEdit && !activeEdit && (
         <div><button type="button" className={buttonClass("primary", "small")} disabled={Boolean(busy)} onClick={startEdit}>修改申请</button></div>
+      )}
+      {state.mine?.status === "pending" && (
+        <div className={styles.blockControls}>
+          {confirmCancel ? (
+            <>
+              <span className={styles.blockHint}>取消后全部座位将释放。</span>
+              <button type="button" className={buttonClass("danger", "small")} disabled={Boolean(busy)} onClick={cancelRequest}>确认取消申请</button>
+              <button type="button" className={buttonClass("ghost", "small")} disabled={Boolean(busy)} onClick={() => setConfirmCancel(false)}>返回</button>
+            </>
+          ) : <button type="button" className={buttonClass("ghost", "small")} disabled={Boolean(busy)} onClick={() => setConfirmCancel(true)}>取消选座申请</button>}
+        </div>
       )}
 
       {(state.enabled || activeEdit) && (

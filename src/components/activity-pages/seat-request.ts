@@ -27,6 +27,6 @@ export async function seatRequest<T>(url: string, init: RequestInit = {}): Promi
   return result as T;
 }
 
-export function seatJSON(method: "POST" | "PUT" | "PATCH", data: object): RequestInit {
+export function seatJSON(method: "POST" | "PUT" | "PATCH" | "DELETE", data: object): RequestInit {
   return { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) };
 }

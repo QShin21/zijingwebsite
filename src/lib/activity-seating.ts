@@ -30,17 +30,18 @@ type SeatDatabase = {
 };
 
 type SeatScope = { id: number; enabled: boolean; opens_at: Date | null };
-type ActiveStatus = Exclude<SeatStatus, "rejected">;
+type ActiveStatus = "pending" | "confirmed";
 type RequestRow = {
   id: number;
   seats: string[];
   status: SeatStatus;
   revision: number;
+  cancelled_at: Date | null;
   created_at: Date;
   reviewed_at: Date | null;
 };
 type ReviewRow = RequestRow & { member_name: string; phone: string; proofs: string[] };
-const rowFields = "id, seats, status, revision, created_at, reviewed_at";
+const rowFields = "id, seats, status, revision, cancelled_at, created_at, reviewed_at";
 const validSeats = new Set(seatKeys);
 const pool = (p: Payload) => (p.db as unknown as PostgresAdapter).pool;
 
@@ -174,7 +175,7 @@ function assertLockedReviewer(activity: SeatActivity, actor: User) {
 
 function requestDTO(row: RequestRow): SeatRequest {
   return {
-    id: row.id, seats: row.seats, status: row.status, revision: row.revision,
+    id: row.id, seats: row.seats, status: row.cancelled_at ? "cancelled" : row.status, revision: row.revision,
     createdAt: row.created_at.toISOString(), reviewedAt: row.reviewed_at?.toISOString() ?? null,
   };
 }
@@ -422,6 +423,32 @@ export async function editPendingSeats(p: Payload, activity: SeatActivity, user:
   });
 }
 
+export async function cancelPendingSeats(p: Payload, activity: SeatActivity, user: User | null, id: unknown, revision: unknown) {
+  const actor = await requireMember(p, user);
+  requirePublic(activity);
+  if (typeof id !== "number" || !Number.isSafeInteger(id) || id < 1 || id > 2147483647 ||
+      typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 0 || revision >= 2147483647)
+    throw new APIError("申请信息无效，请刷新后重试", 400);
+  return transaction(p, async client => {
+    const current = await lockedActivity(p, activity, actor, client);
+    requirePublic(current.activity);
+    const setting = await scope(p, current.activity, client);
+    if (!setting) throw new APIError("选座申请不存在", 404);
+    const found = await client.query<RequestRow>(`SELECT ${rowFields} FROM activity_seat_requests
+      WHERE seating_id = $1 AND id = $2 AND member_id = $3`, [setting.id, id, actor.id]);
+    const own = found.rows[0];
+    if (!own) throw new APIError("选座申请不存在", 404);
+    if (own.status !== "pending") throw new APIError("申请已处理，请刷新查看结果", 409);
+    if (own.revision !== revision) throw new APIError("申请内容已变化，请刷新后重试", 409);
+    const result = await client.query<RequestRow>(`UPDATE activity_seat_requests
+      SET status = 'rejected', cancelled_at = now(), revision = revision + 1
+      WHERE seating_id = $1 AND id = $2 RETURNING ${rowFields}`, [setting.id, id]);
+    await client.query("DELETE FROM activity_seat_claims WHERE seating_id = $1 AND request_id = $2", [setting.id, id]);
+    await client.query("DELETE FROM activity_seat_proofs WHERE seating_id = $1 AND member_id = $2 AND request_id IS NULL", [setting.id, actor.id]);
+    return requestDTO(result.rows[0]);
+  });
+}
+
 export async function seatingWorkbench(
   p: Payload, activity: SeatActivity, user: User | null, status: SeatStatus, page: number,
 ): Promise<SeatingWorkbench> {
@@ -433,12 +460,12 @@ export async function seatingWorkbench(
   if (!setting) return view;
   const limit = 20;
   const { rows } = await pool(p).query<ReviewRow>(
-    `SELECT r.id, r.seats, r.status, r.revision, r.created_at, r.reviewed_at, r.member_name, r.phone,
+    `SELECT r.id, r.seats, r.status, r.revision, r.cancelled_at, r.created_at, r.reviewed_at, r.member_name, r.phone,
        ARRAY(SELECT id FROM activity_seat_proofs
              WHERE seating_id = r.seating_id AND request_id = r.id ORDER BY created_at, id) AS proofs
      FROM activity_seat_requests r
-     WHERE r.seating_id = $1 AND r.status = $2 ORDER BY r.id DESC LIMIT $3 OFFSET $4`,
-    [setting.id, status, limit + 1, (page - 1) * limit],
+     WHERE r.seating_id = $1 AND r.status = $2 AND (r.cancelled_at IS NOT NULL) = $5 ORDER BY r.id DESC LIMIT $3 OFFSET $4`,
+    [setting.id, status === "cancelled" ? "rejected" : status, limit + 1, (page - 1) * limit, status === "cancelled"],
   );
   view.docs = rows.slice(0, limit).map(row => ({
     ...requestDTO(row), memberName: row.member_name, phone: row.phone, proofs: row.proofs,
@@ -461,11 +488,12 @@ export async function decideSeats(
     assertLockedReviewer(currentActivity.activity, currentActivity.actor);
     const setting = await scope(p, currentActivity.activity, client);
     if (!setting) throw new APIError("选座申请不存在", 404);
-    const current = await client.query<{ status: SeatStatus; revision: number }>(
-      "SELECT status, revision FROM activity_seat_requests WHERE seating_id = $1 AND id = $2",
+    const current = await client.query<{ status: SeatStatus; revision: number; cancelled_at: Date | null }>(
+      "SELECT status, revision, cancelled_at FROM activity_seat_requests WHERE seating_id = $1 AND id = $2",
       [setting.id, id],
     );
     if (!current.rows[0]) throw new APIError("选座申请不存在", 404);
+    if (current.rows[0].cancelled_at) throw new APIError("申请人已取消申请，请刷新", 409);
     if ((revision ?? 0) !== current.rows[0].revision) throw new APIError("申请已被修改，请刷新并重新核对", 409);
     if (current.rows[0].status === decision) return { status: decision };
     if (current.rows[0].status !== "pending") throw new APIError("该选座申请已经处理，请刷新", 409);

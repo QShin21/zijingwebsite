@@ -13,9 +13,9 @@ const { actions } = require('../../lib/page');
 // Activity seat selection (member map + reviewer workbench) over the authorized seating API.
 // Server state decides every capability. Phone numbers and proof ids live only in page data
 // for the current account: cleared on account change, never stored, logged or shared.
-const labels = { pending: '待审核', confirmed: '已确认', rejected: '已驳回', blocked: '未开放' };
-const tones = { pending: 'warning', confirmed: 'success', rejected: 'neutral' };
-const filters = ['pending', 'confirmed', 'rejected'].map(status => ({ status, label: labels[status] }));
+const labels = { pending: '待审核', confirmed: '已确认', rejected: '已驳回', cancelled: '已取消', blocked: '未开放' };
+const tones = { pending: 'warning', confirmed: 'success', rejected: 'neutral', cancelled: 'neutral' };
+const filters = ['pending', 'confirmed', 'rejected', 'cancelled'].map(status => ({ status, label: labels[status] }));
 const zooms = [{ size: 36, label: '紧凑' }, { size: 52, label: '标准' }, { size: 68, label: '放大' }];
 const GAP = 8; // rpx between seats; keep in step with .seat margin-right in index.wxss
 const phonePattern = /^\+?[1-9]\d{6,14}$/;
@@ -149,7 +149,7 @@ Page(withVisualTheme({
     const mine = manage ? null : mineView(data.mine);
     const canEditMine = Boolean(!manage && mine && mine.status === 'pending' && data.mineDetails && data.mineDetails.canEdit);
     const editing = Boolean(this.data.editing && canEditMine && data.mine.revision === this.data.editRevision);
-    const editable = manage ? Boolean(data.canReview) : Boolean(editing || (data.enabled && data.open && data.loggedIn && (!mine || mine.status === 'rejected')));
+    const editable = manage ? Boolean(data.canReview) : Boolean(editing || (data.enabled && data.open && data.loggedIn && (!mine || mine.status === 'rejected' || mine.status === 'cancelled')));
     // Seats taken by someone else since the last read drop out of the local selection.
     const selected = editable && !manage ? this.data.selected.filter(id => !data.occupancy[id] || (editing && data.mine.seats.includes(id))) : [];
     this.setData({ title: data.title || '活动选座', enabled: Boolean(data.enabled), open: Boolean(data.open), scheduled: data.scheduled === true, opensAt: data.opensAt || null, openingLabel: data.opensAt ? format.date(data.opensAt) : '', loggedIn: Boolean(data.loggedIn),
@@ -217,6 +217,19 @@ Page(withVisualTheme({
     if (!this.data.editing || !this._state || this.data.busy) return;
     this.setData({ editing: false, editable: false, editRevision: null, editProofs: [], selected: [], chips: [], phone: '', error: '',
       rows: this._state.enabled ? this.layout(this._state, [], this.data.zoom, false) : [] });
+  },
+  cancelRequest() {
+    const state = this._state;
+    if (!state || !state.mine || state.mine.status !== 'pending' || this.data.manage || this.data.review) return;
+    return this.work('正在取消申请', async revision => {
+      const answer = await new Promise(resolve => wx.showModal({ title: '取消选座申请', content: '取消后全部座位将释放给其他成员。确认取消？',
+        confirmText: '确认取消', success: resolve, fail: () => resolve({ confirm: false }) }));
+      if (!answer.confirm || !this.current(revision)) return false;
+      await http.request(this._endpoint, { method: 'DELETE', required: true, raw: true,
+        data: { id: state.mine.id, revision: state.mine.revision } });
+      if (this.current(revision)) this.setData({ editing: false, editRevision: null, editProofs: [], selected: [], chips: [], phone: '',
+        notice: '申请已取消，全部座位已释放。' });
+    }, true);
   },
   setSeatBlocks(event) {
     if (!this.data.manage || !this.data.canReview || !this._state) return;

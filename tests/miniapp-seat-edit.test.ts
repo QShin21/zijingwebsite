@@ -17,6 +17,11 @@ it("小程序预填待审核申请，保存调整后的座位、手机号和凭�
     mineDetails: { phone: "13800138000", proofs: [original], canEdit: true } };
   const http = {
     request: vi.fn(async (_path: string, options: { method?: string; data?: { id: number; revision: number; seats: string[]; phone: string; proofs: string[] } }) => {
+      if (options.method === "DELETE") {
+        state.mine = { ...state.mine, revision: state.mine.revision + 1, status: "cancelled" };
+        state.occupancy = { "1-2": "confirmed" };
+        return { mine: structuredClone(state.mine) };
+      }
       if (options.method === "PATCH" && options.data) {
         state.mine = { ...state.mine, revision: state.mine.revision + 1, seats: options.data.seats };
         state.mineDetails = { ...state.mineDetails, phone: options.data.phone, proofs: options.data.proofs };
@@ -37,7 +42,7 @@ it("小程序预填待审核申请，保存调整后的座位、手机号和凭�
   let page!: NativePage;
   runInNewContext(readFileSync("miniprogram/src/pages/activity-seating/index.js", "utf8"), {
     Page: (value: NativePage) => { page = value; }, require: (name: string) => modules[name],
-    wx: { setNavigationBarTitle: vi.fn() }, clearTimeout, setTimeout,
+    wx: { setNavigationBarTitle: vi.fn(), showModal: (options: { success: (answer: { confirm: boolean }) => void }) => options.success({ confirm: true }) }, clearTimeout, setTimeout,
   });
   page.setData = values => {
     for (const [key, value] of Object.entries(values)) {
@@ -60,4 +65,8 @@ it("小程序预填待审核申请，保存调整后的座位、手机号和凭�
   const write = http.request.mock.calls.find(([, options]) => options.method === "PATCH")?.[1].data;
   expect(write).toMatchObject({ id: 42, revision: 0, seats: ["1-3"], phone: "13900139000", proofs: [replacement] });
   expect(page.data).toMatchObject({ editing: false, notice: "修改已保存，申请继续等待审核。" });
+  await invoke(page, "cancelRequest");
+  const cancel = http.request.mock.calls.find(([, options]) => options.method === "DELETE")?.[1].data;
+  expect(cancel).toMatchObject({ id: 42, revision: 1 });
+  expect(page.data).toMatchObject({ notice: "申请已取消，全部座位已释放。", mine: { status: "cancelled" } });
 });

@@ -20,10 +20,10 @@ import { SeatLegend, SeatMap, SeatZoom } from "./ActivitySeating";
 import { SeatRequestError, seatJSON, seatRequest } from "./seat-request";
 import styles from "./ActivitySeating.module.css";
 
-export const seatStatusOrder: readonly SeatStatus[] = ["pending", "confirmed", "rejected"];
-export const seatTone: Record<SeatStatus, Tone> = { pending: "warning", confirmed: "success", rejected: "neutral" };
+export const seatStatusOrder: readonly SeatStatus[] = ["pending", "confirmed", "rejected", "cancelled"];
+export const seatTone: Record<SeatStatus, Tone> = { pending: "warning", confirmed: "success", rejected: "neutral", cancelled: "neutral" };
 /** Map seat statuses onto the shared V2 record accents (work.module.css). */
-const recordState: Record<SeatStatus, string> = { pending: "pending", confirmed: "approved", rejected: "rejected" };
+const recordState: Record<SeatStatus, string> = { pending: "pending", confirmed: "approved", rejected: "rejected", cancelled: "rejected" };
 
 /** Seat counts for the overview: pending holds, confirmed locks and what is still free. */
 export function seatCounts(state: Pick<SeatingState, "rows" | "occupancy"> & Partial<Pick<SeatingState, "blockedSeats">>) {
@@ -135,7 +135,7 @@ export function SeatReviewCard({
               {!live && <p className={styles.hint}>合成样本：操作已停用。</p>}
             </>
           ) : (
-            <p className={styles.hint}>{review.status === "confirmed" ? "已通过，座位已锁定。" : "已驳回，座位已释放。"}</p>
+            <p className={styles.hint}>{review.status === "confirmed" ? "已通过，座位已锁定。" : review.status === "cancelled" ? "申请人已取消，座位已释放。" : "已驳回，座位已释放。"}</p>
           )}
         </section>
       </div>

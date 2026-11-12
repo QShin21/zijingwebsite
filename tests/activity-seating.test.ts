@@ -93,6 +93,9 @@ async function decide(activity: Activity, who: Actor, id: number, status: string
 async function edit(activity: Activity, who: Actor, data: unknown) {
   return route.PATCH(request(activity, "PATCH", who, data), context(activity));
 }
+async function cancel(activity: Activity, who: Actor, id: number, revision: number) {
+  return route.DELETE(request(activity, "DELETE", who, { id, revision }), context(activity));
+}
 async function block(activity: Activity, who: Actor | undefined, seats: string[], blocked: boolean, browserOrigin?: string) {
   return route.POST(request(activity, "POST", who, { action: "block", seats, blocked }, "", browserOrigin), context(activity));
 }
@@ -579,4 +582,47 @@ it("审核与修改并发时，审核不能通过尚未核对的新内容", asyn
   const state = await map(activity, second);
   if (updated.status === 200) expect(state.mine).toMatchObject({ status: "pending", revision: 1, seats: ["2-2"] });
   else expect(state.mine).toMatchObject({ status: "confirmed", revision: 0, seats: ["2-1"] });
+});
+
+it("申请人可完全取消待审核申请并释放全部座位，之后可重新申请", async () => {
+  const activity = await extraActivity("cancel");
+  const proof = await added(activity, first);
+  const response = await submit(activity, first, ["3-1", "3-2"], [proof]);
+  const mine = (await response.json()).mine;
+  expect((await cancel(activity, second, mine.id, 0)).status).toBe(404);
+  expect((await cancel(activity, first, mine.id, 1)).status).toBe(409);
+  expect((await map(activity, first)).occupancy["3-1"]).toBe("pending");
+  const cancelled = await cancel(activity, first, mine.id, 0);
+  expect(cancelled.status).toBe(200);
+  expect((await cancelled.json()).mine).toMatchObject({ status: "cancelled", revision: 1 });
+  const state = await map(activity, first);
+  expect(state.mine?.status).toBe("cancelled");
+  expect(state.occupancy["3-1"]).toBeUndefined();
+  expect(state.occupancy["3-2"]).toBeUndefined();
+  expect((await image(activity, proof, first)).status).toBe(200);
+  const history = await route.GET(request(activity, "GET", reviewer, undefined, "?mode=review&status=cancelled"), context(activity));
+  expect((await history.json()).docs).toMatchObject([{ id: mine.id, status: "cancelled" }]);
+  expect((await decide(activity, reviewer, mine.id, "confirmed")).status).toBe(409);
+  const newProof = await added(activity, first);
+  expect((await submit(activity, first, ["3-1"], [newProof])).status).toBe(200);
+});
+
+it("取消与审核同时进行时，只能有一个成功", async () => {
+  const activity = await extraActivity("cancel-review-race", "community-posts");
+  const proof = await added(activity, second);
+  const initial = await submit(activity, second, ["4-1"], [proof]);
+  const mine = (await initial.json()).mine;
+  const [cancelled, reviewed] = await Promise.all([
+    cancel(activity, second, mine.id, 0),
+    route.POST(request(activity, "POST", reviewer, { action: "review", id: mine.id, status: "confirmed", revision: 0 }), context(activity)),
+  ]);
+  expect([cancelled.status, reviewed.status].sort()).toEqual([200, 409]);
+  const state = await map(activity, second);
+  if (cancelled.status === 200) {
+    expect(state.mine?.status).toBe("cancelled");
+    expect(state.occupancy["4-1"]).toBeUndefined();
+  } else {
+    expect(state.mine?.status).toBe("confirmed");
+    expect(state.occupancy["4-1"]).toBe("confirmed");
+  }
 });
