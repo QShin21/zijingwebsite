@@ -217,3 +217,7 @@ SSE 通过 Nginx 公网 HTTPS 验证，响应禁止缓冲，每 15 秒心跳、6
 ## 2026-11-12 座位详情直接处理申请
 
 应用 `f9500c890b962c1b5e9c7cdc61114e3f4d88404d` 已部署，无新增数据库迁移。服务器本地备份和切换前统计均为 131 份申请、227 个座位占用、178 个凭证和 21 个未开放座位。公网就绪及资源检查通过，备份在 `/srv/zijingwebsite/backups/seat-actions-20261112-f9500c8`；本轮未执行恢复演练。详见[部署记录](evidence/activity-seat-map-actions-deployment-20261112.json)。
+
+## 2026-11-12 管理员更换申请座位
+
+应用 `6f17453d8e55d7d27a9bfe005f95e5a082e3d6ea` 已部署，无新增数据库迁移。服务器本地备份和切换前统计均为 131 份申请、227 个座位占用、178 个凭证和 21 个未开放座位。公网就绪及资源检查通过，备份在 `/srv/zijingwebsite/backups/seat-change-20261112-6f17453`；本轮未执行恢复演练。详见[部署记录](evidence/activity-seat-change-deployment-20261112.json)。
