@@ -41,7 +41,8 @@ type RequestRow = {
   created_at: Date;
   reviewed_at: Date | null;
 };
-type ReviewRow = RequestRow & { member_name: string; phone: string; proofs: string[] };
+type ReviewRow = RequestRow & { member_name: string; phone: string; proofs: string[];
+  released_seats: { seat: string; releasedAt: string }[] };
 const rowFields = "id, seats, status, revision, cancelled_at, revoked_at, created_at, reviewed_at";
 const validSeats = new Set(seatKeys);
 const pool = (p: Payload) => (p.db as unknown as PostgresAdapter).pool;
@@ -474,6 +475,42 @@ export async function revokeConfirmedSeats(p: Payload, activity: SeatActivity, u
   });
 }
 
+export async function revokeConfirmedSeat(p: Payload, activity: SeatActivity, user: User | null, id: unknown, revision: unknown, seat: unknown) {
+  const reviewer = await requireReviewer(p, activity, user);
+  if (typeof id !== "number" || !Number.isSafeInteger(id) || id < 1 || id > 2147483647 ||
+      typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 0 || revision >= 2147483647 ||
+      typeof seat !== "string" || !validSeats.has(seat))
+    throw new APIError("申请或座位信息无效，请刷新后重试", 400);
+  return transaction(p, async client => {
+    const current = await lockedActivity(p, activity, reviewer, client);
+    assertLockedReviewer(current.activity, current.actor);
+    const setting = await scope(p, current.activity, client);
+    if (!setting) throw new APIError("选座申请不存在", 404);
+    const found = await client.query<RequestRow>(`SELECT ${rowFields} FROM activity_seat_requests
+      WHERE seating_id = $1 AND id = $2`, [setting.id, id]);
+    const request = found.rows[0];
+    if (!request) throw new APIError("选座申请不存在", 404);
+    if (request.status !== "confirmed" || !request.seats.includes(seat))
+      throw new APIError("该座位状态已变化，请刷新", 409);
+    if (request.revision !== revision) throw new APIError("申请内容已变化，请刷新后重试", 409);
+    const claim = await client.query(`DELETE FROM activity_seat_claims
+      WHERE seating_id = $1 AND request_id = $2 AND seat = $3`, [setting.id, id, seat]);
+    if (claim.rowCount !== 1) throw new APIError("该座位状态已变化，请刷新", 409);
+    const last = request.seats.length === 1;
+    const result = last
+      ? await client.query<RequestRow>(`UPDATE activity_seat_requests
+          SET status = 'rejected', revoked_at = now(), revoked_by = $3, revision = revision + 1
+          WHERE seating_id = $1 AND id = $2 RETURNING ${rowFields}`, [setting.id, id, current.actor.id])
+      : await client.query<RequestRow>(`UPDATE activity_seat_requests
+          SET seats = array_remove(seats, $3::text), revision = revision + 1
+          WHERE seating_id = $1 AND id = $2 RETURNING ${rowFields}`, [setting.id, id, seat]);
+    const updated = result.rows[0];
+    await client.query(`INSERT INTO activity_seat_releases (seating_id, request_id, seat, released_by, revision)
+      VALUES ($1, $2, $3, $4, $5)`, [setting.id, id, seat, current.actor.id, updated.revision]);
+    return { request: requestDTO(updated), releasedSeat: seat, fullyRevoked: last };
+  });
+}
+
 export async function seatingWorkbench(
   p: Payload, activity: SeatActivity, user: User | null, status: SeatStatus, page: number,
 ): Promise<SeatingWorkbench> {
@@ -487,7 +524,9 @@ export async function seatingWorkbench(
   const { rows } = await pool(p).query<ReviewRow>(
     `SELECT r.id, r.seats, r.status, r.revision, r.cancelled_at, r.revoked_at, r.created_at, r.reviewed_at, r.member_name, r.phone,
        ARRAY(SELECT id FROM activity_seat_proofs
-             WHERE seating_id = r.seating_id AND request_id = r.id ORDER BY created_at, id) AS proofs
+             WHERE seating_id = r.seating_id AND request_id = r.id ORDER BY created_at, id) AS proofs,
+       COALESCE((SELECT jsonb_agg(jsonb_build_object('seat', s.seat, 'releasedAt', s.released_at) ORDER BY s.id)
+         FROM activity_seat_releases s WHERE s.seating_id = r.seating_id AND s.request_id = r.id), '[]'::jsonb) AS released_seats
      FROM activity_seat_requests r
      WHERE r.seating_id = $1 AND r.status = $2 AND (r.cancelled_at IS NOT NULL) = $5
        AND (r.revoked_at IS NOT NULL) = $6 ORDER BY r.id DESC LIMIT $3 OFFSET $4`,
@@ -495,7 +534,7 @@ export async function seatingWorkbench(
       limit + 1, (page - 1) * limit, status === "cancelled", status === "revoked"],
   );
   view.docs = rows.slice(0, limit).map(row => ({
-    ...requestDTO(row), memberName: row.member_name, phone: row.phone, proofs: row.proofs,
+    ...requestDTO(row), memberName: row.member_name, phone: row.phone, proofs: row.proofs, releasedSeats: row.released_seats,
   }));
   view.hasNextPage = rows.length > limit;
   return view;

@@ -52,6 +52,7 @@ export type SeatReview = SeatRequest & {
   memberName: string;
   phone: string;
   proofs: string[];
+  releasedSeats: { seat: string; releasedAt: string }[];
 };
 
 export type SeatingAvailability = {

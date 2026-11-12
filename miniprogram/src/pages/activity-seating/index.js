@@ -48,6 +48,8 @@ function mineView(mine) {
 function reviewDoc(row) {
   return { id: row.id, revision: row.revision, memberName: row.memberName || '成员', phone: row.phone || '', status: row.status, label: labels[row.status] || '',
     tone: tones[row.status] || 'neutral', seats: seatNames(row.seats), seatCount: (row.seats || []).length,
+    seatItems: (row.seats || []).map(id => ({ id, label: seatLabel(id) })),
+    releasedSeats: seatNames((row.releasedSeats || []).map(item => item.seat)),
     proofs: (row.proofs || []).filter(id => proofPattern.test(String(id))),
     submitted: format.date(row.createdAt), reviewed: row.reviewedAt ? format.date(row.reviewedAt) : '' };
 }
@@ -378,6 +380,21 @@ Page(withVisualTheme({
       await http.request(this._endpoint, { method: 'POST', required: true, raw: true,
         data: { action: 'revoke', id: request, revision: doc.revision } });
       if (this.current(revision)) this.setData({ notice: '已撤销确认，全部座位已释放。' });
+    }, true);
+  },
+  revokeSeat(event) {
+    const request = Number(event.currentTarget.dataset.id), seat = String(event.currentTarget.dataset.seat || '');
+    if (!this.data.review || !Number.isSafeInteger(request) || request <= 0) return;
+    const doc = this.data.docs.find(item => item.id === request);
+    if (!doc || doc.status !== 'confirmed' || !doc.seatItems.some(item => item.id === seat)) return;
+    return this.work('正在撤销座位', async revision => {
+      const message = doc.seatCount === 1 ? '这是最后一个座位，撤销后整份申请将变为已撤销。' : '该座位将释放，其余座位继续保持已确认。';
+      const answer = await new Promise(resolve => wx.showModal({ title: '撤销 ' + seatLabel(seat), content: message,
+        confirmText: '确认撤销', success: resolve, fail: () => resolve({ confirm: false }) }));
+      if (!answer.confirm || !this.current(revision)) return false;
+      const result = await http.request(this._endpoint, { method: 'POST', required: true, raw: true,
+        data: { action: 'revoke-seat', id: request, revision: doc.revision, seat } });
+      if (this.current(revision)) this.setData({ notice: result && result.fullyRevoked ? '座位已释放，申请已全部撤销。' : '该座位已释放，其余座位保持已确认。' });
     }, true);
   },
   call(event) {

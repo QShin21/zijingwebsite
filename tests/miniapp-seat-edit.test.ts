@@ -75,7 +75,7 @@ it("小程序管理员确认后撤销已确认申请并携带版本", async () =
   const calls: { method?: string; data?: unknown }[] = [];
   const doc = { id: 52, revision: 3, status: "confirmed", memberName: "合成成员", phone: "13800138000", seats: ["1-1"], proofs: [], createdAt: "2026-11-12T00:00:00Z" };
   const http = { request: vi.fn(async (_path: string, options: { method?: string; data?: unknown }) => {
-    if (options.method) calls.push(options);
+    if (options.method) { calls.push(options); return { fullyRevoked: true }; }
     return { title: "合成活动", enabled: true, open: true, scheduled: false, docs: [doc], hasNextPage: false };
   }) };
   const modules: Record<string, unknown> = {
@@ -92,8 +92,11 @@ it("小程序管理员确认后撤销已确认申请并携带版本", async () =
   page.setData = values => Object.assign(page.data, values);
   invoke(page, "onLoad", { kind: "events", id: "1", mode: "review" });
   await invoke(page, "onShow");
+  await invoke(page, "revokeSeat", { currentTarget: { dataset: { id: 52, seat: "1-1" } } });
+  expect(calls[0]).toMatchObject({ method: "POST", data: { action: "revoke-seat", id: 52, revision: 3, seat: "1-1" } });
+  expect(page.data.notice).toBe("座位已释放，申请已全部撤销。");
   await invoke(page, "revoke", { currentTarget: { dataset: { id: 52 } } });
-  expect(calls).toHaveLength(1);
-  expect(calls[0]).toMatchObject({ method: "POST", data: { action: "revoke", id: 52, revision: 3 } });
+  expect(calls).toHaveLength(2);
+  expect(calls[1]).toMatchObject({ method: "POST", data: { action: "revoke", id: 52, revision: 3 } });
   expect(page.data.notice).toBe("已撤销确认，全部座位已释放。");
 });

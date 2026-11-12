@@ -48,6 +48,10 @@ export function SeatReviewCard({
   confirming = false,
   onDecide,
   onRevoke,
+  confirmingSeat,
+  onAskSeat,
+  onCancelSeat,
+  onReleaseSeat,
   onAskReject,
   onCancelReject,
 }: {
@@ -57,6 +61,10 @@ export function SeatReviewCard({
   confirming?: boolean;
   onDecide?: (id: number, decision: SeatDecision) => void;
   onRevoke?: (id: number) => void;
+  confirmingSeat?: string;
+  onAskSeat?: (id: number, seat: string) => void;
+  onCancelSeat?: () => void;
+  onReleaseSeat?: (id: number, seat: string) => void;
   onAskReject?: (id: number) => void;
   onCancelReject?: () => void;
 }) {
@@ -81,6 +89,7 @@ export function SeatReviewCard({
             items={[
               { label: "手机号", value: live ? <a href={`tel:${review.phone}`}>{review.phone}</a> : review.phone },
               { label: "座位", value: `${review.seats.length} 个 · ${review.seats.map(seatLabel).join("、")}` },
+              ...(review.releasedSeats?.length ? [{ label: "已撤销座位", value: review.releasedSeats.map(item => seatLabel(item.seat)).join("、") }] : []),
             ]}
           />
           <details className={work.disclosure} open={review.status === "pending"}>
@@ -138,7 +147,23 @@ export function SeatReviewCard({
             </>
           ) : review.status === "confirmed" ? (
             <>
-              <p className={styles.hint}>已通过，座位已锁定。撤销后全部座位将释放。</p>
+              <p className={styles.hint}>已通过，座位已锁定。可撤销单个座位或整份申请。</p>
+              <details className={work.disclosure}>
+                <summary>撤销单个座位</summary>
+                <p className={styles.hint}>选择需要释放的座位。</p>
+                <div className={work.actions}>
+                  {review.seats.map(seat => <button type="button" key={seat} className={buttonClass("ghost", "small")}
+                    disabled={busy || !onReleaseSeat} onClick={() => onAskSeat?.(review.id, seat)}>撤销 {seatLabel(seat)}</button>)}
+                </div>
+                {confirmingSeat && review.seats.includes(confirmingSeat) && (
+                  <div className={work.actions}>
+                    <p className={styles.hint}>{review.seats.length === 1 ? "这是最后一个座位，撤销后整份申请将变为已撤销。" : "该座位将释放，其余座位继续保持已确认。"}</p>
+                    <button type="button" className={buttonClass("danger", "small")} disabled={busy || !onReleaseSeat}
+                      onClick={() => onReleaseSeat?.(review.id, confirmingSeat)}>确认撤销 {seatLabel(confirmingSeat)}</button>
+                    <button type="button" className={buttonClass("ghost", "small")} disabled={busy} onClick={onCancelSeat}>返回</button>
+                  </div>
+                )}
+              </details>
               <div className={work.actions}>
                 {confirming ? (
                   <>
@@ -174,6 +199,7 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [confirming, setConfirming] = useState<number | null>(null);
+  const [confirmingSeat, setConfirmingSeat] = useState<{ id: number; seat: string } | null>(null);
   const [zoom, setZoom] = useState(0);
   const [selected, setSelected] = useState<string[]>([]);
   const [openingTime, setOpeningTime] = useState<string | null>(null);
@@ -212,6 +238,7 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
       setData(undefined);
       setLayout(undefined);
       setConfirming(null);
+      setConfirmingSeat(null);
       setSelected([]);
     }
   }, []);
@@ -233,6 +260,7 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
   function show(status: SeatStatus, page: number) {
     if (lock.current) return;
     setConfirming(null);
+    setConfirmingSeat(null);
     setError("");
     setNotice("");
     setLoading(true);
@@ -256,6 +284,7 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
       if (alive.current) {
         setBusy("");
         setConfirming(null);
+        setConfirmingSeat(null);
       }
     }
   }
@@ -293,6 +322,15 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
     void act("正在撤销确认", async () => {
       await seatRequest(endpoint, seatJSON("POST", { action: "revoke", id: request, revision: record.revision }));
       return "已撤销确认，全部座位已释放。";
+    });
+  }
+
+  function releaseSeat(request: number, seat: string) {
+    const record = data?.docs.find(value => value.id === request);
+    if (!record || record.status !== "confirmed" || !record.seats.includes(seat)) return;
+    void act("正在撤销座位", async () => {
+      const result = await seatRequest<{ fullyRevoked: boolean }>(endpoint, seatJSON("POST", { action: "revoke-seat", id: request, revision: record.revision, seat }));
+      return result.fullyRevoked ? `已撤销 ${seatLabel(seat)}，申请已全部撤销。` : `已撤销 ${seatLabel(seat)}，其余座位保持已确认。`;
     });
   }
 
@@ -425,7 +463,11 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
                   confirming={confirming === review.id}
                   onDecide={decide}
                   onRevoke={revoke}
-                  onAskReject={setConfirming}
+                  confirmingSeat={confirmingSeat?.id === review.id ? confirmingSeat.seat : undefined}
+                  onAskSeat={(request, seat) => { setConfirming(null); setConfirmingSeat({ id: request, seat }); }}
+                  onCancelSeat={() => setConfirmingSeat(null)}
+                  onReleaseSeat={releaseSeat}
+                  onAskReject={request => { setConfirmingSeat(null); setConfirming(request); }}
                   onCancelReject={() => setConfirming(null)}
                 />
               ))}
