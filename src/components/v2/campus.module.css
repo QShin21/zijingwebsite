@@ -607,8 +607,8 @@
   white-space: nowrap;
 }
 .gamesCompact .gameList {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 4px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 10px;
 }
 .gamesCompact .game {
   padding: 0;
@@ -646,10 +646,6 @@
   }
 }
 @media (max-width: 760px) {
-  .gamesCompact .gameList {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px 10px;
-  }
   .gamesCompact .gameIntro {
     flex-wrap: wrap;
   }

@@ -337,6 +337,14 @@ export default async function Home() {
       0,
       <PersonalPanel key="personal" home={home} />,
     );
+  const aboutIndex = blocks.findIndex(
+    (block) => block.props["data-section"] === "about",
+  );
+  blocks.splice(
+    aboutIndex < 0 ? blocks.length : aboutIndex,
+    0,
+    <PixelGames key="games" communities={home.communities} compact />,
+  );
   return (
     <>
       <CampusHero home={home} />
@@ -364,7 +372,6 @@ export default async function Home() {
         </div>
         <div className={styles.lowerSections}>
           {blocks}
-          <PixelGames communities={home.communities} compact />
         </div>
       </Wrap>
     </>
