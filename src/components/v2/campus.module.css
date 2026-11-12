@@ -813,3 +813,17 @@
   text-decoration: underline;
   text-underline-offset: 4px;
 }
+
+.gameCommunities {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--z-line-strong);
+}
+.gamesCompact:has(.gameCommunities) .gameList {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+@media (max-width: 760px) {
+  .gamesCompact:has(.gameCommunities) .gameList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

@@ -31,9 +31,10 @@ function PersonalPanel({ home }: { home: HomeResponse }) {
       >
         <PixelCorners variant="coral" />
         <h2 id="me-title" className={layout.panelTitle}>
-          你好，{viewer.name}
-          <Link href="/account">进入我的</Link>
+          我的工作台
+          <Link href="/account">我的主场</Link>
         </h2>
+        <p className={styles.greeting}>你好，{viewer.name}</p>
         <ul className={styles.quick}>
           <li>
             <Link href="/account#todo">
@@ -47,6 +48,18 @@ function PersonalPanel({ home }: { home: HomeResponse }) {
               <Icon name="ticket" />
               我的赛程
               <strong>{home.me?.upcomingSignups ?? 0}</strong>
+            </Link>
+          </li>
+          <li>
+            <Link href="/account?view=signups">
+              <Icon name="ticket" />
+              我的报名回执
+            </Link>
+          </li>
+          <li>
+            <Link href="/account?view=applications">
+              <Icon name="news" />
+              我的申请记录
             </Link>
           </li>
           <li>
@@ -307,8 +320,128 @@ function HomeBlock({
   }
 }
 
+/** Signed-in home pairs personal tasks and public content without changing the guest layout. */
+function MemberHome({ home }: { home: HomeResponse }) {
+  const section = (kind: HomeSection["kind"]) =>
+    home.sections.find((item) => item.kind === kind && item.enabled);
+  const block = (kind: HomeSection["kind"]) => {
+    const settings = section(kind);
+    if (!settings) return null;
+    const content = HomeBlock({ section: settings, home });
+    if (!content) return null;
+    return (
+      <div className={styles.sectionBlock} data-section={kind}>
+        {["upcoming", "open", "notices", "about"].includes(kind) && (
+          <PixelCorners seed={kind} />
+        )}
+        {content}
+      </div>
+    );
+  };
+  const highlights = section("highlights");
+  const communities = section("communities");
+  return (
+    <>
+      <CampusHero home={home} />
+      <Wrap>
+        <div className={styles.memberHome}>
+          <div
+            className={`${styles.memberRow} ${styles.workRow}`}
+            data-home-row="work"
+          >
+            <PersonalPanel home={home} />
+            {block("upcoming")}
+          </div>
+          <div className={styles.memberRow} data-home-row="action">
+            {home.spotlight && (
+              <div className={styles.sectionBlock} data-section="spotlight">
+                <Section id="spotlight" title="焦点活动">
+                  <MatchCard
+                    event={home.spotlight}
+                    variant="spotlight"
+                    headingLevel={3}
+                  />
+                </Section>
+              </div>
+            )}
+            {block("open")}
+          </div>
+          <div className={styles.memberRow} data-home-row="news">
+            {block("notices")}
+            {highlights && (
+              <div className={styles.sectionBlock} data-section="highlights">
+                <section
+                  id="highlights"
+                  className={styles.highlightsPanel}
+                  aria-label={highlights.title}
+                >
+                  <HomeReel home={home} title={highlights.title} />
+                  {home.highlights?.length ? (
+                    <div className={styles.highlightLinks}>
+                      {home.highlights.map((item) => (
+                        <Link key={item.item.key} href={item.item.href}>
+                          <span>{item.item.title}</span>
+                          <Icon name="arrow" size={16} />
+                        </Link>
+                      ))}
+                    </div>
+                  ) : null}
+                  <Link className={styles.allHighlights} href="/news">
+                    全部动态 <Icon name="arrow" size={16} />
+                  </Link>
+                </section>
+              </div>
+            )}
+          </div>
+          <div className={styles.memberRow} data-home-row="club">
+            {block("promoted")}
+            {block("about")}
+          </div>
+          {communities && (
+            <div
+              id="communities"
+              className={styles.communityPanel}
+              data-home-row="games"
+            >
+              <PixelGames
+                communities={home.communities}
+                title={communities.title}
+                compact
+              >
+                {home.communities?.length ? (
+                  <div className={layout.communities}>
+                    {home.communities.map((card) => (
+                      <CommunityTile key={card.community.id} card={card} />
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState
+                    title={empty.communities.title}
+                    actions={
+                      <ButtonLink
+                        href="/community/apply"
+                        tone="ghost"
+                        size="small"
+                      >
+                        申请组织新社群
+                      </ButtonLink>
+                    }
+                  >
+                    {empty.communities.body}
+                  </EmptyState>
+                )}
+              </PixelGames>
+            </div>
+          )}
+        </div>
+      </Wrap>
+    </>
+  );
+}
+
 export default async function Home() {
   const home = await read(getHome, {});
+  if (home.viewer) return <MemberHome home={home} />;
   const { spotlight } = home;
   const sections = home.sections.filter((section) => section.enabled);
   const blocks = sections

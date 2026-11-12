@@ -117,7 +117,13 @@ export type CampusSlide = {
   href: string;
   source?: string;
 };
-export function CampusReel({ slides }: { slides: CampusSlide[] }) {
+export function CampusReel({
+  slides,
+  title = "赛场瞬间",
+}: {
+  slides: CampusSlide[];
+  title?: string;
+}) {
   const { ref, index, running, move, ...events } = useCampusMotion(
     slides.length,
   );
@@ -131,12 +137,12 @@ export function CampusReel({ slides }: { slides: CampusSlide[] }) {
       className={styles.reel}
       data-running={running}
       role="region"
-      aria-label="赛场瞬间"
+      aria-label={title}
       aria-roledescription="轮播"
     >
       <PixelCorners variant="mint" />
       <div className={styles.reelHead}>
-        <h2>赛场瞬间</h2>
+        <h2>{title}</h2>
         <div className={styles.controls}>
           <span aria-label={`第 ${index + 1} 张，共 ${slides.length} 张`}>
             {index + 1} / {slides.length}

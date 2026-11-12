@@ -1,11 +1,16 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import type { HomeResponse } from "../src/lib/v2/types";
+import type { HomeResponse, EventCard } from "../src/lib/v2/types";
 import { CampusHero, HomeReel, PixelGames } from "../src/components/v2/Campus";
 import { SuccessMark } from "../src/components/v2/SuccessMark";
 import { PixelCorners } from "../src/components/v2/PixelCorners";
 import { TopBar, MobileTabs, Footer } from "../src/components/v2/Shell";
+import Home from "../src/app/(frontend)/page";
+import { read } from "../src/components/v2/data";
+import { defaultHomeSections } from "../src/lib/v2/home-sections";
+vi.mock("../src/lib/v2", () => ({ getHome: vi.fn() }));
+vi.mock("../src/components/v2/data", () => ({ read: vi.fn() }));
 
 vi.mock("next/image", () => ({
   default: (props: { src: string; alt: string }) =>
@@ -183,4 +188,87 @@ it("keeps ordinary corners static and explicitly opts in actionable corners", ()
   expect(mark).toContain("data-confirmed-success");
   expect(mark).toContain('aria-hidden="true"');
   expect(mark).not.toContain('role="status"');
+});
+
+it("pairs only the signed-in homepage and combines all community entry points at the bottom", async () => {
+  const event: EventCard = {
+    key: "club:1",
+    ref: { type: "event", source: "club", id: 1, slug: "synthetic" },
+    href: "/events/synthetic",
+    title: "合成活动",
+    summary: null,
+    cover: null,
+    community: null,
+    team: null,
+    category: "比赛",
+    startAt: null,
+    endAt: null,
+    location: null,
+    state: "upcoming",
+    stateLabel: "即将开始",
+    signup: {
+      mode: "form",
+      state: "open",
+      label: "报名开放",
+      opensAt: null,
+      deadline: null,
+      viewerSubmitted: false,
+    },
+    promoted: false,
+    demo: true,
+    archived: false,
+    publishedAt: null,
+  };
+  const data: HomeResponse = {
+    ...home,
+    sections: defaultHomeSections.map((item) => ({ ...item })),
+    viewer: {
+      id: 1,
+      name: "合成成员",
+      email: "member@example.invalid",
+      roles: ["member"],
+      department: null,
+      capabilities: {
+        publishClub: false,
+        submitClubContent: false,
+        reviewCommunityApplications: false,
+        manageStaffRecruitment: false,
+        reviewPromotions: false,
+        appoint: false,
+        reviewEstablishments: false,
+        communities: [],
+      },
+    },
+    spotlight: event,
+    upcoming: [event],
+    openSignups: [event],
+    communities: [],
+  };
+  vi.mocked(read).mockResolvedValue(data);
+  const member = renderToStaticMarkup(await Home());
+  const positions = [
+    "me-title",
+    'id="upcoming"',
+    'id="spotlight"',
+    'id="open"',
+    'id="notices"',
+    'id="highlights"',
+    'data-home-row="games"',
+  ].map((key) => member.indexOf(key));
+  expect(positions.every((position) => position >= 0)).toBe(true);
+  expect(positions).toEqual([...positions].sort((a, b) => a - b));
+  expect(member.match(/id="games-title"/g)).toHaveLength(1);
+  expect(member).not.toContain('id="communities-title"');
+  expect(member).toContain("/account?view=applications");
+  vi.mocked(read).mockResolvedValue({
+    ...data,
+    viewer: null,
+    communities: null,
+  });
+  const guest = renderToStaticMarkup(await Home());
+  expect(guest).not.toContain("data-home-row=");
+  expect(guest).not.toContain("我的工作台");
+  expect(guest.indexOf('id="spotlight"')).toBeLessThan(
+    guest.indexOf('id="upcoming"'),
+  );
 });

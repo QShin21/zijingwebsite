@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import type { HomeResponse } from "@/lib/v2";
 import { ButtonLink, Img } from "./ui";
 import { Icon } from "./Icon";
@@ -131,9 +132,13 @@ const games = [
 export function PixelGames({
   communities,
   compact = false,
+  title,
+  children,
 }: {
   communities: HomeResponse["communities"];
   compact?: boolean;
+  title?: string;
+  children?: ReactNode;
 }) {
   return (
     <section
@@ -143,9 +148,13 @@ export function PixelGames({
       {compact && <PixelCorners variant="mint" seed="games" />}
       <div className={styles.gameIntro}>
         <h2 id="games-title">
-          你的热爱
-          <br />
-          在这里集合
+          {title || (
+            <>
+              你的热爱
+              <br />
+              在这里集合
+            </>
+          )}
         </h2>
         <Link href="/community">
           全部游戏社群 <Icon name="arrow" size={16} />
@@ -171,11 +180,18 @@ export function PixelGames({
           );
         })}
       </div>
+      {children && <div className={styles.gameCommunities}>{children}</div>}
     </section>
   );
 }
 
-export function HomeReel({ home }: { home: HomeResponse }) {
+export function HomeReel({
+  home,
+  title,
+}: {
+  home: HomeResponse;
+  title?: string;
+}) {
   const slides: CampusSlide[] = [];
   for (const feed of home.highlights || []) {
     const item = feed.item;
@@ -221,5 +237,5 @@ export function HomeReel({ home }: { home: HomeResponse }) {
       },
     );
   }
-  return <CampusReel slides={slides.slice(0, 6)} />;
+  return <CampusReel slides={slides.slice(0, 6)} title={title} />;
 }
