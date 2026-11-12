@@ -96,6 +96,9 @@ async function edit(activity: Activity, who: Actor, data: unknown) {
 async function cancel(activity: Activity, who: Actor, id: number, revision: number) {
   return route.DELETE(request(activity, "DELETE", who, { id, revision }), context(activity));
 }
+async function revoke(activity: Activity, who: Actor, id: number, revision: number) {
+  return route.POST(request(activity, "POST", who, { action: "revoke", id, revision }), context(activity));
+}
 async function block(activity: Activity, who: Actor | undefined, seats: string[], blocked: boolean, browserOrigin?: string) {
   return route.POST(request(activity, "POST", who, { action: "block", seats, blocked }, "", browserOrigin), context(activity));
 }
@@ -625,4 +628,33 @@ it("取消与审核同时进行时，只能有一个成功", async () => {
     expect(state.mine?.status).toBe("confirmed");
     expect(state.occupancy["4-1"]).toBe("confirmed");
   }
+});
+
+it("有权管理员撤销已确认申请并释放座位，申请人可重新申请", async () => {
+  const activity = await extraActivity("revoke");
+  const proof = await added(activity, first);
+  const submitted = await submit(activity, first, ["5-1", "5-2"], [proof]);
+  const mine = (await submitted.json()).mine;
+  expect((await revoke(activity, reviewer, mine.id, 0)).status).toBe(409);
+  expect((await decide(activity, reviewer, mine.id, "confirmed")).status).toBe(200);
+  expect((await revoke(activity, first, mine.id, 0)).status).toBe(403);
+  expect((await revoke(activity, otherReviewer, mine.id, 0)).status).toBe(403);
+  expect((await revoke(activity, reviewer, mine.id, 1)).status).toBe(409);
+  expect((await map(activity, first)).occupancy["5-1"]).toBe("confirmed");
+  expect((await put(activity, reviewer, false)).status).toBe(200);
+  const decisions = await Promise.all([revoke(activity, reviewer, mine.id, 0), revoke(activity, president, mine.id, 0)]);
+  expect(decisions.map(result => result.status).sort()).toEqual([200, 409]);
+  const state = await map(activity, first);
+  expect(state.mine).toMatchObject({ status: "revoked", revision: 1 });
+  expect(state.mineDetails).toBeNull();
+  expect((await map(activity, reviewer)).occupancy["5-1"]).toBeUndefined();
+  expect((await map(activity, reviewer)).occupancy["5-2"]).toBeUndefined();
+  expect((await image(activity, proof, first)).status).toBe(200);
+  const history = await route.GET(request(activity, "GET", reviewer, undefined, "?mode=review&status=revoked"), context(activity));
+  expect((await history.json()).docs).toMatchObject([{ id: mine.id, status: "revoked" }]);
+  const rejected = await route.GET(request(activity, "GET", reviewer, undefined, "?mode=review&status=rejected"), context(activity));
+  expect((await rejected.json()).docs).toEqual([]);
+  expect((await put(activity, reviewer, true)).status).toBe(200);
+  const newProof = await added(activity, first);
+  expect((await submit(activity, first, ["5-1"], [newProof])).status).toBe(200);
 });

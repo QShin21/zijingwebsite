@@ -13,9 +13,9 @@ const { actions } = require('../../lib/page');
 // Activity seat selection (member map + reviewer workbench) over the authorized seating API.
 // Server state decides every capability. Phone numbers and proof ids live only in page data
 // for the current account: cleared on account change, never stored, logged or shared.
-const labels = { pending: '待审核', confirmed: '已确认', rejected: '已驳回', cancelled: '已取消', blocked: '未开放' };
-const tones = { pending: 'warning', confirmed: 'success', rejected: 'neutral', cancelled: 'neutral' };
-const filters = ['pending', 'confirmed', 'rejected', 'cancelled'].map(status => ({ status, label: labels[status] }));
+const labels = { pending: '待审核', confirmed: '已确认', rejected: '已驳回', cancelled: '已取消', revoked: '已撤销', blocked: '未开放' };
+const tones = { pending: 'warning', confirmed: 'success', rejected: 'neutral', cancelled: 'neutral', revoked: 'neutral' };
+const filters = ['pending', 'confirmed', 'rejected', 'cancelled', 'revoked'].map(status => ({ status, label: labels[status] }));
 const zooms = [{ size: 36, label: '紧凑' }, { size: 52, label: '标准' }, { size: 68, label: '放大' }];
 const GAP = 8; // rpx between seats; keep in step with .seat margin-right in index.wxss
 const phonePattern = /^\+?[1-9]\d{6,14}$/;
@@ -149,7 +149,7 @@ Page(withVisualTheme({
     const mine = manage ? null : mineView(data.mine);
     const canEditMine = Boolean(!manage && mine && mine.status === 'pending' && data.mineDetails && data.mineDetails.canEdit);
     const editing = Boolean(this.data.editing && canEditMine && data.mine.revision === this.data.editRevision);
-    const editable = manage ? Boolean(data.canReview) : Boolean(editing || (data.enabled && data.open && data.loggedIn && (!mine || mine.status === 'rejected' || mine.status === 'cancelled')));
+    const editable = manage ? Boolean(data.canReview) : Boolean(editing || (data.enabled && data.open && data.loggedIn && (!mine || mine.status === 'rejected' || mine.status === 'cancelled' || mine.status === 'revoked')));
     // Seats taken by someone else since the last read drop out of the local selection.
     const selected = editable && !manage ? this.data.selected.filter(id => !data.occupancy[id] || (editing && data.mine.seats.includes(id))) : [];
     this.setData({ title: data.title || '活动选座', enabled: Boolean(data.enabled), open: Boolean(data.open), scheduled: data.scheduled === true, opensAt: data.opensAt || null, openingLabel: data.opensAt ? format.date(data.opensAt) : '', loggedIn: Boolean(data.loggedIn),
@@ -364,6 +364,20 @@ Page(withVisualTheme({
       }
       await http.request(this._endpoint, { method: 'POST', required: true, raw: true, data: { action: 'review', id: request, status, revision: doc.revision } });
       if (this.current(revision)) this.setData({ notice: status === 'confirmed' ? '已通过并锁定座位。' : '已驳回并释放座位。' });
+    }, true);
+  },
+  revoke(event) {
+    const request = Number(event.currentTarget.dataset.id);
+    if (!this.data.review || !Number.isSafeInteger(request) || request <= 0) return;
+    const doc = this.data.docs.find(item => item.id === request);
+    if (!doc || doc.status !== 'confirmed') return;
+    return this.work('正在撤销确认', async revision => {
+      const answer = await new Promise(resolve => wx.showModal({ title: '撤销确认', content: '撤销后此申请的全部座位将释放给其他成员。确认撤销？',
+        confirmText: '确认撤销', success: resolve, fail: () => resolve({ confirm: false }) }));
+      if (!answer.confirm || !this.current(revision)) return false;
+      await http.request(this._endpoint, { method: 'POST', required: true, raw: true,
+        data: { action: 'revoke', id: request, revision: doc.revision } });
+      if (this.current(revision)) this.setData({ notice: '已撤销确认，全部座位已释放。' });
     }, true);
   },
   call(event) {

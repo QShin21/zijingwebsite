@@ -69,6 +69,7 @@
           <button class="plain" data-phone="{{record.phone}}" bindtap="call" disabled="{{busy}}">拨打</button>
           <button wx:if="{{record.status === 'pending'}}" class="primary" data-id="{{record.id}}" data-status="confirmed" bindtap="decide" disabled="{{busy || loading}}">通过并锁定</button>
           <button wx:if="{{record.status === 'pending'}}" class="danger" data-id="{{record.id}}" data-status="rejected" bindtap="decide" disabled="{{busy || loading}}">驳回并释放</button>
+          <button wx:if="{{record.status === 'confirmed'}}" class="danger" data-id="{{record.id}}" bindtap="revoke" disabled="{{busy || loading}}">撤销确认</button>
         </view>
       </view>
       <view wx:if="{{pageNumber > 1 || hasNextPage}}" class="seat-pager">
@@ -82,7 +83,7 @@
       <view wx:if="{{mine}}" class="zj-sheet seat-receipt seat-receipt-{{mine.status}}">
         <view class="zj-record-head"><text class="zj-sheet-title">我的选座申请</text><text class="zj-pill zj-pill-{{mine.tone}}">{{mine.label}}</text></view>
         <text class="seat-receipt-seats">{{mine.seats}}</text>
-        <text class="zj-form-hint">{{mine.status === 'pending' ? '座位已为你保留，等待管理员核对凭证后锁定。' : mine.status === 'confirmed' ? '审核已通过，座位已锁定。' : mine.status === 'cancelled' ? '申请已取消，座位已释放。' : editable ? '申请已驳回，座位已释放；可以重新选座并提交凭证。' : '申请已驳回，座位已释放。'}}</text>
+        <text class="zj-form-hint">{{mine.status === 'pending' ? '座位已为你保留，等待管理员核对凭证后锁定。' : mine.status === 'confirmed' ? '审核已通过，座位已锁定。' : mine.status === 'cancelled' ? '申请已取消，座位已释放。' : mine.status === 'revoked' ? '管理员已撤销确认，座位已释放。' : editable ? '申请已驳回，座位已释放；可以重新选座并提交凭证。' : '申请已驳回，座位已释放。'}}</text>
         <view wx:if="{{canEditMine && !editing}}" class="zj-record-actions"><button class="primary" bindtap="startEdit" disabled="{{busy || loading}}">修改申请</button></view>
         <view wx:if="{{mine.status === 'pending'}}" class="zj-record-actions"><button class="secondary" bindtap="cancelRequest" disabled="{{busy || loading}}">取消选座申请</button></view>
       </view>

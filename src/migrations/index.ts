@@ -2,6 +2,7 @@ import * as communityIcons from "./20261112_020000_community_icons";
 import * as activitySeatBlocks from "./20261112_030000_activity_seat_blocks";
 import * as activitySeatRevision from "./20261112_040000_activity_seat_revision";
 import * as activitySeatCancellation from "./20261112_050000_activity_seat_cancellation";
+import * as activitySeatRevocation from "./20261112_060000_activity_seat_revocation";
 import * as activitySeating from "./20261112_000000_activity_seating";
 import * as activitySeatingSchedule from "./20261112_010000_activity_seating_schedule";
 import * as v2HomeSections from "./20261112_000000_v2_home_sections";
@@ -86,4 +87,5 @@ export const migrations = [
   { up: activitySeatBlocks.up, down: activitySeatBlocks.down, name: "20261112_030000_activity_seat_blocks" },
   { up: activitySeatRevision.up, down: activitySeatRevision.down, name: "20261112_040000_activity_seat_revision" },
   { up: activitySeatCancellation.up, down: activitySeatCancellation.down, name: "20261112_050000_activity_seat_cancellation" },
+  { up: activitySeatRevocation.up, down: activitySeatRevocation.down, name: "20261112_060000_activity_seat_revocation" },
 ];

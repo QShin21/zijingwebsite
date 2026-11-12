@@ -239,6 +239,7 @@ export function SeatReceipt({ mine, editable }: { mine: Pick<SeatRequest, "seats
         <p className={styles.hint}>{editable ? "申请已驳回，座位已释放；可以重新选座并提交凭证。" : "申请已驳回，座位已释放。"}</p>
       )}
       {mine.status === "cancelled" && <p className={styles.hint}>{editable ? "申请已取消，座位已释放；可以重新选座。" : "申请已取消，座位已释放。"}</p>}
+      {mine.status === "revoked" && <p className={styles.hint}>{editable ? "管理员已撤销确认，座位已释放；可以重新选座。" : "管理员已撤销确认，座位已释放。"}</p>}
     </div>
   );
 }
@@ -349,7 +350,7 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
   }
   if (!state.enabled && !state.canReview && !state.mine) return null;
   const activeEdit = editing && state.mine?.status === "pending" && state.mineDetails?.canEdit === true;
-  const editable = Boolean(activeEdit || (state.open && state.loggedIn && (!state.mine || state.mine.status === "rejected" || state.mine.status === "cancelled")));
+  const editable = Boolean(activeEdit || (state.open && state.loggedIn && (!state.mine || state.mine.status === "rejected" || state.mine.status === "cancelled" || state.mine.status === "revoked")));
   const visibleProofs = activeEdit ? editProofs : state.drafts;
   const total = state.rows.reduce((sum, row) => sum + row.count, 0);
 

@@ -20,10 +20,10 @@ import { SeatLegend, SeatMap, SeatZoom } from "./ActivitySeating";
 import { SeatRequestError, seatJSON, seatRequest } from "./seat-request";
 import styles from "./ActivitySeating.module.css";
 
-export const seatStatusOrder: readonly SeatStatus[] = ["pending", "confirmed", "rejected", "cancelled"];
-export const seatTone: Record<SeatStatus, Tone> = { pending: "warning", confirmed: "success", rejected: "neutral", cancelled: "neutral" };
+export const seatStatusOrder: readonly SeatStatus[] = ["pending", "confirmed", "rejected", "cancelled", "revoked"];
+export const seatTone: Record<SeatStatus, Tone> = { pending: "warning", confirmed: "success", rejected: "neutral", cancelled: "neutral", revoked: "neutral" };
 /** Map seat statuses onto the shared V2 record accents (work.module.css). */
-const recordState: Record<SeatStatus, string> = { pending: "pending", confirmed: "approved", rejected: "rejected", cancelled: "rejected" };
+const recordState: Record<SeatStatus, string> = { pending: "pending", confirmed: "approved", rejected: "rejected", cancelled: "rejected", revoked: "rejected" };
 
 /** Seat counts for the overview: pending holds, confirmed locks and what is still free. */
 export function seatCounts(state: Pick<SeatingState, "rows" | "occupancy"> & Partial<Pick<SeatingState, "blockedSeats">>) {
@@ -47,6 +47,7 @@ export function SeatReviewCard({
   busy = false,
   confirming = false,
   onDecide,
+  onRevoke,
   onAskReject,
   onCancelReject,
 }: {
@@ -55,6 +56,7 @@ export function SeatReviewCard({
   busy?: boolean;
   confirming?: boolean;
   onDecide?: (id: number, decision: SeatDecision) => void;
+  onRevoke?: (id: number) => void;
   onAskReject?: (id: number) => void;
   onCancelReject?: () => void;
 }) {
@@ -110,7 +112,7 @@ export function SeatReviewCard({
           <h4>审核决定</h4>
           {review.status === "pending" ? (
             <>
-              <p className={styles.hint}>通过后座位锁定；驳回后座位释放给其他成员。决定提交后不能撤回。</p>
+              <p className={styles.hint}>通过后座位锁定；驳回后座位释放给其他成员。已确认的申请可在已确认列表中撤销。</p>
               <div className={work.actions}>
                 {confirming ? (
                   <>
@@ -134,8 +136,20 @@ export function SeatReviewCard({
               </div>
               {!live && <p className={styles.hint}>合成样本：操作已停用。</p>}
             </>
+          ) : review.status === "confirmed" ? (
+            <>
+              <p className={styles.hint}>已通过，座位已锁定。撤销后全部座位将释放。</p>
+              <div className={work.actions}>
+                {confirming ? (
+                  <>
+                    <button type="button" className={buttonClass("danger")} disabled={busy || !onRevoke} onClick={() => onRevoke?.(review.id)}>确认撤销并释放</button>
+                    <button type="button" className={buttonClass("ghost")} disabled={busy} onClick={onCancelReject}>返回</button>
+                  </>
+                ) : <button type="button" className={buttonClass("ghost")} disabled={busy || !onRevoke} onClick={() => onAskReject?.(review.id)}>撤销确认</button>}
+              </div>
+            </>
           ) : (
-            <p className={styles.hint}>{review.status === "confirmed" ? "已通过，座位已锁定。" : review.status === "cancelled" ? "申请人已取消，座位已释放。" : "已驳回，座位已释放。"}</p>
+            <p className={styles.hint}>{review.status === "cancelled" ? "申请人已取消，座位已释放。" : review.status === "revoked" ? "管理员已撤销确认，座位已释放。" : "已驳回，座位已释放。"}</p>
           )}
         </section>
       </div>
@@ -273,6 +287,15 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
     });
   }
 
+  function revoke(request: number) {
+    const record = data?.docs.find(value => value.id === request);
+    if (!record || record.status !== "confirmed") return;
+    void act("正在撤销确认", async () => {
+      await seatRequest(endpoint, seatJSON("POST", { action: "revoke", id: request, revision: record.revision }));
+      return "已撤销确认，全部座位已释放。";
+    });
+  }
+
   function setBlocks(blocked: boolean) {
     if (!layout) return;
     const blockedSeats = new Set(layout.blockedSeats || []);
@@ -401,6 +424,7 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
                   busy={Boolean(busy)}
                   confirming={confirming === review.id}
                   onDecide={decide}
+                  onRevoke={revoke}
                   onAskReject={setConfirming}
                   onCancelReject={() => setConfirming(null)}
                 />

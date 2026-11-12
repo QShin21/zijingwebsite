@@ -1,6 +1,6 @@
 
 export type SeatingKind = "events" | "community-posts";
-export type SeatStatus = "pending" | "confirmed" | "rejected" | "cancelled";
+export type SeatStatus = "pending" | "confirmed" | "rejected" | "cancelled" | "revoked";
 export type SeatDecision = "confirmed" | "rejected";
 export const seatLimit = 10;
 export const seatProofLimit = 10;
@@ -10,6 +10,7 @@ export const seatStatusLabels: Record<SeatStatus, string> = {
   confirmed: "已确认",
   rejected: "已驳回",
   cancelled: "已取消",
+  revoked: "已撤销",
 };
 
 export const seatRows = [

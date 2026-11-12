@@ -70,3 +70,30 @@ it("小程序预填待审核申请，保存调整后的座位、手机号和凭�
   expect(cancel).toMatchObject({ id: 42, revision: 1 });
   expect(page.data).toMatchObject({ notice: "申请已取消，全部座位已释放。", mine: { status: "cancelled" } });
 });
+
+it("小程序管理员确认后撤销已确认申请并携带版本", async () => {
+  const calls: { method?: string; data?: unknown }[] = [];
+  const doc = { id: 52, revision: 3, status: "confirmed", memberName: "合成成员", phone: "13800138000", seats: ["1-1"], proofs: [], createdAt: "2026-11-12T00:00:00Z" };
+  const http = { request: vi.fn(async (_path: string, options: { method?: string; data?: unknown }) => {
+    if (options.method) calls.push(options);
+    return { title: "合成活动", enabled: true, open: true, scheduled: false, docs: [doc], hasNextPage: false };
+  }) };
+  const modules: Record<string, unknown> = {
+    "../../lib/theme": { page: (value: NativePage) => value }, "../../lib/http": http,
+    "../../lib/files": {}, "../../lib/privacy": {}, "../../lib/navigation": {},
+    "../../lib/session": { user: () => ({ id: 1 }), subscribe: () => () => {} },
+    "../../lib/format": { date: () => "", beijingParts: () => ({}) }, "../../lib/page": { actions: {} },
+  };
+  let page!: NativePage;
+  runInNewContext(readFileSync("miniprogram/src/pages/activity-seating/index.js", "utf8"), {
+    Page: (value: NativePage) => { page = value; }, require: (name: string) => modules[name],
+    wx: { setNavigationBarTitle: vi.fn(), showModal: (options: { success: (answer: { confirm: boolean }) => void }) => options.success({ confirm: true }) }, clearTimeout, setTimeout,
+  });
+  page.setData = values => Object.assign(page.data, values);
+  invoke(page, "onLoad", { kind: "events", id: "1", mode: "review" });
+  await invoke(page, "onShow");
+  await invoke(page, "revoke", { currentTarget: { dataset: { id: 52 } } });
+  expect(calls).toHaveLength(1);
+  expect(calls[0]).toMatchObject({ method: "POST", data: { action: "revoke", id: 52, revision: 3 } });
+  expect(page.data.notice).toBe("已撤销确认，全部座位已释放。");
+});

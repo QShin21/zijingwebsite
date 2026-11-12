@@ -1,5 +1,5 @@
 
-import { cancelPendingSeats, decideSeats, editPendingSeats, seatActivity, seatingState, seatingWorkbench, setSeatBlocks, setSeating, submitSeats } from "@/lib/activity-seating";
+import { cancelPendingSeats, decideSeats, editPendingSeats, revokeConfirmedSeats, seatActivity, seatingState, seatingWorkbench, setSeatBlocks, setSeating, submitSeats } from "@/lib/activity-seating";
 import { seatingHTTP, seatingJSON, seatingFields, seatingReviewFilter, seatReply, type SeatRouteContext } from "@/lib/activity-seating-http";
 
 export const runtime = "nodejs";
@@ -35,6 +35,11 @@ export function POST(request: Request, context: SeatRouteContext) {
     if (data.action === "block") {
       seatingFields(data, ["action", "seats", "blocked"]);
       return seatReply(await setSeatBlocks(p, await seatActivity(p, kind, id, user), user, data.seats, data.blocked));
+    }
+    if (data.action === "revoke") {
+      seatingFields(data, ["action", "id", "revision"]);
+      const mine = await revokeConfirmedSeats(p, await seatActivity(p, kind, id, user), user, data.id, data.revision);
+      return seatReply({ request: mine });
     }
     if (data.action === "edit") {
       seatingFields(data, ["action", "id", "revision", "seats", "phone", "proofs"]);

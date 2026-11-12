@@ -67,7 +67,7 @@ export async function GET() {
     await db.pool.query("SELECT id,event_id,post_id,enabled,opens_at FROM activity_seatings LIMIT 0");
     await db.pool.query("SELECT seating_id,seat,request_id FROM activity_seat_claims LIMIT 0");
     await db.pool.query("SELECT seating_id,seat,blocked_by,created_at FROM activity_seat_blocks LIMIT 0");
-    await db.pool.query("SELECT seating_id,member_id,status,phone,seats,revision,cancelled_at FROM activity_seat_requests LIMIT 0");
+    await db.pool.query("SELECT seating_id,member_id,status,phone,seats,revision,cancelled_at,revoked_at,revoked_by FROM activity_seat_requests LIMIT 0");
     await db.pool.query("SELECT id,seating_id,member_id,request_id,picture FROM activity_seat_proofs LIMIT 0");
     const seatingMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261112_000000_activity_seating"]);
     if (seatingMigration.rowCount !== 1) throw new Error("Required activity seating migration unavailable");
@@ -79,6 +79,8 @@ export async function GET() {
     if (revisionMigration.rowCount !== 1) throw new Error("Required seat request revision migration unavailable");
     const cancellationMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261112_050000_activity_seat_cancellation"]);
     if (cancellationMigration.rowCount !== 1) throw new Error("Required seat cancellation migration unavailable");
+    const revocationMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261112_060000_activity_seat_revocation"]);
+    if (revocationMigration.rowCount !== 1) throw new Error("Required seat revocation migration unavailable");
     await db.pool.query("SELECT start_at,end_at,location FROM community_posts LIMIT 0");
     await db.pool.query("SELECT owner_id,expires_at FROM pending_uploads LIMIT 0");
     await db.pool.query("SELECT kind,enabled FROM site_home_sections LIMIT 0");
