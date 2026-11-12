@@ -166,7 +166,6 @@ function HomeBlock({
         <Section
           id="open"
           title={section.title}
-          description="报名开放的活动、骨干招新与代表队选拔，按截止时间排列。"
           more={
             viewer
               ? { href: "/teams/recruitment", label: "选拔中心" }
