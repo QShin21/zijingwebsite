@@ -296,6 +296,34 @@ describe('Native authorized workbench and manual joins — synthetic VM only', (
     h.page.contactAdmins(); expect(h.wx.nextTick).toHaveBeenCalledTimes(2);
     expect(h.calls.filter(call => call.options.method === 'POST')).toEqual([]);
   });
+  it('shows the directory icon in the community header and refreshes both after a replacement', async () => {
+    let coverSrc = '/api/game-icons/default/league-of-legends';
+    const request = (path: string) => {
+      if (path === '/api/v2/communities/synthetic-9/header') return { card: communityCard(9, coverSrc) };
+      if (path.startsWith('/api/v2/communities?')) return pageResult([communityCard(9, coverSrc)]);
+      if (path.endsWith('/contacts')) return [];
+      if (path === '/api/miniapp/club') return { staffBatches: [], promotions: {} };
+      throw new Error('Unexpected synthetic request: ' + path);
+    };
+    const list = harness('communities', { request });
+    const detail = harness('community', { request,
+      cmsDetail: async () => ({ id: 9, slug: 'synthetic-9', title: '合成测试社群', body: null }) });
+    const visibleIcon = () => (detail.page.data.img as Record<string, string>)[String(detail.page.data.iconKey)];
+    const assertSameIcon = () => {
+      const listKey = String(list.page.data.docs[0].coverKey);
+      expect((list.page.data.img as Record<string, string>)[listKey]).toBe('https://synthetic.invalid' + coverSrc);
+      expect(visibleIcon()).toBe('https://synthetic.invalid' + coverSrc);
+    };
+    await Promise.all([list.page.onShow(), detail.page.onShow()]);
+    await vi.waitFor(assertSameIcon);
+
+    coverSrc = '/api/game-icons/synthetic-9?v=updated';
+    await Promise.all([list.page.load(), detail.page.onShow()]);
+    await vi.waitFor(assertSameIcon);
+    detail.changeUser(null);
+    expect(detail.page.data.iconKey).toBe('');
+    expect(detail.page.data.img).toEqual({});
+  });
   it('accepts permissions from fresh server workbench rather than stored president roles', async () => {
     const denied = harness('review', { user: { id: 1, roles: ['president'] } });
     await denied.page.onShow(); expect(denied.page.data.allowed).toBe(false); expect(denied.calls.some(call => call.path.includes('mode=review'))).toBe(false);

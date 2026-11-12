@@ -7,7 +7,10 @@
       <button class="zj-hero-back" bindtap="back">‹ 返回</button>
       <block wx:if="{{!loading && !error && !needsLogin}}">
         <view class="community-identity">
-          <text class="community-crest">{{game.title ? game.title[0] : '紫'}}</text>
+          <view class="community-crest" aria-hidden="true">
+            <image wx:if="{{iconKey && img[iconKey]}}" class="community-crest-image" src="{{img[iconKey]}}" mode="aspectFit" binderror="imageError" data-key="{{iconKey}}" data-url="{{img[iconKey]}}" />
+            <text wx:else>{{game.title ? game.title[0] : '紫'}}</text>
+          </view>
           <view class="community-titles">
             <text class="zj-hero-kicker">游戏社群</text>
             <text class="zj-hero-title">{{game.title}}</text>
