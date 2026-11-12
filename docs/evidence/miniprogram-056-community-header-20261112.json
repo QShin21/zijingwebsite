@@ -1,0 +1,24 @@
+{
+  "version": "0.5.6",
+  "appid": "wxccf9f8fc9515ebd5",
+  "sourceRevision": "d06de37da3d43210b9b5892a75dbbcd18b3afbe7",
+  "miniprogramSourceTree": "7151b70933a4ae79aa8061d8d88723bc86d3e366",
+  "uploadedAt": "2026-11-12T16:54:48.963+08:00",
+  "platformStatus": "developmentVersionUploaded",
+  "officialTool": "wechatide upload",
+  "officialSizeBytes": 804471,
+  "change": "Community detail header reads the same cover as the directory through the existing community header API.",
+  "checks": {
+    "focusedNativeLogicTests": 4,
+    "typecheck": "passed",
+    "changedFilesLint": "passed",
+    "package": {
+      "pages": 29,
+      "files": 199,
+      "bytes": 926440,
+      "domainChecking": true
+    },
+    "officialCompileAndUpload": "passed",
+    "realDeviceVerified": false
+  }
+}
