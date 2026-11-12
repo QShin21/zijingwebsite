@@ -782,9 +782,6 @@
     inset 3px 3px 0 var(--z-control-shadow),
     inset -2px -2px 0 var(--z-control-highlight);
 }
-.game > span > :global([data-pixel-corners]) {
-  inset: -2px;
-}
 .game:hover > span {
   transform: none;
   background: var(--z-field);
@@ -798,9 +795,6 @@
   background: var(--z-raised);
   border-color: var(--z-accent);
   box-shadow: inset 1px 1px 0 var(--z-control-shadow);
-}
-.game:active > span > :global([data-pixel-corners]) svg {
-  scale: 0.82;
 }
 .game strong {
   text-decoration: underline;

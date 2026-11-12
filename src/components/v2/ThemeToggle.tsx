@@ -8,7 +8,6 @@ import {
   type ThemeName,
 } from "./theme";
 import { Icon } from "./Icon";
-import { PixelCorners } from "./PixelCorners";
 import styles from "./Shell.module.css";
 
 export function ThemeToggle({
@@ -87,7 +86,6 @@ export function ThemeToggle({
               aria-pressed={theme === value}
               onClick={() => choose(value)}
             >
-              <PixelCorners interactive seed={`theme-${value}`} />
               {label}
             </button>
           ),
