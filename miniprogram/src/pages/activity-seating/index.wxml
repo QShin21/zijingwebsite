@@ -237,6 +237,9 @@
             <button class="secondary seat-proof-button" data-proof="{{item}}" bindtap="previewProof" disabled="{{busy || loading}}">查看</button>
             <button class="plain" data-proof="{{item}}" bindtap="removeProof" disabled="{{busy || loading}}" aria-label="移除凭证 {{index + 1}}">移除</button>
           </view>
+          <text wx:if="{{busy === '正在上传凭证'}}" class="zj-form-hint" aria-role="status">正在上传凭证…</text>
+          <text wx:if="{{proofNotice}}" class="zj-callout zj-callout-success" aria-role="status">{{proofNotice}}</text>
+          <text wx:if="{{proofError}}" class="zj-callout zj-callout-warning" aria-role="alert">{{proofError}}</text>
           <button class="secondary seat-upload" bindtap="chooseProofs" disabled="{{busy || loading || (editing ? editProofs.length : drafts.length) >= proofLimit}}">＋ 上传凭证</button>
         </view>
         <text class="zj-form-hint">{{editing ? '保存后申请继续等待审核。' : mode === 'random' ? '手机号与凭证仅供本活动审核使用。审核通过后系统安排座位。' : '手机号与凭证仅供本活动审核使用。提交后座位进入待审核；每人每场活动只保留一份待审核或已确认的申请。'}}</text>

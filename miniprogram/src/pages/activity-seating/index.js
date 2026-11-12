@@ -27,7 +27,7 @@ const memberOf = user => (user && user.id ? String(user.id) : '');
 const step = zoom => zooms[zoom].size + GAP;
 const boardWidth = (rows, zoom) => Math.max(...rows.map(row => row.offset + row.count)) * step(zoom) + 24;
 // Everything private or account-bound that must disappear when the account changes.
-const cleared = () => ({ rows: [], chips: [], selected: [], phone: '', drafts: [], mine: null, docs: [], counts: null, busy: '', error: '', notice: '',
+const cleared = () => ({ rows: [], chips: [], selected: [], phone: '', drafts: [], mine: null, docs: [], counts: null, busy: '', error: '', notice: '', proofError: '', proofNotice: '',
   editable: false, editing: false, editRevision: null, editProofs: [], canEditMine: false, loggedIn: false, canReview: false, enabled: false, mode: 'selection', requestedCount: 1, open: false, scheduled: false, opensAt: null, openingLabel: '', openingDate: '', openingTime: '', title: '', loadError: '', selectedBlocked: 0, selectedAvailable: 0, requestNumber: null, existingCount: 0, seatReview: null, inspectedSeat: '', changeReady: false });
 
 function seatCell(id, number, taken, picked, accent, blocked, manage, own) {
@@ -58,7 +58,7 @@ function reviewDoc(row) {
 }
 
 Page(withVisualTheme({
-  data: { review: false, manage: false, adding: false, changing: false, changeReady: false, requestNumber: null, existingCount: 0, seatReview: null, inspectedSeat: '', kind: '', title: '', loading: true, busy: '', error: '', loadError: '', notice: '', needsLogin: false,
+  data: { review: false, manage: false, adding: false, changing: false, changeReady: false, requestNumber: null, existingCount: 0, seatReview: null, inspectedSeat: '', kind: '', title: '', loading: true, busy: '', error: '', loadError: '', notice: '', proofError: '', proofNotice: '', needsLogin: false,
     enabled: false, mode: 'selection', requestedCount: 1, open: false, scheduled: false, opensAt: null, openingLabel: '', openingDate: '', openingTime: '', loggedIn: false, canReview: false, editable: false, editing: false, editRevision: null, editProofs: [], canEditMine: false, counts: null,
     rows: [], boardWidth: 0, zoom: 1, zoomLabel: zooms[1].label, selected: [], selectedBlocked: 0, selectedAvailable: 0, chips: [], phone: '', drafts: [], mine: null,
     seatLimit: 10, proofLimit: 10, proofMB: 8,
@@ -252,11 +252,11 @@ Page(withVisualTheme({
     if (!this.data.canEditMine || !state || !state.mine || !state.mineDetails || this.data.busy || this.data.loading) return;
     const selected = state.mine.seats.slice(), editProofs = state.mineDetails.proofs.concat(state.drafts || []);
     this.setData({ editing: true, editable: true, editRevision: state.mine.revision, editProofs, selected, chips: chipsFor(selected),
-      requestedCount: state.mine.requestedCount || state.mine.seats.length || 1, phone: state.mineDetails.phone, rows: this.data.mode === 'random' && !this.data.canReview ? [] : this.layout(state, selected, this.data.zoom, true), boardWidth: boardWidth(state.rows, this.data.zoom), error: '', notice: '' });
+      requestedCount: state.mine.requestedCount || state.mine.seats.length || 1, phone: state.mineDetails.phone, rows: this.data.mode === 'random' && !this.data.canReview ? [] : this.layout(state, selected, this.data.zoom, true), boardWidth: boardWidth(state.rows, this.data.zoom), error: '', notice: '', proofError: '', proofNotice: '' });
   },
   cancelEdit() {
     if (!this.data.editing || !this._state || this.data.busy) return;
-    this.setData({ editing: false, editable: false, editRevision: null, editProofs: [], selected: [], chips: [], phone: '', error: '',
+    this.setData({ editing: false, editable: false, editRevision: null, editProofs: [], selected: [], chips: [], phone: '', error: '', proofError: '', proofNotice: '',
       rows: this._state.enabled ? this.layout(this._state, [], this.data.zoom, false) : [] });
   },
   cancelRequest() {
@@ -268,7 +268,7 @@ Page(withVisualTheme({
       if (!answer.confirm || !this.current(revision)) return false;
       await http.request(this._endpoint, { method: 'DELETE', required: true, raw: true,
         data: { id: state.mine.id, revision: state.mine.revision } });
-      if (this.current(revision)) this.setData({ editing: false, editRevision: null, editProofs: [], selected: [], chips: [], phone: '',
+      if (this.current(revision)) this.setData({ editing: false, editRevision: null, editProofs: [], selected: [], chips: [], phone: '', proofError: '', proofNotice: '',
         notice: '申请已取消，全部座位已释放。' });
     }, true);
   },
@@ -305,16 +305,27 @@ Page(withVisualTheme({
     const proofs = this.data.editing ? this.data.editProofs : this.data.drafts;
     if (!this.data.editable || proofs.length >= this.data.proofLimit) return;
     return this.work('正在上传凭证', async revision => {
-      await privacy.authorize();
-      if (!this.current(revision)) return false;
-      let paths;
-      try { paths = await files.choose(Math.min(9, this.data.proofLimit - proofs.length)); }
-      catch { return false; /* Cancelling the picker is not an error. */ }
-      for (const filePath of paths) {
+      this.setData({ proofError: '', proofNotice: '' });
+      let uploaded = 0;
+      try {
+        await privacy.authorize();
         if (!this.current(revision)) return false;
-        const result = await http.upload(this._endpoint + '/proofs', filePath, { raw: true });
-        if (this.current(revision) && this.data.editing && result && proofPattern.test(String(result.id)))
-          this.setData({ editProofs: this.data.editProofs.concat(result.id) });
+        const paths = await files.choose(Math.min(9, this.data.proofLimit - proofs.length));
+        for (const filePath of paths) {
+          if (!this.current(revision)) return false;
+          const result = await http.upload(this._endpoint + '/proofs', filePath, { raw: true });
+          if (!this.current(revision)) return false;
+          const id = result && String(result.id);
+          if (!proofPattern.test(id)) throw new Error('上传结果暂不可确认，请刷新座位后核对');
+          const field = this.data.editing ? 'editProofs' : 'drafts';
+          if (!this.data[field].includes(id)) this.setData({ [field]: this.data[field].concat(id) });
+          uploaded++;
+          this.setData({ proofNotice: '已上传 ' + uploaded + ' 张凭证。' });
+        }
+      } catch (cause) {
+        if (cause && cause.code === 'MEDIA_PICK_CANCELLED') return false;
+        if (this.current(revision)) this.setData({ proofError: (cause && cause.message) || '凭证上传未完成，请重试' });
+        throw cause;
       }
     }, true);
   },
@@ -322,6 +333,7 @@ Page(withVisualTheme({
     const id = String(event.currentTarget.dataset.proof || '');
     const proofs = this.data.editing ? this.data.editProofs : this.data.drafts;
     if (!this.data.editable || !proofPattern.test(id) || !proofs.includes(id)) return;
+    this.setData({ proofError: '', proofNotice: '' });
     if (this.data.editing && !this.data.drafts.includes(id)) {
       this.setData({ editProofs: this.data.editProofs.filter(value => value !== id) });
       return;
@@ -356,7 +368,7 @@ Page(withVisualTheme({
     return this.work(editing ? '正在保存修改' : '正在提交选座', async revision => {
       const result = await http.request(this._endpoint, { method: 'POST', required: true, raw: true, data });
       if (!this.current(revision)) return false;
-      this.setData({ selected: [], chips: [], phone: '', drafts: [], editing: false, editProofs: [], editRevision: null, editable: false, mine: mineView(result && result.mine), notice: editing ? '修改已保存，申请继续等待审核。' : random ? '申请已提交，审核通过后安排座位。' : '选座申请已提交，座位进入待审核。' });
+      this.setData({ selected: [], chips: [], phone: '', drafts: [], editing: false, editProofs: [], editRevision: null, editable: false, proofError: '', proofNotice: '', mine: mineView(result && result.mine), notice: editing ? '修改已保存，申请继续等待审核。' : random ? '申请已提交，审核通过后安排座位。' : '选座申请已提交，座位进入待审核。' });
     }, true);
   },
   openReview() { if (this.data.canReview && this._endpoint && navigation.requireUser()) navigation.go('activity-seating', { kind: this._kind, id: this._id, mode: 'review' }); },

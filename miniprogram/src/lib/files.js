@@ -42,8 +42,21 @@ function clearPrivate() {
 function choose(count = 1) {
   return new Promise((resolve, reject) => wx.chooseMedia({
     count, mediaType: ['image'], sourceType: ['album', 'camera'], sizeType: ['compressed'],
-    success(result) { resolve(result.tempFiles.map(file => file.tempFilePath)); },
-    fail() { reject(new Error('未选择图片')); },
+    success(result) {
+      const selected = result && Array.isArray(result.tempFiles) ? result.tempFiles : [];
+      if (!selected.length || selected.some(file => !file || typeof file.tempFilePath !== 'string' || !file.tempFilePath)) {
+        reject(Object.assign(new Error('未获取到所选图片，请重新选择'), { code: 'MEDIA_PICK_FAILED' }));
+        return;
+      }
+      resolve(selected.map(file => file.tempFilePath));
+    },
+    fail(result) {
+      const detail = result && typeof result.errMsg === 'string' ? result.errMsg : '';
+      const cancelled = /cancel/i.test(detail);
+      const denied = /auth(?:orization)?\s*(?:deny|denied)|permission\s*(?:deny|denied)/i.test(detail);
+      const message = cancelled ? '未选择图片' : denied ? '图片选择权限不可用，请检查微信相册或相机权限' : '图片选择失败，请重新选择';
+      reject(Object.assign(new Error(message), { code: cancelled ? 'MEDIA_PICK_CANCELLED' : 'MEDIA_PICK_FAILED' }));
+    },
   }));
 }
 module.exports = { readImage, localImage, clearPrivate, choose };

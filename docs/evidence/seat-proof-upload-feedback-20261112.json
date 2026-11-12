@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-12",
+  "version": "0.5.17",
+  "diagnosis": {
+    "missingUploadDomainReportedByUser": true,
+    "userAddedUploadDomain": true,
+    "platformConfigurationIndependentlyVerified": false,
+    "phoneRetest": "pending",
+    "serverLogScope": "aggregate request times, methods and statuses; no image content or personal data read"
+  },
+  "changes": [
+    "distinguish picker cancellation and failure",
+    "show upload feedback alongside the proof field",
+    "retain acknowledged proof IDs if the next read fails",
+    "report upload domain rejection without exposing raw SDK details"
+  ],
+  "checks": {
+    "targetedSyntheticTests": 189,
+    "targetedSyntheticFailures": 0,
+    "nativeStatic": "passed",
+    "typecheck": "passed",
+    "changedFilesLint": "passed",
+    "baselineCommunityLifecycle": "17 failures reproduced on unchanged main: obsolete community and community-joins page expectations"
+  },
+  "wechatUpload": false,
+  "productionDeployment": false
+}
