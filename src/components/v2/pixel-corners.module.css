@@ -1,4 +1,11 @@
 .corners {
+  --piece-gold: #ffe16a;
+  --piece-mint: #77f2c2;
+  --piece-coral: #ff9c7f;
+  --piece-lilac: #dab1ff;
+  --piece-blue: #79d4ff;
+  --piece-orange: #ffbe63;
+  --piece-pink: #ff9bce;
   position: absolute;
   inset: -1px;
   z-index: 2;
@@ -18,25 +25,34 @@
   transform: rotate(180deg);
 }
 .corners svg[data-color="0"] {
-  color: var(--z-accent);
+  color: var(--piece-gold);
 }
 .corners svg[data-color="1"] {
-  color: var(--z-mint);
+  color: var(--piece-mint);
 }
 .corners svg[data-color="2"] {
-  color: var(--z-coral);
+  color: var(--piece-coral);
 }
 .corners svg[data-color="3"] {
-  color: var(--z-muted);
+  color: var(--piece-lilac);
 }
 .corners svg[data-color="4"] {
-  color: var(--z-info);
+  color: var(--piece-blue);
 }
 .corners svg[data-color="5"] {
-  color: color-mix(in srgb, var(--z-coral) 65%, var(--z-accent));
+  color: var(--piece-orange);
 }
 .corners svg[data-color="6"] {
-  color: color-mix(in srgb, var(--z-muted) 65%, var(--z-ink));
+  color: var(--piece-pink);
+}
+:global(:root[data-z-theme="winter"]) .corners {
+  --piece-gold: #be8020;
+  --piece-mint: #218f6c;
+  --piece-coral: #ce6541;
+  --piece-lilac: #a65bbc;
+  --piece-blue: #297db2;
+  --piece-orange: #d17b24;
+  --piece-pink: #c65d91;
 }
 :global(:root[data-z-theme="simple"]) .corners {
   display: none;
