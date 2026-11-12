@@ -464,25 +464,9 @@
   right: 10px;
   pointer-events: none;
 }
-.themePicker select {
-  appearance: none;
-  width: 100%;
-  height: 100%;
-  padding: 0 28px 0 38px;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--z-ink);
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-}
 .themePicker:focus-within {
   outline: 2px solid var(--z-focus);
   outline-offset: 3px;
-}
-.themePicker select:focus {
-  outline: none;
 }
 .joinPill {
   border: 1px solid var(--z-line-strong);
@@ -587,12 +571,87 @@
   .themePicker {
     width: 128px;
   }
-  .themePicker select {
-    padding-left: 30px;
-    font-size: 12px;
-  }
   .themePicker > svg:first-child {
     left: 8px;
     width: 16px;
   }
+}
+
+.themeMenu {
+  position: relative;
+}
+.themePicker {
+  cursor: pointer;
+  list-style: none;
+}
+.themePicker::-webkit-details-marker {
+  display: none;
+}
+.themePicker > span {
+  padding-left: 38px;
+  font-size: 13px;
+}
+.themeOptions {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  z-index: 30;
+  min-width: 200px;
+  padding: 6px;
+  background: var(--z-surface);
+  color: var(--z-ink);
+  border: 1px solid var(--z-line-strong);
+  box-shadow: 0 8px 20px #0003;
+}
+.themeOptions button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--z-ink);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+.themeOptions button::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--z-muted);
+}
+.themeOptions button[aria-pressed="true"] {
+  background: var(--z-raised);
+  border-color: var(--z-line);
+}
+.themeOptions button[aria-pressed="true"]::before {
+  background: var(--z-accent);
+  border-color: var(--z-accent);
+}
+.themeOptions button:hover {
+  background: var(--z-raised);
+}
+.footer::after {
+  content: "";
+  position: absolute;
+  right: 56px;
+  top: 16px;
+  width: 6px;
+  height: 6px;
+  background: var(--z-accent);
+  opacity: 0.4;
+  pointer-events: none;
+  box-shadow:
+    6px 0 0 var(--z-accent),
+    0 6px 0 var(--z-accent),
+    30px 14px 0 var(--z-muted),
+    36px 14px 0 var(--z-muted),
+    36px 20px 0 var(--z-muted);
+}
+:global(:root[data-z-theme="simple"]) .footer::after {
+  display: none;
 }

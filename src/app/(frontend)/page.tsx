@@ -111,7 +111,7 @@ function HomeBlock({
           more={{ href: "/events", label: "完整日程" }}
         >
           {home.upcoming.length ? (
-            <div className={layout.stack}>
+            <div className={`${layout.stack} ${styles.scheduleGrid}`}>
               {home.upcoming.map((event) => (
                 <MatchCard key={event.key} event={event} variant="row" />
               ))}
@@ -304,6 +304,19 @@ function HomeBlock({
 export default async function Home() {
   const home = await read(getHome, {});
   const { spotlight } = home;
+  const sections = home.sections.filter((section) => section.enabled);
+  const renderSection = (section: HomeSection) => {
+    const block = HomeBlock({ section, home });
+    return block ? (
+      <div
+        key={section.kind}
+        className={styles.sectionBlock}
+        data-section={section.kind}
+      >
+        {block}
+      </div>
+    ) : null;
+  };
   return (
     <>
       <CampusHero home={home} />
@@ -312,7 +325,11 @@ export default async function Home() {
         <div className={styles.homeFlow}>
           <div className={styles.mainColumn}>
             {spotlight && (
-              <Section id="spotlight" title="焦点活动">
+              <Section
+                id="spotlight"
+                title="焦点活动"
+                className={styles.featureSection}
+              >
                 <MatchCard
                   event={spotlight}
                   variant="spotlight"
@@ -320,18 +337,15 @@ export default async function Home() {
                 />
               </Section>
             )}
-            {home.sections
-              .filter((section) => section.enabled)
-              .map((section) => (
-                <div key={section.kind} data-section={section.kind}>
-                  <HomeBlock section={section} home={home} />
-                </div>
-              ))}
+            {!spotlight && <PersonalPanel home={home} />}
           </div>
           <aside className={styles.campusSide} aria-label="参与紫荆与赛场瞬间">
             <HomeReel home={home} />
-            <PersonalPanel home={home} />
           </aside>
+        </div>
+        <div className={styles.lowerSections}>
+          {spotlight && <PersonalPanel home={home} />}
+          {sections.map(renderSection)}
         </div>
       </Wrap>
     </>

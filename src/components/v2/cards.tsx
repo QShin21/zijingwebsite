@@ -198,6 +198,7 @@ export function NoticeRow({ article }: { article: ArticleCard }) {
       <div>
         <p className={styles.noticeLabel}>
           {article.label}
+          {article.demo && <DemoPill />}
           {article.community && <span> · {article.community.title}</span>}
           {article.promoted && <span className={styles.promoted}>精选</span>}
         </p>

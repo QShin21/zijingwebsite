@@ -39,10 +39,18 @@ describe("public campus art has a narrow allowlist", () => {
       "esports-fistbump.jpg",
       "esports-match.jpg",
       "esports-trophy.jpg",
+      "game-icons/lol.ico",
+      "game-icons/cs.jpg",
+      "game-icons/hok.png",
+      "game-icons/valorant.png",
+      "game-icons/tft.png",
+      "game-icons/minecraft.png",
     ])
       expect(isGuestPage(`/pixel-campus/${asset}`)).toBe(true);
     for (const route of [
       "/pixel-campus/private.jpg",
+      "/pixel-campus/game-icons/private.png",
+      "/pixel-campus/game-icons/SOURCES.json",
       "/pixel-campus/pixel-campus.jpg/private",
       "/pixel-campus/../community",
       "/community",

@@ -11,7 +11,7 @@ const publicPaths = [
 ];
 export function isGuestPage(path: string) {
   const campusAsset =
-    /^\/pixel-campus\/(?:pixel-campus\.jpg|campus-(?:summer|winter)\.webp|fusion-pixel\.woff2|esports-(?:fistbump|match|trophy)\.jpg)$/.test(
+    /^\/pixel-campus\/(?:pixel-campus\.jpg|campus-(?:summer|winter)\.webp|fusion-pixel\.woff2|esports-(?:fistbump|match|trophy)\.jpg|game-icons\/(?:lol\.ico|cs\.jpg|(?:hok|valorant|tft|minecraft)\.png))$/.test(
       path,
     );
   return (

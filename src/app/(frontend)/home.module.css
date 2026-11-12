@@ -133,7 +133,7 @@
 }
 .joinPanel,
 .mePanel {
-  background: color-mix(in srgb, var(--z-mint) 4%, var(--z-surface));
+  background: var(--z-raised);
   border: 1px solid var(--z-line-strong);
   padding: 20px;
 }
@@ -195,12 +195,178 @@
     margin-block: 24px;
   }
   .campusSide {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     align-items: start;
   }
 }
 @media (max-width: 600px) {
   .campusSide {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Distinct surfaces keep the schedule, calls and bulletin easy to scan. */
+.sectionBlock[data-section="upcoming"] > section {
+  padding: 24px;
+  border: 1px solid var(--z-line-strong);
+  background: color-mix(in srgb, var(--z-surface) 50%, var(--z-paper));
+}
+.sectionBlock[data-section="notices"] > section {
+  padding: 24px;
+  border: 1px solid var(--z-line-strong);
+  background: color-mix(in srgb, var(--z-raised) 75%, var(--z-paper));
+}
+.sectionBlock[data-section="open"] > section {
+  padding: 24px;
+  border: 1px solid var(--z-line-strong);
+  background: var(--z-surface);
+}
+.sectionBlock[data-section="upcoming"] h2 {
+  color: var(--z-ink);
+}
+.sectionBlock[data-section="notices"] h2 {
+  color: var(--z-action);
+}
+.sectionBlock[data-section="open"] h2 {
+  color: var(--z-ink);
+}
+@media (max-width: 600px) {
+  .sectionBlock[data-section="upcoming"] > section,
+  .sectionBlock[data-section="notices"] > section,
+  .sectionBlock[data-section="open"] > section {
+    padding: 18px 14px;
+  }
+}
+
+.sectionBlock[data-section="upcoming"] article {
+  background: color-mix(in srgb, var(--z-surface) 75%, var(--z-paper));
+}
+.sectionBlock[data-section="notices"] ul {
+  background: color-mix(in srgb, var(--z-surface) 60%, var(--z-raised));
+}
+
+.lowerSections {
+  margin-bottom: 40px;
+}
+.homeFlow {
+  position: relative;
+}
+.campusSide {
+  align-self: start;
+}
+.joinSteps li {
+  padding: 10px 0 10px 40px;
+  border-bottom: 1px solid var(--z-line);
+}
+.joinSteps li::before {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  border-radius: 0;
+  font-size: 13px;
+}
+.joinSteps li:last-child {
+  border-bottom: 0;
+}
+.joinSteps strong {
+  color: var(--z-ink);
+  font-size: 15px;
+}
+.joinSteps p {
+  color: var(--z-muted);
+}
+.joinSteps {
+  gap: 0;
+  margin-top: 4px;
+}
+.homeFlow::before,
+.sectionBlock::after {
+  content: "";
+}
+.sectionBlock {
+  position: relative;
+}
+.homeFlow::before,
+.sectionBlock::after {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--z-accent);
+  box-shadow:
+    6px 0 0 var(--z-accent),
+    0 6px 0 var(--z-accent),
+    32px 14px 0 var(--z-muted),
+    38px 14px 0 var(--z-muted),
+    38px 20px 0 var(--z-muted),
+    70px -6px 0 var(--z-accent),
+    76px -6px 0 var(--z-accent),
+    70px 0 0 var(--z-accent);
+  opacity: 0.42;
+  pointer-events: none;
+}
+.homeFlow::before {
+  right: 78px;
+  top: -20px;
+}
+.sectionBlock::after {
+  right: 88px;
+  bottom: 8px;
+}
+:global(:root[data-z-theme="simple"]) .homeFlow::before,
+:global(:root[data-z-theme="simple"]) .sectionBlock::after {
+  display: none;
+}
+@media (min-width: 900px) {
+  .about {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 40px;
+  }
+  .aboutLinks {
+    margin-top: 0;
+  }
+}
+
+.homeFlow {
+  align-items: stretch;
+}
+.featureSection {
+  margin: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.featureSection > article {
+  flex: 1;
+}
+.lowerSections > .joinPanel,
+.lowerSections > .mePanel {
+  margin-bottom: 32px;
+}
+.scheduleGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (min-width: 900px) {
+  .lowerSections .joinSteps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+  }
+  .lowerSections .joinSteps li {
+    border-bottom: 0;
+  }
+  .lowerSections .joinActions {
+    justify-content: flex-end;
+  }
+  .lowerSections .joinActions > a {
+    flex: 0 1 auto;
+  }
+  .lowerSections .quick {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 900px) {
+  .scheduleGrid {
     grid-template-columns: 1fr;
   }
 }

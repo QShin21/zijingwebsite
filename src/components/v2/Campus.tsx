@@ -16,7 +16,7 @@ export function CampusHero({ home }: { home: HomeResponse }) {
   const messages = [
     ...home.notices.map((item) => ({
       key: item.key,
-      text: item.title,
+      text: `${item.demo ? "演示 · " : ""}${item.title}`,
       href: item.href,
     })),
     ...home.upcoming.map((item) => ({
@@ -119,42 +119,12 @@ export function CampusHero({ home }: { home: HomeResponse }) {
 }
 
 const games = [
-  {
-    name: "英雄联盟",
-    kind: "lol",
-    color: "#e2ba64",
-    path: "M5 2h7v2h2v7h-2v3H5v-2H3V4h2zm2 2v8h4v-2H9V4z",
-  },
-  {
-    name: "CS",
-    kind: "cs",
-    color: "#edb18d",
-    path: "M7 1h2v4h4v2h2v2h-4v2H9v4H7v-4H5V9H1V7h4V5h2zm0 5v4h3V6z",
-  },
-  {
-    name: "王者荣耀",
-    kind: "hok",
-    color: "#e2ca80",
-    path: "M1 3h2v2h2V3h2V1h2v2h2v2h2V3h2v8h-2v3H3v-3H1zm3 6v2h8V9z",
-  },
-  {
-    name: "瓦罗兰特",
-    kind: "valorant",
-    color: "#f3979c",
-    path: "M1 2h2v2h2v2h2v2h2v2h5v2h-2v2H8v-2H6v-2H4V8H2V6H1zm13 0h1v6h-2v2H9V8h2V6h2V4h1z",
-  },
-  {
-    name: "金铲铲",
-    kind: "tft",
-    color: "#e5c96b",
-    path: "M9 1h4v2h2v5h-2v2h-3v2H8v3H4v-3h2v-2h2V8H6V5h1V3h2zm0 3v3h3V4z",
-  },
-  {
-    name: "我的世界",
-    kind: "minecraft",
-    color: "#a7ce8c",
-    path: "M1 2h14v12H1zm2 2v3h2V5h2v2h2V5h2v2h2V4zm2 5v3h2v-2h2v2h2V9z",
-  },
+  { name: "英雄联盟", kind: "lol", file: "lol.ico" },
+  { name: "CS", kind: "cs", file: "cs.jpg" },
+  { name: "王者荣耀", kind: "hok", file: "hok.png" },
+  { name: "瓦罗兰特", kind: "valorant", file: "valorant.png" },
+  { name: "金铲铲", kind: "tft", file: "tft.png" },
+  { name: "我的世界", kind: "minecraft", file: "minecraft.png" },
 ];
 export function PixelGames({
   communities,
@@ -185,16 +155,16 @@ export function PixelGames({
               key={game.kind}
               aria-label={`${game.name} · 寻找游戏社群`}
             >
-              <span style={{ color: game.color }}>
-                <svg
-                  viewBox="0 0 16 16"
-                  width="42"
-                  height="42"
-                  shapeRendering="crispEdges"
-                  aria-hidden="true"
-                >
-                  <path d={game.path} fill="currentColor" />
-                </svg>
+              <span>
+                <img
+                  className={styles.gameIcon}
+                  src={`/pixel-campus/game-icons/${game.file}`}
+                  width="72"
+                  height="72"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
               </span>
               <strong>{game.name}</strong>
             </Link>

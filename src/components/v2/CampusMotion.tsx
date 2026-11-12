@@ -102,6 +102,11 @@ export function CampusCover({
           <i key={i} />
         ))}
       </div>
+      <div className={styles.fragments} aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </div>
       {children}
     </div>
   );

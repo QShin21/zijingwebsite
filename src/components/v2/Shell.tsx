@@ -54,6 +54,7 @@ const guestTop: NavItem[] = [
     icon: "flag",
     match: ["/about", "/contact", "/privacy"],
   },
+  memberTop[5],
 ];
 const memberTabs: NavItem[] = [
   memberTop[0],
@@ -62,7 +63,7 @@ const memberTabs: NavItem[] = [
   memberTop[3],
   {
     href: "/account",
-    label: "我的",
+    label: "我的主场",
     icon: "user",
     match: ["/account", "/staff"],
   },
@@ -73,10 +74,10 @@ const guestTabs: NavItem[] = [
   guestTop[2],
   { href: "/join", label: "加入", icon: "spark", match: ["/join"] },
   {
-    href: "/login",
-    label: "登录",
-    icon: "login",
-    match: ["/login", "/register", "/account/reset"],
+    href: "/account",
+    label: "我的主场",
+    icon: "user",
+    match: ["/account", "/login", "/register"],
   },
 ];
 
@@ -155,7 +156,12 @@ export function Footer({
         <div className={styles.footerBrand}>
           <p className={styles.footerKicker}>清华园，下一局见</p>
           <strong>{name}</strong>
-          <p>{footer || "清华大学学生紫荆电竞社。一起玩，认真赢。"}</p>
+          <p>
+            {(footer || "一起玩，认真赢")
+              .trim()
+              .replace(/。+$/u, "")
+              .replace(/。/gu, " · ")}
+          </p>
         </div>
         <nav className={styles.footerNav} aria-label="页脚">
           <div>

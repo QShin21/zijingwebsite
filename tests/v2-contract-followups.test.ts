@@ -66,6 +66,8 @@ describe("V2 backend follow-up contracts (synthetic Local API)", () => {
     expect(new Set(output.map(section => section.kind)).size).toBe(7);
     expect(JSON.stringify(defaultHomeSections)).toBe(before);
     expect(homeSections(null)).toEqual(defaultHomeSections);
+    expect(homeSections([{ kind: "upcoming", title: "接下来的赛程" }])[0].title).toBe("近期日程");
+    expect(homeSections([{ kind: "upcoming", title: "自定义安排" }])[0].title).toBe("自定义安排");
     expect(validateHomeSections([{ kind: "open" }, { kind: "open" }])).toContain("只能配置一次");
     expect(validateHomeSections([{ kind: "private-data" }])).toContain("有效");
     expect(validateHomeSections([{ kind: "about", title: "x".repeat(61) }])).toContain("60");

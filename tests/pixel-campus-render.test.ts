@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { HomeResponse } from "../src/lib/v2/types";
 import { CampusHero, HomeReel, PixelGames } from "../src/components/v2/Campus";
-import { TopBar } from "../src/components/v2/Shell";
+import { TopBar, MobileTabs, Footer } from "../src/components/v2/Shell";
 
 vi.mock("next/image", () => ({
   default: (props: { src: string; alt: string }) =>
@@ -48,6 +48,31 @@ describe("real campus components preserve functional entry points", () => {
     expect(html).toContain('href="/account"');
     expect(html).toContain('aria-label="界面风格"');
     expect(html).not.toContain("暂停");
+  });
+  it("keeps the account entry visible to guests on desktop and mobile", () => {
+    for (const html of [
+      renderToStaticMarkup(
+        createElement(TopBar, {
+          name: home.site.name,
+          theme: "classic",
+          viewer: null,
+        }),
+      ),
+      renderToStaticMarkup(createElement(MobileTabs, { signedIn: false })),
+    ]) {
+      expect(html).toContain('href="/account"');
+      expect(html).toContain("我的主场");
+    }
+  });
+  it("cleans the footer slogan while keeping custom content", () => {
+    const html = renderToStaticMarkup(
+      createElement(Footer, {
+        name: home.site.name,
+        footer: "清华大学学生紫荆电竞社。一起玩，认真赢。",
+      }),
+    );
+    expect(html).toContain("一起玩，认真赢");
+    expect(html).not.toContain("。");
   });
   it("renders CMS hero content, custom action, image and all personal counts", () => {
     const data: HomeResponse = {
