@@ -15,7 +15,7 @@ const { actions, error } = require('../../lib/page');
 const socialCollections = ['community-posts', 'community-showcase'];
 Page(withVisualTheme({
   data: { loading: true, error: '', needsLogin: false, collection: '', doc: {}, nodes: [], links: [], photos: [],
-    related: [], previewImages: [], registration: '', coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', reading: {} },
+    related: [], previewImages: [], registration: '', seatInfo: null, coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', reading: {} },
   ...actions,
   onLoad(options) {
     this._options = options; this._hidden = false; this._unloaded = false;
@@ -23,7 +23,7 @@ Page(withVisualTheme({
     this._unsubscribe = session.subscribe(user => {
       if (String(user && user.id) === String(this._userId)) return;
       this._ticket = (this._ticket || 0) + 1;
-      this.setData({ loading: false, error: '', doc: {}, reading: {}, nodes: [], links: [], photos: [], previewImages: [], signupInfo: null, related: [], coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', videoError: false, registration: '', signupFailed: false, needsLogin: !user });
+      this.setData({ loading: false, error: '', doc: {}, reading: {}, nodes: [], links: [], photos: [], previewImages: [], signupInfo: null, seatInfo: null, related: [], coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', videoError: false, registration: '', signupFailed: false, needsLogin: !user });
     });
   },
   onShow() { this._hidden = false; this.load(); },
@@ -34,7 +34,7 @@ Page(withVisualTheme({
   async load() {
     const ticket = this._ticket = (this._ticket || 0) + 1;
     const user = session.user(); this._userId = user && user.id;
-    this.setData({ loading: true, error: '', needsLogin: false, user, signupInfo: null, signupFailed: false, signupStartText: '', signupEndText: '', doc: {}, reading: {}, photos: [], nodes: [], links: [], related: [], previewImages: [], coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', videoError: false, registration: '' });
+    this.setData({ loading: true, error: '', needsLogin: false, user, signupInfo: null, seatInfo: null, signupFailed: false, signupStartText: '', signupEndText: '', doc: {}, reading: {}, photos: [], nodes: [], links: [], related: [], previewImages: [], coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', videoError: false, registration: '' });
     try {
       const { collection, id, slug } = this._options;
       const social = socialCollections.includes(collection);
@@ -66,6 +66,9 @@ Page(withVisualTheme({
         registration: ['events', 'recruitment'].includes(collection) ? format.registrationState(doc) : '' });
       wx.setNavigationBarTitle({ title: doc.title || '内容详情' });
       if (collection === 'events' || (collection === 'community-posts' && doc.category === 'event')) {
+        void http.request('/api/activities/'+collection+'/'+doc.id+'/seating', { raw: true })
+          .then(seatInfo => { if (ticket === this._ticket) this.setData({ seatInfo }); })
+          .catch(() => {});
         try { const signupInfo = await http.request('/api/activities/'+collection+'/'+doc.id+'/signup'); if(ticket===this._ticket)this.setData({signupInfo,registration:signupInfo.form.enabled?'':this.data.registration,
           signupStartText: signupInfo.form.start ? format.date(signupInfo.form.start) : '', signupEndText: signupInfo.form.end ? format.date(signupInfo.form.end) : ''}); }
         catch { if(ticket===this._ticket)this.setData({signupFailed:true}); }
@@ -73,6 +76,11 @@ Page(withVisualTheme({
     } catch (cause) { if (ticket === this._ticket) error(this, cause); }
   },
   signup() { if(navigation.requireUser())navigation.go('signup',{kind:this.data.collection,id:this.data.doc.id}); },
+  seating(event) {
+    const mode = event.currentTarget.dataset.mode;
+    if (mode === 'review' && !navigation.requireUser()) return;
+    navigation.go('activity-seating', { kind: this.data.collection, id: this.data.doc.id, mode });
+  },
   teamPage(event) {
     const page = event.currentTarget.dataset.page, id = this.data.doc.id;
     if (this.data.collection === 'teams' && ['team-profiles', 'team-honors', 'team-honor-workspace'].includes(page) && /^[1-9]\d*$/.test(String(id)))

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "活动选座",
+  "usingComponents": {
+    "privacy-consent": "/components/privacy-consent/index"
+  }
+}

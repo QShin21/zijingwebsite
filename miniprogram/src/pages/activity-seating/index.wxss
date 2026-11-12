@@ -1,0 +1,45 @@
+
+.seat-page .seat-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.seat-page .seat-toolbar button { margin: 0; width: auto; }
+.seat-page .seat-legend { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; }
+.seat-page .swatch { display: inline-block; width: 13px; height: 13px; border: 1px solid; border-radius: 4px; }
+.seat-page .seat-receipt, .seat-page .seat-form, .seat-page .seat-review {
+  display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--z-line);
+}
+.seat-page .seating-board {
+  display: flex; width: 100%; max-width: 100%; box-sizing: border-box;
+  border: 1px solid var(--z-line); border-radius: 8px; overflow: hidden; margin: 8px 0;
+}
+.seat-page .seating-labels { width: 26px; flex: 0 0 26px; background: var(--z-surface); }
+.seat-page .seating-screen-spacer { height: 36px; }
+.seat-page .seat-row-number {
+  display: block; width: 100%; height: 30px; line-height: 30px; text-align: center;
+  font-size: 12px; color: var(--z-muted);
+}
+.seat-page .seating-scroll { flex: 1 1 auto; width: 0; min-width: 0; }
+.seat-page .seating-grid { width: 1110px; padding: 0 6px 8px 0; }
+.seat-page .seating-screen {
+  display: block; box-sizing: border-box; height: 36px; line-height: 29px;
+  border-bottom: 1px solid var(--z-line); width: 76%; margin: 0 auto;
+  text-align: center; color: var(--z-muted); font-size: 13px;
+}
+.seat-page .seat-row { display: flex; align-items: center; height: 30px; gap: 5px; }
+.seat-page .seat-row .seat-cell {
+  flex: 0 0 25px; width: 25px; height: 25px; min-width: 25px; min-height: 25px;
+  padding: 0; margin: 0; box-sizing: border-box; border: 1px solid; border-radius: 5px;
+  font-size: 10px; line-height: 23px; text-align: center;
+}
+.seat-page .seat-row .seat-cell::after { border: 0; }
+.seat-page .swatch.available, .seat-page .seat-row .seat-cell.available {
+  color: var(--z-text); background: var(--z-surface); border-color: #487994;
+}
+.seat-page .seat-row.accent .seat-cell.available { border-color: #9d742a; }
+.seat-page .swatch.selected, .seat-page .seat-row .seat-cell.selected {
+  color: #fff; background: var(--z-primary, #702c65); border-color: var(--z-primary, #702c65);
+}
+.seat-page .swatch.pending, .seat-page .seat-row .seat-cell.pending {
+  color: #543402; background: #f9dfac; border-color: #9a631a;
+}
+.seat-page .swatch.confirmed, .seat-page .seat-row .seat-cell.confirmed {
+  color: #fff; background: #83334b; border-color: #83334b;
+}

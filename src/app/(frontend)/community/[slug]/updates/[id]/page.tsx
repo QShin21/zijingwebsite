@@ -1,4 +1,5 @@
 import { ActivitySignup } from "@/components/ActivitySignup";
+import { ActivitySeating } from "@/components/activity-pages/ActivitySeating";
 import { CommunityPostImageEditor } from "@/components/CommunityPostImageEditor";
 import { PublicationImages } from "@/components/PublicationImages";
 import { publicationImages } from "@/lib/publication-images";
@@ -103,9 +104,12 @@ export default async function Update({
         </aside>
       </div>
       {post.category === "event" && (
-        <section id="activity-registration" className={styles.section}>
-          <ActivitySignup kind="community-posts" id={post.id} />
-        </section>
+        <>
+          <section id="activity-registration" className={styles.section}>
+            <ActivitySignup kind="community-posts" id={post.id} />
+          </section>
+          <ActivitySeating kind="community-posts" id={post.id} returnTo={`/community/${slug}/updates/${post.id}`} />
+        </>
       )}
     </ClubFrame>
   );

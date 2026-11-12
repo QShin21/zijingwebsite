@@ -1,0 +1,105 @@
+
+<page-meta page-style="{{themePageStyle}}" />
+<view class="page mini-page business-page native-page native-form-page seat-page">
+  <button class="plain back" bindtap="back">返回</button>
+  <view class="page-heading">
+    <text class="title">{{review ? '选座工作台' : '活动选座'}}</text>
+    <text wx:if="{{title}}" class="subtitle">{{title}}</text>
+  </view>
+  <text wx:if="{{loading}}" class="muted" aria-role="status">正在读取选座信息…</text>
+  <text wx:if="{{busy}}" class="muted" aria-role="status">{{busy}}…</text>
+  <text wx:if="{{notice}}" class="field-note" aria-role="status">{{notice}}</text>
+  <text wx:if="{{error || loadError}}" class="error" aria-role="alert">{{error || loadError}}</text>
+  <button wx:if="{{loadError}}" class="secondary" bindtap="refresh" disabled="{{loading || busy}}">重新加载</button>
+  <button wx:if="{{needsLogin}}" class="primary" bindtap="login">登录</button>
+
+  <block wx:if="{{review && !needsLogin && !loadError && title}}">
+    <view class="seat-toolbar">
+      <text>活动选座 · {{enabled ? '已启用' : '未启用'}}</text>
+      <button class="secondary" bindtap="setEnabled" disabled="{{loading || busy}}">{{enabled ? '停用选座' : '启用选座'}}</button>
+    </view>
+    <view class="seat-toolbar">
+      <button wx:for="{{filters}}" wx:key="status" class="{{status === item.status ? 'primary' : 'secondary'}}"
+        data-status="{{item.status}}" bindtap="filter" disabled="{{loading || busy}}">{{item.label}}</button>
+      <button class="plain" bindtap="refresh" disabled="{{loading || busy}}">刷新</button>
+    </view>
+    <text wx:if="{{!loading && !docs.length}}" class="muted">此页暂无{{statusLabel}}的选座申请。</text>
+    <view wx:for="{{docs}}" wx:key="id" class="seat-review" wx:for-item="record">
+      <view class="seat-toolbar"><text class="section-title">{{record.memberName}}</text><text class="badge">{{record.label}}</text></view>
+      <text class="body">手机号 {{record.phone}}</text>
+      <text class="body">座位 {{record.seatLabel}}</text>
+      <text class="field-note">提交时间 {{record.submitted}}</text>
+      <text wx:if="{{record.reviewed}}" class="field-note">审核时间 {{record.reviewed}}</text>
+      <view class="seat-toolbar">
+        <button wx:for="{{record.proofs}}" wx:key="*this" class="secondary" data-proof="{{item}}"
+          bindtap="previewProof" disabled="{{loading || busy}}">查看凭证 {{index + 1}}</button>
+      </view>
+      <view wx:if="{{record.status === 'pending'}}" class="seat-toolbar">
+        <button class="primary" data-id="{{record.id}}" data-status="confirmed" bindtap="decide" disabled="{{loading || busy}}">通过并锁定</button>
+        <button class="secondary" data-id="{{record.id}}" data-status="rejected" bindtap="decide" disabled="{{loading || busy}}">驳回并释放</button>
+      </view>
+    </view>
+    <view wx:if="{{pageNumber > 1 || hasNextPage}}" class="seat-toolbar">
+      <button class="plain" bindtap="turn" data-delta="-1" disabled="{{pageNumber <= 1 || loading || busy}}">上一页</button>
+      <text>第 {{pageNumber}} 页</text>
+      <button class="plain" bindtap="turn" data-delta="1" disabled="{{!hasNextPage || loading || busy}}">下一页</button>
+    </view>
+  </block>
+
+  <block wx:if="{{!review && title}}">
+    <view wx:if="{{mine}}" class="seat-receipt">
+      <text class="section-title">我的申请 · {{mine.label}}</text>
+      <text class="body">{{mine.seatLabel}}</text>
+      <text wx:if="{{mine.status === 'rejected' && editable}}" class="field-note">可以重新选座并提交凭证。</text>
+    </view>
+    <text wx:if="{{!open}}" class="muted">当前活动暂未开放选座。</text>
+    <view wx:if="{{enabled}}">
+      <view class="seat-toolbar">
+        <text class="seat-legend"><text class="swatch available" />可选</text>
+        <text class="seat-legend"><text class="swatch selected" />已选</text>
+        <text class="seat-legend"><text class="swatch pending" />待审核</text>
+        <text class="seat-legend"><text class="swatch confirmed" />已确认</text>
+      </view>
+      <text class="field-note">左右滑动座位图查看整排座位。</text>
+      <view class="seating-board">
+        <view class="seating-labels">
+          <view class="seating-screen-spacer" />
+          <text wx:for="{{rows}}" wx:key="row" class="seat-row-number" aria-label="第 {{item.row}} 排">{{item.row}}</text>
+        </view>
+        <scroll-view scroll-x enhanced class="seating-scroll">
+          <view class="seating-grid">
+            <text class="seating-screen">屏幕 / 舞台</text>
+            <view wx:for="{{rows}}" wx:key="row" wx:for-item="row"
+              class="seat-row {{row.accent ? 'accent' : ''}}" style="padding-left: {{row.indent}}px;">
+              <button wx:for="{{row.seats}}" wx:key="id" wx:for-item="seat" class="seat-cell {{seat.style}}"
+                data-seat="{{seat.id}}" aria-label="{{seat.label}}" bindtap="toggle" disabled="{{!editable || seat.locked || busy || loading}}">{{seat.number}}</button>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+    <view class="seat-toolbar">
+      <button wx:if="{{enabled}}" class="secondary" bindtap="refresh" disabled="{{loading || busy}}">刷新座位</button>
+      <button wx:if="{{open && !loggedIn}}" class="primary" bindtap="login">登录后选座</button>
+    </view>
+    <view wx:if="{{editable}}" class="seat-form">
+      <text class="section-title">已选 {{selected.length}} / {{seatLimit}} 个座位</text>
+      <text wx:if="{{selectedLabel}}" class="body">{{selectedLabel}}</text>
+      <label class="field">
+        <text class="field-label">手机号</text>
+        <input type="text" maxlength="24" value="{{phone}}" bindinput="phone" disabled="{{loading || busy}}" />
+      </label>
+      <text class="field-label">活动参与凭证</text>
+      <text class="field-note">已上传 {{drafts.length}} / {{proofLimit}} 张，单张最多 {{proofMB}} MB。手机号与凭证供本活动审核使用。</text>
+      <view wx:for="{{drafts}}" wx:key="*this" class="seat-toolbar">
+        <button class="secondary" data-proof="{{item}}" bindtap="previewProof" disabled="{{loading || busy}}">查看凭证 {{index + 1}}</button>
+        <button class="plain" data-proof="{{item}}" bindtap="removeProof" disabled="{{loading || busy}}">移除</button>
+      </view>
+      <view class="seat-toolbar">
+        <button class="secondary" bindtap="chooseProofs" disabled="{{loading || busy || drafts.length >= proofLimit}}">上传凭证</button>
+        <button class="primary" bindtap="submit" disabled="{{loading || busy}}">提交选座</button>
+      </view>
+    </view>
+  </block>
+</view>
+<privacy-consent id="privacyConsent" />

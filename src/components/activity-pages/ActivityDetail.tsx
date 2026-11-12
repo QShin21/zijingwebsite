@@ -8,6 +8,7 @@ import {
 } from "@/lib/rules";
 import { Pagination, Picture, Prose } from "@/components/Content";
 import { ActivitySignup } from "@/components/ActivitySignup";
+import { ActivitySeating } from "./ActivitySeating";
 import { registrationSummary } from "./registration-summary";
 import styles from "./ActivityPages.module.css";
 
@@ -269,6 +270,7 @@ export async function ActivityDetail({
           </p>
         </article>
       </div>
+      {isEvent && <ActivitySeating kind="events" id={doc.id} returnTo={`/events/${doc.slug}`} />}
     </>
   );
 }

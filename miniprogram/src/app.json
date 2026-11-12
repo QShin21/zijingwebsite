@@ -14,6 +14,7 @@
     "pages/review/index",
     "pages/signup/index",
     "pages/activity-manage/index",
+    "pages/activity-seating/index",
     "pages/staff/index",
     "pages/staff-review/index",
     "pages/team/index",
