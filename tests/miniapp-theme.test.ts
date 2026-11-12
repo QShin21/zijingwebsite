@@ -40,7 +40,7 @@ describe('Explicit native light/dark appearance', () => {
     expect(h.theme.init()).toBe('light');
     expect(h.systemReads()).toBe(0);
     expect(h.storage.size).toBe(0);
-    expect(h.calls.find(c => c.name === 'setNavigationBarColor')?.args).toMatchObject({ frontColor: '#000000', backgroundColor: '#f5f4fa', animation: { duration: 0 } });
+    expect(h.calls.find(c => c.name === 'setNavigationBarColor')?.args).toMatchObject({ frontColor: '#000000', backgroundColor: '#f2f1f5', animation: { duration: 0 } });
   });
   it.each(['auto', 'system', '', null, { theme: 'dark' }])('ignores invalid stored preference %j and uses light', value => {
     const h = harness(new Map([['zijing_theme', value]]));
@@ -53,7 +53,7 @@ describe('Explicit native light/dark appearance', () => {
     expect(first.theme.set('dark')).toMatchObject({ ok: true, persisted: true });
     const restartedDark = harness(storage);
     expect(restartedDark.theme.init()).toBe('dark');
-    expect(restartedDark.calls.find(c => c.name === 'setTabBarStyle')?.args).toMatchObject({ backgroundColor: '#18152a', selectedColor: '#a58cff' });
+    expect(restartedDark.calls.find(c => c.name === 'setTabBarStyle')?.args).toMatchObject({ backgroundColor: '#17151f', selectedColor: '#d69be3' });
     restartedDark.theme.set('light');
     expect(harness(storage).theme.init()).toBe('light');
   });

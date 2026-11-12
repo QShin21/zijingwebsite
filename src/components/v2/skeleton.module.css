@@ -3,7 +3,7 @@
 }
 .band {
   background:
-    repeating-linear-gradient(115deg, transparent 0 26px, rgba(255, 255, 255, 0.03) 26px 52px),
+    linear-gradient(100deg, transparent 52%, rgba(239, 214, 245, 0.06) 64%, transparent 76%),
     radial-gradient(90% 130% at 88% 0%, var(--z-stage-2), transparent 62%),
     var(--z-stage);
   color: var(--z-stage-ink);

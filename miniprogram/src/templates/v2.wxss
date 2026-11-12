@@ -172,7 +172,7 @@
 .zj-pad { display: block; padding: 0 24rpx 20rpx; }
 .zj-date-tbd { margin: 10rpx 0 8rpx; font-size: 30rpx; font-weight: 900; }
 .zj-field-graphic { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; min-height: 200rpx; overflow: hidden; border-radius: 24rpx; background: linear-gradient(150deg, var(--z-stage2), var(--z-stage)); }
-.zj-field-graphic-glow { position: absolute; width: 70%; height: 70%; border-radius: 50%; background: radial-gradient(circle, rgba(165, 140, 255, .45), transparent 70%); }
+.zj-field-graphic-glow { position: absolute; width: 70%; height: 70%; border-radius: 50%; background: radial-gradient(circle, rgba(214, 155, 227, .4), transparent 70%); }
 .zj-field-graphic-mark { position: relative; color: var(--z-accent); font-size: 72rpx; font-weight: 900; }
 .zj-promotion { border-top-color: var(--z-accent); }
 .zj-reading-mark { width: 96rpx; height: 12rpx; margin: 12rpx 0 20rpx; }
@@ -213,3 +213,33 @@
 .zj-gallery-image { width: 100%; height: 280rpx; border-radius: 24rpx; background: var(--z-media); }
 .zj-form-hint { display: block; margin-top: 8rpx; color: var(--z-muted); font-size: 24rpx; line-height: 1.7; }
 .zj-today { padding: 2rpx 14rpx; border-radius: 999rpx; background: var(--z-accent); color: var(--z-on-accent); font-size: 22rpx; }
+
+/* ===== V3 黑曜竞技场 (native composition; obsidian broadcast layers, Tsinghua purple identity, restrained gold) ===== */
+.zj-stage { border-radius: 0; padding-bottom: 56rpx; background: radial-gradient(90% 60% at 78% 92%, rgba(102, 8, 116, .55), transparent 70%), linear-gradient(180deg, #08070d 0%, var(--z-stage2) 58%, #08070d 100%); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 28rpx), 0 100%); }
+.zj-stage::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 28rpx; background: linear-gradient(170deg, transparent 49%, rgba(240, 192, 96, .7) 50%, transparent 54%); pointer-events: none; }
+.zj-stage-stripes { background: linear-gradient(100deg, transparent 52%, rgba(239, 214, 245, .1) 64%, transparent 76%), repeating-radial-gradient(ellipse at 70% 98%, transparent 0, transparent 60rpx, rgba(241, 238, 246, .07) 62rpx, transparent 66rpx); }
+.zj-stage-kicker { gap: 16rpx; letter-spacing: 2rpx; }
+.zj-stage-badge { padding: 0; border-radius: 0; background: transparent; color: var(--z-stage-ink); font-family: 'DIN Alternate', 'Bahnschrift', 'Roboto Condensed', sans-serif; letter-spacing: 10rpx; border-left: 6rpx solid var(--z-accent); padding-left: 14rpx; }
+.zj-stage-title { font-size: 92rpx; line-height: 1; letter-spacing: -1rpx; text-shadow: 0 4rpx 30rpx rgba(8, 7, 13, .7); }
+.zj-stage-title-accent { color: #e6bdef; }
+.zj-score { border-radius: 10rpx; border-color: rgba(241, 238, 246, .14); background: linear-gradient(180deg, rgba(241, 238, 246, .07), rgba(241, 238, 246, .02)); }
+.zj-score-value { font-family: 'DIN Alternate', 'Bahnschrift', 'Roboto Condensed', sans-serif; }
+.zj-hero { margin-bottom: 32rpx; border-radius: 0; background: repeating-radial-gradient(ellipse at 86% 120%, transparent 0, transparent 70rpx, rgba(241, 238, 246, .08) 72rpx, transparent 76rpx), radial-gradient(80% 130% at 100% 0%, rgba(102, 8, 116, .55), transparent 64%), linear-gradient(180deg, var(--z-stage2), var(--z-stage) 78%); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20rpx), 0 100%); }
+.zj-hero-hue { background: repeating-radial-gradient(ellipse at 86% 120%, transparent 0, transparent 70rpx, rgba(241, 238, 246, .08) 72rpx, transparent 76rpx), radial-gradient(80% 130% at 100% 0%, hsla(var(--hue), 62%, 40%, .6), transparent 66%), linear-gradient(180deg, hsl(var(--hue), 40%, 12%), var(--z-stage) 80%); }
+.zj-hero-kicker { color: var(--z-stage-muted); letter-spacing: 8rpx; border-left: 6rpx solid var(--z-accent); padding-left: 14rpx; }
+.zj-section-title { position: relative; padding-left: 22rpx; }
+.zj-section-title::before { content: ''; position: absolute; left: 0; top: 10rpx; bottom: 10rpx; width: 8rpx; background: linear-gradient(180deg, var(--z-accent), var(--z-primary)); }
+.zj-date { border-radius: 12rpx; background: linear-gradient(180deg, #1c1430, #0b0a11); box-shadow: inset 0 0 0 1rpx rgba(241, 238, 246, .12); }
+.zj-date::before { height: 6rpx; background: linear-gradient(90deg, var(--z-accent), #f6d98b); }
+.zj-date-lg { border-radius: 16rpx; }
+.zj-match { border-radius: 16rpx; background: linear-gradient(90deg, var(--z-tint), var(--z-surface) 46%); }
+.zj-card, .zj-record { border-radius: 18rpx; }
+.zj-cover { background: repeating-radial-gradient(ellipse at 50% 112%, transparent 0, transparent 46rpx, rgba(241, 238, 246, .1) 48rpx, transparent 52rpx), radial-gradient(80% 110% at 70% 10%, hsla(var(--hue), 70%, 42%, .75), transparent 70%), linear-gradient(170deg, hsl(var(--hue), 45%, 16%), #0b0a11 88%); }
+.zj-cover-initial { display: flex; align-items: center; justify-content: center; width: 150rpx; height: 136rpx; font-size: 64rpx; background: linear-gradient(160deg, rgba(241, 238, 246, .22), rgba(11, 10, 17, .55)); clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
+.zj-crest { border-radius: 0; background: radial-gradient(90% 90% at 30% 15%, hsla(var(--hue), 70%, 52%, .9), transparent 70%), linear-gradient(160deg, hsl(var(--hue), 45%, 22%), #0b0a11); clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
+.zj-honor { border-radius: 18rpx; box-shadow: inset 0 0 0 1rpx rgba(240, 192, 96, .3); background: radial-gradient(110% 80% at 100% 0%, rgba(240, 192, 96, .18), transparent 55%), radial-gradient(120% 90% at 0% 100%, hsla(var(--hue), 60%, 30%, .45), transparent 60%), linear-gradient(165deg, #1c1430, var(--z-stage)); }
+.zj-segments { padding: 0; border-radius: 0; background: transparent; border-bottom: 1rpx solid var(--z-line); }
+.mini-page .zj-segment { border-radius: 0; border-bottom: 6rpx solid transparent; }
+.mini-page .zj-segment.active { background: transparent; box-shadow: none; color: var(--z-text); font-weight: 900; border-bottom-color: var(--z-accent); }
+.zj-pill-live { background: linear-gradient(135deg, #f6d98b, var(--z-accent)); }
+.zj-dock { border-top-color: var(--z-line-strong); }

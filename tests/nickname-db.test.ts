@@ -117,7 +117,7 @@ describe.sequential("昵称唯一身份", () => {
       ).nameKey,
     ).toBe(`renamed-${suffix}`);
   });
-  it("迁移保留旧昵称大小写，并删除数字账户列", async () => {
+  it("迁移保留旧昵称大小写及数字账户，新账户不必填写旧字段", async () => {
     await p.db.drizzle.transaction(async (tx) => {
       await tx.execute(sql`CREATE TEMP TABLE users (id integer PRIMARY KEY, name varchar, account varchar NOT NULL) ON COMMIT DROP;
         CREATE UNIQUE INDEX users_account_idx ON users(account);
@@ -128,7 +128,19 @@ describe.sequential("昵称唯一身份", () => {
         req: await createLocalReq({}, p),
       } as MigrateUpArgs);
       const { rows } = await tx.execute(sql`SELECT * FROM users`);
-      expect(rows).toEqual([{ id: 1, name: "Shin", name_key: "shin" }]);
+      expect(rows).toEqual([
+        { id: 1, name: "Shin", account: "123456", name_key: "shin" },
+      ]);
+      // The retained archive column must not prevent modern account creation.
+      await tx.execute(sql`INSERT INTO users(id, name, name_key) VALUES (2, 'NewMember', 'newmember')`);
+      expect((await tx.execute(sql`SELECT account FROM users WHERE id = 2`)).rows)
+        .toEqual([{ account: null }]);
+      // Keep historical account uniqueness without making it a login field.
+      await expect(tx.transaction(async (nested) => {
+        await nested.execute(sql`INSERT INTO users(id, name, name_key, account) VALUES (3, 'OtherMember', 'othermember', '123456')`);
+      })).rejects.toThrow();
+      expect((await tx.execute(sql`SELECT account FROM users WHERE id = 1`)).rows)
+        .toEqual([{ account: "123456" }]);
     });
   });
   for (const [names, error] of [

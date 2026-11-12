@@ -27,7 +27,7 @@
 .signup-stages { display: flex; gap: 10rpx; }
 .signup-stage { flex: 1; min-width: 0; padding: 10rpx 6rpx; border-radius: 999rpx; background: rgba(255, 255, 255, .08); color: var(--z-stage-muted); font-size: 22rpx; font-weight: 800; text-align: center; }
 .signup-stage.current { background: var(--z-accent); color: var(--z-on-accent); }
-.signup-stage.done { background: rgba(197, 240, 74, .22); color: var(--z-accent); }
+.signup-stage.done { background: rgba(240, 192, 96, .22); color: var(--z-accent); }
 .signup-progress-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16rpx; }
 .signup-progress-title { font-size: 32rpx; font-weight: 900; }
 .signup-progress-count { color: var(--z-accent); font-size: 36rpx; font-weight: 800; }

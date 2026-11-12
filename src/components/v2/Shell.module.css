@@ -374,3 +374,102 @@
     display: none;
   }
 }
+
+/* ===== V3 黑曜竞技场: obsidian broadcast HUD (top bar, tab bar, footer) in both themes. ===== */
+.bar {
+  border-bottom: 1px solid var(--z-stage-line);
+  background: var(--z-bar);
+  color: var(--z-stage-ink);
+  box-shadow: inset 0 -1px 0 rgba(240, 192, 96, 0.08);
+}
+.wordmark strong {
+  color: var(--z-stage-ink);
+  letter-spacing: 0.04em;
+}
+.wordmark small {
+  color: var(--z-stage-muted);
+  letter-spacing: 0.26em;
+}
+.topLink {
+  color: var(--z-stage-muted);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.topLink:hover {
+  background: rgba(241, 238, 246, 0.07);
+  color: var(--z-stage-ink);
+}
+.topLink[aria-current="page"] {
+  color: var(--z-stage-ink);
+}
+.topLink[aria-current="page"]::after {
+  right: 22px;
+  bottom: -12px;
+  left: 22px;
+  height: 3px;
+  border-radius: 0;
+  background: var(--z-accent);
+  box-shadow: 0 0 14px rgba(240, 192, 96, 0.55);
+}
+.iconButton {
+  border-color: var(--z-stage-line);
+  background: rgba(241, 238, 246, 0.05);
+  color: var(--z-stage-ink);
+}
+.iconButton:hover {
+  border-color: rgba(214, 155, 227, 0.6);
+  background: rgba(214, 155, 227, 0.12);
+}
+.loginLink {
+  color: var(--z-stage-ink);
+}
+.loginLink:hover {
+  color: #e6bdef;
+}
+/* Primary CTA on the HUD: Tsinghua purple plate with a gold edge. */
+.joinPill {
+  border-radius: 6px;
+  background: linear-gradient(135deg, #7a1189, #4e0559);
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(240, 192, 96, 0.55);
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+.joinPill:hover {
+  box-shadow: inset 0 0 0 1px rgba(240, 192, 96, 0.9), 0 10px 26px rgba(102, 8, 116, 0.5);
+}
+.avatarLink {
+  border-color: var(--z-stage-line);
+  background: rgba(241, 238, 246, 0.05);
+  color: var(--z-stage-ink);
+}
+.avatarLink:hover {
+  border-color: var(--z-accent);
+}
+.avatar {
+  background: linear-gradient(135deg, #8a1a9b, #2b1240);
+  box-shadow: 0 0 0 2px rgba(240, 192, 96, 0.6);
+}
+.tabs {
+  border-top: 1px solid var(--z-stage-line);
+  background: var(--z-bar);
+}
+.tab {
+  color: var(--z-stage-muted);
+}
+.tab[aria-current="page"] {
+  color: var(--z-stage-ink);
+}
+.tab[aria-current="page"] .tabIcon {
+  background: rgba(214, 155, 227, 0.16);
+  box-shadow: inset 0 -2px 0 var(--z-accent);
+}
+.footer {
+  background:
+    radial-gradient(70% 120% at 85% 0%, rgba(102, 8, 116, 0.42), transparent 62%),
+    linear-gradient(180deg, var(--z-stage-2), var(--z-stage) 46%);
+  border-top: 1px solid var(--z-stage-line);
+}
+.footerKicker {
+  color: var(--z-accent);
+  letter-spacing: 0.32em;
+}

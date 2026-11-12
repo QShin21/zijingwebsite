@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { getHome, type HomeResponse, type HomeSection } from "@/lib/v2";
 import { read } from "@/components/v2/data";
+import { artAsset } from "@/components/v2/art";
 import { Stage, StageActions, StageKicker, StageLead, StageTitle, Ticker } from "@/components/v2/Stage";
 import { ButtonLink, EmptyState, Img, Section, Wrap } from "@/components/v2/ui";
 import { CommunityTile, FeedTile, MatchCard, NoticeRow, RecruitmentTile, ShowcaseTile } from "@/components/v2/cards";
@@ -222,24 +223,27 @@ function HomeBlock({ section, home }: { section: HomeSection; home: HomeResponse
           </div>
         </Section>
       );
-    case "about":
+    case "about": {
+      const art = artAsset("monolith-detail.webp");
       return (
         <section className={styles.about} aria-labelledby="about-title">
+          {art && <span className={styles.aboutArt} aria-hidden="true" style={{ backgroundImage: `url(${art})` }} />}
           <div>
             <p className={styles.aboutKicker}>ABOUT ZIJING</p>
             <h2 id="about-title">{section.title}</h2>
             <p>{home.about?.excerpt || "清华大学学生紫荆电竞社，组织校园电竞活动、游戏社群与代表队。"}</p>
           </div>
           <div className={styles.aboutLinks}>
-            <ButtonLink href="/about" tone="ghost" icon="arrow">
+            <ButtonLink href="/about" tone="accent" icon="arrow">
               了解社团
             </ButtonLink>
-            <ButtonLink href="/contact" tone="ghost">
+            <ButtonLink href="/contact" tone="stage">
               联系与合作
             </ButtonLink>
           </div>
         </section>
       );
+    }
     default:
       return null;
   }

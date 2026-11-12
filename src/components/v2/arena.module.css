@@ -1,0 +1,77 @@
+/* 黑曜竞技场 art: two compositions, transform/opacity motion only, paused by reduced motion. */
+.frame {
+  display: block;
+}
+.art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* Portrait composition only on phones; landscape everywhere else. */
+.portrait {
+  display: none;
+}
+@media (max-width: 640px) {
+  .landscape {
+    display: none;
+  }
+  .portrait {
+    display: block;
+  }
+}
+.beams {
+  transform-origin: 1000px 0;
+  animation: sway 14s ease-in-out infinite alternate;
+  mix-blend-mode: screen;
+}
+.beamsPortrait {
+  transform-origin: 620px 0;
+  animation: sway 14s ease-in-out infinite alternate;
+  mix-blend-mode: screen;
+}
+.scan {
+  animation: scan 9s linear infinite;
+}
+.scanPortrait {
+  animation: scanPortrait 9s linear infinite;
+}
+.plate {
+  animation: float 7s ease-in-out infinite alternate;
+}
+@keyframes sway {
+  from {
+    transform: rotate(-2.2deg);
+    opacity: 0.82;
+  }
+  to {
+    transform: rotate(2.4deg);
+    opacity: 1;
+  }
+}
+@keyframes scan {
+  to {
+    stroke-dashoffset: -3040;
+  }
+}
+@keyframes scanPortrait {
+  to {
+    stroke-dashoffset: -1520;
+  }
+}
+@keyframes float {
+  from {
+    transform: translateY(-6px);
+  }
+  to {
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .beams,
+  .beamsPortrait,
+  .scan,
+  .scanPortrait,
+  .plate {
+    animation: none;
+  }
+}

@@ -154,7 +154,7 @@
 .joinPanel {
   border-color: transparent;
   background:
-    repeating-linear-gradient(115deg, transparent 0 22px, rgba(255, 255, 255, 0.03) 22px 44px),
+    linear-gradient(100deg, transparent 52%, rgba(239, 214, 245, 0.07) 64%, transparent 76%),
     linear-gradient(150deg, var(--z-stage-2), var(--z-stage));
   color: var(--z-stage-ink);
 }
@@ -229,6 +229,34 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+/* V3: "关于紫荆" is an obsidian monolith panel (optional generated detail art on the right). */
+.about {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: rgba(240, 192, 96, 0.28);
+  border-radius: 12px;
+  background:
+    radial-gradient(60% 120% at 100% 100%, rgba(102, 8, 116, 0.55), transparent 70%),
+    linear-gradient(160deg, #1c1430, #0b0a11 70%);
+  color: #f1eef6;
+}
+.about p {
+  color: #b9b3c7;
+}
+.aboutKicker {
+  color: #f0c060 !important;
+  letter-spacing: 0.32em;
+}
+.aboutArt {
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 0 40%;
+  background-position: center;
+  background-size: cover;
+  opacity: 0.7;
+  mask-image: linear-gradient(90deg, transparent, #000 45%);
 }
 @keyframes rise {
   from {

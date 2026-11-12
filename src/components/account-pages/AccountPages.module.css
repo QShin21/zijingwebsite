@@ -12,7 +12,7 @@
   overflow: hidden;
   padding: clamp(28px, 5vw, 64px) var(--z-gutter);
   background:
-    repeating-linear-gradient(115deg, transparent 0 26px, rgba(255, 255, 255, 0.035) 26px 52px),
+    repeating-radial-gradient(ellipse at 70% 125%, transparent 0 58px, rgba(241, 238, 246, 0.08) 59px 60px, transparent 61px 64px), linear-gradient(100deg, transparent 52%, rgba(239, 214, 245, 0.08) 64%, transparent 76%),
     radial-gradient(80% 120% at 0% 100%, var(--z-stage-2), transparent 62%),
     var(--z-stage);
   color: var(--z-stage-ink);

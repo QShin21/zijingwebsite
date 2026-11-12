@@ -1,12 +1,15 @@
+/* 黑曜竞技场 broadcast stage (home hero). Obsidian base, arena art, restrained gold. */
 .stage {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: clamp(40px, 7vw, 96px) 0 0;
-  background: linear-gradient(160deg, var(--z-stage) 0%, var(--z-stage-2) 58%, var(--z-stage) 100%);
+  min-height: min(92svh, 860px);
+  padding: clamp(48px, 8vw, 120px) 0 0;
+  background: var(--z-stage);
   color: var(--z-stage-ink);
 }
 .compact {
+  min-height: 0;
   padding-top: clamp(32px, 5vw, 64px);
 }
 .backdrop {
@@ -15,39 +18,46 @@
   inset: 0;
   pointer-events: none;
 }
-.sweep {
-  position: absolute;
-  inset: -40%;
-  background: conic-gradient(
-    from 200deg at 70% 30%,
-    transparent 0deg,
-    rgba(165, 140, 255, 0.22) 24deg,
-    transparent 58deg,
-    transparent 180deg,
-    rgba(197, 240, 74, 0.1) 205deg,
-    transparent 240deg
-  );
-  filter: blur(18px);
-  animation: sweep 22s linear infinite;
-}
-.stripes {
+.arena {
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(115deg, transparent 0 28px, rgba(255, 255, 255, 0.035) 28px 56px);
-  mask-image: linear-gradient(90deg, transparent, #000 35%, #000 80%, transparent);
 }
-.floor {
+/* Optional generated render (public/visual-v3/arena-hero.webp): blended over the vector arena. */
+.render {
   position: absolute;
-  right: -10%;
-  bottom: -30%;
-  left: -10%;
-  height: 70%;
-  background:
-    linear-gradient(rgba(165, 140, 255, 0.18) 1px, transparent 1px) 0 0 / 100% 36px,
-    linear-gradient(90deg, rgba(165, 140, 255, 0.18) 1px, transparent 1px) 0 0 / 48px 100%;
-  mask-image: linear-gradient(to top, #000, transparent 80%);
-  transform: perspective(520px) rotateX(62deg);
-  transform-origin: bottom;
+  inset: 0;
+  background-position: 68% 60%;
+  background-size: cover;
+  mix-blend-mode: lighten;
+  opacity: 0.78;
+  mask-image: linear-gradient(90deg, transparent 18%, #000 52%), linear-gradient(to top, transparent, #000 22%);
+  mask-composite: intersect;
+}
+/* Optional portrait render (public/visual-v3/arena-portrait.webp) replaces the wide one on phones. */
+.renderPortrait {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background-position: 68% 100%;
+  background-size: cover;
+  mix-blend-mode: lighten;
+  opacity: 0.8;
+  mask-image: linear-gradient(to top, #000 40%, transparent 85%);
+}
+@media (max-width: 640px) {
+  .render[data-portrait] {
+    display: none;
+  }
+  .renderPortrait {
+    display: block;
+  }
+}
+/* Fine film grain keeps large dark fields from banding (static, no animation). */
+.grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
 }
 .canvas {
   position: absolute;
@@ -57,72 +67,84 @@
   height: 100%;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 900ms var(--z-ease);
+  transition: opacity 1200ms var(--z-ease);
 }
 .canvas[data-ready] {
   opacity: 1;
 }
 .inner {
   display: grid;
-  gap: clamp(28px, 4vw, 48px);
-  align-items: center;
+  gap: clamp(28px, 4vw, 56px);
+  align-items: end;
   width: min(100%, var(--z-max));
   margin: 0 auto;
-  padding: 0 var(--z-gutter) clamp(36px, 5vw, 64px);
+  padding: 0 var(--z-gutter) clamp(40px, 6vw, 80px);
 }
 .copy {
   display: grid;
-  gap: 18px;
+  gap: 20px;
   min-width: 0;
+  max-width: 44rem;
 }
 .aside {
   min-width: 0;
   color: var(--z-ink);
 }
+/* Broadcast kicker: hairline rule + tracked caps, gold badge reserved for the live label. */
 .kicker {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 12px;
+  gap: 8px 14px;
   color: var(--z-stage-muted);
-  font-size: 14px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.kicker::before {
+  content: "";
+  width: 36px;
+  height: 2px;
+  background: var(--z-accent);
 }
 .kicker strong {
-  padding: 3px 10px;
-  border-radius: var(--z-radius-pill);
-  background: var(--z-accent);
-  color: var(--z-accent-ink);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
+  color: var(--z-stage-ink);
+  font-family: var(--z-num);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.32em;
 }
 .title {
   font-size: var(--z-text-display);
   font-weight: 900;
-  line-height: 1.02;
+  line-height: 0.98;
   letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 .title em {
-  position: relative;
-  color: var(--z-accent);
   font-style: normal;
+  background: linear-gradient(100deg, #f6f1fb 0%, #e6bdef 45%, #f0c060 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 .lead {
   max-width: 34em;
   color: var(--z-stage-muted);
-  font-size: clamp(16px, 1.6vw, 20px);
+  font-size: clamp(16px, 1.5vw, 19px);
+  line-height: 1.7;
 }
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 6px;
+  margin-top: 8px;
 }
 .ticker {
   position: relative;
   border-top: 1px solid var(--z-stage-line);
-  background: rgba(0, 0, 0, 0.22);
+  background: linear-gradient(90deg, rgba(8, 7, 13, 0.92), rgba(26, 16, 41, 0.78));
+  backdrop-filter: blur(10px);
 }
 .tickerRow {
   display: flex;
@@ -134,28 +156,29 @@
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
-  padding: 12px 18px 12px var(--z-gutter);
+  gap: 8px;
+  padding: 13px 22px 13px var(--z-gutter);
   background: var(--z-accent);
   color: var(--z-accent-ink);
   font-family: var(--z-num);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
-  letter-spacing: 0.14em;
-  clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+  letter-spacing: 0.24em;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
 }
 .tickerViewport {
   flex: 1 1 auto;
   overflow: hidden;
-  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
 }
 .tickerTrack {
   display: flex;
-  gap: 40px;
+  gap: 44px;
   width: max-content;
   margin: 0;
-  padding: 12px 24px;
+  padding: 13px 24px;
   list-style: none;
-  animation: ticker 48s linear infinite;
+  animation: ticker 56s linear infinite;
 }
 .tickerTrack li {
   color: var(--z-stage-ink);
@@ -164,10 +187,14 @@
   white-space: nowrap;
 }
 .tickerTrack li::before {
-  content: "●";
-  margin-right: 10px;
-  color: var(--z-accent);
-  font-size: 10px;
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 12px;
+  transform: rotate(45deg);
+  background: var(--z-action);
+  vertical-align: 1px;
 }
 .ticker:hover .tickerTrack {
   animation-play-state: paused;
@@ -177,22 +204,38 @@
     transform: translateX(-50%);
   }
 }
-@keyframes sweep {
-  to {
-    transform: rotate(360deg);
-  }
-}
 @media (min-width: 1024px) {
   .inner {
-    grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+    grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
+  }
+}
+@media (max-width: 640px) {
+  .stage {
+    min-height: 0;
+  }
+  .render {
+    background-position: 60% 30%;
+    mask-image: linear-gradient(to top, transparent 10%, #000 55%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .sweep,
   .tickerTrack {
     animation: none;
   }
+  /* Static ticker scrolls by hand; the stage is obsidian in both themes, so its scrollbar is too. */
   .tickerViewport {
     overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(241, 238, 246, 0.32) transparent;
+  }
+  .tickerViewport::-webkit-scrollbar {
+    height: 6px;
+  }
+  .tickerViewport::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .tickerViewport::-webkit-scrollbar-thumb {
+    border-radius: 6px;
+    background: rgba(241, 238, 246, 0.32);
   }
 }

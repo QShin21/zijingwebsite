@@ -33,7 +33,7 @@
   color: var(--z-stage-ink);
 }
 .rail li[data-done] > span {
-  background: rgba(197, 240, 74, 0.25);
+  background: rgba(240, 192, 96, 0.28);
   color: var(--z-accent);
 }
 .rail li[aria-current="step"] {

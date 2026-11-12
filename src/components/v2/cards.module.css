@@ -454,7 +454,7 @@
   aspect-ratio: 16 / 10;
   overflow: hidden;
   background:
-    repeating-linear-gradient(115deg, transparent 0 18px, rgba(255, 255, 255, 0.07) 18px 36px),
+    repeating-radial-gradient(ellipse at 50% 118%, transparent 0 34px, rgba(241, 238, 246, 0.1) 35px 36px, transparent 37px 40px),
     linear-gradient(135deg, hsl(var(--hue) 65% 34%), hsl(calc(var(--hue) + 30) 70% 16%));
 }
 .cover img {
@@ -639,7 +639,7 @@
   border-radius: 50%;
   background: var(--z-accent);
   color: var(--z-accent-ink);
-  box-shadow: 0 0 0 6px rgba(197, 240, 74, 0.16);
+  box-shadow: 0 0 0 6px rgba(240, 192, 96, 0.22);
 }
 .placing {
   color: var(--z-accent);
@@ -703,7 +703,7 @@
   display: grid;
   place-items: center;
   background:
-    repeating-linear-gradient(115deg, transparent 0 18px, rgba(255, 255, 255, 0.07) 18px 36px),
+    repeating-radial-gradient(ellipse at 50% 118%, transparent 0 34px, rgba(241, 238, 246, 0.1) 35px 36px, transparent 37px 40px),
     linear-gradient(135deg, hsl(var(--hue) 65% 34%), hsl(calc(var(--hue) + 30) 70% 16%));
 }
 .mediaCount {
@@ -916,5 +916,105 @@
   .receipt > :last-child {
     grid-column: 2;
     justify-self: start;
+  }
+}
+
+/* ===== V3 黑曜竞技场 card overrides ===== */
+/* Scoreboard date plates: obsidian, condensed numerals, gold top rule. */
+.date {
+  border-radius: 8px;
+  background: linear-gradient(180deg, #1c1430, var(--z-stage));
+  box-shadow: inset 0 0 0 1px rgba(241, 238, 246, 0.12);
+}
+.date::before {
+  height: 3px;
+  background: linear-gradient(90deg, var(--z-accent), #f6d98b);
+}
+.date_lg {
+  border-radius: 12px;
+}
+.date_accent {
+  background: linear-gradient(160deg, #f6d98b, var(--z-accent));
+}
+/* Match cards: broadcast lower third with a steel hairline and a purple edge on hover. */
+.match {
+  border-radius: 10px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--z-action) 7%, transparent), transparent 42%),
+    var(--z-surface);
+  box-shadow: 0 1px 0 rgba(20, 18, 28, 0.04);
+}
+.match:hover {
+  border-color: var(--z-action);
+  box-shadow: var(--z-shadow), inset 3px 0 0 var(--z-action);
+}
+.match_spotlight {
+  border-color: rgba(240, 192, 96, 0.45);
+  background:
+    linear-gradient(135deg, rgba(102, 8, 116, 0.16), transparent 55%),
+    var(--z-surface);
+  box-shadow: var(--z-shadow-strong), inset 0 0 0 1px rgba(240, 192, 96, 0.25);
+}
+/* Content tiles: crisp plates with a steel frame instead of soft rounded cards. */
+.article,
+.community,
+.showcase,
+.team,
+.call,
+.application {
+  border-radius: 10px;
+}
+.article:hover,
+.community:hover,
+.showcase:hover,
+.team:hover,
+.call:hover {
+  border-color: var(--z-action);
+  box-shadow: var(--z-shadow), inset 0 -3px 0 var(--z-accent);
+}
+/* Community covers: hue-tinted arena panel + ring ornament + hex crest (no stripes, no flat letter squares). */
+.cover {
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 200' preserveAspectRatio='xMidYMax slice'><g fill='none' stroke='%23f1eaf8'><ellipse cx='160' cy='182' rx='190' ry='44' stroke-opacity='.18' stroke-width='1.5'/><ellipse cx='160' cy='182' rx='182' ry='42' stroke-width='6' stroke-dasharray='1.5 16' stroke-opacity='.16'/><ellipse cx='160' cy='182' rx='120' ry='28' stroke-opacity='.3'/></g><path d='M140 -10 L180 -10 L230 170 L90 170 Z' fill='%23ffffff' fill-opacity='.06'/></svg>")
+      center bottom / cover no-repeat,
+    radial-gradient(80% 110% at 70% 10%, hsl(var(--hue) 70% 42% / 0.75), transparent 70%),
+    linear-gradient(170deg, hsl(var(--hue) 45% 16%), #0b0a11 88%);
+}
+.coverInitial {
+  display: grid;
+  place-items: center;
+  width: clamp(68px, 9vw, 92px);
+  aspect-ratio: 1.1;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background: linear-gradient(160deg, rgba(241, 238, 246, 0.22), rgba(11, 10, 17, 0.55));
+  color: #fff;
+  font-size: clamp(30px, 4.2vw, 44px);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 0 0 2px rgba(240, 192, 96, 0.55);
+}
+.teamCrest {
+  border-radius: 0;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background:
+    radial-gradient(90% 90% at 30% 15%, hsl(var(--hue, 290) 70% 52% / 0.9), transparent 70%),
+    linear-gradient(160deg, hsl(var(--hue, 290) 45% 22%), #0b0a11);
+  font-family: var(--z-num), var(--z-sans);
+}
+/* Trophy cards: gold rim light, deep plum field. */
+.honor {
+  border-color: rgba(240, 192, 96, 0.28);
+  background:
+    radial-gradient(110% 80% at 100% 0%, rgba(240, 192, 96, 0.18), transparent 55%),
+    radial-gradient(120% 90% at 0% 100%, hsl(var(--hue, 290) 60% 30% / 0.45), transparent 60%),
+    linear-gradient(165deg, #1c1430, var(--z-stage));
+}
+.honor:hover {
+  box-shadow: 0 20px 48px rgba(102, 8, 116, 0.35), inset 0 0 0 1px rgba(240, 192, 96, 0.5);
+  transform: translateY(-3px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .match:hover,
+  .honor:hover {
+    transform: none;
   }
 }

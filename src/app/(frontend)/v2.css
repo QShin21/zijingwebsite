@@ -64,6 +64,12 @@ html {
   color: var(--z-ink);
   -webkit-text-size-adjust: 100%;
   scroll-padding-top: calc(var(--z-topbar) + 16px);
+  /*
+   * Theme-aware native scrollbars. scrollbar-color is inherited, so every scroller (rails,
+   * tables, code, dialogs) gets a token-derived thumb on a transparent track instead of the
+   * platform default (Firefox on Linux otherwise paints a light track even in the dark theme).
+   */
+  scrollbar-color: color-mix(in srgb, var(--z-ink) 34%, transparent) transparent;
 }
 @media (prefers-reduced-motion: no-preference) {
   html {

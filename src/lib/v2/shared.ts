@@ -1,6 +1,7 @@
 import { APIError, type CollectionSlug, type Payload, type Where } from "payload";
 import type { User } from "@/payload-types";
 import { relationID, safeURL } from "../rules";
+import { serverURL } from "../environment";
 import type { CommunityRef, ImageRef, Page, TeamRef } from "./types";
 
 export type Row = Record<string, unknown> & { id: number };
@@ -54,9 +55,24 @@ export async function teamRef(p: Payload, value: unknown): Promise<TeamRef | nul
 export async function mediaRef(p: Payload, value: unknown, alt = ""): Promise<ImageRef | null> {
   const id = rel(value);
   if (!id) return null;
-  const media = await p.findByID({ collection: "media", id, overrideAccess: false, user: null, depth: 0, select: { url: true, width: true, height: true, alt: true } }).catch(() => null);
-  // Cross-origin storage URLs and inline data never enter list responses.
-  return media && typeof media.url === "string" && /^\/(?!\/)/.test(media.url) ? { src: media.url, width: typeof media.width === "number" ? media.width : null, height: typeof media.height === "number" ? media.height : null, alt: txt(media.alt) ?? alt } : null;
+  const media = await p.findByID({ collection: "media", id, overrideAccess: false, user: null, depth: 0, select: { url: true, filename: true, width: true, height: true, alt: true } }).catch(() => null);
+  if (!media) return null;
+  // Payload may return an absolute URL, including a historical host or S3 URL.
+  // Keep existing bytes/metadata untouched and use its access-checked same-origin
+  // file endpoint. The configured storage adapter serves that endpoint for S3 too.
+  let src: string | null = null;
+  if (typeof media.filename === "string" && media.filename) {
+    if (!media.filename.startsWith(".") && !/[\\/\p{Cc}]/u.test(media.filename) && /\.(png|jpe?g|webp)$/i.test(media.filename))
+      src = `/api/media/file/${encodeURIComponent(media.filename)}`;
+  } else if (typeof media.url === "string") {
+    try {
+      const base = new URL(serverURL), url = new URL(media.url, base);
+      if (url.origin === base.origin && !url.username && !url.password &&
+        url.pathname.startsWith("/api/media/file/") && !media.url.includes("\\"))
+        src = url.pathname + url.search;
+    } catch { /* Invalid legacy metadata is not an image source. */ }
+  }
+  return src ? { src, width: typeof media.width === "number" ? media.width : null, height: typeof media.height === "number" ? media.height : null, alt: txt(media.alt) ?? alt } : null;
 }
 export function safeBody(value: unknown): unknown | null {
   if (!value || typeof value !== "object") return null;

@@ -2,7 +2,7 @@
   position: relative;
   overflow: hidden;
   background:
-    repeating-linear-gradient(115deg, transparent 0 26px, rgba(255, 255, 255, 0.04) 26px 52px),
+    repeating-radial-gradient(ellipse at 82% 130%, transparent 0 58px, rgba(241, 238, 246, 0.08) 59px 60px, transparent 61px 64px), linear-gradient(100deg, transparent 52%, rgba(239, 214, 245, 0.08) 64%, transparent 76%),
     radial-gradient(60% 120% at 100% 0%, hsl(calc(var(--hue) + 40) 85% 55% / 0.4), transparent 60%),
     linear-gradient(130deg, var(--z-stage-2), var(--z-stage) 70%);
   color: var(--z-stage-ink);
@@ -39,12 +39,12 @@
   border: 2px solid rgba(255, 255, 255, 0.25);
   border-radius: 32px;
   background:
-    repeating-linear-gradient(115deg, transparent 0 10px, rgba(255, 255, 255, 0.08) 10px 20px),
+    radial-gradient(90% 90% at 30% 15%, rgba(255, 255, 255, 0.16), transparent 70%),
     linear-gradient(135deg, hsl(var(--hue) 70% 45%), hsl(calc(var(--hue) + 30) 70% 20%));
   color: #fff;
   font-size: clamp(40px, 6vw, 64px);
   font-weight: 900;
-  box-shadow: 0 0 0 8px rgba(197, 240, 74, 0.12), 0 24px 60px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 8px rgba(240, 192, 96, 0.22), 0 24px 60px rgba(0, 0, 0, 0.35);
 }
 .titles {
   display: grid;

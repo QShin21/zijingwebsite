@@ -38,7 +38,20 @@
   overflow-x: auto;
   scroll-padding-inline: var(--z-gutter);
   scroll-snap-type: x mandatory;
+  /* Visible but quiet: a thin token-coloured thumb on a transparent track in both themes. */
   scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--z-ink) 34%, transparent) transparent;
+}
+/* Safari (no standard scrollbar-color): same thin thumb, transparent track. */
+.rail::-webkit-scrollbar {
+  height: 6px;
+}
+.rail::-webkit-scrollbar-track {
+  background: transparent;
+}
+.rail::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--z-ink) 34%, transparent);
 }
 .rail > * {
   scroll-snap-align: start;
@@ -98,13 +111,18 @@
 .filters label {
   display: grid;
   flex: 1 1 160px;
+  min-width: 0;
   gap: 6px;
   color: var(--z-muted);
   font-size: 13px;
   font-weight: 800;
 }
+/* Controls may not impose their intrinsic width (long options, month pickers) on a phone row. */
 .filters select,
 .filters input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   min-height: 44px;
   padding: 8px 12px;
   border: 1.5px solid var(--z-field-border);

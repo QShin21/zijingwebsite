@@ -120,7 +120,7 @@
               <text class="signup-stage">3 查看回执</text>
             </view>
             <view class="signup-progress-head"><text class="signup-progress-title">{{review ? '核对提交内容' : responseEditing ? team && receipt.status === 'draft' ? '继续填写草稿' : '修改已提交资料' : applicationMode ? '填写申请资料' : '填写报名资料'}}</text><text class="signup-progress-count">{{completed}} / {{answerTotal}}</text></view>
-            <progress percent="{{progress}}" activeColor="#c5f04a" backgroundColor="rgba(255,255,255,0.16)" stroke-width="6" border-radius="6" />
+            <progress percent="{{progress}}" activeColor="#e3b04b" backgroundColor="rgba(255,255,255,0.16)" stroke-width="6" border-radius="6" />
             <text class="signup-progress-hint">带 * 为必填。{{review ? '确认本页内容后，使用下方按钮提交。' : answerPages > 1 ? '翻页时会保留已填内容，完成后再核对提交。' : '完成后可先核对，再提交。'}}</text>
           </view>
           <view wx:if="{{review}}" class="zj-sheet">

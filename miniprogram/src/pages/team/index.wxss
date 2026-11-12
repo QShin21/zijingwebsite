@@ -15,7 +15,7 @@
 .mini-page .team-wide { display: block; width: 100%; margin-top: 8rpx; }
 .mini-page .team-disclosure { display: flex; justify-content: space-between; width: 100%; padding: 10rpx 0; }
 .team-links { display: flex; flex-direction: column; gap: 12rpx; }
-.team-organization { display: flex; flex-direction: column; gap: 12rpx; margin-top: 40rpx; padding: 32rpx; border-radius: 40rpx; background: repeating-linear-gradient(115deg, transparent 0, transparent 22rpx, rgba(255, 255, 255, .03) 22rpx, rgba(255, 255, 255, .03) 44rpx), linear-gradient(150deg, var(--z-stage2), var(--z-stage)); color: var(--z-stage-ink); }
+.team-organization { display: flex; flex-direction: column; gap: 12rpx; margin-top: 40rpx; padding: 32rpx; border-radius: 18rpx; background: radial-gradient(80% 120% at 100% 100%, rgba(102, 8, 116, .5), transparent 70%), linear-gradient(160deg, var(--z-stage2), var(--z-stage)); box-shadow: inset 0 0 0 1rpx rgba(240, 192, 96, .3); color: var(--z-stage-ink); }
 .team-organization-title { color: var(--z-stage-ink); }
 .team-organization-note { color: var(--z-stage-muted); font-size: 25rpx; }
 .team-organization-actions { display: flex; flex-direction: column; gap: 12rpx; }

@@ -3,7 +3,7 @@
   overflow: hidden;
   color: #fff;
   background:
-    repeating-linear-gradient(115deg, transparent 0 26px, rgba(255, 255, 255, 0.05) 26px 52px),
+    repeating-radial-gradient(ellipse at 82% 130%, transparent 0 58px, rgba(241, 238, 246, 0.08) 59px 60px, transparent 61px 64px), linear-gradient(100deg, transparent 52%, rgba(239, 214, 245, 0.08) 64%, transparent 76%),
     radial-gradient(70% 140% at 90% 0%, hsl(calc(var(--hue) + 40) 80% 55% / 0.45), transparent 60%),
     linear-gradient(125deg, hsl(var(--hue) 65% 30%), hsl(calc(var(--hue) + 30) 70% 12%));
 }
@@ -178,7 +178,7 @@
   border-radius: var(--z-radius-sheet);
   color: var(--z-stage-ink);
   background:
-    repeating-linear-gradient(115deg, transparent 0 22px, rgba(255, 255, 255, 0.04) 22px 44px),
+    linear-gradient(100deg, transparent 52%, rgba(239, 214, 245, 0.07) 64%, transparent 76%),
     linear-gradient(150deg, hsl(var(--hue) 60% 26%), var(--z-stage));
 }
 .contactPanel h2 {
@@ -237,20 +237,51 @@
   font-family: var(--z-num);
   text-align: center;
 }
+/*
+ * Search row. A flex <input> keeps min-width:auto = its intrinsic width (~20 average chars;
+ * wider with CJK fallback fonts), which overflowed the 358px content box at 390px. A grid with
+ * minmax(0, 1fr) plus min-width:0/width:100% lets the field shrink; the button stays on one row.
+ */
 .search {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
+  align-items: stretch;
+  width: 100%;
   margin: 0 0 20px;
 }
+.search > * {
+  min-width: 0;
+  box-sizing: border-box;
+}
 .search input {
-  flex: 1 1 260px;
+  width: 100%;
+  min-width: 0;
   min-height: 50px;
-  padding: 10px 18px;
+  padding: 10px 16px;
   border: 1.5px solid var(--z-field-border);
-  border-radius: var(--z-radius-pill);
+  border-radius: 8px;
   background: var(--z-field);
   font-size: 16px;
+  box-sizing: border-box;
+}
+.search :global(.button) {
+  min-height: 50px;
+  padding-inline: 18px;
+  border-radius: 8px;
+}
+/* "全部社群" (only with an active query) takes its own row on phones. */
+.search > a {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+@media (min-width: 640px) {
+  .search {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+  .search > a {
+    grid-column: auto;
+  }
 }
 .organize {
   display: grid;
@@ -260,7 +291,7 @@
   padding: clamp(22px, 4vw, 36px);
   border-radius: var(--z-radius-sheet);
   background:
-    repeating-linear-gradient(115deg, transparent 0 22px, rgba(255, 255, 255, 0.03) 22px 44px),
+    linear-gradient(100deg, transparent 52%, rgba(239, 214, 245, 0.06) 64%, transparent 76%),
     linear-gradient(140deg, var(--z-stage-2), var(--z-stage));
   color: var(--z-stage-ink);
 }

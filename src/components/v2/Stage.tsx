@@ -1,10 +1,14 @@
 import type { ReactNode } from "react";
+import { ArenaArt } from "./ArenaArt";
 import { StageCanvas } from "./StageCanvas";
+import { artAsset } from "./art";
 import styles from "./stage.module.css";
 
 /**
- * Dark broadcast stage. The layered light (CSS sweep + client Canvas sparks)
- * is decorative; the content is complete without it.
+ * 黑曜竞技场 broadcast stage. Layers (back → front): original arena illustration,
+ * optional generated arena render (only when the file exists), client-rendered light
+ * dust (paused offscreen/hidden, single frame under reduced motion), then content.
+ * Every art layer is decorative; content and flows are complete without them.
  */
 export function Stage({
   children,
@@ -19,12 +23,15 @@ export function Stage({
   compact?: boolean;
   label?: string;
 }) {
+  const render = artAsset("arena-hero.webp");
+  const portrait = artAsset("arena-portrait.webp");
   return (
     <section className={compact ? `${styles.stage} ${styles.compact}` : styles.stage} aria-label={label}>
       <div className={styles.backdrop} aria-hidden="true">
-        <span className={styles.sweep} />
-        <span className={styles.stripes} />
-        <span className={styles.floor} />
+        <ArenaArt className={styles.arena} />
+        {render && <span className={styles.render} data-portrait={portrait ? "" : undefined} style={{ backgroundImage: `url(${render})` }} />}
+        {portrait && <span className={styles.renderPortrait} style={{ backgroundImage: `url(${portrait})` }} />}
+        <span className={styles.grain} />
       </div>
       <StageCanvas className={styles.canvas} />
       <div className={styles.inner}>
