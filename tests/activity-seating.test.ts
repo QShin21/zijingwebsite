@@ -90,6 +90,9 @@ async function submit(activity: Activity, who: Actor, seats: string[], proofs: s
 async function decide(activity: Activity, who: Actor, id: number, status: string) {
   return route.POST(request(activity, "POST", who, { action: "review", id, status }), context(activity));
 }
+async function block(activity: Activity, who: Actor | undefined, seats: string[], blocked: boolean, browserOrigin?: string) {
+  return route.POST(request(activity, "POST", who, { action: "block", seats, blocked }, "", browserOrigin), context(activity));
+}
 async function image(activity: Activity, proof: string, who?: Actor) {
   return proofRoute.GET(request(activity, "GET", who, undefined, "/proofs/" + proof), proofContext(activity, proof));
 }
@@ -460,4 +463,66 @@ it("按北京时间到点开放，开放前禁止上传和提交，停用后清�
   expect(await map(activity, first)).toMatchObject({ enabled: false, open: false, opensAt: null, mine: { status: "pending" } });
   expect((await put(activity, president, true)).status).toBe(200);
   expect(await map(activity, first)).toMatchObject({ enabled: true, open: true, opensAt: null });
+});
+
+it("按活动预设和批量解锁未开放座位，兼容旧版座位图并保护已有申请", async () => {
+  const seeded = await p.create({ collection: "events", user: president.user, overrideAccess: false,
+    data: { title: "合成锁座活动", slug: "seat-block-" + suffix, game: mainScope, _status: "published" } });
+  const activity: Activity = { kind: "events", id: seeded.id };
+  activities.push(activity);
+  const seats = seatKeys.slice(0, 25);
+  expect((await block(activity, undefined, seats, true)).status).toBe(403);
+  expect((await block(activity, first, seats, true)).status).toBe(403);
+  expect((await block(activity, otherReviewer, seats, true)).status).toBe(403);
+  expect((await block(activity, reviewer, seats, true, "https://elsewhere.invalid")).status).toBe(403);
+  expect((await block(activity, reviewer, ["1-1", "1-1"], true)).status).toBe(400);
+  expect((await block(activity, reviewer, ["999-1"], true)).status).toBe(400);
+  expect((await block(activity, reviewer, seats, true)).status).toBe(200);
+  expect(await map(activity, reviewer)).toMatchObject({ enabled: false, blockedSeats: expect.arrayContaining(seats) });
+  expect((await map(activity, first)).blockedSeats).toEqual([]);
+  expect((await map(event, reviewer)).blockedSeats).toEqual([]);
+  expect((await put(activity, reviewer, true)).status).toBe(200);
+  const open = await map(activity, first);
+  expect(open.blockedSeats).toHaveLength(25);
+  expect(seats.every(seat => open.occupancy[seat] === "confirmed")).toBe(true);
+  const proof = await added(activity, first);
+  expect((await submit(activity, first, [seats[0]], [proof])).status).toBe(409);
+  expect((await map(activity, first)).drafts).toContain(proof);
+  expect((await block(activity, reviewer, seats.slice(0, 2), false)).status).toBe(200);
+  const submitted = await submit(activity, first, [seats[0]], [proof]);
+  expect(submitted.status).toBe(200);
+  const mine = (await submitted.json()).mine;
+  expect((await block(activity, reviewer, [seats[0], seats[1]], true)).status).toBe(409);
+  const afterConflict = await map(activity, first);
+  expect(afterConflict.occupancy[seats[0]]).toBe("pending");
+  expect(afterConflict.occupancy[seats[1]]).toBeUndefined();
+  expect((await block(activity, reviewer, [seats[0]], false)).status).toBe(200);
+  expect((await map(activity, first)).mine?.id).toBe(mine.id);
+  expect((await decide(activity, reviewer, mine.id, "confirmed")).status).toBe(200);
+  expect((await put(activity, reviewer, false)).status).toBe(200);
+  expect((await map(activity, reviewer)).occupancy[seats[0]]).toBe("confirmed");
+  expect((await put(activity, reviewer, true)).status).toBe(200);
+  expect((await map(activity, first)).blockedSeats).toHaveLength(23);
+});
+
+it("社群活动锁座与成员选座并发时，同一座位只保留一种占用", async () => {
+  const activity = await extraActivity("block-race", "community-posts");
+  const proof = await added(activity, second);
+  const [locked, submitted] = await Promise.all([
+    block(activity, reviewer, ["12-1"], true), submit(activity, second, ["12-1"], [proof]),
+  ]);
+  expect([locked.status, submitted.status].sort()).toEqual([200, 409]);
+  const state = await map(activity, second);
+  if (locked.status === 200) {
+    expect(state.blockedSeats).toContain("12-1");
+    expect(state.mine).toBeNull();
+    expect(state.drafts).toContain(proof);
+    expect((await block(activity, reviewer, ["12-1"], false)).status).toBe(200);
+    expect((await submit(activity, second, ["12-1"], [proof])).status).toBe(200);
+  } else {
+    expect(state.blockedSeats).not.toContain("12-1");
+    expect(state.mine?.status).toBe("pending");
+    expect((await block(activity, reviewer, ["12-1"], true)).status).toBe(409);
+  }
+  expect((await map(activity, second)).occupancy["12-1"]).toBe("pending");
 });

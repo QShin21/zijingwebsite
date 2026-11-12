@@ -26,12 +26,14 @@ export const seatTone: Record<SeatStatus, Tone> = { pending: "warning", confirme
 const recordState: Record<SeatStatus, string> = { pending: "pending", confirmed: "approved", rejected: "rejected" };
 
 /** Seat counts for the overview: pending holds, confirmed locks and what is still free. */
-export function seatCounts(state: Pick<SeatingState, "rows" | "occupancy">) {
+export function seatCounts(state: Pick<SeatingState, "rows" | "occupancy"> & Partial<Pick<SeatingState, "blockedSeats">>) {
   const total = state.rows.reduce((sum, row) => sum + row.count, 0);
-  const values = Object.values(state.occupancy);
+  const blockedSeats = new Set(state.blockedSeats || []);
+  const values = Object.entries(state.occupancy).filter(([seat]) => !blockedSeats.has(seat)).map(([, status]) => status);
   const pending = values.filter((value) => value === "pending").length;
   const confirmed = values.filter((value) => value === "confirmed").length;
-  return { total, pending, confirmed, free: Math.max(0, total - pending - confirmed) };
+  const blocked = blockedSeats.size;
+  return { total, pending, confirmed, blocked, free: Math.max(0, total - pending - confirmed - blocked) };
 }
 
 /**
@@ -159,6 +161,7 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
   const [notice, setNotice] = useState("");
   const [confirming, setConfirming] = useState<number | null>(null);
   const [zoom, setZoom] = useState(0);
+  const [selected, setSelected] = useState<string[]>([]);
   const [openingTime, setOpeningTime] = useState<string | null>(null);
   const lock = useRef(false);
   const ticket = useRef(0);
@@ -183,6 +186,7 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
       if (!alive.current || signal?.aborted || current !== ticket.current) return;
       setData(records);
       setLayout(seats);
+      setSelected([]);
     },
     [endpoint],
   );
@@ -194,6 +198,7 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
       setData(undefined);
       setLayout(undefined);
       setConfirming(null);
+      setSelected([]);
     }
   }, []);
 
@@ -266,8 +271,21 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
     });
   }
 
+  function setBlocks(blocked: boolean) {
+    if (!layout) return;
+    const blockedSeats = new Set(layout.blockedSeats || []);
+    const seats = selected.filter(seat => blockedSeats.has(seat) === !blocked);
+    if (!seats.length) return;
+    void act(blocked ? "正在锁定座位" : "正在解锁座位", async () => {
+      await seatRequest(endpoint, seatJSON("POST", { action: "block", seats, blocked }));
+      return `已${blocked ? "锁定" : "解锁"} ${seats.length} 个座位。`;
+    });
+  }
+
   const counts = layout ? seatCounts(layout) : null;
   const disabled = loading || Boolean(busy);
+  const lockedSelection = selected.filter(seat => layout?.blockedSeats?.includes(seat)).length;
+  const availableSelection = selected.length - lockedSelection;
   return (
     <div className={styles.workbench} aria-busy={disabled}>
       {data && (
@@ -310,21 +328,32 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
             <span>已确认锁定</span>
           </li>
           <li>
+            <strong>{counts.blocked}</strong>
+            <span>未开放</span>
+          </li>
+          <li>
             <strong>{counts.free}</strong>
             <span>剩余可选 / {counts.total}</span>
           </li>
         </ul>
       )}
 
-      {layout && layout.enabled && (
+      {layout && (
         <details className={`${work.disclosure} ${styles.overview}`} open>
-          <summary>座位占用总览</summary>
+          <summary>管理未开放座位</summary>
+          <p className={styles.blockHint}>点选空座锁定，或点选未开放的座位解锁。已有申请的座位保留原状态。</p>
           <div className={styles.mapBlock}>
             <div className={styles.mapTools}>
               <SeatLegend />
               <SeatZoom zoom={zoom} onChange={setZoom} />
             </div>
-            <SeatMap state={layout} selected={[]} editable={false} zoom={zoom} label="座位占用总览" />
+            <SeatMap state={layout} selected={selected} editable={!disabled} manage zoom={zoom} label="管理未开放座位" toggle={seat => setSelected(current => current.includes(seat) ? current.filter(value => value !== seat) : [...current, seat])} />
+          </div>
+          <div className={styles.blockControls}>
+            <span className={styles.blockHint}>已选 {availableSelection} 个空座、{lockedSelection} 个未开放座位</span>
+            <button type="button" className={buttonClass("primary", "small")} disabled={disabled || !availableSelection} onClick={() => setBlocks(true)}>锁定所选空座</button>
+            <button type="button" className={buttonClass("ghost", "small")} disabled={disabled || !lockedSelection} onClick={() => setBlocks(false)}>解锁所选座位</button>
+            <button type="button" className={buttonClass("ghost", "small")} disabled={disabled || !selected.length} onClick={() => setSelected([])}>清除选择</button>
           </div>
         </details>
       )}

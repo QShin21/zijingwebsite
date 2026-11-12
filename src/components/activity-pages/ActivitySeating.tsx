@@ -16,19 +16,20 @@ import { buttonClass } from "@/components/v2/ui";
 import { SeatRequestError, seatJSON, seatRequest } from "./seat-request";
 import styles from "./ActivitySeating.module.css";
 
-export type SeatVisual = "available" | "selected" | "pending" | "confirmed";
+export type SeatVisual = "available" | "selected" | "pending" | "confirmed" | "blocked";
 export const seatLegend: readonly (readonly [SeatVisual, string])[] = [
   ["available", "可选"],
   ["selected", "已选"],
   ["pending", "待审核"],
   ["confirmed", "已确认"],
+  ["blocked", "未开放"],
 ];
 /** Seat sizes (px) for the three zoom steps. Even the compact step keeps a 24px target pitch. */
 export const seatZooms = [20, 26, 34] as const;
 export const seatGap = 4;
 const zoomNames = ["紧凑", "标准", "放大"];
 const proofTypes = ["image/jpeg", "image/png", "image/webp"];
-type SeatLayout = Pick<SeatingState, "rows" | "occupancy">;
+type SeatLayout = Pick<SeatingState, "rows" | "occupancy"> & Partial<Pick<SeatingState, "blockedSeats">>;
 
 /** Widest zoom whose whole board fits `width`; narrow screens keep the touch-friendly standard step and scroll. */
 export function fittedZoom(rows: SeatLayout["rows"], width: number) {
@@ -82,6 +83,7 @@ export function SeatMap({
   toggle,
   zoom = 1,
   label = "座位图",
+  manage = false,
 }: {
   state: SeatLayout;
   selected: readonly string[];
@@ -89,10 +91,13 @@ export function SeatMap({
   toggle?: (seat: string) => void;
   zoom?: number;
   label?: string;
+  manage?: boolean;
 }) {
   const [focused, setFocused] = useState("");
   const keys = state.rows.flatMap(({ row, count }) => Array.from({ length: count }, (_, index) => `${row}-${index + 1}`));
-  const first = focused && keys.includes(focused) && !state.occupancy[focused] ? focused : keys.find((seat) => !state.occupancy[seat]);
+  const blocked = new Set(state.blockedSeats || []);
+  const selectable = (seat: string) => !state.occupancy[seat] || (manage && blocked.has(seat));
+  const first = focused && keys.includes(focused) && selectable(focused) ? focused : keys.find(selectable);
 
   function moveFocus(event: KeyboardEvent<HTMLDivElement>) {
     if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key) || !(event.target instanceof HTMLButtonElement)) return;
@@ -143,20 +148,21 @@ export function SeatMap({
                   const seat = `${row.row}-${index + 1}`;
                   const taken = state.occupancy[seat];
                   const picked = selected.includes(seat);
-                  const value: SeatVisual = taken || (picked ? "selected" : "available");
+                  const value: SeatVisual = blocked.has(seat) ? "blocked" : taken || (picked ? "selected" : "available");
                   return (
                     <button
                       type="button"
                       key={seat}
                       data-seat={seat}
                       data-state={value}
+                      data-picked={picked ? "true" : undefined}
                       data-row={row.row}
                       data-column={row.offset + index}
                       className={styles.seat}
-                      disabled={!editable || Boolean(taken)}
+                      disabled={!editable || !selectable(seat)}
                       tabIndex={seat === first ? 0 : -1}
-                      aria-pressed={taken ? undefined : picked}
-                      aria-label={`${seatLabel(seat)}${accent ? " · 中心区" : ""} · ${seatLegend.find(([key]) => key === value)?.[1]}`}
+                      aria-pressed={selectable(seat) ? picked : undefined}
+                      aria-label={`${seatLabel(seat)}${accent ? " · 中心区" : ""} · ${seatLegend.find(([key]) => key === value)?.[1]}${picked && value === "blocked" ? " · 已选" : ""}`}
                       title={seatLabel(seat)}
                       onFocus={() => setFocused(seat)}
                       onClick={() => toggle?.(seat)}

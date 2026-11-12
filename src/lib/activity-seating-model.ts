@@ -68,6 +68,7 @@ export type SeatingState = SeatingAvailability & {
   proofLimit: number;
   proofBytes: number;
   occupancy: Partial<Record<string, Exclude<SeatStatus, "rejected">>>;
+  blockedSeats: string[];
   mine: SeatRequest | null;
   drafts: string[];
 };

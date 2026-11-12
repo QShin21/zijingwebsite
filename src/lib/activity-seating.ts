@@ -226,14 +226,17 @@ export async function seatingState(p: Payload, activity: SeatActivity, user: Use
   const state: SeatingState = {
     ...availability(activity, setting), loggedIn,
     canReview: canReviewActivitySeats(user, activity.game), title: activity.title, rows: seatRows,
-    seatLimit, proofLimit: seatProofLimit, proofBytes: seatProofBytes, occupancy: {}, mine: null, drafts: [],
+    seatLimit, proofLimit: seatProofLimit, proofBytes: seatProofBytes, occupancy: {}, blockedSeats: [], mine: null, drafts: [],
   };
   if (!setting) return state;
-  const [claims, mine, drafts] = await Promise.all([
-    setting.enabled ? pool(p).query<{ seat: string; status: ActiveStatus }>(
+  const [claims, blocks, mine, drafts] = await Promise.all([
+    setting.enabled || state.canReview ? pool(p).query<{ seat: string; status: ActiveStatus }>(
       `SELECT c.seat, r.status FROM activity_seat_claims c
        JOIN activity_seat_requests r ON r.id = c.request_id WHERE c.seating_id = $1`,
       [setting.id],
+    ) : null,
+    setting.enabled || state.canReview ? pool(p).query<{ seat: string }>(
+      `SELECT seat FROM activity_seat_blocks WHERE seating_id = $1 ORDER BY seat`, [setting.id],
     ) : null,
     loggedIn ? pool(p).query<RequestRow>(
       `SELECT ${rowFields} FROM activity_seat_requests
@@ -247,6 +250,9 @@ export async function seatingState(p: Payload, activity: SeatActivity, user: Use
     ) : null,
   ]);
   state.occupancy = Object.fromEntries(claims?.rows.map(({ seat, status }) => [seat, status]) || []);
+  state.blockedSeats = blocks?.rows.map(({ seat }) => seat) || [];
+  // Older released clients already treat confirmed seats as unavailable.
+  for (const seat of state.blockedSeats) state.occupancy[seat] = "confirmed";
   if (mine?.rows[0]) state.mine = requestDTO(mine.rows[0]);
   state.drafts = drafts?.rows.map(({ id }) => id) || [];
   return state;
@@ -267,6 +273,37 @@ export async function setSeating(p: Payload, activity: SeatActivity, user: User 
       [current.activity.id, enabled, opensAt],
     );
     return availability(current.activity, { enabled, opens_at: opensAt });
+  });
+}
+
+export async function setSeatBlocks(
+  p: Payload, activity: SeatActivity, user: User | null, seats: unknown, blocked: unknown,
+) {
+  await requireReviewer(p, activity, user);
+  if (typeof blocked !== "boolean" || !Array.isArray(seats) || !seats.length || seats.length > seatKeys.length ||
+      seats.some(seat => typeof seat !== "string" || !validSeats.has(seat)) || new Set(seats).size !== seats.length)
+    throw new APIError("请选择不同的有效座位和锁定状态", 400);
+  return transaction(p, async client => {
+    const current = await lockedActivity(p, activity, user, client);
+    assertLockedReviewer(current.activity, current.actor);
+    requirePublic(current.activity);
+    const column = scopeColumn(current.activity);
+    await client.query(`INSERT INTO activity_seatings (${column}, enabled) VALUES ($1, false)
+      ON CONFLICT (${column}) DO NOTHING`, [current.activity.id]);
+    const setting = await scope(p, current.activity, client);
+    if (!setting) throw new APIError("选座设置读取失败，请重试", 409);
+    if (blocked) {
+      const occupied = await client.query(
+        "SELECT 1 FROM activity_seat_claims WHERE seating_id = $1 AND seat = ANY($2::text[]) LIMIT 1",
+        [setting.id, seats],
+      );
+      if (occupied.rowCount) throw new APIError("部分座位已有申请，请刷新座位图后重新选择", 409);
+      await client.query(`INSERT INTO activity_seat_blocks (seating_id, seat, blocked_by)
+        SELECT $1, seat, $3 FROM unnest($2::text[]) AS seat ON CONFLICT DO NOTHING`, [setting.id, seats, current.actor.id]);
+    } else {
+      await client.query("DELETE FROM activity_seat_blocks WHERE seating_id = $1 AND seat = ANY($2::text[])", [setting.id, seats]);
+    }
+    return { blocked, seats };
   });
 }
 
@@ -295,10 +332,11 @@ export async function submitSeats(
     const existing = await activeRequest(client, setting.id, actor.id);
     if (existing) return requestDTO(existing);
     const busy = await client.query(
-      "SELECT 1 FROM activity_seat_claims WHERE seating_id = $1 AND seat = ANY($2::text[]) LIMIT 1",
+      `SELECT 1 FROM activity_seat_claims WHERE seating_id = $1 AND seat = ANY($2::text[])
+       UNION ALL SELECT 1 FROM activity_seat_blocks WHERE seating_id = $1 AND seat = ANY($2::text[]) LIMIT 1`,
       [setting.id, seats],
     );
-    if (busy.rowCount) throw new APIError("部分座位刚被选走，请刷新座位图后重新选择", 409);
+    if (busy.rowCount) throw new APIError("部分座位已被选走或暂未开放，请刷新座位图后重新选择", 409);
     const result = await client.query<RequestRow>(
       `INSERT INTO activity_seat_requests (seating_id, member_id, member_name, phone, seats, status)
        VALUES ($1, $2, $3, $4, $5, 'pending') RETURNING ${rowFields}`,

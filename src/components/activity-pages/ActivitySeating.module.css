@@ -392,6 +392,16 @@
     #3b3549;
   color: rgba(241, 238, 246, 0.62);
 }
+.seat[data-state="blocked"],
+.swatch[data-state="blocked"] {
+  border-color: #f18d8d;
+  background: repeating-linear-gradient(45deg, #542b3a 0 4px, #803c4a 4px 8px);
+  color: #ffe3e3;
+}
+.seat[data-state="blocked"][data-picked] {
+  outline: 2px solid #f3d6fa;
+  outline-offset: 2px;
+}
 .seat:enabled {
   cursor: pointer;
 }
@@ -658,6 +668,8 @@ button.chip:focus-visible {
 .overview > summary {
   font-size: 17px;
 }
+.blockControls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.blockHint { color: var(--z-muted); font-size: 14px; line-height: 1.6; }
 .proofGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));

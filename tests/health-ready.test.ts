@@ -31,6 +31,7 @@ function migratedIndexes(): IndexRow[] {
     ["activity_seatings_event_id_key", "activity_seatings", ["event_id"]],
     ["activity_seatings_post_id_key", "activity_seatings", ["post_id"]],
     ["activity_seat_claims_pkey", "activity_seat_claims", ["seating_id", "seat"]],
+    ["activity_seat_blocks_pkey", "activity_seat_blocks", ["seating_id", "seat"]],
     ["activity_seat_requests_active_idx", "activity_seat_requests", ["seating_id", "member_id"]],
   ].map(([name, table_name, columns]) => ({
     name: name as string, table_name: table_name as string, columns: columns as string[],
@@ -128,11 +129,11 @@ it.each([0, 2])("seating migration must exist exactly once: %s", async count => 
   seatingMigrationRows = count;
   expect((await GET()).status).toBe(503);
 });
-it.each(["activity_seatings", "activity_seat_claims", "activity_seat_requests", "activity_seat_proofs", "pending_uploads", "site_home_sections"])("missing seating/V2 structure is not ready: %s", async table => {
+it.each(["activity_seatings", "activity_seat_claims", "activity_seat_blocks", "activity_seat_requests", "activity_seat_proofs", "pending_uploads", "site_home_sections"])("missing seating/V2 structure is not ready: %s", async table => {
   unavailableProbe = "FROM " + table;
   expect((await GET()).status).toBe(503);
 });
-it.each(["activity_seatings_event_id_key", "activity_seatings_post_id_key", "activity_seat_claims_pkey", "activity_seat_requests_active_idx"])("missing seating unique index is not ready: %s", async name => {
+it.each(["activity_seatings_event_id_key", "activity_seatings_post_id_key", "activity_seat_claims_pkey", "activity_seat_blocks_pkey", "activity_seat_requests_active_idx"])("missing seating unique index is not ready: %s", async name => {
   catalog = catalog.filter(index => index.name !== name);
   expect((await GET()).status).toBe(503);
 });
