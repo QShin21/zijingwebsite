@@ -1,5 +1,11 @@
 # 部署、迁移与恢复
 
+## 2026-11-12 待审核选座申请取消
+
+北京时间 19:49:03，`main@b5707ff` 已部署到 `home.thuzijing.top`，构建 `YiHlCB83VjPvfMwJe7N9w`。新增迁移 `20261112_050000_activity_seat_cancellation` 记录取消时间；迁移前备份与迁移后的申请、占用、凭证及未开放座位计数均为 125、230、171、23。公网就绪、活动页和构建清单返回 200。
+
+服务器同机备份和应用回退脚本位于 `/srv/zijingwebsite/backups/seat-cancel-20261112-b5707ff`。小程序 0.5.9 开发版已上传，含取消申请及修改申请请求兼容修复。详见[发布记录](evidence/activity-seat-cancel-deployment-20261112.json)。
+
 ## 2026-11-12 待审核选座申请修改
 
 北京时间 19:39:58，`main@bf86300` 已部署到 `home.thuzijing.top`，构建 `ajZqV_Gz8oAI5cIXnuwwv`。新增迁移 `20261112_040000_activity_seat_revision` 为申请记录增加版本字段。迁移前备份与迁移后检查的选座申请、占用、凭证及未开放座位计数分别为 124、228、170、23。公网健康检查、活动页和构建清单返回 200。
