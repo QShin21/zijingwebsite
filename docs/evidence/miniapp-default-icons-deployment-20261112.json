@@ -1,0 +1,59 @@
+{
+  "deployedAt": "2026-11-12T16:12:49+08:00",
+  "branch": "new",
+  "applicationRevision": "ac32f08288aad30fba0e15da17b7157fe56126a4",
+  "previousApplicationRevision": "b1d7486b257b78b57bd4fc994da42dccfec02ce4",
+  "origin": "https://home.thuzijing.top",
+  "releaseDirectory": "/srv/zijingwebsite/releases/miniapp-icons-20261112-ac32f08",
+  "build": {
+    "id": "541kHp3fQc20q2pdNbuzz",
+    "matchedSourceFiles": 454,
+    "typeScriptPassed": true,
+    "manifestSha256": "1f0efb19e574d81f3478ce77da93e15d647c446b6484af77d7a07e554991aaed"
+  },
+  "scope": {
+    "pages": [
+      "mini program home community cards",
+      "mini program community directory",
+      "website community cards"
+    ],
+    "clientSourceTree": "3bb2bf6848331bd78f158571cd0d74f0959128fb",
+    "compatibleClient": "0.5.5",
+    "databaseMigrations": [],
+    "iconStorage": "Prepared public PNG files in the existing server media directory",
+    "priority": "Administrator upload, then matching publisher default, then CMS cover"
+  },
+  "checks": {
+    "changedFileLint": "passed",
+    "miniProgramLoader": "All five same-origin paths accepted by existing client code in a local harness",
+    "candidate": "Healthy against the previous isolated restore. All five prepared images decoded.",
+    "public": {
+      "/": 200,
+      "/health/ready": 200,
+      "/admin/login": 200,
+      "/api/miniapp/status": 200,
+      "unknownIconKey": 404,
+      "allFivePreparedImagesMatched": true
+    },
+    "nativeDevice": "Not exercised in this rollout"
+  },
+  "images": {
+    "format": "PNG",
+    "dimensions": [
+      512,
+      512
+    ],
+    "sha256": {
+      "honor-of-kings": "fd5b53632c67433a9e4232b1220da1b860e94636ded1395dbb94a5d869b6e732",
+      "cs2": "22e9798db448c7b8386e02a654b7353281fbe67b5bd262ce3c8bf31141e7cbf1",
+      "stardew-valley": "15510c66c7cdba7de992fd66ad6deea1f250376b544ba815411720a384402b8b",
+      "eggy-party": "4e02385ac917d39f19f61b65c3e6c008621414110b5ff43e6687356bedfd86a4",
+      "league-of-legends": "f66aa310fbb8ff714dbfb6fe3b24ffae13eab3917aa75de62fa0df26f662e7e4"
+    }
+  },
+  "rollback": {
+    "script": "/srv/zijingwebsite/backups/miniapp-icons-20261112-ac32f08/rollback.sh",
+    "previousReleaseRetained": true,
+    "executed": false
+  }
+}
