@@ -120,9 +120,11 @@ export type CampusSlide = {
 export function CampusReel({
   slides,
   title = "赛场瞬间",
+  showCaption = true,
 }: {
   slides: CampusSlide[];
   title?: string;
+  showCaption?: boolean;
 }) {
   const { ref, index, running, move, ...events } = useCampusMotion(
     slides.length,
@@ -136,6 +138,7 @@ export function CampusReel({
       {...events}
       className={styles.reel}
       data-running={running}
+      data-caption={showCaption}
       role="region"
       aria-label={title}
       aria-roledescription="轮播"
@@ -185,17 +188,19 @@ export function CampusReel({
           </span>
         )}
       </Link>
-      <div className={styles.reelCaption}>
-        <Link href={slide.href}>
-          {slide.title}
-          <Icon name="arrow" size={16} />
-        </Link>
-        {slide.source && (
-          <a href={slide.source} target="_blank" rel="noopener noreferrer">
-            赛事摄影来源
-          </a>
-        )}
-      </div>
+      {showCaption && (
+        <div className={styles.reelCaption}>
+          <Link href={slide.href}>
+            {slide.title}
+            <Icon name="arrow" size={16} />
+          </Link>
+          {slide.source && (
+            <a href={slide.source} target="_blank" rel="noopener noreferrer">
+              赛事摄影来源
+            </a>
+          )}
+        </div>
+      )}
     </div>
   );
 }

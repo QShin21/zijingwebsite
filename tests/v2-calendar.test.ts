@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Payload } from 'payload';
 import type { User } from '../src/payload-types';
 vi.mock('../src/lib/content-promotions',()=>({promotedContent:async()=>[]}));
-import { getCalendar, signupSummary } from '../src/lib/v2/events';
+import { getCalendar, getCalendarDays, signupSummary } from '../src/lib/v2/events';
 const user={id:2,roles:['member'],accountStatus:'active'} as User;
 const pub={_status:'published',signupForm:{enabled:false},lifecycle:'scheduled'};
 const game={id:8,slug:'sample',title:'合成社群',_status:'published'};
@@ -36,4 +36,28 @@ it('signupOpen filters effective state before pagination and keeps totals consis
  expect(second.docs[0].signup.mode).toBe('external');
  expect((await getCalendar(p,null,{signupOpen:false})).totalDocs).toBe(5);
  await expect(getCalendar(p,null,{signupOpen:'yes'})).rejects.toMatchObject({status:400});
+});
+
+
+it('marks the full Beijing month beyond the first page and distinguishes own signups', async () => {
+ const rows=Array.from({length:60},(_,i)=>({id:i+1,...pub,title:'合成'+i,startAt:'2026-11-14T10:00:00Z',endAt:'2026-11-14T11:00:00Z'}));
+ rows.push({id:61,...pub,title:'下月',startAt:'2026-11-30T16:30:00Z',endAt:'2026-12-01T01:00:00Z'});
+ const p=pWith(rows);
+ expect(await getCalendarDays(p,user,{month:'2026-11',scope:'mine',signupOpen:true,page:2,limit:1})).toEqual([{date:'2026-11-14',count:60,mine:1}]);
+ expect(await getCalendarDays(p,null,{month:'2026-11'})).toEqual([{date:'2026-11-14',count:60,mine:0}]);
+});
+it('filters a clicked Beijing day before pagination and rejects impossible dates', async () => {
+ const p=pWith([
+  {id:1,...pub,title:'前一天',startAt:'2026-11-13T15:30:00Z'},
+  {id:2,...pub,title:'当天',startAt:'2026-11-13T16:30:00Z'},
+  {id:3,...pub,title:'当天第二场',startAt:'2026-11-14T10:00:00Z'},
+ ]);
+ const result=await getCalendar(p,user,{range:'month',month:'2026-11',day:'2026-11-14',limit:1,page:2});
+ expect(result).toMatchObject({totalDocs:2,totalPages:2});
+ expect(result.docs[0].title).toBe('当天第二场');
+ for(const day of ['2026-11-31','2026-12-01','invalid']) await expect(getCalendar(p,user,{range:'month',month:'2026-11',day})).rejects.toMatchObject({status:400});
+});
+it('omits cancelled events from calendar markers', async () => {
+ const p=pWith([{id:1,...pub,title:'取消',lifecycle:'cancelled',startAt:'2026-11-14T10:00:00Z'}]);
+ expect(await getCalendarDays(p,user,{month:'2026-11'})).toEqual([]);
 });

@@ -375,27 +375,17 @@ function MemberHome({ home }: { home: HomeResponse }) {
                   className={styles.highlightsPanel}
                   aria-label={highlights.title}
                 >
-                  <HomeReel home={home} title={highlights.title} />
-                  {home.highlights?.length ? (
-                    <div className={styles.highlightLinks}>
-                      {home.highlights.map((item) => (
-                        <Link key={item.item.key} href={item.item.href}>
-                          <span>{item.item.title}</span>
-                          <Icon name="arrow" size={16} />
-                        </Link>
-                      ))}
-                    </div>
-                  ) : null}
-                  <Link className={styles.allHighlights} href="/news">
-                    全部动态 <Icon name="arrow" size={16} />
-                  </Link>
+                  <HomeReel
+                    home={home}
+                    title={highlights.title}
+                    showCaption={false}
+                  />
                 </section>
               </div>
             )}
           </div>
           <div className={styles.memberRow} data-home-row="club">
             {block("promoted")}
-            {block("about")}
           </div>
           {communities && (
             <div
@@ -433,6 +423,9 @@ function MemberHome({ home }: { home: HomeResponse }) {
               </PixelGames>
             </div>
           )}
+          <div className={styles.memberRow} data-home-row="about">
+            {block("about")}
+          </div>
         </div>
       </Wrap>
     </>

@@ -424,7 +424,7 @@
   padding-left: 14px;
 }
 .topLinks {
-  gap: 0;
+  gap: 12px;
 }
 .topLink {
   padding: 8px 11px;
@@ -520,6 +520,9 @@
   -webkit-backdrop-filter: none;
 }
 @media (max-width: 1199px) {
+  .topLinks {
+    gap: 8px;
+  }
   .wordmark small {
     display: none;
   }

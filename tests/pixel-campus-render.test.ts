@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { HomeResponse, EventCard } from "../src/lib/v2/types";
 import { CampusHero, HomeReel, PixelGames } from "../src/components/v2/Campus";
+import { ScheduleCalendar } from "../src/components/v2/ScheduleCalendar";
 import { SuccessMark } from "../src/components/v2/SuccessMark";
 import { PixelCorners } from "../src/components/v2/PixelCorners";
 import { TopBar, MobileTabs, Footer } from "../src/components/v2/Shell";
@@ -254,12 +255,14 @@ it("pairs only the signed-in homepage and combines all community entry points at
     'id="notices"',
     'id="highlights"',
     'data-home-row="games"',
+    'data-home-row="about"',
   ].map((key) => member.indexOf(key));
   expect(positions.every((position) => position >= 0)).toBe(true);
   expect(positions).toEqual([...positions].sort((a, b) => a - b));
   expect(member.match(/id="games-title"/g)).toHaveLength(1);
   expect(member).not.toContain('id="communities-title"');
   expect(member).toContain("/account?view=applications");
+  expect(member).toContain('data-caption="false"');
   vi.mocked(read).mockResolvedValue({
     ...data,
     viewer: null,
@@ -271,4 +274,30 @@ it("pairs only the signed-in homepage and combines all community entry points at
   expect(guest.indexOf('id="spotlight"')).toBeLessThan(
     guest.indexOf('id="upcoming"'),
   );
+});
+
+it("renders leap-month dates and distinct personal, event, today and selected markers", () => {
+  const html = renderToStaticMarkup(
+    createElement(ScheduleCalendar, {
+      month: "2028-02",
+      today: "2028-02-14",
+      selectedDay: "2028-02-15",
+      days: [
+        { date: "2028-02-14", count: 3, mine: 1 },
+        { date: "2028-02-15", count: 2, mine: 0 },
+      ],
+      href: (patch) =>
+        `/events?${new URLSearchParams(Object.entries(patch).filter((entry): entry is [string, string] => typeof entry[1] === "string"))}`,
+    }),
+  );
+  expect(html).toContain("2028年2月29日，0场活动");
+  expect(html).not.toContain("2028年2月30日");
+  expect(html).toContain("2028年2月14日，3场活动，已报名1场");
+  expect(html).toContain('data-mine="true"');
+  expect(html).toContain('data-events="true"');
+  expect(html).toContain('data-today="true"');
+  expect(html).toContain('aria-current="date"');
+  expect(html).toContain("month=2028-01");
+  expect(html).toContain("month=2028-03");
+  expect(html).toContain("day=2028-02-15#event-results");
 });

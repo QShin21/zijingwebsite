@@ -188,9 +188,11 @@ export function PixelGames({
 export function HomeReel({
   home,
   title,
+  showCaption,
 }: {
   home: HomeResponse;
   title?: string;
+  showCaption?: boolean;
 }) {
   const slides: CampusSlide[] = [];
   for (const feed of home.highlights || []) {
@@ -237,5 +239,11 @@ export function HomeReel({
       },
     );
   }
-  return <CampusReel slides={slides.slice(0, 6)} title={title} />;
+  return (
+    <CampusReel
+      slides={slides.slice(0, 6)}
+      title={title}
+      showCaption={showCaption}
+    />
+  );
 }

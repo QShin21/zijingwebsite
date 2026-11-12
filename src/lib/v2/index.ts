@@ -2,7 +2,7 @@
 export * from "./types";
 export { getSession } from "./identity";
 export { getHome } from "./home";
-export { getCalendar, getEventDetail } from "./events";
+export { getCalendar, getCalendarDays, getEventDetail } from "./events";
 export { getFeed, getArticle } from "./feed";
 export { getCommunities, getCommunity, getCommunityHeader, getContacts, getShowcase, getCommunityPosts } from "./community";
 export { getTeams, getTeam, getHonors } from "./teams";

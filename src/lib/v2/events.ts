@@ -39,7 +39,7 @@ export async function submittedKeys(p: Payload, viewer: User | null): Promise<Se
     return match ? [`${match[1] === "events" ? "club" : "community"}:${match[2]}`] : [];
   }));
 }
-export async function getCalendar(p: Payload, viewer: User | null, input: Input = {}): Promise<Page<EventCard>> {
+async function calendarCards(p: Payload, viewer: User | null, input: Input = {}): Promise<EventCard[]> {
   viewer = await refreshViewer(p, viewer);
   const scope = String(input.scope ?? "all"), range = String(input.range ?? "upcoming"), category = txt(input.category);
   // HTTP query strings and server boolean callers share the same strict flag.
@@ -51,6 +51,8 @@ export async function getCalendar(p: Payload, viewer: User | null, input: Input 
   if (category && !["比赛", "观赛", "交流", "训练", "其他"].includes(category)) throw new APIError("活动类型无效", 400);
   const month = String(input.month ?? "");
   if (range === "month" && !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw new APIError("请选择有效月份", 400);
+  const day = txt(input.day);
+  if (day && (range !== "month" || !/^\d{4}-\d{2}-\d{2}$/.test(day) || !day.startsWith(`${month}-`) || !Number.isFinite(Date.parse(`${day}T00:00:00Z`)) || new Date(`${day}T00:00:00Z`).toISOString().slice(0, 10) !== day)) throw new APIError("请选择有效日期", 400);
   const now = Date.now(), cutoff = now - 30 * 86400000, nowISO = new Date(now).toISOString(), cutoffISO = new Date(cutoff).toISOString();
   const monthStart = range === "month" ? new Date(`${month}-01T00:00:00+08:00`).toISOString() : null;
   const nextMonth = range === "month" ? new Date(Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5)), 1) - 8 * 3600_000).toISOString() : null;
@@ -67,7 +69,7 @@ export async function getCalendar(p: Payload, viewer: User | null, input: Input 
     ] };
   };
   const game = input.community ? await findRow(p, "games", String(input.community), ["slug", "_status", "demo"], null, publicWhere()) : null;
-  if (input.community && !game) return paginate([], input);
+  if (input.community && !game) return [];
   const gameWhere: Where = game ? { game: { equals: game.id } } : {};
   const teamID = input.team == null ? null : rel(input.team);
   if (input.team != null && !teamID) throw new APIError("代表队筛选无效", 400);
@@ -88,6 +90,7 @@ export async function getCalendar(p: Payload, viewer: User | null, input: Input 
   communityRows = communityRows.filter(row => visibleParents.has(rel(row.game) ?? 0));
   let cards = await Promise.all([...clubRows.map(row => eventCard(p, row, "club", viewer, submissions)), ...communityRows.map(row => eventCard(p, row, "community", viewer, submissions, promotedIDs.has(row.id)))]);
   cards = cards.filter(card => {
+    if (day && (!card.startAt || new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Shanghai" }).format(new Date(card.startAt)) !== day)) return false;
     if (scope === "mine" && !submissions.has(card.key)) return false;
     if (signupOpen && card.signup.state !== "open") return false;
     if (range === "month") return card.startAt ? new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit" }).format(new Date(card.startAt)) === month : false;
@@ -95,7 +98,26 @@ export async function getCalendar(p: Payload, viewer: User | null, input: Input 
     return range === "past" ? ["ended", "cancelled"].includes(card.state) || undatedOld : ["upcoming", "live", "postponed"].includes(card.state) && !undatedOld;
   });
   cards.sort((a, b) => range === "past" ? (b.startAt ?? b.publishedAt ?? "").localeCompare(a.startAt ?? a.publishedAt ?? "") : a.startAt && b.startAt ? a.startAt.localeCompare(b.startAt) : a.startAt ? -1 : b.startAt ? 1 : (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""));
-  return paginate(cards, input);
+  return cards;
+}
+export async function getCalendar(p: Payload, viewer: User | null, input: Input = {}): Promise<Page<EventCard>> {
+  return paginate(await calendarCards(p, viewer, input), input);
+}
+
+/** Month markers use all visible candidates, independent of the timeline's page and scope. */
+export async function getCalendarDays(p: Payload, viewer: User | null, input: Input = {}) {
+  const cards = await calendarCards(p, viewer, { ...input, range: "month", scope: "all", signupOpen: false, day: undefined });
+  const days = new Map<string, { date: string; count: number; mine: number }>();
+  const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Shanghai" });
+  for (const card of cards) {
+    if (!card.startAt || card.state === "cancelled") continue;
+    const key = date.format(new Date(card.startAt));
+    const marker = days.get(key) ?? { date: key, count: 0, mine: 0 };
+    marker.count++;
+    if (card.signup.viewerSubmitted) marker.mine++;
+    days.set(key, marker);
+  }
+  return [...days.values()].sort((a, b) => a.date.localeCompare(b.date));
 }
 export async function getEventDetail(p: Payload, viewer: User | null, input: Input): Promise<EventDetail> {
   viewer = await refreshViewer(p, viewer);
