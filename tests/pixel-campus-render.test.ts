@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { HomeResponse } from "../src/lib/v2/types";
 import { CampusHero, HomeReel, PixelGames } from "../src/components/v2/Campus";
+import { PixelCorners } from "../src/components/v2/PixelCorners";
 import { TopBar, MobileTabs, Footer } from "../src/components/v2/Shell";
 
 vi.mock("next/image", () => ({
@@ -140,5 +141,22 @@ describe("real campus components preserve functional entry points", () => {
       "我的世界",
     ])
       expect(html).toContain(game);
+  });
+});
+
+describe("corner ornaments", () => {
+  it("keeps four-cell pieces stable across server renders and varies neighbouring cards", () => {
+    const render = (seed: string) =>
+      renderToStaticMarkup(createElement(PixelCorners, { seed }));
+    const neighbours = ["event:11", "event:12", "event:13", "event:14"].map(
+      render,
+    );
+    expect(new Set(neighbours).size).toBe(4);
+    for (let i = 0; i < neighbours.length; i++) {
+      expect(neighbours[i]).toBe(render(`event:${11 + i}`));
+      expect(neighbours[i].match(/<rect /g)).toHaveLength(8);
+      expect(neighbours[i]).toContain('aria-hidden="true"');
+      expect(neighbours[i]).not.toContain("<a");
+    }
   });
 });

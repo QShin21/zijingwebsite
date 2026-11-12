@@ -1,3 +1,4 @@
+import { PixelCorners } from "./PixelCorners";
 import Link from "next/link";
 import { CommunityGameIcon } from "../CommunityGameIcon";
 import type {
@@ -121,6 +122,7 @@ export function MatchCard({
       data-state={event.state}
       data-promotion-source={promotionSource(event.ref, event.promoted)}
     >
+      <PixelCorners seed={event.key} variant={variant === "spotlight" ? "coral" : "mint"} />
       <DateBlock iso={event.startAt} size={variant === "spotlight" ? "lg" : variant === "tile" ? "sm" : "md"} tone={variant === "spotlight" ? "accent" : "plain"} />
       <div className={styles.matchBody}>
         <div className={styles.matchTop}>

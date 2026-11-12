@@ -635,23 +635,3 @@
 .themeOptions button:hover {
   background: var(--z-raised);
 }
-.footer::after {
-  content: "";
-  position: absolute;
-  right: 56px;
-  top: 16px;
-  width: 6px;
-  height: 6px;
-  background: var(--z-accent);
-  opacity: 0.4;
-  pointer-events: none;
-  box-shadow:
-    6px 0 0 var(--z-accent),
-    0 6px 0 var(--z-accent),
-    30px 14px 0 var(--z-muted),
-    36px 14px 0 var(--z-muted),
-    36px 20px 0 var(--z-muted);
-}
-:global(:root[data-z-theme="simple"]) .footer::after {
-  display: none;
-}

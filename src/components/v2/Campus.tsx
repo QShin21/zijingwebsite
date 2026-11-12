@@ -2,11 +2,13 @@ import Link from "next/link";
 import type { HomeResponse } from "@/lib/v2";
 import { ButtonLink, Img } from "./ui";
 import { Icon } from "./Icon";
+import { PixelCorners } from "./PixelCorners";
 import { formatShort } from "./format";
 import {
   CampusCover,
   CampusNews,
   CampusReel,
+  PixelGameIcon,
   type CampusSlide,
 } from "./CampusMotion";
 import styles from "./campus.module.css";
@@ -128,11 +130,17 @@ const games = [
 ];
 export function PixelGames({
   communities,
+  compact = false,
 }: {
   communities: HomeResponse["communities"];
+  compact?: boolean;
 }) {
   return (
-    <section className={styles.games} aria-labelledby="games-title">
+    <section
+      className={`${styles.games} ${compact ? styles.gamesCompact : ""}`}
+      aria-labelledby="games-title"
+    >
+      {compact && <PixelCorners variant="mint" seed="games" />}
       <div className={styles.gameIntro}>
         <h2 id="games-title">
           你的热爱
@@ -156,15 +164,7 @@ export function PixelGames({
               aria-label={`${game.name} · 寻找游戏社群`}
             >
               <span>
-                <img
-                  className={styles.gameIcon}
-                  src={`/pixel-campus/game-icons/${game.file}`}
-                  width="72"
-                  height="72"
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                />
+                <PixelGameIcon src={`/pixel-campus/game-icons/${game.file}`} />
               </span>
               <strong>{game.name}</strong>
             </Link>

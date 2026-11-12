@@ -112,73 +112,6 @@
     transparent 85%
   );
 }
-.fireflies {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  pointer-events: none;
-}
-.fireflies i {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: #f3dba1;
-  opacity: 0.6;
-  left: 46%;
-  top: 28%;
-  box-shadow: 8px 8px 0 #f3dba144;
-  animation: pixelDrift 7s steps(8, end) infinite alternate;
-  animation-play-state: paused;
-}
-.fireflies i:nth-child(2n) {
-  background: #b1e1d4;
-  width: 3px;
-  height: 3px;
-}
-.fireflies i:nth-child(2) {
-  left: 61%;
-  top: 48%;
-  animation-delay: -3s;
-}
-.fireflies i:nth-child(3) {
-  left: 82%;
-  top: 68%;
-  animation-delay: -5s;
-}
-.fireflies i:nth-child(4) {
-  left: 35%;
-  top: 78%;
-  animation-delay: -2s;
-}
-.fireflies i:nth-child(5) {
-  left: 92%;
-  top: 18%;
-  animation-delay: -4s;
-}
-.fireflies i:nth-child(6) {
-  left: 70%;
-  top: 86%;
-  animation-delay: -6s;
-}
-.fireflies i:nth-child(7) {
-  left: 16%;
-  top: 18%;
-  animation-delay: -1s;
-}
-.fireflies i:nth-child(8) {
-  left: 53%;
-  top: 66%;
-  animation-delay: -2s;
-}
-.cover[data-running="true"] .fireflies i {
-  animation-play-state: running;
-}
-@keyframes pixelDrift {
-  to {
-    transform: translate(12px, -24px);
-    opacity: 0.15;
-  }
-}
 .newsWrap {
   background: var(--z-surface);
   border-block: 1px solid var(--z-line);
@@ -291,7 +224,8 @@
   align-items: center;
   gap: 30px;
   padding: 26px 0;
-  border-bottom: 1px solid var(--z-line-strong);
+  border-top: 1px solid var(--z-line-strong);
+  margin-bottom: 24px;
 }
 .gameIntro {
   flex: 0 0 160px;
@@ -368,7 +302,7 @@
 }
 .photo {
   display: block;
-  aspect-ratio: 3/2;
+  aspect-ratio: 16/9;
   overflow: hidden;
   background: var(--z-raised);
 }
@@ -414,7 +348,6 @@
   min-height: 0;
 }
 :global(:root[data-z-theme="simple"]) .scene,
-:global(:root[data-z-theme="simple"]) .fireflies,
 :global(:root[data-z-theme="simple"]) .artCredit {
   display: none;
 }
@@ -577,9 +510,6 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .fireflies {
-    display: none;
-  }
   .game:hover > span,
   .controls button:active {
     transform: none;
@@ -599,124 +529,128 @@
   }
 }
 
+.iconArt {
+  position: relative;
+  display: block;
+  width: 64px;
+  height: 64px;
+}
+.iconArt canvas,
 .gameIcon {
   display: block;
-  width: 72px;
-  height: 72px;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   image-rendering: pixelated;
-  filter: blur(0.4px) saturate(0.9);
 }
-/* Scattered pixels gather at the edges, leaving reading and hit areas clear. */
-.fragments {
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  pointer-events: none;
-}
-.fragments i,
-.games::before,
-.games::after,
-.reel::after {
-  position: absolute;
-  display: block;
-  width: 6px;
-  height: 6px;
-  background: var(--z-accent);
-  box-shadow:
-    6px 0 0 var(--z-accent),
-    0 6px 0 var(--z-accent),
-    32px 14px 0 var(--z-muted),
-    38px 14px 0 var(--z-muted),
-    38px 20px 0 var(--z-muted),
-    70px -6px 0 var(--z-accent),
-    76px -6px 0 var(--z-accent),
-    70px 0 0 var(--z-accent),
-    104px 18px 0 var(--z-muted),
-    110px 18px 0 var(--z-muted);
-  pointer-events: none;
-}
-.fragments i:first-child {
-  left: max(18px, calc((100% - var(--z-max)) / 2));
-  bottom: 28px;
-  opacity: 0.66;
-}
-.fragments i:nth-child(2) {
-  right: 20px;
-  top: 46px;
-  transform: rotate(90deg);
-  opacity: 0.75;
-}
-.fragments i:last-child {
-  right: 130px;
-  bottom: 70px;
-  transform: rotate(-90deg);
-  opacity: 0.5;
-}
-.games {
-  position: relative;
-}
-.games::before,
-.games::after {
-  content: "";
-  opacity: 0.55;
-}
-.games::before {
-  left: -18px;
-  top: 5px;
-  transform: scale(1);
-  transform-origin: left top;
-}
-.games::after {
-  right: 92px;
-  bottom: 8px;
-  transform: rotate(180deg);
-  transform-origin: left top;
-}
-.reel::after {
-  content: "";
-  top: 3px;
-  right: 22px;
-  transform: rotate(90deg);
-  transform-origin: left top;
-  opacity: 0.55;
-}
-:global(:root[data-z-theme="simple"]) .fragments,
-:global(:root[data-z-theme="simple"]) .games::before,
-:global(:root[data-z-theme="simple"]) .games::after,
-:global(:root[data-z-theme="simple"]) .reel::after {
+.iconArt canvas {
   display: none;
 }
+.iconArt[data-ready] canvas {
+  display: block;
+}
+.iconArt[data-ready] img {
+  display: none;
+}
+.cover[data-running="true"] .scene {
+  animation: campusBreathe 12s ease-in-out infinite alternate;
+}
+@keyframes campusBreathe {
+  to {
+    transform: scale(1.025);
+  }
+}
 @media (max-width: 900px) {
-  .gameIcon {
+  .iconArt {
     width: 48px;
     height: 48px;
   }
 }
 @media (max-width: 600px) {
-  .gameIcon {
+  .iconArt {
     width: 64px;
     height: 64px;
   }
-  .fragments i:first-child {
-    bottom: 40px;
-    left: 16px;
-    transform: scale(0.8);
-    transform-origin: left bottom;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene {
+    animation: none !important;
   }
-  .fragments i:nth-child(2) {
-    top: 28px;
-    opacity: 0.5;
+}
+
+/* A compact final-row companion for the club introduction. */
+.gamesCompact {
+  position: relative;
+  display: block;
+  min-width: 0;
+  padding: 22px;
+  margin: 0;
+  border: 1px solid var(--z-line-strong);
+  background: color-mix(in srgb, var(--z-raised) 80%, var(--z-surface));
+}
+.gamesCompact .gameIntro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.gamesCompact .gameIntro h2 {
+  margin: 0;
+  font-size: 23px;
+}
+.gamesCompact .gameIntro br {
+  display: none;
+}
+.gamesCompact .gameIntro > a {
+  font-size: 11px;
+  white-space: nowrap;
+}
+.gamesCompact .gameList {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+}
+.gamesCompact .game {
+  padding: 0;
+  gap: 6px;
+}
+.gamesCompact .game > span {
+  width: 64px;
+  height: 60px;
+}
+.gamesCompact .iconArt {
+  width: 48px;
+  height: 48px;
+}
+.gamesCompact .game strong {
+  font-size: 11px;
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .gamesCompact .gameIntro {
+    flex-wrap: wrap;
+    gap: 8px;
   }
-  .fragments i:last-child {
-    display: none;
+  .gamesCompact .gameIntro h2 {
+    font-size: 21px;
   }
-  .games::before {
-    left: -9px;
-    transform: scale(0.8);
+  .gamesCompact .game > span {
+    width: 44px;
+    height: 44px;
   }
-  .games::after {
-    right: 60px;
-    transform: scale(0.8) rotate(180deg);
+  .gamesCompact .iconArt {
+    width: 36px;
+    height: 36px;
+  }
+  .gamesCompact .game strong {
+    font-size: 10px;
+  }
+}
+@media (max-width: 760px) {
+  .gamesCompact .gameList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px 10px;
+  }
+  .gamesCompact .gameIntro {
+    flex-wrap: wrap;
   }
 }

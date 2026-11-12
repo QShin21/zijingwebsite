@@ -13,6 +13,7 @@ import {
   ShowcaseTile,
 } from "@/components/v2/cards";
 import { Icon } from "@/components/v2/Icon";
+import { PixelCorners } from "@/components/v2/PixelCorners";
 import { empty, joinPaths } from "@/components/v2/copy";
 import layout from "@/components/v2/layout.module.css";
 import styles from "./home.module.css";
@@ -28,6 +29,7 @@ function PersonalPanel({ home }: { home: HomeResponse }) {
         className={`${layout.panel} ${styles.mePanel}`}
         aria-labelledby="me-title"
       >
+        <PixelCorners variant="coral" />
         <h2 id="me-title" className={layout.panelTitle}>
           你好，{viewer.name}
           <Link href="/account">进入我的</Link>
@@ -67,6 +69,7 @@ function PersonalPanel({ home }: { home: HomeResponse }) {
       className={`${layout.panel} ${styles.joinPanel}`}
       aria-labelledby="join-title"
     >
+      <PixelCorners variant="gold" />
       <h2 id="join-title" className={layout.panelTitle}>
         三步加入紫荆
         <Link href="/join">了解全部</Link>
@@ -305,23 +308,39 @@ export default async function Home() {
   const home = await read(getHome, {});
   const { spotlight } = home;
   const sections = home.sections.filter((section) => section.enabled);
-  const renderSection = (section: HomeSection) => {
-    const block = HomeBlock({ section, home });
-    return block ? (
-      <div
-        key={section.kind}
-        className={styles.sectionBlock}
-        data-section={section.kind}
-      >
-        {block}
-      </div>
-    ) : null;
-  };
+  const blocks = sections
+    .map((section) => {
+      const block = HomeBlock({ section, home });
+      return block ? (
+        <div
+          key={section.kind}
+          className={styles.sectionBlock}
+          data-section={section.kind}
+        >
+          {["upcoming", "open", "notices", "about"].includes(section.kind) && (
+            <PixelCorners
+              seed={section.kind}
+              variant={section.kind === "notices" ? "coral" : "gold"}
+            />
+          )}
+          {block}
+        </div>
+      ) : null;
+    })
+    .filter((block) => block !== null);
+  const personalIndex = blocks.findIndex((block) =>
+    ["notices", "about"].includes(block.props["data-section"]),
+  );
+  if (spotlight)
+    blocks.splice(
+      personalIndex < 0 ? blocks.length : personalIndex,
+      0,
+      <PersonalPanel key="personal" home={home} />,
+    );
   return (
     <>
       <CampusHero home={home} />
       <Wrap>
-        <PixelGames communities={home.communities} />
         <div className={styles.homeFlow}>
           <div className={styles.mainColumn}>
             {spotlight && (
@@ -344,8 +363,8 @@ export default async function Home() {
           </aside>
         </div>
         <div className={styles.lowerSections}>
-          {spotlight && <PersonalPanel home={home} />}
-          {sections.map(renderSection)}
+          {blocks}
+          <PixelGames communities={home.communities} compact />
         </div>
       </Wrap>
     </>

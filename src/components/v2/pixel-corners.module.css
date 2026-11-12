@@ -1,0 +1,34 @@
+.corners {
+  position: absolute;
+  inset: -1px;
+  z-index: 2;
+  pointer-events: none;
+}
+.corners svg {
+  position: absolute;
+  fill: currentColor;
+}
+.corners svg:first-child {
+  top: 0;
+  left: 0;
+}
+.corners svg:last-child {
+  right: 0;
+  bottom: 0;
+  transform: rotate(180deg);
+}
+.corners svg[data-color="0"] {
+  color: var(--z-accent);
+}
+.corners svg[data-color="1"] {
+  color: var(--z-mint);
+}
+.corners svg[data-color="2"] {
+  color: var(--z-coral);
+}
+.corners svg[data-color="3"] {
+  color: var(--z-muted);
+}
+:global(:root[data-z-theme="simple"]) .corners {
+  display: none;
+}

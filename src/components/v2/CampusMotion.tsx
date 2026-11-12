@@ -8,6 +8,7 @@ import {
   type FocusEvent,
 } from "react";
 import { Icon } from "./Icon";
+import { PixelCorners } from "./PixelCorners";
 import styles from "./campus.module.css";
 
 /** One clock for each visible surface; all automatic motion uses the same stop conditions. */
@@ -97,16 +98,6 @@ export function CampusCover({
       onBlur={onBlur}
     >
       <div className={styles.scene} aria-hidden="true" />
-      <div className={styles.fireflies} aria-hidden="true">
-        {Array.from({ length: 8 }, (_, i) => (
-          <i key={i} />
-        ))}
-      </div>
-      <div className={styles.fragments} aria-hidden="true">
-        <i />
-        <i />
-        <i />
-      </div>
       {children}
     </div>
   );
@@ -136,6 +127,7 @@ export function CampusReel({ slides }: { slides: CampusSlide[] }) {
       aria-label="赛场瞬间"
       aria-roledescription="轮播"
     >
+      <PixelCorners variant="mint" />
       <div className={styles.reelHead}>
         <h2>赛场瞬间</h2>
         <div className={styles.controls}>
@@ -242,5 +234,48 @@ export function CampusNews({
         </div>
       )}
     </div>
+  );
+}
+
+/** Sample the original app emblem into twelve coarse cells per side. */
+export function PixelGameIcon({ src }: { src: string }) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const image = useRef<HTMLImageElement>(null);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const source = image.current;
+    if (!source) return;
+    const paint = () => {
+      const context = canvas.current?.getContext("2d");
+      if (!context || !source.naturalWidth) return;
+      context.drawImage(source, 0, 0, 12, 12);
+      const pixels = context.getImageData(0, 0, 12, 12);
+      for (let i = 0; i < pixels.data.length; i += 4) {
+        for (let channel = 0; channel < 3; channel++)
+          pixels.data[i + channel] =
+            Math.round(pixels.data[i + channel] / 48) * 48;
+      }
+      context.putImageData(pixels, 0, 0);
+      setReady(true);
+    };
+    // Cached images can finish before hydration attaches an onLoad handler.
+    if (source.complete) paint();
+    source.addEventListener("load", paint);
+    return () => source.removeEventListener("load", paint);
+  }, [src]);
+  return (
+    <span className={styles.iconArt} data-ready={ready || undefined}>
+      <canvas ref={canvas} width="12" height="12" aria-hidden="true" />
+      <img
+        ref={image}
+        className={styles.gameIcon}
+        src={src}
+        width="72"
+        height="72"
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+    </span>
   );
 }
