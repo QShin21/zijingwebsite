@@ -768,3 +768,34 @@ it("管理员增加座位与成员选座并发时，同一座位只被占用一�
   expect(state.occupancy["11-2"]).toBe("pending");
   expect(state.mine?.seats.length).toBe(result[0].status === 200 ? 2 : 1);
 });
+
+it("管理员按座位查看当前申请，权限和活动范围受到限制", async () => {
+  const activity = await extraActivity("seat-review");
+  const otherActivity = await extraActivity("seat-review-other", "community-posts");
+  const proof = await added(activity, first), otherProof = await added(activity, second);
+  const pending = (await (await submit(activity, first, ["12-1", "12-2"], [proof])).json()).mine;
+  const confirmed = (await (await submit(activity, second, ["12-3"], [otherProof])).json()).mine;
+  expect((await decide(activity, reviewer, confirmed.id, "confirmed")).status).toBe(200);
+  const detail = (who: Actor | undefined, seat: string, target = activity) =>
+    route.GET(request(target, "GET", who, undefined, `?mode=seat-review&seat=${seat}`), context(target));
+  expect((await detail(undefined, "12-1")).status).toBe(401);
+  expect((await detail(first, "12-1")).status).toBe(403);
+  expect((await detail(otherReviewer, "12-1")).status).toBe(403);
+  expect((await detail(reviewer, "99-1")).status).toBe(400);
+  const pendingDetail = await detail(reviewer, "12-1");
+  expect(pendingDetail.headers.get("cache-control")).toContain("no-store");
+  expect(await pendingDetail.json()).toMatchObject({ seat: "12-1", request: { id: pending.id, status: "pending", phone: "13800138000", seats: ["12-1", "12-2"], proofs: [proof] } });
+  expect(await (await detail(reviewer, "12-2")).json()).toMatchObject({ request: { id: pending.id } });
+  expect(await (await detail(reviewer, "12-3")).json()).toMatchObject({ request: { id: confirmed.id, status: "confirmed", proofs: [otherProof] } });
+  expect(await (await detail(reviewer, "12-4")).json()).toEqual({ seat: "12-4", request: null });
+  expect(await (await detail(reviewer, "12-1", otherActivity)).json()).toEqual({ seat: "12-1", request: null });
+  const mapRequest = (who?: Actor) => route.GET(request(activity, "GET", who, undefined, "?mode=review-map"), context(activity));
+  expect((await mapRequest(first)).status).toBe(403);
+  const mapData = await (await mapRequest(reviewer)).json();
+  expect(mapData.occupancy).toMatchObject({ "12-1": "pending", "12-3": "confirmed" });
+  expect(JSON.stringify(mapData)).not.toContain("13800138000");
+  expect((await revokeOne(activity, reviewer, confirmed.id, 0, "12-3")).status).toBe(200);
+  expect(await (await detail(reviewer, "12-3")).json()).toEqual({ seat: "12-3", request: null });
+  expect((await put(activity, reviewer, false)).status).toBe(200);
+  expect((await detail(reviewer, "12-1")).status).toBe(200);
+});

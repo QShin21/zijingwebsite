@@ -5,7 +5,7 @@ import { APIError, type Payload } from "payload";
 import type { User } from "@/payload-types";
 import {
   seatKeys, seatLimit, seatPhonePattern, seatProofBytes, seatProofID, seatProofLimit, seatRows,
-  type SeatDecision, type SeatRequest, type SeatStatus, type SeatingKind, type SeatingState,
+  type SeatDecision, type SeatRequest, type SeatReview, type SeatStatus, type SeatingKind, type SeatingState,
   type SeatAssignment, type SeatingAvailability, type SeatingWorkbench,
 } from "./activity-seating-model";
 import { beijingInputTime, canParticipate, canPublish, communityIDs, relationID } from "./rules";
@@ -44,6 +44,12 @@ type RequestRow = {
 type ReviewRow = RequestRow & { member_name: string; phone: string; proofs: string[];
   released_seats: { seat: string; releasedAt: string }[]; added_seats: { seat: string; addedAt: string }[] };
 const rowFields = "id, seats, status, revision, cancelled_at, revoked_at, created_at, reviewed_at";
+const reviewFields = `r.id, r.seats, r.status, r.revision, r.cancelled_at, r.revoked_at, r.created_at, r.reviewed_at, r.member_name, r.phone,
+  ARRAY(SELECT id FROM activity_seat_proofs WHERE seating_id = r.seating_id AND request_id = r.id ORDER BY created_at, id) AS proofs,
+  COALESCE((SELECT jsonb_agg(jsonb_build_object('seat', s.seat, 'releasedAt', s.released_at) ORDER BY s.id)
+    FROM activity_seat_releases s WHERE s.seating_id = r.seating_id AND s.request_id = r.id), '[]'::jsonb) AS released_seats,
+  COALESCE((SELECT jsonb_agg(jsonb_build_object('seat', a.seat, 'addedAt', a.added_at) ORDER BY a.id)
+    FROM activity_seat_additions a WHERE a.seating_id = r.seating_id AND a.request_id = r.id), '[]'::jsonb) AS added_seats`;
 const validSeats = new Set(seatKeys);
 const pool = (p: Payload) => (p.db as unknown as PostgresAdapter).pool;
 
@@ -182,6 +188,11 @@ function requestDTO(row: RequestRow): SeatRequest {
   };
 }
 
+function reviewDTO(row: ReviewRow): SeatReview {
+  return { ...requestDTO(row), memberName: row.member_name, phone: row.phone, proofs: row.proofs,
+    releasedSeats: row.released_seats, addedSeats: row.added_seats };
+}
+
 async function activeRequest(client: SeatDatabase, seatingID: number, memberID: number) {
   const result = await client.query<RequestRow>(
     `SELECT ${rowFields} FROM activity_seat_requests
@@ -293,6 +304,41 @@ export async function seatingAssignment(p: Payload, activity: SeatActivity, user
   const blockedSeats = blocks.rows.map(({ seat }) => seat);
   for (const seat of blockedSeats) occupancy[seat] = "confirmed";
   return { title: activity.title, request: requestDTO(request), rows: seatRows, seatLimit, occupancy, blockedSeats };
+}
+
+export async function seatingReviewMap(p: Payload, activity: SeatActivity, user: User | null): Promise<SeatingState> {
+  user = await requireMember(p, user);
+  activity = await seatActivity(p, activity.kind, activity.id, user);
+  await requireReviewer(p, activity, user);
+  const setting = await scope(p, activity);
+  const result: SeatingState = {
+    ...availability(activity, setting), loggedIn: true, canReview: true, title: activity.title, rows: seatRows,
+    seatLimit, proofLimit: seatProofLimit, proofBytes: seatProofBytes, occupancy: {}, blockedSeats: [],
+    mine: null, mineDetails: null, drafts: [],
+  };
+  if (!setting) return result;
+  const [claims, blocks] = await Promise.all([
+    pool(p).query<{ seat: string; status: ActiveStatus }>(`SELECT c.seat, r.status FROM activity_seat_claims c
+      JOIN activity_seat_requests r ON r.id = c.request_id WHERE c.seating_id = $1`, [setting.id]),
+    pool(p).query<{ seat: string }>("SELECT seat FROM activity_seat_blocks WHERE seating_id = $1 ORDER BY seat", [setting.id]),
+  ]);
+  result.occupancy = Object.fromEntries(claims.rows.map(({ seat, status }) => [seat, status]));
+  result.blockedSeats = blocks.rows.map(({ seat }) => seat);
+  for (const seat of result.blockedSeats) result.occupancy[seat] = "confirmed";
+  return result;
+}
+
+export async function seatingReviewForSeat(p: Payload, activity: SeatActivity, user: User | null, seat: string | null) {
+  user = await requireMember(p, user);
+  activity = await seatActivity(p, activity.kind, activity.id, user);
+  await requireReviewer(p, activity, user);
+  if (!seat || !validSeats.has(seat)) throw new APIError("座位信息无效，请刷新后重试", 400);
+  const setting = await scope(p, activity);
+  if (!setting) return { seat, request: null };
+  const result = await pool(p).query<ReviewRow>(`SELECT ${reviewFields}
+    FROM activity_seat_claims c JOIN activity_seat_requests r ON r.id = c.request_id AND r.seating_id = c.seating_id
+    WHERE c.seating_id = $1 AND c.seat = $2 AND r.status IN ('pending', 'confirmed')`, [setting.id, seat]);
+  return { seat, request: result.rows[0] ? reviewDTO(result.rows[0]) : null };
 }
 
 export async function setSeating(p: Payload, activity: SeatActivity, user: User | null, enabled: unknown, opening?: unknown) {
@@ -580,22 +626,14 @@ export async function seatingWorkbench(
   if (!setting) return view;
   const limit = 20;
   const { rows } = await pool(p).query<ReviewRow>(
-    `SELECT r.id, r.seats, r.status, r.revision, r.cancelled_at, r.revoked_at, r.created_at, r.reviewed_at, r.member_name, r.phone,
-       ARRAY(SELECT id FROM activity_seat_proofs
-             WHERE seating_id = r.seating_id AND request_id = r.id ORDER BY created_at, id) AS proofs,
-       COALESCE((SELECT jsonb_agg(jsonb_build_object('seat', s.seat, 'releasedAt', s.released_at) ORDER BY s.id)
-         FROM activity_seat_releases s WHERE s.seating_id = r.seating_id AND s.request_id = r.id), '[]'::jsonb) AS released_seats,
-       COALESCE((SELECT jsonb_agg(jsonb_build_object('seat', a.seat, 'addedAt', a.added_at) ORDER BY a.id)
-         FROM activity_seat_additions a WHERE a.seating_id = r.seating_id AND a.request_id = r.id), '[]'::jsonb) AS added_seats
+    `SELECT ${reviewFields}
      FROM activity_seat_requests r
      WHERE r.seating_id = $1 AND r.status = $2 AND (r.cancelled_at IS NOT NULL) = $5
        AND (r.revoked_at IS NOT NULL) = $6 ORDER BY r.id DESC LIMIT $3 OFFSET $4`,
     [setting.id, status === "cancelled" || status === "revoked" ? "rejected" : status,
       limit + 1, (page - 1) * limit, status === "cancelled", status === "revoked"],
   );
-  view.docs = rows.slice(0, limit).map(row => ({
-    ...requestDTO(row), memberName: row.member_name, phone: row.phone, proofs: row.proofs, releasedSeats: row.released_seats, addedSeats: row.added_seats,
-  }));
+  view.docs = rows.slice(0, limit).map(reviewDTO);
   view.hasNextPage = rows.length > limit;
   return view;
 }

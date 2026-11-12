@@ -1,5 +1,5 @@
 
-import { addSeats, cancelPendingSeats, decideSeats, editPendingSeats, revokeConfirmedSeat, revokeConfirmedSeats, seatActivity, seatingAssignment, seatingState, seatingWorkbench, setSeatBlocks, setSeating, submitSeats } from "@/lib/activity-seating";
+import { addSeats, cancelPendingSeats, decideSeats, editPendingSeats, revokeConfirmedSeat, revokeConfirmedSeats, seatActivity, seatingAssignment, seatingReviewForSeat, seatingReviewMap, seatingState, seatingWorkbench, setSeatBlocks, setSeating, submitSeats } from "@/lib/activity-seating";
 import { seatingHTTP, seatingJSON, seatingFields, seatingReviewFilter, seatReply, type SeatRouteContext } from "@/lib/activity-seating-http";
 
 export const runtime = "nodejs";
@@ -8,6 +8,12 @@ export const dynamic = "force-dynamic";
 export function GET(request: Request, context: SeatRouteContext) {
   return seatingHTTP(request, context, async (p, kind, id, user) => {
     const query = new URL(request.url).searchParams;
+    if (query.get("mode") === "review-map") {
+      return seatReply(await seatingReviewMap(p, await seatActivity(p, kind, id, user), user));
+    }
+    if (query.get("mode") === "seat-review") {
+      return seatReply(await seatingReviewForSeat(p, await seatActivity(p, kind, id, user), user, query.get("seat")));
+    }
     if (query.get("mode") === "assignment") {
       return seatReply(await seatingAssignment(p, await seatActivity(p, kind, id, user), user, query.get("request")));
     }

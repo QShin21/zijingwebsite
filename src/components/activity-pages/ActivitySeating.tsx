@@ -74,7 +74,7 @@ export function SeatZoom({ zoom, onChange }: { zoom: number; onChange: (zoom: nu
 /**
  * The seat map. Layout and occupancy come from the server, selection from the caller.
  * One seat is in the tab order (roving tabindex); arrow keys move between enabled seats,
- * Space/Enter toggles. Taken seats are disabled and announced with their state.
+ * Space/Enter toggles selectable seats; reviewers can inspect occupied seats.
  */
 export function SeatMap({
   state,
@@ -85,6 +85,7 @@ export function SeatMap({
   label = "座位图",
   manage = false,
   own = [],
+  onInspect,
 }: {
   state: SeatLayout;
   selected: readonly string[];
@@ -94,11 +95,13 @@ export function SeatMap({
   label?: string;
   manage?: boolean;
   own?: readonly string[];
+  onInspect?: (seat: string) => void;
 }) {
   const [focused, setFocused] = useState("");
   const keys = state.rows.flatMap(({ row, count }) => Array.from({ length: count }, (_, index) => `${row}-${index + 1}`));
   const blocked = new Set(state.blockedSeats || []);
-  const selectable = (seat: string) => !state.occupancy[seat] || (manage && blocked.has(seat)) || own.includes(seat);
+  const inspectable = (seat: string) => Boolean(onInspect && state.occupancy[seat] && !blocked.has(seat) && !own.includes(seat));
+  const selectable = (seat: string) => !state.occupancy[seat] || (manage && blocked.has(seat)) || own.includes(seat) || inspectable(seat);
   const first = focused && keys.includes(focused) && selectable(focused) ? focused : keys.find(selectable);
 
   function moveFocus(event: KeyboardEvent<HTMLDivElement>) {
@@ -163,11 +166,11 @@ export function SeatMap({
                       className={styles.seat}
                       disabled={!editable || !selectable(seat)}
                       tabIndex={seat === first ? 0 : -1}
-                      aria-pressed={selectable(seat) ? picked : undefined}
-                      aria-label={`${seatLabel(seat)}${accent ? " · 中心区" : ""} · ${seatLegend.find(([key]) => key === value)?.[1]}${picked && value === "blocked" ? " · 已选" : ""}`}
+                      aria-pressed={selectable(seat) && !inspectable(seat) ? picked : undefined}
+                      aria-label={`${seatLabel(seat)}${accent ? " · 中心区" : ""} · ${seatLegend.find(([key]) => key === value)?.[1]}${picked && value === "blocked" ? " · 已选" : ""}${inspectable(seat) ? " · 查看申请" : ""}`}
                       title={seatLabel(seat)}
                       onFocus={() => setFocused(seat)}
-                      onClick={() => toggle?.(seat)}
+                      onClick={() => inspectable(seat) ? onInspect?.(seat) : toggle?.(seat)}
                     >
                       {index + 1}
                     </button>

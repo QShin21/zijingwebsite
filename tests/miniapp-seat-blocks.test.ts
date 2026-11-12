@@ -14,9 +14,13 @@ const tap = (seat: string) => ({ currentTarget: { dataset: { seat } } });
 
 function harness(manage: boolean, canReview = true) {
   const state: State = { title: "合成活动", enabled: false, open: false, scheduled: false, loggedIn: true, canReview,
-    rows: [{ row: 1, count: 15, offset: 0 }], occupancy: { "1-14": "pending", "1-15": "confirmed" },
+    rows: [{ row: 1, count: 15, offset: 0 }], occupancy: { "1-13": "confirmed", "1-14": "pending", "1-15": "confirmed" },
     blockedSeats: ["1-15"], seatLimit: 10, proofLimit: 10, proofBytes: 8388608, drafts: [], mine: null };
-  const http = { request: vi.fn(async (_path: string, options: { method?: string; data?: { seats: string[]; blocked: boolean } }) => {
+  const http = { request: vi.fn(async (path: string, options: { method?: string; data?: { seats: string[]; blocked: boolean } }) => {
+    if (path.includes("mode=seat-review")) {
+      const confirmed = path.includes("1-13"), seat = confirmed ? "1-13" : "1-14";
+      return { seat, request: { id: confirmed ? 43 : 42, revision: 0, status: confirmed ? "confirmed" : "pending", memberName: "合成申请人", phone: "13800138000", seats: [seat], proofs: [], createdAt: "2026-11-12T00:00:00Z" } };
+    }
     if (options.method === "POST" && options.data) {
       for (const seat of options.data.seats) {
         if (options.data.blocked) { state.blockedSeats.push(seat); state.occupancy[seat] = "confirmed"; }
@@ -49,11 +53,14 @@ function harness(manage: boolean, canReview = true) {
   return { page, http, state };
 }
 
-it("小程序管理员在开放前批量锁定和解锁座位，已申请座位不可选择", async () => {
+it("小程序管理员在开放前锁定和解锁座位，并点击已申请座位查看记录", async () => {
   const { page, http } = harness(true);
   await invoke(page, "onShow");
   for (let i = 1; i <= 12; i++) invoke(page, "toggle", tap(`1-${i}`));
-  invoke(page, "toggle", tap("1-14"));
+  await invoke(page, "toggle", tap("1-14"));
+  expect(page.data).toMatchObject({ inspectedSeat: "1排14座", seatReview: { id: 42, status: "pending", memberName: "合成申请人" } });
+  await invoke(page, "toggle", tap("1-13"));
+  expect(page.data).toMatchObject({ inspectedSeat: "1排13座", seatReview: { id: 43, status: "confirmed" } });
   invoke(page, "toggle", tap("1-15"));
   expect(page.data).toMatchObject({ selectedAvailable: 12, selectedBlocked: 1 });
   await invoke(page, "setSeatBlocks", { currentTarget: { dataset: { blocked: true } } });
