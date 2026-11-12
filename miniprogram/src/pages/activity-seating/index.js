@@ -5,7 +5,7 @@ const navigation = require('../../lib/navigation');
 const privacy = require('../../lib/privacy');
 const session = require('../../lib/session');
 const { page } = require('../../lib/theme');
-const { date } = require('../../lib/format');
+const { beijingParts, date } = require('../../lib/format');
 
 const labels = { pending: '待审核', confirmed: '已确认', rejected: '已驳回' };
 const filters = Object.keys(labels).map(status => ({ status, label: labels[status] }));
@@ -35,6 +35,7 @@ Page(page({
   data: {
     review: false, title: '', loading: true, busy: '', error: '', loadError: '', notice: '',
     needsLogin: false, enabled: false, open: false, loggedIn: false, editable: false,
+    scheduled: false, openingLabel: '', opensAt: null, openingDate: '', openingTime: '',
     rows: [], selected: [], selectedLabel: '', phone: '', drafts: [], mine: null,
     seatLimit: 10, proofLimit: 10, proofMB: 8,
     filters, status: 'pending', statusLabel: labels.pending, pageNumber: 1, hasNextPage: false, docs: [],
@@ -55,6 +56,7 @@ Page(page({
       this._member = member;
       this._revision++;
       this._state = null;
+      clearTimeout(this._openingTimer);
       this.setData({
         rows: [], selected: [], selectedLabel: '', phone: '', drafts: [], mine: null, docs: [],
         busy: '', error: '', notice: '', editable: false, loggedIn: false, needsLogin: !member,
@@ -63,8 +65,9 @@ Page(page({
     });
   },
 
-  onShow() { if (!this.data.busy) void this.load(); },
-  onUnload() { this._closed = true; this._unsubscribe?.(); },
+  onShow() { this._hidden = false; if (!this.data.busy) void this.load(); },
+  onHide() { this._hidden = true; clearTimeout(this._openingTimer); },
+  onUnload() { this._closed = true; this.onHide(); this._unsubscribe?.(); },
   onPullDownRefresh() {
     return (this.data.busy ? Promise.resolve() : this.load()).finally(() => wx.stopPullDownRefresh());
   },
@@ -90,19 +93,34 @@ Page(page({
       const path = review ? `${this._endpoint}?mode=review&status=${status}&page=${pageNumber}` : this._endpoint;
       const data = await http.request(path, { required: review, raw: true });
       if (!this.current(revision) || read !== this._read) return;
+      const opensAt = data.opensAt || null;
+      const opening = {
+        scheduled: data.scheduled === true, opensAt, openingLabel: opensAt ? date(opensAt) : '',
+      };
+      clearTimeout(this._openingTimer);
+      if (!review && !this._hidden && opening.scheduled && opensAt) {
+        const delay = Math.min(2147483647, Math.max(0, Date.parse(opensAt) - data.serverTime) + 200);
+        this._openingTimer = setTimeout(() => {
+          if (this.current(revision) && !this._hidden) void this.load();
+        }, delay);
+      }
       if (review) {
         const docs = data.docs.map(row => ({
           ...row, label: labels[row.status], seatLabel: row.seats.map(seatLabel).join('、'),
           submitted: date(row.createdAt), reviewed: row.reviewedAt ? date(row.reviewedAt) : '',
         }));
-        this.setData({ title: data.title, enabled: data.enabled, docs, hasNextPage: data.hasNextPage });
+        const fields = opensAt !== this.data.opensAt ? beijingParts(opensAt) : null;
+        this.setData({
+          ...opening, title: data.title, enabled: data.enabled, open: data.open, docs, hasNextPage: data.hasNextPage,
+          ...(fields ? { openingDate: fields.date, openingTime: fields.time } : {}),
+        });
       } else {
         this._state = data;
         const selected = this.data.selected.filter(id => !data.occupancy[id]);
         const mine = data.mine && { ...data.mine, label: labels[data.mine.status], seatLabel: data.mine.seats.map(seatLabel).join('、') };
         const editable = data.open && data.loggedIn && (!mine || mine.status === 'rejected');
         this.setData({
-          title: data.title, enabled: data.enabled, open: data.open, loggedIn: data.loggedIn,
+          ...opening, title: data.title, enabled: data.enabled, open: data.open, loggedIn: data.loggedIn,
           editable, mine, drafts: data.drafts, seatLimit: data.seatLimit, proofLimit: data.proofLimit,
           proofMB: data.proofBytes / 1024 / 1024, selected, selectedLabel: selected.map(seatLabel).join('、'),
           rows: data.enabled ? rowsFor(data, selected) : [],
@@ -206,12 +224,27 @@ Page(page({
     return this.load();
   },
 
-  setEnabled() {
+  changeOpeningDate(event) { this.setData({ openingDate: event.detail.value }); },
+  changeOpeningTime(event) { this.setData({ openingTime: event.detail.value }); },
+
+  setEnabled(event) {
+    const enabled = event.currentTarget.dataset.enabled === true;
+    return this.saveOpening({ enabled }, enabled ? '已启用选座' : '已停用选座');
+  },
+
+  scheduleOpening() {
+    const { openingDate, openingTime } = this.data;
+    if (!openingDate || !openingTime) {
+      this.setData({ error: '请选择开放日期和时间' });
+      return;
+    }
+    return this.saveOpening({ enabled: true, opensAt: openingDate + 'T' + openingTime }, '已保存定时开放');
+  },
+
+  saveOpening(data, notice) {
     return this.work('正在保存', async revision => {
-      const result = await http.request(this._endpoint, {
-        method: 'PUT', required: true, raw: true, data: { enabled: !this.data.enabled },
-      });
-      if (this.current(revision)) this.setData({ enabled: result.enabled, notice: result.enabled ? '已启用选座' : '已停用选座' });
+      await http.request(this._endpoint, { method: 'PUT', required: true, data });
+      if (this.current(revision)) this.setData({ notice });
     });
   },
 

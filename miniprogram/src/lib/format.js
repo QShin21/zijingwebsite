@@ -30,4 +30,12 @@ function card(doc, collection) {
     statusText: collection === 'events' ? eventState(doc) : collection === 'recruitment' ? registrationState(doc) : '',
     kindText: { members: '普通社员', teams: '代表队选拔', staff: '骨干招新' }[doc.kind] || doc.type || '' };
 }
-module.exports = { date, safeURL, eventState, registrationState, card };
+const beijingOffset = 8 * 60 * 60 * 1000;
+
+function beijingParts(value) {
+  const timestamp = Date.parse(value);
+  if (!Number.isFinite(timestamp)) return { date: '', time: '', value: '' };
+  const local = new Date(timestamp + beijingOffset).toISOString();
+  return { date: local.slice(0, 10), time: local.slice(11, 16), value };
+}
+module.exports = { date, safeURL, eventState, registrationState, card, beijingParts };

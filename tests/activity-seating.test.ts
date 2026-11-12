@@ -6,6 +6,7 @@ import sharp from "sharp";
 import { getPayload, type Payload } from "payload";
 import config from "../src/payload.config";
 import { serverURL } from "@/lib/environment";
+import { beijingInputTime } from "@/lib/rules";
 import { seatAPI, seatKeys, type SeatingKind, type SeatingState } from "@/lib/activity-seating-model";
 import type { User } from "@/payload-types";
 import * as route from "@/app/(frontend)/api/activities/[kind]/[id]/seating/route";
@@ -223,4 +224,40 @@ it("社群活动接受 10 张凭证与 10 个座位，启停独立于站点活�
   expect((await map(post, first)).mine?.status).toBe("confirmed");
   expect(Object.values((await map(post)).occupancy)).toEqual(Array(10).fill("confirmed"));
   expect((await upload(post, first)).status).toBe(409);
+});
+
+it("按北京时间到点开放，开放前禁止上传和提交，停用后清除定时", async () => {
+  const seeded = await p.create({
+    collection: "events", user: president.user, overrideAccess: false,
+    data: { title: "合成定时选座活动", slug: "timed-seats-" + suffix, _status: "published" },
+  });
+  const activity: Activity = { kind: "events", id: seeded.id };
+  activities.push(activity);
+  const time = beijingInputTime(new Date(Date.now() + 5 * 60_000).toISOString());
+  const expected = new Date(time + ":00+08:00");
+  const schedule = (actor: Actor, opensAt: string) => route.PUT(
+    request(activity, "PUT", actor, { enabled: true, opensAt }), context(activity),
+  );
+  expect((await schedule(first, time)).status).toBe(403);
+  expect((await schedule(president, "2027-02-31T18:00")).status).toBe(400);
+  expect((await schedule(president, "2000-01-01T18:00")).status).toBe(400);
+  const saved = await schedule(president, time);
+  expect(saved.status).toBe(200);
+  expect(await saved.json()).toMatchObject({ enabled: true, scheduled: true, open: false, opensAt: expected.toISOString() });
+  expect(await map(activity, first)).toMatchObject({ scheduled: true, open: false, opensAt: expected.toISOString() });
+  expect((await upload(activity, first)).status).toBe(409);
+  expect((await submit(activity, first, ["1-1"], ["88714164-37a2-4afa-a69f-3bbfc336d3d1"])).status).toBe(409);
+
+  const clock = vi.spyOn(Date, "now").mockReturnValue(expected.getTime());
+  try {
+    expect(await map(activity, first)).toMatchObject({ scheduled: false, open: true });
+    const proof = await added(activity, first);
+    expect((await submit(activity, first, ["1-1"], [proof])).status).toBe(200);
+  } finally {
+    clock.mockRestore();
+  }
+  expect((await put(activity, president, false)).status).toBe(200);
+  expect(await map(activity, first)).toMatchObject({ enabled: false, open: false, opensAt: null, mine: { status: "pending" } });
+  expect((await put(activity, president, true)).status).toBe(200);
+  expect(await map(activity, first)).toMatchObject({ enabled: true, open: true, opensAt: null });
 });

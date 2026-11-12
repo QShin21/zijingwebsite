@@ -117,6 +117,12 @@ export function eventState(
   if (doc.startAt && now.getTime() >= Date.parse(doc.startAt)) return "进行中";
   return "即将开始";
 }
+export function beijingInputTime(value?: string | null) {
+  if (!value) return "";
+  const date = new Date(Date.parse(value) + 8 * 60 * 60 * 1000);
+  return Number.isFinite(date.getTime()) ? date.toISOString().slice(0, 16) : "";
+}
+
 export const formatDate = (value?: string | null) =>
   value
     ? new Intl.DateTimeFormat("zh-CN", {

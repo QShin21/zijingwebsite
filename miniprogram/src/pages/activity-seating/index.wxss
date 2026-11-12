@@ -43,3 +43,6 @@
 .seat-page .swatch.confirmed, .seat-page .seat-row .seat-cell.confirmed {
   color: #fff; background: #83334b; border-color: #83334b;
 }
+
+.seat-page .seat-opening { padding: 12px 0; border-bottom: 1px solid var(--z-line); }
+.seat-page .seat-picker { padding: 10px; border: 1px solid var(--z-line); border-radius: 6px; }

@@ -7,6 +7,7 @@ import {
   seatAPI, seatKeys, seatLabel, seatPhonePattern, seatStatusLabels,
   type SeatRequest, type SeatingKind, type SeatingState,
 } from "@/lib/activity-seating-model";
+import { formatDate } from "@/lib/rules";
 import { seatJSON, seatRequest } from "./seat-request";
 import styles from "./ActivitySeating.module.css";
 
@@ -103,6 +104,21 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
     return () => controller.abort();
   }, [load]);
 
+  useEffect(() => {
+    if (!state?.scheduled || !state.opensAt) return;
+    const controller = new AbortController();
+    const delay = Math.min(2147483647, Math.max(0, Date.parse(state.opensAt) - state.serverTime) + 200);
+    const timer = setTimeout(() => {
+      void load(controller.signal).catch(cause => {
+        if (!controller.signal.aborted) setError((cause as Error).message);
+      });
+    }, delay);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [state?.scheduled, state?.opensAt, state?.serverTime, load]);
+
   if (!state || (!state.enabled && !state.canReview && !state.mine)) return null;
   const editable = state.open && state.loggedIn && (!state.mine || state.mine.status === "rejected");
 
@@ -197,7 +213,8 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
       {state.enabled && (
         <SeatMap state={state} selected={selected} editable={editable && !busy} toggle={toggle} />
       )}
-      {state.enabled && !state.open && <p>当前活动选座已关闭。</p>}
+      {state.scheduled && <p role="status">将于北京时间 {formatDate(state.opensAt)} 开放选座。</p>}
+      {state.enabled && !state.open && !state.scheduled && <p>当前活动选座已关闭。</p>}
       {state.open && !state.loggedIn && (
         <Link className="button" href={`/login?returnTo=${encodeURIComponent(returnTo + "#activity-seating")}`}>登录后选座</Link>
       )}

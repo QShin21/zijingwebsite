@@ -15,8 +15,22 @@
 
   <block wx:if="{{review && !needsLogin && !loadError && title}}">
     <view class="seat-toolbar">
-      <text>活动选座 · {{enabled ? '已启用' : '未启用'}}</text>
-      <button class="secondary" bindtap="setEnabled" disabled="{{loading || busy}}">{{enabled ? '停用选座' : '启用选座'}}</button>
+      <text>活动选座 · {{scheduled ? '等待开放' : open ? '已开放' : enabled ? '已关闭' : '未启用'}}</text>
+      <button wx:if="{{!enabled || scheduled}}" class="secondary" bindtap="setEnabled" data-enabled="{{true}}" disabled="{{loading || busy}}">{{scheduled ? '立即开放' : '启用选座'}}</button>
+      <button wx:if="{{enabled}}" class="secondary" bindtap="setEnabled" data-enabled="{{false}}" disabled="{{loading || busy}}">停用选座</button>
+    </view>
+    <view class="field seat-opening">
+      <text class="field-label">定时开放（北京时间）</text>
+      <view class="seat-toolbar">
+        <picker mode="date" value="{{openingDate}}" bindchange="changeOpeningDate" disabled="{{loading || busy}}" aria-label="开放日期">
+          <view class="seat-picker">{{openingDate || '选择日期'}}</view>
+        </picker>
+        <picker mode="time" value="{{openingTime}}" bindchange="changeOpeningTime" disabled="{{loading || busy}}" aria-label="开放时间">
+          <view class="seat-picker">{{openingTime || '选择时间'}}</view>
+        </picker>
+        <button class="primary" bindtap="scheduleOpening" disabled="{{loading || busy}}">保存开放时间</button>
+      </view>
+      <text wx:if="{{scheduled}}" class="field-note">将于北京时间 {{openingLabel}} 开放选座。</text>
     </view>
     <view class="seat-toolbar">
       <button wx:for="{{filters}}" wx:key="status" class="{{status === item.status ? 'primary' : 'secondary'}}"
@@ -52,7 +66,8 @@
       <text class="body">{{mine.seatLabel}}</text>
       <text wx:if="{{mine.status === 'rejected' && editable}}" class="field-note">可以重新选座并提交凭证。</text>
     </view>
-    <text wx:if="{{!open}}" class="muted">当前活动暂未开放选座。</text>
+    <text wx:if="{{scheduled}}" class="field-note" aria-role="status">将于北京时间 {{openingLabel}} 开放选座。</text>
+    <text wx:elif="{{!open}}" class="muted">当前活动暂未开放选座。</text>
     <view wx:if="{{enabled}}">
       <view class="seat-toolbar">
         <text class="seat-legend"><text class="swatch available" />可选</text>

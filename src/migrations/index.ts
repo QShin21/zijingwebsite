@@ -1,4 +1,5 @@
 import * as activitySeating from "./20261112_000000_activity_seating";
+import * as activitySeatingSchedule from "./20261112_010000_activity_seating_schedule";
 import * as publicationImages from "./20261110_000000_publication_images";
 import * as activitySignups from './20261011_160000_activity_signups';
 import * as clubOperations from './20261011_180000_club_operations';
@@ -72,4 +73,5 @@ export const migrations = [
   { up: teamMemberProfiles.up, down: teamMemberProfiles.down, name: '20261012_170000_team_member_profiles' },
   { up: publicationImages.up, down: publicationImages.down, name: '20261110_000000_publication_images' },
   { up: activitySeating.up, down: activitySeating.down, name: "20261112_000000_activity_seating" },
+  { up: activitySeatingSchedule.up, down: activitySeatingSchedule.down, name: "20261112_010000_activity_seating_schedule" },
 ];

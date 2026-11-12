@@ -141,3 +141,5 @@
 @media (max-width: 1190px) {
   .scrollHint { display: block; }
 }
+
+.schedule { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }

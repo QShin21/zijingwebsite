@@ -6,9 +6,9 @@ import type { User } from "@/payload-types";
 import {
   seatKeys, seatLimit, seatPhonePattern, seatProofBytes, seatProofID, seatProofLimit, seatRows,
   type SeatDecision, type SeatRequest, type SeatStatus, type SeatingKind, type SeatingState,
-  type SeatingWorkbench,
+  type SeatingAvailability, type SeatingWorkbench,
 } from "./activity-seating-model";
-import { canParticipate, canPublish, communityIDs, relationID } from "./rules";
+import { beijingInputTime, canParticipate, canPublish, communityIDs, relationID } from "./rules";
 import { normalizeImageBytes } from "./showcase-images";
 
 type SeatActivity = {
@@ -18,6 +18,7 @@ type SeatActivity = {
   game: unknown;
   public: boolean;
   open: boolean;
+  endAt?: string | null;
 };
 
 type SeatDatabase = {
@@ -26,7 +27,7 @@ type SeatDatabase = {
   ): Promise<{ rows: T[]; rowCount: number | null }>;
 };
 
-type SeatScope = { id: number; enabled: boolean };
+type SeatScope = { id: number; enabled: boolean; opens_at: Date | null };
 type ActiveStatus = Exclude<SeatStatus, "rejected">;
 type RequestRow = {
   id: number;
@@ -56,10 +57,8 @@ export async function seatActivity(
     if (!event) throw new APIError("活动未公开或已移除", 404);
     const visible = event._status === "published" && !(process.env.APP_ENV === "production" && event.demo);
     return {
-      kind, id, title: event.title, game: event.game, public: visible,
-      open: visible && !event.archived &&
-        !["cancelled", "postponed", "ended"].includes(event.lifecycle || "") &&
-        (!event.endAt || Date.parse(event.endAt) > Date.now()),
+      kind, id, title: event.title, game: event.game, public: visible, endAt: event.endAt,
+      open: visible && !event.archived && !["cancelled", "postponed", "ended"].includes(event.lifecycle || ""),
     };
   }
   const post = await p.findByID({
@@ -90,7 +89,7 @@ const scopeColumn = (activity: SeatActivity) => activity.kind === "events" ? "ev
 
 async function scope(p: Payload, activity: SeatActivity, client?: SeatDatabase) {
   const result = await ((client ?? pool(p)) as SeatDatabase).query<SeatScope>(
-    `SELECT id, enabled FROM activity_seatings WHERE ${scopeColumn(activity)} = $1${client ? " FOR UPDATE" : ""}`,
+    `SELECT id, enabled, opens_at FROM activity_seatings WHERE ${scopeColumn(activity)} = $1${client ? " FOR UPDATE" : ""}`,
     [activity.id],
   );
   return result.rows[0];
@@ -127,9 +126,23 @@ async function activeRequest(client: SeatDatabase, seatingID: number, memberID: 
   return result.rows[0];
 }
 
+function availability(activity: SeatActivity, setting?: Pick<SeatScope, "enabled" | "opens_at">): SeatingAvailability {
+  const serverTime = Date.now();
+  const enabled = setting?.enabled === true;
+  const openingTime = setting?.opens_at?.getTime() ?? null;
+  const end = activity.endAt ? Date.parse(activity.endAt) : Infinity;
+  const available = enabled && activity.open && serverTime < end && (openingTime === null || openingTime < end);
+  const scheduled = available && openingTime !== null && openingTime > serverTime;
+  return {
+    enabled, open: available && !scheduled, scheduled,
+    opensAt: setting?.opens_at?.toISOString() ?? null, serverTime,
+  };
+}
+
 async function openScope(p: Payload, activity: SeatActivity, client: SeatDatabase) {
   const setting = await scope(p, activity, client);
-  if (!activity.open || !setting?.enabled) throw new APIError("当前活动暂未开放选座", 409);
+  if (!setting || !availability(activity, setting).open)
+    throw new APIError("当前活动暂未开放选座", 409);
   return setting;
 }
 
@@ -138,7 +151,7 @@ export async function seatingState(p: Payload, activity: SeatActivity, user: Use
   const setting = await scope(p, activity);
   const loggedIn = Boolean(user && canParticipate(user));
   const state: SeatingState = {
-    enabled: Boolean(setting?.enabled), open: Boolean(setting?.enabled && activity.open), loggedIn,
+    ...availability(activity, setting), loggedIn,
     canReview: canReviewActivitySeats(user, activity.game), title: activity.title, rows: seatRows,
     seatLimit, proofLimit: seatProofLimit, proofBytes: seatProofBytes, occupancy: {}, mine: null, drafts: [],
   };
@@ -166,17 +179,34 @@ export async function seatingState(p: Payload, activity: SeatActivity, user: Use
   return state;
 }
 
-export async function setSeating(p: Payload, activity: SeatActivity, user: User | null, enabled: unknown) {
+function openingDate(activity: SeatActivity, value: unknown) {
+  if (value == null || value === "") return null;
+  if (typeof value !== "string" || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}$/.test(value))
+    throw new APIError("请选择北京时间的开放日期和时间", 400);
+  const date = new Date(`${value}:00+08:00`);
+  if (!Number.isFinite(date.getTime()) || beijingInputTime(date.toISOString()) !== value)
+    throw new APIError("请选择有效的开放日期和时间", 400);
+  if (date.getTime() <= Date.now())
+    throw new APIError("定时开放时间须晚于当前时间", 400);
+  if (!activity.open || (activity.endAt && date.getTime() >= Date.parse(activity.endAt)))
+    throw new APIError("请选择活动结束前的开放时间", 400);
+  return date;
+}
+
+export async function setSeating(
+  p: Payload, activity: SeatActivity, user: User | null, enabled: unknown, opening?: unknown,
+) {
   requireReviewer(activity, user);
   if (typeof enabled !== "boolean") throw new APIError("请指定选座启用状态", 400);
   if (enabled) requirePublic(activity);
+  const opensAt = enabled ? openingDate(activity, opening) : null;
   const column = scopeColumn(activity);
   await pool(p).query(
-    `INSERT INTO activity_seatings (${column}, enabled) VALUES ($1, $2)
-     ON CONFLICT (${column}) DO UPDATE SET enabled = EXCLUDED.enabled`,
-    [activity.id, enabled],
+    `INSERT INTO activity_seatings (${column}, enabled, opens_at) VALUES ($1, $2, $3)
+     ON CONFLICT (${column}) DO UPDATE SET enabled = EXCLUDED.enabled, opens_at = EXCLUDED.opens_at`,
+    [activity.id, enabled, opensAt],
   );
-  return { enabled };
+  return availability(activity, { enabled, opens_at: opensAt });
 }
 
 export async function submitSeats(
@@ -236,7 +266,7 @@ export async function seatingWorkbench(
 ): Promise<SeatingWorkbench> {
   requireReviewer(activity, user);
   const setting = await scope(p, activity);
-  const view: SeatingWorkbench = { title: activity.title, enabled: Boolean(setting?.enabled), docs: [], page, hasNextPage: false };
+  const view: SeatingWorkbench = { title: activity.title, ...availability(activity, setting), docs: [], page, hasNextPage: false };
   if (!setting) return view;
   const limit = 20;
   const { rows } = await pool(p).query<ReviewRow>(
@@ -288,7 +318,7 @@ export async function decideSeats(
 export async function uploadSeatProof(p: Payload, activity: SeatActivity, user: User | null, file: File) {
   const actor = requireMember(user);
   requirePublic(activity);
-  if (!activity.open || !(await scope(p, activity))?.enabled)
+  if (!availability(activity, await scope(p, activity)).open)
     throw new APIError("当前活动暂未开放选座", 409);
   if (!file.size || file.size > seatProofBytes) throw new APIError("单张凭证图片最多 8 MB", 400);
   const picture = await normalizeImageBytes(Buffer.from(await file.arrayBuffer())).catch(() => {

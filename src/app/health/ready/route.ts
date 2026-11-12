@@ -57,12 +57,12 @@ export async function GET() {
     await db.pool.query("SELECT version_post_images FROM _announcements_v LIMIT 0");
     const imagesMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261110_000000_publication_images"]);
     if (imagesMigration.rowCount !== 1) throw new Error("Required publication images migration unavailable");
-    await db.pool.query("SELECT id FROM activity_seatings LIMIT 0");
+    await db.pool.query("SELECT id, opens_at FROM activity_seatings LIMIT 0");
     await db.pool.query("SELECT request_id FROM activity_seat_claims LIMIT 0");
     await db.pool.query("SELECT status FROM activity_seat_requests LIMIT 0");
     await db.pool.query("SELECT picture FROM activity_seat_proofs LIMIT 0");
-    const seatingMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261112_000000_activity_seating"]);
-    if (seatingMigration.rowCount !== 1) throw new Error("Required activity seating migration unavailable");
+    const seatingMigrations = await db.pool.query("SELECT name FROM payload_migrations WHERE name=ANY($1::text[])", [["20261112_000000_activity_seating", "20261112_010000_activity_seating_schedule"]]);
+    if (seatingMigrations.rowCount !== 2) throw new Error("Required activity seating migrations unavailable");
     const indexes = await db.pool.query<IndexMetadata>(`
       SELECT idx.relname name, src.relname table_name, i.indisvalid valid,
         i.indisready ready, i.indisunique is_unique, pg_get_expr(i.indpred,i.indrelid) predicate,

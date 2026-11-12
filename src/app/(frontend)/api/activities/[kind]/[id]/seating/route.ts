@@ -20,7 +20,7 @@ export function GET(request: Request, context: SeatRouteContext) {
 export function PUT(request: Request, context: SeatRouteContext) {
   return seatingHTTP(request, context, async (p, kind, id, user) => {
     const data = await seatingJSON(request);
-    return seatReply(await setSeating(p, await seatActivity(p, kind, id, user), user, data.enabled));
+    return seatReply(await setSeating(p, await seatActivity(p, kind, id, user), user, data.enabled, data.opensAt));
   });
 }
 

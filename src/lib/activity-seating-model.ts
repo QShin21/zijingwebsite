@@ -51,9 +51,15 @@ export type SeatReview = SeatRequest & {
   proofs: string[];
 };
 
-export type SeatingState = {
+export type SeatingAvailability = {
   enabled: boolean;
   open: boolean;
+  scheduled: boolean;
+  opensAt: string | null;
+  serverTime: number;
+};
+
+export type SeatingState = SeatingAvailability & {
   loggedIn: boolean;
   canReview: boolean;
   title: string;
@@ -66,9 +72,8 @@ export type SeatingState = {
   drafts: string[];
 };
 
-export type SeatingWorkbench = {
+export type SeatingWorkbench = SeatingAvailability & {
   title: string;
-  enabled: boolean;
   docs: SeatReview[];
   page: number;
   hasNextPage: boolean;
