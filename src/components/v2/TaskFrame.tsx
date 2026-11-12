@@ -19,7 +19,7 @@ export function TaskFrame({
   children,
   wide = false,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   description?: string;
   back?: { href: string; label: string };

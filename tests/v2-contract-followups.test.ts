@@ -16,12 +16,18 @@ function payload(user: User | null = actor) {
     find: vi.fn(async (args: Record<string, unknown>) => ({ docs: args.collection === "games" ? [game] : [], totalDocs: 0 })) } as unknown as Payload;
 }
 describe("V2 backend follow-up contracts (synthetic Local API)", () => {
-  it("header reads one game and counts, no body, officers or child-content lists; viewer matches detail", async () => {
+  it("header reads game and icon metadata with counts, no body, officers or child-content lists; viewer matches detail", async () => {
     const p = payload();
     const header = await getCommunityHeader(p, actor, { slug: "synthetic" });
     expect(header.card).toMatchObject({ community: { id: 8, hue: 16 }, summary: "简介", counts: { teams: 0, showcase: 0 } });
     const calls = vi.mocked(p.find).mock.calls;
-    expect(calls).toHaveLength(1);
+    expect(calls).toHaveLength(2);
+    expect(calls[1][0]).toMatchObject({
+      collection: "community-icons", overrideAccess: false, user: null, depth: 0, limit: 1,
+      context: { publicCommunityIcon: game.id }, where: { game: { equals: game.id } },
+      select: { updatedAt: true },
+    });
+    expect(calls[1][0].select).toEqual({ updatedAt: true });
     expect(calls[0][0]).toMatchObject({ collection: "games", overrideAccess: false, user: null, draft: false });
     expect(calls[0][0].select).not.toHaveProperty("body");
     const detail = await getCommunity(p, actor, { slug: "synthetic" });

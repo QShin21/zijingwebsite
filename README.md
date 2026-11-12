@@ -65,7 +65,7 @@ PowerShell 可先设置 `$env:PIXEL_PREVIEW_SEED = '1'`，再运行 `pnpm exec t
 
 脚本补充标记为演示的公告、活动与相册，重复运行不重复导入，演示活动不接受实际报名。`pnpm demo:clean` 清理 `demo=true` 内容，保留正式记录。
 
-网站没有默认账号。正常注册需要清华邮箱及 SMTP；登录支持唯一昵称或邮箱。首位后台管理员可通过 `ADMIN_EMAIL`、`ADMIN_PASSWORD` 临时环境变量运行 `pnpm admin:create` 创建；密码至少 16 位，使用安全交互输入，完成后清除环境变量。已有后台用户时初始化会拒绝执行。
+网站没有默认账号。正常注册需要清华邮箱及 SMTP；登录支持唯一昵称或邮箱。首位后台管理员可通过 `ADMIN_EMAIL`、`ADMIN_PASSWORD` 临时环境变量运行 `pnpm admin:create` 创建；建议使用至少 16 位密码，通过安全交互输入，完成后清除环境变量。已有后台用户时初始化会拒绝执行。
 
 登录后界面的合成记录脚本为 `scripts/pixel-preview-account-seed.ts`：仅接受本机 55439 端口、`APP_ENV=development`、未配置 SMTP/S3 的数据库，以及预先创建、仅有 `member` 角色的专用体验账号。它不创建账号或授予权限；具体约束见 [改版记录](docs/PIXEL_CAMPUS_WEB.md)。
 

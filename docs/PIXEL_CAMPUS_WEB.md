@@ -154,3 +154,8 @@ public/pixel-campus/ASSET-PROVENANCE.json 记录素材来源与转换；字体�
 - 清理公共栏目、参与入口和选拔中心的重复标题、泛化口号及“都在这里”等无信息说明；同一流程只在对应引导区解释一次。
 - 保留批次条件、截止时间、草稿与提交区别、人工处理、资料授权、离队后果、错误恢复以及演示标识。将操作标签改为“查看申请”“编辑队内简介”等具体动作；修正空态对上下位置的依赖。
 - README 补充四档主题、目录、安装启动、合成预览数据、账号条件、定向测试与素材来源。
+
+- 合并上游 `ae6677f`，保留新增活动发布、座位与身份逻辑；解决两处文案冲突，骨干录用后的身份说明与实际行为一致。
+- 修正社群头部的过时查询断言：明确允许一条社群读取与一条只取 `updatedAt` 的图标读取，继续限制正文、联系人和子内容读取。
+- 最终验证：52 项定向测试、改动 TS/TSX/JS 文件 ESLint、生产构建及 TypeScript 通过，差异空白检查通过；本地开发库迁移完成。浏览器查看首页与骨干招新，390px 和默认655px视口无横向溢出，流程、空态引导及录用说明可见。截图存于协作工作区 `outputs/pixel-integration/evidence/copy-final-preview.jpg`。
+- 全量检查遗留：`pnpm lint` 在上游 `tests/content-promotions.test.ts:137` 的未使用变量处失败；上游 `publication-image-multipart.test.ts` 的3项断言通过，但 Payload multipart 超限分支触发 Node/Undici `ReadableStream is already closed` 未处理拒绝，独立重跑可复现。相关文件相对上游未修改，完整测试不能记为通过。本轮未重跑登录后报名、申请与审批的浏览器写入链路，也未运行 GitHub CI。
