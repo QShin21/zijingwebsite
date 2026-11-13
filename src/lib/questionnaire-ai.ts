@@ -16,6 +16,36 @@ export class QuestionnaireAIError extends Error {
     super(message);
   }
 }
+/**
+ * Server-only AI endpoint shared by questionnaire generation and published-content
+ * translation. Only the allowlisted origin and /v1 path are accepted; the key never
+ * leaves this process (not returned to clients, stored or logged).
+ */
+export function questionnaireAIService():
+  | { key: string; base: string }
+  | "missing"
+  | "invalid" {
+  const key = process.env.QUESTIONNAIRE_AI_API_KEY;
+  if (!key) return "missing";
+  const base =
+    process.env.QUESTIONNAIRE_AI_BASE_URL || "https://llmapi.paratera.com/v1";
+  let url: URL;
+  try {
+    url = new URL(base);
+  } catch {
+    return "invalid";
+  }
+  if (
+    url.origin !== "https://llmapi.paratera.com" ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
+    url.pathname.replace(/\/$/, "") !== "/v1"
+  )
+    return "invalid";
+  return { key, base };
+}
 export function generationRequest(raw: unknown): GenerationRequest {
   const input = raw as Record<string, unknown>;
   if (
@@ -220,24 +250,15 @@ export async function generateQuestionnaire(
   signal?: AbortSignal,
   progress?: (event: GenerationProgress) => void,
 ) {
-  const key = process.env.QUESTIONNAIRE_AI_API_KEY;
-  if (!key)
+  const service = questionnaireAIService();
+  if (service === "missing")
     throw new QuestionnaireAIError(
       "AI 制作尚未开通，请先使用模板或手动制作。",
       503,
     );
-  const base =
-    process.env.QUESTIONNAIRE_AI_BASE_URL || "https://llmapi.paratera.com/v1";
-  const url = new URL(base);
-  if (
-    url.origin !== "https://llmapi.paratera.com" ||
-    url.username ||
-    url.password ||
-    url.search ||
-    url.hash ||
-    url.pathname.replace(/\/$/, "") !== "/v1"
-  )
+  if (service === "invalid")
     throw new QuestionnaireAIError("AI 服务配置无效，请联系网站管理员。", 503);
+  const { key, base } = service;
   const deadline = AbortSignal.timeout(120000);
   const combined = signal ? AbortSignal.any([signal, deadline]) : deadline;
   let correction = "",

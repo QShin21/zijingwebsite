@@ -1,3 +1,4 @@
+const i18n = (() => { try { const value = require('./i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { t: zh => zh, message: value => value, locale: () => 'zh' }; })();
 const session = require('./session');
 let registered = false;
 let active = null;
@@ -9,7 +10,7 @@ const currentPage = () => {
   const pages = typeof getCurrentPages === 'function' ? getCurrentPages() : [];
   return pages[pages.length - 1];
 };
-const unread = () => new Error('隐私授权未完成，图片未读取；可查看隐私说明后重新选择');
+const unread = () => new Error(i18n.message('隐私授权未完成，图片未读取；可查看隐私说明后重新选择'));
 
 // Register once: wx.onNeedPrivacyAuthorization replaces earlier listeners.
 function setup() {
@@ -42,15 +43,15 @@ function finish(request, cause) {
 }
 // Only called from an explicit choose-image/video action. No file API runs here.
 function authorize() {
-  if (active) return Promise.reject(new Error('隐私说明正在处理，请先完成或取消当前操作'));
-  if (pendingSDK) return Promise.reject(new Error('微信隐私授权正在结束，请稍后重新选择'));
+  if (active) return Promise.reject(new Error(i18n.message('隐私说明正在处理，请先完成或取消当前操作')));
+  if (pendingSDK) return Promise.reject(new Error(i18n.message('微信隐私授权正在结束，请稍后重新选择')));
   if (typeof wx.requirePrivacyAuthorize !== 'function' || typeof wx.getPrivacySetting !== 'function' ||
       typeof wx.openPrivacyContract !== 'function' || !setup()) {
-    return Promise.reject(new Error('当前微信版本暂不支持隐私授权，请升级微信后重试'));
+    return Promise.reject(new Error(i18n.message('当前微信版本暂不支持隐私授权，请升级微信后重试')));
   }
   const page = currentPage(), who = actor();
   const dialog = page && typeof page.selectComponent === 'function' && page.selectComponent('#privacyConsent');
-  if (!who || !dialog || !dialog.available()) return Promise.reject(new Error('页面或账号已更新，请重新操作'));
+  if (!who || !dialog || !dialog.available()) return Promise.reject(new Error(i18n.message('页面或账号已更新，请重新操作')));
   return new Promise((resolve, reject) => {
     const request = { dialog, resolve, reject, who, started: false, agreed: false, sdkResolve: null,
       ownsContext: () => active === request && actor() === who && currentPage() === page,
@@ -65,7 +66,7 @@ function authorize() {
             if (pendingSDK === request) pendingSDK = null;
             if (active !== request) return;
             if (!request.current() || needAuthorization && !request.agreed) {
-              finish(request, new Error('页面或隐私授权状态已更新，请重新操作'));
+              finish(request, new Error(i18n.message('页面或隐私授权状态已更新，请重新操作')));
             } else finish(request);
           },
           fail() { if (pendingSDK === request) pendingSDK = null; finish(request, unread()); },
@@ -84,24 +85,24 @@ function authorize() {
     };
     active = request;
     request.unsubscribe = session.subscribe(() => {
-      if (actor() !== who) request.cancel(new Error('页面或账号已更新，请重新操作'));
+      if (actor() !== who) request.cancel(new Error(i18n.message('页面或账号已更新，请重新操作')));
     });
     try { dialog.present(request); } catch (cause) { finish(request, cause); }
   });
 }
 function setting() {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('平台隐私设置读取超时，请重试')), 15000);
+    const timer = setTimeout(() => reject(new Error(i18n.message('平台隐私设置读取超时，请重试'))), 15000);
     const done = callback => value => { clearTimeout(timer); callback(value); };
     try {
       wx.getPrivacySetting({
         success: done(value => {
           if (!value || typeof value.needAuthorization !== 'boolean' ||
               typeof value.privacyContractName !== 'string' || !value.privacyContractName.trim()) {
-            reject(new Error('微信平台隐私指引尚未配置，请联系负责人'));
+            reject(new Error(i18n.message('微信平台隐私指引尚未配置，请联系负责人')));
           } else resolve(value);
         }),
-        fail: done(() => reject(new Error('平台隐私设置暂不可用，请重试'))),
+        fail: done(() => reject(new Error(i18n.message('平台隐私设置暂不可用，请重试')))),
       });
     } catch (cause) { clearTimeout(timer); reject(cause); }
   });
@@ -109,10 +110,10 @@ function setting() {
 function openContract() {
   return new Promise((resolve, reject) => {
     if (typeof wx.openPrivacyContract !== 'function') {
-      reject(new Error('当前微信版本暂不支持查看平台隐私指引，请升级微信后重试'));
+      reject(new Error(i18n.message('当前微信版本暂不支持查看平台隐私指引，请升级微信后重试')));
       return;
     }
-    wx.openPrivacyContract({ success() { resolve(); }, fail() { reject(new Error('隐私指引暂不可用，请稍后重试')); } });
+    wx.openPrivacyContract({ success() { resolve(); }, fail() { reject(new Error(i18n.message('隐私指引暂不可用，请稍后重试'))); } });
   });
 }
 module.exports = { setup, authorize, setting, openContract };

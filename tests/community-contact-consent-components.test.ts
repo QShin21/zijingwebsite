@@ -4,6 +4,7 @@ import { createRequire } from 'node:module';
 import { isValidElement, type ReactElement } from 'react';
 import ts from 'typescript';
 import { describe, expect, it, vi } from 'vitest';
+import * as localeModule from '../src/lib/i18n/locale';
 import { applicationContactConsentLabel as label, applicationContactConsentRequiredMessage as message } from '../src/lib/community-status';
 
 type Values = Record<string, unknown>;
@@ -14,6 +15,14 @@ const require = createRequire(import.meta.url);
 const sourceForm = readFileSync('src/components/CommunityApplicationForm.tsx', 'utf8');
 const sourceReview = readFileSync('src/app/(frontend)/community/review/page.tsx', 'utf8');
 const shared = { applicationContactConsentLabel: label, applicationContactConsentRequiredMessage: message };
+// Chinese-default i18n stand-ins: the vm harness cannot load TSX or path aliases.
+const i18nStubs = {
+  '@/components/i18n/LocaleProvider': { useT: () => (zh: string) => zh, useLocale: () => 'zh' },
+  '@/lib/i18n/messages-account': { localizeAccountMessage: (value: string) => value },
+  '@/lib/i18n/server': { getT: async () => ({ locale: 'zh', t: (zh: string) => zh }), getLocale: async () => 'zh' },
+  '@/lib/i18n/locale': localeModule,
+  '@/lib/i18n/labels-account': { accountLabel: (value: string) => value, keyedLabel: (_l: string, _k: string, _e: unknown, zh: string) => zh },
+};
 const initial = (consent?: boolean | null): Initial => ({ id: 81, updatedAt: '2026-10-13T01:00:00Z', proposedGame: '合成游戏', reason: '合成已填写申请说明', contactConsent: consent });
 function evaluate(text: string, dependencies: Values, extra: Values = {}) {
   const exports: Values = {};
@@ -63,7 +72,7 @@ function formHarness(saved?: Initial) {
     constructor() { construct(); const value = new FormData(); for (const [key, entry] of values) value.set(key, entry); if (input.checked) value.set('contactConsent', 'on'); return value; }
   }
   const component = evaluate(sourceForm, { react: hooks, 'next/navigation': { useRouter: () => router },
-    '@/lib/community-status': shared, '@/app/(frontend)/community/actions': { applyAction: action } }, { FormData: BrowserFormDataFixture }).CommunityApplicationForm as (props: unknown) => unknown;
+    '@/lib/community-status': shared, '@/app/(frontend)/community/actions': { applyAction: action }, ...i18nStubs }, { FormData: BrowserFormDataFixture }).CommunityApplicationForm as (props: unknown) => unknown;
   function find(predicate: (value: Element) => boolean) { const value = elements(tree).find(predicate); expect(value).toBeDefined(); return value!; }
   function render() {
     cursor = 0; tree = component({ games: [{ id: 31, title: '合成已有游戏' }], initial: saved });
@@ -165,7 +174,7 @@ async function reviewHarness(contactConsent: unknown, complete = true, authorize
     '@/components/v2/ui': { EmptyState: 'section', KeyValues: 'dl', Pager: 'nav', Section: 'section', StatusPill: 'span' },
     '@/lib/content': { cms: async () => ({ auth: async () => ({ user }), find }) }, '@/lib/rules': rules, '@/lib/community-status': shared,
     '../actions': { decideCommunityResultAction: vi.fn() },
-    '../../_club/ClubPage': { ClubFrame: 'div' },
+    '../../_club/ClubPage': { ClubFrame: 'div' }, ...i18nStubs,
   }).default as (value: unknown) => Promise<unknown>;
   const tree = await component({ searchParams: Promise.resolve({}) });
   return { tree, find, user };

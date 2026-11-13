@@ -7,6 +7,10 @@ const choices = [
   { id: 'simple', label: '简约' },
 ];
 const modes = choices.map(choice => choice.id);
+const choiceLabelsEn = { dark: 'Tsinghua Classic', summer: 'Summer Night', light: 'Winter Warmth', simple: 'Simple' };
+// Optional: harnesses that load this module alone keep the Chinese labels.
+function lang() { try { const value = require('./i18n'); return value && typeof value.t === 'function' ? value : null; } catch { return null; } }
+function localChoices() { const value = lang(); return value ? choices.map(choice => ({ ...choice, label: value.t(choice.label, choiceLabelsEn[choice.id]) })) : choices; }
 const generated = require('./design-tokens');
 const tokens = {
   ...generated.tokens,
@@ -79,7 +83,7 @@ function set(mode) {
 function presentation(mode) {
   return {
     theme: isDark(mode) ? 'dark' : 'light',
-    palette: mode, scene: scenes[mode], themeChoices: choices,
+    palette: mode, scene: scenes[mode], themeChoices: localChoices(),
     themePageStyle: style(mode), themePrimary: tokens[mode].primary,
     themeMuted: tokens[mode].muted, themeLine: tokens[mode].line,
   };
@@ -93,6 +97,8 @@ function subscribe(listener) {
 }
 function attach(target) {
   if (!target._visualThemeOff) target._visualThemeOff = subscribe(mode => apply(target, mode));
+  const value = !target._visualLocaleOff && lang();
+  if (value && typeof value.subscribe === 'function') target._visualLocaleOff = value.subscribe(() => target.setData({ themeChoices: localChoices(), themeNotice: '' }));
 }
 function page(definition) {
   const original = { load: definition.onLoad, show: definition.onShow, hide: definition.onHide, unload: definition.onUnload };
@@ -108,14 +114,18 @@ function page(definition) {
       if (original.show) return original.show.apply(this, arguments);
     },
     onHide() { if (original.hide) return original.hide.apply(this, arguments); },
-    onUnload() { if (this._visualThemeOff) this._visualThemeOff(); this._visualThemeOff = null; if (original.unload) return original.unload.apply(this, arguments); },
+    onUnload() { if (this._visualThemeOff) this._visualThemeOff(); this._visualThemeOff = null;
+      if (this._visualLocaleOff) this._visualLocaleOff(); this._visualLocaleOff = null;
+      if (this._i18nOff) this._i18nOff(); this._i18nOff = null; if (original.unload) return original.unload.apply(this, arguments); },
     setVisualTheme(event) {
       const mode = event && event.currentTarget && event.currentTarget.dataset.theme;
       const result = set(mode);
       if (!result.ok) return;
       apply(this, mode);
-      this.setData({ themeError: result.persisted ? '' : '本次切换已生效，暂无法保存偏好；下次打开可能恢复原设置。',
-        themeNotice: result.persisted ? '已切换至' + choices.find(choice => choice.id === mode).label + '。' : '' });
+      const i18n = lang(), tr = (zh, en) => i18n ? i18n.t(zh, en) : zh;
+      const label = localChoices().find(choice => choice.id === mode).label;
+      this.setData({ themeError: result.persisted ? '' : tr('本次切换已生效，暂无法保存偏好；下次打开可能恢复原设置。', 'Applied for now, but the preference could not be saved; it may reset next time.'),
+        themeNotice: result.persisted ? tr('已切换至' + label + '。', 'Switched to ' + label + '.') : '' });
     }
   };
 }

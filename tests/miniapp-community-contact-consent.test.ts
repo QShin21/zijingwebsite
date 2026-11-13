@@ -229,7 +229,9 @@ describe('旧管理员申请：原生审核提示与服务器授权不扩权', (
 
   it('申请checkbox使用精确文本、可访问错误和定位区域，提交按钮不会因未同意禁用', () => {
     const text = source('pages/applications/index.wxml');
-    expect(text).toContain('<text>' + consentLabel + '</text>'); expect(text).toContain('aria-label="' + consentLabel + '"');
+    // Bilingual: the WXML binds t.consentLabel, whose Chinese text is the exact consent sentence.
+    expect(text).toContain('<text>{{t.consentLabel}}</text>'); expect(text).toContain('aria-label="{{t.consentLabel}}"');
+    expect(source('pages/applications/index.js')).toContain("consentLabel: ['" + consentLabel + "'");
     expect(text).toContain('id="contact-consent"'); expect(text).toContain('checked="{{contactConsent}}"');
     expect(text).toContain('wx:if="{{formError}}" class="error" aria-role="alert"');
     expect(text).not.toContain('（可选）'); expect(text).toContain('<privacy-consent id="privacyConsent"');
@@ -241,7 +243,7 @@ describe('旧管理员申请：原生审核提示与服务器授权不扩权', (
     const text = source('pages/review/index.wxml');
     expect(text).toContain('<view class="actions" wx:if="{{item.actions.review}}">');
     expect(text).toMatch(/<button wx:if="\{\{item\.contactConsent === true\}\}"[^>]*data-decision="approved"/);
-    expect(text).toContain(reviewConsentError); expect(text).not.toContain('批准后不提供成员可见名片');
-    expect(source('pages/community/index.wxml')).toContain('申请和修改重提时，需要本人主动同意展示微信名片作为进群联系方式');
+    expect(source('pages/review/index.js')).toContain(reviewConsentError); expect(text).not.toContain('批准后不提供成员可见名片');
+    expect(source('pages/community/index.js')).toContain('申请和修改重提时，需要本人主动同意展示微信名片作为进群联系方式');
   });
 });

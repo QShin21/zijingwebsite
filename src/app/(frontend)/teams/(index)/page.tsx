@@ -5,11 +5,16 @@ import { ButtonLink, EmptyState, PageHero, Pager, Wrap } from "@/components/v2/u
 import { TeamTile } from "@/components/v2/cards";
 import { TeamsNav } from "@/components/v2/TeamsNav";
 import layout from "@/components/v2/layout.module.css";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata = { title: "代表队" };
-const statuses = { active: "活跃", resting: "休整", archived: "归档" } as const;
+export async function generateMetadata() {
+  const { t } = await getT();
+  return { title: t("代表队", "Teams") };
+}
+const statuses = { active: { zh: "活跃", en: "Active" }, resting: { zh: "休整", en: "Resting" }, archived: { zh: "归档", en: "Archived" } } as const;
 
 export default async function Teams({ searchParams }: { searchParams: Search }) {
+  const { t } = await getT();
   const search = await searchParams;
   const rawCommunity = single(search.community) ?? single(search.game);
   const community = rawCommunity && /^[\w-]{1,120}$/.test(rawCommunity) ? rawCommunity : undefined;
@@ -25,16 +30,16 @@ export default async function Teams({ searchParams }: { searchParams: Search }) 
     <>
       <PageHero
         tone="stage"
-        eyebrow="TEAMS · 代表队中心"
-        title="代表队"
-        description="各游戏社群的代表队、公开队员简介与已核验荣誉。想上场？到选拔中心找开放批次。"
+        eyebrow={t("TEAMS · 代表队中心", "TEAMS · Team center")}
+        title={t("代表队", "Teams")}
+        description={t("各游戏社群的代表队、公开队员简介与已核验荣誉。想上场？到选拔中心找开放批次。", "Teams from each game community, public player profiles and verified honors. Want to play? Find an open batch in the tryout center.")}
         actions={
           <>
             <ButtonLink href="/teams/recruitment" tone="accent" icon="arrow">
-              选拔中心
+              {t("选拔中心", "Tryout center")}
             </ButtonLink>
             <ButtonLink href="/teams/honors" tone="stage">
-              荣誉墙
+              {t("荣誉墙", "Honor wall")}
             </ButtonLink>
           </>
         }
@@ -43,12 +48,12 @@ export default async function Teams({ searchParams }: { searchParams: Search }) 
         <TeamsNav current="teams" />
         <div className={layout.sidebarLayout}>
           <div>
-            <form className={layout.filters} method="get" action="/teams" aria-label="筛选代表队">
+            <form className={layout.filters} method="get" action="/teams" aria-label={t("筛选代表队", "Filter teams")}>
               {communities && communities.docs.length > 0 && (
                 <label>
-                  游戏社群
+                  {t("游戏社群", "Game community")}
                   <select name="community" defaultValue={community ?? ""}>
-                    <option value="">全部社群</option>
+                    <option value="">{t("全部社群", "All communities")}</option>
                     {communities.docs.map((card) => (
                       <option key={card.community.id} value={card.community.slug}>
                         {card.community.title}
@@ -58,30 +63,30 @@ export default async function Teams({ searchParams }: { searchParams: Search }) 
                 </label>
               )}
               <label>
-                状态
+                {t("状态", "Status")}
                 <select name="status" defaultValue={status ?? ""}>
-                  <option value="">全部状态</option>
+                  <option value="">{t("全部状态", "All statuses")}</option>
                   {Object.entries(statuses).map(([value, label]) => (
                     <option key={value} value={value}>
-                      {label}
+                      {t(label.zh, label.en)}
                     </option>
                   ))}
                 </select>
               </label>
               <div className={layout.filterActions}>
                 <button type="submit" className="button">
-                  筛选
+                  {t("筛选", "Filter")}
                 </button>
                 {filtered && (
                   <Link href="/teams" className="text-link">
-                    清除筛选
+                    {t("清除筛选", "Clear filters")}
                   </Link>
                 )}
               </div>
             </form>
             <p className={layout.resultMeta}>
               <span>
-                {filtered ? "筛选结果" : "全部队伍"} · {result.totalDocs} 支
+                {filtered ? t("筛选结果", "Results") : t("全部队伍", "All teams")} · {t(`${result.totalDocs} 支`, `${result.totalDocs} ${result.totalDocs === 1 ? "team" : "teams"}`)}
               </span>
             </p>
             {result.docs.length ? (
@@ -92,42 +97,42 @@ export default async function Teams({ searchParams }: { searchParams: Search }) 
               </div>
             ) : (
               <EmptyState
-                title={filtered ? "没有符合条件的队伍" : "还没有公开的代表队"}
+                title={filtered ? t("没有符合条件的队伍", "No matching teams") : t("还没有公开的代表队", "No public teams yet")}
                 icon="trophy"
                 actions={
                   filtered ? (
                     <ButtonLink href="/teams" tone="ghost" size="small">
-                      清除筛选
+                      {t("清除筛选", "Clear filters")}
                     </ButtonLink>
                   ) : (
                     <ButtonLink href="/teams/apply" tone="ghost" size="small">
-                      申请建立代表队
+                      {t("申请建立代表队", "Apply to create a team")}
                     </ButtonLink>
                   )
                 }
               >
-                代表队由社群管理员申请建立，审核通过后出现在这里。
+                {t("代表队由社群管理员申请建立，审核通过后出现在这里。", "Community admins apply to create teams; approved teams appear here.")}
               </EmptyState>
             )}
             <Pager page={result.page} totalPages={result.totalPages} path="/teams" query={{ community, status }} />
           </div>
           <aside className={`${layout.panel} ${layout.sticky}`}>
-            <h2 className={layout.panelTitle}>组织与管理</h2>
-            <p style={{ color: "var(--z-muted)", fontSize: 14 }}>建队申请与队伍事务，按当前社群任职和授权处理。</p>
+            <h2 className={layout.panelTitle}>{t("组织与管理", "Organization")}</h2>
+            <p style={{ color: "var(--z-muted)", fontSize: 14 }}>{t("建队申请与队伍事务，按当前社群任职和授权处理。", "Team applications and team affairs are handled according to your current community role and permissions.")}</p>
             <ul style={{ display: "grid", gap: 10, marginTop: 14 }}>
               <li>
                 <Link className="text-link" href="/teams/apply">
-                  申请建立代表队
+                  {t("申请建立代表队", "Apply to create a team")}
                 </Link>
               </li>
               <li>
                 <Link className="text-link" href="/teams/manage">
-                  代表队工作台
+                  {t("代表队工作台", "Team workspace")}
                 </Link>
               </li>
               <li>
                 <Link className="text-link" href="/teams/recruitment#mine">
-                  我的选拔申请
+                  {t("我的选拔申请", "My tryout applications")}
                 </Link>
               </li>
             </ul>

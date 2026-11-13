@@ -1,3 +1,4 @@
+import { i18nStub } from "./i18n-stubs";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { createRequire } from "node:module";
@@ -31,7 +32,7 @@ function evaluate(source: string, dependencies: Values, extra: Values = {}) {
   }).outputText;
   runInNewContext(code, {
     exports,
-    require: (name: string) => dependencies[name] ?? require(name),
+    require: (name: string) => dependencies[name] ?? i18nStub(name) ?? require(name),
     URLSearchParams,
     Error,
     ...extra,

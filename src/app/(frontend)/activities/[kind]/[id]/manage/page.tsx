@@ -1,7 +1,11 @@
 import { notFound } from "next/navigation";
 import { SignupManager } from "@/components/ActivitySignup";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata = { title: "报名问卷设置" };
+export async function generateMetadata() {
+  const { t } = await getT();
+  return { title: t("报名问卷设置", "Sign-up questionnaire settings") };
+}
 
 /** SignupManager renders its own V2 stage header (ActivityPages .hero) and h1. */
 export default async function Page({ params }: { params: Promise<{ kind: string; id: string }> }) {

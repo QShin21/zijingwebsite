@@ -1,12 +1,12 @@
 <!-- V2 club templates (names, data and handlers unchanged). -->
 <template name="staff-batches">
   <view wx:if="{{batches.length}}" class="zj-section">
-    <view class="zj-section-head"><view><text class="zj-section-title">正在招募社团骨干</text><text class="zj-small">参与执行部与宣传部的社团工作。</text></view><text class="zj-more" bindtap="openPage" data-page="staff" aria-role="link">全部批次 ›</text></view>
+    <view class="zj-section-head"><view><text class="zj-section-title">{{t.cStaffHiring}}</text><text class="zj-small">{{t.cStaffHiringBody}}</text></view><text class="zj-more" bindtap="openPage" data-page="staff" aria-role="link">{{t.cAllBatches}} ›</text></view>
     <view class="zj-list">
       <view wx:for="{{batches}}" wx:key="id" class="zj-call" hover-class="zj-pressed" bindtap="openPage" data-page="signup" data-params="{{item.params}}" aria-role="link" aria-label="{{item.title}}">
-        <view class="zj-tags"><text class="zj-kind">骨干招新</text><text class="zj-pill zj-pill-success">{{item.state}}</text></view>
+        <view class="zj-tags"><text class="zj-kind">{{t.cStaffRecruitment}}</text><text class="zj-pill zj-pill-success">{{item.state}}</text></view>
         <text class="zj-card-title">{{item.title}}</text>
-        <text class="zj-card-action">查看批次并申请 ›</text>
+        <text class="zj-card-action">{{t.cViewBatch}} ›</text>
       </view>
     </view>
   </view>
@@ -14,10 +14,10 @@
 <template name="promotion-cards">
   <view class="zj-list">
     <view wx:for="{{docs}}" wx:key="sourceKey" class="zj-call zj-promotion" hover-class="zj-pressed" bindtap="openWebsite" data-url="{{item.href}}" aria-role="link" aria-label="{{item.snapshot.title}}">
-      <view class="zj-tags"><text class="zj-tag zj-tag-accent">社团展示</text><text class="zj-kind">{{item.gameTitle}}</text></view>
+      <view class="zj-tags"><text class="zj-tag zj-tag-accent">{{t.cClubShowcase}}</text><text class="zj-kind">{{item.gameTitle}}</text></view>
       <text class="zj-card-title">{{item.snapshot.title}}</text>
       <text wx:if="{{item.snapshot.body}}" class="zj-card-summary zj-clamp">{{item.snapshot.body}}</text>
-      <text class="zj-card-action">查看社群原文 ›</text>
+      <text class="zj-card-action">{{t.cOpenCommunityPost}} ›</text>
     </view>
   </view>
 </template>

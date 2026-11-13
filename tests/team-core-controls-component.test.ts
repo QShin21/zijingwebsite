@@ -1,3 +1,4 @@
+import { i18nStub } from "./i18n-stubs";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { createRequire } from "node:module";
@@ -102,7 +103,7 @@ function harness(
   const exports: Values = {};
   runInNewContext(compiled, {
     exports,
-    require: (name: string) => dependencies[name] ?? require(name),
+    require: (name: string) => dependencies[name] ?? i18nStub(name) ?? require(name),
     fetch: request,
     FormData: BrowserFormDataFixture,
     Error,
@@ -189,7 +190,7 @@ describe("队伍工作台异步反馈：实际 TSX，合成 fetch / hook 边界"
       };
       runInNewContext(compiled, {
         exports,
-        require: (name: string) => dependencies[name] ?? require(name),
+        require: (name: string) => dependencies[name] ?? i18nStub(name) ?? require(name),
       });
       const component = exports[name] as (props: Values) => ReactElement;
       const html = renderToStaticMarkup(createElement(component, props));

@@ -5,28 +5,28 @@
   <view class="zj-hero">
     <view class="zj-stage-stripes"></view>
     <view class="zj-hero-inner">
-      <button class="zj-hero-back" bindtap="back">‹ 返回</button>
-      <text class="zj-hero-kicker">{{team ? '代表队入队申请' : staff ? '骨干招新申请' : edit ? '活动问卷与报名管理' : '活动报名'}}</text>
-      <text class="zj-hero-title">{{info ? info.title : (team ? '代表队申请' : staff ? '骨干招新申请' : edit ? '问卷与报名管理' : '活动报名')}}</text>
-      <view wx:if="{{info}}" class="zj-hero-meta"><text wx:if="{{info.state}}" class="zj-pill zj-pill-live">{{info.state}}</text><text wx:if="{{receipt}}">{{applicationMode ? '申请' : '报名'}} {{receipt.id}}</text></view>
+      <button class="zj-hero-back" bindtap="back">‹ {{t.back}}</button>
+      <text class="zj-hero-kicker">{{team ? t.kickerTeam : staff ? t.staffApplication : edit ? t.kickerManage : t.activitySignup}}</text>
+      <text class="zj-hero-title">{{info ? info.title : (team ? t.teamApplication : staff ? t.staffApplication : edit ? t.titleManage : t.activitySignup)}}</text>
+      <view wx:if="{{info}}" class="zj-hero-meta"><text wx:if="{{info.state}}" class="zj-pill zj-pill-live">{{stateText}}</text><text wx:if="{{receipt}}">{{applicationMode ? t.applicationWord : t.signupWord}} {{receipt.id}}</text></view>
     </view>
   </view>
-  <template is="feedback" data="{{loading,error,needsLogin}}" />
+  <template is="feedback" data="{{loading,error,needsLogin,t}}" />
   <view wx:if="{{seatReceipt && !needsLogin && !edit}}" class="zj-sheet signup-receipt">
-    <view class="zj-record-head"><text class="zj-sheet-title">我的选座回执</text><text class="zj-pill zj-pill-action">{{seatReceipt.statusText}}</text></view>
+    <view class="zj-record-head"><text class="zj-sheet-title">{{t.seatReceipt}}</text><text class="zj-pill zj-pill-action">{{seatReceipt.statusText}}</text></view>
     <text class="body">{{seatReceipt.seats}}</text>
     <block wx:for="{{seatTickets}}" wx:key="seat">
-      <view class="signup-seat-ticket"><text class="field-label">{{item.label}}电子票据</text><image wx:if="{{item.path}}" src="{{item.path}}" mode="widthFix" class="signup-seat-image" /><text wx:elif="{{item.uploaded}}" class="zj-form-hint">图片加载失败，请进入选座页面重试。</text><text wx:else class="zj-form-hint">票据上传后将在这里显示。</text></view>
+      <view class="signup-seat-ticket"><text class="field-label">{{item.label}}{{t.ticketSuffix}}</text><image wx:if="{{item.path}}" src="{{item.path}}" mode="widthFix" class="signup-seat-image" /><text wx:elif="{{item.uploaded}}" class="zj-form-hint">{{t.ticketLoadFailed}}</text><text wx:else class="zj-form-hint">{{t.ticketPending}}</text></view>
     </block>
-    <button class="secondary" bindtap="openSeatReceipt">查看选座详情与保存票据</button>
+    <button class="secondary" bindtap="openSeatReceipt">{{t.openSeat}}</button>
   </view>
   <view wx:if="{{team && error && confirmedReceipt && !needsLogin}}" class="zj-sheet signup-receipt">
-    <view class="zj-record-head"><text class="zj-sheet-title">上次保存已确认</text><text class="zj-pill zj-pill-success">{{confirmedReceipt.statusText}}</text></view>
+    <view class="zj-record-head"><text class="zj-sheet-title">{{t.lastSaveConfirmed}}</text><text class="zj-pill zj-pill-success">{{confirmedReceipt.statusText}}</text></view>
     <text class="body">{{confirmationMessage}}</text>
-    <view class="zj-tags"><text class="zj-small">申请 {{confirmedReceipt.id}}</text><text class="zj-small">{{confirmedReceipt.updatedText}}</text></view>
-    <text wx:if="{{confirmedReceipt.feedback}}" class="zj-callout">处理反馈：{{confirmedReceipt.feedback}}</text>
+    <view class="zj-tags"><text class="zj-small">{{t.applicationWord}} {{confirmedReceipt.id}}</text><text class="zj-small">{{confirmedReceipt.updatedText}}</text></view>
+    <text wx:if="{{confirmedReceipt.feedback}}" class="zj-callout">{{t.feedbackPrefix}}{{confirmedReceipt.feedback}}</text>
     <view class="zj-kv"><view wx:for="{{confirmedReceipt.rows}}" wx:key="id" class="zj-kv-row signup-answer"><text class="zj-kv-label">{{item.label}}</text><text class="zj-kv-value" selectable>{{item.answer}}</text></view></view>
-    <button class="secondary" bindtap="retry" disabled="{{loading || busy}}">重新读取申请状态</button>
+    <button class="secondary" bindtap="retry" disabled="{{loading || busy}}">{{t.rereadApplication}}</button>
   </view>
 
   <block wx:if="{{!loading && !error && !needsLogin && info}}">
@@ -34,131 +34,131 @@
 
     <block wx:if="{{edit}}">
       <view class="zj-segments" aria-role="tablist">
-        <button wx:if="{{info.canManage}}" class="zj-segment {{tab === 'edit' ? 'active' : ''}}" bindtap="tab" data-tab="edit" disabled="{{busy || loading}}">编辑问卷</button>
-        <button wx:if="{{info.canViewSignups}}" class="zj-segment {{tab === 'entries' ? 'active' : ''}}" bindtap="tab" data-tab="entries" disabled="{{busy || loading}}">报名名单</button>
+        <button wx:if="{{info.canManage}}" class="zj-segment {{tab === 'edit' ? 'active' : ''}}" bindtap="tab" data-tab="edit" disabled="{{busy || loading}}">{{t.editForm}}</button>
+        <button wx:if="{{info.canViewSignups}}" class="zj-segment {{tab === 'entries' ? 'active' : ''}}" bindtap="tab" data-tab="entries" disabled="{{busy || loading}}">{{t.signupList}}</button>
       </view>
       <view wx:if="{{info.canManage && tab === 'edit' && advancedEditing}}" class="zj-sheet">
-        <text class="zj-sheet-title">题目与分支概览</text>
-        <text class="zj-callout">此问卷包含高级题型或分支规则。小程序可完整填写与查看报名名单，制作和逻辑设置请在网站编辑。</text>
-        <button class="secondary" bindtap="websiteEditor">复制网站编辑地址</button>
-        <view class="zj-kv"><view wx:for="{{editQuestions}}" wx:key="id" class="zj-kv-row"><text class="zj-kv-label">第 {{index+1}} 题</text><text class="zj-kv-value">{{item.label}} · {{item.typeLabel}}</text></view></view>
+        <text class="zj-sheet-title">{{t.overview}}</text>
+        <text class="zj-callout">{{t.advancedNote}}</text>
+        <button class="secondary" bindtap="websiteEditor">{{t.copyEditor}}</button>
+        <view class="zj-kv"><view wx:for="{{editQuestions}}" wx:key="id" class="zj-kv-row"><text class="zj-kv-label">{{t.questionPrefix}}{{index+1}}{{t.questionSuffix}}</text><text class="zj-kv-value">{{item.label}} · {{item.typeLabel}}</text></view></view>
       </view>
       <block wx:elif="{{info.canManage && tab === 'edit'}}">
         <view class="zj-sheet">
-          <text class="zj-sheet-title">报名方式</text>
-          <label class="signup-switch"><view><text class="field-label">启用问卷报名</text><text class="zj-form-hint">每个账号保留一份记录，提交后确认报名。</text></view><switch color="{{themePrimary}}" checked="{{form.enabled}}" bindchange="field" data-key="enabled" disabled="{{busy}}" /></label>
+          <text class="zj-sheet-title">{{t.signupMethod}}</text>
+          <label class="signup-switch"><view><text class="field-label">{{t.enableForm}}</text><text class="zj-form-hint">{{t.enableFormHint}}</text></view><switch color="{{themePrimary}}" checked="{{form.enabled}}" bindchange="field" data-key="enabled" disabled="{{busy}}" /></label>
         </view>
         <block wx:if="{{form.enabled}}">
           <view class="zj-sheet">
-            <text class="zj-sheet-title">报名说明与开放时间</text>
-            <view class="field"><text class="field-label">报名说明（可选）</text><textarea cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{form.intro}}" maxlength="1000" bindinput="field" data-key="intro" placeholder="说明参与条件与填写用途" disabled="{{busy}}" /></view>
-            <view class="field"><text class="field-label">报名开始（可选）</text><view class="signup-datetime"><picker mode="date" value="{{startDate}}" bindchange="time" data-key="start" data-part="date" disabled="{{busy}}"><view class="picker-value">{{startDate || '选择日期'}}</view></picker><picker mode="time" value="{{startTime}}" bindchange="time" data-key="start" data-part="time" disabled="{{busy}}"><view class="picker-value">{{startTime || '选择时间'}}</view></picker></view><button class="plain" bindtap="clearTime" data-key="start" disabled="{{busy}}">不设开始时间</button></view>
-            <view class="field"><text class="field-label">报名截止（可选）</text><view class="signup-datetime"><picker mode="date" value="{{endDate}}" bindchange="time" data-key="end" data-part="date" disabled="{{busy}}"><view class="picker-value">{{endDate || '选择日期'}}</view></picker><picker mode="time" value="{{endTime}}" bindchange="time" data-key="end" data-part="time" disabled="{{busy}}"><view class="picker-value">{{endTime || '选择时间'}}</view></picker></view><button class="plain" bindtap="clearTime" data-key="end" disabled="{{busy}}">不设截止时间</button></view>
-            <label class="signup-switch"><view><text class="field-label">暂停接收报名</text><text class="zj-form-hint">已提交的报名记录保留。</text></view><switch color="{{themePrimary}}" checked="{{form.closed}}" bindchange="field" data-key="closed" disabled="{{busy}}" /></label>
+            <text class="zj-sheet-title">{{t.introAndTime}}</text>
+            <view class="field"><text class="field-label">{{t.introOptional}}</text><textarea cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{form.intro}}" maxlength="1000" bindinput="field" data-key="intro" placeholder="{{t.introPlaceholder}}" disabled="{{busy}}" /></view>
+            <view class="field"><text class="field-label">{{t.startOptional}}</text><view class="signup-datetime"><picker mode="date" value="{{startDate}}" bindchange="time" data-key="start" data-part="date" disabled="{{busy}}"><view class="picker-value">{{startDate || t.qPickDate}}</view></picker><picker mode="time" value="{{startTime}}" bindchange="time" data-key="start" data-part="time" disabled="{{busy}}"><view class="picker-value">{{startTime || t.qPickTime}}</view></picker></view><button class="plain" bindtap="clearTime" data-key="start" disabled="{{busy}}">{{t.noStart}}</button></view>
+            <view class="field"><text class="field-label">{{t.endOptional}}</text><view class="signup-datetime"><picker mode="date" value="{{endDate}}" bindchange="time" data-key="end" data-part="date" disabled="{{busy}}"><view class="picker-value">{{endDate || t.qPickDate}}</view></picker><picker mode="time" value="{{endTime}}" bindchange="time" data-key="end" data-part="time" disabled="{{busy}}"><view class="picker-value">{{endTime || t.qPickTime}}</view></picker></view><button class="plain" bindtap="clearTime" data-key="end" disabled="{{busy}}">{{t.noEnd}}</button></view>
+            <label class="signup-switch"><view><text class="field-label">{{t.pause}}</text><text class="zj-form-hint">{{t.pauseHint}}</text></view><switch color="{{themePrimary}}" checked="{{form.closed}}" bindchange="field" data-key="closed" disabled="{{busy}}" /></label>
           </view>
-          <view class="zj-section-head signup-questions-head"><view><text class="zj-section-title">报名题目</text><text class="zj-small">按填写顺序排列。已有报名保留提交时的题目和答案。</text></view><text class="zj-count">{{editQuestions.length}}</text></view>
+          <view class="zj-section-head signup-questions-head"><view><text class="zj-section-title">{{t.questionsTitle}}</text><text class="zj-small">{{t.questionsHint}}</text></view><text class="zj-count">{{editQuestions.length}}</text></view>
           <view wx:for="{{editQuestions}}" wx:key="id" class="zj-record signup-editor">
-            <view class="zj-record-head"><text class="signup-editor-index">第 {{index+1}} 题</text><text class="zj-pill zj-pill-action">{{typeLabels[item.typeIndex]}}</text></view>
-            <view class="field"><text class="field-label">题目标题 *</text><input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{item.label}}" maxlength="120" bindinput="question" data-index="{{index}}" data-key="label" placeholder="填写题目" disabled="{{busy}}" /></view>
-            <view class="field"><text class="field-label">题型</text><picker range="{{typeLabels}}" value="{{item.typeIndex}}" bindchange="question" data-index="{{index}}" data-key="type" disabled="{{busy}}"><view class="picker-value">{{typeLabels[item.typeIndex]}} ▾</view></picker></view>
-            <label class="signup-switch"><text class="field-label">此题必填</text><switch color="{{themePrimary}}" checked="{{item.required}}" bindchange="question" data-index="{{index}}" data-key="required" disabled="{{busy}}" /></label>
-            <view wx:if="{{item.type === 'single' || item.type === 'multiple'}}" class="field"><text class="field-label">选项（每行一个）</text><textarea cursor-spacing="24" value="{{item.optionsText}}" maxlength="2400" bindinput="question" data-index="{{index}}" data-key="options" disabled="{{busy}}" /></view>
-            <view class="zj-record-actions"><button class="secondary" disabled="{{busy || index === 0}}" bindtap="move" data-index="{{index}}" data-direction="-1">上移</button><button class="secondary" disabled="{{busy || index === editQuestions.length-1}}" bindtap="move" data-index="{{index}}" data-direction="1">下移</button><button class="danger" bindtap="remove" data-index="{{index}}" disabled="{{busy}}">删除此题</button></view>
+            <view class="zj-record-head"><text class="signup-editor-index">{{t.questionPrefix}}{{index+1}}{{t.questionSuffix}}</text><text class="zj-pill zj-pill-action">{{typeLabels[item.typeIndex]}}</text></view>
+            <view class="field"><text class="field-label">{{t.questionTitle}} *</text><input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{item.label}}" maxlength="120" bindinput="question" data-index="{{index}}" data-key="label" placeholder="{{t.questionPlaceholder}}" disabled="{{busy}}" /></view>
+            <view class="field"><text class="field-label">{{t.questionType}}</text><picker range="{{typeLabels}}" value="{{item.typeIndex}}" bindchange="question" data-index="{{index}}" data-key="type" disabled="{{busy}}"><view class="picker-value">{{typeLabels[item.typeIndex]}} ▾</view></picker></view>
+            <label class="signup-switch"><text class="field-label">{{t.required}}</text><switch color="{{themePrimary}}" checked="{{item.required}}" bindchange="question" data-index="{{index}}" data-key="required" disabled="{{busy}}" /></label>
+            <view wx:if="{{item.type === 'single' || item.type === 'multiple'}}" class="field"><text class="field-label">{{t.optionsPerLine}}</text><textarea cursor-spacing="24" value="{{item.optionsText}}" maxlength="2400" bindinput="question" data-index="{{index}}" data-key="options" disabled="{{busy}}" /></view>
+            <view class="zj-record-actions"><button class="secondary" disabled="{{busy || index === 0}}" bindtap="move" data-index="{{index}}" data-direction="-1">{{t.moveUp}}</button><button class="secondary" disabled="{{busy || index === editQuestions.length-1}}" bindtap="move" data-index="{{index}}" data-direction="1">{{t.moveDown}}</button><button class="danger" bindtap="remove" data-index="{{index}}" disabled="{{busy}}">{{t.deleteQuestion}}</button></view>
           </view>
-          <button class="secondary signup-wide" bindtap="add" disabled="{{busy}}">＋ 添加题目</button>
+          <button class="secondary signup-wide" bindtap="add" disabled="{{busy}}">＋ {{t.addQuestion}}</button>
         </block>
-        <view class="zj-dock"><text class="zj-form-hint signup-dock-note">确认报名时间与题目后，保存本次设置。</text><button class="primary" bindtap="save" loading="{{busy}}" disabled="{{busy}}">保存报名问卷</button></view>
+        <view class="zj-dock"><text class="zj-form-hint signup-dock-note">{{t.saveHint}}</text><button class="primary" bindtap="save" loading="{{busy}}" disabled="{{busy}}">{{t.saveForm}}</button></view>
       </block>
       <block wx:elif="{{info.canViewSignups && tab === 'entries'}}">
-        <view class="zj-section-head"><text class="zj-section-title">已提交报名</text><text class="zj-count">{{total}}</text></view>
-        <text wx:if="{{busy}}" class="zj-form-hint" aria-role="status">正在读取报名名单…</text>
+        <view class="zj-section-head"><text class="zj-section-title">{{t.submittedSignups}}</text><text class="zj-count">{{total}}</text></view>
+        <text wx:if="{{busy}}" class="zj-form-hint" aria-role="status">{{t.readingList}}</text>
         <view wx:for="{{entries}}" wx:key="id" class="zj-record">
-          <view class="zj-record-head"><text class="zj-record-title">{{item.memberName}}</text><text class="zj-small">报名 {{item.id}}</text></view>
-          <button class="plain signup-disclosure" bindtap="toggleEntry" data-id="{{item.id}}" disabled="{{busy}}" aria-expanded="{{expandedEntryId === item.id}}"><text>{{expandedEntryId === item.id ? '收起报名资料' : '查看已提交资料'}}</text><text>{{expandedEntryId === item.id ? '−' : '＋'}}</text></button>
+          <view class="zj-record-head"><text class="zj-record-title">{{item.memberName}}</text><text class="zj-small">{{t.signupWord}} {{item.id}}</text></view>
+          <button class="plain signup-disclosure" bindtap="toggleEntry" data-id="{{item.id}}" disabled="{{busy}}" aria-expanded="{{expandedEntryId === item.id}}"><text>{{expandedEntryId === item.id ? t.collapseEntry : t.expandEntry}}</text><text>{{expandedEntryId === item.id ? '−' : '＋'}}</text></button>
           <view wx:if="{{expandedEntryId === item.id}}" class="zj-kv"><view wx:for="{{item.rows}}" wx:for-item="answer" wx:key="label" class="zj-kv-row signup-answer"><text class="zj-kv-label">{{answer.label}}</text><text class="zj-kv-value" selectable>{{answer.answer}}</text></view></view>
         </view>
-        <view wx:if="{{!entries.length && !busy}}" class="zj-empty"><text class="zj-empty-icon">📋</text><text class="zj-empty-title">暂无报名</text><text class="zj-small">已提交的报名资料会显示在这里。</text></view>
-        <view wx:if="{{pages > 1}}" class="signup-pager"><button class="secondary" bindtap="previous" disabled="{{busy || page <= 1}}">上一页</button><text class="signup-pager-status">{{page}} / {{pages}}</text><button class="secondary" bindtap="next" disabled="{{busy || page >= pages}}">下一页</button></view>
+        <view wx:if="{{!entries.length && !busy}}" class="zj-empty"><text class="zj-empty-icon">📋</text><text class="zj-empty-title">{{t.noSignups}}</text><text class="zj-small">{{t.noSignupsHint}}</text></view>
+        <view wx:if="{{pages > 1}}" class="signup-pager"><button class="secondary" bindtap="previous" disabled="{{busy || page <= 1}}">{{t.previousPage}}</button><text class="signup-pager-status">{{page}} / {{pages}}</text><button class="secondary" bindtap="next" disabled="{{busy || page >= pages}}">{{t.nextPage}}</button></view>
       </block>
     </block>
 
     <block wx:else>
       <view wx:if="{{(!applicationMode && (info.canManage || info.canViewSignups)) || (staff && info.actions.review) || (team && info.actions.review)}}" class="signup-tools">
-        <button wx:if="{{!applicationMode && (info.canManage || info.canViewSignups)}}" class="secondary" bindtap="manage">{{info.canManage ? '管理报名问卷' : '查看报名名单'}}</button>
-        <button wx:if="{{staff && info.actions.review}}" class="secondary" bindtap="staffReview">骨干申请审核</button>
-        <button wx:if="{{team && info.actions.review}}" class="secondary" bindtap="teamReview">代表队申请审核</button>
+        <button wx:if="{{!applicationMode && (info.canManage || info.canViewSignups)}}" class="secondary" bindtap="manage">{{info.canManage ? t.manageForm : t.viewList}}</button>
+        <button wx:if="{{staff && info.actions.review}}" class="secondary" bindtap="staffReview">{{t.staffReview}}</button>
+        <button wx:if="{{team && info.actions.review}}" class="secondary" bindtap="teamReview">{{t.teamReview}}</button>
       </view>
       <view wx:if="{{recoveryRows.length}}" class="zj-sheet signup-recovery">
-        <text class="zj-sheet-title">尚未保存的内容</text>
-        <text class="zj-callout zj-callout-warning">当前状态无法提交，内容仅在本页保留。可重新加载核对申请状态。</text>
+        <text class="zj-sheet-title">{{t.unsaved}}</text>
+        <text class="zj-callout zj-callout-warning">{{t.unsavedHint}}</text>
         <view class="zj-kv"><view wx:for="{{recoveryRows}}" wx:key="id" class="zj-kv-row signup-answer"><text class="zj-kv-label">{{item.label}}</text><text class="zj-kv-value" selectable>{{item.answer}}</text></view></view>
       </view>
       <view wx:if="{{receipt && !responseEditing}}" class="signup-receipt-wrap">
         <view class="zj-sheet signup-receipt">
-          <text class="zj-hero-kicker signup-receipt-kicker">本人{{applicationMode ? '申请' : '报名'}}回执</text>
-          <text class="signup-receipt-status">{{applicationMode ? receipt.statusText : '已报名'}}</text>
-          <view class="zj-tags"><text class="zj-small">编号 {{receipt.id}}</text><text wx:if="{{applicationMode}}" class="zj-small">更新于 {{receipt.updatedText}}</text></view>
-          <view wx:if="{{receipt.feedback}}" class="zj-callout"><text class="signup-feedback-label">处理反馈</text><text>{{receipt.feedback}}</text></view>
+          <text class="zj-hero-kicker signup-receipt-kicker">{{applicationMode ? t.myApplicationReceipt : t.mySignupReceipt}}</text>
+          <text class="signup-receipt-status">{{applicationMode ? receipt.statusText : t.signedUp}}</text>
+          <view class="zj-tags"><text class="zj-small">{{t.numberPrefix}}{{receipt.id}}</text><text wx:if="{{applicationMode}}" class="zj-small">{{t.updatedPrefix}}{{receipt.updatedText}}</text></view>
+          <view wx:if="{{receipt.feedback}}" class="zj-callout"><text class="signup-feedback-label">{{t.feedback}}</text><text>{{receipt.feedback}}</text></view>
           <view wx:if="{{(applicationMode ? info.actions.edit : info.state === '报名开放') || (applicationMode && info.actions.withdraw)}}" class="actions">
-            <button wx:if="{{applicationMode ? info.actions.edit : info.state === '报名开放'}}" class="primary" disabled="{{busy}}" bindtap="editAnswers">{{applicationMode ? team && receipt.status === 'draft' ? '继续填写草稿' : receipt.status === 'withdrawn' ? '重新提交申请' : '修改申请' : '修改作答'}}</button>
-            <button wx:if="{{applicationMode && info.actions.withdraw}}" class="danger" disabled="{{busy}}" bindtap="withdraw">撤回申请</button>
+            <button wx:if="{{applicationMode ? info.actions.edit : info.state === '报名开放'}}" class="primary" disabled="{{busy}}" bindtap="editAnswers">{{applicationMode ? team && receipt.status === 'draft' ? t.continueDraft : receipt.status === 'withdrawn' ? t.resubmit : t.editApplication : t.editAnswers}}</button>
+            <button wx:if="{{applicationMode && info.actions.withdraw}}" class="danger" disabled="{{busy}}" bindtap="withdraw">{{t.withdraw}}</button>
           </view>
-          <text wx:if="{{!(applicationMode ? info.actions.edit : info.state === '报名开放')}}" class="zj-form-hint">当前回执只读。{{info.state}}</text>
-          <button class="plain" disabled="{{busy}}" bindtap="retry">重新加载已提交内容</button>
+          <text wx:if="{{!(applicationMode ? info.actions.edit : info.state === '报名开放')}}" class="zj-form-hint">{{t.readOnly}}{{stateText}}</text>
+          <button class="plain" disabled="{{busy}}" bindtap="retry">{{t.reloadSubmitted}}</button>
         </view>
         <view class="zj-sheet">
-          <text class="zj-sheet-title">{{team && receipt.status === 'draft' ? '已保存的草稿' : '已提交内容'}}</text>
+          <text class="zj-sheet-title">{{team && receipt.status === 'draft' ? t.savedDraft : t.submittedContent}}</text>
           <view class="zj-kv"><view wx:for="{{receipt.rows}}" wx:key="id" class="zj-kv-row signup-answer"><text class="zj-kv-label">{{item.label}}</text><text class="zj-kv-value" selectable>{{item.answer}}</text></view></view>
         </view>
       </view>
       <block wx:else>
-        <text wx:if="{{form.intro}}" class="zj-callout signup-intro">{{form.intro}}</text>
+        <text wx:if="{{form.intro}}" class="zj-callout signup-intro">{{introText || form.intro}}</text>
         <view class="signup-privacy">
           <text wx:if="{{staff}}" class="zj-form-hint">{{info.privacy}}</text>
           <text wx:if="{{staff && info.deadlinePolicy}}" class="zj-form-hint">{{info.deadlinePolicy}}</text>
-          <text wx:if="{{team}}" class="zj-form-hint">申请资料用于本队选拔，仅供本人及当前有权限的管理者查看。保存草稿后仍需提交，录取不授予平台或社群任职，也不代替公开简介授权。</text>
+          <text wx:if="{{team}}" class="zj-form-hint">{{t.teamPrivacy}}</text>
           <text wx:if="{{team && info.historyNote}}" class="zj-form-hint">{{info.historyNote}}</text>
-          <text wx:if="{{!applicationMode}}" class="zj-form-hint">提交的答案仅供本人和有权限的活动管理者查看，用于本次活动组织。</text>
+          <text wx:if="{{!applicationMode}}" class="zj-form-hint">{{t.signupPrivacy}}</text>
         </view>
         <block wx:if="{{form.enabled && (team ? (info.actions.draft || info.actions.submit) : staff ? (responseEditing ? info.actions.edit : info.actions.submit) : info.state === '报名开放')}}">
           <view class="signup-progress">
-            <view class="signup-stages" aria-label="填写、核对、查看回执">
-              <text class="signup-stage {{!review ? 'current' : 'done'}}">1 填写资料</text>
-              <text class="signup-stage {{review ? 'current' : ''}}">2 核对提交</text>
-              <text class="signup-stage">3 查看回执</text>
+            <view class="signup-stages" aria-label="{{t.stagesLabel}}">
+              <text class="signup-stage {{!review ? 'current' : 'done'}}">1 {{t.stageFill}}</text>
+              <text class="signup-stage {{review ? 'current' : ''}}">2 {{t.stageReview}}</text>
+              <text class="signup-stage">3 {{t.stageReceipt}}</text>
             </view>
-            <view class="signup-progress-head"><text class="signup-progress-title">{{review ? '核对提交内容' : responseEditing ? team && receipt.status === 'draft' ? '继续填写草稿' : '修改已提交资料' : applicationMode ? '填写申请资料' : '填写报名资料'}}</text><text class="signup-progress-count">{{completed}} / {{answerTotal}}</text></view>
+            <view class="signup-progress-head"><text class="signup-progress-title">{{review ? t.reviewTitle : responseEditing ? team && receipt.status === 'draft' ? t.continueDraft : t.editSubmitted : applicationMode ? t.fillApplication : t.fillSignup}}</text><text class="signup-progress-count">{{completed}} / {{answerTotal}}</text></view>
             <progress percent="{{progress}}" activeColor="#e3b04b" backgroundColor="rgba(255,255,255,0.16)" stroke-width="6" border-radius="6" />
-            <text class="signup-progress-hint">带 * 为必填。{{review ? '确认本页内容后，使用下方按钮提交。' : answerPages > 1 ? '翻页时会保留已填内容，完成后再核对提交。' : '完成后可先核对，再提交。'}}</text>
+            <text class="signup-progress-hint">{{t.requiredHint}}{{review ? t.hintReview : answerPages > 1 ? t.hintPages : t.hintSingle}}</text>
           </view>
           <view wx:if="{{review}}" class="zj-sheet">
-            <text class="zj-form-hint">以下内容将用于本次{{applicationMode ? '申请' : '报名'}}。如需调整，可在下方返回修改。</text>
+            <text class="zj-form-hint">{{applicationMode ? t.reviewNoteApplication : t.reviewNoteSignup}}</text>
             <view class="zj-kv"><view wx:for="{{reviewRows}}" wx:key="id" class="zj-kv-row signup-answer"><text class="zj-kv-label">{{item.label}}</text><text class="zj-kv-value" selectable>{{item.answer}}</text></view></view>
           </view>
           <block wx:else>
-            <text wx:if="{{answerPages > 1}}" class="signup-page-label">第 {{step+1}} / {{answerPages}} 页</text>
+            <text wx:if="{{answerPages > 1}}" class="signup-page-label">{{t.pagePrefix}}{{step+1}} / {{answerPages}}{{t.pageSuffix}}</text>
             <view class="signup-questions">
-              <block wx:for="{{questions}}" wx:for-item="question" wx:key="id"><template is="questionnaire-question" data="{{question,busy,theme,themePrimary,themeMuted}}" /></block>
+              <block wx:for="{{questions}}" wx:for-item="question" wx:key="id"><template is="questionnaire-question" data="{{question,busy,theme,themePrimary,themeMuted,t}}" /></block>
             </view>
             <text wx:if="{{branchNotice}}" class="branch-notice">{{branchNotice}}</text>
           </block>
-          <text wx:if="{{team && info.actions.draft}}" class="zj-form-hint">保存草稿不会进入审核队列，完成后仍需核对提交。</text>
-          <text wx:if="{{busy}}" class="zj-form-hint" aria-role="status">正在保存，请稍候。</text>
+          <text wx:if="{{team && info.actions.draft}}" class="zj-form-hint">{{t.draftHint}}</text>
+          <text wx:if="{{busy}}" class="zj-form-hint" aria-role="status">{{t.saving}}</text>
           <view class="zj-dock">
-            <button wx:if="{{review || step > 0}}" class="secondary" disabled="{{busy}}" bindtap="answerPrevious">{{review ? '返回修改' : '上一页'}}</button>
-            <button wx:if="{{!review}}" class="primary" disabled="{{busy}}" bindtap="answerNext">{{step < answerPages-1 ? '下一页' : '核对填写内容'}}</button>
-            <button wx:else class="primary" bindtap="submit" loading="{{busy}}" disabled="{{busy || (team && !info.actions.submit)}}">{{team ? '提交代表队申请' : staff ? '保存并提交骨干申请' : responseEditing ? '提交修改' : '提交并确认报名'}}</button>
-            <button wx:if="{{team && info.actions.draft}}" class="plain signup-draft" bindtap="saveDraft" loading="{{busy}}" disabled="{{busy}}">保存草稿，稍后继续</button>
+            <button wx:if="{{review || step > 0}}" class="secondary" disabled="{{busy}}" bindtap="answerPrevious">{{review ? t.backToEdit : t.previousPage}}</button>
+            <button wx:if="{{!review}}" class="primary" disabled="{{busy}}" bindtap="answerNext">{{step < answerPages-1 ? t.nextPage : t.reviewAnswers}}</button>
+            <button wx:else class="primary" bindtap="submit" loading="{{busy}}" disabled="{{busy || (team && !info.actions.submit)}}">{{team ? t.submitTeam : staff ? t.submitStaff : responseEditing ? t.submitChanges : t.submitSignup}}</button>
+            <button wx:if="{{team && info.actions.draft}}" class="plain signup-draft" bindtap="saveDraft" loading="{{busy}}" disabled="{{busy}}">{{t.saveDraft}}</button>
           </view>
         </block>
         <view wx:else class="zj-empty signup-unavailable">
           <text class="zj-empty-icon">⏸</text>
-          <text class="zj-empty-title">{{form.enabled ? '当前暂不能填写' : '当前未开放问卷'}}</text>
-          <text class="zj-small">{{info.state || '请重新读取当前状态，核对允许的操作。'}}</text>
-          <button class="secondary" bindtap="retry" disabled="{{busy}}">重新读取状态</button>
+          <text class="zj-empty-title">{{form.enabled ? t.cannotFill : t.notOpen}}</text>
+          <text class="zj-small">{{stateText || t.rereadHint}}</text>
+          <button class="secondary" bindtap="retry" disabled="{{busy}}">{{t.rereadState}}</button>
         </view>
       </block>
-      <button wx:if="{{team}}" class="secondary signup-wide" bindtap="openPage" data-page="team">代表队招新与我的成员记录</button>
+      <button wx:if="{{team}}" class="secondary signup-wide" bindtap="openPage" data-page="team">{{t.teamCenter}}</button>
     </block>
   </block>
 </view>

@@ -5,22 +5,24 @@ import { ArticleTile, FeedTile, MatchCard } from "./cards";
 import { ButtonLink, CommunityChip, DemoPill, EmptyState, Img, LinkTabs, PageHero, Pager, Wrap } from "./ui";
 import { RichText, Sections } from "./RichText";
 import { PublicationPresentation } from "./PublicationPresentation";
-import { empty, memberOnly } from "./copy";
+import { emptyCopy, memberOnlyCopy } from "./copy";
+import { getT } from "@/lib/i18n/server";
+import { articleLabel } from "@/lib/i18n/labels-public";
 import { formatDate } from "./format";
 import layout from "./layout.module.css";
 import styles from "./feed.module.css";
 
 export const feedKinds = [
-  { kind: "all", label: "全部", path: "/news" },
-  { kind: "announcements", label: "公告", path: "/announcements" },
-  { kind: "news", label: "新闻", path: "/news?kind=news" },
-  { kind: "albums", label: "影像", path: "/gallery" },
-  { kind: "showcase", label: "风采", path: "/news?kind=showcase" },
-  { kind: "honors", label: "荣誉", path: "/news?kind=honors" },
+  { kind: "all", zh: "全部", en: "All", path: "/news" },
+  { kind: "announcements", zh: "公告", en: "Notices", path: "/announcements" },
+  { kind: "news", zh: "新闻", en: "News", path: "/news?kind=news" },
+  { kind: "albums", zh: "影像", en: "Gallery", path: "/gallery" },
+  { kind: "showcase", zh: "风采", en: "Showcase", path: "/news?kind=showcase" },
+  { kind: "honors", zh: "荣誉", en: "Honors", path: "/news?kind=honors" },
 ] as const;
 export type FeedKind = (typeof feedKinds)[number]["kind"];
 
-export function FeedView({
+export async function FeedView({
   title,
   description,
   kind,
@@ -37,14 +39,16 @@ export function FeedView({
   basePath: string;
   query?: Record<string, string | undefined>;
 }) {
+  const { t } = await getT();
+  const empty = emptyCopy(t);
   return (
     <>
-      <PageHero tone="stage" eyebrow="FEED · 动态" title={title} description={description} />
+      <PageHero tone="stage" eyebrow={t("FEED · 动态", "FEED · Updates")} title={title} description={description} />
       <Wrap className={layout.pageBody}>
         {signedIn && (
           <LinkTabs
-            label="动态分类"
-            items={feedKinds.map((entry) => ({ href: entry.path, label: entry.label, current: entry.kind === kind }))}
+            label={t("动态分类", "Update categories")}
+            items={feedKinds.map((entry) => ({ href: entry.path, label: t(entry.zh, entry.en), current: entry.kind === kind }))}
           />
         )}
         {result.docs.length ? (
@@ -61,9 +65,9 @@ export function FeedView({
         <Pager page={result.page} totalPages={result.totalPages} path={basePath} query={query} />
         {result.restricted && (
           <aside className={styles.restricted}>
-            <p>{memberOnly}</p>
+            <p>{memberOnlyCopy(t)}</p>
             <ButtonLink href={`/login?returnTo=${encodeURIComponent(basePath)}`} size="small">
-              登录
+              {t("登录", "Sign in")}
             </ButtonLink>
           </aside>
         )}
@@ -72,14 +76,14 @@ export function FeedView({
   );
 }
 
-const backFor: Record<ArticleDetail["article"]["kind"], { href: string; label: string }> = {
-  announcement: { href: "/announcements", label: "公告" },
-  communityNotice: { href: "/news", label: "动态" },
-  news: { href: "/news?kind=news", label: "新闻" },
-  album: { href: "/gallery", label: "影像" },
+const backFor: Record<ArticleDetail["article"]["kind"], { href: string; zh: string; en: string }> = {
+  announcement: { href: "/announcements", zh: "公告", en: "Notices" },
+  communityNotice: { href: "/news", zh: "动态", en: "Updates" },
+  news: { href: "/news?kind=news", zh: "新闻", en: "News" },
+  album: { href: "/gallery", zh: "影像", en: "Gallery" },
 };
 
-export function ArticleView({
+export async function ArticleView({
   detail,
   photoPath,
   extra,
@@ -90,21 +94,22 @@ export function ArticleView({
   extra?: ReactNode;
   notice?: ReactNode;
 }) {
+  const { t, locale } = await getT();
   const { article, related } = detail;
   const back =
     article.kind === "communityNotice" && article.community
-      ? { href: `/community/${article.community.slug}/updates`, label: `${article.community.title} · 活动与通知` }
-      : backFor[article.kind];
+      ? { href: `/community/${article.community.slug}/updates`, label: t(`${article.community.title} · 活动与通知`, `${article.community.title} · Events & notices`) }
+      : { href: backFor[article.kind].href, label: t(backFor[article.kind].zh, backFor[article.kind].en) };
   return (
     <>
       <PageHero
         back={back}
-        eyebrow={article.label}
+        eyebrow={articleLabel(article.kind, article.label, locale)}
         title={article.title}
         description={article.summary}
         meta={
           <>
-            {article.publishedAt && <time dateTime={article.publishedAt}>{formatDate(article.publishedAt)}</time>}
+            {article.publishedAt && <time dateTime={article.publishedAt}>{formatDate(article.publishedAt, locale)}</time>}
             {article.community && <CommunityChip community={article.community} link />}
             {article.demo && <DemoPill />}
           </>
@@ -132,7 +137,7 @@ export function ArticleView({
           {detail.photos && (
             <section className={styles.photos} aria-labelledby="photos-title">
               <h2 id="photos-title">
-                相册照片 <span>{detail.photos.totalDocs} 张公开照片</span>
+                {t("相册照片", "Album photos")} <span>{t(`${detail.photos.totalDocs} 张公开照片`, `${detail.photos.totalDocs} public photos`)}</span>
               </h2>
               {detail.photos.docs.length ? (
                 <div className={styles.photoGrid}>
@@ -144,18 +149,19 @@ export function ArticleView({
                   ))}
                 </div>
               ) : (
-                <p className={styles.muted}>暂无获准公开的照片。</p>
+                <p className={styles.muted}>{t("暂无获准公开的照片。", "No photos approved for public viewing yet.")}</p>
               )}
               {photoPath && <Pager page={detail.photos.page} totalPages={detail.photos.totalPages} path={photoPath} />}
             </section>
           )}
           {(related.event || related.team) && (
             <section className={styles.related} aria-labelledby="related-title">
-              <h2 id="related-title">相关</h2>
+              <h2 id="related-title">{t("相关", "Related")}</h2>
               {related.event && <MatchCard event={related.event} />}
               {related.team && (
                 <Link href={`/teams/${related.team.slug}`} className={styles.teamLink}>
-                  代表队：{related.team.title} →
+                  {t("代表队：", "Team: ")}
+                  {related.team.title} →
                 </Link>
               )}
             </section>

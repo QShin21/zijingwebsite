@@ -1,5 +1,6 @@
 "use client";
 import type { Answer, EntryAnswer, Question } from "@/lib/signup-schema";
+import { useQuestionText, useT } from "./i18n/LocaleProvider";
 export function QuestionnaireGroup({
   q,
   value,
@@ -9,6 +10,9 @@ export function QuestionnaireGroup({
   value: Answer | undefined;
   onChange: (value: Answer) => void;
 }) {
+  const t = useT(),
+    text = useQuestionText(),
+    label = text.label(q);
   const entries =
     Array.isArray(value) && value.every((row) => typeof row === "object")
       ? (value as EntryAnswer[])
@@ -26,34 +30,38 @@ export function QuestionnaireGroup({
   return (
     <div className="questionnaire-group">
       <p className="muted">
-        填写 {q.minEntries}–{q.maxEntries}{" "}
-        条完整记录。每条记录中的必填字段均需完成。
-        {!q.required && "此题可整题留空。"}
+        {t(
+          `填写 ${q.minEntries}–${q.maxEntries} 条完整记录。每条记录中的必填字段均需完成。`,
+          `Add ${q.minEntries}–${q.maxEntries} complete entries. Every required field in each entry must be filled in.`,
+        )}
+        {!q.required && t("此题可整题留空。", " This question may be left empty.")}
       </p>
       {shown.map((row, index) => (
         <fieldset className="questionnaire-group-entry" key={index}>
-          <legend>第 {index + 1} 条</legend>
+          <legend>{t(`第 ${index + 1} 条`, `Entry ${index + 1}`)}</legend>
           <div className="questionnaire-group-fields">
             {q.fields!.map((field) => (
               <label key={field.id}>
                 <span>
-                  {field.label}
+                  {text.fieldLabel(q, field)}
                   {field.required && <span className="required-mark"> *</span>}
                 </span>
                 {field.type === "select" ? (
                   <select
-                    aria-label={`${q.label}第 ${index + 1} 条：${field.label}`}
+                    aria-label={t(`${label}第 ${index + 1} 条：${text.fieldLabel(q, field)}`, `${label}, entry ${index + 1}: ${text.fieldLabel(q, field)}`)}
                     value={row[field.id] || ""}
                     onChange={(e) => update(index, field.id, e.target.value)}
                   >
-                    <option value="">请选择</option>
+                    <option value="">{t("请选择", "Select")}</option>
                     {field.options.map((option) => (
-                      <option key={option}>{option}</option>
+                      <option key={option} value={option}>
+                        {text.fieldOption(q, field, option)}
+                      </option>
                     ))}
                   </select>
                 ) : (
                   <input
-                    aria-label={`${q.label}第 ${index + 1} 条：${field.label}`}
+                    aria-label={t(`${label}第 ${index + 1} 条：${text.fieldLabel(q, field)}`, `${label}, entry ${index + 1}: ${text.fieldLabel(q, field)}`)}
                     type={
                       field.type === "number"
                         ? "number"
@@ -68,7 +76,7 @@ export function QuestionnaireGroup({
                     step={field.step || "any"}
                     minLength={field.minLength}
                     maxLength={field.maxLength || 200}
-                    placeholder={field.placeholder}
+                    placeholder={text.fieldPlaceholder(q, field)}
                     value={row[field.id] || ""}
                     onChange={(e) => update(index, field.id, e.target.value)}
                   />
@@ -81,7 +89,7 @@ export function QuestionnaireGroup({
               type="button"
               onClick={() => onChange(shown.filter((_, i) => i !== index))}
             >
-              移除第 {index + 1} 条
+              {t(`移除第 ${index + 1} 条`, `Remove entry ${index + 1}`)}
             </button>
           )}
         </fieldset>
@@ -92,11 +100,11 @@ export function QuestionnaireGroup({
           disabled={shown.length >= q.maxEntries!}
           onClick={() => onChange([...shown, {}])}
         >
-          添加一条记录
+          {t("添加一条记录", "Add an entry")}
         </button>
         {!q.required && (
           <button type="button" onClick={() => onChange([])}>
-            清空此题
+            {t("清空此题", "Clear this question")}
           </button>
         )}
       </div>

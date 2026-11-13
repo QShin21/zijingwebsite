@@ -6,43 +6,43 @@
   <view class="zj-hero">
     <view class="zj-stage-stripes"></view>
     <view class="zj-hero-inner">
-      <button class="zj-hero-back" bindtap="back">‹ 返回</button>
-      <text class="zj-hero-kicker">FEED · 动态</text>
+      <button class="zj-hero-back" bindtap="back">{{t.back}}</button>
+      <text class="zj-hero-kicker">{{t.kicker}}</text>
       <text class="zj-hero-title">{{title}}</text>
       <text wx:if="{{catalog.intro}}" class="zj-hero-lead">{{catalog.intro}}</text>
     </view>
   </view>
 
   <view wx:if="{{collection === 'teams'}}" class="zj-call list-team-entry" hover-class="zj-pressed" bindtap="openPage" data-page="team" aria-role="link">
-    <text class="zj-kind">代表队事务</text>
-    <text class="zj-card-title">招新与我的队伍</text>
-    <text class="zj-small">查看选拔批次、本人申请与成员关系。</text>
+    <text class="zj-kind">{{t.teamAffairs}}</text>
+    <text class="zj-card-title">{{t.teamEntryTitle}}</text>
+    <text class="zj-small">{{t.teamEntryBody}}</text>
   </view>
 
   <view wx:if="{{collection !== 'club-showcase'}}" class="list-filters">
     <view class="search">
-      <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{search}}" bindinput="input" bindconfirm="search" placeholder="搜索{{title}}标题关键词" aria-label="搜索当前栏目标题" confirm-type="search" maxlength="80" />
-      <button class="primary" bindtap="search">搜索</button>
+      <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{search}}" bindinput="input" bindconfirm="search" placeholder="{{t.searchPrefix}}{{title}}{{t.searchSuffix}}" aria-label="{{t.searchAria}}" confirm-type="search" maxlength="80" />
+      <button class="primary" bindtap="search">{{t.search}}</button>
     </view>
     <view wx:if="{{collection === 'honors' || collection === 'teams'}}" class="list-pickers">
-      <picker wx:if="{{collection === 'honors'}}" range="{{years}}" value="{{yearIndex}}" bindchange="changeYear"><view class="list-picker"><text class="zj-small">赛事年份</text><text class="list-picker-value">{{year}} ▾</text></view></picker>
-      <picker range="{{games}}" range-key="title" value="{{gameIndex}}" bindchange="changeGame"><view class="list-picker"><text class="zj-small">游戏项目</text><text class="list-picker-value">{{games[gameIndex].title}} ▾</text></view></picker>
+      <picker wx:if="{{collection === 'honors'}}" range="{{yearLabels}}" value="{{yearIndex}}" bindchange="changeYear"><view class="list-picker"><text class="zj-small">{{t.year}}</text><text class="list-picker-value">{{yearIndex ? year : t.allYears}} ▾</text></view></picker>
+      <picker range="{{games}}" range-key="title" value="{{gameIndex}}" bindchange="changeGame"><view class="list-picker"><text class="zj-small">{{t.game}}</text><text class="list-picker-value">{{games[gameIndex].title}} ▾</text></view></picker>
     </view>
-    <scroll-view wx:if="{{collection === 'recruitment'}}" scroll-x class="chips" aria-role="radiogroup" aria-label="招新分类"><button wx:for="{{kinds}}" wx:key="*this" class="chip {{kind === item ? 'active' : ''}}" bindtap="changeKind" data-kind="{{item}}" aria-role="radio" aria-checked="{{kind === item}}" aria-label="{{item}}，{{kind === item ? '已选中' : '未选中'}}">{{item}}</button></scroll-view>
-    <button wx:if="{{search || yearIndex || gameIndex || kind !== '全部'}}" class="plain list-clear" bindtap="clearFilters">清除筛选</button>
+    <scroll-view wx:if="{{collection === 'recruitment'}}" scroll-x class="chips" aria-role="radiogroup" aria-label="{{t.kindAria}}"><button wx:for="{{kinds}}" wx:key="*this" class="chip {{kind === item ? 'active' : ''}}" bindtap="changeKind" data-kind="{{item}}" aria-role="radio" aria-checked="{{kind === item}}" aria-label="{{kindLabels[index]}}{{t.ariaSep}}{{kind === item ? t.selected : t.unselected}}">{{kindLabels[index]}}</button></scroll-view>
+    <button wx:if="{{search || yearIndex || gameIndex || kind !== '全部'}}" class="plain list-clear" bindtap="clearFilters">{{t.clear}}</button>
   </view>
 
-  <template is="feedback" data="{{loading, error, needsLogin}}" />
+  <template is="feedback" data="{{loading, error, needsLogin, t}}" />
   <block wx:if="{{!loading && !error && !needsLogin}}">
-    <view class="zj-section-head list-result-heading"><text class="zj-section-title">{{collection === 'honors' && yearIndex ? year + '年荣誉' : catalog.resultTitle}}</text><text wx:if="{{docs.length}}" class="zj-count">{{docs.length}}</text></view>
+    <view class="zj-section-head list-result-heading"><text class="zj-section-title">{{collection === 'honors' && yearIndex ? year + t.yearHonorsSuffix : catalog.resultTitle}}</text><text wx:if="{{docs.length}}" class="zj-count">{{docs.length}}</text></view>
     <block wx:if="{{collection === 'club-showcase'}}">
-      <template is="native-promotions" data="{{docs, compact:false}}" />
-      <view wx:if="{{!docs.length}}" class="zj-empty"><text class="zj-empty-icon">✦</text><text class="zj-empty-title">暂无已审批社群风采</text><text class="zj-small">新的记录发布后会出现在这里。</text></view>
+      <template is="native-promotions" data="{{docs, compact:false, t}}" />
+      <view wx:if="{{!docs.length}}" class="zj-empty"><text class="zj-empty-icon">✦</text><text class="zj-empty-title">{{t.showcaseEmpty}}</text><text class="zj-small">{{t.showcaseEmptyBody}}</text></view>
     </block>
-    <template wx:elif="{{collection === 'events'}}" is="native-events" data="{{docs, featured:false, compact:false, showNotices:false, emptyTitle:'暂无符合条件的活动', emptyHint:'可清除筛选查看全部，或稍后下拉刷新。'}}" />
-    <template wx:else is="native-content-records" data="{{docs, emptyTitle:'暂无符合条件的内容', emptyHint:'可清除筛选查看全部，或稍后下拉刷新。'}}" />
+    <template wx:elif="{{collection === 'events'}}" is="native-events" data="{{docs, featured:false, compact:false, showNotices:false, emptyTitle:t.eventsEmpty, emptyHint:t.emptyHint, t}}" />
+    <template wx:else is="native-content-records" data="{{docs, emptyTitle:t.contentEmpty, emptyHint:t.emptyHint, t}}" />
     <text wx:if="{{loadMoreError}}" class="error" aria-role="alert">{{loadMoreError}}</text>
-    <button wx:if="{{hasMore}}" class="secondary list-more" bindtap="onReachBottom" loading="{{loadingMore}}" disabled="{{loadingMore}}">{{loadMoreError ? '重试加载更多' : '加载更多'}}</button>
-    <text wx:if="{{docs.length && !hasMore}}" class="result-caption list-end">— 已展示全部结果 —</text>
+    <button wx:if="{{hasMore}}" class="secondary list-more" bindtap="onReachBottom" loading="{{loadingMore}}" disabled="{{loadingMore}}">{{loadMoreError ? t.retryMore : t.loadMore}}</button>
+    <text wx:if="{{docs.length && !hasMore}}" class="result-caption list-end">{{t.end}}</text>
   </block>
 </view>

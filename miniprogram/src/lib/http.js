@@ -1,10 +1,11 @@
 const config = require('../config');
 const session = require('./session');
 const brand = require('./brand');
+const i18n = (() => { try { const value = require('./i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { locale: () => 'zh', message: value => value }; })();
 
 function url(path) {
   if (typeof path !== 'string' || !/^\/(?!\/)/.test(path) || /[\s\\]/.test(path) ||
-      Array.from(path).some(char => char.charCodeAt(0) < 32)) throw new Error('请求地址无效');
+      Array.from(path).some(char => char.charCodeAt(0) < 32)) throw new Error(i18n.message('请求地址无效'));
   return config.origin + path;
 }
 function message(data, status) {
@@ -21,27 +22,27 @@ function message(data, status) {
 }
 function request(path, options = {}) {
   const method = options.method === undefined ? 'GET' : options.method;
-  if (!['OPTIONS', 'GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'TRACE', 'CONNECT'].includes(method)) return Promise.reject(new Error('请求方式不受小程序支持'));
+  if (!['OPTIONS', 'GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'TRACE', 'CONNECT'].includes(method)) return Promise.reject(new Error(i18n.message('请求方式不受小程序支持')));
   const credential = options.auth === false ? '' : session.token();
-  if (options.required && !credential) return Promise.reject(Object.assign(new Error('请先登录'), { status: 401 }));
+  if (options.required && !credential) return Promise.reject(Object.assign(new Error(i18n.message('请先登录')), { status: 401 }));
   return new Promise((resolve, reject) => {
     wx.request({
       url: url(path), method, data: options.data,
       timeout: options.timeout || 20000,
-      header: { 'content-type': 'application/json', ...(credential ? { Authorization: `JWT ${credential}` } : {}), ...(options.questionnaire ? { 'x-questionnaire-version': '3' } : {}),
+      header: { 'content-type': 'application/json', 'x-zijing-locale': i18n.locale(), ...(credential ? { Authorization: `JWT ${credential}` } : {}), ...(options.questionnaire ? { 'x-questionnaire-version': '3' } : {}),
         ...(options.siteWrite === true && options.required && credential && ['POST', 'PUT', 'DELETE'].includes(method) ? { Origin: config.origin } : {}) },
       success(response) {
         if (response.statusCode >= 200 && response.statusCode < 300) {
           if (typeof response.data === 'string' && response.data.trim().startsWith('<')) {
-            reject(Object.assign(new Error('此功能需要更新网站服务接口'), { status: 404 }));
+            reject(Object.assign(new Error(i18n.message('此功能需要更新网站服务接口')), { status: 404 }));
           } else resolve(options.raw ? response.data : brand.display(response.data));
         } else {
           if (response.statusCode === 401 && credential && session.token() === credential) session.clear();
-          reject(Object.assign(new Error(message(response.data, response.statusCode)), { status: response.statusCode,
+          reject(Object.assign(new Error(i18n.message(message(response.data, response.statusCode))), { status: response.statusCode,
             ...(response.statusCode === 409 && response.data && response.data.code === 'PROFILE_PERIOD_CHANGED' ? { code: 'PROFILE_PERIOD_CHANGED' } : {}) }));
         }
       },
-      fail() { reject(new Error('连接失败，请检查网络后重试')); },
+      fail() { reject(new Error(i18n.message('连接失败，请检查网络后重试'))); },
     });
   });
 }
@@ -53,29 +54,29 @@ function taskCallbacks(task, options) {
 }
 function upload(path, filePath, options = {}) {
   const credential = session.token();
-  if (!credential) return Promise.reject(Object.assign(new Error('请先登录'), { status: 401 }));
+  if (!credential) return Promise.reject(Object.assign(new Error(i18n.message('请先登录')), { status: 401 }));
   return new Promise((resolve, reject) => {
     // The SDK supplies the multipart boundary; a JSON Content-Type would corrupt this body.
     const task = wx.uploadFile({
       url: url(path), filePath, name: options.name || 'file', formData: options.formData || {},
-      timeout: options.timeout || 60000, header: { Authorization: `JWT ${credential}` },
+      timeout: options.timeout || 60000, header: { Authorization: `JWT ${credential}`, 'x-zijing-locale': i18n.locale() },
       success(response) {
         let data;
         try { data = JSON.parse(response.data); } catch {
           if (response.statusCode === 401 && session.token() === credential) session.clear();
-          reject(Object.assign(new Error(response.statusCode >= 400 ? message(null, response.statusCode) : '上传结果暂不可用，请重新加载核对'), { status: response.statusCode }));
+          reject(Object.assign(new Error(i18n.message(response.statusCode >= 400 ? message(null, response.statusCode) : '上传结果暂不可用，请重新加载核对')), { status: response.statusCode }));
           return;
         }
         if (response.statusCode >= 200 && response.statusCode < 300) resolve(options.raw ? data : brand.display(data));
         else {
           if (response.statusCode === 401 && session.token() === credential) session.clear();
-          reject(Object.assign(new Error(message(data, response.statusCode)), { status: response.statusCode }));
+          reject(Object.assign(new Error(i18n.message(message(data, response.statusCode))), { status: response.statusCode }));
         }
       },
       fail(result) {
         const detail = result && typeof result.errMsg === 'string' ? result.errMsg : '';
         const domain = /url\s+not\s+in\s+domain\s+list/i.test(detail);
-        reject(new Error(domain ? '微信未允许当前图片上传域名，请联系负责人检查小程序后台设置' : '上传未完成，请检查网络并重新加载核对'));
+        reject(new Error(i18n.message(domain ? '微信未允许当前图片上传域名，请联系负责人检查小程序后台设置' : '上传未完成，请检查网络并重新加载核对')));
       },
     });
     taskCallbacks(task, options);
@@ -83,7 +84,7 @@ function upload(path, filePath, options = {}) {
 }
 function download(path, options = {}) {
   const credential = session.token();
-  if (!credential) return Promise.reject(Object.assign(new Error('请先登录'), { status: 401 }));
+  if (!credential) return Promise.reject(Object.assign(new Error(i18n.message('请先登录')), { status: 401 }));
   return new Promise((resolve, reject) => {
     const task = wx.downloadFile({
       url: url(path), header: { Authorization: `JWT ${credential}` },
@@ -93,9 +94,9 @@ function download(path, options = {}) {
         if (result.statusCode === 200) resolve(options.filePath ? result.filePath : result.tempFilePath);
         else {
           if (result.statusCode === 401 && session.token() === credential) session.clear();
-          reject(Object.assign(new Error('图片暂不可用'), { status: result.statusCode }));
+          reject(Object.assign(new Error(i18n.message('图片暂不可用')), { status: result.statusCode }));
         }
-      }, fail() { reject(new Error('图片加载失败')); },
+      }, fail() { reject(new Error(i18n.message('图片加载失败'))); },
     });
     taskCallbacks(task, options);
   });

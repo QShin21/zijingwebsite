@@ -1,4 +1,5 @@
 import { signupFields, validateSignupForm } from './signups';
+import { queueTranslationAfterChange, removeTranslationAfterDelete } from '../lib/content-translation/hooks';
 import { communityVideo } from "../lib/community-video";
 import { normalizeShowcaseImage } from "../lib/showcase-images";
 import { controlledVideoName } from "../lib/showcase-videos";
@@ -147,7 +148,7 @@ function social(slug: string, title: string, kind: "local" | "showcase"): Collec
       delete: ({ req }) => canPublish(req.user as Identity) && (kind !== "showcase" || req.context.webShowcaseWrite === true),
     },
     hooks: { beforeChange: [participationGuard(kind), ...(kind === "local" ? [validateCommunitySchedule, validatePostImages, validatePublicationContent, validateSignupForm] : [])],
-      afterChange: [promotionSourceChanged], afterDelete: [promotionSourceDeleted] },
+      afterChange: [promotionSourceChanged, ...(kind === "local" ? [queueTranslationAfterChange("community-posts")] : [])], afterDelete: [promotionSourceDeleted, ...(kind === "local" ? [removeTranslationAfterDelete("community-posts")] : [])] },
     fields,
   };
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import styles from "./PageHeading.module.css";
+import { LabeledNav, Tr } from "./v2/LocalText";
 
 /**
  * V2 inner-page header (broadcast band). Same props as the previous heading so
@@ -24,19 +25,23 @@ export function PageHeading({
   return (
     <header className={styles.heading}>
       <div className={styles.inner}>
-        <nav className={styles.breadcrumbs} aria-label="面包屑">
-          <Link href="/">主场</Link>
+        <LabeledNav className={styles.breadcrumbs} zh="面包屑" en="Breadcrumb">
+          <Link href="/">
+            <Tr zh="主场" en="Home" />
+          </Link>
           <span aria-hidden="true">/</span>
           {parent ? (
             <>
               <Link href={parent.href}>{parent.label}</Link>
               <span aria-hidden="true">/</span>
-              <span aria-current="page">详情</span>
+              <span aria-current="page">
+                <Tr zh="详情" en="Details" />
+              </span>
             </>
           ) : (
             <span aria-current="page">{title}</span>
           )}
-        </nav>
+        </LabeledNav>
         <div className={styles.headingRow}>
           <div className={styles.copy}>
             <p className={styles.eyebrow}>{eyebrow}</p>

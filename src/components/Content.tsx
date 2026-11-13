@@ -25,34 +25,47 @@ import { Icon, type IconName } from "./Identity";
 import { PageHero, StatusPill, Wrap } from "./v2/ui";
 import layout from "./v2/layout.module.css";
 import styles from "./account-pages/ReadingPages.module.css";
+import { getT } from "@/lib/i18n/server";
+import { PageStatus } from "./v2/LocalText";
+import type { Locale } from "@/lib/i18n/locale";
+import { eventStateLabel, publicLabel, signupStateLabel } from "@/lib/i18n/labels-public";
 
-export function Empty({
+/** formatDate from lib/rules in Chinese; the same Beijing-time style in English. */
+export function formatWhen(value: string | null | undefined, locale: Locale) {
+  if (locale !== "en") return formatDate(value);
+  return value
+    ? new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Shanghai", dateStyle: "medium", timeStyle: "short" }).format(new Date(value))
+    : "TBA";
+}
+
+export async function Empty({
   text,
   collection,
 }: {
   text?: string;
   collection?: string;
 }) {
+  const { t } = await getT();
   const copy: Record<string, [string, string, IconName]> = {
     events: [
-      "暂无活动安排",
-      "确认后的活动时间与报名方式会在这里发布。",
+      t("暂无活动安排", "No events scheduled"),
+      t("确认后的活动时间与报名方式会在这里发布。", "Confirmed event times and sign-up details will be posted here."),
       "calendar",
     ],
-    teams: ["代表队档案正在整理", "项目介绍与赛季信息将在确认后公开。", "team"],
-    honors: ["暂无公开荣誉", "经核实的赛事成绩将在这里归档。", "trophy"],
-    news: ["暂无社团动态", "社团公告与活动回顾将在这里更新。", "layers"],
-    albums: ["暂无公开影像", "获准公开的社团照片将在这里发布。", "camera"],
+    teams: [t("代表队档案正在整理", "Team archives are being prepared"), t("项目介绍与赛季信息将在确认后公开。", "Team and season details will be published once confirmed."), "team"],
+    honors: [t("暂无公开荣誉", "No public honors yet"), t("经核实的赛事成绩将在这里归档。", "Verified competition results will be archived here."), "trophy"],
+    news: [t("暂无社团动态", "No club updates yet"), t("社团公告与活动回顾将在这里更新。", "Club notices and event recaps will appear here."), "layers"],
+    albums: [t("暂无公开影像", "No public galleries yet"), t("获准公开的社团照片将在这里发布。", "Approved club photos will be posted here."), "camera"],
     recruitment: [
-      "暂未发布匹配的招新批次",
-      "后续招新安排与报名渠道将在确认后公布。",
+      t("暂未发布匹配的招新批次", "No matching recruitment rounds"),
+      t("后续招新安排与报名渠道将在确认后公布。", "Upcoming recruitment and sign-up channels will be announced once confirmed."),
       "team",
     ],
-    announcements: ["暂无通知", "社团通知确认后将在这里发布。", "layers"],
+    announcements: [t("暂无通知", "No notices yet"), t("社团通知确认后将在这里发布。", "Club notices will be posted here once confirmed."), "layers"],
   };
   const entry = copy[collection || ""] || [
-    "内容正在整理",
-    "确认后的公开资料会在这里更新。",
+    t("内容正在整理", "Content is being prepared"),
+    t("确认后的公开资料会在这里更新。", "Confirmed public information will appear here."),
     "layers",
   ];
   return (
@@ -61,7 +74,7 @@ export function Empty({
       <div>
         <h3>{text || entry[0]}</h3>
         {!text && <p>{entry[1]}</p>}
-        <Link href="/events">浏览社团活动 →</Link>
+        <Link href="/events">{t("浏览社团活动 →", "Browse club events →")}</Link>
       </div>
     </div>
   );
@@ -133,7 +146,8 @@ export function Prose({ doc }: { doc: Content }) {
     </div>
   );
 }
-export function JoinCards({ selected }: { selected?: string } = {}) {
+export async function JoinCards({ selected }: { selected?: string } = {}) {
+  const { t } = await getT();
   const items: {
     key: string;
     title: string;
@@ -143,23 +157,32 @@ export function JoinCards({ selected }: { selected?: string } = {}) {
   }[] = [
     {
       key: "members",
-      title: "加入游戏社群",
-      desc: "寻找同好，了解活动。通过社群联系入口添加管理员微信，由管理员人工拉群。",
-      next: "了解普通入社",
+      title: t("加入游戏社群", "Join a game community"),
+      desc: t(
+        "寻找同好，了解活动。通过社群联系入口添加管理员微信，由管理员人工拉群。",
+        "Find fellow players and events. Add an admin on WeChat through the community contacts; admins invite you to the group.",
+      ),
+      next: t("了解普通入社", "How to join"),
       icon: "team",
     },
     {
       key: "teams",
-      title: "参加代表队选拔",
-      desc: "查看各项目招新与训练安排，提交入队资料，等待社群管理员人工选拔。",
-      next: "了解代表队选拔",
+      title: t("参加代表队选拔", "Try out for a team"),
+      desc: t(
+        "查看各项目招新与训练安排，提交入队资料，等待社群管理员人工选拔。",
+        "See each game's recruitment and training plans, apply, and wait for community admins to select players.",
+      ),
+      next: t("了解代表队选拔", "About team tryouts"),
       icon: "target",
     },
     {
       key: "staff",
-      title: "参与骨干工作",
-      desc: "了解执行与宣传方向，选择批次提交申请，查看自己的选拔结果。",
-      next: "查看骨干招新",
+      title: t("参与骨干工作", "Join the staff"),
+      desc: t(
+        "了解执行与宣传方向，选择批次提交申请，查看自己的选拔结果。",
+        "Learn about the operations and publicity roles, apply in an open round and check your result.",
+      ),
+      next: t("查看骨干招新", "View staff recruitment"),
       icon: "layers",
     },
   ];
@@ -192,6 +215,7 @@ export async function Cards({
   headingLevel?: 2 | 3;
 }) {
   if (!docs.length) return <Empty collection={collection} />;
+  const { t, locale } = await getT();
   const Heading = headingLevel === 2 ? "h2" : "h3";
   if (collection === "teams") {
     const metadata = await publicTeamMeta(docs.map((doc) => doc.id));
@@ -208,7 +232,7 @@ export async function Cards({
       <div className={styles.teamDirectory}>
         {docs.map((doc) => {
           const game = doc.game ? gameByID.get(doc.game) : undefined;
-          const state = publicTeamState(metadata.get(doc.id), doc.archived);
+          const state = publicTeamState(metadata.get(doc.id), doc.archived, locale);
           return (
             <article className={styles.teamEntry} key={doc.id}>
               <div className={styles.teamEntryIdentity}>
@@ -216,7 +240,7 @@ export async function Cards({
                   <Link href={`/community/${game.slug}`}>{game.title}</Link>
                 )}
                 {state && <span className={styles.status}>{state}</span>}
-                {doc.demo && <span>演示资料</span>}
+                {doc.demo && <span>{t("演示资料", "Demo content")}</span>}
               </div>
               <div className={styles.teamEntryBody}>
                 <Heading>
@@ -224,8 +248,8 @@ export async function Cards({
                 </Heading>
                 {doc.summary && <p>{doc.summary}</p>}
                 <div className={styles.entryActions}>
-                  <Link href={`/teams/${doc.slug}`}>查看队伍</Link>
-                  <Link href={`/teams/honors?team=${doc.id}`}>队伍荣誉</Link>
+                  <Link href={`/teams/${doc.slug}`}>{t("查看队伍", "View team")}</Link>
+                  <Link href={`/teams/honors?team=${doc.id}`}>{t("队伍荣誉", "Team honors")}</Link>
                 </div>
               </div>
               {doc.cover && (
@@ -264,12 +288,12 @@ export async function Cards({
           )}
           <div className={styles.storyContent}>
             <div className={styles.cardMeta}>
-              <span>{doc.type || "社团动态"}</span>
+              <span>{doc.type ? publicLabel(doc.type, locale) : t("社团动态", "Club update")}</span>
               {publishedAt && (
-                <time dateTime={publishedAt}>{formatDate(publishedAt)}</time>
+                <time dateTime={publishedAt}>{formatWhen(publishedAt, locale)}</time>
               )}
-              {doc.archived && <span>历史归档</span>}
-              {doc.demo && <span>演示资料</span>}
+              {doc.archived && <span>{t("历史归档", "Archived")}</span>}
+              {doc.demo && <span>{t("演示资料", "Demo content")}</span>}
             </div>
             <Heading>
               <Link href={`/news/${doc.slug}`}>{doc.title}</Link>
@@ -278,9 +302,9 @@ export async function Cards({
             <Link
               className={styles.storyRead}
               href={`/news/${doc.slug}`}
-              aria-label={`阅读${doc.title}`}
+              aria-label={t(`阅读${doc.title}`, `Read ${doc.title}`)}
             >
-              阅读全文
+              {t("阅读全文", "Read more")}
             </Link>
           </div>
         </article>
@@ -315,14 +339,14 @@ export async function Cards({
             <div className={styles.honorDate}>
               {doc.date && (
                 <time dateTime={doc.date}>
-                  {new Intl.DateTimeFormat("zh-CN", {
+                  {new Intl.DateTimeFormat(locale === "en" ? "en-GB" : "zh-CN", {
                     year: "numeric",
                     timeZone: "Asia/Shanghai",
                   }).format(new Date(doc.date))}
                 </time>
               )}
-              {doc.demo && <span>演示资料</span>}
-              {doc.archived && <span>历史归档</span>}
+              {doc.demo && <span>{t("演示资料", "Demo content")}</span>}
+              {doc.archived && <span>{t("历史归档", "Archived")}</span>}
             </div>
             <div>
               {doc.competition && (
@@ -340,7 +364,7 @@ export async function Cards({
                 <p className={styles.cardSummary}>{doc.summary}</p>
               )}
               <Link className={styles.storyRead} href={`/honors/${doc.slug}`}>
-                查看成果记录
+                {t("查看成果记录", "View result")}
               </Link>
             </div>
           </article>
@@ -352,13 +376,15 @@ export async function Cards({
     <div className={styles.cards} data-collection={collection}>
       {docs.map((doc) => {
         const href = `/${routeFor[collection]}/${doc.slug}`;
-        const label =
+        const label = publicLabel(
           collection === "events"
             ? eventState(doc)
             : kindLabels[doc.kind || ""] ||
               doc.type ||
               names[collection] ||
-              "紫荆电竞";
+              "紫荆电竞", // i18n-exempt: fallback label mapped by publicLabel
+          locale,
+        );
         return (
           <article className={styles.card} key={doc.id}>
             {doc.cover && collection !== "honors" && (
@@ -374,9 +400,9 @@ export async function Cards({
             <div className={styles.cardBody}>
               <div className={styles.cardMeta}>
                 <span className={styles.cardLabel}>{label}</span>
-                {doc.demo && <span>演示资料</span>}
-                {doc.archived && <span>历史归档</span>}
-                {doc.date && <span>{formatDate(doc.date)}</span>}
+                {doc.demo && <span>{t("演示资料", "Demo content")}</span>}
+                {doc.archived && <span>{t("历史归档", "Archived")}</span>}
+                {doc.date && <span>{formatWhen(doc.date, locale)}</span>}
               </div>
               {collection === "honors" && doc.placing && (
                 <p className={styles.placing}>
@@ -392,14 +418,14 @@ export async function Cards({
               <div className={styles.cardBottom}>
                 <span>
                   {collection === "recruitment"
-                    ? registrationState(doc)
+                    ? publicLabel(registrationState(doc), locale)
                     : doc.startAt
-                      ? formatDate(doc.startAt)
+                      ? formatWhen(doc.startAt, locale)
                       : doc.competition ||
-                        (collection === "teams" ? "代表队档案" : "")}
+                        (collection === "teams" ? t("代表队档案", "Team archive") : "")}
                 </span>
-                <Link href={href} aria-label={`查看${doc.title}`}>
-                  查看详情 ↗
+                <Link href={href} aria-label={t(`查看${doc.title}`, `View ${doc.title}`)}>
+                  {t("查看详情 ↗", "Details ↗")}
                 </Link>
               </div>
             </div>
@@ -418,7 +444,10 @@ export async function Detail({
   collection: string;
   photoPage?: number;
 }) {
+  const { t, locale } = await getT();
   const state = registrationState(doc);
+  const stateText = signupStateLabel("", state, locale);
+  const eventText = eventStateLabel("", eventState(doc), locale);
   const teamContext =
     collection === "teams"
       ? await (async () => {
@@ -473,34 +502,35 @@ export async function Detail({
     collection === "teams" ? publicTeamMeta([doc.id]) : null,
   ]);
   if (collection === "teams" && teamContext && history) {
-    const teamState = publicTeamState(metadata?.get(doc.id), doc.archived);
+    const teamState = publicTeamState(metadata?.get(doc.id), doc.archived, locale);
     const hasIntroduction = Boolean(doc.body || doc.sections?.length);
     return (
       <div data-collection="teams">
         <PageHero
           tone="stage"
-          eyebrow={linkedGame?.title || "代表队档案"}
+          eyebrow={linkedGame?.title || t("代表队档案", "Team archive")}
           title={doc.title}
           description={doc.summary}
-          back={{ href: "/teams", label: "代表队与荣誉" }}
+          back={{ href: "/teams", label: t("代表队与荣誉", "Teams & honors") }}
           meta={
             <>
               {teamState && <StatusPill tone="success">{teamState}</StatusPill>}
-              {doc.demo && <StatusPill tone="warning">演示资料 · 非真实社团记录</StatusPill>}
+              {doc.demo && <StatusPill tone="warning">{t("演示资料 · 非真实社团记录", "Demo content · not a real club record")}</StatusPill>}
               {linkedGame && (
                 <Link className={styles.heroLink} href={`/community/${linkedGame.slug}`}>
-                  所属社群：{linkedGame.title}
+                  {t("所属社群：", "Community: ")}
+                  {linkedGame.title}
                 </Link>
               )}
             </>
           }
         />
         <Wrap className={`${layout.pageBody} ${styles.teamArchive}`}>
-        <nav className={styles.sectionIndex} aria-label="代表队档案栏目">
-          {hasIntroduction && <a href="#team-introduction">队伍介绍</a>}
-          <a href="#public-members">公开成员</a>
-          <a href="#team-honors">队伍荣誉</a>
-          {history[0].docs.length > 0 && <a href="#team-history">赛季档案</a>}
+        <nav className={styles.sectionIndex} aria-label={t("代表队档案栏目", "Team archive sections")}>
+          {hasIntroduction && <a href="#team-introduction">{t("队伍介绍", "About the team")}</a>}
+          <a href="#public-members">{t("公开成员", "Public members")}</a>
+          <a href="#team-honors">{t("队伍荣誉", "Team honors")}</a>
+          {history[0].docs.length > 0 && <a href="#team-history">{t("赛季档案", "Season archive")}</a>}
         </nav>
         <div className={styles.teamOverview}>
           <div className={styles.teamIntroduction}>
@@ -511,14 +541,17 @@ export async function Detail({
             )}
             {hasIntroduction ? (
               <section id="team-introduction">
-                <h2>队伍介绍</h2>
+                <h2>{t("队伍介绍", "About the team")}</h2>
                 <Prose doc={doc} />
               </section>
             ) : (
               <div className={styles.teamBrief}>
-                <h2>认识队伍，了解共同经历</h2>
+                <h2>{t("认识队伍，了解共同经历", "Meet the team and its story")}</h2>
                 <p>
-                  下方收录成员自选公开的简介与已批准荣誉。入队要求和开放时间请查看招新批次。
+                  {t(
+                    "下方收录成员自选公开的简介与已批准荣誉。入队要求和开放时间请查看招新批次。",
+                    "Below are profiles members chose to make public and approved honors. See the recruitment rounds for requirements and dates.",
+                  )}
                 </p>
               </div>
             )}
@@ -542,26 +575,32 @@ export async function Detail({
             className={styles.teamParticipation}
             aria-labelledby="team-participation-title"
           >
-            <h2 id="team-participation-title">加入与参与</h2>
+            <h2 id="team-participation-title">{t("加入与参与", "Join & take part")}</h2>
             <p>
-              查看招新要求与时间，提交自己的入队申请，再到回执查看人工选拔结果。
+              {t(
+                "查看招新要求与时间，提交自己的入队申请，再到回执查看人工选拔结果。",
+                "Check the requirements and dates, submit your application, then follow the selection result on your receipt.",
+              )}
             </p>
             <Link className="button" href="/teams/recruitment">
-              查看代表队招新与我的记录
+              {t("查看代表队招新与我的记录", "Team recruitment & my records")}
             </Link>
             <div className={styles.participationLinks}>
               <Link href={`/teams/honors?team=${doc.id}`}>
-                队伍荣誉档案与投稿
+                {t("队伍荣誉档案与投稿", "Team honors & submissions")}
               </Link>
               {linkedGame && (
-                <Link href={`/community/${linkedGame.slug}`}>联系所属社群</Link>
+                <Link href={`/community/${linkedGame.slug}`}>{t("联系所属社群", "Contact the community")}</Link>
               )}
               {managesTeam && (
-                <Link href={`/teams/manage/${doc.id}`}>本队工作台</Link>
+                <Link href={`/teams/manage/${doc.id}`}>{t("本队工作台", "Team workspace")}</Link>
               )}
             </div>
             <p className={styles.smallNote}>
-              入队资格以已批准的成员关系为准，公开阵容和简介不授管理权限。
+              {t(
+                "入队资格以已批准的成员关系为准，公开阵容和简介不授管理权限。",
+                "Membership follows approved member records; public rosters and profiles grant no management rights.",
+              )}
             </p>
           </aside>
         </div>
@@ -574,8 +613,8 @@ export async function Detail({
             aria-labelledby="team-roster-title"
           >
             <div className={styles.archiveHeading}>
-              <h2 id="team-roster-title">档案中的公开阵容</h2>
-              <p>按队伍档案保存的名单展示，当前在队资格以成员记录为准。</p>
+              <h2 id="team-roster-title">{t("档案中的公开阵容", "Archived public roster")}</h2>
+              <p>{t("按队伍档案保存的名单展示，当前在队资格以成员记录为准。", "Shown as saved in the team archive; current membership follows member records.")}</p>
             </div>
             <ul className={styles.roster}>
               {doc.members?.map((member, index) => (
@@ -601,8 +640,8 @@ export async function Detail({
             aria-labelledby="legacy-honors-title"
           >
             <div className={styles.archiveHeading}>
-              <h2 id="legacy-honors-title">历史荣誉记录</h2>
-              <p>继续查阅此前归档的赛事成果。</p>
+              <h2 id="legacy-honors-title">{t("历史荣誉记录", "Past honors")}</h2>
+              <p>{t("继续查阅此前归档的赛事成果。", "Browse previously archived competition results.")}</p>
             </div>
             <Cards docs={history[1].docs} collection="honors" />
           </section>
@@ -614,9 +653,9 @@ export async function Detail({
             aria-labelledby="season-title"
           >
             <div className={styles.archiveHeading}>
-              <h2 id="season-title">赛季档案</h2>
+              <h2 id="season-title">{t("赛季档案", "Season archive")}</h2>
             </div>
-            <nav className={styles.seasonNav} aria-label="赛季导航">
+            <nav className={styles.seasonNav} aria-label={t("赛季导航", "Seasons")}>
               {history[0].docs.map((season) => (
                 <a href={`#season-${season.id}`} key={season.id}>
                   {season.title}
@@ -653,7 +692,7 @@ export async function Detail({
             aria-labelledby="team-events-title"
           >
             <div className={styles.archiveHeading}>
-              <h2 id="team-events-title">队伍相关活动</h2>
+              <h2 id="team-events-title">{t("队伍相关活动", "Team events")}</h2>
             </div>
             <Cards docs={history[2].docs} collection="events" />
           </section>
@@ -667,22 +706,37 @@ export async function Detail({
     <div data-collection={collection}>
       <PageHero
         tone="stage"
-        eyebrow={doc.demo ? "演示资料 · 非真实社团记录" : collection === "news" ? "社团动态" : names[collection] || "内容预览"}
+        eyebrow={
+          doc.demo
+            ? t("演示资料 · 非真实社团记录", "Demo content · not a real club record")
+            : collection === "news"
+              ? t("社团动态", "Club update")
+              : names[collection]
+                ? publicLabel(names[collection], locale)
+                : t("内容预览", "Content preview")
+        }
         title={doc.title}
         description={doc.summary}
-        back={{ href: routeFor[collection] ? `/${routeFor[collection]}` : "/account", label: names[collection] || "档案" }}
+        back={{ href: routeFor[collection] ? `/${routeFor[collection]}` : "/account", label: names[collection] ? publicLabel(names[collection], locale) : t("档案", "Archive") }}
         meta={
           <>
-            {doc.archived && <StatusPill>历史归档</StatusPill>}
-            {collection === "events" && <StatusPill tone="info">{eventState(doc)}</StatusPill>}
-            {collection === "recruitment" && <StatusPill tone={state === "报名开放" ? "live" : "neutral"}>{state}</StatusPill>}
-            {collection === "news" && <StatusPill>{doc._status === "published" ? "社团公开内容" : "内容预览"}</StatusPill>}
-            {publishedAt && <time className={styles.heroMeta} dateTime={publishedAt}>发布于 {formatDate(publishedAt)}</time>}
-            {(doc.date || doc.startAt) && <span className={styles.heroMeta}>时间 · {formatDate(doc.date || doc.startAt)}</span>}
+            {doc.archived && <StatusPill>{t("历史归档", "Archived")}</StatusPill>}
+            {collection === "events" && <StatusPill tone="info">{eventText}</StatusPill>}
+            {collection === "recruitment" && <StatusPill tone={state === "报名开放" ? "live" : "neutral"}>{stateText}</StatusPill>}
+            {collection === "news" && <StatusPill>{doc._status === "published" ? t("社团公开内容", "Public club content") : t("内容预览", "Content preview")}</StatusPill>}
+            {publishedAt && (
+              <time className={styles.heroMeta} dateTime={publishedAt}>
+                {t(`发布于 ${formatDate(publishedAt)}`, `Published ${formatWhen(publishedAt, locale)}`)}
+              </time>
+            )}
+            {(doc.date || doc.startAt) && (
+              <span className={styles.heroMeta}>{t(`时间 · ${formatDate(doc.date || doc.startAt)}`, `Time · ${formatWhen(doc.date || doc.startAt, locale)}`)}</span>
+            )}
             {doc.competition && <span className={styles.heroMeta}>{doc.competition}</span>}
             {linkedGame && (
               <Link className={styles.heroLink} href={`/community/${linkedGame.slug}`}>
-                所属社群：{linkedGame.title}
+                {t("所属社群：", "Community: ")}
+                {linkedGame.title}
               </Link>
             )}
           </>
@@ -706,7 +760,7 @@ export async function Detail({
           <Prose doc={doc} />
           {Boolean(doc.members?.length) && (
             <section>
-              <h2>公开阵容</h2>
+              <h2>{t("公开阵容", "Public roster")}</h2>
               <ul className={styles.roster}>
                 {doc.members?.map((m, i) => (
                   <li key={i}>
@@ -719,7 +773,7 @@ export async function Detail({
           )}
           {doc.positions?.map((p, i) => (
             <section className={styles.panel} key={i}>
-              <p className={styles.eyebrow}>岗位职责与要求</p>
+              <p className={styles.eyebrow}>{t("岗位职责与要求", "Duties & requirements")}</p>
               <h2>{p.name}</h2>
               <p>{p.duties}</p>
               <p>{p.requirements}</p>
@@ -729,7 +783,7 @@ export async function Detail({
           ))}
           {collection === "albums" && (
             <>
-              {!doc.photos?.length && <Empty text="暂无获准公开的照片。" />}
+              {!doc.photos?.length && <Empty text={t("暂无获准公开的照片。", "No photos approved for public viewing yet.")} />}
               <div className={styles.photos}>
                 {doc.photos
                   ?.slice((photoPage - 1) * 12, photoPage * 12)
@@ -750,11 +804,11 @@ export async function Detail({
           {related && (
             <>
               <section>
-                <h2>活动回顾</h2>
+                <h2>{t("活动回顾", "Recaps")}</h2>
                 <Cards docs={related[0].docs} collection="news" />
               </section>
               <section>
-                <h2>活动相册</h2>
+                <h2>{t("活动相册", "Albums")}</h2>
                 <Cards docs={related[1].docs} collection="albums" />
               </section>
             </>
@@ -763,8 +817,8 @@ export async function Detail({
         <aside className={styles.sidebar}>
           {(linkedTeam || linkedEvent) && (
             <div className={styles.panel}>
-              <p className={styles.eyebrow}>相关内容</p>
-              <h2>相关档案</h2>
+              <p className={styles.eyebrow}>{t("相关内容", "Related")}</p>
+              <h2>{t("相关档案", "Related records")}</h2>
               {linkedTeam && (
                 <p>
                   <Link href={`/teams/${linkedTeam.slug}`}>
@@ -792,16 +846,16 @@ export async function Detail({
           )}
           {collection === "events" && (
             <div className={styles.panel}>
-              <p className={styles.eyebrow}>时间与地点</p>
-              <h2>活动信息</h2>
-              <p className={styles.status}>{eventState(doc)}</p>
+              <p className={styles.eyebrow}>{t("时间与地点", "Time & place")}</p>
+              <h2>{t("活动信息", "Event info")}</h2>
+              <p className={styles.status}>{eventText}</p>
               <dl>
-                <dt>开始</dt>
-                <dd>{formatDate(doc.startAt)}</dd>
-                <dt>结束</dt>
-                <dd>{formatDate(doc.endAt)}</dd>
-                <dt>地点</dt>
-                <dd>{doc.location || "待公布"}</dd>
+                <dt>{t("开始", "Starts")}</dt>
+                <dd>{formatWhen(doc.startAt, locale)}</dd>
+                <dt>{t("结束", "Ends")}</dt>
+                <dd>{formatWhen(doc.endAt, locale)}</dd>
+                <dt>{t("地点", "Location")}</dt>
+                <dd>{doc.location || t("待公布", "TBA")}</dd>
               </dl>
             </div>
           )}
@@ -811,26 +865,26 @@ export async function Detail({
           {(collection === "recruitment" ||
             (collection === "events" && !doc.signupForm?.enabled)) && (
             <div className={styles.panel}>
-              <p className={styles.eyebrow}>参与方式</p>
-              <h2>{state}</h2>
+              <p className={styles.eyebrow}>{t("参与方式", "How to join")}</p>
+              <h2>{stateText}</h2>
               <p className="preserve">{doc.requirements}</p>
-              <p>开始：{formatDate(doc.registrationStart)}</p>
+              <p>{t(`开始：${formatDate(doc.registrationStart)}`, `Opens: ${formatWhen(doc.registrationStart, locale)}`)}</p>
               <p>
-                截止：
+                {t("截止：", "Closes: ")}
                 {doc.registrationEnd
-                  ? formatDate(doc.registrationEnd)
-                  : "未设定"}
+                  ? formatWhen(doc.registrationEnd, locale)
+                  : t("未设定", "Not set")}
               </p>
               {state === "报名开放" && (
                 <>
                   {safeURL(doc.registrationURL) && (
                     <a
                       className="button light"
-                      aria-label="前往外部报名 ↗"
+                      aria-label={t("前往外部报名 ↗", "Sign up externally ↗")}
                       href={doc.registrationURL!}
                       rel="noopener noreferrer"
                     >
-                      前往外部报名 <Icon name="diagonal" />
+                      {t("前往外部报名", "Sign up externally")} <Icon name="diagonal" />
                     </a>
                   )}
                   {doc.channelText && (
@@ -838,14 +892,19 @@ export async function Detail({
                   )}
                   <Picture id={doc.qrCode} />
                   <p className="meta">
-                    报名由外部平台受理，请以外部平台提示为准。
+                    {t("报名由外部平台受理，请以外部平台提示为准。", "Sign-up is handled by an external platform; follow its instructions.")}
                   </p>
                 </>
               )}
-              {doc.contact && <p>联系：{doc.contact}</p>}
+              {doc.contact && (
+                <p>
+                  {t("联系：", "Contact: ")}
+                  {doc.contact}
+                </p>
+              )}
               {doc.channelCheckedAt && (
                 <p className="meta">
-                  渠道核验：{formatDate(doc.channelCheckedAt)}
+                  {t(`渠道核验：${formatDate(doc.channelCheckedAt)}`, `Channel verified: ${formatWhen(doc.channelCheckedAt, locale)}`)}
                 </p>
               )}
             </div>
@@ -853,19 +912,19 @@ export async function Detail({
           {collection === "honors" && (
             <div className={styles.panel}>
               <Icon name="trophy" />
-              <h2>荣誉信息</h2>
+              <h2>{t("荣誉信息", "Honor details")}</h2>
               <p>{doc.competition}</p>
               <p className={styles.placing}>
                 {[doc.division, doc.placing].filter(Boolean).join(" · ")}
               </p>
-              <p>{formatDate(doc.date)}</p>
+              <p>{formatWhen(doc.date, locale)}</p>
               {safeURL(doc.sourceURL) && (
                 <a
                   className="text-link"
                   href={doc.sourceURL}
                   rel="noopener noreferrer"
                 >
-                  查看公开来源 <Icon name="diagonal" />
+                  {t("查看公开来源", "View public source")} <Icon name="diagonal" />
                 </a>
               )}
             </div>
@@ -876,7 +935,7 @@ export async function Detail({
     </div>
   );
 }
-export function Pagination({
+export async function Pagination({
   page,
   total,
   path,
@@ -888,22 +947,23 @@ export function Pagination({
   query?: Record<string, string>;
 }) {
   if (total <= 1) return null;
+  const { t } = await getT();
   const href = (p: number) =>
     `${path}?${new URLSearchParams({ ...query, page: String(p) })}`;
   return (
-    <nav className={styles.pagination} aria-label="分页">
+    <nav className={styles.pagination} aria-label={t("分页", "Pagination")}>
       {page > 1 ? (
-        <Link href={href(page - 1)}>← 上一页</Link>
+        <Link href={href(page - 1)}>{t("← 上一页", "← Previous")}</Link>
       ) : (
-        <span aria-disabled="true">← 上一页</span>
+        <span aria-disabled="true">{t("← 上一页", "← Previous")}</span>
       )}
       <span>
-        第 <strong>{page}</strong> / {total} 页
+        <PageStatus page={page} totalPages={total} />
       </span>
       {page < total ? (
-        <Link href={href(page + 1)}>下一页 →</Link>
+        <Link href={href(page + 1)}>{t("下一页 →", "Next →")}</Link>
       ) : (
-        <span aria-disabled="true">下一页 →</span>
+        <span aria-disabled="true">{t("下一页 →", "Next →")}</span>
       )}
     </nav>
   );

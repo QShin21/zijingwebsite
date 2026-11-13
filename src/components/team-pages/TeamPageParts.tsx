@@ -1,16 +1,18 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { getT } from "@/lib/i18n/server";
 import styles from "./TeamPages.module.css";
 
-export function TeamTaskNav({
+export async function TeamTaskNav({
   items,
-  label = "本页任务",
+  label,
 }: {
   items: { href: string; label: string; current?: boolean }[];
   label?: string;
 }) {
+  const { t } = await getT();
   return (
-    <nav className={styles.taskNav} aria-label={label}>
+    <nav className={styles.taskNav} aria-label={label ?? t("本页任务", "On this page")}>
       {items.map((item) => (
         <Link
           key={item.href}

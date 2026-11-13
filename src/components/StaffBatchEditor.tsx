@@ -10,6 +10,8 @@ import {
 import { saveStaffBatchAction } from "@/app/(frontend)/staff/manage/actions";
 import { ActionForm } from "./activity-pages/ActionForm";
 import styles from "./activity-pages/Workspace.module.css";
+import { useLocale, useT } from "./i18n/LocaleProvider";
+import { accountLabel } from "@/lib/i18n/labels-account";
 
 const localDate = (value?: string | null) => {
   if (!value) return "";
@@ -25,6 +27,8 @@ const isoDate = (value: string) =>
     ? new Date(value).toISOString()
     : "";
 export function StaffBatchEditor({ batch }: { batch?: StaffBatch }) {
+  const t = useT(),
+    locale = useLocale();
   const [form, setForm] = useState(() =>
     batch ? staffForm(batch.signupForm) : defaultStaffForm,
   );
@@ -41,15 +45,17 @@ export function StaffBatchEditor({ batch }: { batch?: StaffBatch }) {
       <summary>
         <span>
           {batch
-            ? "配置批次：" + batch.title
+            ? t("配置批次：", "Configure batch: ") + batch.title
             : identity.id
-              ? "已保存批次：" + title
-              : "创建骨干招新批次"}
+              ? t("已保存批次：", "Saved batch: ") + title
+              : t("创建骨干招新批次", "Create a staff recruitment batch")}
         </span>
         <span className={styles.batchMeta}>
           {batch
-            ? `${batch.state === "draft" ? "草稿 · 未公开" : staffWindow(batch)} · 批次 ${batch.id}`
-            : "配置说明、开放时间与申请问卷"}
+            ? (batch.state === "draft" ? t("草稿 · 未公开", "Draft · not public") : accountLabel(staffWindow(batch), locale)) +
+              " · " +
+              t(`批次 ${batch.id}`, `Batch ${batch.id}`)
+            : t("配置说明、开放时间与申请问卷", "Set the description, dates and application form")}
         </span>
       </summary>
       <ActionForm
@@ -62,11 +68,11 @@ export function StaffBatchEditor({ batch }: { batch?: StaffBatch }) {
         <input type="hidden" name="revision" value={identity.revision} />
         <section className={styles.batchFields}>
           <header>
-            <h3>批次说明与开放安排</h3>
-            <p>向同学说明职责、申请条件和后续选拔安排。</p>
+            <h3>{t("批次说明与开放安排", "Description and schedule")}</h3>
+            <p>{t("向同学说明职责、申请条件和后续选拔安排。", "Explain duties, requirements and the selection process.")}</p>
           </header>
           <label>
-            批次标题
+            {t("批次标题", "Batch title")}
             <input
               name="title"
               required
@@ -76,7 +82,7 @@ export function StaffBatchEditor({ batch }: { batch?: StaffBatch }) {
             />
           </label>
           <label>
-            批次说明
+            {t("批次说明", "Batch description")}
             <textarea
               name="description"
               maxLength={5000}
@@ -87,7 +93,7 @@ export function StaffBatchEditor({ batch }: { batch?: StaffBatch }) {
           </label>
           <div className={styles.toolbar}>
             <label>
-              开始时间
+              {t("开始时间", "Start time")}
               <input
                 type="datetime-local"
                 value={start}
@@ -95,7 +101,7 @@ export function StaffBatchEditor({ batch }: { batch?: StaffBatch }) {
               />
             </label>
             <label>
-              截止时间
+              {t("截止时间", "Deadline")}
               <input
                 type="datetime-local"
                 value={end}
@@ -107,16 +113,16 @@ export function StaffBatchEditor({ batch }: { batch?: StaffBatch }) {
         <input type="hidden" name="startAt" value={isoDate(start)} />
         <input type="hidden" name="endAt" value={isoDate(end)} />
         <p className={styles.scope}>
-          同一时间只有一个当前批次。截止或关闭后申请只读；已有录用结果的申请须明确退回后才可补充。录用不会授予账号角色。
+          {t("同一时间只有一个当前批次。截止或关闭后申请只读；已有录用结果的申请须明确退回后才可补充。录用不会授予账号角色。", "Only one batch is current at a time. After the deadline or closing, applications are read-only; decided applications must be returned explicitly before they can be updated. Acceptance does not grant an account role.")}
         </p>
         <section className={styles.batchQuestionnaire}>
           <SignupBuilder value={form} onChange={setForm} />
         </section>
         <input type="hidden" name="signupForm" value={JSON.stringify(form)} />
-        <p>保留必要资料与执行／宣传方向选择。不要求身份证、住址或健康信息。</p>
+        <p>{t("保留必要资料与执行／宣传方向选择。不要求身份证、住址或健康信息。", "Keep the required fields and the Operations/Publicity choice. Do not ask for ID numbers, addresses or health information.")}</p>
         <div className={styles.saveBar}>
           <p>
-            保存草稿不公开。发布后，同学可在开放时间内提交申请；关闭后已有申请保留为只读回执。
+            {t("保存草稿不公开。发布后，同学可在开放时间内提交申请；关闭后已有申请保留为只读回执。", "Drafts are not public. Once published, students can apply while it is open; after closing, applications remain as read-only receipts.")}
           </p>
           <div className="reaction-bar">
             <button
@@ -125,10 +131,10 @@ export function StaffBatchEditor({ batch }: { batch?: StaffBatch }) {
               value="draft"
               className="button light"
             >
-              保存草稿
+              {t("保存草稿", "Save draft")}
             </button>
             <button type="submit" name="state" value="open" className="button">
-              发布骨干招新
+              {t("发布骨干招新", "Publish recruitment")}
             </button>
             <button
               type="submit"
@@ -137,13 +143,13 @@ export function StaffBatchEditor({ batch }: { batch?: StaffBatch }) {
               className="button light"
               disabled={!identity.id}
             >
-              关闭批次
+              {t("关闭批次", "Close batch")}
             </button>
           </div>
         </div>
         {batch && batch.updatedAt !== identity.revision && (
           <p className={styles.scope}>
-            此批次已有更新。当前编辑仍保留，载入最新配置后可继续修改。
+            {t("此批次已有更新。当前编辑仍保留，载入最新配置后可继续修改。", "This batch has been updated. Your edits are kept; load the latest settings to continue.")}
             <button
               type="button"
               onClick={() => {
@@ -155,7 +161,7 @@ export function StaffBatchEditor({ batch }: { batch?: StaffBatch }) {
                 setIdentity({ id: batch.id, revision: batch.updatedAt });
               }}
             >
-              载入最新配置并替换当前编辑
+              {t("载入最新配置并替换当前编辑", "Load latest settings and replace my edits")}
             </button>
           </p>
         )}

@@ -1,9 +1,19 @@
 import { createElement } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
 import { expect, it, vi } from "vitest";
 import type { ApplicationItem, EventCard, SignupReceiptCard } from "../src/lib/v2/types";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+// Cards read the interface language on the server; outside a request this is the default (Chinese).
+vi.mock("@/lib/i18n/server", async () => {
+  const { translator } = await import("../src/lib/i18n/locale");
+  return { getLocale: async () => "zh", getT: async () => ({ locale: "zh", t: translator("zh") }) };
+});
+// Async server components resolve to an element first; the markup is then rendered as before.
+async function render(component: unknown, props: Record<string, unknown>) {
+  const { prerender } = await import("react-dom/static.edge");
+  const { prelude } = await prerender(createElement(component as never, props as never));
+  return (await new Response(prelude).text()).replace(/<!-- -->/g, "");
+}
 vi.mock("next/link", () => ({ default: ({ href, children, ...rest }: { href: string; children: unknown }) => createElement("a", { href, ...rest }, children as never) }));
 
 const event: EventCard = {
@@ -19,9 +29,9 @@ const receipt: SignupReceiptCard = { key: "signup:1", eventTitle: "合成活动"
 it("公共日程卡不显示归档；我的赛程把详情箭头和归档按钮上下排列在链接外", async () => {
   const { MatchCard } = await import("../src/components/v2/cards");
   const { ArchiveButton } = await import("../src/components/v2/ArchiveButton");
-  const plain = renderToStaticMarkup(createElement(MatchCard, { event }));
+  const plain = await render(MatchCard, { event });
   expect(plain).not.toContain("<button");
-  const mine = renderToStaticMarkup(createElement(MatchCard, { event, archive: createElement(ArchiveButton, { target: event.key, archived: false, title: event.title }) }));
+  const mine = await render(MatchCard, { event, archive: createElement(ArchiveButton, { target: event.key, archived: false, title: event.title }) });
   const side = mine.slice(mine.lastIndexOf("</a>"));
   // Arrow first, then the archive button, both after (never inside) the details link.
   expect(side.indexOf("aria-hidden=\"true\"")).toBeLessThan(side.indexOf("<button"));
@@ -33,11 +43,11 @@ it("公共日程卡不显示归档；我的赛程把详情箭头和归档按钮�
 it("全部申请与全部报名显示已归档并提供撤销归档", async () => {
   const { ApplicationCard, ReceiptRow } = await import("../src/components/v2/cards");
   const { ArchiveButton } = await import("../src/components/v2/ArchiveButton");
-  const card = renderToStaticMarkup(createElement(ApplicationCard, { item: application, archive: createElement(ArchiveButton, { target: application.key, archived: true, title: application.title, variant: "text" }) }));
+  const card = await render(ApplicationCard, { item: application, archive: createElement(ArchiveButton, { target: application.key, archived: true, title: application.title, variant: "text" }) });
   expect(card).toContain("已归档");
   expect(card).toContain("撤销归档");
   expect(card.indexOf("<button")).toBeGreaterThan(card.indexOf("</a>"));
-  const row = renderToStaticMarkup(createElement(ReceiptRow, { receipt, archive: createElement(ArchiveButton, { target: "club:7", archived: true, title: receipt.eventTitle, variant: "text" }) }));
+  const row = await render(ReceiptRow, { receipt, archive: createElement(ArchiveButton, { target: "club:7", archived: true, title: receipt.eventTitle, variant: "text" }) });
   expect(row).toContain("已归档");
   expect(row).toContain("撤销归档");
 });

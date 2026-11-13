@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState, type FocusEvent, type ReactNode, type RefObject } from "react";
 import { Icon } from "./Icon";
 import styles from "./campus.module.css";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const simplePalette = () => document.documentElement.dataset.zPalette === "simple";
@@ -111,9 +112,15 @@ function useRotation(count: number, interval: number) {
   };
 }
 
-function PauseButton({ paused, onToggle, subject }: { paused: boolean; onToggle: () => void; subject: string }) {
+function PauseButton({ paused, onToggle, subject }: { paused: boolean; onToggle: () => void; subject: { zh: string; en: string } }) {
+  const t = useT();
   return (
-    <button type="button" className={styles.control} onClick={onToggle} aria-label={paused ? `继续自动播放${subject}` : `暂停自动播放${subject}`}>
+    <button
+      type="button"
+      className={styles.control}
+      onClick={onToggle}
+      aria-label={paused ? t(`继续自动播放${subject.zh}`, `Resume ${subject.en}`) : t(`暂停自动播放${subject.zh}`, `Pause ${subject.en}`)}
+    >
       <Icon name={paused ? "play" : "pause"} size={16} />
     </button>
   );
@@ -121,6 +128,7 @@ function PauseButton({ paused, onToggle, subject }: { paused: boolean; onToggle:
 
 /** "下一场" strip: one upcoming event at a time, every item is a real event link. */
 export function NextUpStrip({ items }: { items: { key: string; href: string; text: string }[] }) {
+  const t = useT();
   const rotation = useRotation(items.length, 5000);
   const item = items[rotation.index];
   if (!item) return null;
@@ -137,11 +145,11 @@ export function NextUpStrip({ items }: { items: { key: string; href: string; tex
           <span className={styles.counter}>
             {rotation.index + 1}/{items.length}
           </span>
-          <button type="button" className={styles.control} onClick={() => rotation.move(-1)} aria-label="上一场活动">
+          <button type="button" className={styles.control} onClick={() => rotation.move(-1)} aria-label={t("上一场活动", "Previous event")}>
             <Icon name="back" size={16} />
           </button>
-          <PauseButton paused={rotation.paused} onToggle={rotation.togglePause} subject="近期活动" />
-          <button type="button" className={styles.control} onClick={() => rotation.move(1)} aria-label="下一场活动">
+          <PauseButton paused={rotation.paused} onToggle={rotation.togglePause} subject={{ zh: "近期活动", en: "upcoming events" }} />
+          <button type="button" className={styles.control} onClick={() => rotation.move(1)} aria-label={t("下一场活动", "Next event")}>
             <Icon name="arrow" size={16} />
           </button>
         </div>
@@ -155,6 +163,7 @@ export function NextUpStrip({ items }: { items: { key: string; href: string; tex
  * only the active one is shown. Manual controls, a pause button and picker dots stay available.
  */
 export function HighlightsCarousel({ slides, labels, title }: { slides: ReactNode[]; labels: string[]; title: string }) {
+  const t = useT();
   const rotation = useRotation(slides.length, 6500);
   const regionId = useId();
   if (!slides.length) return null;
@@ -163,7 +172,7 @@ export function HighlightsCarousel({ slides, labels, title }: { slides: ReactNod
       ref={rotation.ref}
       className={styles.carousel}
       role="region"
-      aria-roledescription="轮播"
+      aria-roledescription={t("轮播", "carousel")}
       aria-label={title}
       {...rotation.hold}
     >
@@ -173,8 +182,8 @@ export function HighlightsCarousel({ slides, labels, title }: { slides: ReactNod
             key={position}
             className={styles.slide}
             role="group"
-            aria-roledescription="幻灯片"
-            aria-label={`第 ${position + 1} 项，共 ${slides.length} 项：${labels[position] ?? ""}`}
+            aria-roledescription={t("幻灯片", "slide")}
+            aria-label={t(`第 ${position + 1} 项，共 ${slides.length} 项：${labels[position] ?? ""}`, `${position + 1} of ${slides.length}: ${labels[position] ?? ""}`)}
             hidden={position !== rotation.index}
           >
             {slide}
@@ -191,7 +200,7 @@ export function HighlightsCarousel({ slides, labels, title }: { slides: ReactNod
                 className={styles.dot}
                 aria-controls={regionId}
                 aria-current={position === rotation.index ? "true" : undefined}
-                aria-label={`查看第 ${position + 1} 项：${labels[position] ?? ""}`}
+                aria-label={t(`查看第 ${position + 1} 项：${labels[position] ?? ""}`, `Show item ${position + 1}: ${labels[position] ?? ""}`)}
                 onClick={() => rotation.setIndex(position)}
               />
             ))}
@@ -200,11 +209,11 @@ export function HighlightsCarousel({ slides, labels, title }: { slides: ReactNod
             <span className={styles.counter}>
               {rotation.index + 1}/{slides.length}
             </span>
-            <button type="button" className={styles.control} aria-controls={regionId} onClick={() => rotation.move(-1)} aria-label="上一项高光">
+            <button type="button" className={styles.control} aria-controls={regionId} onClick={() => rotation.move(-1)} aria-label={t("上一项高光", "Previous highlight")}>
               <Icon name="back" size={16} />
             </button>
-            <PauseButton paused={rotation.paused} onToggle={rotation.togglePause} subject="赛场高光" />
-            <button type="button" className={styles.control} aria-controls={regionId} onClick={() => rotation.move(1)} aria-label="下一项高光">
+            <PauseButton paused={rotation.paused} onToggle={rotation.togglePause} subject={{ zh: "赛场高光", en: "highlights" }} />
+            <button type="button" className={styles.control} aria-controls={regionId} onClick={() => rotation.move(1)} aria-label={t("下一项高光", "Next highlight")}>
               <Icon name="arrow" size={16} />
             </button>
           </div>

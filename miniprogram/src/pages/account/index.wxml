@@ -5,11 +5,11 @@
     <view class="zj-stage-stripes"></view>
     <zj-campus scene="{{scene}}" palette="{{palette}}" />
     <view class="account-card-inner">
-      <text class="account-kicker">MY ZIJING · 我的</text>
+      <text class="account-kicker">MY ZIJING · {{t.mine}}</text>
       <view class="account-identity">
         <view class="account-avatar">{{initial}}</view>
         <view class="account-who">
-          <text class="account-name">{{user ? user.name : '还未登录'}}</text>
+          <text class="account-name">{{user ? user.name : t.notSignedIn}}</text>
           <text wx:if="{{user}}" class="account-role">{{affiliation}}{{campus ? ' · ' + role : ''}}</text>
           <text wx:if="{{user}}" class="account-email" selectable>{{user.email}}</text>
           <view wx:if="{{campus && me.communities.length}}" class="account-offices">
@@ -18,106 +18,106 @@
         </view>
       </view>
       <view wx:if="{{me}}" class="zj-scoreboard">
-        <view class="zj-score"><text class="zj-score-value">{{me.todo.length}}</text><text class="zj-score-label">待办</text></view>
-        <view class="zj-score"><text class="zj-score-value">{{me.counts.signups}}</text><text class="zj-score-label">报名</text></view>
-        <view wx:if="{{campus}}" class="zj-score"><text class="zj-score-value">{{me.counts.applications}}</text><text class="zj-score-label">申请</text></view>
+        <view class="zj-score"><text class="zj-score-value">{{me.todo.length}}</text><text class="zj-score-label">{{t.todo}}</text></view>
+        <view class="zj-score"><text class="zj-score-value">{{me.counts.signups}}</text><text class="zj-score-label">{{t.signups}}</text></view>
+        <view wx:if="{{campus}}" class="zj-score"><text class="zj-score-value">{{me.counts.applications}}</text><text class="zj-score-label">{{t.applications}}</text></view>
       </view>
       <view wx:if="{{!user}}" class="actions">
-        <button class="accent" bindtap="login">登录账号</button>
-        <button class="zj-stage-ghost" bindtap="register">注册账号</button>
+        <button class="accent" bindtap="login">{{t.cLoginAction}}</button>
+        <button class="zj-stage-ghost" bindtap="register">{{t.cRegister}}</button>
       </view>
     </view>
   </view>
 
-  <view wx:if="{{refreshing}}" class="account-refresh" aria-role="status"><view class="state-dot"></view><text class="muted">正在核对账号与管理权限</text></view>
-  <view wx:if="{{error}}"><text class="error" aria-role="alert">{{error}}</text><button class="secondary" bindtap="refresh">重新获取账号资料</button></view>
-  <text wx:if="{{!user}}" class="muted account-hint">网站与小程序使用同一紫荆账号，注册时验证邮箱。</text>
+  <view wx:if="{{refreshing}}" class="account-refresh" aria-role="status"><view class="state-dot"></view><text class="muted">{{t.checking}}</text></view>
+  <view wx:if="{{error}}"><text class="error" aria-role="alert">{{error}}</text><button class="secondary" bindtap="refresh">{{t.reloadAccount}}</button></view>
+  <text wx:if="{{!user}}" class="muted account-hint">{{t.accountHint}}</text>
 
   <block wx:if="{{user && me}}">
     <view class="zj-section">
-      <template is="zj-section" data="{{title: '待办', count: me.todo.length}}" />
+      <template is="zj-section" data="{{title: t.todo, count: me.todo.length}}" />
       <view wx:if="{{me.todo.length}}" class="zj-list">
         <view wx:for="{{me.todo}}" wx:key="key" class="account-todo" hover-class="zj-pressed" bindtap="openTodo" data-url="{{item.href}}" data-web="{{item.web}}" aria-role="link" aria-label="{{item.title}}">
           <text class="account-todo-icon">{{item.kind === 'review' ? '◎' : '!'}}</text>
-          <view class="account-todo-main"><text class="account-todo-title">{{item.title}}</text><text class="zj-small">{{item.web ? '请在网页端完成 · ' : ''}}{{item.detail}}</text></view>
+          <view class="account-todo-main"><text class="account-todo-title">{{item.title}}</text><text class="zj-small">{{item.web ? t.webOnlyPrefix : ''}}{{item.detail}}</text></view>
           <text wx:if="{{item.count}}" class="zj-count">{{item.count}}</text>
           <text wx:else class="zj-arrow">›</text>
         </view>
       </view>
-      <template wx:else is="zj-empty" data="{{title: '暂时没有需要处理的事项', body: '去日程看看最近的活动吧。', icon: '✓', action: '浏览日程', page: 'events'}}" />
+      <template wx:else is="zj-empty" data="{{title: t.todoEmpty, body: t.todoEmptyBody, icon: '✓', action: t.browseEvents, page: 'events'}}" />
     </view>
 
     <view class="zj-section">
-      <template is="zj-section" data="{{title: '我的赛程', more: '全部报名', page: 'records', params: signupRecordParams}}" />
-      <text wx:if="{{me.counts.archivedUpcoming}}" class="muted account-archive-hint">已归档 {{me.counts.archivedUpcoming}} 项赛程，可在“全部报名”中查看并撤销归档。</text>
-      <view wx:if="{{me.upcoming.length}}"><block wx:for="{{me.upcoming}}" wx:key="key"><template is="zj-match" data="{{item, img, archive: true}}" /></block></view>
-      <template wx:elif="{{me.counts.archivedUpcoming}}" is="zj-empty" data="{{title: '近期赛程均已归档', body: '报名仍然有效，撤销归档后会重新显示在这里。', icon: '🎫', action: '查看全部报名', page: 'records', params: signupRecordParams}}" />
-      <template wx:else is="zj-empty" data="{{title: '还没有报名记录', body: '报名开放的活动会标注「报名开放」。', icon: '🎫', action: '查看活动', page: 'events'}}" />
-      <button class="plain account-events-link" bindtap="openPage" data-page="events">浏览全部日程 ›</button>
+      <template is="zj-section" data="{{title: t.mySchedule, more: t.allSignups, page: 'records', params: signupRecordParams}}" />
+      <text wx:if="{{me.counts.archivedUpcoming}}" class="muted account-archive-hint">{{t.archivedUpcomingPrefix}}{{me.counts.archivedUpcoming}}{{t.archivedUpcomingSuffix}}</text>
+      <view wx:if="{{me.upcoming.length}}"><block wx:for="{{me.upcoming}}" wx:key="key"><template is="zj-match" data="{{item, img, t, archive: true}}" /></block></view>
+      <template wx:elif="{{me.counts.archivedUpcoming}}" is="zj-empty" data="{{title: t.allUpcomingArchived, body: t.allUpcomingArchivedBody, icon: '🎫', action: t.viewAllSignups, page: 'records', params: signupRecordParams}}" />
+      <template wx:else is="zj-empty" data="{{title: t.noSignups, body: t.noSignupsBody, icon: '🎫', action: t.viewEvents, page: 'events'}}" />
+      <button class="plain account-events-link" bindtap="openPage" data-page="events">{{t.browseSchedule}}</button>
     </view>
 
     <view class="zj-section">
-      <template is="zj-section" data="{{title: '我的选座回执'}}" />
+      <template is="zj-section" data="{{title: t.seatReceipts}}" />
       <view wx:if="{{seatReceipts.length}}" class="zj-list">
         <view wx:for="{{seatReceipts}}" wx:key="key" class="account-todo" bindtap="openSeatReceipt" data-kind="{{item.kind}}" data-id="{{item.id}}" aria-role="link">
           <view class="account-todo-main"><text class="account-todo-title">{{item.title}}</text><text class="zj-small">{{item.summary}}</text></view><text wx:if="{{item.id}}" class="zj-arrow">›</text>
         </view>
       </view>
-      <text wx:elif="{{!seatError}}" class="muted">提交选座申请后可在这里查看状态与票据。</text>
-      <text wx:if="{{seatError}}" class="error">选座记录加载失败，请刷新后重试。</text>
-      <button wx:if="{{seatHasNext}}" class="secondary" bindtap="moreSeatReceipts" loading="{{seatLoading}}" disabled="{{seatLoading}}">查看更多选座记录</button>
+      <text wx:elif="{{!seatError}}" class="muted">{{t.seatEmpty}}</text>
+      <text wx:if="{{seatError}}" class="error">{{t.seatError}}</text>
+      <button wx:if="{{seatHasNext}}" class="secondary" bindtap="moreSeatReceipts" loading="{{seatLoading}}" disabled="{{seatLoading}}">{{t.seatMore}}</button>
     </view>
 
     <view wx:if="{{campus}}" class="zj-section">
-      <template is="zj-section" data="{{title: '申请进度', count: me.applications.length, more: '全部申请', page: 'records', params: applicationRecordParams}}" />
-      <text wx:if="{{me.counts.archivedApplications}}" class="muted account-archive-hint">已归档 {{me.counts.archivedApplications}} 项申请，可在“全部申请”中查看并撤销归档。</text>
-      <view wx:if="{{me.applications.length}}" class="zj-list"><block wx:for="{{me.applications}}" wx:key="key"><template is="zj-application" data="{{item, archive: true}}" /></block></view>
-      <template wx:elif="{{me.counts.archivedApplications}}" is="zj-empty" data="{{title: '申请均已归档', body: '归档不会撤回申请，撤销归档后会重新显示在这里。', icon: '📮', action: '查看全部申请', page: 'records', params: applicationRecordParams}}" />
-      <template wx:else is="zj-empty" data="{{title: '还没有申请记录', body: '社群管理员、骨干招新、建队与入队申请都会记录在这里。', icon: '📮'}}" />
+      <template is="zj-section" data="{{title: t.progress, count: me.applications.length, more: t.allApplications, page: 'records', params: applicationRecordParams}}" />
+      <text wx:if="{{me.counts.archivedApplications}}" class="muted account-archive-hint">{{t.archivedApplicationsPrefix}}{{me.counts.archivedApplications}}{{t.archivedApplicationsSuffix}}</text>
+      <view wx:if="{{me.applications.length}}" class="zj-list"><block wx:for="{{me.applications}}" wx:key="key"><template is="zj-application" data="{{item, t, archive: true}}" /></block></view>
+      <template wx:elif="{{me.counts.archivedApplications}}" is="zj-empty" data="{{title: t.allApplicationsArchived, body: t.allApplicationsArchivedBody, icon: '📮', action: t.viewAllApplications, page: 'records', params: applicationRecordParams}}" />
+      <template wx:else is="zj-empty" data="{{title: t.noApplications, body: t.noApplicationsBody, icon: '📮'}}" />
       <view class="account-links">
-        <button class="shortcut" bindtap="openPage" data-page="applications"><view class="shortcut-main"><text class="shortcut-title">社群管理员申请</text><text class="muted">处理结果与名片授权</text></view><text class="shortcut-sign">›</text></button>
-        <button class="shortcut" bindtap="openPage" data-page="staff"><view class="shortcut-main"><text class="shortcut-title">骨干招新申请</text><text class="muted">继续填写与查看回执</text></view><text class="shortcut-sign">›</text></button>
-        <button class="shortcut" bindtap="openPage" data-page="team" data-params="{{teamApplicationParams}}"><view class="shortcut-main"><text class="shortcut-title">入队申请</text><text class="muted">选拔进度与退回意见</text></view><text class="shortcut-sign">›</text></button>
-        <button class="shortcut" bindtap="openPage" data-page="team-honor-workspace"><view class="shortcut-main"><text class="shortcut-title">荣誉投稿</text><text class="muted">草稿、材料与审核结果</text></view><text class="shortcut-sign">›</text></button>
+        <button class="shortcut" bindtap="openPage" data-page="applications"><view class="shortcut-main"><text class="shortcut-title">{{t.adminApplication}}</text><text class="muted">{{t.adminApplicationHint}}</text></view><text class="shortcut-sign">›</text></button>
+        <button class="shortcut" bindtap="openPage" data-page="staff"><view class="shortcut-main"><text class="shortcut-title">{{t.staffApplication}}</text><text class="muted">{{t.staffApplicationHint}}</text></view><text class="shortcut-sign">›</text></button>
+        <button class="shortcut" bindtap="openPage" data-page="team" data-params="{{teamApplicationParams}}"><view class="shortcut-main"><text class="shortcut-title">{{t.teamApplication}}</text><text class="muted">{{t.teamApplicationHint}}</text></view><text class="shortcut-sign">›</text></button>
+        <button class="shortcut" bindtap="openPage" data-page="team-honor-workspace"><view class="shortcut-main"><text class="shortcut-title">{{t.honorSubmission}}</text><text class="muted">{{t.honorSubmissionHint}}</text></view><text class="shortcut-sign">›</text></button>
       </view>
     </view>
 
     <view wx:if="{{campus}}" class="zj-section">
-      <template is="zj-section" data="{{title: '我的队伍'}}" />
+      <template is="zj-section" data="{{title: t.myTeams}}" />
       <view wx:if="{{me.memberships.length}}" class="zj-list">
         <view wx:for="{{me.memberships}}" wx:key="id" class="account-team">
           <view class="row"><button class="account-team-link" bindtap="openTeam" data-slug="{{item.slug}}" aria-role="link">{{item.title}} ›</button><text class="zj-pill {{item.active ? 'zj-pill-success' : 'zj-pill-neutral'}}">{{item.status}}</text></view>
           <view wx:if="{{item.active}}" class="account-team-actions">
-            <button wx:if="{{item.actions.editProfile}}" class="secondary" bindtap="openTeamPage" data-page="team-profiles" data-team="{{item.teamID}}">编辑我的简介</button>
-            <button wx:if="{{item.actions.submitHonor}}" class="secondary" bindtap="openTeamPage" data-page="team-honor-workspace" data-team="{{item.teamID}}">投稿荣誉</button>
-            <button wx:if="{{item.actions.leave}}" class="plain" bindtap="openPage" data-page="team" data-params="{{membershipParams}}">办理离队</button>
+            <button wx:if="{{item.actions.editProfile}}" class="secondary" bindtap="openTeamPage" data-page="team-profiles" data-team="{{item.teamID}}">{{t.editProfile}}</button>
+            <button wx:if="{{item.actions.submitHonor}}" class="secondary" bindtap="openTeamPage" data-page="team-honor-workspace" data-team="{{item.teamID}}">{{t.submitHonor}}</button>
+            <button wx:if="{{item.actions.leave}}" class="plain" bindtap="openPage" data-page="team" data-params="{{membershipParams}}">{{t.leaveTeam}}</button>
           </view>
         </view>
       </view>
-      <template wx:else is="zj-empty" data="{{title: '暂无代表队成员记录', body: '入队由社群管理员人工选拔，录取不授予管理权限。', icon: '🏆', action: '查看选拔中心', page: 'recruitment'}}" />
+      <template wx:else is="zj-empty" data="{{title: t.noTeams, body: t.noTeamsBody, icon: '🏆', action: t.viewTrials, page: 'recruitment'}}" />
     </view>
 
     <view wx:if="{{campus}}" class="zj-section">
-      <template is="zj-section" data="{{title: '管理台'}}" />
-      <text class="muted">按当前任职核对可处理的社群、队伍与对象。</text>
+      <template is="zj-section" data="{{title: t.console}}" />
+      <text class="muted">{{t.consoleHint}}</text>
       <view class="zj-list account-queues">
         <view wx:for="{{queues}}" wx:key="key" class="account-queue" hover-class="zj-pressed" bindtap="openQueue" data-url="{{item.href}}" data-web="{{item.web}}" aria-role="link" aria-label="{{item.title}}">
-          <view class="account-todo-main"><text class="account-todo-title">{{item.title}}</text><text class="zj-small">{{item.web ? '请在网页端完成 · ' : ''}}{{item.scope}}</text></view>
+          <view class="account-todo-main"><text class="account-todo-title">{{item.title}}</text><text class="zj-small">{{item.web ? t.webOnlyPrefix : ''}}{{item.scope}}</text></view>
           <text wx:if="{{item.pending}}" class="zj-count">{{item.pending}}</text>
-          <text wx:elif="{{item.pending === 0}}" class="zj-pill zj-pill-success">已全部处理</text>
+          <text wx:elif="{{item.pending === 0}}" class="zj-pill zj-pill-success">{{t.allDone}}</text>
           <text wx:else class="zj-arrow">›</text>
         </view>
-        <view class="account-queue" hover-class="zj-pressed" bindtap="openPage" data-page="activity-manage" aria-role="link"><view class="account-todo-main"><text class="account-todo-title">活动问卷与报名</text><text class="zj-small">名单查看与统计</text></view><text class="zj-arrow">›</text></view>
-        <view class="account-queue" hover-class="zj-pressed" bindtap="openPage" data-page="team" data-params="{{managedTeamParams}}" aria-role="link"><view class="account-todo-main"><text class="account-todo-title">我可管理的队伍</text><text class="zj-small">招新、成员与审核</text></view><text class="zj-arrow">›</text></view>
+        <view class="account-queue" hover-class="zj-pressed" bindtap="openPage" data-page="activity-manage" aria-role="link"><view class="account-todo-main"><text class="account-todo-title">{{t.activityForms}}</text><text class="zj-small">{{t.activityFormsHint}}</text></view><text class="zj-arrow">›</text></view>
+        <view class="account-queue" hover-class="zj-pressed" bindtap="openPage" data-page="team" data-params="{{managedTeamParams}}" aria-role="link"><view class="account-todo-main"><text class="account-todo-title">{{t.managedTeams}}</text><text class="zj-small">{{t.managedTeamsHint}}</text></view><text class="zj-arrow">›</text></view>
       </view>
     </view>
   </block>
 
   <view class="zj-section account-appearance">
-    <template is="zj-section" data="{{title: '外观'}}" />
-    <text class="muted">选择首页风格</text>
+    <template is="zj-section" data="{{title: t.appearance}}" />
+    <text class="muted">{{t.appearanceHint}}</text>
     <view class="theme-choices">
-      <button wx:for="{{themeChoices}}" wx:key="id" class="theme-choice {{palette === item.id ? 'selected' : ''}}" bindtap="setVisualTheme" data-theme="{{item.id}}" disabled="{{themeUnavailable}}" aria-label="{{item.label}}{{palette === item.id ? '，已选择' : ''}}">
+      <button wx:for="{{themeChoices}}" wx:key="id" class="theme-choice {{palette === item.id ? 'selected' : ''}}" bindtap="setVisualTheme" data-theme="{{item.id}}" disabled="{{themeUnavailable}}" aria-label="{{item.label}}{{palette === item.id ? t.selectedSuffix : ''}}">
         <view class="theme-swatch theme-swatch-{{item.id}}" aria-hidden="true"><view></view><view></view><view></view></view>
         <view class="theme-choice-title"><text>{{item.label}}</text><text wx:if="{{palette === item.id}}" class="theme-check">✓</text></view>
       </button>
@@ -127,11 +127,12 @@
   </view>
 
   <view class="zj-section account-links">
-    <button class="shortcut" bindtap="openWebsite" data-url="/privacy"><view class="shortcut-main"><text class="shortcut-title">隐私说明</text></view><text class="shortcut-sign">›</text></button>
-    <button class="shortcut" bindtap="openWebsite" data-url="/contact"><view class="shortcut-main"><text class="shortcut-title">联系与合作</text></view><text class="shortcut-sign">›</text></button>
-    <button wx:if="{{user}}" class="shortcut" bindtap="reset"><view class="shortcut-main"><text class="shortcut-title">重设密码</text></view><text class="shortcut-sign">›</text></button>
-    <button wx:if="{{campus && queues.length}}" class="shortcut" bindtap="openAdmin"><view class="shortcut-main"><text class="shortcut-title">内容管理后台</text><text class="muted">复制网页链接</text></view><text class="shortcut-sign">⧉</text></button>
-    <button wx:if="{{user}}" class="plain account-logout" bindtap="logout">退出账号</button>
+    <button class="shortcut" bindtap="switchLocale" aria-label="{{t.languageLabel}}"><view class="shortcut-main"><text class="shortcut-title">{{t.language}}</text><text class="muted">中文 / English</text></view><text class="shortcut-sign">{{locale === 'en' ? 'EN' : '中'}}</text></button>
+    <button class="shortcut" bindtap="openWebsite" data-url="/privacy"><view class="shortcut-main"><text class="shortcut-title">{{t.privacy}}</text></view><text class="shortcut-sign">›</text></button>
+    <button class="shortcut" bindtap="openWebsite" data-url="/contact"><view class="shortcut-main"><text class="shortcut-title">{{t.contact}}</text></view><text class="shortcut-sign">›</text></button>
+    <button wx:if="{{user}}" class="shortcut" bindtap="reset"><view class="shortcut-main"><text class="shortcut-title">{{t.resetPassword}}</text></view><text class="shortcut-sign">›</text></button>
+    <button wx:if="{{campus && queues.length}}" class="shortcut" bindtap="openAdmin"><view class="shortcut-main"><text class="shortcut-title">{{t.admin}}</text><text class="muted">{{t.copyWebLink}}</text></view><text class="shortcut-sign">⧉</text></button>
+    <button wx:if="{{user}}" class="plain account-logout" bindtap="logout">{{t.logout}}</button>
   </view>
-  <text class="bottom-note">竞在紫荆 / v{{version}}</text>
+  <text class="bottom-note">{{t.brand}} / v{{version}}</text>
 </view>

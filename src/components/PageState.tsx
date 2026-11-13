@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import styles from "./PageState.module.css";
+import { Tr } from "./v2/LocalText";
 
 /** V2 full-width state stage (error, permission, not found, unavailable). */
 export function PageState({
@@ -29,7 +30,9 @@ export function PageState({
           <div className={styles.actions}>{children}</div>
         </div>
         <aside className={styles.help}>
-          <h2>接下来可以做什么</h2>
+          <h2>
+            <Tr zh="接下来可以做什么" en="What you can do next" />
+          </h2>
           {help}
         </aside>
       </div>

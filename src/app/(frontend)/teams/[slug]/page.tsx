@@ -11,10 +11,12 @@ import { empty } from "@/components/v2/copy";
 import { formatDate, hueStyle, initial } from "@/components/v2/format";
 import layout from "@/components/v2/layout.module.css";
 import styles from "./team.module.css";
+import { getT } from "@/lib/i18n/server";
 
 type Props = { params: Promise<{ slug: string }> };
 const load = cache((slug: string) => read(getTeam, { slug }, `/teams/${slug}`));
 const tone: Record<TeamDetail["card"]["status"], Tone> = { active: "success", resting: "warning", archived: "neutral", unestablished: "info" };
+const statusEn: Record<TeamDetail["card"]["status"], string> = { active: "Active", resting: "Resting", archived: "Archived", unestablished: "Not established" };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { card } = await load((await params).slug);
@@ -22,6 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function Team({ params }: Props) {
+  const { t, locale } = await getT();
   const detail = await load((await params).slug);
   const { card, viewer } = detail;
   const team = card.team;
@@ -31,8 +34,8 @@ export default async function Team({ params }: Props) {
     <>
       <header className={styles.hero} style={hueStyle(hue)}>
         <div className={styles.heroInner}>
-          <nav className={styles.crumbs} aria-label="面包屑">
-            <Link href="/teams">代表队</Link>
+          <nav className={styles.crumbs} aria-label={t("面包屑", "Breadcrumb")}>
+            <Link href="/teams">{t("代表队", "Teams")}</Link>
             <span aria-hidden="true">/</span>
             <span aria-current="page">{team.title}</span>
           </nav>
@@ -43,46 +46,46 @@ export default async function Team({ params }: Props) {
             <div className={styles.titles}>
               <p className={styles.tags}>
                 {team.community && <CommunityChip community={team.community} link />}
-                <StatusPill tone={tone[card.status]}>{card.statusLabel}</StatusPill>
+                <StatusPill tone={tone[card.status]}>{t(card.statusLabel, statusEn[card.status])}</StatusPill>
                 {card.demo && <DemoPill />}
               </p>
               <h1>{team.title}</h1>
               {card.summary && <p className={styles.summary}>{card.summary}</p>}
             </div>
           </div>
-          <ul className={styles.stats} aria-label="队伍数据">
+          <ul className={styles.stats} aria-label={t("队伍数据", "Team stats")}>
             <li>
               <strong>{card.counts.publicMembers}</strong>
-              <span>公开队员</span>
+              <span>{t("公开队员", "Public players")}</span>
             </li>
             <li>
               <strong>{card.counts.honors}</strong>
-              <span>已核验荣誉</span>
+              <span>{t("已核验荣誉", "Verified honors")}</span>
             </li>
             <li>
               <strong>{detail.seasons.length}</strong>
-              <span>赛季档案</span>
+              <span>{t("赛季档案", "Seasons")}</span>
             </li>
           </ul>
           <div className={styles.actions}>
             {open && (
               <ButtonLink href={open.href} tone="accent" icon="arrow">
-                报名选拔：{open.title}
+                {t("报名选拔：", "Join tryout: ")}{open.title}
               </ButtonLink>
             )}
             {viewer?.canEditProfile && (
               <ButtonLink href={`/teams/profiles/${team.id}`} tone="stage" icon="edit">
-                编辑我的简介
+                {t("编辑我的简介", "Edit my profile")}
               </ButtonLink>
             )}
             {viewer?.canSubmitHonor && (
               <ButtonLink href={`/teams/honors?view=mine&team=${team.id}`} tone="stage" icon="trophy">
-                投稿荣誉
+                {t("投稿荣誉", "Submit an honor")}
               </ButtonLink>
             )}
             {viewer?.canManage && (
               <ButtonLink href={`/teams/manage/${team.id}`} tone="stage" icon="settings">
-                本队工作台
+                {t("本队工作台", "Team workspace")}
               </ButtonLink>
             )}
           </div>
@@ -92,16 +95,16 @@ export default async function Team({ params }: Props) {
         {viewer?.membership && (
           <p className={styles.membership}>
             <Icon name="shield" size={18} />
-            {viewer.membership.status === "active" ? "你是本队现任队员" : viewer.membership.status === "left" ? "你曾是本队队员" : "你的成员关系已撤销"}
-            {viewer.membership.joinedAt && ` · ${formatDate(viewer.membership.joinedAt)} 入队`}
+            {viewer.membership.status === "active" ? t("你是本队现任队员", "You are a current player") : viewer.membership.status === "left" ? t("你曾是本队队员", "You are a former player") : t("你的成员关系已撤销", "Your membership was revoked")}
+            {viewer.membership.joinedAt && t(` · ${formatDate(viewer.membership.joinedAt)} 入队`, ` · Joined ${formatDate(viewer.membership.joinedAt, locale)}`)}
             {viewer.membership.actions.leave && (
               <Link href="/teams/recruitment#my-team-memberships" className="text-link">
-                办理离队
+                {t("办理离队", "Leave team")}
               </Link>
             )}
           </p>
         )}
-        <Section id="roster" title="队员" count={detail.roster.length}>
+        <Section id="roster" title={t("队员", "Players")} count={detail.roster.length}>
           {detail.roster.length ? (
             <ul className={styles.roster}>
               {detail.roster.map((profile) => (
@@ -116,12 +119,12 @@ export default async function Team({ params }: Props) {
               ))}
             </ul>
           ) : (
-            <EmptyState title={empty.roster.title} icon="user" compact>
-              {empty.roster.body}
+            <EmptyState title={t(empty.roster.title, "No public player profiles yet")} icon="user" compact>
+              {t(empty.roster.body, "Current players can edit their profile and choose to make it public.")}
             </EmptyState>
           )}
         </Section>
-        <Section id="honors" title="荣誉" count={detail.honors.length} more={{ href: `/teams/honors?team=${team.id}`, label: "荣誉墙" }}>
+        <Section id="honors" title={t("荣誉", "Honors")} count={detail.honors.length} more={{ href: `/teams/honors?team=${team.id}`, label: t("荣誉墙", "Honor wall") }}>
           {detail.honors.length ? (
             <div className={layout.grid3}>
               {detail.honors.map((honor) => (
@@ -129,13 +132,13 @@ export default async function Team({ params }: Props) {
               ))}
             </div>
           ) : (
-            <EmptyState title={empty.honors.title} icon="trophy" compact>
-              {empty.honors.body}
+            <EmptyState title={t(empty.honors.title, "No verified honors yet")} icon="trophy" compact>
+              {t(empty.honors.body, "Current players can submit match honors; they appear after review.")}
             </EmptyState>
           )}
         </Section>
         {detail.recruitments.length > 0 && (
-          <Section id="recruitment" title="选拔">
+          <Section id="recruitment" title={t("选拔", "Tryouts")}>
             <div className={layout.grid2}>
               {detail.recruitments.map((call) => (
                 <RecruitmentTile key={call.key} call={call} />
@@ -144,7 +147,7 @@ export default async function Team({ params }: Props) {
           </Section>
         )}
         {detail.positions.length > 0 && (
-          <Section id="positions" title="位置与要求">
+          <Section id="positions" title={t("位置与要求", "Positions & requirements")}>
             <div className={layout.grid2}>
               {detail.positions.map((position, index) => (
                 <article key={`${position.name}-${index}`} className={`${layout.panel} ${styles.positionPanel}`}>
@@ -152,25 +155,25 @@ export default async function Team({ params }: Props) {
                   <dl className={styles.positionFacts}>
                     {position.duties && (
                       <div>
-                        <dt>职责</dt>
+                        <dt>{t("职责", "Duties")}</dt>
                         <dd>{position.duties}</dd>
                       </div>
                     )}
                     {position.requirements && (
                       <div>
-                        <dt>要求</dt>
+                        <dt>{t("要求", "Requirements")}</dt>
                         <dd>{position.requirements}</dd>
                       </div>
                     )}
                     {position.commitment && (
                       <div>
-                        <dt>投入</dt>
+                        <dt>{t("投入", "Commitment")}</dt>
                         <dd>{position.commitment}</dd>
                       </div>
                     )}
                     {position.arrangement && (
                       <div>
-                        <dt>安排</dt>
+                        <dt>{t("安排", "Schedule")}</dt>
                         <dd>{position.arrangement}</dd>
                       </div>
                     )}
@@ -181,7 +184,7 @@ export default async function Team({ params }: Props) {
           </Section>
         )}
         {detail.events.length > 0 && (
-          <Section id="events" title="相关活动">
+          <Section id="events" title={t("相关活动", "Related events")}>
             <div className={styles.events}>
               {detail.events.slice(0, 6).map((event) => (
                 <MatchCard key={event.key} event={event} />
@@ -190,24 +193,24 @@ export default async function Team({ params }: Props) {
           </Section>
         )}
         {detail.body != null && (
-          <Section id="about" title="队伍介绍">
+          <Section id="about" title={t("队伍介绍", "About the team")}>
             <RichText body={detail.body} />
           </Section>
         )}
         {detail.seasons.length > 0 && (
-          <Section id="seasons" title="赛季档案">
+          <Section id="seasons" title={t("赛季档案", "Seasons")}>
             <ol className={styles.seasons}>
               {detail.seasons.map((season) => (
                 <li key={season.id} id={`season-${season.id}`}>
-                  <span className={styles.seasonDate}>{season.startAt ? formatDate(season.startAt) : "时间待补"}</span>
+                  <span className={styles.seasonDate}>{season.startAt ? formatDate(season.startAt, locale) : t("时间待补", "Date TBA")}</span>
                   <div>
                     <h3>{season.title}</h3>
                     {season.members.length > 0 ? (
                       <p>
-                        {season.members.map((member) => (member.position ? `${member.displayName}（${member.position}）` : member.displayName)).join("、")}
+                        {season.members.map((member) => (member.position ? t(`${member.displayName}（${member.position}）`, `${member.displayName} (${member.position})`) : member.displayName)).join(t("、", ", "))}
                       </p>
                     ) : (
-                      <p className={styles.muted}>本赛季阵容未公开。</p>
+                      <p className={styles.muted}>{t("本赛季阵容未公开。", "This season's lineup is not public.")}</p>
                     )}
                   </div>
                 </li>

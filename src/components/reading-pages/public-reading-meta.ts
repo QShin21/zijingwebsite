@@ -1,5 +1,7 @@
 import { cms } from "@/lib/content";
 import { teamLifecycleLabels } from "@/lib/team-core";
+import type { Locale } from "@/lib/i18n/locale";
+import { teamStatusLabel } from "@/lib/i18n/labels-public";
 
 export type ReadingMeta = {
   teamStatus?: string | null;
@@ -35,7 +37,8 @@ export async function publicTeamMeta(
   }
 }
 
-export function publicTeamState(meta?: ReadingMeta, archived?: boolean | null) {
-  if (archived || meta?.teamStatus === "archived") return "历史归档";
-  return meta?.teamStatus ? teamLifecycleLabels[meta.teamStatus] : undefined;
+export function publicTeamState(meta?: ReadingMeta, archived?: boolean | null, locale: Locale = "zh") {
+  if (archived || meta?.teamStatus === "archived") return locale === "en" ? "Archived" : "历史归档";
+  if (!meta?.teamStatus) return undefined;
+  return teamStatusLabel(meta.teamStatus, teamLifecycleLabels[meta.teamStatus], locale);
 }

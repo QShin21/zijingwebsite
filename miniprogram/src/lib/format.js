@@ -1,5 +1,6 @@
+const i18n = (() => { try { const value = require('./i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { t: zh => zh, message: value => value, locale: () => 'zh' }; })();
 function date(value, short = false) {
-  if (!value || !Number.isFinite(Date.parse(value))) return '待公布';
+  if (!value || !Number.isFinite(Date.parse(value))) return i18n.t('待公布', 'TBA');
   const time = new Date(Date.parse(value) + 8 * 60 * 60 * 1000);
   const pad = number => String(number).padStart(2, '0');
   return `${time.getUTCFullYear()}.${pad(time.getUTCMonth() + 1)}.${pad(time.getUTCDate())}` +
@@ -27,8 +28,8 @@ function registrationState(doc, now = Date.now()) {
 }
 function card(doc, collection) {
   return { ...doc, collection, dateText: date(doc.startAt || doc.date || doc.publishedAt || doc.createdAt, true),
-    statusText: collection === 'events' ? eventState(doc) : collection === 'recruitment' ? registrationState(doc) : '',
-    kindText: { members: '普通社员', teams: '代表队选拔', staff: '骨干招新' }[doc.kind] || doc.type || '' };
+    statusText: i18n.message(collection === 'events' ? eventState(doc) : collection === 'recruitment' ? registrationState(doc) : ''),
+    kindText: { members: i18n.t('普通社员', 'Members'), teams: i18n.t('代表队选拔', 'Team trials'), staff: i18n.t('骨干招新', 'Staff recruitment') }[doc.kind] || doc.type || '' };
 }
 const beijingOffset = 8 * 60 * 60 * 1000;
 

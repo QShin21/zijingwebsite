@@ -1,3 +1,4 @@
+const i18n = (() => { try { const value = require('./i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { t: zh => zh, message: value => value, locale: () => 'zh' }; })();
 const http = require('./http');
 const files = require('./files');
 function id(value) {
@@ -17,13 +18,13 @@ function sourceHref(record) {
 function archive(value, team) {
   const teamID = id(team);
   if (!teamID || !value || typeof value !== 'object' || !value.team || id(value.team.id) !== teamID ||
-      !Array.isArray(value.records)) throw new Error('荣誉档案与当前队伍不匹配，请重新加载');
+      !Array.isArray(value.records)) throw new Error(i18n.t('荣誉档案与当前队伍不匹配，请重新加载', 'The honor records do not match this team. Please reload.'));
   const records = value.records.map(record => {
     if (!record || typeof record !== 'object' || !/^(team-honor-records|honors):[1-9]\d*$/.test(record.key || '') ||
-        typeof record.title !== 'string' || !Array.isArray(record.images) || record.images.length > 6) throw new Error('荣誉档案格式暂不可用，请重新加载');
+        typeof record.title !== 'string' || !Array.isArray(record.images) || record.images.length > 6) throw new Error(i18n.t('荣誉档案格式暂不可用，请重新加载', 'The honor record format is unavailable. Please reload.'));
     const images = record.legacy ? [] : record.images.map(image => {
       if (!image || typeof image.source !== 'string' || !/^data:image\/webp;base64,[A-Za-z0-9+/=]+$/.test(image.source) ||
-          image.source.length > 11200000 || typeof image.caption !== 'string') throw new Error('荣誉证据图片暂不可用，请重新加载');
+          image.source.length > 11200000 || typeof image.caption !== 'string') throw new Error(i18n.t('荣誉证据图片暂不可用，请重新加载', 'Honor evidence images are unavailable. Please reload.'));
       return { source: image.source, caption: image.caption };
     });
     // Keep only the public archive fields. Storage videoURL and private facts never enter page data.
@@ -41,7 +42,7 @@ function archive(value, team) {
 }
 function load(team) {
   const teamID = id(team);
-  if (!teamID) return Promise.reject(new Error('队伍入口无效，请返回后重新进入'));
+  if (!teamID) return Promise.reject(new Error(i18n.t('队伍入口无效，请返回后重新进入', 'Invalid team link. Go back and open it again.')));
   return http.request('/api/team-honor-archives/' + teamID, { auth: false, raw: true }).then(value => archive(value, teamID));
 }
 async function pictures(record) {
@@ -50,7 +51,7 @@ async function pictures(record) {
     return { url, caption: image.caption };
   }));
   return { ...record, images: [], localImages: images.filter(image => image.url), mediaLoading: false,
-    mediaError: images.some(image => !image.url) ? '部分证据图片暂时无法加载，可重新加载档案后重试' : '' };
+    mediaError: images.some(image => !image.url) ? i18n.t('部分证据图片暂时无法加载，可重新加载档案后重试', 'Some evidence images could not load. Reload the record and try again.') : '' };
 }
 function removePictures(paths) {
   try {

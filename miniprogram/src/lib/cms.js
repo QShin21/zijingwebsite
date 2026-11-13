@@ -1,3 +1,4 @@
+const i18n = (() => { try { const value = require('./i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { t: zh => zh, message: value => value, locale: () => 'zh' }; })();
 const http = require('./http');
 const config = require('../config');
 const { card } = require('./format');
@@ -14,7 +15,7 @@ function query(values) {
 }
 function selection(names) { return Object.fromEntries(names.map(name => [`select[${name}]`, true])); }
 function contentQuery(collection, options = {}) {
-  if (!collections.includes(collection)) throw new Error('栏目无效');
+  if (!collections.includes(collection)) throw new Error(i18n.t('栏目无效', 'Invalid section.'));
   return { depth: 0, draft: false, page: options.page || 1, limit: Math.min(options.limit || 12, 50),
     sort: collection === 'games' ? 'sort' : options.sort || '-createdAt',
     'where[_status][equals]': 'published',
@@ -46,13 +47,13 @@ async function list(collection, options = {}) {
     return { docs: page.updatedAt ? [card({ ...page, _status: 'published' }, collection)] : [], page: 1, hasNextPage: false };
   }
   const data = await http.request(`/api/${collection}?${query(contentQuery(collection, options))}`, { required: true });
-  if (!data || !Array.isArray(data.docs)) throw new Error('栏目数据暂不可用');
+  if (!data || !Array.isArray(data.docs)) throw new Error(i18n.t('栏目数据暂不可用', 'Section data is unavailable.'));
   const docs = data.docs.filter(doc => doc._status === 'published' && (collection !== 'honors' || doc.verified === true));
   return { docs: docs.map(doc => card(publicProjection(doc), collection)), hasNextPage: Boolean(data.hasNextPage), page: data.page || 1, totalDocs: data.totalDocs || 0 };
 }
 async function detail(collection, id, slug) {
   const result = await list(collection, { id, slug, limit: 1 });
-  if (!result.docs[0]) throw new Error('内容尚未公开或已移除');
+  if (!result.docs[0]) throw new Error(i18n.t('内容尚未公开或已移除', 'This content is not public or has been removed.'));
   return result.docs[0];
 }
 async function media(id) {
@@ -82,15 +83,15 @@ function socialQuery(options = {}) {
 }
 const socials = ['community-posts', 'community-showcase'];
 async function social(collection, options = {}) {
-  if (!socials.includes(collection)) throw new Error('内容类型无效');
+  if (!socials.includes(collection)) throw new Error(i18n.t('内容类型无效', 'Invalid content type.'));
   return http.request(`/api/${collection}?${query(socialQuery(options))}`, { required: true });
 }
 async function socialDetail(collection, id) {
-  if (!socials.includes(collection)) throw new Error('内容类型无效');
+  if (!socials.includes(collection)) throw new Error(i18n.t('内容类型无效', 'Invalid content type.'));
   const detailFields = ['title', 'body', 'game', 'authorName', 'createdAt', 'status', 'category', 'videoURL', 'images'];
   if (collection === 'community-posts') detailFields.push('startAt', 'endAt', 'location');
   const value = await http.request(`/api/${collection}/${encodeURIComponent(id)}?depth=0&${query(selection(detailFields))}`, { required: true });
-  if (value.status !== 'visible') throw new Error('内容暂不可用');
+  if (value.status !== 'visible') throw new Error(i18n.t('内容暂不可用', 'This content is not available right now.'));
   return { ...value, collection };
 }
 async function eventDetail(ref, collection) {

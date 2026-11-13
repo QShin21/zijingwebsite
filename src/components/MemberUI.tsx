@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import { BrandMark } from "./Identity";
 import styles from "./account-pages/AccountPages.module.css";
+import { getT } from "@/lib/i18n/server";
 
-export function MemberLayout({
+export async function MemberLayout({
   title,
   description,
   steps,
@@ -13,6 +14,7 @@ export function MemberLayout({
   steps: string[];
   children: ReactNode;
 }) {
+  const { t } = await getT();
   return (
     <div className={styles.authLayout}>
       <aside className={styles.authIntro}>
@@ -28,7 +30,7 @@ export function MemberLayout({
           ))}
         </ol>
         <div className={styles.authNotice}>
-          网站账号用于记录报名与申请。加入微信群仍需联系社群管理员，人工添加好友并邀请进群。
+          {t("网站账号用于记录报名与申请。加入微信群仍需联系社群管理员，人工添加好友并邀请进群。", "Your account records sign-ups and applications. To join a WeChat group, contact a community admin, who adds you as a friend and invites you.")}
         </div>
       </aside>
       <section className={styles.authPanel}>{children}</section>

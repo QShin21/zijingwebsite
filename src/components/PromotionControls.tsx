@@ -4,8 +4,9 @@ import { ActionForm } from "./activity-pages/ActionForm";
 import { promotionAction } from "@/app/(frontend)/community/promotions/actions";
 import type { ContentPromotion } from "@/payload-types";
 import type { PromotionSource } from "@/lib/promotion-model";
+import { getT } from "@/lib/i18n/server";
 
-export function PromotionControls({
+export async function PromotionControls({
   collection,
   id,
   version,
@@ -26,6 +27,7 @@ export function PromotionControls({
   canApprove?: boolean;
   returnQuery?: string;
 }) {
+  const { t } = await getT();
   const fields = (
     <>
       <input type="hidden" name="sourceCollection" value={collection} />
@@ -39,7 +41,7 @@ export function PromotionControls({
     return (
       <>
         <p className="field-hint">
-          申请正在等待审核。处理结果会保存在原记录中。
+          {t("申请正在等待审核。处理结果会保存在原记录中。", "The request is awaiting review. The result is saved in the original record.")}
         </p>
         {manager &&
           Number(
@@ -54,7 +56,7 @@ export function PromotionControls({
                 value="withdraw"
                 className="button light"
               >
-                撤回申请
+                {t("撤回申请", "Withdraw request")}
               </SubmitButton>
             </ActionForm>
           )}
@@ -63,11 +65,11 @@ export function PromotionControls({
             {fields}
             {!canApprove && (
               <p role="status">
-                原内容版本已变化或已不可公开，请退回处理后重新申请。
+                {t("原内容版本已变化或已不可公开，请退回处理后重新申请。", "The original content changed or is no longer public. Return it so it can be resubmitted.")}
               </p>
             )}
             <label>
-              审核意见（退回或拒绝必填）
+              {t("审核意见（退回或拒绝必填）", "Review note (required to return or reject)")}
               <textarea name="reason" rows={3} maxLength={1000} />
             </label>
             <div className="reaction-bar">
@@ -76,21 +78,21 @@ export function PromotionControls({
                 value="approve"
                 disabled={!canApprove}
               >
-                通过升推
+                {t("通过升推", "Approve promotion")}
               </SubmitButton>
               <SubmitButton
                 name="action"
                 value="return"
                 className="button light"
               >
-                退回修改
+                {t("退回修改", "Return for changes")}
               </SubmitButton>
               <SubmitButton
                 name="action"
                 value="reject"
                 className="button light"
               >
-                拒绝升推
+                {t("拒绝升推", "Reject promotion")}
               </SubmitButton>
             </div>
           </ActionForm>
@@ -100,21 +102,21 @@ export function PromotionControls({
   if (current?.status === "approved")
     return reviewer ? (
       <details className={styles.disclosure} open>
-        <summary>调整展示范围</summary>
-        <p>降级后保留社群展示与原报名记录。</p>
+        <summary>{t("调整展示范围", "Adjust display scope")}</summary>
+        <p>{t("降级后保留社群展示与原报名记录。", "Demoting keeps the community display and existing sign-ups.")}</p>
         <ActionForm action={promotionAction} className="member-form">
           {fields}
           <label>
-            降级理由
+            {t("降级理由", "Reason for demotion")}
             <textarea name="reason" required maxLength={1000} rows={2} />
           </label>
           <SubmitButton name="action" value="demote" className="button light">
-            降为社群展示
+            {t("降为社群展示", "Demote to community display")}
           </SubmitButton>
         </ActionForm>
       </details>
     ) : (
-      <p className="field-hint">已通过升推，当前展示状态可在下方记录中查看。</p>
+      <p className="field-hint">{t("已通过升推，当前展示状态可在下方记录中查看。", "Promoted. The current display status is in the records below.")}</p>
     );
   return (
     <>
@@ -122,7 +124,7 @@ export function PromotionControls({
         <ActionForm action={promotionAction} className="member-form">
           {fields}
           <label>
-            升推理由
+            {t("升推理由", "Reason for promotion")}
             <textarea
               name="reason"
               required
@@ -133,18 +135,18 @@ export function PromotionControls({
             />
           </label>
           <SubmitButton name="action" value="submit">
-            {current ? "重新申请升推" : "申请升推"}
+            {current ? t("重新申请升推", "Request promotion again") : t("申请升推", "Request promotion")}
           </SubmitButton>
         </ActionForm>
       )}
       {reviewer && (
         <details className={styles.disclosure} open>
-          <summary>直接升为社团展示</summary>
-          <p>你有权直接提升当前内容，处理理由会留在记录中。</p>
+          <summary>{t("直接升为社团展示", "Promote to the club front page")}</summary>
+          <p>{t("你有权直接提升当前内容，处理理由会留在记录中。", "You can promote this content directly; your reason is kept in the record.")}</p>
           <ActionForm action={promotionAction} className="member-form">
             {fields}
             <label>
-              主动升推理由
+              {t("主动升推理由", "Reason for direct promotion")}
               <textarea name="reason" required maxLength={1000} rows={2} />
             </label>
             <SubmitButton
@@ -152,7 +154,7 @@ export function PromotionControls({
               value="promote"
               className="button light"
             >
-              主动升推
+              {t("主动升推", "Promote directly")}
             </SubmitButton>
           </ActionForm>
         </details>

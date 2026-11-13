@@ -9,6 +9,8 @@ import { themeColors, themeCookieName, themeFromPreference, themeScheme } from "
 import { pixelFont } from "@/components/v2/pixel-font";
 import { ClientEffects } from "@/components/v2/ClientEffects";
 import shell from "@/components/v2/Shell.module.css";
+import { LocaleProvider } from "@/components/i18n/LocaleProvider";
+import { englishSiteName, htmlLang, localeCookieName, parseLocale, translator } from "@/lib/i18n/locale";
 import "./tokens.css";
 import "./v2.css";
 import "./pixel.css";
@@ -21,10 +23,11 @@ export async function generateViewport(): Promise<Viewport> {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const s = await site();
+  const [s, store] = await Promise.all([site(), cookies()]);
+  const name = parseLocale(store.get(localeCookieName)?.value) === "en" ? englishSiteName : s.name;
   return {
     metadataBase: new URL(serverURL),
-    title: { default: s.name, template: `%s | ${s.name}` },
+    title: { default: name, template: `%s | ${name}` },
     description: s.description || undefined,
     robots:
       process.env.APP_ENV === "production"
@@ -36,24 +39,30 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const [s, { user }, store] = await Promise.all([site(), request(), cookies()]);
   const theme = themeFromPreference(store.get(themeCookieName)?.value);
+  const locale = parseLocale(store.get(localeCookieName)?.value);
+  const t = translator(locale);
+  // The CMS site name is Chinese; English mode uses the club's fixed English name.
+  const name = locale === "en" ? englishSiteName : s.name;
   const campus = canUseCampus(user);
-  const viewer = user ? { name: user.name || "成员", campus } : null;
+  const viewer = user ? { name: user.name || t("成员", "Member"), campus } : null;
   return (
-    <html lang="zh-CN" data-z-theme={themeScheme(theme)} data-z-palette={theme} className={pixelFont.variable}>
+    <html lang={htmlLang[locale]} data-z-theme={themeScheme(theme)} data-z-palette={theme} className={pixelFont.variable}>
       <body>
-        <a className={shell.skip} href="#main">
-          跳到正文
-        </a>
-        {process.env.APP_ENV !== "production" && (
-          <div className={shell.environment}>开发 / 预览环境 · 内容以正式发布为准</div>
-        )}
-        <TopBar name={s.name} theme={theme} viewer={viewer} />
-        <main id="main" tabIndex={-1} className={shell.main}>
-          {children}
-        </main>
-        <Footer name={s.name} footer={s.footer} campus={campus} />
-        <MobileTabs signedIn={Boolean(viewer)} campus={campus} />
-        <ClientEffects />
+        <LocaleProvider locale={locale}>
+          <a className={shell.skip} href="#main">
+            {t("跳到正文", "Skip to content")}
+          </a>
+          {process.env.APP_ENV !== "production" && (
+            <div className={shell.environment}>{t("开发 / 预览环境 · 内容以正式发布为准", "Development / preview · published content is authoritative")}</div>
+          )}
+          <TopBar name={name} theme={theme} viewer={viewer} locale={locale} />
+          <main id="main" tabIndex={-1} className={shell.main}>
+            {children}
+          </main>
+          <Footer name={name} footer={s.footer} campus={campus} locale={locale} />
+          <MobileTabs signedIn={Boolean(viewer)} campus={campus} locale={locale} />
+          <ClientEffects />
+        </LocaleProvider>
       </body>
     </html>
   );

@@ -18,6 +18,8 @@ import { applicationError } from "@/lib/application-error";
 import { publicationImageRevision } from "@/lib/publication-image-storage";
 import { publicationImageRequestBytes } from "@/lib/publication-images";
 import { lotteryReceipt, readLottery } from "@/lib/activity-signup-lottery";
+import { requestLocale } from "@/lib/i18n/locale";
+import { localizedFormDisplay, localizedTitle } from "@/lib/content-translation/localize";
 import { boundedBody } from "@/lib/site-request";
 import { publicationAssetData } from "@/lib/v2/images";
 import type { PublicationImage } from "@/lib/publication-images";
@@ -34,7 +36,7 @@ const reply = (data: unknown, status = 200) =>
     status,
     headers: {
       "Cache-Control": "private, no-store",
-      Vary: "Cookie, Authorization",
+      Vary: "Cookie, Authorization, X-Zijing-Locale",
       "X-Content-Type-Options": "nosniff",
     },
   });
@@ -159,7 +161,12 @@ async function run(
       }
       const signup = await ownSignup(p, kind, id, user);
       const lottery = signup ? await readLottery(p, kind, id) : null;
+      // Filling view only (published form): English labels ride beside the unchanged form;
+      // option values, IDs and logic in `form` stay the canonical Chinese values.
+      const locale = requestLocale(request);
+      const display = !mode ? await localizedFormDisplay(kind, id, value.form, locale) : null;
       return reply({
+        ...(display ? { display } : {}),
         ...(includeImages && mode === "manage"
           ? { images: await withImagePreviews(p, value.images), imageRevision: publicationImageRevision(value.images) }
           : includeImages && !mode && value.form.enabled
@@ -167,7 +174,7 @@ async function run(
                 !questionId || value.form.questions.some(({ id }) => id === questionId),
               )) }
             : {}),
-        title: value.doc.title,
+        title: !mode ? await localizedTitle(kind, id, value.doc.title, locale) : value.doc.title,
         form: value.form,
         version: value.version,
         state: signupState(value.form, value.doc),

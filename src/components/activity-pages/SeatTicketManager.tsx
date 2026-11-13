@@ -1,11 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
-import { seatLabel, seatTicketBytes, seatTicketFilename } from "@/lib/activity-seating-model";
-import { seatRequest } from "./seat-request";
+import { seatTicketBytes, seatTicketFilename } from "@/lib/activity-seating-model";
+import { localizeSeatError, seatRequest } from "./seat-request";
+import { seatName } from "./ActivitySeating";
+import { useLocale, useT } from "@/components/i18n/LocaleProvider";
 import styles from "./ActivitySeating.module.css";
 
 export function SeatTicketManager({ endpoint, disabled }: { endpoint: string; disabled: boolean }) {
+  const t = useT(),
+    locale = useLocale();
   const [seats, setSeats] = useState<string[]>([]);
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
@@ -18,9 +22,9 @@ export function SeatTicketManager({ endpoint, disabled }: { endpoint: string; di
   }, [endpoint]);
   useEffect(() => {
     alive.current = true;
-    load().catch(() => { if (alive.current) setErrors(["票据清单读取失败，请刷新页面重试。"]); });
+    load().catch(() => { if (alive.current) setErrors([t("票据清单读取失败，请刷新页面重试。", "Failed to load the ticket list. Refresh the page and try again.")]); });
     return () => { alive.current = false; };
-  }, [load]);
+  }, [load, t]);
 
   async function upload(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.currentTarget.files || []);
@@ -37,11 +41,11 @@ export function SeatTicketManager({ endpoint, disabled }: { endpoint: string; di
     let saved = 0;
     for (const [index, file] of files.entries()) {
       if (!alive.current) break;
-      setBusy(`正在上传 ${index + 1} / ${files.length}`);
+      setBusy(t(`正在上传 ${index + 1} / ${files.length}`, `Uploading ${index + 1} / ${files.length}`));
       const parsed = seatTicketFilename(file.name);
-      if (!parsed) { failures.push(`${file.name}：文件名或座位无效`); continue; }
-      if (selected.get(parsed.seat)! > 1) { failures.push(`${file.name}：本次选择中同一座位有多个文件`); continue; }
-      if (!file.size || file.size > seatTicketBytes) { failures.push(`${file.name}：单张图片最多 8 MB`); continue; }
+      if (!parsed) { failures.push(t(`${file.name}：文件名或座位无效`, `${file.name}: invalid filename or seat`)); continue; }
+      if (selected.get(parsed.seat)! > 1) { failures.push(t(`${file.name}：本次选择中同一座位有多个文件`, `${file.name}: several files for the same seat in this selection`)); continue; }
+      if (!file.size || file.size > seatTicketBytes) { failures.push(t(`${file.name}：单张图片最多 8 MB`, `${file.name}: each image can be up to 8 MB`)); continue; }
       try {
         const form = new FormData();
         form.set("file", file);
@@ -49,29 +53,30 @@ export function SeatTicketManager({ endpoint, disabled }: { endpoint: string; di
         await seatRequest(`${endpoint}/tickets`, { method: "POST", body: form });
         saved++;
       } catch (cause) {
-        failures.push(`${file.name}：${cause instanceof Error ? cause.message : "上传失败"}`);
+        failures.push(t(`${file.name}：${cause instanceof Error ? cause.message : "上传失败"}`, `${file.name}: ${cause instanceof Error ? localizeSeatError(cause.message, locale) : "Upload failed"}`));
       }
     }
     if (alive.current) {
-      try { await load(); } catch { failures.push("票据清单刷新失败，请刷新页面核对。"); }
-      setMessage(`已保存 ${saved} 张票据${failures.length ? `，${failures.length} 张未完成` : ""}。`);
+      try { await load(); } catch { failures.push(t("票据清单刷新失败，请刷新页面核对。", "Failed to refresh the ticket list. Refresh the page to check.")); }
+      setMessage(t(`已保存 ${saved} 张票据${failures.length ? `，${failures.length} 张未完成` : ""}。`, `Saved ${saved} tickets${failures.length ? `; ${failures.length} not completed` : ""}.`));
       setErrors(failures);
       setBusy("");
     }
     lock.current = false;
   }
   return (
-    <section className={styles.ticketManager} aria-label="座位票据管理">
-      <h3>座位电子票据</h3>
-      <p className={styles.hint}>批量选择 JPG 或 PNG 图片，按“01排01座.jpg”命名。单张最多 8 MB；同一座位重新上传会更新票据。</p>
-      <p className={styles.hint}>已上传 {seats.length} 个座位的票据。已确认座位的成员可在本人回执查看和保存。</p>
-      <label className={styles.ticketUpload}>选择票据图片
+    <section className={styles.ticketManager} aria-label={t("座位票据管理", "Seat ticket management")}>
+      <h3>{t("座位电子票据", "Seat e-tickets")}</h3>
+      {/* i18n-exempt: the English text quotes the required Chinese ticket filename */}
+      <p className={styles.hint}>{t("批量选择 JPG 或 PNG 图片，按“01排01座.jpg”命名。单张最多 8 MB；同一座位重新上传会更新票据。", "Select JPG or PNG images in bulk, named like “01排01座.jpg” (row 01, seat 01). Up to 8 MB each; uploading again for a seat replaces its ticket.")}</p>
+      <p className={styles.hint}>{t(`已上传 ${seats.length} 个座位的票据。已确认座位的成员可在本人回执查看和保存。`, `Tickets uploaded for ${seats.length} seats. Members with confirmed seats can view and save them on their receipt.`)}</p>
+      <label className={styles.ticketUpload}>{t("选择票据图片", "Choose ticket images")}
         <input type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple disabled={disabled || Boolean(busy)} onChange={upload} />
       </label>
       {busy && <p className={styles.hint} role="status">{busy}…</p>}
       {message && <p role="status">{message}</p>}
       {errors.length > 0 && <ul className={styles.ticketErrors} role="alert">{errors.map((error, index) => <li key={`${index}-${error}`}>{error}</li>)}</ul>}
-      {seats.length > 0 && <details><summary>查看已上传座位</summary><p className={styles.hint}>{seats.map(seatLabel).join("、")}</p></details>}
+      {seats.length > 0 && <details><summary>{t("查看已上传座位", "View uploaded seats")}</summary><p className={styles.hint}>{seats.map((seat) => seatName(seat, locale)).join(t("、", ", "))}</p></details>}
     </section>
   );
 }

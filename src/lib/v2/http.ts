@@ -6,10 +6,12 @@ import type { ErrorCode } from "./types";
 import * as service from "./index";
 import { signImages } from "./images";
 import { publicationImageBytes } from "../publication-images";
+import { requestLocale } from "../i18n/locale";
+import { localizeView } from "../content-translation/localize";
 
 const codes: Record<number, ErrorCode> = { 400: "VALIDATION", 401: "AUTH_REQUIRED", 403: "FORBIDDEN", 404: "NOT_FOUND", 409: "CONFLICT", 413: "PAYLOAD_TOO_LARGE", 415: "UNSUPPORTED_MEDIA", 429: "RATE_LIMITED", 503: "UNAVAILABLE" };
 const messages: Record<number, string> = { 400: "请求内容无效，请检查后重试", 401: "请先登录可用账号", 403: "无权进行此操作", 404: "内容暂时不可访问", 409: "内容已更新或已处理，请刷新后重试", 413: "请求内容过大", 415: "不支持此文件格式", 429: "操作过于频繁，请稍后重试", 503: "服务暂时不可用，请稍后重试" };
-const headers = { "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff", Vary: "Cookie, Authorization" };
+const headers = { "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff", Vary: "Cookie, Authorization, X-Zijing-Locale" };
 const reply = (body: unknown, status = 200) => Response.json(body, { status, headers });
 // No SQL, stack traces or third-party diagnostics are reflected to clients.
 function failure(error: unknown): Response {
@@ -69,6 +71,9 @@ export async function v2Request(p: Payload, request: Request, path: string[]): P
     const query = Object.fromEntries(new URL(request.url).searchParams.entries());
     const route = path.join("/");
     if (request.method === "GET") {
+      // English readers get cached translations of text already in the authorized result.
+      const locale = requestLocale(request);
+      const view = async (value: unknown) => reply(await localizeView(value, locale));
       if (path[0] === "images" && path.length === 4) return await service.getImage(p, viewer, {
         kind: path[1], id: path[2], index: path[3], version: query.v, ticket: query.ticket, ifNoneMatch: request.headers.get("if-none-match"),
       });
@@ -79,20 +84,20 @@ export async function v2Request(p: Payload, request: Request, path: string[]): P
         "me/applications": service.getMyApplications, "me/seat-requests": service.getMySeatReceipts, manage: service.getManage,
       };
       const read = Object.hasOwn(reads, route) ? reads[route as keyof typeof reads] : undefined;
-      if (read) return reply(await read(p, viewer, query));
+      if (read) return view(await read(p, viewer, query));
       if (path[0] === "events" && path.length === 3 && ["club", "community"].includes(path[1]))
-        return reply(await service.getEventDetail(p, viewer, { ...query, source: path[1], idOrSlug: path[2] }));
+        return view(await service.getEventDetail(p, viewer, { ...query, source: path[1], idOrSlug: path[2] }));
       if (path[0] === "articles" && path.length === 3)
-        return reply(await service.getArticle(p, viewer, { ...query, kind: path[1], idOrSlug: path[2] }));
+        return view(await service.getArticle(p, viewer, { ...query, kind: path[1], idOrSlug: path[2] }));
       if (path[0] === "communities" && path.length === 2)
-        return reply(await service.getCommunity(p, viewer, { ...query, slug: path[1] }));
+        return view(await service.getCommunity(p, viewer, { ...query, slug: path[1] }));
       if (path[0] === "communities" && path.length === 3) {
         const reads = { header: service.getCommunityHeader, contacts: service.getContacts, showcase: service.getShowcase, posts: service.getCommunityPosts };
         const read = Object.hasOwn(reads, path[2]) ? reads[path[2] as keyof typeof reads] : undefined;
-        if (read) return reply(await read(p, viewer, { ...query, slug: path[1] }));
+        if (read) return view(await read(p, viewer, { ...query, slug: path[1] }));
       }
-      if (path[0] === "teams" && path.length === 2) return reply(await service.getTeam(p, viewer, { ...query, slug: path[1] }));
-      if (path[0] === "pages" && path.length === 2) return reply(await service.getFixedPage(p, viewer, { key: path[1] }));
+      if (path[0] === "teams" && path.length === 2) return view(await service.getTeam(p, viewer, { ...query, slug: path[1] }));
+      if (path[0] === "pages" && path.length === 2) return view(await service.getFixedPage(p, viewer, { key: path[1] }));
     } else if (request.method === "POST") {
       const actor = await refreshViewer(p, viewer);
       if (!actor) throw new APIError("请登录可用账号", viewer ? 403 : 401);

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { PageHero, Wrap } from "./ui";
 import styles from "./task.module.css";
+import { LabeledOl } from "./LocalText";
 
 /**
  * V2 task layout for retained business flows (sign-up, questionnaires, staff,
@@ -34,14 +35,14 @@ export function TaskFrame({
     <>
       <PageHero tone="stage" eyebrow={eyebrow} title={title} description={description} back={back} actions={actions}>
         {steps && (
-          <ol className={styles.rail} aria-label="办理步骤">
+          <LabeledOl className={styles.rail} zh="办理步骤" en="Steps">
             {steps.map((step, index) => (
               <li key={step} aria-current={current === index ? "step" : undefined} data-done={current !== undefined && index < current ? "" : undefined}>
                 <span>{index + 1}</span>
                 {step}
               </li>
             ))}
-          </ol>
+          </LabeledOl>
         )}
       </PageHero>
       <Wrap width={wide ? "max" : "workspace"} className={styles.body}>

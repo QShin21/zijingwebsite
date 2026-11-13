@@ -10,6 +10,8 @@ import {
 } from "@/lib/publication-images";
 import type { Question } from "@/lib/signup-schema";
 import styles from "./PublicationImages.module.css";
+import { useLocale, useT } from "@/components/i18n/LocaleProvider";
+import { localizeAccountMessage } from "@/lib/i18n/messages-account";
 
 export async function uploadPublicationImage(file: File) {
   const data = new FormData();
@@ -20,7 +22,7 @@ export async function uploadPublicationImage(file: File) {
   const upload = result?.upload;
   const match = typeof upload?.preview?.src === "string" && /\?v=([a-f0-9]{16})$/.exec(upload.preview.src);
   if (!response.ok || !Number.isSafeInteger(upload?.id) || !match)
-    throw new Error(typeof result?.error === "string" ? result.error : "图片上传失败，请重新选择。");
+    throw new Error(typeof result?.error === "string" ? result.error : "图片上传失败，请重新选择。"); // i18n-exempt: server message, localized at display
   return { source: `asset:${upload.id}:${match[1]}`, preview: upload.preview.src, alt: "" };
 }
 
@@ -39,6 +41,8 @@ export function PublicationImagesEditor({
   readOnly?: boolean;
   allowReplace?: boolean;
 }) {
+  const t = useT();
+  const locale = useLocale();
   const id = useId();
   const [error, setError] = useState("");
   const [reading, setReading] = useState(false);
@@ -51,10 +55,10 @@ export function PublicationImagesEditor({
     if (files.some((file) =>
       !file.size || file.size > publicationImageBytes || !publicationImageTypes.includes(file.type)
     )) {
-      setError(`请选择 ${publicationImageMegabytes} MB 以内的 PNG、JPEG 或 WebP 图片。`);
+      setError(t(`请选择 ${publicationImageMegabytes} MB 以内的 PNG、JPEG 或 WebP 图片。`, `Choose PNG, JPEG or WebP images up to ${publicationImageMegabytes} MB.`));
       return;
     }
-    input.setCustomValidity("图片正在读取，请稍候。");
+    input.setCustomValidity(t("图片正在读取，请稍候。", "Reading images, please wait."));
     setReading(true);
     try {
       const sources: PublicationImage[] = [];
@@ -63,7 +67,7 @@ export function PublicationImagesEditor({
         ? [...images, ...sources]
         : images.map((image, index) => index === replaceIndex ? { ...image, ...sources[0], alt: image.alt } : image));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "图片上传失败，请重新选择。");
+      setError(cause instanceof Error ? cause.message : t("图片上传失败，请重新选择。", "Image upload failed. Choose again."));
     } finally {
       input.setCustomValidity("");
       setReading(false);
@@ -83,9 +87,12 @@ export function PublicationImagesEditor({
         onChange={(event) => void chooseImages(event.currentTarget)}
       />
       <small id={`${id}-hint`}>
-        PNG、JPEG、WebP，每张不超过 {publicationImageMegabytes} MB。已添加 {images.length} 张。
+        {t(
+          `PNG、JPEG、WebP，每张不超过 ${publicationImageMegabytes} MB。已添加 ${images.length} 张。`,
+          `PNG, JPEG or WebP, up to ${publicationImageMegabytes} MB each. ${images.length} added.`,
+        )}
       </small>
-      {error && <p role="alert">{error}</p>}
+      {error && <p role="alert">{localizeAccountMessage(error, locale)}</p>}
       {images.length > 0 && (
         <ol>
           {images.map((image, index) => {
@@ -95,9 +102,9 @@ export function PublicationImagesEditor({
               ));
             return (
               <li key={index}>
-                <img src={publicationPreview(image)} alt={image.alt || `第 ${index + 1} 张图片预览`} />
+                <img src={publicationPreview(image)} alt={image.alt || t(`第 ${index + 1} 张图片预览`, `Preview of image ${index + 1}`)} />
                 <label>
-                  第 {index + 1} 张图片说明（选填）
+                  {t(`第 ${index + 1} 张图片说明（选填）`, `Image ${index + 1} caption (optional)`)}
                   <input
                     value={image.alt}
                     maxLength={120}
@@ -107,7 +114,7 @@ export function PublicationImagesEditor({
                 </label>
                 {allowReplace && !readOnly && (
                   <label>
-                    更换第 {index + 1} 张图片
+                    {t(`更换第 ${index + 1} 张图片`, `Replace image ${index + 1}`)}
                     <input
                       type="file"
                       accept={publicationImageTypes.join(",")}
@@ -117,18 +124,18 @@ export function PublicationImagesEditor({
                 )}
                 {questions && (
                   <label>
-                    展示位置
+                    {t("展示位置", "Placement")}
                     <select
                       value={image.questionId ?? ""}
                       disabled={readOnly || reading}
                       onChange={(event) => update({ questionId: event.target.value || undefined })}
                     >
-                      <option value="">问卷说明</option>
+                      <option value="">{t("问卷说明", "Questionnaire intro")}</option>
                       {image.questionId && !questions.some(({ id }) => id === image.questionId) && (
-                        <option value={image.questionId}>原题目已移除</option>
+                        <option value={image.questionId}>{t("原题目已移除", "Original question removed")}</option>
                       )}
                       {questions.map(({ id, label }, position) => (
-                        <option key={id} value={id}>第 {position + 1} 题 · {label}</option>
+                        <option key={id} value={id}>{t(`第 ${position + 1} 题`, `Q${position + 1}`)} · {label}</option>
                       ))}
                     </select>
                   </label>
@@ -142,7 +149,7 @@ export function PublicationImagesEditor({
                       setError("");
                     }}
                   >
-                    移除第 {index + 1} 张图片
+                    {t(`移除第 ${index + 1} 张图片`, `Remove image ${index + 1}`)}
                   </button>
                 )}
               </li>

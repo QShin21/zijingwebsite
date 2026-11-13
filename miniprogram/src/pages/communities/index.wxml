@@ -3,22 +3,22 @@
 <view wx:if="{{campus}}" class="page mini-page zj-tab-page {{theme === 'dark' ? 'zj-dark' : ''}} {{palette === 'simple' ? 'communities-simple' : ''}}">
   <view class="page-heading {{scene ? 'page-heading-scenic' : ''}}">
     <zj-campus scene="{{scene}}" palette="{{palette}}" />
-    <text class="eyebrow">COMMUNITIES · 游戏社群</text>
-    <text class="title">找到同好，从这里开场</text>
-    <text class="subtitle">选择你玩的游戏，看看活动与风采，再联系管理员人工拉你进群。</text>
+    <text class="eyebrow">{{t.eyebrow}}</text>
+    <text class="title">{{t.title}}</text>
+    <text class="subtitle">{{t.subtitle}}</text>
   </view>
-  <template wx:if="{{!user}}" is="zj-login" data="{{title: '登录后查看游戏社群', body: '社群名片与活动仅向社团成员展示。'}}" />
+  <template wx:if="{{!user}}" is="zj-login" data="{{title: t.loginTitle, body: t.loginBody, t}}" />
   <block wx:else>
     <view class="search" role="search">
-      <input value="{{input}}" placeholder="搜索游戏名称或介绍" confirm-type="search" maxlength="80" bindinput="typing" bindconfirm="search" cursor-spacing="24" aria-label="搜索社群" />
-      <button class="primary" bindtap="search">查找</button>
+      <input value="{{input}}" placeholder="{{t.searchPlaceholder}}" confirm-type="search" maxlength="80" bindinput="typing" bindconfirm="search" cursor-spacing="24" aria-label="{{t.searchLabel}}" />
+      <button class="primary" bindtap="search">{{t.find}}</button>
     </view>
-    <view wx:if="{{q}}" class="row"><text class="result-caption">“{{q}}”的匹配结果 · {{total}} 个</text><button class="plain" bindtap="clear">全部社群</button></view>
-    <template wx:if="{{loading}}" is="zj-loading" />
-    <template wx:elif="{{error}}" is="zj-error" data="{{error}}" />
+    <view wx:if="{{q}}" class="row"><text class="result-caption">{{t.resultsPrefix}}{{q}}{{t.resultsMiddle}}{{total}}{{t.resultsSuffix}}</text><button class="plain" bindtap="clear">{{t.allCommunities}}</button></view>
+    <template wx:if="{{loading}}" is="zj-loading" data="{{t}}" />
+    <template wx:elif="{{error}}" is="zj-error" data="{{error, t}}" />
     <block wx:elif="{{docs.length}}">
       <view class="zj-grid2">
-        <view wx:for="{{docs}}" wx:key="key" class="zj-card zj-community" hover-class="zj-pressed" bindtap="openPage" data-page="{{item.page}}" data-params="{{item.params}}" aria-role="link" aria-label="{{item.title}}社群">
+        <view wx:for="{{docs}}" wx:key="key" class="zj-card zj-community" hover-class="zj-pressed" bindtap="openPage" data-page="{{item.page}}" data-params="{{item.params}}" aria-role="link" aria-label="{{item.title}}{{t.communitySuffix}}">
           <view class="zj-cover communities-cover">
             <view class="communities-icon" aria-hidden="true">
               <image wx:if="{{item.coverKey && img[item.coverKey]}}" class="communities-icon-image {{item.defaultIcon ? 'communities-icon-default' : ''}}" src="{{img[item.coverKey]}}" mode="aspectFit" lazy-load binderror="imageError" data-key="{{item.coverKey}}" data-url="{{img[item.coverKey]}}" />
@@ -29,18 +29,18 @@
             <text class="zj-card-title">{{item.title}}</text>
             <text wx:if="{{item.summary}}" class="zj-card-summary zj-clamp">{{item.summary}}</text>
             <text class="zj-small">{{item.facts}}</text>
-            <text wx:if="{{item.officer}}" class="zj-tag zj-tag-accent">我是管理员</text>
+            <text wx:if="{{item.officer}}" class="zj-tag zj-tag-accent">{{t.officer}}</text>
           </view>
         </view>
       </view>
       <text wx:if="{{loadMoreError && !loading}}" class="error">{{loadMoreError}}</text>
-      <button wx:if="{{hasMore || loadMoreError}}" class="secondary communities-more" bindtap="onReachBottom" disabled="{{loadingMore}}">{{loadingMore ? '加载中…' : (loadMoreError ? '重试加载更多' : '加载更多')}}</button>
+      <button wx:if="{{hasMore || loadMoreError}}" class="secondary communities-more" bindtap="onReachBottom" disabled="{{loadingMore}}">{{loadingMore ? t.loadingMore : (loadMoreError ? t.retryMore : t.loadMore)}}</button>
     </block>
-    <template wx:else is="zj-empty" data="{{title: q ? '没有找到匹配的社群' : '社群正在筹备', body: q ? '换一个游戏名称或关键词试试。' : '想组织新的游戏社群，可以提交组织申请。', icon: '🎮'}}" />
+    <template wx:else is="zj-empty" data="{{title: q ? t.noMatchTitle : t.emptyTitle, body: q ? t.noMatchBody : t.emptyBody, icon: '🎮'}}" />
     <view class="communities-organize">
-      <text class="communities-organize-title">把热爱的游戏，组织成社群</text>
-      <text class="zj-small communities-organize-body">参与已有社群的组织工作，或为还没出现的游戏发起申请。</text>
-      <button class="accent" bindtap="apply">申请成为社群管理员</button>
+      <text class="communities-organize-title">{{t.organizeTitle}}</text>
+      <text class="zj-small communities-organize-body">{{t.organizeBody}}</text>
+      <button class="accent" bindtap="apply">{{t.apply}}</button>
     </view>
   </block>
 </view>

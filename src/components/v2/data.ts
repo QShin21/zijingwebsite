@@ -7,6 +7,8 @@ import { cms } from "@/lib/content";
 import { canParticipate, canUseCampus } from "@/lib/rules";
 import { getSession } from "@/lib/v2";
 import type { Viewer } from "@/lib/v2";
+import { getLocale } from "@/lib/i18n/server";
+import { localizeView } from "@/lib/content-translation/localize";
 
 /**
  * Server-side bridge from V2 pages to the shared view functions in src/lib/v2.
@@ -63,7 +65,7 @@ export async function read<I, T>(reader: Reader<I, T>, input: I, path?: string, 
   const { payload, user } = await request();
   let failure: unknown;
   try {
-    return await reader(payload, user, input);
+    return await localizeView(await reader(payload, user, input), await getLocale());
   } catch (error) {
     failure = error;
   }
@@ -73,13 +75,15 @@ export async function read<I, T>(reader: Reader<I, T>, input: I, path?: string, 
     notFound();
   }
   if (status === 401) {
-    const target = new URLSearchParams({ message: "请登录后访问此栏目" });
+    const target = new URLSearchParams({ message: (await getLocale()) === "en" ? "Please sign in to view this section." : "请登录后访问此栏目" });
     if (path) target.set("returnTo", path);
     redirect(`/login?${target}`);
   }
   throw new ViewError(
     status,
-    status === 403 ? "当前账号无权查看此内容" : status === 400 ? "筛选条件无效，请调整后重试" : "内容暂时无法加载，请稍后重试",
+    (await getLocale()) === "en"
+      ? status === 403 ? "This account cannot view this content." : status === 400 ? "The filters are invalid. Adjust them and try again." : "This content could not be loaded. Please try again later."
+      : status === 403 ? "当前账号无权查看此内容" : status === 400 ? "筛选条件无效，请调整后重试" : "内容暂时无法加载，请稍后重试",
   );
 }
 
@@ -87,7 +91,7 @@ export async function read<I, T>(reader: Reader<I, T>, input: I, path?: string, 
 export async function readOptional<I, T>(reader: Reader<I, T>, input: I): Promise<T | null> {
   const { payload, user } = await request();
   try {
-    return await reader(payload, user, input);
+    return await localizeView(await reader(payload, user, input), await getLocale());
   } catch {
     return null;
   }

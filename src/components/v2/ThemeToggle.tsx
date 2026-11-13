@@ -3,12 +3,15 @@ import { useEffect, useId, useRef, useState } from "react";
 import { themeColors, themeCookieName, themeLabel, themes, themeScheme, type ThemeName } from "./theme";
 import { Icon } from "./Icon";
 import styles from "./Shell.module.css";
+import { useLocale, useT } from "@/components/i18n/LocaleProvider";
 
 /**
  * Four-palette menu (disclosure + pressed buttons). The server renders the stored choice;
  * switching only updates <html> attributes and the cookie, so forms in progress keep their input.
  */
 export function ThemeToggle({ initialTheme }: { initialTheme: ThemeName; compact?: boolean }) {
+  const locale = useLocale();
+  const t = useT();
   const [theme, setTheme] = useState(initialTheme);
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -62,13 +65,13 @@ export function ThemeToggle({ initialTheme }: { initialTheme: ThemeName; compact
         className={styles.iconButton}
         aria-expanded={open}
         aria-controls={menuId}
-        aria-label={`界面风格：${themeLabel(theme)}`}
+        aria-label={t(`界面风格：${themeLabel(theme)}`, `Theme: ${themeLabel(theme, locale)}`)}
         onClick={() => setOpen((value) => !value)}
       >
         <Icon name={themeScheme(theme) === "dark" ? "moon" : "sun"} size={18} />
-        <span className={styles.iconLabel}>{themeLabel(theme)}</span>
+        <span className={styles.iconLabel}>{themeLabel(theme, locale)}</span>
       </button>
-      <div id={menuId} className={styles.themeOptions} role="group" aria-label="选择界面风格" hidden={!open}>
+      <div id={menuId} className={styles.themeOptions} role="group" aria-label={t("选择界面风格", "Choose a theme")} hidden={!open}>
         {themes.map((entry) => (
           <button
             key={entry.name}
@@ -79,7 +82,7 @@ export function ThemeToggle({ initialTheme }: { initialTheme: ThemeName; compact
             onClick={() => choose(entry.name)}
           >
             <span className={styles.themeSwatch} aria-hidden="true" />
-            {entry.label}
+            {locale === "en" ? entry.labelEn : entry.label}
           </button>
         ))}
       </div>

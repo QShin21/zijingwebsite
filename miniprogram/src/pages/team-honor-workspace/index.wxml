@@ -4,58 +4,58 @@
   <view class="zj-hero">
     <view class="zj-stage-stripes"></view>
     <view class="zj-hero-inner">
-      <button class="zj-hero-back" bindtap="back">‹ 返回</button>
-      <text class="zj-hero-kicker">{{view === 'review' ? '社群管理 · 荣誉审核' : '队伍成果 · 本人记录'}}</text>
-      <text class="zj-hero-title">{{view === 'review' ? '荣誉审核工作台' : '我的荣誉投稿'}}</text>
-      <text class="zj-hero-lead">{{view === 'review' ? '核对本次文字与成果材料，再决定是否进入公开档案。' : '继续草稿、查看审核反馈，记录队伍的共同成果。'}}</text>
+      <button class="zj-hero-back" bindtap="back">{{t.back}}</button>
+      <text class="zj-hero-kicker">{{view === 'review' ? t.kickerReview : t.kickerMine}}</text>
+      <text class="zj-hero-title">{{view === 'review' ? t.titleReview : t.titleMine}}</text>
+      <text class="zj-hero-lead">{{view === 'review' ? t.leadReview : t.leadMine}}</text>
     </view>
   </view>
-  <template is="feedback" data="{{needsLogin}}" />
+  <template is="feedback" data="{{needsLogin,t}}" />
   <block wx:if="{{!needsLogin}}">
-    <view class="zj-segments" aria-role="tablist"><button class="zj-segment {{view === 'mine' ? 'active' : ''}}" bindtap="view" data-view="mine" disabled="{{busy || loading}}" aria-role="tab" aria-selected="{{view === 'mine'}}">我的记录</button><button wx:if="{{actions.review}}" class="zj-segment {{view === 'review' ? 'active' : ''}}" bindtap="view" data-view="review" disabled="{{busy || loading}}" aria-role="tab" aria-selected="{{view === 'review'}}">社群审核</button></view>
-    <view wx:if="{{view === 'mine' && actions.create && teams.length}}" class="honor-ws-create"><button class="accent" bindtap="create" disabled="{{busy || loading || !ready}}">＋ 新建荣誉投稿</button><text class="zj-form-hint">现任队员可投稿，由本社群其他有权限的管理员审核。</text></view>
-    <text wx:if="{{view === 'mine' && ready && !teams.length}}" class="zj-callout">当前暂无可投稿的有效队伍，本人历史记录仍保留。</text>
-    <text wx:if="{{busy}}" class="zj-callout">本次确认、读取或保存尚未结束，请稍候。</text>
-    <text wx:if="{{loading}}" class="zj-form-hint" aria-role="status">正在核对荣誉与操作权限…</text>
-    <view wx:if="{{error}}" class="zj-alert"><text class="zj-small">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{busy || loading}}">重新加载</button></view>
+    <view class="zj-segments" aria-role="tablist"><button class="zj-segment {{view === 'mine' ? 'active' : ''}}" bindtap="view" data-view="mine" disabled="{{busy || loading}}" aria-role="tab" aria-selected="{{view === 'mine'}}">{{t.tabMine}}</button><button wx:if="{{actions.review}}" class="zj-segment {{view === 'review' ? 'active' : ''}}" bindtap="view" data-view="review" disabled="{{busy || loading}}" aria-role="tab" aria-selected="{{view === 'review'}}">{{t.tabReview}}</button></view>
+    <view wx:if="{{view === 'mine' && actions.create && teams.length}}" class="honor-ws-create"><button class="accent" bindtap="create" disabled="{{busy || loading || !ready}}">{{t.create}}</button><text class="zj-form-hint">{{t.createHint}}</text></view>
+    <text wx:if="{{view === 'mine' && ready && !teams.length}}" class="zj-callout">{{t.noTeams}}</text>
+    <text wx:if="{{busy}}" class="zj-callout">{{t.busyNote}}</text>
+    <text wx:if="{{loading}}" class="zj-form-hint" aria-role="status">{{t.checking}}</text>
+    <view wx:if="{{error}}" class="zj-alert"><text class="zj-small">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{busy || loading}}">{{t.reload}}</button></view>
     <text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text>
     <text wx:if="{{message}}" class="zj-callout zj-callout-success" aria-role="status">{{message}}</text>
-    <view class="zj-section-head"><view><text class="zj-section-title">{{view === 'review' ? '当前授权范围的记录' : '投稿回执'}}</text><text wx:if="{{ready}}" class="zj-small">共 {{totalDocs}} 条，已加载至第 {{page}} 页</text></view><button class="plain zj-more" bindtap="retry" disabled="{{busy || loading}}">刷新核对</button></view>
+    <view class="zj-section-head"><view><text class="zj-section-title">{{view === 'review' ? t.scopeRecords : t.receipts}}</text><text wx:if="{{ready}}" class="zj-small">{{t.totalPrefix}}{{totalDocs}}{{t.totalMiddle}}{{page}}{{t.totalSuffix}}</text></view><button class="plain zj-more" bindtap="retry" disabled="{{busy || loading}}">{{t.refresh}}</button></view>
     <view wx:for="{{docs}}" wx:for-item="entry" wx:key="id" id="honor-record-{{entry.id}}" class="zj-record honor-ws-record {{detail && detail.id === entry.id ? 'honor-ws-open' : ''}}">
       <view class="honor-ws-head">
-        <view class="honor-ws-trophy"><text class="honor-ws-placing">{{entry.placing || '奖项待补充'}}</text><text class="honor-ws-date">{{entry.date || '日期待补充'}}</text></view>
+        <view class="honor-ws-trophy"><text class="honor-ws-placing">{{entry.placing || t.placingPending}}</text><text class="honor-ws-date">{{entry.date || t.datePending}}</text></view>
         <text class="zj-pill zj-pill-action">{{entry.statusText}}</text>
       </view>
       <text class="zj-record-title">{{entry.title}}</text>
-      <text class="zj-small">{{entry.competition || '赛事待补充'}}</text>
-      <view class="zj-tags"><text class="zj-tag zj-tag-line">队伍 {{entry.team}}</text><text class="zj-small">投稿 {{entry.id}}</text><text class="zj-small">修订 {{entry.revision}}</text></view>
-      <text class="zj-small">投稿人：{{entry.authorName}}</text>
-      <view wx:if="{{entry.reviewNote}}" class="zj-callout zj-callout-warning"><text class="honor-ws-label">处理反馈</text><text>{{entry.reviewNote}}</text></view>
-      <button wx:if="{{!detail || detail.id !== entry.id}}" class="secondary honor-ws-disclosure" bindtap="inspect" data-id="{{entry.id}}" disabled="{{busy || loading}}"><text>查看文字与本次证据</text><text>＋</text></button>
+      <text class="zj-small">{{entry.competition || t.competitionPending}}</text>
+      <view class="zj-tags"><text class="zj-tag zj-tag-line">{{t.teamPrefix}}{{entry.team}}</text><text class="zj-small">{{t.submissionPrefix}}{{entry.id}}</text><text class="zj-small">{{t.revisionPrefix}}{{entry.revision}}</text></view>
+      <text class="zj-small">{{t.authorPrefix}}{{entry.authorName}}</text>
+      <view wx:if="{{entry.reviewNote}}" class="zj-callout zj-callout-warning"><text class="honor-ws-label">{{t.feedback}}</text><text>{{entry.reviewNote}}</text></view>
+      <button wx:if="{{!detail || detail.id !== entry.id}}" class="secondary honor-ws-disclosure" bindtap="inspect" data-id="{{entry.id}}" disabled="{{busy || loading}}"><text>{{t.inspect}}</text><text>＋</text></button>
       <view wx:if="{{detail && detail.id === entry.id}}" class="honor-ws-detail">
-        <view class="zj-record-head"><text class="zj-sheet-title">本次审核材料</text><button class="plain" bindtap="closeDetail" disabled="{{busy}}">收起</button></view>
-        <text class="zj-form-hint">批准前仅本人及当前有权审核者可读；获批材料随荣誉档案公开。</text>
+        <view class="zj-record-head"><text class="zj-sheet-title">{{t.materials}}</text><button class="plain" bindtap="closeDetail" disabled="{{busy}}">{{t.collapse}}</button></view>
+        <text class="zj-form-hint">{{t.materialsHint}}</text>
         <text wx:if="{{detail.description}}" class="body" selectable>{{detail.description}}</text>
-        <text class="field-label">图片 {{entry.imageCount}} 份{{entry.hasVideo ? '，含视频' : ''}}</text>
+        <text class="field-label">{{t.imagesPrefix}}{{entry.imageCount}}{{t.imagesSuffix}}{{entry.hasVideo ? t.withVideo : ''}}</text>
         <view class="zj-gallery">
-          <view wx:for="{{detailImages}}" wx:key="index" class="honor-ws-evidence"><button class="image-button" hover-class="zj-pressed" wx:if="{{item.path}}" bindtap="previewEvidence" data-path="{{item.path}}" aria-label="{{item.caption || '荣誉证据图片'}}"><image class="zj-gallery-image" mode="aspectFill" src="{{item.path}}" aria-label="{{item.caption || '荣誉证据图片'}}" /></button><text class="zj-small">{{item.caption}}</text></view>
+          <view wx:for="{{detailImages}}" wx:key="index" class="honor-ws-evidence"><button class="image-button" hover-class="zj-pressed" wx:if="{{item.path}}" bindtap="previewEvidence" data-path="{{item.path}}" aria-label="{{item.caption || t.evidenceImage}}"><image class="zj-gallery-image" mode="aspectFill" src="{{item.path}}" aria-label="{{item.caption || t.evidenceImage}}" /></button><text class="zj-small">{{item.caption}}</text></view>
         </view>
         <text wx:if="{{imageError}}" class="zj-form-hint">{{imageError}}</text>
-        <button wx:if="{{detail.hasVideo}}" class="secondary" bindtap="viewVideo" disabled="{{busy || loading}}">读取本次视频证据</button>
-        <video wx:if="{{videoSource}}" id="honor-evidence" class="evidence-video" src="{{videoSource}}" controls autoplay="{{false}}" binderror="videoError" data-id="{{detail.id}}" data-revision="{{detail.revision}}" aria-label="本次荣誉视频证据" />
+        <button wx:if="{{detail.hasVideo}}" class="secondary" bindtap="viewVideo" disabled="{{busy || loading}}">{{t.readVideo}}</button>
+        <video wx:if="{{videoSource}}" id="honor-evidence" class="evidence-video" src="{{videoSource}}" controls autoplay="{{false}}" binderror="videoError" data-id="{{detail.id}}" data-revision="{{detail.revision}}" aria-label="{{t.videoLabel}}" />
         <text wx:if="{{videoError}}" class="error">{{videoError}}</text>
-        <button wx:if="{{detail.hasVideo}}" class="plain" bindtap="websiteEvidence" disabled="{{busy}}">复制网站证据页地址</button>
+        <button wx:if="{{detail.hasVideo}}" class="plain" bindtap="websiteEvidence" disabled="{{busy}}">{{t.copyWebsite}}</button>
         <view wx:if="{{entry.decisions.length || entry.actions.hide}}" class="honor-ws-decision">
-          <text class="zj-sheet-title">处理这份荣誉</text>
-          <text class="zj-form-hint">请核对本修订的材料与公开范围。批准后进入队伍荣誉档案，并显示在对应社群的荣誉索引中。</text>
-          <view class="field"><text class="field-label">处理说明</text><textarea cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{entry.noteDraft}}" maxlength="1000" bindinput="note" data-id="{{entry.id}}" placeholder="退回、拒绝或隐藏须说明原因" disabled="{{busy || loading || !ready}}" /></view>
-          <view class="actions"><button wx:for="{{entry.decisions}}" wx:key="action" class="{{item.action === 'approve' ? 'primary' : item.action === 'reject' ? 'danger' : 'secondary'}}" bindtap="perform" data-action="{{item.action}}" data-id="{{entry.id}}" disabled="{{busy || loading || !ready}}">{{item.label}}</button><button wx:if="{{entry.actions.hide}}" class="danger" bindtap="perform" data-action="hide" data-id="{{entry.id}}" disabled="{{busy || loading || !ready}}">隐藏荣誉</button></view>
+          <text class="zj-sheet-title">{{t.decide}}</text>
+          <text class="zj-form-hint">{{t.decideHint}}</text>
+          <view class="field"><text class="field-label">{{t.noteLabel}}</text><textarea cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{entry.noteDraft}}" maxlength="1000" bindinput="note" data-id="{{entry.id}}" placeholder="{{t.notePlaceholder}}" disabled="{{busy || loading || !ready}}" /></view>
+          <view class="actions"><button wx:for="{{entry.decisions}}" wx:key="action" class="{{item.action === 'approve' ? 'primary' : item.action === 'reject' ? 'danger' : 'secondary'}}" bindtap="perform" data-action="{{item.action}}" data-id="{{entry.id}}" disabled="{{busy || loading || !ready}}">{{item.label}}</button><button wx:if="{{entry.actions.hide}}" class="danger" bindtap="perform" data-action="hide" data-id="{{entry.id}}" disabled="{{busy || loading || !ready}}">{{t.hide}}</button></view>
         </view>
       </view>
-      <view wx:if="{{entry.actions.edit || entry.actions.withdraw}}" class="zj-record-actions"><button wx:if="{{entry.actions.edit}}" class="secondary" bindtap="edit" data-id="{{entry.id}}" disabled="{{busy || loading || !ready}}">{{entry.state === 'draft' ? '继续编辑草稿' : '修改 / 重新提交'}}</button><button wx:if="{{entry.actions.withdraw}}" class="danger" bindtap="perform" data-action="withdraw" data-id="{{entry.id}}" disabled="{{busy || loading || !ready}}">撤回投稿</button></view>
-      <text wx:if="{{!ready}}" class="zj-form-hint">当前回执只读，请重新加载核对操作。</text>
+      <view wx:if="{{entry.actions.edit || entry.actions.withdraw}}" class="zj-record-actions"><button wx:if="{{entry.actions.edit}}" class="secondary" bindtap="edit" data-id="{{entry.id}}" disabled="{{busy || loading || !ready}}">{{entry.state === 'draft' ? t.continueDraft : t.editResubmit}}</button><button wx:if="{{entry.actions.withdraw}}" class="danger" bindtap="perform" data-action="withdraw" data-id="{{entry.id}}" disabled="{{busy || loading || !ready}}">{{t.withdraw}}</button></view>
+      <text wx:if="{{!ready}}" class="zj-form-hint">{{t.readOnly}}</text>
     </view>
-    <view wx:if="{{!docs.length && ready && !loading}}" class="zj-empty"><text class="zj-empty-icon">🏆</text><text class="zj-empty-title">{{view === 'review' ? '当前范围暂无荣誉记录' : '尚无本人荣誉投稿'}}</text><text class="zj-small">{{view === 'review' ? '可刷新核对最新投稿与权限。' : '有可投稿的队伍时，可从上方新建一份荣誉。'}}</text></view>
-    <button wx:if="{{hasMore}}" class="secondary honor-ws-more" bindtap="onReachBottom" disabled="{{busy || loading || !ready}}">加载更多记录</button>
+    <view wx:if="{{!docs.length && ready && !loading}}" class="zj-empty"><text class="zj-empty-icon">🏆</text><text class="zj-empty-title">{{view === 'review' ? t.emptyReview : t.emptyMine}}</text><text class="zj-small">{{view === 'review' ? t.emptyReviewHint : t.emptyMineHint}}</text></view>
+    <button wx:if="{{hasMore}}" class="secondary honor-ws-more" bindtap="onReachBottom" disabled="{{busy || loading || !ready}}">{{t.loadMore}}</button>
   </block>
 </view>

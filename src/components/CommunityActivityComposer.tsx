@@ -11,7 +11,11 @@ import { SubmitButton } from "./SubmitButton";
 import { audiences, audienceLabels } from "@/lib/content-audience";
 import { ActionForm } from "./activity-pages/ActionForm";
 import { publishCommunityResultAction } from "@/app/(frontend)/community/actions";
+import { useLocale, useT } from "@/components/i18n/LocaleProvider";
+import { keyedLabel, audienceLabelsEn } from "@/lib/i18n/labels-account";
 export function CommunityActivityComposer({ game }: { game: number }) {
+  const t = useT();
+  const locale = useLocale();
   const [kind, setKind] = useState("event"),
     [signup, setSignup] = useState(emptySignup);
   const [postImages, setPostImages] = useState<PublicationImage[]>([]);
@@ -29,7 +33,7 @@ export function CommunityActivityComposer({ game }: { game: number }) {
   const [ready, setReady] = useState(false);
   useEffect(() => setReady(true), []);
   return (
-    <section aria-label="活动与通知发布表单">
+    <section aria-label={t("活动与通知发布表单", "Event and notice publishing form")}>
       <ActionForm
         action={publishCommunityResultAction}
         resetOnSuccess
@@ -47,41 +51,42 @@ export function CommunityActivityComposer({ game }: { game: number }) {
       >
         <fieldset className="composer-fields" disabled={!ready}>
           <input type="hidden" name="game" value={game} />
-          <section className={styles.formGroup} aria-label="内容与发布范围">
-            <h3>内容与发布范围</h3>
+          <section className={styles.formGroup} aria-label={t("内容与发布范围", "Content and audience")}>
+            <h3>{t("内容与发布范围", "Content and audience")}</h3>
             <label>
-              类型
+              {t("类型", "Type")}
               <select
                 name="kind"
                 value={kind}
                 onChange={(e) => setKind(e.target.value)}
               >
-                <option value="event">社群活动</option>
-                <option value="notice">社群通知</option>
+                <option value="event">{t("社群活动", "Community event")}</option>
+                <option value="notice">{t("社群通知", "Community notice")}</option>
               </select>
             </label>
             <label>
-              可见范围
+              {t("可见范围", "Visibility")}
               <select name="audience" defaultValue="campus">
-                {audiences.map(value => <option key={value} value={value}>{audienceLabels[value]}</option>)}
+                {audiences.map(value => <option key={value} value={value}>{keyedLabel(locale, value, audienceLabelsEn, audienceLabels[value])}</option>)}
               </select>
             </label>
             <label>
               <span>
-                标题<span aria-hidden="true">（必填）</span>
+                {t("标题", "Title")}
+                <span aria-hidden="true">{t("（必填）", " (required)")}</span>
               </span>
               <input name="title" maxLength={120} required />
             </label>
             <label>
-              内容形式
+              {t("内容形式", "Format")}
               <select name="contentMode" value={contentMode} onChange={event => setContentMode(event.target.value as "gallery" | "article")}>
-                <option value="gallery">图文（图片翻页）</option>
-                <option value="article">文章（图文混排）</option>
+                <option value="gallery">{t("图文（图片翻页）", "Text with image slides")}</option>
+                <option value="article">{t("文章（图文混排）", "Article (mixed text and images)")}</option>
               </select>
             </label>
             <div hidden={contentMode !== "gallery"}>
               <label>
-                <span>内容<span aria-hidden="true">（必填）</span></span>
+                <span>{t("内容", "Content")}<span aria-hidden="true">{t("（必填）", " (required)")}</span></span>
                 <textarea name="body" rows={8} maxLength={5000} required={contentMode === "gallery"} disabled={contentMode !== "gallery"} />
               </label>
             </div>
@@ -94,28 +99,28 @@ export function CommunityActivityComposer({ game }: { game: number }) {
               <>
                 <div className={styles.fieldPair}>
                   <label>
-                    <span>活动开始时间<span aria-hidden="true">（选填）</span></span>
+                    <span>{t("活动开始时间", "Start time")}<span aria-hidden="true">{t("（选填）", " (optional)")}</span></span>
                     <input type="datetime-local" name="startAt" value={startAt} onChange={(event) => setStartAt(event.target.value)} />
                   </label>
                   <label>
-                    <span>活动结束时间<span aria-hidden="true">（选填）</span></span>
+                    <span>{t("活动结束时间", "End time")}<span aria-hidden="true">{t("（选填）", " (optional)")}</span></span>
                     <input type="datetime-local" name="endAt" value={endAt} onChange={(event) => setEndAt(event.target.value)} />
                   </label>
                 </div>
-                <p>时间按北京时间填写；同时填写开始和结束时间时，结束时间需晚于开始时间。</p>
+                <p>{t("时间按北京时间填写；同时填写开始和结束时间时，结束时间需晚于开始时间。", "Use Beijing time. If both are set, the end must be after the start.")}</p>
                 <label>
-                  <span>活动地点<span aria-hidden="true">（选填）</span></span>
+                  <span>{t("活动地点", "Location")}<span aria-hidden="true">{t("（选填）", " (optional)")}</span></span>
                   <input name="location" maxLength={120} value={location} onChange={(event) => setLocation(event.target.value)} />
                 </label>
               </>
             )}
-            {contentMode === "gallery" && <PublicationImagesEditor label="正文配图" images={postImages} onChange={setPostImages} />}
+            {contentMode === "gallery" && <PublicationImagesEditor label={t("正文配图", "Body images")} images={postImages} onChange={setPostImages} />}
             <input type="hidden" name="postImages" value={JSON.stringify(publicationImageInput(contentMode === "article" ? articleImages : postImages))} />
           </section>
           {kind === "event" && (
-            <section className={styles.formGroup} aria-label="活动报名配置">
-              <h3>活动报名配置</h3>
-              <p>按活动实际需要启用问卷，报名和统计沿用当前活动。</p>
+            <section className={styles.formGroup} aria-label={t("活动报名配置", "Sign-up settings")}>
+              <h3>{t("活动报名配置", "Sign-up settings")}</h3>
+              <p>{t("按活动实际需要启用问卷，报名和统计沿用当前活动。", "Enable a questionnaire if the event needs one; sign-ups and stats stay with this event.")}</p>
               <SignupBuilder
                 value={signup}
                 onChange={setSignup}
@@ -134,9 +139,9 @@ export function CommunityActivityComposer({ game }: { game: number }) {
           )}
           <div className={styles.submitRow}>
             <SubmitButton className="button" disabled={articleBusy}>
-              {kind === "event" ? "发布社群活动" : "发布社群通知"}
+              {kind === "event" ? t("发布社群活动", "Publish community event") : t("发布社群通知", "Publish community notice")}
             </SubmitButton>
-            <p>内容将发布到当前游戏社群。</p>
+            <p>{t("内容将发布到当前游戏社群。", "This will be published to the current game community.")}</p>
           </div>
         </fieldset>
       </ActionForm>

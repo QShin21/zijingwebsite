@@ -2,6 +2,8 @@
 // presentation projections shared by the V2 pages. No business decisions here;
 // the server already applied identity, permission and publication rules.
 const http = require('./http');
+const i18n = (() => { try { const value = require('./i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { t: zh => zh, message: value => value, locale: () => 'zh' }; })();
+
 
 function query(values) {
   const parts = [];
@@ -19,7 +21,11 @@ function post(path, data) {
   return http.request('/api/v2/' + path, { method: 'POST', data, required: true });
 }
 
-const WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+const WEEK_ZH = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+const WEEK_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTH_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const en = () => i18n.locale() === 'en';
+const week = day => (en() ? WEEK_EN : WEEK_ZH)[day];
 const pad = value => (value < 10 ? '0' : '') + value;
 function beijing(iso) {
   if (!iso) return null;
@@ -27,16 +33,16 @@ function beijing(iso) {
   if (!Number.isFinite(time)) return null;
   const t = new Date(time + 8 * 3600 * 1000);
   const y = t.getUTCFullYear(), m = t.getUTCMonth() + 1, d = t.getUTCDate();
-  return { y, m, d, w: WEEK[t.getUTCDay()], hh: pad(t.getUTCHours()), mm: pad(t.getUTCMinutes()), key: y + '-' + pad(m) + '-' + pad(d) };
+  return { y, m, d, w: week(t.getUTCDay()), hh: pad(t.getUTCHours()), mm: pad(t.getUTCMinutes()), key: y + '-' + pad(m) + '-' + pad(d) };
 }
-function dayLabel(iso) { const p = beijing(iso); return p ? p.m + '月' + p.d + '日 ' + p.w : '时间待定'; }
-function dateText(iso) { const p = beijing(iso); return p ? p.y + '年' + p.m + '月' + p.d + '日' : ''; }
+function dayLabel(iso) { const p = beijing(iso); return p ? (en() ? p.w + ', ' + MONTH_EN[p.m - 1] + ' ' + p.d : p.m + '月' + p.d + '日 ' + p.w) : i18n.t('时间待定', 'Time TBA'); }
+function dateText(iso) { const p = beijing(iso); return p ? (en() ? MONTH_EN[p.m - 1] + ' ' + p.d + ', ' + p.y : p.y + '年' + p.m + '月' + p.d + '日') : ''; }
 function shortDate(iso) { const p = beijing(iso); return p ? p.m + '/' + p.d : ''; }
-function dateTime(iso) { const p = beijing(iso); return p ? p.m + '月' + p.d + '日 ' + p.hh + ':' + p.mm : ''; }
+function dateTime(iso) { const p = beijing(iso); return p ? (en() ? MONTH_EN[p.m - 1] + ' ' + p.d + ' ' : p.m + '月' + p.d + '日 ') + p.hh + ':' + p.mm : ''; }
 function range(start, end) {
   const a = beijing(start), b = beijing(end);
-  if (!a) return b ? dateTime(end) + ' 结束' : '时间待定';
-  if (!b) return a.hh + ':' + a.mm + ' 开始';
+  if (!a) return b ? dateTime(end) + i18n.t(' 结束', ' end') : i18n.t('时间待定', 'Time TBA');
+  if (!b) return a.hh + ':' + a.mm + i18n.t(' 开始', ' start');
   if (a.key === b.key) return a.hh + ':' + a.mm + '–' + b.hh + ':' + b.mm;
   return a.m + '/' + a.d + ' ' + a.hh + ':' + a.mm + ' – ' + b.m + '/' + b.d + ' ' + b.hh + ':' + b.mm;
 }
@@ -48,13 +54,13 @@ function daysUntil(iso) {
 function countdown(iso) {
   const days = daysUntil(iso);
   if (days === null || days < 0) return '';
-  return days === 0 ? '今天' : days === 1 ? '明天' : '还有 ' + days + ' 天';
+  return days === 0 ? i18n.t('今天', 'Today') : days === 1 ? i18n.t('明天', 'Tomorrow') : i18n.t('还有 ' + days + ' 天', 'In ' + days + ' days');
 }
 function deadline(iso) {
   const days = daysUntil(iso);
   if (days === null) return '';
-  if (days < 0) return shortDate(iso) + ' 已截止';
-  return days === 0 ? '今天截止' : shortDate(iso) + ' 截止 · 剩 ' + days + ' 天';
+  if (days < 0) return shortDate(iso) + i18n.t(' 已截止', ' closed');
+  return days === 0 ? i18n.t('今天截止', 'Closes today') : shortDate(iso) + i18n.t(' 截止 · 剩 ' + days + ' 天', ' deadline · ' + days + (days === 1 ? ' day left' : ' days left'));
 }
 function initial(title) { const text = String(title || '').trim(); return text ? text.charAt(0).toUpperCase() : '紫'; }
 function hue(value) { return Number.isFinite(value) ? value : 262; }
@@ -79,10 +85,10 @@ function event(card) {
     key: card.key, title: card.title, summary: card.summary || '',
     community: card.community ? card.community.title : '', hue: card.community ? hue(card.community.hue) : 262, club: !card.community,
     team: card.team ? card.team.title : '', category: card.category || '',
-    month: p ? p.m + '月' : '时间', day: p ? pad(p.d) : '待定', week: p ? p.w : '', dayKey: p ? p.key : 'tbd', dayLabel: dayLabel(card.startAt),
-    when: card.startAt ? range(card.startAt, card.endAt) : card.publishedAt ? '发布于 ' + dateText(card.publishedAt) : '时间待定',
+    month: p ? (en() ? MONTH_EN[p.m - 1] : p.m + '月') : i18n.t('时间', 'Time'), day: p ? pad(p.d) : i18n.t('待定', 'TBA'), week: p ? p.w : '', dayKey: p ? p.key : 'tbd', dayLabel: dayLabel(card.startAt),
+    when: card.startAt ? range(card.startAt, card.endAt) : card.publishedAt ? i18n.t('发布于 ', 'Published ') + dateText(card.publishedAt) : i18n.t('时间待定', 'Time TBA'),
     location: card.location || '', state: card.state, stateLabel: card.stateLabel, stateTone: eventTone[card.state] || 'neutral',
-    signupLabel: card.signup.mode === 'none' || !tone ? '' : card.signup.viewerSubmitted ? '已报名' : card.signup.label, signupTone: tone,
+    signupLabel: card.signup.mode === 'none' || !tone ? '' : card.signup.viewerSubmitted ? i18n.t('已报名', 'Signed up') : card.signup.label, signupTone: tone,
     soon: card.state === 'upcoming' ? countdown(card.startAt) : '',
     deadline: card.signup.state === 'open' && card.signup.deadline && !card.signup.viewerSubmitted ? deadline(card.signup.deadline) : '',
     promoted: card.promoted, demo: card.demo, ended: card.state === 'ended' || card.state === 'cancelled',
@@ -103,18 +109,18 @@ function article(card) {
     hue: card.community ? hue(card.community.hue) : 262, date: shortDate(card.publishedAt), dateText: dateText(card.publishedAt), promoted: card.promoted, demo: card.demo,
     coverSrc: card.cover ? card.cover.src : '', page: target.page, params: target.params };
 }
-const showcaseStatus = { visible: ['已展示', 'success'], pending: ['待审核', 'warning'], hidden: ['已隐藏', 'neutral'], rejected: ['已退回', 'danger'] };
+const showcaseStatus = { visible: ['已展示', 'success', 'Shown'], pending: ['待审核', 'warning', 'Pending review'], hidden: ['已隐藏', 'neutral', 'Hidden'], rejected: ['已退回', 'danger', 'Returned'] };
 function showcase(card) {
   const status = showcaseStatus[card.status] || ['', 'neutral'];
-  return { key: card.key, kind: 'showcase', label: '风采', title: card.title, community: card.community.title, hue: hue(card.community.hue), author: card.authorName,
-    date: shortDate(card.createdAt), dateText: dateText(card.createdAt), statusLabel: status[0], statusTone: status[1], status: card.status,
+  return { key: card.key, kind: 'showcase', label: i18n.t('风采', 'Showcase'), title: card.title, community: card.community.title, hue: hue(card.community.hue), author: card.authorName,
+    date: shortDate(card.createdAt), dateText: dateText(card.createdAt), statusLabel: i18n.t(status[0], status[2]), statusTone: status[1], status: card.status,
     count: card.images.length, video: Boolean(card.video), initial: initial(card.title),
     coverSrc: card.images[0] ? card.images[0].image.src : '', page: 'detail', params: { collection: 'community-showcase', id: card.id } };
 }
 function honor(card) {
-  return { key: card.key, kind: 'honor', label: '荣誉', title: card.title || card.competition, competition: card.competition, placing: card.placing || '荣誉',
-    team: card.team.title, teamID: card.team.id, hue: card.team.community ? hue(card.team.community.hue) : 262, date: card.date ? dateText(card.date) : '日期待补',
-    year: card.date ? card.date.substring(0, 4) : '日期待补', legacy: card.legacy, coverSrc: card.images[0] ? card.images[0].src : '',
+  return { key: card.key, kind: 'honor', label: i18n.t('荣誉', 'Honor'), title: card.title || card.competition, competition: card.competition, placing: card.placing || i18n.t('荣誉', 'Honor'),
+    team: card.team.title, teamID: card.team.id, hue: card.team.community ? hue(card.team.community.hue) : 262, date: card.date ? dateText(card.date) : i18n.t('日期待补', 'Date pending'),
+    year: card.date ? card.date.substring(0, 4) : i18n.t('日期待补', 'Date pending'), legacy: card.legacy, coverSrc: card.images[0] ? card.images[0].src : '',
     page: 'team-honors', params: { team: card.team.id } };
 }
 function feed(item) {
@@ -124,11 +130,11 @@ function feed(item) {
 }
 function community(card) {
   const counts = card.counts, facts = [];
-  if (counts.upcomingEvents > 0) facts.push('即将活动 ' + counts.upcomingEvents);
-  if (counts.teams > 0) facts.push('队伍 ' + counts.teams);
-  if (counts.showcase > 0) facts.push('风采 ' + counts.showcase);
+  if (counts.upcomingEvents > 0) facts.push(i18n.t('即将活动 ', 'Upcoming ') + counts.upcomingEvents);
+  if (counts.teams > 0) facts.push(i18n.t('队伍 ', 'Teams ') + counts.teams);
+  if (counts.showcase > 0) facts.push(i18n.t('风采 ', 'Showcase ') + counts.showcase);
   return { key: 'community:' + card.community.id, slug: card.community.slug, title: card.community.title, summary: card.summary || '', hue: hue(card.community.hue),
-    initial: initial(card.community.title), facts: facts.join(' · ') || '进入社群查看最新安排', officer: Boolean(card.viewer && card.viewer.isOfficer), demo: card.demo,
+    initial: initial(card.community.title), facts: facts.join(' · ') || i18n.t('进入社群查看最新安排', 'Open the community for the latest plans'), officer: Boolean(card.viewer && card.viewer.isOfficer), demo: card.demo,
     coverSrc: card.cover ? card.cover.src : '', page: 'community', params: { slug: card.community.slug } };
 }
 const teamTone = { active: 'success', resting: 'warning', archived: 'neutral', unestablished: 'info' };
@@ -142,9 +148,9 @@ function team(card) {
 }
 const callTone = { open: 'success', upcoming: 'info', closed: 'neutral' };
 function recruitment(card) {
-  return { key: card.key, kind: card.kind, kindLabel: card.kind === 'staff' ? '骨干招新' : '代表队选拔', title: card.title, summary: card.summary || '',
+  return { key: card.key, kind: card.kind, kindLabel: card.kind === 'staff' ? i18n.t('骨干招新', 'Staff recruitment') : i18n.t('代表队选拔', 'Team trials'), title: card.title, summary: card.summary || '',
     team: card.team ? card.team.title : '', hue: card.community ? hue(card.community.hue) : 262, stateLabel: card.stateLabel, stateTone: callTone[card.state] || 'neutral',
-    deadline: card.state === 'open' ? deadline(card.deadline) : card.state === 'upcoming' && card.opensAt ? dateTime(card.opensAt) + ' 开放' : '',
+    deadline: card.state === 'open' ? deadline(card.deadline) : card.state === 'upcoming' && card.opensAt ? dateTime(card.opensAt) + i18n.t(' 开放', ' opens') : '',
     mine: card.viewerApplication ? card.viewerApplication.statusLabel : '', page: 'signup', params: { kind: card.kind === 'staff' ? 'staff' : 'team', id: idOf(card.ref, card.key) } };
 }
 function application(item) {
@@ -173,7 +179,8 @@ function groupByDay(views) {
 function today(beijingDate) {
   const parts = String(beijingDate || '').split('-').map(Number);
   if (parts.length !== 3 || !parts[0]) return '';
-  return parts[1] + '月' + parts[2] + '日 ' + WEEK[new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])).getUTCDay()];
+  const day = week(new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])).getUTCDay());
+  return en() ? day + ', ' + MONTH_EN[parts[1] - 1] + ' ' + parts[2] : parts[1] + '月' + parts[2] + '日 ' + day;
 }
 module.exports = { get, post, query, beijing, dayLabel, dateText, dateTime, shortDate, range, countdown, deadline, initial,
   event, article, showcase, honor, feed, community, team, recruitment, application, receipt, groupByDay, today };

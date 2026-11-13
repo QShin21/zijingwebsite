@@ -6,11 +6,12 @@ import { Detail } from "@/components/Content";
 import { canSubmitClubContent } from "@/lib/rules";
 import { buttonClass } from "@/components/v2/ui";
 import work from "@/components/v2/work.module.css";
+import { getT } from "@/lib/i18n/server";
 export const dynamic = "force-dynamic";
-export const metadata = {
-  title: "内容预览",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata() {
+  const { t } = await getT();
+  return { title: t("内容预览", "Content preview"), robots: { index: false, follow: false } };
+}
 export default async function Preview({
   params,
 }: {
@@ -47,16 +48,20 @@ export default async function Preview({
     })
     .catch(() => null);
   if (!doc) notFound();
+  const { t } = await getT();
   return (
     <>
-      <aside className={work.previewBanner} aria-label="预览状态">
+      <aside className={work.previewBanner} aria-label={t("预览状态", "Preview status")}>
         <span className={work.previewBadge}>DRAFT</span>
         <p>
-          <strong>草稿预览 · 仅当前授权人员可见。</strong>
-          此页面用于核对内容，不代表已发布；公开列表继续读取已发布内容。
+          <strong>{t("草稿预览 · 仅当前授权人员可见。", "Draft preview · visible to authorized staff only.")}</strong>
+          {t(
+            "此页面用于核对内容，不代表已发布；公开列表继续读取已发布内容。",
+            "This page is for checking content and is not published; public lists still show published content.",
+          )}
         </p>
         <a className={buttonClass("ghost", "small")} href={`/admin/collections/${collection}/${id}`}>
-          返回内容编辑
+          {t("返回内容编辑", "Back to editor")}
         </a>
       </aside>
       <Detail doc={doc as unknown as Content} collection={collection} />

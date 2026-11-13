@@ -1,3 +1,4 @@
+const i18n = (() => { try { const value = require('./i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { t: zh => zh, message: value => value, locale: () => 'zh' }; })();
 const { safeURL } = require('./format');
 const session = require('./session');
 const tabs = ['home', 'events', 'communities', 'teams', 'account'];
@@ -15,7 +16,7 @@ function back() {
 }
 function requireUser() { if (session.user()) return true; login(); return false; }
 function content(doc) { go('detail', { collection: doc.collection, id: doc.id, slug: doc.slug || '' }); }
-function copy(value, label = '链接已复制') {
+function copy(value, label = i18n.t('链接已复制', 'Link copied')) {
   if (!value) return;
   wx.setClipboardData({ data: String(value), success() { wx.showToast({ title: label, icon: 'none' }); } });
 }
@@ -106,13 +107,13 @@ function website(path) {
     return go(match[2] ? 'detail' : 'list', { collection, ...(match[2] ? { slug: match[2] } : {}) });
   }
   // Any other site page has no native equivalent (old share links included): offer the web link.
-  if (/^\/(?!\/)/.test(path)) return copy(require('../config').origin + path, '请在网页端打开，链接已复制');
-  if (safeURL(path)) return copy(path, '链接已复制，可在浏览器打开');
+  if (/^\/(?!\/)/.test(path)) return copy(require('../config').origin + path, i18n.t('请在网页端打开，链接已复制', 'Open this on the website; link copied'));
+  if (safeURL(path)) return copy(path, i18n.t('链接已复制，可在浏览器打开', 'Link copied; open it in a browser'));
 }
 /** Server-declared destinations (ApplicationItem/TodoItem/ManageQueue): webOnly items are completed on the website. */
 function open(path, webOnly) {
   if (!path || typeof path !== 'string' || !/^\/(?!\/)/.test(path)) return;
-  if (webOnly === true) return copy(require('../config').origin + path, '请在网页端完成，链接已复制');
+  if (webOnly === true) return copy(require('../config').origin + path, i18n.t('请在网页端完成，链接已复制', 'Complete this on the website; link copied'));
   return website(path);
 }
 module.exports = { go, back, login, requireUser, content, copy, website, open };

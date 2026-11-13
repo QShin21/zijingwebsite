@@ -6,6 +6,7 @@ import { publicationAsset, publicationImageInput, type PublicationImage } from "
 import { PublicationImagesEditor } from "./PublicationImagesEditor";
 import { ActionForm } from "./activity-pages/ActionForm";
 import styles from "./community-pages/CommunityPages.module.css";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 export function CommunityPostImageEditor({
   id,
@@ -18,6 +19,7 @@ export function CommunityPostImageEditor({
   images: PublicationImage[];
   revision: string;
 }) {
+  const t = useT();
   const [draft, setDraft] = useState<{ images: PublicationImage[]; revision: string } | null>(null);
   const current = draft?.images ?? images.map((image, index) => {
     const asset = publicationAsset(image.source);
@@ -26,15 +28,15 @@ export function CommunityPostImageEditor({
 
   return (
     <details className={styles.disclosure}>
-      <summary>编辑配图</summary>
-      <p>补充、替换或移除正文图片，保存后同步更新展示。</p>
+      <summary>{t("编辑配图", "Edit images")}</summary>
+      <p>{t("补充、替换或移除正文图片，保存后同步更新展示。", "Add, replace or remove body images. Saving updates the display.")}</p>
       <ActionForm action={updateCommunityPostImagesAction} onSuccess={() => setDraft(null)}>
         <input type="hidden" name="id" value={id} />
         <input type="hidden" name="game" value={game} />
         <input type="hidden" name="revision" value={draft?.revision ?? revision} />
         <input type="hidden" name="postImages" value={JSON.stringify(publicationImageInput(current))} />
         <PublicationImagesEditor
-          label="正文配图"
+          label={t("正文配图", "Body images")}
           images={current}
           allowReplace
           onChange={(next) => setDraft((previous) => ({
@@ -42,10 +44,10 @@ export function CommunityPostImageEditor({
           }))}
         />
         <div className={styles.submitRow}>
-          <button className="button" type="submit" disabled={!draft}>保存配图</button>
+          <button className="button" type="submit" disabled={!draft}>{t("保存配图", "Save images")}</button>
           {draft && (
             <button className="button light" type="button" onClick={() => setDraft(null)}>
-              载入已保存配图
+              {t("载入已保存配图", "Reload saved images")}
             </button>
           )}
         </div>

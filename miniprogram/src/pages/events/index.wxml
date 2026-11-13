@@ -3,36 +3,36 @@
 <view class="page mini-page zj-tab-page {{theme === 'dark' ? 'zj-dark' : ''}}">
   <view class="page-heading {{scene ? 'page-heading-scenic' : ''}}">
     <zj-campus scene="{{scene}}" palette="{{palette}}" />
-    <text class="eyebrow">SCHEDULE · 日程</text>
-    <text class="title">日程</text>
-    <text class="subtitle">{{user ? '查看可参与的社团和社群活动。' : '浏览公开活动，登录后报名。'}}</text>
+    <text class="eyebrow">{{t.eyebrow}}</text>
+    <text class="title">{{t.title}}</text>
+    <text class="subtitle">{{user ? t.subtitleUser : t.subtitleGuest}}</text>
   </view>
   <view class="zj-segments" aria-role="tablist">
-    <button class="zj-segment {{scope === 'all' ? 'active' : ''}}" bindtap="setScope" data-scope="all" aria-selected="{{scope === 'all'}}">全部</button>
-    <button class="zj-segment {{scope === 'club' ? 'active' : ''}}" bindtap="setScope" data-scope="club" aria-selected="{{scope === 'club'}}">社团</button>
-    <button class="zj-segment {{scope === 'community' ? 'active' : ''}}" bindtap="setScope" data-scope="community" aria-selected="{{scope === 'community'}}">社群</button>
-    <button class="zj-segment {{scope === 'mine' ? 'active' : ''}}" bindtap="setScope" data-scope="mine" aria-selected="{{scope === 'mine'}}">已报名</button>
+    <button class="zj-segment {{scope === 'all' ? 'active' : ''}}" bindtap="setScope" data-scope="all" aria-selected="{{scope === 'all'}}">{{t.scopeAll}}</button>
+    <button class="zj-segment {{scope === 'club' ? 'active' : ''}}" bindtap="setScope" data-scope="club" aria-selected="{{scope === 'club'}}">{{t.scopeClub}}</button>
+    <button class="zj-segment {{scope === 'community' ? 'active' : ''}}" bindtap="setScope" data-scope="community" aria-selected="{{scope === 'community'}}">{{t.scopeCommunity}}</button>
+    <button class="zj-segment {{scope === 'mine' ? 'active' : ''}}" bindtap="setScope" data-scope="mine" aria-selected="{{scope === 'mine'}}">{{t.scopeMine}}</button>
   </view>
   <view class="chips">
-    <view class="events-range-group" aria-role="radiogroup" aria-label="活动时间">
-      <button class="chip {{range === 'upcoming' ? 'active' : ''}}" bindtap="setRange" data-range="upcoming" aria-role="radio" aria-checked="{{range === 'upcoming'}}" aria-label="即将开始，{{range === 'upcoming' ? '已选中' : '未选中'}}">即将开始</button>
-      <button class="chip {{range === 'past' ? 'active' : ''}}" bindtap="setRange" data-range="past" aria-role="radio" aria-checked="{{range === 'past'}}" aria-label="已结束，{{range === 'past' ? '已选中' : '未选中'}}">已结束</button>
+    <view class="events-range-group" aria-role="radiogroup" aria-label="{{t.rangeLabel}}">
+      <button class="chip {{range === 'upcoming' ? 'active' : ''}}" bindtap="setRange" data-range="upcoming" aria-role="radio" aria-checked="{{range === 'upcoming'}}" aria-label="{{t.upcoming}}{{range === 'upcoming' ? t.selectedSuffix : t.unselectedSuffix}}">{{t.upcoming}}</button>
+      <button class="chip {{range === 'past' ? 'active' : ''}}" bindtap="setRange" data-range="past" aria-role="radio" aria-checked="{{range === 'past'}}" aria-label="{{t.past}}{{range === 'past' ? t.selectedSuffix : t.unselectedSuffix}}">{{t.past}}</button>
     </view>
-    <button class="chip {{signupOpen ? 'active' : ''}}" bindtap="toggleSignupOpen" aria-role="checkbox" aria-checked="{{signupOpen}}" disabled="{{loading}}">可报名</button>
+    <button class="chip {{signupOpen ? 'active' : ''}}" bindtap="toggleSignupOpen" aria-role="checkbox" aria-checked="{{signupOpen}}" disabled="{{loading}}">{{t.signupOpen}}</button>
   </view>
-  <template wx:if="{{loading}}" is="zj-loading" />
+  <template wx:if="{{loading}}" is="zj-loading" data="{{t}}" />
   <view wx:elif="{{error}}">
-    <template is="zj-error" data="{{error}}" />
-    <button wx:if="{{needsLogin}}" class="primary" bindtap="login">登录后查看</button>
+    <template is="zj-error" data="{{error, t}}" />
+    <button wx:if="{{needsLogin}}" class="primary" bindtap="login">{{t.loginToView}}</button>
   </view>
   <block wx:elif="{{groups.length}}">
     <view wx:for="{{groups}}" wx:for-item="group" wx:key="key">
       <view class="zj-day-head"><text>{{group.label}}</text></view>
-      <block wx:for="{{group.items}}" wx:key="key"><template is="zj-match" data="{{item, img}}" /></block>
+      <block wx:for="{{group.items}}" wx:key="key"><template is="zj-match" data="{{item, img, t}}" /></block>
     </view>
     <text wx:if="{{loadMoreError && !loading}}" class="error">{{loadMoreError}}</text>
-    <button wx:if="{{hasMore || loadMoreError}}" class="secondary zj-more-button" bindtap="onReachBottom" disabled="{{loadingMore}}">{{loadingMore ? '加载中…' : (loadMoreError ? '重试加载更多' : '加载更多')}}</button>
+    <button wx:if="{{hasMore || loadMoreError}}" class="secondary zj-more-button" bindtap="onReachBottom" disabled="{{loadingMore}}">{{loadingMore ? t.loadingMore : (loadMoreError ? t.retryMore : t.loadMore)}}</button>
   </block>
-  <template wx:elif="{{scope === 'mine'}}" is="zj-empty" data="{{title: '还没有报名记录', body: '报名开放的活动会标注「报名开放」。', icon: '🎫', action: '查看全部活动', page: 'events'}}" />
-  <template wx:else is="zj-empty" data="{{title: range === 'past' ? '暂无已结束的活动' : '近期暂无安排', body: '新的活动确认后会出现在这里。', icon: '📅'}}" />
+  <template wx:elif="{{scope === 'mine'}}" is="zj-empty" data="{{title: t.mineEmptyTitle, body: t.mineEmptyBody, icon: '🎫', action: t.mineEmptyAction, page: 'events'}}" />
+  <template wx:else is="zj-empty" data="{{title: range === 'past' ? t.pastEmptyTitle : t.upcomingEmptyTitle, body: t.emptyBody, icon: '📅'}}" />
 </view>

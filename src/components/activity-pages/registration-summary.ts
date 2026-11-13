@@ -20,6 +20,7 @@ export function registrationSummary(doc: Content) {
     dates.sort((left, right) => Date.parse(left) - Date.parse(right));
     return { state: signupState(form, doc), deadline: dates[0] || "" };
   } catch {
+    // i18n-exempt: Chinese state value compared by callers; localized at display
     return { state: "查看报名说明", deadline: doc.registrationEnd || "" };
   }
 }

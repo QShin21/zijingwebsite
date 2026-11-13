@@ -4,62 +4,62 @@
   <view class="zj-hero">
     <view class="zj-stage-stripes"></view>
     <view class="zj-hero-inner">
-      <button class="zj-hero-back" bindtap="back">‹ 返回</button>
-      <text class="zj-hero-kicker">REVIEW · 审核台</text>
-      <text class="zj-hero-title">管理员申请审核</text>
-      <text class="zj-hero-lead">核对社群计划、申请资料与名片展示同意，再保存审核决定。</text>
-      <view wx:if="{{allowed && docs.length}}" class="zj-hero-meta"><text class="zj-pill zj-pill-live">{{docs.length}} 条</text><text>只显示当前有权处理的记录</text></view>
+      <button class="zj-hero-back" bindtap="back">{{t.back}}</button>
+      <text class="zj-hero-kicker">{{t.kicker}}</text>
+      <text class="zj-hero-title">{{t.heroTitle}}</text>
+      <text class="zj-hero-lead">{{t.heroLead}}</text>
+      <view wx:if="{{allowed && docs.length}}" class="zj-hero-meta"><text class="zj-pill zj-pill-live">{{docs.length}}{{t.countSuffix}}</text><text>{{t.scopeNote}}</text></view>
     </view>
   </view>
-  <template is="feedback" data="{{needsLogin}}" />
-  <view wx:if="{{loading}}" class="zj-skeleton" aria-role="status" aria-label="正在核对权限与待审申请"><view wx:if="{{!docs.length}}" class="zj-skeleton-row"><view class="zj-skeleton-date"></view><view class="zj-skeleton-lines"><view></view><view></view><view></view></view></view></view>
-  <view wx:if="{{!needsLogin && !allowed && !loading && !error}}" class="zj-empty"><text class="zj-empty-icon">🔒</text><text class="zj-empty-title">当前账号没有此管理权限</text><text class="zj-small">审核入口按当前账号的实际授权开放。</text><button class="secondary" bindtap="retry">重新核对权限</button></view>
-  <view wx:if="{{error}}" class="zj-alert"><text class="zj-small" aria-role="alert">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{loading || busy}}">重新加载</button></view>
+  <template is="feedback" data="{{needsLogin,t}}" />
+  <view wx:if="{{loading}}" class="zj-skeleton" aria-role="status" aria-label="{{t.checking}}"><view wx:if="{{!docs.length}}" class="zj-skeleton-row"><view class="zj-skeleton-date"></view><view class="zj-skeleton-lines"><view></view><view></view><view></view></view></view></view>
+  <view wx:if="{{!needsLogin && !allowed && !loading && !error}}" class="zj-empty"><text class="zj-empty-icon">🔒</text><text class="zj-empty-title">{{t.noPermission}}</text><text class="zj-small">{{t.noPermissionBody}}</text><button class="secondary" bindtap="retry">{{t.recheck}}</button></view>
+  <view wx:if="{{error}}" class="zj-alert"><text class="zj-small" aria-role="alert">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{loading || busy}}">{{t.reload}}</button></view>
   <text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text>
-  <view wx:if="{{done}}" class="zj-callout zj-callout-success" aria-role="status"><text class="review-done">{{done}}</text><text wx:if="{{error}}">已确认的处理结果保留在下方，刷新后再核对最新列表。</text></view>
+  <view wx:if="{{done}}" class="zj-callout zj-callout-success" aria-role="status"><text class="review-done">{{done}}</text><text wx:if="{{error}}">{{t.doneKept}}</text></view>
 
   <block wx:if="{{allowed && !needsLogin}}">
-    <view class="zj-section-head"><view><text class="zj-section-title">{{done ? '申请与处理回执' : '待审申请'}}</text><text class="zj-small">只显示当前有权处理的记录。</text></view><button class="plain zj-more" bindtap="retry" disabled="{{loading || busy}}">刷新核对</button></view>
-    <text wx:if="{{busy}}" class="zj-form-hint" aria-role="status">正在确认或保存本次决定，请稍候。</text>
+    <view class="zj-section-head"><view><text class="zj-section-title">{{done ? t.receiptsTitle : t.pendingTitle}}</text><text class="zj-small">{{t.scopeNoteFull}}</text></view><button class="plain zj-more" bindtap="retry" disabled="{{loading || busy}}">{{t.refresh}}</button></view>
+    <text wx:if="{{busy}}" class="zj-form-hint" aria-role="status">{{t.saving}}</text>
     <view wx:for="{{docs}}" wx:key="id" class="zj-record review-record {{expandedId === item.id ? 'review-open' : ''}}">
       <view class="zj-record-head"><text class="zj-pill zj-pill-{{item.status === 'pending' ? 'info' : item.status === 'approved' ? 'success' : item.status === 'returned' ? 'warning' : 'neutral'}}">{{item.statusText}}</text><text class="zj-small">{{item.dateText}}</text></view>
-      <text class="zj-record-title">{{item.proposedGame || item.game.title || '游戏社群申请'}}</text>
-      <view class="zj-tags"><text class="zj-small">申请人 {{item.realName}}</text><text class="zj-small">回执 {{item.id}}</text></view>
-      <text class="zj-pill {{item.contactConsent === true ? 'zj-pill-success' : 'zj-pill-warning'}}">{{item.contactConsent === true ? '已取得本人名片展示同意' : '需由申请人补充名片展示同意'}}</text>
-      <button class="plain review-disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy || imageBusy}}" aria-expanded="{{expandedId === item.id}}"><text>{{expandedId === item.id ? '收起申请材料' : item.actions.review ? '核对材料与处理' : '查看申请材料'}}</text><text aria-hidden="true">{{expandedId === item.id ? '−' : '＋'}}</text></button>
+      <text class="zj-record-title">{{item.proposedGame || item.game.title || t.gameFallback}}</text>
+      <view class="zj-tags"><text class="zj-small">{{t.applicantPrefix}}{{item.realName}}</text><text class="zj-small">{{t.receiptPrefix}}{{item.id}}</text></view>
+      <text class="zj-pill {{item.contactConsent === true ? 'zj-pill-success' : 'zj-pill-warning'}}">{{item.contactConsent === true ? t.consentYes : t.consentNo}}</text>
+      <button class="plain review-disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy || imageBusy}}" aria-expanded="{{expandedId === item.id}}"><text>{{expandedId === item.id ? t.collapse : item.actions.review ? t.checkAndHandle : t.viewMaterials}}</text><text aria-hidden="true">{{expandedId === item.id ? '−' : '＋'}}</text></button>
 
       <view wx:if="{{expandedId === item.id}}" class="review-materials">
         <view class="review-block">
-          <text class="field-label">组织计划</text><text class="body" selectable>{{item.reason}}</text>
+          <text class="field-label">{{t.plan}}</text><text class="body" selectable>{{item.reason}}</text>
           <view class="zj-kv">
-            <view class="zj-kv-row"><text class="zj-kv-label">申请人</text><text class="zj-kv-value" selectable>{{item.realName}}</text></view>
-            <view class="zj-kv-row"><text class="zj-kv-label">手机号</text><text class="zj-kv-value" selectable>{{item.phone}}</text></view>
+            <view class="zj-kv-row"><text class="zj-kv-label">{{t.applicant}}</text><text class="zj-kv-value" selectable>{{item.realName}}</text></view>
+            <view class="zj-kv-row"><text class="zj-kv-label">{{t.phone}}</text><text class="zj-kv-value" selectable>{{item.phone}}</text></view>
           </view>
         </view>
         <view class="review-block">
-          <text class="field-label">进群名片与本人同意</text>
-          <text class="zj-small">{{item.contactConsent === true ? '申请人已同意展示微信名片作为进群联系方式。' : '申请人尚未同意展示微信名片。'}}</text>
-          <text wx:if="{{item.contactConsent !== true}}" class="error" aria-role="alert">申请人尚未同意展示管理联系方式，请退回由本人补充同意后重新提交。</text>
-          <button wx:if="{{item.actions.review}}" class="secondary" bindtap="inspect" data-id="{{item.id}}" disabled="{{busy || imageBusy}}" loading="{{imageBusy}}">{{imageBusy ? '正在读取名片…' : '查看微信名片二维码'}}</button>
+          <text class="field-label">{{t.cardConsent}}</text>
+          <text class="zj-small">{{item.contactConsent === true ? t.consentAgreed : t.consentMissing}}</text>
+          <text wx:if="{{item.contactConsent !== true}}" class="error" aria-role="alert">{{t.consentRequired}}</text>
+          <button wx:if="{{item.actions.review}}" class="secondary" bindtap="inspect" data-id="{{item.id}}" disabled="{{busy || imageBusy}}" loading="{{imageBusy}}">{{imageBusy ? t.readingCard : t.viewCard}}</button>
         </view>
         <view wx:if="{{item.actions.review}}" class="review-decision">
-          <text class="zj-sheet-title">保存审核决定</text>
-          <text class="zj-form-hint">意见会显示在申请人的回执中。批准后开放社群任职，微信群仍需人工建立与拉群。</text>
+          <text class="zj-sheet-title">{{t.saveDecision}}</text>
+          <text class="zj-form-hint">{{t.decisionHint}}</text>
           <view class="field">
-            <text class="field-label">处理意见</text>
-            <textarea cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{item.reviewDraft}}" bindinput="note" data-id="{{item.id}}" maxlength="1000" placeholder="写明需要补充的资料或处理原因" disabled="{{busy}}" />
-            <text class="zj-form-hint">退回补充或拒绝时，请填写具体原因。最多 1000 字。</text>
+            <text class="field-label">{{t.note}}</text>
+            <textarea cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{item.reviewDraft}}" bindinput="note" data-id="{{item.id}}" maxlength="1000" placeholder="{{t.notePlaceholder}}" disabled="{{busy}}" />
+            <text class="zj-form-hint">{{t.noteHint}}</text>
           </view>
           <view class="actions" wx:if="{{item.actions.review}}">
-            <button wx:if="{{item.contactConsent === true}}" class="primary" bindtap="decide" data-id="{{item.id}}" data-decision="approved" disabled="{{busy || imageBusy || loading}}">批准申请</button>
-            <button class="secondary" bindtap="decide" data-id="{{item.id}}" data-decision="returned" disabled="{{busy || imageBusy || loading}}">退回补充</button>
-            <button class="danger" bindtap="decide" data-id="{{item.id}}" data-decision="rejected" disabled="{{busy || imageBusy || loading}}">拒绝申请</button>
+            <button wx:if="{{item.contactConsent === true}}" class="primary" bindtap="decide" data-id="{{item.id}}" data-decision="approved" disabled="{{busy || imageBusy || loading}}">{{t.approve}}</button>
+            <button class="secondary" bindtap="decide" data-id="{{item.id}}" data-decision="returned" disabled="{{busy || imageBusy || loading}}">{{t.returnIt}}</button>
+            <button class="danger" bindtap="decide" data-id="{{item.id}}" data-decision="rejected" disabled="{{busy || imageBusy || loading}}">{{t.reject}}</button>
           </view>
         </view>
-        <view wx:else class="review-block"><text wx:if="{{item.reviewNote}}" class="body" selectable>{{item.reviewNote}}</text><text class="zj-form-hint">当前没有可执行的审核操作。请刷新核对最新状态。</text></view>
+        <view wx:else class="review-block"><text wx:if="{{item.reviewNote}}" class="body" selectable>{{item.reviewNote}}</text><text class="zj-form-hint">{{t.noActions}}</text></view>
       </view>
     </view>
-    <view wx:if="{{!docs.length && !loading && !error}}" class="zj-empty"><text class="zj-empty-icon">✓</text><text class="zj-empty-title">没有待审核申请</text><text class="zj-small">新申请提交后会出现在当前授权范围内。</text></view>
-    <button wx:if="{{hasMore}}" class="secondary review-more" bindtap="onReachBottom" disabled="{{loading || busy}}" loading="{{loading}}">加载更多申请</button>
+    <view wx:if="{{!docs.length && !loading && !error}}" class="zj-empty"><text class="zj-empty-icon">✓</text><text class="zj-empty-title">{{t.emptyTitle}}</text><text class="zj-small">{{t.emptyBody}}</text></view>
+    <button wx:if="{{hasMore}}" class="secondary review-more" bindtap="onReachBottom" disabled="{{loading || busy}}" loading="{{loading}}">{{t.more}}</button>
   </block>
 </view>

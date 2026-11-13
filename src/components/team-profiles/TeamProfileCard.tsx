@@ -2,6 +2,7 @@ import {
   safeTeamProfileAvatar,
   type TeamProfileDraft,
 } from "@/lib/team-profiles-model";
+import { useT } from "@/components/i18n/LocaleProvider";
 import styles from "./TeamProfiles.module.css";
 
 export function TeamProfileCard({
@@ -9,6 +10,7 @@ export function TeamProfileCard({
 }: {
   profile: Omit<TeamProfileDraft, "visible">;
 }) {
+  const t = useT();
   return (
     <article className={styles.card}>
       {safeTeamProfileAvatar(profile.avatar) ? (
@@ -22,11 +24,11 @@ export function TeamProfileCard({
         />
       ) : (
         <span className={styles.placeholder} aria-hidden="true">
-          {profile.displayName.slice(0, 1) || "队"}
+          {profile.displayName.slice(0, 1) || t("队", "P")}
         </span>
       )}
       <div className={styles.cardText}>
-        <h3>{profile.displayName || "公开昵称"}</h3>
+        <h3>{profile.displayName || t("公开昵称", "Public nickname")}</h3>
         {profile.position && (
           <p className={styles.position}>{profile.position}</p>
         )}

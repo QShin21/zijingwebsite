@@ -6,7 +6,7 @@
 <template name="native-date">
   <view class="zj-date {{date.known ? '' : 'zj-date-ended'}}" aria-label="{{date.label}}">
     <block wx:if="{{date.known}}"><text class="zj-date-month">{{date.month}}</text><text class="zj-date-day">{{date.day}}</text><text class="zj-date-week">{{date.year}}</text></block>
-    <block wx:else><text class="zj-date-month">时间</text><text class="zj-date-tbd">待公布</text></block>
+    <block wx:else><text class="zj-date-month">{{t.cTime}}</text><text class="zj-date-tbd">{{t.cTba}}</text></block>
   </view>
 </template>
 
@@ -14,29 +14,29 @@
   <view class="zj-list">
     <block wx:for="{{docs}}" wx:key="id">
       <view class="zj-match {{featured && index === 0 ? 'zj-match-featured' : ''}}" hover-class="zj-pressed" bindtap="openContent" data-doc="{{item}}" aria-role="link" aria-label="{{item.title}}">
-        <template is="native-date" data="{{date:item.nativeDate}}" />
+        <template is="native-date" data="{{date:item.nativeDate,t}}" />
         <view class="zj-match-body">
           <view class="zj-tags">
             <text wx:if="{{item.kindText}}" class="zj-tag zj-tag-club">{{item.kindText}}</text>
             <text wx:if="{{item.game.title && !compact}}" class="zj-tag zj-tag-line">{{item.game.title}}</text>
-            <text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">演示资料</text>
+            <text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">{{t.cDemo}}</text>
           </view>
           <text class="zj-match-title">{{item.title}}</text>
-          <text wx:if="{{item.nativeDate.known}}" class="zj-match-meta">{{item.nativeDate.weekday}} {{item.nativeDate.time}} 开始<block wx:if="{{item.location && !compact}}"> · {{item.location}}</block></text>
+          <text wx:if="{{item.nativeDate.known}}" class="zj-match-meta">{{item.nativeDate.weekday}} {{item.nativeDate.time}}{{t.cStartsSuffix}}<block wx:if="{{item.location && !compact}}"> · {{item.location}}</block></text>
           <view class="zj-tags">
             <text wx:if="{{item.statusText}}" class="zj-pill zj-pill-action">{{item.statusText}}</text>
             <text wx:if="{{item.nativeChannel && !compact}}" class="zj-small">{{item.nativeChannel}}</text>
           </view>
-          <text wx:if="{{item.nativeDeadline && !compact}}" class="zj-small">报名截止 {{item.nativeDeadline}}</text>
-          <text wx:if="{{item.nativeEnd && !compact}}" class="zj-small">结束 {{item.nativeEnd}}</text>
+          <text wx:if="{{item.nativeDeadline && !compact}}" class="zj-small">{{t.cDeadlinePrefix}}{{item.nativeDeadline}}</text>
+          <text wx:if="{{item.nativeEnd && !compact}}" class="zj-small">{{t.cEndPrefix}}{{item.nativeEnd}}</text>
           <image wx:if="{{!compact && item.coverImage && !item.nativeCoverError}}" class="zj-match-cover" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt || item.title}}" binderror="nativeCoverError" data-id="{{item.id}}" data-collection="{{item.collection}}" data-url="{{item.coverImage.url}}" />
-          <text wx:if="{{item.coverImage && item.nativeCoverError}}" class="zj-small">封面暂时无法显示，仍可查看详情。</text>
+          <text wx:if="{{item.coverImage && item.nativeCoverError}}" class="zj-small">{{t.cCoverFallback}}</text>
           <text wx:if="{{item.coverImage.credit && !compact}}" class="zj-credit">{{item.coverImage.credit}}</text>
         </view>
       </view>
-      <template wx:if="{{featured && index === 0 && showNotices}}" is="home-notices" data="{{announcements}}" />
+      <template wx:if="{{featured && index === 0 && showNotices}}" is="home-notices" data="{{announcements,t}}" />
     </block>
-    <view wx:if="{{!docs.length}}" class="zj-empty"><text class="zj-empty-icon">📅</text><text class="zj-empty-title">{{emptyTitle || '活动日程正在准备'}}</text><text class="zj-small">{{emptyHint || '新活动发布后会出现在这里，也可先去寻找游戏社群。'}}</text></view>
+    <view wx:if="{{!docs.length}}" class="zj-empty"><text class="zj-empty-icon">📅</text><text class="zj-empty-title">{{emptyTitle || t.cEventsEmptyTitle}}</text><text class="zj-small">{{emptyHint || t.cEventsEmptyHint}}</text></view>
   </view>
 </template>
 
@@ -44,36 +44,36 @@
   <view class="zj-panel">
     <view wx:for="{{docs}}" wx:key="id" class="zj-notice" hover-class="zj-pressed" bindtap="openContent" data-doc="{{item}}" aria-role="link" aria-label="{{item.title}}">
       <view class="zj-notice-main">
-        <view class="zj-tags"><text wx:if="{{item.dateText}}" class="zj-small">{{item.dateText}}</text><text wx:if="{{item.kindText}}" class="zj-kind">{{item.kindText}}</text><text wx:if="{{item.statusText}}" class="zj-pill zj-pill-action">{{item.statusText}}</text><text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">演示资料</text></view>
+        <view class="zj-tags"><text wx:if="{{item.dateText}}" class="zj-small">{{item.dateText}}</text><text wx:if="{{item.kindText}}" class="zj-kind">{{item.kindText}}</text><text wx:if="{{item.statusText}}" class="zj-pill zj-pill-action">{{item.statusText}}</text><text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">{{t.cDemo}}</text></view>
         <text class="zj-notice-title">{{item.title}}</text>
         <text wx:if="{{item.placing}}" class="zj-placing-inline">{{item.placing}}</text>
         <text wx:if="{{!compact && item.summary}}" class="zj-card-summary zj-clamp">{{item.summary}}</text>
-        <text wx:if="{{item.nativeCoverError}}" class="zj-small">封面暂时无法显示，仍可查看详情。</text>
+        <text wx:if="{{item.nativeCoverError}}" class="zj-small">{{t.cCoverFallback}}</text>
       </view>
       <image wx:if="{{item.coverImage && !item.nativeCoverError && item.collection !== 'honors'}}" class="zj-card-thumb" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt || item.title}}" binderror="nativeCoverError" data-id="{{item.id}}" data-collection="{{item.collection}}" data-url="{{item.coverImage.url}}" />
       <text wx:else class="zj-arrow">›</text>
     </view>
-    <view wx:if="{{!docs.length}}" class="zj-empty zj-empty-flat"><text class="zj-empty-title">{{emptyTitle || '暂无已发布内容'}}</text><text class="zj-small">{{emptyHint || '新内容发布后会出现在这里，可稍后下拉刷新。'}}</text></view>
+    <view wx:if="{{!docs.length}}" class="zj-empty zj-empty-flat"><text class="zj-empty-title">{{emptyTitle || t.cEmptyTitle}}</text><text class="zj-small">{{emptyHint || t.cEmptyHint}}</text></view>
   </view>
 </template>
 
 <template name="native-promotions">
   <view class="zj-list">
     <view wx:for="{{docs}}" wx:key="sourceKey" class="zj-call zj-promotion" hover-class="zj-pressed" bindtap="openWebsite" data-url="{{item.href}}" aria-role="link" aria-label="{{item.snapshot.title}}">
-      <view class="zj-tags"><text class="zj-tag zj-tag-accent">精选</text><text class="zj-kind">{{item.gameTitle}}</text><text wx:if="{{item.kindText}}" class="zj-small">{{item.kindText}}</text></view>
+      <view class="zj-tags"><text class="zj-tag zj-tag-accent">{{t.cFeatured}}</text><text class="zj-kind">{{item.gameTitle}}</text><text wx:if="{{item.kindText}}" class="zj-small">{{item.kindText}}</text></view>
       <text class="zj-card-title">{{item.snapshot.title}}</text>
       <text wx:if="{{!compact && item.snapshot.body}}" class="zj-card-summary zj-clamp">{{item.snapshot.body}}</text>
-      <text class="zj-card-action">查看社群原文 ›</text>
+      <text class="zj-card-action">{{t.cOpenCommunityPost}} ›</text>
     </view>
   </view>
 </template>
 
 <template name="home-notices">
   <view class="zj-section">
-    <view class="zj-section-head"><text class="zj-section-title">社团通知</text><text class="zj-more" bindtap="openModule" data-kind="announcements" aria-role="link">全部通知 ›</text></view>
+    <view class="zj-section-head"><text class="zj-section-title">{{t.cNotices}}</text><text class="zj-more" bindtap="openModule" data-kind="announcements" aria-role="link">{{t.cAllNotices}} ›</text></view>
     <view class="zj-panel">
       <view wx:for="{{announcements}}" wx:key="id" class="zj-notice" hover-class="zj-pressed" bindtap="openContent" data-doc="{{item}}" aria-role="link" aria-label="{{item.title}}"><text class="zj-notice-date">{{item.dateText}}</text><view class="zj-notice-main"><text class="zj-notice-title">{{item.title}}</text></view><text class="zj-arrow">›</text></view>
-      <text wx:if="{{!announcements.length}}" class="zj-small zj-pad">暂时没有新通知。</text>
+      <text wx:if="{{!announcements.length}}" class="zj-small zj-pad">{{t.cNoNotices}}</text>
     </view>
   </view>
 </template>

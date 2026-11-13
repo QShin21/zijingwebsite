@@ -16,6 +16,8 @@ import {
 } from "@/lib/community-icon-shared";
 import { updateCommunityIcon } from "@/app/(frontend)/community/[slug]/appearance/actions";
 import styles from "./CommunityIconEditor.module.css";
+import { useLocale, useT } from "@/components/i18n/LocaleProvider";
+import { localizeAccountMessage } from "@/lib/i18n/messages-account";
 
 type EditorState = {
   title: string;
@@ -32,6 +34,8 @@ export function CommunityIconEditor({
   slug: string;
   initial: EditorState;
 }) {
+  const t = useT();
+  const locale = useLocale();
   const router = useRouter();
   const [source, setSource] = useState(initial.source);
   const [crop, setCrop] = useState(initial.crop);
@@ -66,7 +70,7 @@ export function CommunityIconEditor({
     };
     image.onerror = () => {
       if (active) {
-        setError("图片无法读取，请重新选择");
+        setError(t("图片无法读取，请重新选择", "The image cannot be read. Choose another."));
         setDimensions({ width: 0, height: 0 });
         setLoading(false);
       }
@@ -75,7 +79,7 @@ export function CommunityIconEditor({
     return () => {
       active = false;
     };
-  }, [source]);
+  }, [source, t]);
 
   function changeCrop(next: IconCrop) {
     setCrop(next);
@@ -90,7 +94,7 @@ export function CommunityIconEditor({
       !communityIconTypes.includes(file.type) ||
       file.size > communityIconMaxBytes
     ) {
-      setError("请选择 4 MB 以内的 PNG、JPEG 或 WebP 图片");
+      setError(t("请选择 4 MB 以内的 PNG、JPEG 或 WebP 图片", "Choose a PNG, JPEG or WebP image up to 4 MB."));
       return;
     }
     setLoading(true);
@@ -107,7 +111,7 @@ export function CommunityIconEditor({
       setIsNew(true);
       setDirty(true);
     } catch {
-      setError("读取图片失败，请重新选择");
+      setError(t("读取图片失败，请重新选择", "Failed to read the image. Choose again."));
       setLoading(false);
     }
   }
@@ -179,10 +183,10 @@ export function CommunityIconEditor({
       setRevision(result.revision);
       setIsNew(false);
       setDirty(false);
-      setMessage("社群图标已保存，卡片和社群页已更新。");
+      setMessage(t("社群图标已保存，卡片和社群页已更新。", "Community icon saved. Cards and the community page are updated."));
       router.refresh();
     } catch {
-      setError("保存失败，请检查网络后重试。当前裁切已保留。");
+      setError(t("保存失败，请检查网络后重试。当前裁切已保留。", "Save failed. Check your network and try again; your crop is kept."));
     } finally {
       setBusy(false);
     }
@@ -194,7 +198,7 @@ export function CommunityIconEditor({
   return (
     <div className={styles.editor} aria-busy={busy}>
       <label className={styles.fileLabel}>
-        选择游戏图标
+        {t("选择游戏图标", "Choose game icon")}
         <input
           type="file"
           accept={communityIconTypes.join(",")}
@@ -206,13 +210,16 @@ export function CommunityIconEditor({
         />
       </label>
       <p id="icon-help" className={styles.help}>
-        拖动图片调整位置，也可使用下方滑块。裁切框内为最终显示范围。
+        {t(
+          "拖动图片调整位置，也可使用下方滑块。裁切框内为最终显示范围。",
+          "Drag the image or use the sliders below. The crop frame shows the final display area.",
+        )}
       </p>
       <div className={styles.workspace}>
         <div
           className={styles.crop}
           role="img"
-          aria-label="图标裁切预览"
+          aria-label={t("图标裁切预览", "Icon crop preview")}
           aria-describedby="icon-help"
           onPointerDown={pointerDown}
           onPointerMove={pointerMove}
@@ -227,26 +234,27 @@ export function CommunityIconEditor({
           }}
         >
           {image ?? (
-            <span>{loading ? "正在读取图片…" : "选择图片后开始裁切"}</span>
+            <span>{loading ? t("正在读取图片…", "Reading image…") : t("选择图片后开始裁切", "Choose an image to start cropping")}</span>
           )}
           {image && <span className={styles.grid} aria-hidden="true" />}
         </div>
         <div className={styles.controls}>
           <div className={styles.previewRow}>
-            <span className={styles.preview} role="img" aria-label="缩略图预览">
+            <span className={styles.preview} role="img" aria-label={t("缩略图预览", "Thumbnail preview")}>
               {image}
             </span>
             <span>
               <strong>{initial.title}</strong>
-              <span className={styles.help}>社群图标预览</span>
+              <span className={styles.help}>{t("社群图标预览", "Community icon preview")}</span>
             </span>
           </div>
           <fieldset disabled={busy || loading || !image}>
-            <legend>裁切调整</legend>
+            <legend>{t("裁切调整", "Crop")}</legend>
             <label>
-              放大 <output>{crop.zoom.toFixed(2)} 倍</output>
+              {t("放大", "Zoom")}{" "}
+              <output>{t(`${crop.zoom.toFixed(2)} 倍`, `${crop.zoom.toFixed(2)}×`)}</output>
               <input
-                aria-label="放大"
+                aria-label={t("放大", "Zoom")}
                 type="range"
                 min="1"
                 max="4"
@@ -258,9 +266,9 @@ export function CommunityIconEditor({
               />
             </label>
             <label>
-              水平位置 <output>{Math.round(crop.x)}%</output>
+              {t("水平位置", "Horizontal")} <output>{Math.round(crop.x)}%</output>
               <input
-                aria-label="水平位置"
+                aria-label={t("水平位置", "Horizontal")}
                 type="range"
                 min="0"
                 max="100"
@@ -272,9 +280,9 @@ export function CommunityIconEditor({
               />
             </label>
             <label>
-              垂直位置 <output>{Math.round(crop.y)}%</output>
+              {t("垂直位置", "Vertical")} <output>{Math.round(crop.y)}%</output>
               <input
-                aria-label="垂直位置"
+                aria-label={t("垂直位置", "Vertical")}
                 type="range"
                 min="0"
                 max="100"
@@ -290,19 +298,19 @@ export function CommunityIconEditor({
               className={styles.secondary}
               onClick={() => changeCrop(defaultIconCrop)}
             >
-              重置裁切
+              {t("重置裁切", "Reset crop")}
             </button>
           </fieldset>
         </div>
       </div>
       <label className={styles.credit}>
-        图片来源（选填）
+        {t("图片来源（选填）", "Image source (optional)")}
         <input
           type="text"
           maxLength={200}
           value={credit}
           disabled={busy}
-          placeholder="如：游戏官网、社群自制"
+          placeholder={t("如：游戏官网、社群自制", "e.g. official game site, made by the community")}
           onChange={(e) => {
             setCredit(e.target.value);
             setDirty(true);
@@ -312,11 +320,11 @@ export function CommunityIconEditor({
       </label>
       {error && (
         <p role="alert" className={styles.error}>
-          {error}
+          {localizeAccountMessage(error, locale)}
         </p>
       )}
       <p role="status" className={styles.help}>
-        {message || (dirty ? "调整尚未保存" : "")}
+        {message || (dirty ? t("调整尚未保存", "Changes not saved yet") : "")}
       </p>
       <button
         type="button"
@@ -324,7 +332,7 @@ export function CommunityIconEditor({
         onClick={save}
         disabled={busy || loading || !image || !dirty}
       >
-        {busy ? "正在保存…" : "保存社群图标"}
+        {busy ? t("正在保存…", "Saving…") : t("保存社群图标", "Save community icon")}
       </button>
     </div>
   );

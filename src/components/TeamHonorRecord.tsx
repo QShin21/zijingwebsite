@@ -1,14 +1,27 @@
 import Link from "next/link";
 import type { TeamHonorRecord as HonorRecord } from "@/payload-types";
 import type { HonorImage } from "@/lib/team-honor-model";
-import { honorLabels } from "@/lib/team-honor-model";
+import { honorLabels, type HonorState } from "@/lib/team-honor-model";
+import { translator, type Locale } from "@/lib/i18n/locale";
 import { changeTeamHonorResultAction } from "@/app/(frontend)/teams/honors/actions";
 import { SubmitButton } from "./SubmitButton";
 import { ActionForm } from "./activity-pages/ActionForm";
 import { teamHonorQuery } from "./TeamHonorNavigation";
 import styles from "./team-pages/TeamPages.module.css";
 
+const honorLabelsEn: Record<HonorState, string> = {
+  draft: "Draft",
+  pending: "Pending review",
+  withdrawn: "Withdrawn",
+  returned: "Returned for changes",
+  rejected: "Rejected",
+  approved: "Approved",
+  hidden: "Hidden",
+};
+
+// Synchronous leaf: the calling server page passes its locale.
 export function TeamHonorRecordCard({
+  locale = "zh",
   record,
   reviewer = false,
   owner = false,
@@ -24,7 +37,9 @@ export function TeamHonorRecordCard({
   returnQuery?: string;
   headingLevel?: "h2" | "h3";
   compact?: boolean;
+  locale?: Locale;
 }) {
+  const t = translator(locale);
   const images = Array.isArray(record.images)
     ? (record.images as unknown as HonorImage[])
     : [];
@@ -40,67 +55,67 @@ export function TeamHonorRecordCard({
       <header className={styles.honorTitle}>
         <div>
           <p className={styles.recordDate}>
-            投稿人：{record.authorName}；修订 {record.revision}
+            {t(`投稿人：${record.authorName}；修订 ${record.revision}`, `Submitted by ${record.authorName}; revision ${record.revision}`)}
           </p>
           <Heading>
             <Link href={detailHref}>{record.title}</Link>
           </Heading>
         </div>
         <span className={styles.status} data-state={record.state}>
-          {honorLabels[record.state]}
+          {t(honorLabels[record.state], honorLabelsEn[record.state as HonorState])}
         </span>
       </header>
       <dl className={styles.facts}>
         <div>
-          <dt>赛事</dt>
-          <dd>{record.competition || "待补充"}</dd>
+          <dt>{t("赛事", "Competition")}</dt>
+          <dd>{record.competition || t("待补充", "To be added")}</dd>
         </div>
         <div>
-          <dt>奖项或名次</dt>
-          <dd>{record.placing || "待补充"}</dd>
+          <dt>{t("奖项或名次", "Award or placing")}</dt>
+          <dd>{record.placing || t("待补充", "To be added")}</dd>
         </div>
         <div>
-          <dt>赛事日期</dt>
+          <dt>{t("赛事日期", "Competition date")}</dt>
           <dd>
             {record.date ? (
               <time dateTime={record.date.slice(0, 10)}>
                 {record.date.slice(0, 10)}
               </time>
             ) : (
-              "待补充"
+              t("待补充", "To be added")
             )}
           </dd>
         </div>
       </dl>
       {record.reviewNote && (
         <div className={styles.note}>
-          <SectionHeading>审核说明</SectionHeading>
+          <SectionHeading>{t("审核说明", "Review note")}</SectionHeading>
           <p className="preserve">{record.reviewNote}</p>
         </div>
       )}
       {owner && !editable && (
         <p className={styles.muted}>
-          当前有效入队关系已结束或队伍未开放。历史荣誉仍保留，新的修改请联系负责人。
+          {t("当前有效入队关系已结束或队伍未开放。历史荣誉仍保留，新的修改请联系负责人。", "Your active team membership has ended or the team is closed. Past honors are kept; contact the team lead for new changes.")}
         </p>
       )}
       <details className={styles.disclosure} open={!compact}>
         <summary>
-          {canAct ? "查看材料与处理" : "查看投稿材料"}
+          {canAct ? t("查看材料与处理", "View materials and act") : t("查看投稿材料", "View submitted materials")}
           {images.length > 0
-            ? `（${images.length} 份图片${record.videoURL ? "及视频" : ""}）`
+            ? t(`（${images.length} 份图片${record.videoURL ? "及视频" : ""}）`, ` (${images.length} image${images.length === 1 ? "" : "s"}${record.videoURL ? " and video" : ""})`)
             : record.videoURL
-              ? "（视频）"
+              ? t("（视频）", " (video)")
               : ""}
         </summary>
         <div className={canAct ? styles.reviewGrid : undefined}>
           <div className={styles.reviewContent}>
-            <SectionHeading>成果说明</SectionHeading>
+            <SectionHeading>{t("成果说明", "Achievement description")}</SectionHeading>
             <p className="preserve">
-              {record.description || "尚未填写成果说明。"}
+              {record.description || t("尚未填写成果说明。", "No description yet.")}
             </p>
             {(images.length > 0 || record.videoURL) && (
               <p className={styles.muted}>
-                投稿材料在审核前仅本人和有权限的审核者可见。
+                {t("投稿材料在审核前仅本人和有权限的审核者可见。", "Until review, materials are visible only to you and authorized reviewers.")}
               </p>
             )}
             {images.length > 0 && (
@@ -109,7 +124,7 @@ export function TeamHonorRecordCard({
                   <figure key={index}>
                     <img
                       src={image.source}
-                      alt={image.caption || "荣誉证据 " + (index + 1)}
+                      alt={image.caption || t("荣誉证据 " + (index + 1), "Honor evidence " + (index + 1))}
                       width={800}
                       height={600}
                       loading="lazy"
@@ -131,7 +146,7 @@ export function TeamHonorRecordCard({
                   "/video?revision=" +
                   record.revision
                 }
-                aria-label="荣誉视频证据"
+                aria-label={t("荣誉视频证据", "Honor video evidence")}
               />
             )}
           </div>
@@ -139,8 +154,8 @@ export function TeamHonorRecordCard({
             <div className={styles.reviewAction}>
               <SectionHeading>
                 {reviewer && record.state === "pending"
-                  ? "审核这项荣誉"
-                  : "记录操作"}
+                  ? t("审核这项荣誉", "Review this honor")
+                  : t("记录操作", "Record actions")}
               </SectionHeading>
               <ActionForm
                 action={changeTeamHonorResultAction}
@@ -157,46 +172,46 @@ export function TeamHonorRecordCard({
                 {reviewer && record.state === "pending" && (
                   <>
                     <p>
-                      核对赛事、成绩与材料后处理。批准后更新同一队伍荣誉档案，并置顶到所属社群风采。
+                      {t("核对赛事、成绩与材料后处理。批准后更新同一队伍荣誉档案，并置顶到所属社群风采。", "Check the competition, result and materials before acting. Approval updates the team's honor archive and pins it to the community showcase.")}
                     </p>
                     <label>
-                      审核说明（退回或拒绝必填）
+                      {t("审核说明（退回或拒绝必填）", "Review note (required to return or reject)")}
                       <textarea name="note" maxLength={1000} rows={4} />
                     </label>
                     <div className={styles.actions}>
                       <SubmitButton name="action" value="approve">
-                        批准荣誉
+                        {t("批准荣誉", "Approve honor")}
                       </SubmitButton>
                       <SubmitButton
                         className="button light"
                         name="action"
                         value="return"
                       >
-                        退回修改
+                        {t("退回修改", "Return for changes")}
                       </SubmitButton>
                       <SubmitButton
                         className="button light"
                         name="action"
                         value="reject"
                       >
-                        拒绝荣誉
+                        {t("拒绝荣誉", "Reject honor")}
                       </SubmitButton>
                     </div>
                   </>
                 )}
                 {owner && editable && record.state === "pending" && (
                   <>
-                    <p>撤回后可继续补充材料，再提交审核。</p>
+                    <p>{t("撤回后可继续补充材料，再提交审核。", "After withdrawing, you can add materials and resubmit for review.")}</p>
                     <SubmitButton name="action" value="withdraw">
-                      撤回待审记录
+                      {t("撤回待审记录", "Withdraw pending submission")}
                     </SubmitButton>
                   </>
                 )}
                 {record.state === "approved" && (
                   <>
-                    <p>隐藏后，当前公开档案将不再展示这项荣誉。</p>
+                    <p>{t("隐藏后，当前公开档案将不再展示这项荣誉。", "Once hidden, this honor no longer appears in the public archive.")}</p>
                     <label>
-                      隐藏说明
+                      {t("隐藏说明", "Reason for hiding")}
                       <textarea
                         name="note"
                         maxLength={1000}
@@ -209,7 +224,7 @@ export function TeamHonorRecordCard({
                       name="action"
                       value="hide"
                     >
-                      隐藏荣誉
+                      {t("隐藏荣誉", "Hide honor")}
                     </SubmitButton>
                   </>
                 )}
@@ -217,12 +232,12 @@ export function TeamHonorRecordCard({
                   editable &&
                   !["pending", "approved"].includes(record.state) && (
                     <Link href={detailHref + "#honor-editor"}>
-                      补充或修改投稿
+                      {t("补充或修改投稿", "Add to or edit submission")}
                     </Link>
                   )}
                 {reviewer &&
                   !["pending", "approved"].includes(record.state) && (
-                    <p>当前记录暂无可执行的审核操作。</p>
+                    <p>{t("当前记录暂无可执行的审核操作。", "No review actions are available for this record.")}</p>
                   )}
               </ActionForm>
             </div>
@@ -232,7 +247,7 @@ export function TeamHonorRecordCard({
       {compact && (
         <div className={styles.actions}>
           <Link href={detailHref}>
-            {owner && editable ? "打开记录 / 修改投稿" : "打开完整记录"}
+            {owner && editable ? t("打开记录 / 修改投稿", "Open record / edit submission") : t("打开完整记录", "Open full record")}
           </Link>
         </div>
       )}

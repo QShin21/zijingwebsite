@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { getT } from "@/lib/i18n/server";
 export const teamPage = (value?: string) =>
   Math.max(1, Math.min(10000, Math.floor(Number(value) || 1)));
-export function TeamCorePagination({
+export async function TeamCorePagination({
   page,
   total,
   path,
@@ -17,6 +18,7 @@ export function TeamCorePagination({
   label: string;
 }) {
   if (total <= 1) return null;
+  const { t } = await getT();
   const href = (next: number) => {
     const params = new URLSearchParams(
       Object.entries(query).filter(
@@ -27,12 +29,10 @@ export function TeamCorePagination({
     return `${path}?${params}`;
   };
   return (
-    <nav className="pagination" aria-label={`${label}分页`}>
-      {page > 1 && <Link href={href(page - 1)}>上一页{label}</Link>}
-      <span>
-        第 {page} / {total} 页
-      </span>
-      {page < total && <Link href={href(page + 1)}>下一页{label}</Link>}
+    <nav className="pagination" aria-label={t(`${label}分页`, `${label} pages`)}>
+      {page > 1 && <Link href={href(page - 1)}>{t(`上一页${label}`, `Previous ${label}`)}</Link>}
+      <span>{t(`第 ${page} / ${total} 页`, `Page ${page} of ${total}`)}</span>
+      {page < total && <Link href={href(page + 1)}>{t(`下一页${label}`, `Next ${label}`)}</Link>}
     </nav>
   );
 }

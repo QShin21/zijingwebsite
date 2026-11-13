@@ -6,10 +6,15 @@ import { CommunityTile } from "@/components/v2/cards";
 import { empty } from "@/components/v2/copy";
 import layout from "@/components/v2/layout.module.css";
 import styles from "@/components/v2/community.module.css";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata = { title: "游戏社群" };
+export async function generateMetadata() {
+  const { t } = await getT();
+  return { title: t("游戏社群", "Game communities") };
+}
 
 export default async function Communities({ searchParams }: { searchParams: Search }) {
+  const { t } = await getT();
   const search = await searchParams;
   const q = (single(search.q) ?? "").trim().slice(0, 80);
   const page = pageNumber(search.page);
@@ -18,33 +23,33 @@ export default async function Communities({ searchParams }: { searchParams: Sear
     <>
       <PageHero
         tone="stage"
-        eyebrow="COMMUNITIES · 游戏社群"
-        title="找到同好，从这里开场"
-        description="游戏社群是紫荆的日常据点。找到你玩的游戏，看看活动与风采，再联系管理员人工拉你进群。"
+        eyebrow={t("COMMUNITIES · 游戏社群", "COMMUNITIES")}
+        title={t("找到同好，从这里开场", "Find your people and start here")}
+        description={t("游戏社群是紫荆的日常据点。找到你玩的游戏，看看活动与风采，再联系管理员人工拉你进群。", "Game communities are where Zijing gathers day to day. Find your game, browse its events and showcase, then contact an admin to be added to the group.")}
         actions={
           <ButtonLink href="/community/apply" tone="stage" icon="plus">
-            申请组织社群
+            {t("申请组织社群", "Apply to organize a community")}
           </ButtonLink>
         }
       />
       <Wrap className={layout.pageBody}>
         <form action="/community" method="get" role="search" className={styles.search}>
           <label htmlFor="community-search" className="sr-only">
-            按游戏或社群名称查找
+            {t("按游戏或社群名称查找", "Search by game or community name")}
           </label>
-          <input id="community-search" name="q" type="search" defaultValue={q} maxLength={80} placeholder="搜索游戏名称或介绍关键词" />
+          <input id="community-search" name="q" type="search" defaultValue={q} maxLength={80} placeholder={t("搜索游戏名称或介绍关键词", "Search game names or keywords")} />
           <button className="button" type="submit">
-            查找社群
+            {t("查找社群", "Search")}
           </button>
           {q && (
             <Link className="button light" href="/community">
-              全部社群
+              {t("全部社群", "All communities")}
             </Link>
           )}
         </form>
         <p className={layout.resultMeta}>
           <span>
-            {q ? `“${q}”的匹配结果` : "已开放社群"} · {result.totalDocs} 个
+            {q ? t(`“${q}”的匹配结果`, `Results for “${q}”`) : t("已开放社群", "Open communities")} · {t(`${result.totalDocs} 个`, `${result.totalDocs}`)}
           </span>
         </p>
         {result.docs.length ? (
@@ -54,22 +59,22 @@ export default async function Communities({ searchParams }: { searchParams: Sear
             ))}
           </div>
         ) : q ? (
-          <EmptyState title="没有找到匹配的社群" icon="search" actions={<ButtonLink href="/community" tone="ghost" size="small">查看全部社群</ButtonLink>}>
-            换一个游戏名称或关键词试试。
+          <EmptyState title={t("没有找到匹配的社群", "No matching communities")} icon="search" actions={<ButtonLink href="/community" tone="ghost" size="small">{t("查看全部社群", "View all communities")}</ButtonLink>}>
+            {t("换一个游戏名称或关键词试试。", "Try another game name or keyword.")}
           </EmptyState>
         ) : (
-          <EmptyState title={empty.communities.title} icon="community" actions={<ButtonLink href="/community/apply" tone="ghost" size="small">申请组织新社群</ButtonLink>}>
-            {empty.communities.body}
+          <EmptyState title={t(empty.communities.title, "Communities are being prepared")} icon="community" actions={<ButtonLink href="/community/apply" tone="ghost" size="small">{t("申请组织新社群", "Apply to organize a new community")}</ButtonLink>}>
+            {t(empty.communities.body, "To organize your game as a community, submit an organizer application.")}
           </EmptyState>
         )}
         <Pager page={result.page} totalPages={result.totalPages} path="/community" query={{ q: q || undefined }} />
         <section className={styles.organize} aria-labelledby="organize-title">
           <div>
-            <h2 id="organize-title">把热爱的游戏，组织成社群</h2>
-            <p>参与已有社群的组织工作，或为还没出现的游戏发起申请。审核状态和处理意见会保存在你的申请记录中。</p>
+            <h2 id="organize-title">{t("把热爱的游戏，组织成社群", "Turn the game you love into a community")}</h2>
+            <p>{t("参与已有社群的组织工作，或为还没出现的游戏发起申请。审核状态和处理意见会保存在你的申请记录中。", "Help organize an existing community, or apply for a game that is not here yet. Review status and comments are kept in your application record.")}</p>
           </div>
           <ButtonLink href="/community/apply" tone="accent" icon="arrow">
-            申请成为社群管理员
+            {t("申请成为社群管理员", "Apply to be a community admin")}
           </ButtonLink>
         </section>
       </Wrap>

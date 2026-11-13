@@ -213,6 +213,6 @@ describe("骨干审核生命周期修复", () => {
     ]);
     expect(currentContract.filter(control => control.bindtap !== "toggleRecord")).toEqual(interactiveContract(frozenWXML));
     expect(current).toContain('<view wx:if="{{expandedId === item.id}}" class="record-detail">');
-    for (const binding of ['data="{{loading,error,needsLogin}}"', 'wx:if="{{!loading && !error && !needsLogin}}"', 'wx:for="{{docs}}"', 'wx:for="{{item.rows}}"', 'wx:if="{{item.allowed.length}}"', 'range="{{item.allowed}}"', 'value="{{item.feedbackDraft}}"', '{{answer.answer}}', 'wx:if="{{pages > 1}}"', 'disabled="{{busy || page <= 1}}"', 'disabled="{{busy || page >= pages}}"']) expect(current).toContain(binding);
+    for (const binding of ['data="{{loading,error,needsLogin,t}}"', 'wx:if="{{!loading && !error && !needsLogin}}"', 'wx:for="{{docs}}"', 'wx:for="{{item.rows}}"', 'wx:if="{{item.allowed.length}}"', 'range="{{item.allowed}}"', 'value="{{item.feedbackDraft}}"', '{{answer.answer}}', 'wx:if="{{pages > 1}}"', 'disabled="{{busy || page <= 1}}"', 'disabled="{{busy || page >= pages}}"']) expect(current).toContain(binding);
   });
 });

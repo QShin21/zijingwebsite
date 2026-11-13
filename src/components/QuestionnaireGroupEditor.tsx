@@ -1,8 +1,10 @@
 "use client";
 import type { EntryField, Question } from "@/lib/signup-schema";
+import { useT } from "./i18n/LocaleProvider";
 export const defaultGroupFields = (): EntryField[] => [
   {
     id: crypto.randomUUID(),
+    // i18n-exempt: default questionnaire content inserted into the form (published content)
     label: "姓名",
     type: "text",
     required: true,
@@ -10,6 +12,7 @@ export const defaultGroupFields = (): EntryField[] => [
   },
   {
     id: crypto.randomUUID(),
+    // i18n-exempt: default questionnaire content inserted into the form (published content)
     label: "补充信息",
     type: "text",
     required: false,
@@ -23,6 +26,7 @@ export function QuestionnaireGroupEditor({
   q: Question;
   onChange: (value: Partial<Question>) => void;
 }) {
+  const t = useT();
   const fields = q.fields || [];
   const patch = (id: string, data: Partial<EntryField>) =>
     onChange({
@@ -33,12 +37,12 @@ export function QuestionnaireGroupEditor({
   return (
     <div className="questionnaire-group-editor">
       <p>
-        适用于成员名单、同行人员、设备明细等重复信息。一条记录包含以下字段。
+        {t("适用于成员名单、同行人员、设备明细等重复信息。一条记录包含以下字段。", "For repeated details such as member lists, companions or equipment. Each entry contains the fields below.")}
       </p>
       <div className="signup-times">
         {(["minEntries", "maxEntries"] as const).map((key) => (
           <label key={key}>
-            {key === "minEntries" ? "最少记录条数" : "最多记录条数"}
+            {key === "minEntries" ? t("最少记录条数", "Min. entries") : t("最多记录条数", "Max. entries")}
             <input
               type="number"
               min={1}
@@ -51,10 +55,10 @@ export function QuestionnaireGroupEditor({
       </div>
       {fields.map((field, index) => (
         <fieldset key={field.id}>
-          <legend>字段 {index + 1}</legend>
+          <legend>{t(`字段 ${index + 1}`, `Field ${index + 1}`)}</legend>
           <div className="signup-times">
             <label>
-              字段名称
+              {t("字段名称", "Field name")}
               <input
                 maxLength={120}
                 value={field.label}
@@ -62,13 +66,14 @@ export function QuestionnaireGroupEditor({
               />
             </label>
             <label>
-              字段类型
+              {t("字段类型", "Field type")}
               <select
                 value={field.type}
                 onChange={(e) => {
                   const type = e.target.value as EntryField["type"];
                   patch(field.id, {
                     type,
+                    // i18n-exempt: default questionnaire content inserted into the form (published content)
                     options: type === "select" ? ["选项一", "选项二"] : [],
                     format: undefined,
                     min: undefined,
@@ -77,9 +82,9 @@ export function QuestionnaireGroupEditor({
                   });
                 }}
               >
-                <option value="text">文本</option>
-                <option value="select">下拉选择</option>
-                <option value="number">数字</option>
+                <option value="text">{t("文本", "Text")}</option>
+                <option value="select">{t("下拉选择", "Dropdown")}</option>
+                <option value="number">{t("数字", "Number")}</option>
               </select>
             </label>
           </div>
@@ -89,11 +94,11 @@ export function QuestionnaireGroupEditor({
               checked={field.required}
               onChange={(e) => patch(field.id, { required: e.target.checked })}
             />
-            此字段必填
+            {t("此字段必填", "Required field")}
           </label>
           {field.type === "select" && (
             <label>
-              字段选项（每行一个）
+              {t("字段选项（每行一个）", "Field options (one per line)")}
               <textarea
                 value={field.options.join("\n")}
                 onChange={(e) =>
@@ -105,7 +110,7 @@ export function QuestionnaireGroupEditor({
           {field.type === "text" && (
             <>
               <label>
-                字段格式
+                {t("字段格式", "Field format")}
                 <select
                   value={field.format || "plain"}
                   onChange={(e) =>
@@ -114,16 +119,16 @@ export function QuestionnaireGroupEditor({
                     })
                   }
                 >
-                  <option value="plain">普通文本</option>
-                  <option value="email">邮箱</option>
-                  <option value="phone">中国大陆手机号</option>
-                  <option value="number">数字文本</option>
+                  <option value="plain">{t("普通文本", "Plain text")}</option>
+                  <option value="email">{t("邮箱", "Email")}</option>
+                  <option value="phone">{t("中国大陆手机号", "Mainland China mobile")}</option>
+                  <option value="number">{t("数字文本", "Numeric text")}</option>
                 </select>
               </label>
               <div className="signup-times">
                 {(["minLength", "maxLength"] as const).map((key) => (
                   <label key={key}>
-                    {key === "minLength" ? "字段最少字数" : "字段最多字数"}
+                    {key === "minLength" ? t("字段最少字数", "Field min. characters") : t("字段最多字数", "Field max. characters")}
                     <input
                       type="number"
                       min={1}
@@ -147,7 +152,7 @@ export function QuestionnaireGroupEditor({
               {(["min", "max", "step"] as const).map((key) => (
                 <label key={key}>
                   {
-                    { min: "字段最小值", max: "字段最大值", step: "字段步长" }[
+                    { min: t("字段最小值", "Field minimum"), max: t("字段最大值", "Field maximum"), step: t("字段步长", "Field step") }[
                       key
                     ]
                   }
@@ -174,7 +179,7 @@ export function QuestionnaireGroupEditor({
               onChange({ fields: fields.filter((f) => f.id !== field.id) })
             }
           >
-            删除字段 {index + 1}
+            {t(`删除字段 ${index + 1}`, `Delete field ${index + 1}`)}
           </button>
         </fieldset>
       ))}
@@ -187,6 +192,7 @@ export function QuestionnaireGroupEditor({
               ...fields,
               {
                 id: crypto.randomUUID(),
+                // i18n-exempt: default questionnaire content inserted into the form (published content)
                 label: "新字段",
                 type: "text",
                 required: true,
@@ -196,7 +202,7 @@ export function QuestionnaireGroupEditor({
           })
         }
       >
-        添加字段
+        {t("添加字段", "Add field")}
       </button>
     </div>
   );

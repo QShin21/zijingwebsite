@@ -2,8 +2,8 @@
 <view class="page mini-page">
   <view class="state">
     <view class="state-dot"></view>
-    <text class="state-title">档案已并入代表队中心</text>
-    <text class="muted">队伍、荣誉墙与选拔中心都在「代表队」标签里。</text>
-    <button class="primary" bindtap="go">前往代表队</button>
+    <text class="state-title">{{t.title}}</text>
+    <text class="muted">{{t.body}}</text>
+    <button class="primary" bindtap="go">{{t.go}}</button>
   </view>
 </view>

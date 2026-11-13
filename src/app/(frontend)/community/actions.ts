@@ -43,7 +43,7 @@ export async function applyAction(form: FormData) {
   const image = form.get("wechatQr");
   const file = image instanceof File && image.size ? image : null;
   if ((!id && !file) || (file && (file.size > 2 * 1024 * 1024 || !["image/png", "image/jpeg", "image/webp"].includes(file.type))))
-    return { error: "请上传 2 MB 以内的 PNG、JPEG 或 WebP 微信名片二维码。" };
+    return { error: "请上传 2 MB 以内的 PNG、JPEG 或 WebP 微信名片二维码。" }; // i18n-exempt: server message, localized at display
   try {
     const data = { game: game || null, proposedGame: value(form, "proposedGame"),
       realName: value(form, "realName"), phone: value(form, "phone"),
@@ -58,7 +58,7 @@ export async function decideAction(form: FormData) {
   const { p, user } = await current();
   if (!canPublish(user)) redirect("/account");
   const status = value(form, "decision");
-  if (!["approved", "returned", "rejected"].includes(status)) problem("/community/review", "决定无效");
+  if (!["approved", "returned", "rejected"].includes(status)) problem("/community/review", "决定无效"); // i18n-exempt: server message, localized at display
   try {
     await decideCommunityApplication(p, user, numeric(form, "id"), status, value(form, "reviewNote"), value(form, "revision"));
   } catch (error) { problem("/community/review", applicationError(error)); }
@@ -71,10 +71,10 @@ async function createCommunityPost(
   category: "event" | "notice",
 ) {
   const game = numeric(form, "game");
-  if (!managesGame(user, game)) throw new APIError("无权在此社群发布", 403);
+  if (!managesGame(user, game)) throw new APIError("无权在此社群发布", 403); // i18n-exempt: server message, localized at display
   const requestedAudience = value(form, "audience");
   const audience = readAudience(requestedAudience || "campus");
-  if (!audience) throw new APIError("请选择有效的可见范围", 400);
+  if (!audience) throw new APIError("请选择有效的可见范围", 400); // i18n-exempt: server message, localized at display
   const signupForm = category === "event" && value(form, "signupForm")
     ? JSON.parse(value(form, "signupForm"))
     : undefined;
@@ -83,7 +83,7 @@ async function createCommunityPost(
     ? JSON.parse(value(form, "signupImages") || "[]")
     : [];
   if (!Array.isArray(postImages) || !Array.isArray(signupImages))
-    throw new APIError("请检查配图格式。", 400);
+    throw new APIError("请检查配图格式。", 400); // i18n-exempt: server message, localized at display
 
   return p.create({
     collection: "community-posts",
@@ -113,28 +113,28 @@ export async function updateCommunityAudienceAction(form: FormData) {
   const gameURL = await gamePath(game);
   const path = `${gameURL}/updates/${id}`;
   const audience = readAudience(value(form, "audience"));
-  if (!audience || !managesGame(user, game)) problem(path, "请选择有效的可见范围");
+  if (!audience || !managesGame(user, game)) problem(path, "请选择有效的可见范围"); // i18n-exempt: server message, localized at display
   try {
     await workflowTransaction(p, user, {}, async req => {
       const post = await p.findByID({ collection: "community-posts", id, req,
         overrideAccess: false, depth: 0, select: { game: true } });
       if (Number(post.game) !== game || !managesGame(req.user, game))
-        throw new APIError("无权管理此活动或通知", 403);
+        throw new APIError("无权管理此活动或通知", 403); // i18n-exempt: server message, localized at display
       await p.update({ collection: "community-posts", id, req, overrideAccess: false, data: { audience: audience! } });
     });
   } catch (error) { problem(path, applicationError(error)); }
   revalidatePath(path);
-  redirect(path + "?message=" + encodeURIComponent("已保存可见范围"));
+  redirect(path + "?message=" + encodeURIComponent("已保存可见范围")); // i18n-exempt: server message, localized at display
 }
 export async function publishCommunityAction(form: FormData) {
   const { p, user } = await current();
   const game = numeric(form, "game");
   const kind = value(form, "kind");
   const path = `${await gamePath(game)}/updates`;
-  if (kind !== "event" && kind !== "notice") problem(path, "发布类型无效");
+  if (kind !== "event" && kind !== "notice") problem(path, "发布类型无效"); // i18n-exempt: server message, localized at display
   try {
     await createCommunityPost(p, user, form, kind as "event" | "notice");
-  } catch { problem(path, "发布未成功，请核对内容和权限"); }
+  } catch { problem(path, "发布未成功，请核对内容和权限"); } // i18n-exempt: server message, localized at display
   redirect(path);
 }
 export async function moderateAction(form: FormData) {
@@ -150,7 +150,7 @@ export async function moderateAction(form: FormData) {
   try {
     await p.update({ collection, id, overrideAccess: false, user,
       data: { status: status as "visible" | "hidden" } });
-  } catch { problem(path, "管理操作未成功"); }
+  } catch { problem(path, "管理操作未成功"); } // i18n-exempt: server message, localized at display
   redirect(path);
 }
 export async function banAction(form: FormData) {
@@ -162,20 +162,20 @@ export async function banAction(form: FormData) {
   try {
     await p.create({ collection: "community-bans", overrideAccess: false, user,
       data: { game, member: numeric(form, "member"), reason: value(form, "reason"), active: true } });
-  } catch { problem(path, "禁言未完成"); }
+  } catch { problem(path, "禁言未完成"); } // i18n-exempt: server message, localized at display
   redirect(path);
 }
 
 export async function submitShowcaseAction(form: FormData) {
   const p = await cms(); const { user } = await p.auth({ headers: await headers() });
-  if (!user || user.accountStatus === "suspended") return { error: "请先登录可用账号" };
+  if (!user || user.accountStatus === "suspended") return { error: "请先登录可用账号" }; // i18n-exempt: server message, localized at display
   const files = form.getAll("images").filter(f => f instanceof File && f.size) as File[];
-  if (files.length > 6 || files.some(f => f.size > 2 * 1024 * 1024 || !["image/png", "image/jpeg", "image/webp"].includes(f.type))) return { error: "最多 6 张 PNG、JPEG、WebP 照片，每张 2 MB 以内" };
+  if (files.length > 6 || files.some(f => f.size > 2 * 1024 * 1024 || !["image/png", "image/jpeg", "image/webp"].includes(f.type))) return { error: "最多 6 张 PNG、JPEG、WebP 照片，每张 2 MB 以内" }; // i18n-exempt: server message, localized at display
   const video = form.get('video');
   const videoFile = video instanceof File && video.size ? video : null;
-  if (!value(form, 'title')) return { error: '请填写标题' };
-  if (videoFile && value(form, 'videoURL')) return { error: '上传视频与视频链接请选择一种' };
-  if ((videoFile?.size || 0) > VIDEO_MAX_BYTES || files.reduce((sum, file) => sum + file.size, videoFile?.size || 0) > SUBMISSION_MAX_BYTES) return { error: '视频不超过 10 MB，图片与视频合计不超过 12 MB' };
+  if (!value(form, 'title')) return { error: '请填写标题' }; // i18n-exempt: server message, localized at display
+  if (videoFile && value(form, 'videoURL')) return { error: '上传视频与视频链接请选择一种' }; // i18n-exempt: server message, localized at display
+  if ((videoFile?.size || 0) > VIDEO_MAX_BYTES || files.reduce((sum, file) => sum + file.size, videoFile?.size || 0) > SUBMISSION_MAX_BYTES) return { error: '视频不超过 10 MB，图片与视频合计不超过 12 MB' }; // i18n-exempt: server message, localized at display
   let uploaded = '';
   try {
     const images = await Promise.all(files.map(async file => ({ source: `data:${file.type};base64,${Buffer.from(await file.arrayBuffer()).toString("base64")}`, caption: value(form, "caption") })));
@@ -190,10 +190,10 @@ export async function reviewShowcaseAction(form: FormData) {
   if (!post || !canReviewShowcase(user, post.game)) redirect("/community");
   const path = `${await gamePath(Number(post.game))}/showcase`;
   const status = value(form, "status");
-  if (!["visible", "rejected", "hidden"].includes(status)) problem(path, "审核决定无效");
+  if (!["visible", "rejected", "hidden"].includes(status)) problem(path, "审核决定无效"); // i18n-exempt: server message, localized at display
   try { await reviewShowcase(p, user, { id: post.id, decision: status, reviewNote: value(form, "reviewNote"), revision: value(form, "revision") }); }
-  catch { problem(path, "审核未成功，请刷新后重试"); }
-  redirect(`${path}?view=review&message=${encodeURIComponent("审核已保存")}`);
+  catch { problem(path, "审核未成功，请刷新后重试"); } // i18n-exempt: server message, localized at display
+  redirect(`${path}?view=review&message=${encodeURIComponent("审核已保存")}`); // i18n-exempt: server message, localized at display
 }
 export async function updateCommunityPostScheduleAction(form: FormData) {
   const { p, user } = await current();
@@ -202,7 +202,7 @@ export async function updateCommunityPostScheduleAction(form: FormData) {
       startAt: value(form, "startAt"), endAt: value(form, "endAt"), location: value(form, "location") });
     const path = `${await gamePath(Number(saved.game))}/updates`;
     revalidatePath(path); revalidatePath("/events"); revalidatePath("/");
-    return { ok: true, message: "活动日程已更新。" };
+    return { ok: true, message: "活动日程已更新。" }; // i18n-exempt: server message, localized at display
   } catch (error) { return { ok: false, message: applicationError(error) }; }
 }
 export async function replaceShowcaseVideoAction(form: FormData) {
@@ -212,10 +212,10 @@ export async function replaceShowcaseVideoAction(form: FormData) {
     await workflowTransaction(p, user, { webShowcaseWrite: true }, async req => {
       const post = await p.findByID({ collection: "community-showcase", id, req, overrideAccess: false, depth: 0 });
       game = Number(post.game);
-      if (!canReviewShowcase(req.user, post.game)) throw new APIError("无权修改此社群风采视频", 403);
-      if (value(form, "revision") !== post.updatedAt) throw new APIError("风采已更新，请刷新后再上传", 409);
+      if (!canReviewShowcase(req.user, post.game)) throw new APIError("无权修改此社群风采视频", 403); // i18n-exempt: server message, localized at display
+      if (value(form, "revision") !== post.updatedAt) throw new APIError("风采已更新，请刷新后再上传", 409); // i18n-exempt: server message, localized at display
       const file = form.get("video");
-      if (!(file instanceof File) || !file.size) throw new APIError("请选择 10 MB 以内的 MP4 视频", 400);
+      if (!(file instanceof File) || !file.size) throw new APIError("请选择 10 MB 以内的 MP4 视频", 400); // i18n-exempt: server message, localized at display
       uploaded = await saveVideo(file);
       await p.update({ collection: "community-showcase", id, req, overrideAccess: false, data: { videoURL: uploaded } });
     });
@@ -228,31 +228,31 @@ export async function withdrawApplicationAction(form: FormData) {
   const { p, user } = await current();
   try { await editCommunityApplication(p, user, numeric(form, "id"), value(form, "revision"), { status: "withdrawn" }); }
   catch (error) { problem("/community/apply", applicationError(error)); }
-  redirect("/community/apply?message=" + encodeURIComponent("网站申请已撤回，微信联系不受此操作影响。"));
+  redirect("/community/apply?message=" + encodeURIComponent("网站申请已撤回，微信联系不受此操作影响。")); // i18n-exempt: server message, localized at display
 }
 export async function updateCommunityCardAction(form: FormData) {
   const { p, user } = await current();
   const file = form.get("wechatQr");
-  if (file instanceof File && file.size > 2 * 1024 * 1024) problem("/community/apply", "名片最大 2 MB");
+  if (file instanceof File && file.size > 2 * 1024 * 1024) problem("/community/apply", "名片最大 2 MB"); // i18n-exempt: server message, localized at display
   try { await updateCommunityCard(p, user, numeric(form, "id"), value(form, "revision"), {
     contactConsent: form.get("contactConsent") === "on",
     ...(file instanceof File && file.size ? { wechatQr: `data:${file.type};base64,${Buffer.from(await file.arrayBuffer()).toString("base64")}` } : {}),
   }); }
   catch (error) { problem("/community/apply", applicationError(error)); }
-  redirect("/community/apply?message=" + encodeURIComponent("名片及展示设置已更新。"));
+  redirect("/community/apply?message=" + encodeURIComponent("名片及展示设置已更新。")); // i18n-exempt: server message, localized at display
 }
 
 // Structured presentation adapters preserve rejected form values; legacy redirects remain available.
 export async function publishCommunityResultAction(form: FormData) {
   const p = await cms(), { user } = await p.auth({ headers: await headers() });
-  if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再发布，已填写的内容保留。" };
+  if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再发布，已填写的内容保留。" }; // i18n-exempt: server message, localized at display
   const game = numeric(form, "game"), kind = value(form, "kind");
-  if (kind !== "event" && kind !== "notice") return { ok: false, message: "发布类型无效，请重新选择。" };
+  if (kind !== "event" && kind !== "notice") return { ok: false, message: "发布类型无效，请重新选择。" }; // i18n-exempt: server message, localized at display
   try {
     await createCommunityPost(p, user, form, kind);
     revalidatePath(`${await gamePath(game)}/updates`);
     if (kind === "event") revalidatePath("/events");
-    return { ok: true, message: "内容已发布到当前社群。" };
+    return { ok: true, message: "内容已发布到当前社群。" }; // i18n-exempt: server message, localized at display
   } catch (error) { return { ok: false, message: workflowFeedback(error) }; }
 }
 export async function updateCommunityPostImagesAction(form: FormData) {
@@ -264,23 +264,23 @@ export async function updateCommunityPostImagesAction(form: FormData) {
   try {
     path = await workflowTransaction(p, user, {}, async (req) => {
       if (!id || !game || !managesGame(req.user, game))
-        throw new APIError("当前账号无权编辑此社群的配图。", 403);
+        throw new APIError("当前账号无权编辑此社群的配图。", 403); // i18n-exempt: server message, localized at display
       const post = await p.findByID({
         collection: "community-posts", id, req, overrideAccess: false, depth: 0,
         select: { game: true, status: true, updatedAt: true },
       });
       if (Number(post.game) !== game || post.status !== "visible")
-        throw new APIError("该内容已隐藏或不属于当前社群。", 404);
+        throw new APIError("该内容已隐藏或不属于当前社群。", 404); // i18n-exempt: server message, localized at display
       if (value(form, "revision") !== post.updatedAt)
-        throw new APIError("内容已有更新，请刷新已保存记录，再载入最新配图。", 409);
+        throw new APIError("内容已有更新，请刷新已保存记录，再载入最新配图。", 409); // i18n-exempt: server message, localized at display
       const currentGame = await p.findByID({
         collection: "games", id: game, req: { ...req, user: null },
         overrideAccess: false, user: null, draft: false, depth: 0, select: { slug: true },
       });
       let images: unknown;
       try { images = JSON.parse(value(form, "postImages")); }
-      catch { throw new APIError("请检查配图格式。", 400); }
-      if (!Array.isArray(images)) throw new APIError("请检查配图格式。", 400);
+      catch { throw new APIError("请检查配图格式。", 400); } // i18n-exempt: server message, localized at display
+      if (!Array.isArray(images)) throw new APIError("请检查配图格式。", 400); // i18n-exempt: server message, localized at display
       await p.update({
         collection: "community-posts", id, req, overrideAccess: false, data: { postImages: images },
       });
@@ -292,7 +292,7 @@ export async function updateCommunityPostImagesAction(form: FormData) {
   revalidatePath(path);
   revalidatePath("/events");
   revalidatePath("/");
-  return { ok: true, message: "配图已保存。" };
+  return { ok: true, message: "配图已保存。" }; // i18n-exempt: server message, localized at display
 }
 
 export async function updateCommunityArticleAction(form: FormData) {
@@ -302,16 +302,16 @@ export async function updateCommunityArticleAction(form: FormData) {
   let path: string;
   try {
     path = await workflowTransaction(p, user, {}, async req => {
-      if (!id || !game || !managesGame(req.user, game)) throw new APIError("当前账号无权编辑此社群内容。", 403);
+      if (!id || !game || !managesGame(req.user, game)) throw new APIError("当前账号无权编辑此社群内容。", 403); // i18n-exempt: server message, localized at display
       const post = await p.findByID({ collection: "community-posts", id, req, overrideAccess: false, depth: 0,
         select: { game: true, status: true, updatedAt: true, contentMode: true } });
       if (Number(post.game) !== game || post.status !== "visible" || post.contentMode !== "article")
-        throw new APIError("内容已隐藏或不属于当前社群。", 404);
-      if (value(form, "revision") !== post.updatedAt) throw new APIError("内容已有更新，请刷新后重新编辑。", 409);
+        throw new APIError("内容已隐藏或不属于当前社群。", 404); // i18n-exempt: server message, localized at display
+      if (value(form, "revision") !== post.updatedAt) throw new APIError("内容已有更新，请刷新后重新编辑。", 409); // i18n-exempt: server message, localized at display
       let images: unknown, blocks: unknown;
       try { images = JSON.parse(value(form, "postImages")); blocks = JSON.parse(value(form, "contentBlocks")); }
-      catch { throw new APIError("请检查文章内容。", 400); }
-      if (!Array.isArray(images) || !Array.isArray(blocks)) throw new APIError("请检查文章内容。", 400);
+      catch { throw new APIError("请检查文章内容。", 400); } // i18n-exempt: server message, localized at display
+      if (!Array.isArray(images) || !Array.isArray(blocks)) throw new APIError("请检查文章内容。", 400); // i18n-exempt: server message, localized at display
       await p.update({ collection: "community-posts", id, req, overrideAccess: false,
         data: { postImages: images, contentMode: "article", contentBlocks: blocks } });
       const parent = await p.findByID({ collection: "games", id: game, req: { ...req, user: null },
@@ -320,16 +320,16 @@ export async function updateCommunityArticleAction(form: FormData) {
     });
   } catch (error) { return { ok: false, message: workflowFeedback(error) }; }
   revalidatePath(path); revalidatePath("/events"); revalidatePath("/");
-  return { ok: true, message: "文章已保存。" };
+  return { ok: true, message: "文章已保存。" }; // i18n-exempt: server message, localized at display
 }
 
 export async function reviewShowcaseResultAction(form: FormData) {
   const p = await cms(), { user } = await p.auth({ headers: await headers() });
-  if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再审核，已填写的说明保留。" };
+  if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再审核，已填写的说明保留。" }; // i18n-exempt: server message, localized at display
   const post = await p.findByID({ collection: "community-showcase", id: numeric(form, "id"), overrideAccess: false, user, depth: 0 }).catch(() => null);
-  if (!post || !canReviewShowcase(user, post.game)) return { ok: false, message: "当前账号无法审核这条社群风采。" };
+  if (!post || !canReviewShowcase(user, post.game)) return { ok: false, message: "当前账号无法审核这条社群风采。" }; // i18n-exempt: server message, localized at display
   const status = value(form, "status");
-  if (!["visible", "rejected", "hidden"].includes(status)) return { ok: false, message: "审核决定无效，请重新选择。" };
+  if (!["visible", "rejected", "hidden"].includes(status)) return { ok: false, message: "审核决定无效，请重新选择。" }; // i18n-exempt: server message, localized at display
   try {
     await reviewShowcase(p, user, { id: post.id, decision: status, reviewNote: value(form, "reviewNote"), revision: value(form, "revision") });
     const path = `${await gamePath(Number(post.game))}/showcase`;
@@ -351,22 +351,22 @@ function resultPage(form: FormData) {
 }
 export async function decideCommunityResultAction(form: FormData) {
   const p = await cms(), { user } = await p.auth({ headers: await headers() });
-  if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再审核，已填写的意见保留。" };
-  if (!canPublish(user)) return { ok: false, message: "当前账号无权审核社群管理员申请。" };
+  if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再审核，已填写的意见保留。" }; // i18n-exempt: server message, localized at display
+  if (!canPublish(user)) return { ok: false, message: "当前账号无权审核社群管理员申请。" }; // i18n-exempt: server message, localized at display
   const decision = value(form, "decision");
-  if (!["approved", "returned", "rejected"].includes(decision)) return { ok: false, message: "审核决定无效，请重新选择。" };
+  if (!["approved", "returned", "rejected"].includes(decision)) return { ok: false, message: "审核决定无效，请重新选择。" }; // i18n-exempt: server message, localized at display
   try {
     await decideCommunityApplication(p, user, numeric(form, "id"), decision, value(form, "reviewNote"), value(form, "revision"));
   } catch (error) { return { ok: false, message: workflowFeedback(error) }; }
   revalidatePath("/community/review");
   revalidatePath("/community/apply");
-  return { ok: true, message: "审核结果已保存。", successHref: "/community/review?done=1" + resultPage(form) };
+  return { ok: true, message: "审核结果已保存。", successHref: "/community/review?done=1" + resultPage(form) }; // i18n-exempt: server message, localized at display
 }
 export async function updateCommunityCardResultAction(form: FormData) {
   const p = await cms(), { user } = await p.auth({ headers: await headers() });
-  if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再保存，已选择的名片与展示设置保留。" };
+  if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再保存，已选择的名片与展示设置保留。" }; // i18n-exempt: server message, localized at display
   const file = form.get("wechatQr");
-  if (file instanceof File && file.size > 2 * 1024 * 1024) return { ok: false, message: "名片最大 2 MB，请重新选择。" };
+  if (file instanceof File && file.size > 2 * 1024 * 1024) return { ok: false, message: "名片最大 2 MB，请重新选择。" }; // i18n-exempt: server message, localized at display
   try {
     await updateCommunityCard(p, user, numeric(form, "id"), value(form, "revision"), {
       contactConsent: form.get("contactConsent") === "on",
@@ -379,17 +379,17 @@ export async function updateCommunityCardResultAction(form: FormData) {
 }
 export async function replaceShowcaseVideoResultAction(form: FormData) {
   const p = await cms(), { user } = await p.auth({ headers: await headers() });
-  if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再保存，已选择的视频保留。" };
+  if (!user || user.accountStatus === "suspended") return { ok: false, message: "请重新登录后再保存，已选择的视频保留。" }; // i18n-exempt: server message, localized at display
   const id = numeric(form, "id");
   let uploaded = "", game = 0;
   try {
     await workflowTransaction(p, user, { webShowcaseWrite: true }, async req => {
       const post = await p.findByID({ collection: "community-showcase", id, req, overrideAccess: false, depth: 0 });
       game = Number(post.game);
-      if (!canReviewShowcase(req.user, post.game)) throw new APIError("无权修改此社群风采视频", 403);
-      if (value(form, "revision") !== post.updatedAt) throw new APIError("风采已更新，请刷新后再上传", 409);
+      if (!canReviewShowcase(req.user, post.game)) throw new APIError("无权修改此社群风采视频", 403); // i18n-exempt: server message, localized at display
+      if (value(form, "revision") !== post.updatedAt) throw new APIError("风采已更新，请刷新后再上传", 409); // i18n-exempt: server message, localized at display
       const file = form.get("video");
-      if (!(file instanceof File) || !file.size) throw new APIError("请选择 10 MB 以内的 MP4 视频", 400);
+      if (!(file instanceof File) || !file.size) throw new APIError("请选择 10 MB 以内的 MP4 视频", 400); // i18n-exempt: server message, localized at display
       uploaded = await saveVideo(file);
       await p.update({ collection: "community-showcase", id, req, overrideAccess: false, data: { videoURL: uploaded } });
     });

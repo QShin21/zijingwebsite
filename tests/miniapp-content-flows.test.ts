@@ -170,7 +170,8 @@ describe('原生社团展示与既有活动权限合同', () => {
     expect((target.data.groups as Data[]).length).toBeGreaterThan(0);
     const markup = readFileSync('miniprogram/src/pages/events/index.wxml', 'utf8');
     expect(markup).toContain('loadMoreError && !loading');
-    expect(markup).toContain("loadMoreError ? '重试加载更多' : '加载更多'");
+    expect(markup).toContain('loadMoreError ? t.retryMore : t.loadMore');
+    expect(readFileSync('miniprogram/src/pages/events/index.js', 'utf8')).toMatch(/retryMore: \['重试加载更多'.*loadMore: \['加载更多'/s);
   });
 
   it('V2 图片：受控图按 ≤20 批量换取短时签名，媒体按身份请求；隐藏后迟到回复不写回，签名不持久化不打印', async () => {

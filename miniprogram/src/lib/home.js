@@ -1,3 +1,4 @@
+const i18n = (() => { try { const value = require('./i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { t: zh => zh, message: value => value, locale: () => 'zh' }; })();
 // V2 主场 loader: GET /api/v2/home → presentation view. Called lazily by
 // pages/home so startup failures stay visible and retryable.
 const v2 = require('./v2');
@@ -13,10 +14,13 @@ function chrome() {
   } catch { return { statusBar: 20, navHeight: 44 }; }
 }
 // Server fills missing blocks (home-sections.ts); this fallback only covers an older server during rollout.
-const DEFAULT_SECTIONS = [
-  { kind: 'upcoming', title: '接下来的赛程' }, { kind: 'open', title: '正在招募' }, { kind: 'notices', title: '社团公告' },
-  { kind: 'promoted', title: '社团精选' }, { kind: 'communities', title: '游戏社群' }, { kind: 'highlights', title: '赛场高光' }, { kind: 'about', title: '关于紫荆' },
+const SECTIONS = [
+  { kind: 'upcoming', title: '接下来的赛程', en: 'Coming up' }, { kind: 'open', title: '正在招募', en: 'Open now' }, { kind: 'notices', title: '社团公告', en: 'Club notices' },
+  { kind: 'promoted', title: '社团精选', en: 'Club picks' }, { kind: 'communities', title: '游戏社群', en: 'Game communities' }, { kind: 'highlights', title: '赛场高光', en: 'Highlights' }, { kind: 'about', title: '关于紫荆', en: 'About Zijing' },
 ];
+// Fallback titles follow the current language; server-provided titles are site content.
+const DEFAULT_SECTIONS = { map: fn => SECTIONS.map(entry => fn({ kind: entry.kind, title: i18n.t(entry.title, entry.en) })), some: fn => SECTIONS.some(fn),
+  find: fn => { const entry = SECTIONS.find(fn); return entry && { kind: entry.kind, title: i18n.t(entry.title, entry.en) }; } };
 function sections(value) {
   if (!Array.isArray(value)) return DEFAULT_SECTIONS.map(section => ({ kind: section.kind, title: section.title }));
   return value.filter(section => section && section.enabled !== false && DEFAULT_SECTIONS.some(entry => entry.kind === section.kind))
@@ -35,7 +39,7 @@ function view(home) {
     promoted: promoted(home.promoted),
     today: v2.today(home.today),
     title: home.site.heroTitle || '',
-    subtitle: campus && home.site.heroSubtitle || '查看紫荆近期活动与公告。',
+    subtitle: campus && home.site.heroSubtitle || i18n.t('查看紫荆近期活动与公告。', 'See recent Zijing events and notices.'),
     spotlight: home.spotlight ? v2.event(home.spotlight) : null,
     upcoming: home.upcoming.map(v2.event),
     openSignups: home.openSignups.map(v2.event),
@@ -63,7 +67,7 @@ async function load(page) {
       home.highlights || [], home.communities || []).filter(Boolean), alive);
     page.setData({ loading: false, home });
   } catch (cause) {
-    if (alive()) page.setData({ loading: false, error: (cause && cause.message) || '主场暂时无法加载，请重试' });
+    if (alive()) page.setData({ loading: false, error: (cause && cause.message) || i18n.t('主场暂时无法加载，请重试', 'Home could not load. Please try again.') });
   }
 }
 module.exports = { load, view, chrome, sections };

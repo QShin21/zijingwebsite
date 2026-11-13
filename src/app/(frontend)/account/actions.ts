@@ -35,7 +35,7 @@ export async function requestPasswordCodeAction(
 ): Promise<AuthResult> {
   const email = accountEmail(field(form, "email"));
   const purpose = "password";
-  if (!email) return { error: "请输入注册时验证的完整邮箱" };
+  if (!email) return { error: "请输入注册时验证的完整邮箱" }; // i18n-exempt: server message, localized at display
   try {
     const p = await cms();
     const existing = await p.find({
@@ -79,7 +79,7 @@ async function registrationDetails(form: FormData) {
     password !== form.get("confirm")
   )
     return {
-      error: "请核对邮箱、昵称和密码；密码至少 8 位，两次输入需一致。",
+      error: "请核对邮箱、昵称和密码；密码至少 8 位，两次输入需一致。", // i18n-exempt: server message, localized at display
     } as const;
   const p = await cms();
   const claim = classifyEmail(email) === "tsinghua" && ownerEmail(email);
@@ -91,7 +91,7 @@ async function registrationDetails(form: FormData) {
     depth: 0,
   });
   if (existing.docs[0] && !claim)
-    return { error: "该邮箱已注册，请登录或找回密码" } as const;
+    return { error: "该邮箱已注册，请登录或找回密码" } as const; // i18n-exempt: server message, localized at display
   const sameName = await p.find({
     collection: "users",
     overrideAccess: true,
@@ -104,7 +104,7 @@ async function registrationDetails(form: FormData) {
     sameName.docs[0] &&
     !(claim && sameName.docs[0].id === existing.docs[0]?.id)
   )
-    return { error: "该昵称已被使用，请更换昵称" } as const;
+    return { error: "该昵称已被使用，请更换昵称" } as const; // i18n-exempt: server message, localized at display
   return { p, email, name, password, claim, existing: existing.docs[0] };
 }
 
@@ -129,7 +129,7 @@ export async function beginRegistrationAction(
       error:
         error instanceof Error && /频繁|60 秒/.test(error.message)
           ? error.message
-          : "验证码发送失败，请稍后重试或联系网站管理员。",
+          : "验证码发送失败，请稍后重试或联系网站管理员。", // i18n-exempt: server message, localized at display
     };
   }
 }
@@ -142,7 +142,7 @@ export async function registerAction(
     if ("error" in details) return { error: details.error! };
     const { p, email, name, password, claim, existing } = details;
     if (!(await consumeCode(email, "register", field(form, "code"))))
-      return { error: "验证码错误、过期或尝试次数过多，请核对或重新发送。" };
+      return { error: "验证码错误、过期或尝试次数过多，请核对或重新发送。" }; // i18n-exempt: server message, localized at display
     // No user record or password is persisted until the email code is verified.
     if (existing) {
       await p.update({
@@ -163,7 +163,7 @@ export async function registerAction(
     return { success: true };
   } catch {
     return {
-      error: "注册未完成，邮箱或昵称可能已被使用。请返回检查后重新验证。",
+      error: "注册未完成，邮箱或昵称可能已被使用。请返回检查后重新验证。", // i18n-exempt: server message, localized at display
     };
   }
 }
@@ -199,7 +199,7 @@ export async function signInAction(form: FormData): Promise<AuthResult> {
       password: String(form.get("password") ?? ""),
     });
   } catch {
-    return { error: "昵称、邮箱或密码错误，请核对后重试。" };
+    return { error: "昵称、邮箱或密码错误，请核对后重试。" }; // i18n-exempt: server message, localized at display
   }
   return { success: true, redirect: safeReturnPath(form.get("returnTo")) };
 }
@@ -212,7 +212,7 @@ export async function signOutAction(): Promise<AuthResult> {
     await logout({ config, allSessions: false });
     return { success: true, redirect: "/" };
   } catch {
-    return { error: "退出登录未确认完成，请重试。" };
+    return { error: "退出登录未确认完成，请重试。" }; // i18n-exempt: server message, localized at display
   }
 }
 export async function resetAction(form: FormData) {
@@ -227,10 +227,10 @@ export async function updatePasswordAction(
   const email = accountEmail(field(form, "email"));
   const password = String(form.get("password") ?? "");
   if (!email || !validPassword(password) || password !== form.get("confirm"))
-    return { error: "请核对注册邮箱与新密码；密码至少 8 位，两次输入需一致。" };
+    return { error: "请核对注册邮箱与新密码；密码至少 8 位，两次输入需一致。" }; // i18n-exempt: server message, localized at display
   try {
     if (!(await consumeCode(email, "password", field(form, "code"))))
-      return { error: "验证码错误、过期或尝试次数过多，请核对或重新发送。" };
+      return { error: "验证码错误、过期或尝试次数过多，请核对或重新发送。" }; // i18n-exempt: server message, localized at display
     const p = await cms();
     const result = await p.find({
       collection: "users",
@@ -250,7 +250,7 @@ export async function updatePasswordAction(
     return { success: true, redirect: "/login?reset=1" };
   } catch {
     return {
-      error: "密码更新未确认完成，请重试；如果已完成更新，请使用新密码登录。",
+      error: "密码更新未确认完成，请重试；如果已完成更新，请使用新密码登录。", // i18n-exempt: server message, localized at display
     };
   }
 }

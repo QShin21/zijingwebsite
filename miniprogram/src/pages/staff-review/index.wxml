@@ -4,66 +4,66 @@
   <view class="zj-hero">
     <view class="zj-stage-stripes"></view>
     <view class="zj-hero-inner">
-      <button class="zj-hero-back" bindtap="back">‹ 返回</button>
-      <text class="zj-hero-kicker">REVIEW · 骨干招新审核</text>
-      <text class="zj-hero-title">骨干申请审核</text>
-      <text class="zj-hero-lead">先阅读申请答卷，再填写反馈与处理决定。录用后的任命另行处理。</text>
+      <button class="zj-hero-back" bindtap="back">{{t.back}}</button>
+      <text class="zj-hero-kicker">{{t.kicker}}</text>
+      <text class="zj-hero-title">{{t.heroTitle}}</text>
+      <text class="zj-hero-lead">{{t.heroLead}}</text>
     </view>
   </view>
 
-  <view wx:if="{{message}}" class="zj-callout zj-callout-warning" aria-role="alert"><text class="staff-review-label">处理提示</text><text>{{message}}</text></view>
-  <template is="feedback" data="{{loading,error,needsLogin}}" />
+  <view wx:if="{{message}}" class="zj-callout zj-callout-warning" aria-role="alert"><text class="staff-review-label">{{t.noticeLabel}}</text><text>{{message}}</text></view>
+  <template is="feedback" data="{{loading,error,needsLogin,t}}" />
   <block wx:if="{{!loading && !error && !needsLogin}}">
     <view class="staff-review-filters">
       <view class="staff-review-filter">
-        <text class="zj-small">申请方向</text>
+        <text class="zj-small">{{t.direction}}</text>
         <picker range="{{directions}}" range-key="label" value="{{departmentIndex}}" disabled="{{busy}}" bindchange="direction"><view class="staff-review-picker"><text>{{directions[departmentIndex].label}}</text><text aria-hidden="true">▾</text></view></picker>
       </view>
       <view class="staff-review-filter">
-        <text class="zj-small">处理状态</text>
+        <text class="zj-small">{{t.status}}</text>
         <picker range="{{states}}" range-key="label" value="{{statusIndex}}" disabled="{{busy}}" bindchange="state"><view class="staff-review-picker"><text>{{states[statusIndex].label}}</text><text aria-hidden="true">▾</text></view></picker>
       </view>
     </view>
 
-    <view class="zj-section-head"><text class="zj-section-title">申请记录</text><text class="zj-count">{{total}}</text></view>
+    <view class="zj-section-head"><text class="zj-section-title">{{t.records}}</text><text class="zj-count">{{total}}</text></view>
     <view wx:for="{{docs}}" wx:key="id" class="zj-record staff-review-record {{expandedId === item.id ? 'staff-review-open' : ''}}">
       <view class="zj-record-head">
-        <view class="staff-review-who"><text class="staff-review-avatar">{{item.memberName[0]}}</text><view><text class="zj-record-title">{{item.memberName}}</text><text class="zj-small">申请 {{item.id}} · 最近更新 {{item.updatedText}}</text></view></view>
+        <view class="staff-review-who"><text class="staff-review-avatar">{{item.memberName[0]}}</text><view><text class="zj-record-title">{{item.memberName}}</text><text class="zj-small">{{t.applicationPrefix}}{{item.id}}{{t.updatedPrefix}}{{item.updatedText}}</text></view></view>
         <text class="zj-pill zj-pill-action">{{item.statusText}}</text>
       </view>
       <text wx:if="{{item.batchTitle}}" class="zj-tag zj-tag-club staff-review-batch">{{item.batchTitle}}</text>
-      <button class="plain staff-review-disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy}}" aria-expanded="{{expandedId === item.id}}"><text>{{expandedId === item.id ? '收起答卷与处理区' : '查看答卷与处理记录'}}</text><text aria-hidden="true">{{expandedId === item.id ? '−' : '＋'}}</text></button>
+      <button class="plain staff-review-disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy}}" aria-expanded="{{expandedId === item.id}}"><text>{{expandedId === item.id ? t.collapse : t.expand}}</text><text aria-hidden="true">{{expandedId === item.id ? '−' : '＋'}}</text></button>
 
       <view wx:if="{{expandedId === item.id}}" class="record-detail">
         <view class="staff-review-sheet">
-          <text class="field-label">申请时提交的答卷</text>
-          <text class="zj-form-hint">按提交时的题目保留，请先核对申请资料。</text>
+          <text class="field-label">{{t.answers}}</text>
+          <text class="zj-form-hint">{{t.answersHint}}</text>
           <view class="zj-kv">
             <view wx:for="{{item.rows}}" wx:for-item="answer" wx:key="id" class="zj-kv-row staff-review-answer"><text class="zj-kv-label">{{answer.label}}</text><text class="zj-kv-value" selectable>{{answer.answer}}</text></view>
           </view>
-          <text wx:if="{{!item.rows.length}}" class="zj-form-hint">这份回执暂无可展示的答卷内容。</text>
+          <text wx:if="{{!item.rows.length}}" class="zj-form-hint">{{t.noAnswers}}</text>
         </view>
-        <view wx:if="{{item.feedback}}" class="zj-callout"><text class="staff-review-label">已有处理反馈</text><text selectable>{{item.feedback}}</text></view>
+        <view wx:if="{{item.feedback}}" class="zj-callout"><text class="staff-review-label">{{t.existingFeedback}}</text><text selectable>{{item.feedback}}</text></view>
 
         <view wx:if="{{item.allowed.length}}" class="staff-review-decision">
-          <text class="zj-sheet-title">处理这份申请</text>
-          <text class="zj-form-hint">反馈会出现在申请人的回执中。录用不自动授予平台角色。</text>
+          <text class="zj-sheet-title">{{t.handle}}</text>
+          <text class="zj-form-hint">{{t.handleHint}}</text>
           <view class="field">
-            <text class="field-label">处理决定</text>
+            <text class="field-label">{{t.decision}}</text>
             <picker range="{{item.allowed}}" range-key="label" value="{{item.decisionIndex}}" disabled="{{busy}}" bindchange="field" data-index="{{index}}" data-key="decisionIndex"><view class="staff-review-picker"><text>{{item.allowed[item.decisionIndex].label}}</text><text aria-hidden="true">▾</text></view></picker>
           </view>
           <view class="field">
-            <view class="staff-review-feedback-head"><text class="field-label">给申请人的反馈</text><text wx:if="{{item.allowed[item.decisionIndex].value === 'returned' || item.allowed[item.decisionIndex].value === 'rejected'}}" class="zj-pill zj-pill-danger">必填</text></view>
-            <textarea cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{item.feedbackDraft}}" disabled="{{busy}}" maxlength="1000" bindinput="field" data-index="{{index}}" data-key="feedbackDraft" placeholder="退回或未录用请说明具体原因" />
-            <text class="zj-form-hint">退回补充或未录用时，请写明具体原因与需要补充的内容。</text>
+            <view class="staff-review-feedback-head"><text class="field-label">{{t.feedback}}</text><text wx:if="{{item.allowed[item.decisionIndex].value === 'returned' || item.allowed[item.decisionIndex].value === 'rejected'}}" class="zj-pill zj-pill-danger">{{t.required}}</text></view>
+            <textarea cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{item.feedbackDraft}}" disabled="{{busy}}" maxlength="1000" bindinput="field" data-index="{{index}}" data-key="feedbackDraft" placeholder="{{t.feedbackPlaceholder}}" />
+            <text class="zj-form-hint">{{t.feedbackHint}}</text>
           </view>
-          <view class="staff-review-check"><text class="staff-review-label">即将保存</text><text>{{item.allowed[item.decisionIndex].label}}</text></view>
-          <button class="primary" bindtap="decide" data-index="{{index}}" loading="{{busy}}" disabled="{{busy}}">{{busy ? '正在确认或保存' : '保存处理结果'}}</button>
+          <view class="staff-review-check"><text class="staff-review-label">{{t.willSave}}</text><text>{{item.allowed[item.decisionIndex].label}}</text></view>
+          <button class="primary" bindtap="decide" data-index="{{index}}" loading="{{busy}}" disabled="{{busy}}">{{busy ? t.saving : t.save}}</button>
         </view>
-        <view wx:else class="zj-callout"><text class="staff-review-label">当前回执只读</text><text>可下拉刷新，核对最新状态与允许的操作。</text></view>
+        <view wx:else class="zj-callout"><text class="staff-review-label">{{t.readOnly}}</text><text>{{t.readOnlyHint}}</text></view>
       </view>
     </view>
-    <view wx:if="{{!docs.length}}" class="zj-empty"><text class="zj-empty-icon">✓</text><text class="zj-empty-title">暂无符合条件的申请</text><text class="zj-small">可切换申请方向或处理状态查看。</text></view>
-    <view wx:if="{{pages > 1}}" class="staff-review-pager"><button bindtap="previous" disabled="{{busy || page <= 1}}">上一页</button><text class="staff-review-page">{{page}} / {{pages}}</text><button bindtap="next" disabled="{{busy || page >= pages}}">下一页</button></view>
+    <view wx:if="{{!docs.length}}" class="zj-empty"><text class="zj-empty-icon">✓</text><text class="zj-empty-title">{{t.emptyTitle}}</text><text class="zj-small">{{t.emptyBody}}</text></view>
+    <view wx:if="{{pages > 1}}" class="staff-review-pager"><button bindtap="previous" disabled="{{busy || page <= 1}}">{{t.previous}}</button><text class="staff-review-page">{{page}} / {{pages}}</text><button bindtap="next" disabled="{{busy || page >= pages}}">{{t.next}}</button></view>
   </block>
 </view>

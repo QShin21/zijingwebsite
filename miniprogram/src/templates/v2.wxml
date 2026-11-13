@@ -12,11 +12,11 @@
     <template is="zj-date" data="{{month: item.month, day: item.day, week: item.week, ended: item.ended, size: tile ? 'sm' : ''}}" />
     <view class="zj-match-body">
       <view class="zj-tags">
-        <text wx:if="{{item.club}}" class="zj-tag zj-tag-club">社团活动</text>
+        <text wx:if="{{item.club}}" class="zj-tag zj-tag-club">{{t.cClubEvent}}</text>
         <text wx:else class="zj-community-chip" style="--hue: {{item.hue}}">{{item.community}}</text>
         <text wx:if="{{item.category}}" class="zj-tag zj-tag-line">{{item.category}}</text>
-        <text wx:if="{{item.promoted}}" class="zj-tag zj-tag-accent">精选</text>
-        <text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">演示资料</text>
+        <text wx:if="{{item.promoted}}" class="zj-tag zj-tag-accent">{{t.cFeatured}}</text>
+        <text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">{{t.cDemo}}</text>
       </view>
       <text class="zj-match-title">{{item.title}}</text>
       <text class="zj-match-meta">{{item.when}}<block wx:if="{{item.location}}"> · {{item.location}}</block></text>
@@ -29,7 +29,7 @@
     </view>
     <view wx:if="{{archive && item.archiveTarget}}" class="zj-archive-side">
       <text class="zj-arrow" aria-hidden="true">›</text>
-      <button class="zj-archive" catchtap="setArchive" data-target="{{item.archiveTarget}}" data-archived="{{item.archived}}" disabled="{{item.archiving}}" loading="{{item.archiving}}" aria-label="{{item.archived ? '撤销归档' : '归档'}}：{{item.title}}">{{item.archived ? '撤销归档' : '归档'}}</button>
+      <button class="zj-archive" catchtap="setArchive" data-target="{{item.archiveTarget}}" data-archived="{{item.archived}}" disabled="{{item.archiving}}" loading="{{item.archiving}}" aria-label="{{item.archived ? t.cUnarchive : t.cArchive}}{{t.cColon}}{{item.title}}">{{item.archived ? t.cUnarchive : t.cArchive}}</button>
     </view>
   </view>
 </template>
@@ -59,7 +59,7 @@
       <view class="zj-tags">
         <text class="zj-kind">{{item.label}}</text>
         <text wx:if="{{item.community}}" class="zj-community-chip" style="--hue: {{item.hue}}">{{item.community}}</text>
-        <text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">演示资料</text>
+        <text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">{{t.cDemo}}</text>
       </view>
       <text class="zj-card-title">{{item.title}}</text>
       <text wx:if="{{item.summary}}" class="zj-card-summary">{{item.summary}}</text>
@@ -73,7 +73,7 @@
     <view class="zj-cover zj-cover-square" style="--hue: {{item.hue}}">
       <image wx:if="{{item.coverKey && img[item.coverKey]}}" class="zj-cover-image" src="{{img[item.coverKey]}}" mode="aspectFill" lazy-load binderror="imageError" data-key="{{item.coverKey}}" data-url="{{img[item.coverKey]}}" />
       <text wx:else class="zj-cover-initial">{{item.video ? '▶' : item.initial}}</text>
-      <text wx:if="{{item.count > 1}}" class="zj-media-count">{{item.count}} 张</text>
+      <text wx:if="{{item.count > 1}}" class="zj-media-count">{{item.count}}{{t.cPhotosSuffix}}</text>
     </view>
     <view class="zj-card-body">
       <text class="zj-card-title">{{item.title}}</text>
@@ -97,19 +97,19 @@
 </template>
 
 <template name="zj-feed">
-  <template wx:if="{{item.kind === 'honor'}}" is="zj-honor" data="{{item: item, img: img}}" />
-  <template wx:elif="{{item.kind === 'showcase'}}" is="zj-showcase" data="{{item: item, img: img}}" />
-  <template wx:else is="zj-article" data="{{item: item, img: img}}" />
+  <template wx:if="{{item.kind === 'honor'}}" is="zj-honor" data="{{item: item, img: img, t: t}}" />
+  <template wx:elif="{{item.kind === 'showcase'}}" is="zj-showcase" data="{{item: item, img: img, t: t}}" />
+  <template wx:else is="zj-article" data="{{item: item, img: img, t: t}}" />
 </template>
 
 <template name="zj-community">
-  <view class="zj-card zj-community" hover-class="zj-pressed" bindtap="openPage" data-page="{{item.page}}" data-params="{{item.params}}" aria-role="link" aria-label="{{item.title}}社群">
+  <view class="zj-card zj-community" hover-class="zj-pressed" bindtap="openPage" data-page="{{item.page}}" data-params="{{item.params}}" aria-role="link" aria-label="{{item.title}}{{t.cCommunitySuffix}}">
     <template is="zj-cover" data="{{hue: item.hue, initial: item.initial, coverKey: item.coverKey, img: img}}" />
     <view class="zj-card-body">
       <text class="zj-card-title">{{item.title}}</text>
       <text wx:if="{{item.summary}}" class="zj-card-summary zj-clamp">{{item.summary}}</text>
       <text class="zj-small">{{item.facts}}</text>
-      <text wx:if="{{item.officer}}" class="zj-tag zj-tag-accent">我是管理员</text>
+      <text wx:if="{{item.officer}}" class="zj-tag zj-tag-accent">{{t.cOfficer}}</text>
     </view>
   </view>
 </template>
@@ -123,7 +123,7 @@
         <view class="zj-tags">
           <text wx:if="{{item.community}}" class="zj-community-chip" style="--hue: {{item.hue}}">{{item.community}}</text>
           <text class="zj-pill zj-pill-{{item.statusTone}}">{{item.statusLabel}}</text>
-          <text wx:if="{{item.mine}}" class="zj-tag zj-tag-accent">我的队伍</text>
+          <text wx:if="{{item.mine}}" class="zj-tag zj-tag-accent">{{t.cMyTeam}}</text>
         </view>
       </view>
     </view>
@@ -132,10 +132,10 @@
       <view class="zj-roster">
         <text wx:for="{{item.roster}}" wx:key="*this" wx:for-item="letter" class="zj-roster-avatar">{{letter}}</text>
       </view>
-      <text class="zj-small">队员 {{item.members}} · 荣誉 {{item.honors}}</text>
+      <text class="zj-small">{{t.cMembersPrefix}}{{item.members}} · {{t.cHonorsPrefix}}{{item.honors}}</text>
     </view>
     <view wx:if="{{item.call}}" class="zj-team-call">
-      <text class="zj-tag zj-tag-accent">选拔开放</text>
+      <text class="zj-tag zj-tag-accent">{{t.cTrialsOpen}}</text>
       <text class="zj-team-call-title">{{item.call.title}}</text>
       <text wx:if="{{item.call.deadline}}" class="zj-small">{{item.call.deadline}}</text>
     </view>
@@ -149,7 +149,7 @@
     <text wx:if="{{item.summary}}" class="zj-card-summary zj-clamp">{{item.summary}}</text>
     <view class="zj-tags">
       <text class="zj-pill zj-pill-{{item.stateTone}}">{{item.stateLabel}}</text>
-      <text wx:if="{{item.mine}}" class="zj-pill zj-pill-action">我的申请：{{item.mine}}</text>
+      <text wx:if="{{item.mine}}" class="zj-pill zj-pill-action">{{t.cMyApplicationPrefix}}{{item.mine}}</text>
     </view>
     <text wx:if="{{item.deadline}}" class="zj-small">{{item.deadline}}</text>
   </view>
@@ -170,8 +170,8 @@
     </view>
     <text class="zj-small">{{item.next}}</text>
     <view wx:if="{{archive && item.archiveTarget}}" class="zj-archive-row">
-      <text wx:if="{{item.archived}}" class="zj-archived-tag">已归档</text>
-      <button class="zj-archive" catchtap="setArchive" data-target="{{item.archiveTarget}}" data-archived="{{item.archived}}" disabled="{{item.archiving}}" loading="{{item.archiving}}" aria-label="{{item.archived ? '撤销归档' : '归档'}}：{{item.title}}">{{item.archived ? '撤销归档' : '归档'}}</button>
+      <text wx:if="{{item.archived}}" class="zj-archived-tag">{{t.cArchived}}</text>
+      <button class="zj-archive" catchtap="setArchive" data-target="{{item.archiveTarget}}" data-archived="{{item.archived}}" disabled="{{item.archiving}}" loading="{{item.archiving}}" aria-label="{{item.archived ? t.cUnarchive : t.cArchive}}{{t.cColon}}{{item.title}}">{{item.archived ? t.cUnarchive : t.cArchive}}</button>
     </view>
   </view>
 </template>
@@ -196,7 +196,7 @@
 </template>
 
 <template name="zj-loading">
-  <view class="zj-skeleton" aria-role="status" aria-label="正在加载">
+  <view class="zj-skeleton" aria-role="status" aria-label="{{t.cLoading}}">
     <view wx:for="{{[1, 2, 3]}}" wx:key="*this" class="zj-skeleton-row">
       <view class="zj-skeleton-date"></view>
       <view class="zj-skeleton-lines"><view></view><view></view><view></view></view>
@@ -207,7 +207,7 @@
 <template name="zj-error">
   <view class="error" aria-role="alert">
     <text>{{error}}</text>
-    <button class="secondary zj-retry" bindtap="retry">重新加载</button>
+    <button class="secondary zj-retry" bindtap="retry">{{t.cRetry}}</button>
   </view>
 </template>
 
@@ -217,8 +217,8 @@
     <text class="zj-empty-title">{{title}}</text>
     <text class="zj-small">{{body}}</text>
     <view class="actions">
-      <button class="primary" bindtap="login">登录</button>
-      <button class="secondary" bindtap="register">注册账号</button>
+      <button class="primary" bindtap="login">{{t.cLogin}}</button>
+      <button class="secondary" bindtap="register">{{t.cRegister}}</button>
     </view>
   </view>
 </template>

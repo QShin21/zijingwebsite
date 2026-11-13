@@ -233,7 +233,8 @@ describe('荣誉视频单文件multipart：真实HTTP SDK与已保存revision', 
       header: { Authorization: 'JWT synthetic-honor-token' }, formData: { id: '101', revision: '3', action: 'save', team: '51', season: '61',
         title: draft.title, competition: draft.competition, placing: draft.placing, date: draft.date, description: draft.description,
         'caption-0': '合成改说明一', 'removeImage-1': 'on', 'caption-2': '' } });
-    expect(Object.keys(h.uploads[0].header)).toEqual(['Authorization']);
+    // The interface language header joins the credential; the SDK still owns Content-Type.
+    expect(h.uploads[0].header).toEqual({ Authorization: 'JWT synthetic-honor-token', 'x-zijing-locale': 'zh' });
     expect(JSON.stringify(h.uploads[0].formData)).not.toMatch(/data:image|pictures|videoURL|submittedVersion|"images"|"Origin"/);
     h.replyUpload(); expect(await pending).toMatchObject({ record: { id: 101, revision: 4 } });
     expect(h.uploads).toHaveLength(1); noAutomaticWrites(h);

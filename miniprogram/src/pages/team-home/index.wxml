@@ -1,10 +1,10 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/v2.wxml" />
 <view class="page mini-page {{theme === 'dark' ? 'zj-dark' : ''}}">
-  <button class="back" bindtap="back">‹ 返回</button>
-  <template wx:if="{{needsLogin}}" is="zj-login" data="{{title: '登录后查看队伍', body: '队员简介与荣誉档案仅向社团成员展示。'}}" />
-  <template wx:elif="{{loading && !detail}}" is="zj-loading" />
-  <template wx:elif="{{error}}" is="zj-error" data="{{error}}" />
+  <button class="back" bindtap="back">{{t.back}}</button>
+  <template wx:if="{{needsLogin}}" is="zj-login" data="{{title: t.loginTitle, body: t.loginBody, t: t}}" />
+  <template wx:elif="{{loading && !detail}}" is="zj-loading" data="{{t}}" />
+  <template wx:elif="{{error}}" is="zj-error" data="{{error, t}}" />
   <block wx:elif="{{detail}}">
     <view class="team-hero" style="--hue: {{detail.team.hue}}">
       <view class="zj-stage-stripes"></view>
@@ -21,22 +21,22 @@
         </view>
         <text wx:if="{{detail.team.summary}}" class="team-summary">{{detail.team.summary}}</text>
         <view class="zj-scoreboard">
-          <view class="zj-score"><text class="zj-score-value">{{detail.team.members}}</text><text class="zj-score-label">公开队员</text></view>
-          <view class="zj-score"><text class="zj-score-value">{{detail.team.honors}}</text><text class="zj-score-label">已核验荣誉</text></view>
-          <view class="zj-score"><text class="zj-score-value">{{detail.seasons}}</text><text class="zj-score-label">赛季档案</text></view>
+          <view class="zj-score"><text class="zj-score-value">{{detail.team.members}}</text><text class="zj-score-label">{{t.publicMembers}}</text></view>
+          <view class="zj-score"><text class="zj-score-value">{{detail.team.honors}}</text><text class="zj-score-label">{{t.verifiedHonors}}</text></view>
+          <view class="zj-score"><text class="zj-score-value">{{detail.seasons}}</text><text class="zj-score-label">{{t.seasonArchives}}</text></view>
         </view>
         <view class="actions">
-          <button wx:if="{{detail.open}}" class="accent" bindtap="openPage" data-page="{{detail.open.page}}" data-params="{{detail.open.params}}">报名选拔</button>
-          <button wx:if="{{detail.canEditProfile}}" class="zj-stage-ghost" bindtap="editProfile">编辑我的简介</button>
-          <button wx:if="{{detail.canSubmitHonor}}" class="zj-stage-ghost" bindtap="submitHonor">投稿荣誉</button>
-          <button wx:if="{{detail.canManage}}" class="zj-stage-ghost" bindtap="manage">本队工作台</button>
+          <button wx:if="{{detail.open}}" class="accent" bindtap="openPage" data-page="{{detail.open.page}}" data-params="{{detail.open.params}}">{{t.applyTrial}}</button>
+          <button wx:if="{{detail.canEditProfile}}" class="zj-stage-ghost" bindtap="editProfile">{{t.editProfile}}</button>
+          <button wx:if="{{detail.canSubmitHonor}}" class="zj-stage-ghost" bindtap="submitHonor">{{t.submitHonor}}</button>
+          <button wx:if="{{detail.canManage}}" class="zj-stage-ghost" bindtap="manage">{{t.workbench}}</button>
         </view>
       </view>
     </view>
-    <view wx:if="{{detail.membership}}" class="team-membership"><text>{{detail.membership}}</text><button wx:if="{{detail.canEditProfile}}" class="plain" bindtap="leave">办理离队</button></view>
+    <view wx:if="{{detail.membership}}" class="team-membership"><text>{{detail.membership}}</text><button wx:if="{{detail.canEditProfile}}" class="plain" bindtap="leave">{{t.leave}}</button></view>
 
     <view class="zj-section">
-      <template is="zj-section" data="{{title: '队员', count: detail.roster.length}}" />
+      <template is="zj-section" data="{{title: t.members, count: detail.roster.length}}" />
       <view wx:if="{{detail.roster.length}}" class="zj-list">
         <view wx:for="{{detail.roster}}" wx:key="key" class="team-profile">
           <image wx:if="{{item.coverKey && img[item.coverKey]}}" class="team-avatar" src="{{img[item.coverKey]}}" mode="aspectFill" binderror="imageError" data-key="{{item.coverKey}}" data-url="{{img[item.coverKey]}}" />
@@ -48,42 +48,42 @@
           </view>
         </view>
       </view>
-      <template wx:else is="zj-empty" data="{{title: '暂无公开的队员简介', body: '现任队员可以编辑并选择公开本人简介。', icon: '👤'}}" />
+      <template wx:else is="zj-empty" data="{{title: t.noProfilesTitle, body: t.noProfilesBody, icon: '👤'}}" />
     </view>
 
     <view class="zj-section">
-      <template is="zj-section" data="{{title: '荣誉', count: detail.honors.length}}" />
-      <view wx:if="{{detail.honors.length}}" class="zj-list"><block wx:for="{{detail.honors}}" wx:key="key"><template is="zj-honor" data="{{item, img}}" /></block></view>
-      <template wx:else is="zj-empty" data="{{title: '暂无已核验的荣誉', body: '现任队员可以投稿比赛荣誉，经审核后上墙。', icon: '🏆'}}" />
+      <template is="zj-section" data="{{title: t.honors, count: detail.honors.length}}" />
+      <view wx:if="{{detail.honors.length}}" class="zj-list"><block wx:for="{{detail.honors}}" wx:key="key"><template is="zj-honor" data="{{item, img, t}}" /></block></view>
+      <template wx:else is="zj-empty" data="{{title: t.noHonorsTitle, body: t.noHonorsBody, icon: '🏆'}}" />
     </view>
 
     <view wx:if="{{detail.calls.length}}" class="zj-section">
-      <template is="zj-section" data="{{title: '选拔'}}" />
-      <view class="zj-list"><block wx:for="{{detail.calls}}" wx:key="key"><template is="zj-call" data="{{item}}" /></block></view>
+      <template is="zj-section" data="{{title: t.trials}}" />
+      <view class="zj-list"><block wx:for="{{detail.calls}}" wx:key="key"><template is="zj-call" data="{{item, t}}" /></block></view>
     </view>
 
     <view wx:if="{{detail.positions.length}}" class="zj-section">
-      <template is="zj-section" data="{{title: '位置与要求'}}" />
+      <template is="zj-section" data="{{title: t.positions}}" />
       <view wx:for="{{detail.positions}}" wx:key="name" class="record-row">
         <text class="zj-card-title">{{item.name}}</text>
-        <text wx:if="{{item.duties}}" class="zj-card-summary">职责：{{item.duties}}</text>
-        <text wx:if="{{item.requirements}}" class="zj-card-summary">要求：{{item.requirements}}</text>
-        <text wx:if="{{item.commitment}}" class="zj-card-summary">投入：{{item.commitment}}</text>
-        <text wx:if="{{item.arrangement}}" class="zj-card-summary">安排：{{item.arrangement}}</text>
+        <text wx:if="{{item.duties}}" class="zj-card-summary">{{t.dutiesPrefix}}{{item.duties}}</text>
+        <text wx:if="{{item.requirements}}" class="zj-card-summary">{{t.requirementsPrefix}}{{item.requirements}}</text>
+        <text wx:if="{{item.commitment}}" class="zj-card-summary">{{t.commitmentPrefix}}{{item.commitment}}</text>
+        <text wx:if="{{item.arrangement}}" class="zj-card-summary">{{t.arrangementPrefix}}{{item.arrangement}}</text>
       </view>
     </view>
 
     <view wx:if="{{detail.events.length}}" class="zj-section">
-      <template is="zj-section" data="{{title: '相关活动'}}" />
-      <block wx:for="{{detail.events}}" wx:key="key"><template is="zj-match" data="{{item, img}}" /></block>
+      <template is="zj-section" data="{{title: t.relatedEvents}}" />
+      <block wx:for="{{detail.events}}" wx:key="key"><template is="zj-match" data="{{item, img, t}}" /></block>
     </view>
 
     <view wx:if="{{detail.seasonList.length}}" class="zj-section">
-      <template is="zj-section" data="{{title: '赛季档案'}}" />
+      <template is="zj-section" data="{{title: t.seasonArchives}}" />
       <view wx:for="{{detail.seasonList}}" wx:key="id" class="record-row">
         <text class="archive-date">{{item.date}}</text>
         <text class="zj-card-title">{{item.title}}</text>
-        <text class="zj-card-summary">{{item.members || '本赛季阵容未公开。'}}</text>
+        <text class="zj-card-summary">{{item.members || t.rosterHidden}}</text>
       </view>
     </view>
   </block>

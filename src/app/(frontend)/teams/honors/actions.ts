@@ -61,8 +61,8 @@ export async function saveTeamHonorAction(
       "/teams/honors/" + id,
       form,
       state === "pending"
-        ? "荣誉已提交，等待对应社群管理员审核。"
-        : "草稿已保存；须提交并由他人审核后公开。",
+        ? "荣誉已提交，等待对应社群管理员审核。" // i18n-exempt: Chinese action contract (tests, redirect message query); pages translate via ./messages
+        : "草稿已保存；须提交并由他人审核后公开。", // i18n-exempt: Chinese action contract (tests, redirect message query); pages translate via ./messages
     ),
   );
 }
@@ -73,7 +73,7 @@ async function changeHonor(form: FormData) {
   const id = honorID(value("id")),
     action = value("action") as HonorAction;
   if (!["withdraw", "approve", "return", "reject", "hide"].includes(action))
-    throw new APIError("荣誉操作无效", 400);
+    throw new APIError("荣誉操作无效", 400); // i18n-exempt: Chinese action contract (tests, redirect message query); pages translate via ./messages
   await teamHonorService.change(p, user, action, {
     id,
     revision: value("revision"),
@@ -81,11 +81,11 @@ async function changeHonor(form: FormData) {
     note: value("note"),
   });
   const results = {
-    withdraw: "已撤回待审荣誉。",
-    approve: "荣誉已批准并实时加入队伍档案。",
-    return: "已退回，作者可按说明修改后重提。",
-    reject: "已拒绝，审核说明已保存。",
-    hide: "荣誉已隐藏并从公开档案撤下。",
+    withdraw: "已撤回待审荣誉。", // i18n-exempt: Chinese action contract (tests, redirect message query); pages translate via ./messages
+    approve: "荣誉已批准并实时加入队伍档案。", // i18n-exempt: Chinese action contract (tests, redirect message query); pages translate via ./messages
+    return: "已退回，作者可按说明修改后重提。", // i18n-exempt: Chinese action contract (tests, redirect message query); pages translate via ./messages
+    reject: "已拒绝，审核说明已保存。", // i18n-exempt: Chinese action contract (tests, redirect message query); pages translate via ./messages
+    hide: "荣誉已隐藏并从公开档案撤下。", // i18n-exempt: Chinese action contract (tests, redirect message query); pages translate via ./messages
   };
   return results[action as keyof typeof results];
 }
@@ -149,16 +149,16 @@ async function hideLegacyHonor(form: FormData) {
     });
     const game = relationID(record.game) ?? relationID(team.game);
     if (!canReviewShowcase(req.user, game))
-      throw new APIError("无权撤下此社群的历史荣誉", 403);
+      throw new APIError("无权撤下此社群的历史荣誉", 403); // i18n-exempt: Chinese action contract (tests, redirect message query); pages translate via ./messages
     if (
       String(form.get("revision") ?? "") !== record.updatedAt ||
       record._status !== "published" ||
       !record.verified
     )
-      throw new APIError("历史荣誉已更新，请刷新后核对", 409);
+      throw new APIError("历史荣誉已更新，请刷新后核对", 409); // i18n-exempt: Chinese action contract (tests, redirect message query); pages translate via ./messages
     const note = String(form.get("note") ?? "").trim();
     if (!note || note.length > 500)
-      throw new APIError("请填写 1–500 字的隐藏说明", 400);
+      throw new APIError("请填写 1–500 字的隐藏说明", 400); // i18n-exempt: Chinese action contract (tests, redirect message query); pages translate via ./messages
     await p.update({
       collection: "honors",
       id,
@@ -183,7 +183,7 @@ export async function hideLegacyTeamHonorResultAction(form: FormData) {
   try {
     await hideLegacyHonor(form);
     invalidateHonors();
-    const message = "历史荣誉已撤下，原作者、赛季和内容保留。";
+    const message = "历史荣誉已撤下，原作者、赛季和内容保留。"; // i18n-exempt: Chinese action contract (tests, redirect message query); pages translate via ./messages
     return {
       ok: true,
       message,

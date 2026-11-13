@@ -5,99 +5,99 @@
     <zj-campus scene="{{scene}}" palette="{{palette}}" variant="home" />
     <view class="home-nav" style="top: {{statusBar}}px; height: {{navHeight}}px">
       <text class="home-mark">紫</text>
-      <text class="home-brand">竞在紫荆</text>
+      <text class="home-brand">{{t.brand}}</text>
     </view>
     <view class="zj-stage-content">
       <view class="zj-stage-kicker">
-        <text wx:if="{{home.today}}">今天 {{home.today}}</text>
+        <text wx:if="{{home.today}}">{{t.todayPrefix}}{{home.today}}</text>
       </view>
       <text wx:if="{{home.title}}" class="zj-stage-title">{{home.title}}</text>
-      <text wx:else class="zj-stage-title">竞在<text class="zj-stage-title-accent">紫荆</text></text>
-      <text class="zj-stage-lead">{{home ? home.subtitle : '一起玩，认真赢。'}}</text>
+      <text wx:else class="zj-stage-title">{{t.heroLead}}<text class="zj-stage-title-accent">{{t.heroAccent}}</text></text>
+      <text class="zj-stage-lead">{{home ? home.subtitle : t.heroSubtitle}}</text>
       <view class="zj-stage-actions">
-        <button class="accent" bindtap="openPage" data-page="events">查看日程</button>
-        <button wx:if="{{user}}" class="zj-stage-ghost" bindtap="openPage" data-page="account">{{home.campus ? '我的待办' : '我的报名'}}</button>
-        <button wx:else class="zj-stage-ghost" bindtap="login">登录</button>
+        <button class="accent" bindtap="openPage" data-page="events">{{t.viewSchedule}}</button>
+        <button wx:if="{{user}}" class="zj-stage-ghost" bindtap="openPage" data-page="account">{{home.campus ? t.myTodo : t.mySignups}}</button>
+        <button wx:else class="zj-stage-ghost" bindtap="login">{{t.login}}</button>
       </view>
       <view wx:if="{{home.me}}" class="zj-scoreboard">
-        <view class="zj-score" bindtap="openPage" data-page="account" aria-role="link" aria-label="待办 {{home.me.todo}} 项"><text class="zj-score-value">{{home.me.todo}}</text><text class="zj-score-label">待办</text></view>
-        <view class="zj-score" bindtap="openPage" data-page="account" aria-role="link" aria-label="已报名 {{home.me.upcomingSignups}} 场"><text class="zj-score-value">{{home.me.upcomingSignups}}</text><text class="zj-score-label">已报名</text></view>
-        <view wx:if="{{home.campus}}" class="zj-score" bindtap="openPage" data-page="account" aria-role="link" aria-label="待审核 {{home.me.reviewPending}} 项"><text class="zj-score-value">{{home.me.reviewPending}}</text><text class="zj-score-label">待审核</text></view>
+        <view class="zj-score" bindtap="openPage" data-page="account" aria-role="link" aria-label="{{t.todo}} {{home.me.todo}}{{t.itemsSuffix}}"><text class="zj-score-value">{{home.me.todo}}</text><text class="zj-score-label">{{t.todo}}</text></view>
+        <view class="zj-score" bindtap="openPage" data-page="account" aria-role="link" aria-label="{{t.signedUp}} {{home.me.upcomingSignups}}{{t.eventsSuffix}}"><text class="zj-score-value">{{home.me.upcomingSignups}}</text><text class="zj-score-label">{{t.signedUp}}</text></view>
+        <view wx:if="{{home.campus}}" class="zj-score" bindtap="openPage" data-page="account" aria-role="link" aria-label="{{t.pending}} {{home.me.reviewPending}}{{t.itemsSuffix}}"><text class="zj-score-value">{{home.me.reviewPending}}</text><text class="zj-score-label">{{t.pending}}</text></view>
       </view>
     </view>
   </view>
 
-  <template wx:if="{{loading && !home}}" is="zj-loading" />
-  <template wx:if="{{error}}" is="zj-error" data="{{error}}" />
+  <template wx:if="{{loading && !home}}" is="zj-loading" data="{{t}}" />
+  <template wx:if="{{error}}" is="zj-error" data="{{error, t}}" />
 
   <block wx:if="{{home}}">
     <view wx:if="{{home.spotlight}}" class="home-spotlight">
-      <text class="home-spotlight-label">✦ 焦点活动</text>
-      <template is="zj-match" data="{{item: home.spotlight, img}}" />
+      <text class="home-spotlight-label">{{t.spotlight}}</text>
+      <template is="zj-match" data="{{item: home.spotlight, img, t}}" />
     </view>
 
     <view wx:if="{{!home.signedIn}}" class="zj-section home-join">
-      <text class="zj-section-title home-join-title">注册后报名活动</text>
-      <view class="actions"><button class="accent" bindtap="register">注册账号</button><button class="zj-stage-ghost" bindtap="login">已有账号，登录</button></view>
+      <text class="zj-section-title home-join-title">{{t.joinTitle}}</text>
+      <view class="actions"><button class="accent" bindtap="register">{{t.register}}</button><button class="zj-stage-ghost" bindtap="login">{{t.loginExisting}}</button></view>
     </view>
 
     <!-- CMS-configured blocks: order, titles and visibility from site.homeSections; content access stays server-side. -->
     <block wx:for="{{home.sections}}" wx:key="kind" wx:for-item="section">
       <view wx:if="{{section.kind === 'upcoming'}}" class="zj-section" data-section="upcoming">
-        <template is="zj-section" data="{{title: section.title, more: '完整日程', page: 'events'}}" />
+        <template is="zj-section" data="{{title: section.title, more: t.fullSchedule, page: 'events'}}" />
         <scroll-view wx:if="{{home.upcoming.length}}" scroll-x class="zj-rail" enhanced show-scrollbar="{{false}}">
           <view class="zj-rail-inner">
             <block wx:for="{{home.upcoming}}" wx:key="key">
-              <template is="zj-match" data="{{item, img, tile: true}}" />
+              <template is="zj-match" data="{{item, img, tile: true, t}}" />
             </block>
           </view>
         </scroll-view>
-        <template wx:else is="zj-empty" data="{{title: '近期暂无安排', body: '活动发布后会显示在这里。', icon: '📅', action: home.campus ? '浏览社群' : '', page: 'communities'}}" />
+        <template wx:else is="zj-empty" data="{{title: t.upcomingEmptyTitle, body: t.upcomingEmptyBody, icon: '📅', action: home.campus ? t.browseCommunities : '', page: 'communities'}}" />
       </view>
       <view wx:elif="{{section.kind === 'open' && (home.calls.length || home.openSignups.length)}}" class="zj-section" data-section="open">
-        <template is="zj-section" data="{{title: section.title, more: home.campus ? '选拔中心' : '查看日程', page: home.campus ? 'recruitment' : 'events'}}" />
+        <template is="zj-section" data="{{title: section.title, more: home.campus ? t.trialsCenter : t.viewSchedule, page: home.campus ? 'recruitment' : 'events'}}" />
         <view class="zj-list">
-          <block wx:for="{{home.calls}}" wx:key="key"><template is="zj-call" data="{{item}}" /></block>
-          <block wx:for="{{home.openSignups}}" wx:key="key"><template is="zj-match" data="{{item, img}}" /></block>
+          <block wx:for="{{home.calls}}" wx:key="key"><template is="zj-call" data="{{item, t}}" /></block>
+          <block wx:for="{{home.openSignups}}" wx:key="key"><template is="zj-match" data="{{item, img, t}}" /></block>
         </view>
       </view>
       <view wx:elif="{{section.kind === 'notices'}}" class="zj-section" data-section="notices">
-        <template is="zj-section" data="{{title: section.title, more: '全部公告', page: 'list', params: links.announcements}}" />
+        <template is="zj-section" data="{{title: section.title, more: t.allAnnouncements, page: 'list', params: links.announcements}}" />
         <view wx:if="{{home.notices.length}}" class="zj-panel">
-          <block wx:for="{{home.notices}}" wx:key="key"><template is="zj-notice" data="{{item}}" /></block>
+          <block wx:for="{{home.notices}}" wx:key="key"><template is="zj-notice" data="{{item, t}}" /></block>
         </view>
-        <text wx:else class="zj-small">确认后的社团公告会在这里发布。</text>
+        <text wx:else class="zj-small">{{t.noticesEmpty}}</text>
       </view>
       <view wx:elif="{{section.kind === 'promoted' && home.promoted.count}}" class="zj-section" data-section="promoted">
         <template is="zj-section" data="{{title: section.title}}" />
         <view wx:if="{{home.promoted.events.length}}" class="zj-list">
-          <block wx:for="{{home.promoted.events}}" wx:key="key"><template is="zj-match" data="{{item, img}}" /></block>
+          <block wx:for="{{home.promoted.events}}" wx:key="key"><template is="zj-match" data="{{item, img, t}}" /></block>
         </view>
         <view wx:if="{{home.promoted.notices.length}}" class="zj-panel">
-          <block wx:for="{{home.promoted.notices}}" wx:key="key"><template is="zj-notice" data="{{item}}" /></block>
+          <block wx:for="{{home.promoted.notices}}" wx:key="key"><template is="zj-notice" data="{{item, t}}" /></block>
         </view>
         <view wx:if="{{home.promoted.showcases.length}}" class="zj-grid2">
-          <block wx:for="{{home.promoted.showcases}}" wx:key="key"><template is="zj-showcase" data="{{item, img}}" /></block>
+          <block wx:for="{{home.promoted.showcases}}" wx:key="key"><template is="zj-showcase" data="{{item, img, t}}" /></block>
         </view>
       </view>
       <view wx:elif="{{section.kind === 'communities' && home.communities}}" class="zj-section" data-section="communities">
-        <template is="zj-section" data="{{title: section.title, more: '全部社群', page: 'communities'}}" />
+        <template is="zj-section" data="{{title: section.title, more: t.allCommunities, page: 'communities'}}" />
         <view wx:if="{{home.communities.length}}" class="zj-grid2">
-          <block wx:for="{{home.communities}}" wx:key="key"><template is="zj-community" data="{{item, img}}" /></block>
+          <block wx:for="{{home.communities}}" wx:key="key"><template is="zj-community" data="{{item, img, t}}" /></block>
         </view>
-        <template wx:else is="zj-empty" data="{{title: '社群正在筹备', body: '想组织新的游戏社群，可以提交组织申请。'}}" />
+        <template wx:else is="zj-empty" data="{{title: t.communitiesEmptyTitle, body: t.communitiesEmptyBody}}" />
       </view>
       <view wx:elif="{{section.kind === 'highlights' && home.highlights.length}}" class="zj-section" data-section="highlights">
-        <template is="zj-section" data="{{title: section.title, more: '全部动态', page: 'list', params: links.news}}" />
+        <template is="zj-section" data="{{title: section.title, more: t.allNews, page: 'list', params: links.news}}" />
         <view class="zj-list">
-          <block wx:for="{{home.highlights}}" wx:key="key"><template is="zj-feed" data="{{item, img}}" /></block>
+          <block wx:for="{{home.highlights}}" wx:key="key"><template is="zj-feed" data="{{item, img, t}}" /></block>
         </view>
       </view>
       <view wx:elif="{{section.kind === 'about' && home.about}}" class="zj-section" data-section="about">
-        <template is="zj-section" data="{{title: section.title, more: '了解社团', page: 'fixed', params: links.about}}" />
+        <template is="zj-section" data="{{title: section.title, more: t.aboutClub, page: 'fixed', params: links.about}}" />
         <text class="muted">{{home.about}}</text>
       </view>
     </block>
-    <text class="bottom-note">{{home.footer || '竞在紫荆 · 一起玩，认真赢。'}}</text>
+    <text class="bottom-note">{{home.footer || t.footer}}</text>
   </block>
 </view>

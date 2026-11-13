@@ -1,6 +1,7 @@
+const i18n = (() => { try { const value = require('../../lib/i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { t: zh => zh, message: value => value, locale: () => 'zh', bind() {}, navTitle() {}, unbind() {}, subscribe: () => () => {} }; })();
 function withVisualTheme(definition) {
   try { return require('../../lib/theme').page(definition); }
-  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: '外观设置暂不可用，请重新打开小程序。' } }; }
+  catch { return { ...definition, data: { ...definition.data, theme: 'light', themePageStyle: '', themeUnavailable: true, themeError: i18n.message('外观设置暂不可用，请重新打开小程序。') } }; }
 }
 const v2 = require('../../lib/v2');
 const images = require('../../lib/v2-images');
@@ -8,6 +9,35 @@ const session = require('../../lib/session');
 const navigation = require('../../lib/navigation');
 const { actions } = require('../../lib/page');
 const views = ['teams', 'honors', 'recruitment'];
+const text = {
+  eyebrow: ['TEAMS · 代表队中心', 'TEAMS'],
+  title: ['代表队', 'Teams'],
+  subtitle: ['队伍、荣誉墙与选拔中心。想上场？到选拔中心找开放批次。', 'Teams, the honor wall and tryouts. Want to play? Find an open batch in Tryouts.'],
+  tabTeams: ['队伍', 'Teams'],
+  tabHonors: ['荣誉墙', 'Honor wall'],
+  tabRecruitment: ['选拔中心', 'Tryouts'],
+  loginTitle: ['登录后查看代表队与荣誉', 'Sign in to view teams and honors'],
+  loginBody: ['队员简介与荣誉档案仅向社团成员展示；选拔中心可直接浏览。', 'Member profiles and honors are visible to club members only; Tryouts are open to everyone.'],
+  teamsEmptyTitle: ['还没有公开的代表队', 'No public teams yet'],
+  teamsEmptyBody: ['代表队由社群管理员申请建立，审核通过后出现在这里。', 'Community admins apply to found teams; approved teams appear here.'],
+  myTeamWork: ['我的代表队事务', 'My team tasks'],
+  honorsEmptyTitle: ['暂无已核验的荣誉', 'No verified honors yet'],
+  honorsEmptyBody: ['现任队员可以投稿比赛荣誉，经审核后上墙。', 'Current members can submit honors; approved ones go on the wall.'],
+  honorWorkspace: ['我的荣誉投稿与审核', 'My honor submissions and reviews'],
+  staffTitle: ['骨干招新', 'Staff recruitment'],
+  staffEmptyTitle: ['当前没有骨干招新批次', 'No staff recruitment batches right now'],
+  staffEmptyBody: ['新的批次发布后会出现在这里。', 'New batches will appear here once published.'],
+  callsTitle: ['代表队选拔', 'Team trials'],
+  callsEmptyTitle: ['当前没有开放的代表队选拔', 'No open team trials right now'],
+  callsEmptyBody: ['可以先浏览代表队与往期安排。', 'Browse the teams and past schedules in the meantime.'],
+  mineTitle: ['我的申请进度', 'My application progress'],
+  workspace: ['入队申请与成员记录', 'Team applications and memberships'],
+  staffPage: ['骨干招新与我的回执', 'Staff recruitment and my receipts'],
+  loginCalls: ['登录查看代表队选拔', 'Sign in to view team trials'],
+  loadingMore: ['加载中…', 'Loading…'],
+  retryMore: ['重试加载更多', 'Retry loading more'],
+  loadMore: ['加载更多', 'Load more'],
+};
 
 function yearGroups(items) {
   const groups = [];
@@ -23,15 +53,17 @@ function yearGroups(items) {
 Page(withVisualTheme({
   data: { view: 'teams', user: null, docs: [], groups: [], staff: [], calls: [], mine: [], page: 0, hasMore: false, loading: false, loadingMore: false, error: '', loadMoreError: '', img: {} },
   ...actions,
-  onLoad(options) { if (views.includes(options && options.view)) this.setData({ view: options.view }); },
+  onLoad(options) { i18n.bind(this, text); if (views.includes(options && options.view)) this.setData({ view: options.view }); },
   onShow() {
+    const relocalized = (i18n.refreshIfStale ? i18n.refreshIfStale(this) : false);
+    i18n.navTitle('代表队', 'Teams');
     const user = session.user();
     const campus = session.campus(user);
     this._visible = campus;
     this.setData({ campus });
     if (!campus) return navigation.go('events');
     const identity = String(user.id);
-    if (this._identity === identity && this._loaded) return;
+    if (this._identity === identity && this._loaded && !relocalized) return;
     this._identity = identity;
     this.setData({ user });
     return this.load();
@@ -76,9 +108,9 @@ Page(withVisualTheme({
       this.setData({ docs, groups: view === 'honors' ? yearGroups(docs) : [], page: result.page, hasMore: result.hasNextPage, loading: false, loadingMore: false });
     } catch (cause) {
       if (!alive()) return;
-      if (more) this.setData({ loadingMore: false, loadMoreError: (cause && cause.message) || '加载更多失败' });
-      else this.setData({ loading: false, error: (cause && cause.message) || '内容暂时无法加载' });
+      if (more) this.setData({ loadingMore: false, loadMoreError: (cause && cause.message) || i18n.t('加载更多失败', 'Could not load more') });
+      else this.setData({ loading: false, error: (cause && cause.message) || i18n.t('内容暂时无法加载', 'Content could not be loaded') });
     }
   },
-  onShareAppMessage() { return { title: '紫荆代表队', path: '/pages/teams/index' }; },
+  onShareAppMessage() { return { title: i18n.t('紫荆代表队', 'Zijing Teams'), path: '/pages/teams/index' }; },
 }));

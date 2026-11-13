@@ -1,0 +1,167 @@
+// English renderings of server, network and validation messages. Server APIs keep their
+// Chinese contract; the client translates at display time and falls back to the Chinese text.
+const exact = {
+  // Transport (lib/http.js) and shared page feedback.
+  '请求地址无效': 'Invalid request address.',
+  '请求方式不受小程序支持': 'This request method is not supported in the mini program.',
+  '请先登录可用账号': 'Please sign in with an active account.',
+  '请先登录': 'Please sign in first.',
+  '归档对象无效': 'Invalid archive target.',
+  '归档状态无效': 'Invalid archive state.',
+  '记录不可访问': 'Record unavailable.',
+  '当前账号没有此操作权限': 'This account does not have permission for this action.',
+  '无权进行此操作': 'You do not have permission for this action.',
+  '内容暂不可用': 'This content is not available right now.',
+  '内容暂时不可访问': 'This content is not available right now.',
+  '请求较多，请稍后再试': 'Too many requests. Please try again later.',
+  '操作过于频繁，请稍后重试': 'Too many requests. Please try again later.',
+  '服务暂时不可用，请稍后重试': 'The service is temporarily unavailable. Please try again later.',
+  '操作未完成，请核对内容后重试': 'The action was not completed. Check your input and try again.',
+  '此功能需要更新网站服务接口': 'This feature needs an updated website service.',
+  '连接失败，请检查网络后重试': 'Connection failed. Check your network and try again.',
+  '上传结果暂不可用，请重新加载核对': 'The upload result is unavailable. Reload to check.',
+  '微信未允许当前图片上传域名，请联系负责人检查小程序后台设置': 'WeChat has not allowed this upload domain. Ask the maintainer to check the mini program settings.',
+  '上传未完成，请检查网络并重新加载核对': 'The upload did not finish. Check your network and reload to check.',
+  '图片暂不可用': 'The image is not available.',
+  '图片加载失败': 'The image failed to load.',
+  '加载失败，请重试': 'Failed to load. Please try again.',
+  '请求内容无效，请检查后重试': 'The request is invalid. Check it and try again.',
+  '内容已更新或已处理，请刷新后重试': 'The content was updated or already handled. Refresh and try again.',
+  '请求内容过大': 'The request is too large.',
+  '不支持此文件格式': 'This file format is not supported.',
+  '请从本站操作': 'Please use the official website or mini program for this action.',
+  '确认未完成，请重试': 'Confirmation was not completed. Please try again.',
+  '页面或账号已更新，请重新操作': 'The page or account changed. Please try again.',
+  '登录未完成，请重试': 'Sign-in was not completed. Please try again.',
+  '外观设置暂不可用，请重新打开小程序。': 'Appearance settings are unavailable. Please reopen the mini program.',
+  // Privacy authorization (lib/privacy.js).
+  '隐私授权未完成，图片未读取；可查看隐私说明后重新选择': 'Privacy authorization was not completed, so no image was read. Review the privacy notice and choose again.',
+  '隐私说明正在处理，请先完成或取消当前操作': 'The privacy notice is open. Finish or cancel it first.',
+  '微信隐私授权正在结束，请稍后重新选择': 'WeChat privacy authorization is finishing. Choose again shortly.',
+  '当前微信版本暂不支持隐私授权，请升级微信后重试': 'This WeChat version does not support privacy authorization. Update WeChat and try again.',
+  '页面或隐私授权状态已更新，请重新操作': 'The page or privacy status changed. Please try again.',
+  '平台隐私设置读取超时，请重试': 'Reading the privacy settings timed out. Please try again.',
+  '微信平台隐私指引尚未配置，请联系负责人': 'The WeChat privacy guide is not configured yet. Please contact the maintainer.',
+  '平台隐私设置暂不可用，请重试': 'Privacy settings are unavailable. Please try again.',
+  '当前微信版本暂不支持查看平台隐私指引，请升级微信后重试': 'This WeChat version cannot show the privacy guide. Update WeChat and try again.',
+  '隐私指引暂不可用，请稍后重试': 'The privacy guide is unavailable. Please try again later.',
+  // Questionnaire validation (generated shared code and server).
+  '活动未公开或已移除': 'This activity is not public or has been removed.',
+  '无权执行此活动报名操作': 'You do not have permission for this sign-up action.',
+  '报名表已变化，请刷新后重试': 'The form has changed. Refresh and try again.',
+  '请填写报名信息': 'Please fill in the form.',
+  '报名内容过长': 'The answers are too long.',
+  '请选择有效选项': 'Choose a valid option.',
+  '互斥选项不能与其他选项同时选择': 'This option cannot be combined with other options.',
+  '填写格式不正确': 'The format is incorrect.',
+  '请检查必填内容、长度或选项': 'Check required answers, length or options.',
+  '请输入有效邮箱地址': 'Enter a valid email address.',
+  '请输入 11 位中国大陆手机号': 'Enter an 11-digit mainland China mobile number.',
+  '请输入有效数字': 'Enter a valid number.',
+  '信息组填写格式无效': 'The entry list format is invalid.',
+  '字段已变化，请刷新后填写': 'The fields have changed. Refresh before filling in.',
+  '请填写此条记录，或移除多余的空记录': 'Complete this entry or remove the empty entry.',
+  '子题填写格式无效': 'The sub-question format is invalid.',
+  '子题已变化，请刷新': 'The sub-questions have changed. Please refresh.',
+  '请完成排序': 'Please complete the ranking.',
+  '请为所有选项选择不同名次': 'Give every option a different rank.',
+  '填写格式无效': 'The answer format is invalid.',
+  '请填写此题': 'Please answer this question.',
+  '答案过长': 'The answer is too long.',
+  '数值不符合步长': 'The number does not match the allowed step.',
+  '请输入有效日期': 'Enter a valid date.',
+  '请输入有效时间': 'Enter a valid time.',
+  '格式无效': 'Invalid format.',
+  '选项无效': 'Invalid option.',
+  '报名尚未开始': 'Sign-up has not opened yet.',
+  '报名已截止': 'Sign-up has closed.',
+  '报名已关闭': 'Sign-up is closed.',
+  // Sign-up and activity state labels produced by the server.
+  '报名开放': 'Sign-up open',
+  '未启用报名': 'Sign-up not enabled',
+  '报名状态待核对': 'Checking sign-up status',
+  '即将开始': 'Upcoming',
+  '尚未开始': 'Not started',
+  '进行中': 'In progress',
+  '已结束': 'Ended',
+  '已取消': 'Cancelled',
+  '已延期': 'Postponed',
+  '已截止': 'Closed',
+  '已关闭': 'Closed',
+  '待公布': 'TBA',
+  '暂无报名渠道': 'No sign-up channel yet',
+  '未填写': 'Not answered',
+  // Write receipts.
+  '作答修改已保存': 'Your changes were saved.',
+  '报名成功，已确认报名': 'Signed up. Your sign-up is confirmed.',
+  '报名已保存': 'Sign-up saved.',
+  '报名问卷已保存': 'The sign-up questionnaire was saved.',
+  '问卷草稿已保存，需发布负责人审核发布后生效': 'Draft saved. It takes effect after a publisher reviews and publishes it.',
+  '已中签': 'Selected',
+  '未中签': 'Not selected',
+  '未参与本次抽签': 'Not in this draw',
+  // Account, auth and community server messages.
+  '请输入注册时验证的完整邮箱': 'Enter the full email address you verified at registration.',
+  '邮件暂不可用，请稍后联系网站管理员': 'Email is unavailable right now. Please contact the site admin later.',
+  '请核对邮箱、昵称和密码；密码至少 8 位，两次输入需一致。': 'Check your email, nickname and password. The password needs at least 8 characters and both entries must match.',
+  '该邮箱已注册，请登录或找回密码': 'This email is already registered. Sign in or reset your password.',
+  '该昵称已被使用，请更换昵称': 'This nickname is taken. Choose another one.',
+  '验证码发送失败，请稍后重试或联系网站管理员。': 'The code could not be sent. Try again later or contact the site admin.',
+  '验证码错误、过期或尝试次数过多，请核对或重新发送。': 'The code is wrong, expired or has had too many attempts. Check it or send a new one.',
+  '注册未完成，邮箱或昵称可能已被使用。请返回检查后重新验证。': 'Registration was not completed; the email or nickname may already be in use. Go back, check and verify again.',
+  '昵称、邮箱或密码错误，请核对后重试。': 'Wrong nickname, email or password. Check and try again.',
+  '请核对注册邮箱与新密码；密码至少 8 位，两次输入需一致。': 'Check your registered email and new password. The password needs at least 8 characters and both entries must match.',
+  '密码更新未确认完成，请重试；如果已完成更新，请使用新密码登录。': 'The password update was not confirmed. Try again; if it already changed, sign in with the new password.',
+  '请上传 2 MB 以内的 PNG、JPEG 或 WebP 微信名片二维码。': 'Upload a WeChat contact-card QR code as PNG, JPEG or WebP, up to 2 MB.',
+  '由于入社流程规定，必须展示管理联系方式': 'The joining process requires showing your contact card to the admins.',
+  '决定无效': 'Invalid decision.',
+  '无权在此社群发布': 'You cannot publish in this community.',
+  '请选择有效的可见范围': 'Choose a valid visibility.',
+  '请检查配图格式。': 'Check the image format.',
+  '无权管理此活动或通知': 'You cannot manage this event or notice.',
+  '发布未成功，请核对内容和权限': 'Publishing failed. Check the content and your permissions.',
+  '管理操作未成功': 'The admin action failed.',
+  '最多 6 张 PNG、JPEG、WebP 照片，每张 2 MB 以内': 'Up to 6 PNG, JPEG or WebP photos, 2 MB each.',
+  '请填写标题': 'Please enter a title.',
+  '上传视频与视频链接请选择一种': 'Choose either an uploaded video or a video link, not both.',
+  '视频不超过 10 MB，图片与视频合计不超过 12 MB': 'Videos up to 10 MB; images and video together up to 12 MB.',
+  '审核决定无效': 'Invalid review decision.',
+  '审核未成功，请刷新后重试': 'Review failed. Refresh and try again.',
+  '审核已保存': 'Review saved.',
+  '请选择 10 MB 以内的 MP4 视频': 'Choose an MP4 video up to 10 MB.',
+  '名片最大 2 MB': 'Contact cards can be up to 2 MB.',
+  '已有同一申请，请在我的申请中继续处理。': 'The same application already exists. Continue it under My applications.',
+  '服务器暂时无法保存申请，请稍后重试；已填写的资料会保留。': 'The server cannot save the application right now. Try again later; your answers are kept.',
+  '服务器暂时无法确认操作结果。填写内容已保留，请先刷新已保存记录核对后再重试。': 'The server could not confirm the result. Your input is kept; refresh the saved record to check before retrying.',
+  '处理结果暂不可用，请刷新后核对': 'The result is unavailable. Refresh to check.',
+};
+
+const patterns = [
+  [/^请选择 (\d+)–(\d+) 项$/, (a, b) => `Choose ${a}–${b} options.`],
+  [/^至少填写 (\d+) 字$/, a => `Enter at least ${a} characters.`],
+  [/^最多填写 (\d+) 条记录$/, a => `At most ${a} entries.`],
+  [/^至少填写 (\d+) 条记录$/, a => `At least ${a} entries.`],
+  [/^请填写范围内的数字（(.+) 至 (.+)）$/, (a, b) => `Enter a number in range (${a === '不限' ? 'any' : a} to ${b === '不限' ? 'any' : b}).`],
+  [/^第 (\d+) 条：([\s\S]+)$/, (a, rest) => `Entry ${a}: ${translate(rest)}`],
+  [/^请完成“(.+)”$/, row => `Please complete “${row}”.`],
+  [/^请检查“(.+)”$/, row => `Please check “${row}”.`],
+];
+
+function translate(message) {
+  if (typeof message !== 'string' || !message) return message;
+  const trimmed = message.trim();
+  if (exact[trimmed]) return exact[trimmed];
+  for (const [pattern, render] of patterns) {
+    const match = pattern.exec(trimmed);
+    if (match) return render(...match.slice(1));
+  }
+  // "题目：提示" keeps the (user-authored) question label and translates the hint.
+  const field = /^([^：]+)：([\s\S]+)$/.exec(trimmed);
+  if (field) {
+    const rest = translate(field[2]);
+    if (rest !== field[2]) return `${field[1]}: ${rest}`;
+  }
+  return message;
+}
+
+module.exports = { exact, translate };

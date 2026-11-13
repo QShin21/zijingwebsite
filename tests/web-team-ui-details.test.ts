@@ -1,3 +1,4 @@
+import { i18nStub } from "./i18n-stubs";
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -24,6 +25,7 @@ function evaluate(path: string, dependencies: Record<string, unknown>) {
     exports,
     require: (name: string) => {
       if (name in dependencies) return dependencies[name];
+      if (i18nStub(name)) return i18nStub(name);
       if (name.endsWith(".css")) return cssModule;
       if (name.startsWith("@/") || name.startsWith(".")) return {};
       if (name === "next/link") return { __esModule: true, default: ({ href, children }: { href: string; children: unknown }) => createElement("a", { href }, children as never) };

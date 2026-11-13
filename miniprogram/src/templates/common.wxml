@@ -1,19 +1,19 @@
 <!-- V2 shared states and content cards (template names, data and handlers unchanged). -->
 <template name="feedback">
-  <view wx:if="{{loading}}" class="zj-skeleton" aria-role="status" aria-label="正在读取内容">
+  <view wx:if="{{loading}}" class="zj-skeleton" aria-role="status" aria-label="{{t.cReading}}">
     <view class="zj-skeleton-row"><view class="zj-skeleton-date"></view><view class="zj-skeleton-lines"><view></view><view></view><view></view></view></view>
     <view class="zj-skeleton-row"><view class="zj-skeleton-date"></view><view class="zj-skeleton-lines"><view></view><view></view><view></view></view></view>
   </view>
   <view wx:elif="{{needsLogin}}" class="zj-wall">
     <text class="zj-wall-icon">🔒</text>
-    <text class="zj-empty-title">登录后继续</text>
-    <text class="zj-small">使用紫荆账号登录，完成后回到当前页面。</text>
-    <button class="primary" bindtap="login">登录账号</button>
+    <text class="zj-empty-title">{{t.cLoginTitle}}</text>
+    <text class="zj-small">{{t.cLoginBody}}</text>
+    <button class="primary" bindtap="login">{{t.cLoginAction}}</button>
   </view>
   <view wx:elif="{{error}}" class="zj-alert" aria-role="alert">
-    <text class="zj-alert-title">内容暂时未能读取</text>
+    <text class="zj-alert-title">{{t.cErrorTitle}}</text>
     <text class="zj-small">{{error}}</text>
-    <button class="secondary" bindtap="retry">重新加载</button>
+    <button class="secondary" bindtap="retry">{{t.cRetry}}</button>
   </view>
 </template>
 <template name="cards">
@@ -21,25 +21,25 @@
     <view wx:for="{{docs}}" wx:key="id" class="zj-card zj-content-card zj-content-{{item.collection}}" hover-class="zj-pressed" bindtap="openContent" data-doc="{{item}}" aria-role="link" aria-label="{{item.title}}">
       <image wx:if="{{item.coverImage && (item.collection === 'albums' || item.collection === 'news')}}" class="zj-card-image" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt || item.title}}" />
       <view class="zj-card-row">
-        <view wx:if="{{item.collection === 'events' || item.collection === 'honors'}}" class="zj-date-chip"><text class="zj-date-chip-label">{{item.collection === 'events' ? '活动日期' : '赛事日期'}}</text><text class="zj-date-chip-value">{{item.dateText}}</text></view>
+        <view wx:if="{{item.collection === 'events' || item.collection === 'honors'}}" class="zj-date-chip"><text class="zj-date-chip-label">{{item.collection === 'events' ? t.cEventDate : t.cMatchDate}}</text><text class="zj-date-chip-value">{{item.dateText}}</text></view>
         <view class="zj-card-body zj-card-body-flush">
           <view class="zj-tags">
             <text wx:if="{{item.kindText}}" class="zj-kind">{{item.kindText}}</text>
             <text wx:if="{{item.game.title}}" class="zj-tag zj-tag-club">{{item.game.title}}</text>
             <text wx:if="{{item.dateText && item.collection !== 'events' && item.collection !== 'honors'}}" class="zj-small">{{item.dateText}}</text>
             <text wx:if="{{item.statusText}}" class="zj-pill zj-pill-action">{{item.statusText}}</text>
-            <text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">演示资料</text>
+            <text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">{{t.cDemo}}</text>
           </view>
           <text class="zj-card-title">{{item.title}}</text>
           <text wx:if="{{item.competition}}" class="zj-small">{{item.competition}}</text>
           <text wx:if="{{item.placing}}" class="zj-placing-inline">{{item.placing}}</text>
           <text wx:if="{{item.summary}}" class="zj-card-summary zj-clamp">{{item.summary}}</text>
           <text wx:if="{{item.location}}" class="zj-small">📍 {{item.location}}</text>
-          <text class="zj-card-action">{{item.collection === 'events' ? '活动详情与报名' : item.collection === 'teams' ? '查看队伍档案' : item.collection === 'honors' ? '查看成果记录' : item.collection === 'recruitment' ? '查看参与方式' : '阅读全文'}} ›</text>
+          <text class="zj-card-action">{{item.collection === 'events' ? t.cActionEvent : item.collection === 'teams' ? t.cActionTeam : item.collection === 'honors' ? t.cActionHonor : item.collection === 'recruitment' ? t.cActionRecruitment : t.cActionRead}} ›</text>
         </view>
         <image wx:if="{{item.coverImage && item.collection !== 'albums' && item.collection !== 'news' && item.collection !== 'events' && item.collection !== 'honors'}}" class="zj-card-thumb" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt || item.title}}" />
       </view>
     </view>
-    <view wx:if="{{!docs.length}}" class="zj-empty"><text class="zj-empty-icon">✦</text><text class="zj-empty-title">{{emptyTitle || '暂无已发布内容'}}</text><text class="zj-small">{{emptyHint || '新内容发布后会出现在这里，可稍后下拉刷新。'}}</text></view>
+    <view wx:if="{{!docs.length}}" class="zj-empty"><text class="zj-empty-icon">✦</text><text class="zj-empty-title">{{emptyTitle || t.cEmptyTitle}}</text><text class="zj-small">{{emptyHint || t.cEmptyHint}}</text></view>
   </view>
 </template>

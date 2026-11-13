@@ -5,6 +5,8 @@ import { publicationImageBytes, publicationImageTypes, publicationPreview, type 
 import type { PublicationBlock } from "@/lib/publication-content";
 import { uploadPublicationImage } from "./PublicationImagesEditor";
 import styles from "./PublicationArticleEditor.module.css";
+import { useLocale, useT } from "@/components/i18n/LocaleProvider";
+import { localizeAccountMessage } from "@/lib/i18n/messages-account";
 
 export function PublicationArticleEditor({ onChange, onBusyChange, initialBlocks = [], initialImages = [] }: {
   onChange: (blocks: PublicationBlock[], images: PublicationImage[]) => void;
@@ -12,6 +14,8 @@ export function PublicationArticleEditor({ onChange, onBusyChange, initialBlocks
   initialBlocks?: PublicationBlock[];
   initialImages?: PublicationImage[];
 }) {
+  const t = useT();
+  const locale = useLocale();
   const editor = useRef<HTMLDivElement>(null);
   const selection = useRef<Range | null>(null);
   const initial = useRef({ blocks: initialBlocks, images: initialImages });
@@ -29,7 +33,7 @@ export function PublicationArticleEditor({ onChange, onBusyChange, initialBlocks
         if (!image) continue;
         const element = document.createElement("img");
         element.src = publicationPreview(image); element.dataset.source = image.source;
-        element.alt = image.alt || "文章配图"; element.contentEditable = "false";
+        element.alt = image.alt || "文章配图"; element.contentEditable = "false"; // i18n-exempt: stored image alt (content data)
         editor.current.appendChild(element);
       }
     }
@@ -84,7 +88,7 @@ export function PublicationArticleEditor({ onChange, onBusyChange, initialBlocks
     if (!files.length || busy) return;
     setError("");
     if (files.some(file => !file.size || file.size > publicationImageBytes || !publicationImageTypes.includes(file.type))) {
-      setError("请选择 10 MB 以内的 PNG、JPEG 或 WebP 图片。"); return;
+      setError(t("请选择 10 MB 以内的 PNG、JPEG 或 WebP 图片。", "Choose PNG, JPEG or WebP images up to 10 MB.")); return;
     }
     setBusy(true); onBusyChange(true);
     try {
@@ -92,19 +96,19 @@ export function PublicationArticleEditor({ onChange, onBusyChange, initialBlocks
         const image = await uploadPublicationImage(file);
         const element = document.createElement("img");
         element.src = image.preview; element.dataset.source = image.source;
-        element.alt = "文章配图"; element.contentEditable = "false";
+        element.alt = "文章配图"; element.contentEditable = "false"; // i18n-exempt: stored image alt (content data)
         insert(element);
       }
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "图片上传失败，请重新选择。"); }
+    } catch (cause) { setError(cause instanceof Error ? cause.message : t("图片上传失败，请重新选择。", "Image upload failed. Choose again.")); }
     finally { setBusy(false); onBusyChange(false); }
   }
   return <div className={styles.editor}>
     <div className={styles.toolbar}>
-      <label>插入图片<input type="file" multiple accept={publicationImageTypes.join(",")} disabled={busy}
+      <label>{t("插入图片", "Insert image")}<input type="file" multiple accept={publicationImageTypes.join(",")} disabled={busy}
         onChange={event => { const files = Array.from(event.currentTarget.files ?? []); event.currentTarget.value = ""; void add(files); }} /></label>
-      <span>在正文中输入文字，图片会插入到光标位置。</span>
+      <span>{t("在正文中输入文字，图片会插入到光标位置。", "Type the body here; images are inserted at the cursor.")}</span>
     </div>
-    <div ref={editor} className={styles.canvas} contentEditable suppressContentEditableWarning role="textbox" aria-label="文章正文" aria-multiline="true"
+    <div ref={editor} className={styles.canvas} contentEditable suppressContentEditableWarning role="textbox" aria-label={t("文章正文", "Article body")} aria-multiline="true"
       onInput={read} onKeyUp={rememberSelection} onMouseUp={rememberSelection} onBlur={rememberSelection}
       onPaste={event => {
         event.preventDefault(); rememberSelection();
@@ -112,7 +116,7 @@ export function PublicationArticleEditor({ onChange, onBusyChange, initialBlocks
         if (files.length) void add(files);
         else insert(document.createTextNode(event.clipboardData.getData("text/plain")));
       }} />
-    {busy && <p role="status">正在上传图片，请稍候…</p>}
-    {error && <p role="alert">{error}</p>}
+    {busy && <p role="status">{t("正在上传图片，请稍候…", "Uploading images, please wait…")}</p>}
+    {error && <p role="alert">{localizeAccountMessage(error, locale)}</p>}
   </div>;
 }

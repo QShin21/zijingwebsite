@@ -2,29 +2,31 @@
 
 import { useId, useState } from "react";
 import styles from "./account-pages/AccountPages.module.css";
+import { useT } from "./i18n/LocaleProvider";
 
 const domains = [
-  { value: "mails.tsinghua.edu.cn", label: "学生邮箱" },
-  { value: "tsinghua.org.cn", label: "校友邮箱" },
+  { value: "mails.tsinghua.edu.cn", zh: "学生邮箱", en: "Student email" },
+  { value: "tsinghua.org.cn", zh: "校友邮箱", en: "Alumni email" },
 ];
 
 export function RegistrationEmail() {
+  const t = useT();
   const id = useId();
   const [domain, setDomain] = useState(domains[0].value);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   return (
     <div className={styles.field}>
-      <label htmlFor={`${id}-prefix`}>邮箱</label>
+      <label htmlFor={`${id}-prefix`}>{t("邮箱", "Email")}</label>
       <div className={styles.emailRow}>
         <input
           id={`${id}-prefix`}
           name="emailPrefix"
-          aria-label="邮箱前缀"
+          aria-label={t("邮箱前缀", "Email username")}
           required
           maxLength={64}
           pattern="[^@\s]+"
-          placeholder="邮箱前缀"
+          placeholder={t("邮箱前缀", "Email username")}
           autoComplete="off"
           autoCapitalize="none"
           spellCheck={false}
@@ -41,7 +43,7 @@ export function RegistrationEmail() {
         >
           <input
             name="emailDomain"
-            aria-label="邮箱后缀"
+            aria-label={t("邮箱后缀", "Email domain")}
             role="combobox"
             aria-expanded={open}
             aria-controls={open ? `${id}-domains` : undefined}
@@ -97,7 +99,7 @@ export function RegistrationEmail() {
             <div
               id={`${id}-domains`}
               role="listbox"
-              aria-label="常用邮箱后缀"
+              aria-label={t("常用邮箱后缀", "Common email domains")}
               className={styles.emailOptions}
             >
               {domains.map((option, index) => (
@@ -115,7 +117,7 @@ export function RegistrationEmail() {
                   }}
                 >
                   <span>{option.value}</span>
-                  <small>{option.label}</small>
+                  <small>{t(option.zh, option.en)}</small>
                 </button>
               ))}
             </div>
@@ -123,7 +125,7 @@ export function RegistrationEmail() {
         </div>
       </div>
       <span id={`${id}-hint`} className={styles.hint}>
-        可输入任意可接收验证码的邮箱。清华及校友邮箱对应清华用户，其他教育邮箱对应友校学生，普通邮箱对应校外人士。
+        {t("可输入任意可接收验证码的邮箱。清华及校友邮箱对应清华用户，其他教育邮箱对应友校学生，普通邮箱对应校外人士。", "Use any email that can receive the code. Tsinghua and alumni emails make you a Tsinghua user, other .edu emails a partner-school student, and other emails an external user.")}
       </span>
     </div>
   );

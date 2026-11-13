@@ -1,3 +1,4 @@
+const i18n = (() => { try { const value = require('./i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { t: zh => zh, message: value => value, locale: () => 'zh' }; })();
 const config = require('../config');
 let listeners = [];
 
@@ -24,7 +25,7 @@ function project(value) {
 }
 function save(result) {
   if (!result.token || !result.user || result.user.accountStatus === 'suspended' ||
-      !Number.isFinite(result.exp) || result.exp * 1000 <= Date.now()) throw new Error('登录未完成，请重试');
+      !Number.isFinite(result.exp) || result.exp * 1000 <= Date.now()) throw new Error(i18n.message('登录未完成，请重试'));
   const saved = { token: result.token, exp: result.exp, user: project(result.user) };
   wx.setStorageSync(config.sessionKey, saved);
   publish(saved.user);

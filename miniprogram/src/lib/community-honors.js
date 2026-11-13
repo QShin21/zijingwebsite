@@ -1,10 +1,11 @@
+const i18n = (() => { try { const value = require('./i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { t: zh => zh, message: value => value, locale: () => 'zh' }; })();
 const cms = require('./cms');
 const honor = require('./team-honor');
 // Read only the existing published-team index and public archive endpoint.
 // Raw evidence is never projected into a community card or retained in page data.
 async function load(game, current = () => true) {
   const gameID = honor.id(game);
-  if (!gameID) throw new Error('社群入口无效，请返回后重新进入');
+  if (!gameID) throw new Error(i18n.t('社群入口无效，请返回后重新进入', 'Invalid community link. Go back and open it again.'));
   const teams = []; let page = 1, more = true;
   while (more && current()) {
     const result = await cms.list('teams', { game: gameID, limit: 50, page });

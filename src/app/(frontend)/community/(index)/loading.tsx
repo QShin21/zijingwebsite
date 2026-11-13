@@ -1,5 +1,7 @@
 import { RouteLoading } from "@/components/activity-pages/RouteLoading";
+import { getT } from "@/lib/i18n/server";
 
-export default function Loading() {
-  return <RouteLoading label="游戏社群" />;
+export default async function Loading() {
+  const { t } = await getT();
+  return <RouteLoading label={t("游戏社群", "Game communities")} />;
 }

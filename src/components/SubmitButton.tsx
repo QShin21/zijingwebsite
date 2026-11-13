@@ -1,6 +1,7 @@
 "use client";
 import type { ReactNode } from "react";
 import { useFormStatus } from "react-dom";
+import { useT } from "./i18n/LocaleProvider";
 
 export function SubmitButton({
   children,
@@ -15,6 +16,7 @@ export function SubmitButton({
   value?: string;
   disabled?: boolean;
 }) {
+  const t = useT();
   const { pending } = useFormStatus();
   return (
     <button
@@ -25,7 +27,7 @@ export function SubmitButton({
       disabled={pending || disabled}
       aria-busy={pending}
     >
-      {pending ? "正在提交…" : children}
+      {pending ? t("正在提交…", "Submitting…") : children}
     </button>
   );
 }

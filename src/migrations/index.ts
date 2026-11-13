@@ -38,6 +38,7 @@ import * as activitySignupLotteries from "./20261113_000500_activity_signup_lott
 import * as activitySeatTickets from "./20261113_000600_activity_seat_tickets";
 import * as customSeatLayout from "./20261113_000700_custom_seat_layout";
 import * as personalArchives from "./20261113_000800_personal_archives";
+import * as contentTranslations from "./20261113_000900_content_translations";
 
 export const migrations = [
 
@@ -113,4 +114,5 @@ export const migrations = [
   { up: activitySeatTickets.up, down: activitySeatTickets.down, name: "20261113_000600_activity_seat_tickets" },
   { up: customSeatLayout.up, down: customSeatLayout.down, name: "20261113_000700_custom_seat_layout" },
   { up: personalArchives.up, down: personalArchives.down, name: "20261113_000800_personal_archives" },
+  { up: contentTranslations.up, down: contentTranslations.down, name: "20261113_000900_content_translations" },
 ];

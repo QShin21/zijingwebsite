@@ -4,46 +4,46 @@
   <view class="zj-hero honors-hero">
     <view class="zj-stage-stripes"></view>
     <view class="zj-hero-inner">
-      <button class="zj-hero-back" bindtap="back">‹ 返回队伍</button>
-      <text class="zj-hero-kicker">HALL OF FAME · {{team.gameTitle || '队伍档案'}}</text>
-      <text class="zj-hero-title">{{team.title || '队伍荣誉档案'}}</text>
-      <text class="zj-hero-lead">现任队员可提交荣誉。经审核的成绩按赛事日期归档。</text>
+      <button class="zj-hero-back" bindtap="back">{{t.back}}</button>
+      <text class="zj-hero-kicker">{{t.kickerPrefix}}{{team.gameTitle || t.archive}}</text>
+      <text class="zj-hero-title">{{team.title || t.titleFallback}}</text>
+      <text class="zj-hero-lead">{{t.lead}}</text>
       <view wx:if="{{validTeam}}" class="honors-actions">
-        <button class="accent" bindtap="submitHonor">提交代表队荣誉</button>
-        <button class="zj-stage-ghost" bindtap="workspace">我的荣誉投稿与工作台</button>
+        <button class="accent" bindtap="submitHonor">{{t.submit}}</button>
+        <button class="zj-stage-ghost" bindtap="workspace">{{t.workspace}}</button>
       </view>
     </view>
   </view>
-  <template is="feedback" data="{{loading,error,needsLogin:false}}" />
+  <template is="feedback" data="{{loading,error,needsLogin:false,t}}" />
   <view wx:if="{{loaded && !records.length && !loading && !error}}" class="zj-empty">
     <text class="zj-empty-icon">🏆</text>
-    <text class="zj-empty-title">暂无已公开的荣誉档案</text><text class="zj-small">队伍的荣誉记录核验并发布后会出现在这里。</text>
-    <button class="secondary" bindtap="retry">重新加载</button>
+    <text class="zj-empty-title">{{t.emptyTitle}}</text><text class="zj-small">{{t.emptyBody}}</text>
+    <button class="secondary" bindtap="retry">{{t.reload}}</button>
   </view>
   <view class="honors-timeline">
     <block wx:for="{{records}}" wx:key="key">
-      <view wx:if="{{item.archiveYear && (index === 0 || item.archiveYear !== records[index - 1].archiveYear)}}" class="zj-day-head honors-year"><text>{{item.archiveYear}}</text><text class="zj-small">赛场记录</text></view>
+      <view wx:if="{{item.archiveYear && (index === 0 || item.archiveYear !== records[index - 1].archiveYear)}}" class="zj-day-head honors-year"><text>{{item.archiveYear}}</text><text class="zj-small">{{t.yearRecords}}</text></view>
       <view class="zj-honor honors-record">
         <view class="zj-honor-top">
-          <view class="honors-date"><text class="honors-date-value">{{item.archiveDate || item.dateText}}</text><text class="honors-date-label">赛事日期</text></view>
+          <view class="honors-date"><text class="honors-date-value">{{item.archiveDate || item.dateText}}</text><text class="honors-date-label">{{t.matchDate}}</text></view>
           <text wx:if="{{item.placing}}" class="zj-placing">{{item.placing}}</text>
         </view>
         <text wx:if="{{item.competition}}" class="zj-honor-meta">{{item.competition}}</text>
         <text class="zj-honor-title">{{item.title}}</text>
-        <text wx:if="{{item.legacy}}" class="zj-pill zj-pill-warning">历史荣誉档案</text>
+        <text wx:if="{{item.legacy}}" class="zj-pill zj-pill-warning">{{t.legacy}}</text>
         <text wx:if="{{item.description}}" class="honors-description" selectable>{{item.description}}</text>
-        <text wx:if="{{item.authorName}}" class="zj-honor-meta">记录：{{item.authorName}}</text>
-        <text wx:if="{{item.mediaLoading}}" class="zj-honor-meta">正在加载公开图片…</text>
+        <text wx:if="{{item.authorName}}" class="zj-honor-meta">{{t.recordedByPrefix}}{{item.authorName}}</text>
+        <text wx:if="{{item.mediaLoading}}" class="zj-honor-meta">{{t.loadingImages}}</text>
         <view wx:if="{{item.localImages.length}}" class="honors-gallery">
-          <view wx:for="{{item.localImages}}" wx:for-item="picture" wx:key="url" class="honors-picture"><button class="image-button" hover-class="zj-pressed" bindtap="preview" data-url="{{picture.url}}" aria-label="{{picture.caption || '预览荣誉图片'}}"><image class="honors-image" src="{{picture.url}}" mode="aspectFill" aria-label="{{picture.caption}}" /></button><text class="zj-honor-meta">{{picture.caption}}</text></view>
+          <view wx:for="{{item.localImages}}" wx:for-item="picture" wx:key="url" class="honors-picture"><button class="image-button" hover-class="zj-pressed" bindtap="preview" data-url="{{picture.url}}" aria-label="{{picture.caption || t.previewImage}}"><image class="honors-image" src="{{picture.url}}" mode="aspectFill" aria-label="{{picture.caption}}" /></button><text class="zj-honor-meta">{{picture.caption}}</text></view>
         </view>
         <text wx:if="{{item.mediaError}}" class="error">{{item.mediaError}}</text>
         <video wx:if="{{item.videoSource}}" id="honor-video-{{index}}" class="honor-video" src="{{item.videoSource}}" controls="{{true}}" autoplay="{{false}}" object-fit="contain" binderror="videoError" data-key="{{item.key}}" data-source="{{item.videoSource}}" />
         <text wx:if="{{item.videoError}}" class="error">{{item.videoError}}</text>
-        <button wx:if="{{item.mediaError || item.videoError}}" class="zj-stage-ghost" bindtap="retry" disabled="{{loading}}">重新加载档案</button>
-        <button wx:if="{{item.sourceHref}}" class="zj-stage-ghost" bindtap="source" data-key="{{item.key}}">查看历史荣誉原文</button>
+        <button wx:if="{{item.mediaError || item.videoError}}" class="zj-stage-ghost" bindtap="retry" disabled="{{loading}}">{{t.reloadArchive}}</button>
+        <button wx:if="{{item.sourceHref}}" class="zj-stage-ghost" bindtap="source" data-key="{{item.key}}">{{t.viewSource}}</button>
       </view>
     </block>
   </view>
-  <view wx:if="{{loaded && records.length}}" class="honors-footer"><button class="secondary" bindtap="retry" disabled="{{loading}}">刷新档案</button></view>
+  <view wx:if="{{loaded && records.length}}" class="honors-footer"><button class="secondary" bindtap="retry" disabled="{{loading}}">{{t.refresh}}</button></view>
 </view>

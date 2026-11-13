@@ -3,89 +3,89 @@
   <view class="zj-hero auth-hero">
     <view class="zj-stage-stripes"></view>
     <view class="zj-hero-inner">
-      <button class="zj-hero-back" bindtap="back">‹ 返回</button>
-      <text class="zj-hero-kicker">紫荆赛场 · 账号</text>
-      <text class="zj-hero-title">{{mode === 'login' ? '登录紫荆' : mode === 'register' ? '注册账号' : '重设密码'}}</text>
-      <text class="zj-hero-lead">{{mode === 'login' ? '继续刚才的报名、申请或社群浏览。' : mode === 'register' ? '用清华师生或校友邮箱验证，建立你的紫荆账号。' : '验证注册邮箱，为账号设置新的密码。'}}</text>
+      <button class="zj-hero-back" bindtap="back">{{t.back}}</button>
+      <text class="zj-hero-kicker">{{t.kicker}}</text>
+      <text class="zj-hero-title">{{mode === 'login' ? t.titleLogin : mode === 'register' ? t.titleRegister : t.titleReset}}</text>
+      <text class="zj-hero-lead">{{mode === 'login' ? t.leadLogin : mode === 'register' ? t.leadRegister : t.leadReset}}</text>
       <view class="auth-modes" aria-role="tablist">
-        <button class="auth-mode {{mode === 'login' ? 'active' : ''}}" bindtap="switchMode" data-mode="login" disabled="{{busy}}" aria-selected="{{mode === 'login'}}">登录</button>
-        <button class="auth-mode {{mode === 'register' ? 'active' : ''}}" bindtap="switchMode" data-mode="register" disabled="{{busy}}" aria-selected="{{mode === 'register'}}">注册</button>
-        <button class="auth-mode {{mode === 'reset' ? 'active' : ''}}" bindtap="switchMode" data-mode="reset" disabled="{{busy}}" aria-selected="{{mode === 'reset'}}">找回</button>
+        <button class="auth-mode {{mode === 'login' ? 'active' : ''}}" bindtap="switchMode" data-mode="login" disabled="{{busy}}" aria-selected="{{mode === 'login'}}">{{t.modeLogin}}</button>
+        <button class="auth-mode {{mode === 'register' ? 'active' : ''}}" bindtap="switchMode" data-mode="register" disabled="{{busy}}" aria-selected="{{mode === 'register'}}">{{t.modeRegister}}</button>
+        <button class="auth-mode {{mode === 'reset' ? 'active' : ''}}" bindtap="switchMode" data-mode="reset" disabled="{{busy}}" aria-selected="{{mode === 'reset'}}">{{t.modeReset}}</button>
       </view>
     </view>
   </view>
 
   <view wx:if="{{!bridge}}" class="zj-callout zj-callout-warning">
-    <text class="auth-callout-title">请重新检查账号服务</text>
-    <text>{{mode === 'login' ? '目前可尝试使用完整邮箱登录。昵称登录需重新检查服务后继续。' : '服务连接确认后，可继续获取验证码并完成验证。'}}</text>
-    <button class="secondary auth-callout-action" disabled="{{busy}}" bindtap="retryBridge">重新检查账号服务</button>
+    <text class="auth-callout-title">{{t.bridgeTitle}}</text>
+    <text>{{mode === 'login' ? t.bridgeLogin : t.bridgeOther}}</text>
+    <button class="secondary auth-callout-action" disabled="{{busy}}" bindtap="retryBridge">{{t.bridgeRetry}}</button>
   </view>
 
   <view class="zj-sheet auth-sheet">
-    <text class="zj-sheet-title">{{mode === 'login' ? '账号登录' : '账号资料'}}</text>
-    <text class="zj-form-hint">带 * 的项目均需填写。</text>
+    <text class="zj-sheet-title">{{mode === 'login' ? t.sheetLogin : t.sheetProfile}}</text>
+    <text class="zj-form-hint">{{t.requiredHint}}</text>
     <view wx:if="{{mode === 'login'}}" class="field">
-      <text class="field-label">{{bridge ? '昵称或邮箱' : '完整邮箱'}} *</text>
-      <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{identifier}}" bindinput="input" data-field="identifier" aria-label="昵称或完整邮箱" placeholder="{{bridge ? '输入昵称或完整邮箱' : '输入网站账号邮箱'}}" maxlength="254" />
+      <text class="field-label">{{bridge ? t.identifierLabel : t.emailFull}} *</text>
+      <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{identifier}}" bindinput="input" data-field="identifier" aria-label="{{t.identifierAria}}" placeholder="{{bridge ? t.identifierPlaceholder : t.identifierPlaceholderEmail}}" maxlength="254" />
     </view>
     <block wx:if="{{mode === 'register'}}">
       <view class="field">
-        <text class="field-label">昵称 *</text>
-        <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{name}}" bindinput="input" data-field="name" aria-label="昵称" placeholder="输入昵称" maxlength="40" />
-        <text class="zj-form-hint">2–40 字，昵称不区分大小写。</text>
+        <text class="field-label">{{t.nickname}} *</text>
+        <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{name}}" bindinput="input" data-field="name" aria-label="{{t.nickname}}" placeholder="{{t.nicknamePlaceholder}}" maxlength="40" />
+        <text class="zj-form-hint">{{t.nicknameHint}}</text>
       </view>
       <view class="field">
-        <text class="field-label">邮箱 *</text>
+        <text class="field-label">{{t.email}} *</text>
         <view class="auth-email">
-          <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{emailPrefix}}" bindinput="input" data-field="emailPrefix" aria-label="邮箱前缀" placeholder="@ 前的邮箱名" maxlength="64" />
-          <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{emailDomain}}" bindinput="input" data-field="emailDomain" aria-label="邮箱后缀" placeholder="@ 后的邮箱域名" maxlength="253" />
+          <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{emailPrefix}}" bindinput="input" data-field="emailPrefix" aria-label="{{t.emailPrefixAria}}" placeholder="{{t.emailPrefixPlaceholder}}" maxlength="64" />
+          <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{emailDomain}}" bindinput="input" data-field="emailDomain" aria-label="{{t.emailDomainAria}}" placeholder="{{t.emailDomainPlaceholder}}" maxlength="253" />
         </view>
-        <text class="zj-form-hint">填写 @ 前后的两部分。清华及校友邮箱对应清华用户，其他教育邮箱对应友校学生，普通邮箱对应校外人士。</text>
+        <text class="zj-form-hint">{{t.emailHint}}</text>
       </view>
     </block>
     <view wx:if="{{mode === 'reset'}}" class="field">
-      <text class="field-label">完整邮箱 *</text>
-      <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{email}}" bindinput="input" data-field="email" aria-label="完整邮箱" placeholder="输入注册使用的邮箱" maxlength="254" />
+      <text class="field-label">{{t.emailFull}} *</text>
+      <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{email}}" bindinput="input" data-field="email" aria-label="{{t.emailFull}}" placeholder="{{t.resetEmailPlaceholder}}" maxlength="254" />
     </view>
     <view class="field">
       <view class="auth-password-head">
-        <text class="field-label">{{mode === 'reset' ? '新密码' : '密码'}} *</text>
-        <button class="plain auth-password-toggle" bindtap="togglePassword" aria-label="{{showPassword ? '隐藏密码' : '显示密码'}}">{{showPassword ? '隐藏' : '显示'}}</button>
+        <text class="field-label">{{mode === 'reset' ? t.newPassword : t.password}} *</text>
+        <button class="plain auth-password-toggle" bindtap="togglePassword" aria-label="{{showPassword ? t.hidePassword : t.showPassword}}">{{showPassword ? t.hide : t.show}}</button>
       </view>
-      <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{password}}" password="{{!showPassword}}" confirm-type="done" bindconfirm="submit" bindinput="input" data-field="password" aria-label="密码" placeholder="{{mode === 'login' ? '输入密码' : '至少 8 位'}}" maxlength="-1" />
-      <text wx:if="{{mode !== 'login'}}" class="zj-form-hint">至少 8 位，两次输入需一致。</text>
+      <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{password}}" password="{{!showPassword}}" confirm-type="done" bindconfirm="submit" bindinput="input" data-field="password" aria-label="{{t.password}}" placeholder="{{mode === 'login' ? t.passwordPlaceholder : t.passwordMin}}" maxlength="-1" />
+      <text wx:if="{{mode !== 'login'}}" class="zj-form-hint">{{t.passwordHint}}</text>
     </view>
     <view wx:if="{{mode !== 'login'}}" class="field">
-      <text class="field-label">确认密码 *</text>
-      <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{confirm}}" password="{{!showPassword}}" bindinput="input" data-field="confirm" aria-label="确认密码" placeholder="再次输入密码" maxlength="-1" />
+      <text class="field-label">{{t.confirm}} *</text>
+      <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{confirm}}" password="{{!showPassword}}" bindinput="input" data-field="confirm" aria-label="{{t.confirm}}" placeholder="{{t.confirmPlaceholder}}" maxlength="-1" />
     </view>
   </view>
 
   <view wx:if="{{mode !== 'login'}}" class="zj-sheet auth-sheet">
-    <text class="zj-sheet-title">邮箱验证</text>
-    <text class="zj-form-hint">{{mode === 'register' ? '填写好账号资料，再获取验证码。验证完成后返回登录。' : '获取注册邮箱的验证码，验证后保存新密码。'}}</text>
+    <text class="zj-sheet-title">{{t.verifyTitle}}</text>
+    <text class="zj-form-hint">{{mode === 'register' ? t.verifyRegister : t.verifyReset}}</text>
     <view class="field">
-      <text class="field-label">六位验证码 *</text>
+      <text class="field-label">{{t.codeLabel}} *</text>
       <view class="auth-code">
-        <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{code}}" type="number" bindinput="input" data-field="code" aria-label="邮箱验证码" maxlength="6" placeholder="输入验证码" />
-        <button class="secondary" bindtap="sendCode" disabled="{{busy || countdown > 0}}">{{countdown > 0 ? countdown + ' 秒后重发' : '获取验证码'}}</button>
+        <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{code}}" type="number" bindinput="input" data-field="code" aria-label="{{t.codeAria}}" maxlength="6" placeholder="{{t.codePlaceholder}}" />
+        <button class="secondary" bindtap="sendCode" disabled="{{busy || countdown > 0}}">{{countdown > 0 ? countdown + t.resendSuffix : t.getCode}}</button>
       </view>
       <view wx:if="{{sent}}" class="zj-callout zj-callout-success" aria-role="status">
-        <text class="auth-callout-title">验证码已发送</text>
-        <text>请检查收件箱与垃圾邮件。验证码十分钟内有效。</text>
+        <text class="auth-callout-title">{{t.sentTitle}}</text>
+        <text>{{t.sentBody}}</text>
       </view>
     </view>
   </view>
 
   <text wx:if="{{error}}" class="error" aria-role="alert">{{error}}</text>
-  <text wx:if="{{busy}}" class="zj-form-hint auth-busy" aria-role="status">正在处理，请稍候。</text>
+  <text wx:if="{{busy}}" class="zj-form-hint auth-busy" aria-role="status">{{t.busy}}</text>
   <view class="zj-dock">
-    <button class="primary" bindtap="submit" loading="{{busy}}" disabled="{{busy}}">{{mode === 'login' ? '登录并继续' : mode === 'register' ? '验证并注册' : '重设密码'}}</button>
+    <button class="primary" bindtap="submit" loading="{{busy}}" disabled="{{busy}}">{{mode === 'login' ? t.submitLogin : mode === 'register' ? t.submitRegister : t.submitReset}}</button>
   </view>
   <view class="auth-links">
-    <button wx:if="{{mode !== 'login'}}" class="plain" bindtap="switchMode" data-mode="login" disabled="{{busy}}">返回登录</button>
-    <button wx:if="{{mode === 'login'}}" class="plain" bindtap="switchMode" data-mode="register" disabled="{{busy}}">注册账号</button>
-    <button wx:if="{{mode === 'login'}}" class="plain" bindtap="switchMode" data-mode="reset" disabled="{{busy}}">忘记密码</button>
-    <button class="plain" bindtap="openWebsite" data-url="/privacy">阅读隐私说明</button>
+    <button wx:if="{{mode !== 'login'}}" class="plain" bindtap="switchMode" data-mode="login" disabled="{{busy}}">{{t.backToLogin}}</button>
+    <button wx:if="{{mode === 'login'}}" class="plain" bindtap="switchMode" data-mode="register" disabled="{{busy}}">{{t.register}}</button>
+    <button wx:if="{{mode === 'login'}}" class="plain" bindtap="switchMode" data-mode="reset" disabled="{{busy}}">{{t.forgot}}</button>
+    <button class="plain" bindtap="openWebsite" data-url="/privacy">{{t.privacy}}</button>
   </view>
 </view>

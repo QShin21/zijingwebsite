@@ -9,39 +9,39 @@
       <view wx:if="{{item.collection === 'honors'}}" class="zj-honor" hover-class="zj-pressed" bindtap="openContent" data-doc="{{item}}" aria-role="link" aria-label="{{item.title}}">
         <view class="zj-honor-top">
           <text class="zj-trophy">🏆</text>
-          <text class="zj-placing">{{item.placing || '荣誉'}}</text>
+          <text class="zj-placing">{{item.placing || t.cHonor}}</text>
         </view>
         <image wx:if="{{item.coverImage && !item.nativeCoverError}}" class="zj-honor-image" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt || item.title}}" binderror="nativeCoverError" data-id="{{item.id}}" data-collection="{{item.collection}}" data-url="{{item.coverImage.url}}" />
-        <text wx:if="{{item.nativeCoverError}}" class="zj-honor-meta">封面暂时无法显示</text>
+        <text wx:if="{{item.nativeCoverError}}" class="zj-honor-meta">{{t.cCoverUnavailable}}</text>
         <text class="zj-honor-title">{{item.title}}</text>
         <text wx:if="{{item.competition}}" class="zj-honor-meta">{{item.competition}}</text>
         <text wx:if="{{item.division}}" class="zj-honor-meta">{{item.division}}</text>
-        <text class="zj-honor-meta"><block wx:if="{{item.nativeReading.date.known}}">{{item.nativeReading.date.year}} · {{item.nativeReading.date.day}}</block><block wx:else>日期待公布</block><block wx:if="{{item.game.title}}"> · {{item.game.title}}</block><block wx:if="{{item.verified}}"> · 已核验</block></text>
+        <text class="zj-honor-meta"><block wx:if="{{item.nativeReading.date.known}}">{{item.nativeReading.date.year}} · {{item.nativeReading.date.day}}</block><block wx:else>{{t.cDateTba}}</block><block wx:if="{{item.game.title}}"> · {{item.game.title}}</block><block wx:if="{{item.verified}}"> · {{t.cVerified}}</block></text>
         <text wx:if="{{item.summary}}" class="zj-honor-meta">{{item.summary}}</text>
-        <text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">演示资料</text>
+        <text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">{{t.cDemo}}</text>
         <text wx:if="{{item.coverImage.credit}}" class="zj-credit zj-credit-stage">{{item.coverImage.credit}}</text>
       </view>
       <view wx:elif="{{item.collection === 'albums'}}" class="zj-card" hover-class="zj-pressed" bindtap="openContent" data-doc="{{item}}" aria-role="link" aria-label="{{item.title}}">
         <image wx:if="{{item.coverImage && !item.nativeCoverError}}" class="zj-card-image" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt || item.title}}" binderror="nativeCoverError" data-id="{{item.id}}" data-collection="{{item.collection}}" data-url="{{item.coverImage.url}}" />
         <view wx:else class="zj-cover zj-cover-square" style="--hue: 262"><text class="zj-cover-initial">影</text></view>
         <view class="zj-card-body">
-          <view class="zj-tags"><text class="zj-kind">影像</text><text wx:if="{{item.nativeReading.date.known}}" class="zj-small">{{item.nativeReading.date.text}}</text><text wx:if="{{item.game.title}}" class="zj-tag zj-tag-club">{{item.game.title}}</text><text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">演示资料</text></view>
+          <view class="zj-tags"><text class="zj-kind">{{t.cAlbum}}</text><text wx:if="{{item.nativeReading.date.known}}" class="zj-small">{{item.nativeReading.date.text}}</text><text wx:if="{{item.game.title}}" class="zj-tag zj-tag-club">{{item.game.title}}</text><text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">{{t.cDemo}}</text></view>
           <text class="zj-card-title">{{item.title}}</text>
           <text wx:if="{{item.summary}}" class="zj-card-summary zj-clamp">{{item.summary}}</text>
-          <text wx:if="{{item.nativeCoverError}}" class="zj-small">封面暂时无法显示</text>
+          <text wx:if="{{item.nativeCoverError}}" class="zj-small">{{t.cCoverUnavailable}}</text>
           <text wx:if="{{item.coverImage.credit}}" class="zj-credit">{{item.coverImage.credit}}</text>
-          <text class="zj-card-action">打开相册 ›</text>
+          <text class="zj-card-action">{{t.cOpenAlbum}} ›</text>
         </view>
       </view>
       <view wx:elif="{{item.collection === 'teams' || item.collection === 'recruitment'}}" class="zj-call" hover-class="zj-pressed" bindtap="openContent" data-doc="{{item}}" aria-role="link" aria-label="{{item.title}}">
         <view class="zj-row">
-          <view class="zj-tags"><text class="zj-kind">{{item.kindText || (item.collection === 'teams' ? '代表队' : '招新批次')}}</text><text wx:if="{{item.game.title}}" class="zj-tag zj-tag-club">{{item.game.title}}</text><text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">演示资料</text></view>
+          <view class="zj-tags"><text class="zj-kind">{{item.kindText || (item.collection === 'teams' ? t.cTeam : t.cRecruitmentBatch)}}</text><text wx:if="{{item.game.title}}" class="zj-tag zj-tag-club">{{item.game.title}}</text><text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">{{t.cDemo}}</text></view>
           <image wx:if="{{item.coverImage && !item.nativeCoverError}}" class="zj-card-thumb zj-card-thumb-sm" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt || item.title}}" binderror="nativeCoverError" data-id="{{item.id}}" data-collection="{{item.collection}}" data-url="{{item.coverImage.url}}" />
         </view>
         <text class="zj-card-title">{{item.title}}</text>
         <text wx:if="{{item.summary}}" class="zj-card-summary zj-clamp">{{item.summary}}</text>
-        <text wx:if="{{item.nativeCoverError}}" class="zj-small">封面暂时无法显示</text>
-        <view wx:if="{{item.statusText || item.nativeReading.deadline}}" class="zj-tags"><text wx:if="{{item.statusText}}" class="zj-pill zj-pill-success">{{item.statusText}}</text><text wx:if="{{item.nativeReading.deadline}}" class="zj-small">截止 {{item.nativeReading.deadline}}</text></view>
+        <text wx:if="{{item.nativeCoverError}}" class="zj-small">{{t.cCoverUnavailable}}</text>
+        <view wx:if="{{item.statusText || item.nativeReading.deadline}}" class="zj-tags"><text wx:if="{{item.statusText}}" class="zj-pill zj-pill-success">{{item.statusText}}</text><text wx:if="{{item.nativeReading.deadline}}" class="zj-small">{{t.cClosesPrefix}}{{item.nativeReading.deadline}}</text></view>
         <text wx:if="{{item.location}}" class="zj-small">📍 {{item.location}}</text>
         <text class="zj-card-action">{{item.nativeReading.action}} ›</text>
       </view>
@@ -49,27 +49,27 @@
         <image wx:if="{{item.coverImage && !item.nativeCoverError && item.collection === 'news' && index === 0}}" class="zj-card-image" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt || item.title}}" binderror="nativeCoverError" data-id="{{item.id}}" data-collection="{{item.collection}}" data-url="{{item.coverImage.url}}" />
         <view class="zj-card-row">
           <view class="zj-card-body zj-card-body-flush">
-            <view class="zj-tags"><text wx:if="{{item.kindText}}" class="zj-kind">{{item.kindText}}</text><text wx:if="{{item.nativeReading.date.known}}" class="zj-small">{{item.nativeReading.date.text}}</text><text wx:if="{{item.game.title}}" class="zj-tag zj-tag-club">{{item.game.title}}</text><text wx:if="{{item.statusText}}" class="zj-pill zj-pill-action">{{item.statusText}}</text><text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">演示资料</text></view>
+            <view class="zj-tags"><text wx:if="{{item.kindText}}" class="zj-kind">{{item.kindText}}</text><text wx:if="{{item.nativeReading.date.known}}" class="zj-small">{{item.nativeReading.date.text}}</text><text wx:if="{{item.game.title}}" class="zj-tag zj-tag-club">{{item.game.title}}</text><text wx:if="{{item.statusText}}" class="zj-pill zj-pill-action">{{item.statusText}}</text><text wx:if="{{item.demo}}" class="zj-pill zj-pill-warning">{{t.cDemo}}</text></view>
             <text class="zj-card-title">{{item.title}}</text>
             <text wx:if="{{item.summary}}" class="zj-card-summary zj-clamp">{{item.summary}}</text>
             <text wx:if="{{item.location}}" class="zj-small">📍 {{item.location}}</text>
-            <text class="zj-card-action">{{item.nativeReading.action || '阅读全文'}} ›</text>
+            <text class="zj-card-action">{{item.nativeReading.action || t.cActionRead}} ›</text>
           </view>
           <image wx:if="{{item.coverImage && !item.nativeCoverError && (item.collection !== 'news' || index !== 0)}}" class="zj-card-thumb" src="{{item.coverImage.url}}" mode="aspectFill" aria-label="{{item.coverImage.alt || item.title}}" binderror="nativeCoverError" data-id="{{item.id}}" data-collection="{{item.collection}}" data-url="{{item.coverImage.url}}" />
         </view>
-        <text wx:if="{{item.nativeCoverError}}" class="zj-small zj-pad">封面暂时无法显示</text>
+        <text wx:if="{{item.nativeCoverError}}" class="zj-small zj-pad">{{t.cCoverUnavailable}}</text>
         <text wx:if="{{item.coverImage.credit}}" class="zj-credit zj-pad">{{item.coverImage.credit}}</text>
       </view>
     </block>
-    <view wx:if="{{!docs.length}}" class="zj-empty"><text class="zj-empty-icon">✦</text><text class="zj-empty-title">{{emptyTitle || '暂无已发布内容'}}</text><text class="zj-small">{{emptyHint || '新内容发布后会出现在这里，可稍后下拉刷新。'}}</text></view>
+    <view wx:if="{{!docs.length}}" class="zj-empty"><text class="zj-empty-icon">✦</text><text class="zj-empty-title">{{emptyTitle || t.cEmptyTitle}}</text><text class="zj-small">{{emptyHint || t.cEmptyHint}}</text></view>
   </view>
 </template>
 
 <template name="native-reading-links">
   <view wx:if="{{links.length}}" class="zj-section">
-    <view class="zj-section-head"><text class="zj-section-title">文中链接</text></view>
+    <view class="zj-section-head"><text class="zj-section-title">{{t.cLinks}}</text></view>
     <view class="zj-panel">
-      <view wx:for="{{links}}" wx:key="url" class="zj-link-row"><text class="zj-link-label">{{item.label}}</text><button class="secondary zj-link-copy" bindtap="copy" data-value="{{item.url}}">复制链接，在浏览器打开</button></view>
+      <view wx:for="{{links}}" wx:key="url" class="zj-link-row"><text class="zj-link-label">{{item.label}}</text><button class="secondary zj-link-copy" bindtap="copy" data-value="{{item.url}}">{{t.cCopyLink}}</button></view>
     </view>
   </view>
 </template>

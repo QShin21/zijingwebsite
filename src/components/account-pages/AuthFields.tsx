@@ -8,12 +8,15 @@ import {
   type InputHTMLAttributes,
 } from "react";
 import styles from "./AccountPages.module.css";
+import { useLocale, useT } from "../i18n/LocaleProvider";
+import { localizeAccountMessage } from "@/lib/i18n/messages-account";
 
 export function PasswordField({
   label,
   hint,
   ...props
 }: InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: string }) {
+  const t = useT();
   const generatedID = useId();
   const id = props.id || generatedID;
   const [visible, setVisible] = useState(false);
@@ -31,10 +34,10 @@ export function PasswordField({
           type="button"
           aria-controls={id}
           aria-pressed={visible}
-          aria-label={`${visible ? "隐藏" : "显示"}${label}`}
+          aria-label={t(`${visible ? "隐藏" : "显示"}${label}`, `${visible ? "Hide" : "Show"} ${label}`)}
           onClick={() => setVisible((value) => !value)}
         >
-          {visible ? "隐藏" : "显示"}
+          {visible ? t("隐藏", "Hide") : t("显示", "Show")}
         </button>
       </div>
       {hint && (
@@ -55,6 +58,7 @@ export function FormFeedback({
   error?: boolean;
   focus?: boolean;
 }) {
+  const locale = useLocale();
   const ref = useRef<HTMLParagraphElement>(null);
   useEffect(() => {
     if (message && focus) ref.current?.focus();
@@ -68,7 +72,7 @@ export function FormFeedback({
       className={styles.feedback}
       data-kind={error ? "error" : "status"}
     >
-      {message}
+      {localizeAccountMessage(message, locale)}
     </p>
   );
 }

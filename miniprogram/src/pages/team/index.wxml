@@ -4,62 +4,62 @@
   <view class="zj-hero">
     <view class="zj-stage-stripes"></view>
     <view class="zj-hero-inner">
-      <button class="zj-hero-back" bindtap="back">‹ 返回</button>
-      <text class="zj-hero-kicker">TEAMS · 代表队事务</text>
-      <text class="zj-hero-title">代表队事务</text>
-      <text class="zj-hero-lead">了解招新安排，继续本人申请，查看队伍与成员记录。</text>
+      <button class="zj-hero-back" bindtap="back">{{t.back}}</button>
+      <text class="zj-hero-kicker">{{t.kicker}}</text>
+      <text class="zj-hero-title">{{t.heroTitle}}</text>
+      <text class="zj-hero-lead">{{t.heroLead}}</text>
     </view>
   </view>
-  <template is="feedback" data="{{needsLogin}}" />
-  <text wx:if="{{busy}}" class="zj-callout" aria-role="status">本次确认或保存尚未完成，完成后会核对最新记录。</text>
+  <template is="feedback" data="{{needsLogin,t}}" />
+  <text wx:if="{{busy}}" class="zj-callout" aria-role="status">{{t.busyNote}}</text>
   <block wx:if="{{!needsLogin}}">
     <scroll-view scroll-x class="team-tabs" enhanced show-scrollbar="{{false}}">
       <view class="team-tabs-inner">
-        <button class="team-tab {{view === 'recruitments' ? 'active' : ''}}" bindtap="tab" data-view="recruitments" disabled="{{busy}}" aria-pressed="{{view === 'recruitments'}}">招新批次</button>
-        <button class="team-tab {{view === 'ownApplications' ? 'active' : ''}}" bindtap="tab" data-view="ownApplications" disabled="{{busy}}" aria-pressed="{{view === 'ownApplications'}}">我的申请</button>
-        <button class="team-tab {{view === 'memberships' ? 'active' : ''}}" bindtap="tab" data-view="memberships" disabled="{{busy}}" aria-pressed="{{view === 'memberships'}}">我的队伍</button>
-        <button class="team-tab {{view === 'managedTeams' ? 'active' : ''}}" bindtap="tab" data-view="managedTeams" disabled="{{busy}}" aria-pressed="{{view === 'managedTeams'}}">管理队伍</button>
+        <button class="team-tab {{view === 'recruitments' ? 'active' : ''}}" bindtap="tab" data-view="recruitments" disabled="{{busy}}" aria-pressed="{{view === 'recruitments'}}">{{t.tabRecruitments}}</button>
+        <button class="team-tab {{view === 'ownApplications' ? 'active' : ''}}" bindtap="tab" data-view="ownApplications" disabled="{{busy}}" aria-pressed="{{view === 'ownApplications'}}">{{t.tabOwn}}</button>
+        <button class="team-tab {{view === 'memberships' ? 'active' : ''}}" bindtap="tab" data-view="memberships" disabled="{{busy}}" aria-pressed="{{view === 'memberships'}}">{{t.tabMemberships}}</button>
+        <button class="team-tab {{view === 'managedTeams' ? 'active' : ''}}" bindtap="tab" data-view="managedTeams" disabled="{{busy}}" aria-pressed="{{view === 'managedTeams'}}">{{t.tabManaged}}</button>
       </view>
     </scroll-view>
     <view class="team-intro">
-      <text class="zj-section-title">{{view === 'recruitments' ? '找到想加入的队伍' : view === 'ownApplications' ? '申请进度与反馈' : view === 'memberships' ? '本人成员关系' : '当前可管理的队伍'}}</text>
-      <text class="zj-small">{{view === 'recruitments' ? '先看条件与时间安排，再填写入队申请。' : view === 'ownApplications' ? '查看完整回执；允许修改时，可继续补充原申请。' : view === 'memberships' ? '成员关系、公开简介与历史阵容分别记录。' : '操作范围由当前社群或队伍任职决定。'}}</text>
+      <text class="zj-section-title">{{view === 'recruitments' ? t.introRecruitments : view === 'ownApplications' ? t.introOwn : view === 'memberships' ? t.introMemberships : t.introManaged}}</text>
+      <text class="zj-small">{{view === 'recruitments' ? t.leadRecruitments : view === 'ownApplications' ? t.leadOwn : view === 'memberships' ? t.leadMemberships : t.leadManaged}}</text>
     </view>
-    <view wx:if="{{loading}}" class="zj-skeleton" aria-role="status" aria-label="正在读取代表队记录"><view wx:if="{{!docs.length}}" class="zj-skeleton-row"><view class="zj-skeleton-date"></view><view class="zj-skeleton-lines"><view></view><view></view><view></view></view></view></view>
-    <view wx:if="{{error}}" class="zj-alert"><text class="zj-small" aria-role="alert">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{loading || busy}}">重试读取记录</button></view>
+    <view wx:if="{{loading}}" class="zj-skeleton" aria-role="status" aria-label="{{t.loadingLabel}}"><view wx:if="{{!docs.length}}" class="zj-skeleton-row"><view class="zj-skeleton-date"></view><view class="zj-skeleton-lines"><view></view><view></view><view></view></view></view></view>
+    <view wx:if="{{error}}" class="zj-alert"><text class="zj-small" aria-role="alert">{{error}}</text><button class="secondary" bindtap="retry" disabled="{{loading || busy}}">{{t.retryRead}}</button></view>
     <text wx:if="{{operationError}}" class="error" aria-role="alert">{{operationError}}</text>
     <text wx:if="{{done}}" class="zj-callout zj-callout-success" aria-role="status">{{done}}</text>
-    <view wx:if="{{docs.length || (!loading && !error)}}" class="zj-section-head team-result"><text class="zj-small">共 {{total}} 条，已加载 {{docs.length}} 条</text><button class="plain zj-more" bindtap="retry" disabled="{{loading || busy}}">刷新</button></view>
+    <view wx:if="{{docs.length || (!loading && !error)}}" class="zj-section-head team-result"><text class="zj-small">{{t.totalPrefix}}{{total}}{{t.loadedPrefix}}{{docs.length}}{{t.loadedSuffix}}</text><button class="plain zj-more" bindtap="retry" disabled="{{loading || busy}}">{{t.refresh}}</button></view>
     <view class="zj-list">
       <view wx:for="{{docs}}" wx:key="id" class="zj-record team-record team-record-{{view}}">
-        <view class="zj-record-head"><text class="zj-pill {{view === 'recruitments' ? 'zj-pill-success' : 'zj-pill-action'}}">{{view === 'recruitments' ? item.state : item.statusText}}</text><text wx:if="{{view === 'ownApplications'}}" class="zj-small">申请 {{item.id}}</text><text wx:if="{{view === 'memberships'}}" class="zj-small">成员记录 {{item.id}}</text></view>
+        <view class="zj-record-head"><text class="zj-pill {{view === 'recruitments' ? 'zj-pill-success' : 'zj-pill-action'}}">{{view === 'recruitments' ? item.stateText : item.statusText}}</text><text wx:if="{{view === 'ownApplications'}}" class="zj-small">{{t.applicationPrefix}}{{item.id}}</text><text wx:if="{{view === 'memberships'}}" class="zj-small">{{t.membershipPrefix}}{{item.id}}</text></view>
         <text class="zj-record-title">{{item.title}}</text>
         <block wx:if="{{view === 'recruitments'}}">
-          <view class="team-dates"><view wx:if="{{item.startText}}" class="team-date"><text class="team-date-label">开始</text><text class="team-date-value">{{item.startText}}</text></view><view wx:if="{{item.endText}}" class="team-date team-date-end"><text class="team-date-label">截止</text><text class="team-date-value">{{item.endText}}</text></view></view>
-          <button wx:if="{{item.actions.view}}" class="primary team-wide" bindtap="openRecruitment" data-id="{{item.id}}" disabled="{{loading || busy}}">{{item.actions.apply ? '查看条件并申请' : '查看批次与申请状态'}}</button>
+          <view class="team-dates"><view wx:if="{{item.startText}}" class="team-date"><text class="team-date-label">{{t.start}}</text><text class="team-date-value">{{item.startText}}</text></view><view wx:if="{{item.endText}}" class="team-date team-date-end"><text class="team-date-label">{{t.end}}</text><text class="team-date-value">{{item.endText}}</text></view></view>
+          <button wx:if="{{item.actions.view}}" class="primary team-wide" bindtap="openRecruitment" data-id="{{item.id}}" disabled="{{loading || busy}}">{{item.actions.apply ? t.viewAndApply : t.viewStatus}}</button>
         </block>
         <block wx:elif="{{view === 'ownApplications'}}">
-          <text wx:if="{{item.dateText}}" class="zj-small">更新于 {{item.dateText}}</text>
-          <view wx:if="{{item.reviewNote}}" class="zj-callout zj-callout-warning"><text class="team-label">处理意见</text><text selectable>{{item.reviewNote}}</text></view>
-          <view class="zj-record-actions"><button wx:if="{{item.actions.view}}" class="primary" bindtap="openRecruitment" data-id="{{item.id}}" data-own="{{true}}" disabled="{{loading || busy}}">{{item.actions.edit ? '查看回执并修改' : '查看已提交回执'}}</button><button wx:if="{{item.actions.withdraw}}" class="danger" bindtap="operate" data-operation="withdraw-join" data-id="{{item.id}}" disabled="{{loading || busy}}">撤回入队申请</button></view>
+          <text wx:if="{{item.dateText}}" class="zj-small">{{t.updatedPrefix}}{{item.dateText}}</text>
+          <view wx:if="{{item.reviewNote}}" class="zj-callout zj-callout-warning"><text class="team-label">{{t.reviewNote}}</text><text selectable>{{item.reviewNote}}</text></view>
+          <view class="zj-record-actions"><button wx:if="{{item.actions.view}}" class="primary" bindtap="openRecruitment" data-id="{{item.id}}" data-own="{{true}}" disabled="{{loading || busy}}">{{item.actions.edit ? t.viewAndEdit : t.viewReceipt}}</button><button wx:if="{{item.actions.withdraw}}" class="danger" bindtap="operate" data-operation="withdraw-join" data-id="{{item.id}}" disabled="{{loading || busy}}">{{t.withdraw}}</button></view>
         </block>
         <block wx:elif="{{view === 'memberships'}}">
-          <text wx:if="{{item.dateText}}" class="zj-small">更新于 {{item.dateText}}</text>
-          <text class="zj-form-hint">公开简介由本人另行确认。历史记录会继续保留。</text>
-          <button wx:if="{{item.actions.leave}}" class="danger team-wide" bindtap="operate" data-operation="leave" data-id="{{item.id}}" disabled="{{loading || busy}}">办理本人离队</button>
+          <text wx:if="{{item.dateText}}" class="zj-small">{{t.updatedPrefix}}{{item.dateText}}</text>
+          <text class="zj-form-hint">{{t.profileNote}}</text>
+          <button wx:if="{{item.actions.leave}}" class="danger team-wide" bindtap="operate" data-operation="leave" data-id="{{item.id}}" disabled="{{loading || busy}}">{{t.leave}}</button>
         </block>
-        <block wx:else><view class="zj-record-actions"><button wx:if="{{item.actions.workbench}}" class="primary" bindtap="workbench" data-id="{{item.id}}" disabled="{{loading || busy}}">队伍工作台</button><button wx:if="{{item.actions.workbench}}" class="secondary" bindtap="members" data-id="{{item.id}}" disabled="{{loading || busy}}">成员管理</button></view></block>
-        <button class="plain team-disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy}}" aria-expanded="{{expandedRecord === item.id}}" aria-label="{{expandedRecord === item.id ? '收起队伍资料与荣誉入口' : '展开队伍资料与荣誉入口'}}"><text>队伍资料与荣誉</text><text>{{expandedRecord === item.id ? '−' : '＋'}}</text></button>
-        <view wx:if="{{expandedRecord === item.id}}" class="team-links"><button class="secondary" bindtap="teamPage" data-id="{{item.id}}" data-page="team-profiles" disabled="{{loading || busy}}">公开简介与我的展示设置</button><button class="secondary" bindtap="teamPage" data-id="{{item.id}}" data-page="team-honors" disabled="{{loading || busy}}">已核验荣誉档案</button><button class="secondary" bindtap="teamPage" data-id="{{item.id}}" data-page="team-honor-workspace" disabled="{{loading || busy}}">该队荣誉投稿与审核</button></view>
+        <block wx:else><view class="zj-record-actions"><button wx:if="{{item.actions.workbench}}" class="primary" bindtap="workbench" data-id="{{item.id}}" disabled="{{loading || busy}}">{{t.workbench}}</button><button wx:if="{{item.actions.workbench}}" class="secondary" bindtap="members" data-id="{{item.id}}" disabled="{{loading || busy}}">{{t.members}}</button></view></block>
+        <button class="plain team-disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy}}" aria-expanded="{{expandedRecord === item.id}}" aria-label="{{expandedRecord === item.id ? t.collapseLinks : t.expandLinks}}"><text>{{t.linksTitle}}</text><text>{{expandedRecord === item.id ? '−' : '＋'}}</text></button>
+        <view wx:if="{{expandedRecord === item.id}}" class="team-links"><button class="secondary" bindtap="teamPage" data-id="{{item.id}}" data-page="team-profiles" disabled="{{loading || busy}}">{{t.profiles}}</button><button class="secondary" bindtap="teamPage" data-id="{{item.id}}" data-page="team-honors" disabled="{{loading || busy}}">{{t.honors}}</button><button class="secondary" bindtap="teamPage" data-id="{{item.id}}" data-page="team-honor-workspace" disabled="{{loading || busy}}">{{t.honorWorkspace}}</button></view>
       </view>
     </view>
-    <view wx:if="{{!docs.length && !loading && !error}}" class="zj-empty"><text class="zj-empty-icon">🏆</text><text class="zj-empty-title">{{view === 'recruitments' ? '暂无可查看的招新批次' : view === 'ownApplications' ? '尚未提交入队申请' : view === 'memberships' ? '暂无本人成员关系记录' : '暂无当前可管理队伍'}}</text><text class="zj-small">{{view === 'ownApplications' ? '可先了解各队安排，选择合适的招新批次。' : '下拉刷新可查看最新记录。'}}</text><button wx:if="{{view === 'ownApplications'}}" class="secondary" bindtap="tab" data-view="recruitments" disabled="{{busy}}">查看招新批次</button></view>
-    <button wx:if="{{hasMore}}" class="secondary team-wide" bindtap="onReachBottom" disabled="{{loading || busy}}" loading="{{loading}}">加载更多</button>
+    <view wx:if="{{!docs.length && !loading && !error}}" class="zj-empty"><text class="zj-empty-icon">🏆</text><text class="zj-empty-title">{{view === 'recruitments' ? t.emptyRecruitments : view === 'ownApplications' ? t.emptyOwn : view === 'memberships' ? t.emptyMemberships : t.emptyManaged}}</text><text class="zj-small">{{view === 'ownApplications' ? t.emptyOwnHint : t.emptyHint}}</text><button wx:if="{{view === 'ownApplications'}}" class="secondary" bindtap="tab" data-view="recruitments" disabled="{{busy}}">{{t.viewRecruitments}}</button></view>
+    <button wx:if="{{hasMore}}" class="secondary team-wide" bindtap="onReachBottom" disabled="{{loading || busy}}" loading="{{loading}}">{{t.loadMore}}</button>
     <view class="team-organization">
-      <text class="zj-section-title team-organization-title">建队与组织事务</text>
-      <text class="team-organization-note">建队计划单独提交，处理进度留在本人回执中。</text>
-      <view class="team-organization-actions"><button class="zj-stage-ghost" bindtap="applications" disabled="{{loading || busy}}">我的建队申请</button><button wx:if="{{actions.establish}}" class="accent" bindtap="apply" disabled="{{loading || busy}}">申请建立代表队</button><button wx:if="{{actions.reviewEstablishments}}" class="zj-stage-ghost" bindtap="reviewEstablishments" disabled="{{loading || busy}}">建队申请审核</button><button class="zj-stage-ghost" bindtap="openWebsite" data-url="/teams/honors" disabled="{{loading || busy}}">我的荣誉投稿与当前审核入口</button></view>
+      <text class="zj-section-title team-organization-title">{{t.orgTitle}}</text>
+      <text class="team-organization-note">{{t.orgNote}}</text>
+      <view class="team-organization-actions"><button class="zj-stage-ghost" bindtap="applications" disabled="{{loading || busy}}">{{t.myEstablishments}}</button><button wx:if="{{actions.establish}}" class="accent" bindtap="apply" disabled="{{loading || busy}}">{{t.establish}}</button><button wx:if="{{actions.reviewEstablishments}}" class="zj-stage-ghost" bindtap="reviewEstablishments" disabled="{{loading || busy}}">{{t.reviewEstablishments}}</button><button class="zj-stage-ghost" bindtap="openWebsite" data-url="/teams/honors" disabled="{{loading || busy}}">{{t.honorEntry}}</button></view>
     </view>
-    <text class="bottom-note">入队录取与成员关系分别记录。社群任职、平台角色及简介公开授权由各自流程维护。</text>
+    <text class="bottom-note">{{t.bottomNote}}</text>
   </block>
 </view>

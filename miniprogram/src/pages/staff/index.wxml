@@ -4,67 +4,67 @@
   <view class="zj-hero">
     <view class="zj-stage-stripes"></view>
     <view class="zj-hero-inner">
-      <button class="zj-hero-back" bindtap="back">‹ 返回</button>
-      <text class="zj-hero-kicker">STAFF · 骨干招新</text>
-      <text class="zj-hero-title">一起做好社团的事</text>
-      <text class="zj-hero-lead">执行部与宣传部骨干招新。先了解这次的工作与安排，再选择合适的方向。</text>
-      <view class="staff-process" aria-label="申请顺序：岗位批次、填写申请、核对提交、查看回执">
-        <view class="staff-process-step"><text class="staff-step-number">1</text><text>岗位批次</text></view>
-        <view class="staff-process-step"><text class="staff-step-number">2</text><text>填写申请</text></view>
-        <view class="staff-process-step"><text class="staff-step-number">3</text><text>核对提交</text></view>
-        <view class="staff-process-step"><text class="staff-step-number">4</text><text>查看回执</text></view>
+      <button class="zj-hero-back" bindtap="back">{{t.back}}</button>
+      <text class="zj-hero-kicker">{{t.kicker}}</text>
+      <text class="zj-hero-title">{{t.heroTitle}}</text>
+      <text class="zj-hero-lead">{{t.heroLead}}</text>
+      <view class="staff-process" aria-label="{{t.processLabel}}">
+        <view class="staff-process-step"><text class="staff-step-number">1</text><text>{{t.step1}}</text></view>
+        <view class="staff-process-step"><text class="staff-step-number">2</text><text>{{t.step2}}</text></view>
+        <view class="staff-process-step"><text class="staff-step-number">3</text><text>{{t.step3}}</text></view>
+        <view class="staff-process-step"><text class="staff-step-number">4</text><text>{{t.step4}}</text></view>
       </view>
     </view>
   </view>
 
   <view wx:if="{{user && (own.length || ownLoading || ownError)}}" class="zj-section staff-own">
-    <view class="zj-section-head"><view><text class="zj-section-title">我的骨干申请</text><text class="zj-small">继续查看进度与处理反馈。</text></view><button class="plain zj-more" bindtap="retryOwn" disabled="{{ownLoading}}">刷新回执</button></view>
-    <text wx:if="{{ownLoading}}" class="zj-form-hint" aria-role="status">正在读取本人回执…</text>
+    <view class="zj-section-head"><view><text class="zj-section-title">{{t.ownTitle}}</text><text class="zj-small">{{t.ownLead}}</text></view><button class="plain zj-more" bindtap="retryOwn" disabled="{{ownLoading}}">{{t.refreshOwn}}</button></view>
+    <text wx:if="{{ownLoading}}" class="zj-form-hint" aria-role="status">{{t.ownLoading}}</text>
     <text wx:if="{{ownError}}" class="error" aria-role="alert">{{ownError}}</text>
     <view class="zj-list">
       <view wx:for="{{own}}" wx:key="id" class="zj-application" hover-class="zj-pressed" bindtap="openBatch" data-id="{{item.batch}}" aria-role="link" aria-label="{{item.batchTitle}}，{{item.statusText}}">
-        <view class="zj-row"><text class="zj-small">申请 {{item.id}}</text><text class="zj-pill zj-pill-action">{{item.statusText}}</text></view>
+        <view class="zj-row"><text class="zj-small">{{t.applicationPrefix}}{{item.id}}</text><text class="zj-pill zj-pill-action">{{item.statusText}}</text></view>
         <text class="zj-card-title">{{item.batchTitle}}</text>
-        <text class="zj-small">最近更新 {{item.updatedText}}</text>
-        <text class="zj-card-action">查看进度与反馈 ›</text>
+        <text class="zj-small">{{t.updatedPrefix}}{{item.updatedText}}</text>
+        <text class="zj-card-action">{{t.viewProgress}} ›</text>
       </view>
     </view>
-    <button wx:if="{{ownHasMore}}" class="secondary staff-more" disabled="{{ownLoading}}" bindtap="moreOwn">加载更多本人申请</button>
+    <button wx:if="{{ownHasMore}}" class="secondary staff-more" disabled="{{ownLoading}}" bindtap="moreOwn">{{t.moreOwn}}</button>
   </view>
 
-  <template is="feedback" data="{{loading,error,needsLogin}}" />
+  <template is="feedback" data="{{loading,error,needsLogin,t}}" />
   <block wx:if="{{!loading && !error}}">
     <view class="zj-section">
-      <view class="zj-section-head"><view><text class="zj-section-title">选择招新批次</text><text class="zj-small">查看岗位说明与截止时间。各处入口共用同一份申请与回执。</text></view></view>
+      <view class="zj-section-head"><view><text class="zj-section-title">{{t.chooseBatch}}</text><text class="zj-small">{{t.chooseBatchLead}}</text></view></view>
       <view class="zj-list">
         <view wx:for="{{docs}}" wx:key="id" class="zj-call staff-batch">
-          <view class="zj-row"><text class="zj-kind">骨干招新</text><text class="zj-pill zj-pill-success">{{item.state}}</text></view>
+          <view class="zj-row"><text class="zj-kind">{{t.staffKind}}</text><text class="zj-pill zj-pill-success">{{item.stateText}}</text></view>
           <text class="zj-card-title">{{item.title}}</text>
-          <view class="staff-deadline"><text class="staff-deadline-label">报名截止</text><text class="staff-deadline-value">{{item.deadlineText || '以批次说明为准'}}</text></view>
+          <view class="staff-deadline"><text class="staff-deadline-label">{{t.deadline}}</text><text class="staff-deadline-value">{{item.deadlineText || t.deadlineFallback}}</text></view>
           <text wx:if="{{item.description}}" class="zj-card-summary">{{item.description}}</text>
-          <view class="actions"><button class="primary" bindtap="openBatch" data-id="{{item.id}}">查看批次与本人申请</button></view>
-          <button wx:if="{{reviewStaff}}" class="plain staff-review-link" bindtap="reviewBatch" data-id="{{item.id}}">审核该批次申请 ›</button>
+          <view class="actions"><button class="primary" bindtap="openBatch" data-id="{{item.id}}">{{t.openBatch}}</button></view>
+          <button wx:if="{{reviewStaff}}" class="plain staff-review-link" bindtap="reviewBatch" data-id="{{item.id}}">{{t.reviewBatch}}</button>
         </view>
       </view>
       <view wx:if="{{!docs.length}}" class="zj-empty">
         <text class="zj-empty-icon">🚩</text>
-        <text class="zj-empty-title">暂无已发布骨干批次</text>
-        <text class="zj-small">新一轮招新发布后会出现在这里。</text>
-        <button class="secondary" bindtap="openPage" data-page="communities">寻找游戏社群</button>
+        <text class="zj-empty-title">{{t.emptyTitle}}</text>
+        <text class="zj-small">{{t.emptyBody}}</text>
+        <button class="secondary" bindtap="openPage" data-page="communities">{{t.findCommunities}}</button>
       </view>
-      <button wx:if="{{hasMore}}" class="secondary staff-more" loading="{{loading}}" disabled="{{loading}}" bindtap="more">加载更多批次</button>
+      <button wx:if="{{hasMore}}" class="secondary staff-more" loading="{{loading}}" disabled="{{loading}}" bindtap="more">{{t.moreBatches}}</button>
     </view>
   </block>
 
   <view wx:if="{{!user || (!own.length && !ownLoading && !ownError)}}" class="zj-sheet">
-    <text class="zj-sheet-title">我的骨干申请</text>
-    <text class="zj-form-hint">{{user ? '尚无骨干申请。选择一个已发布批次，填写后可在这里继续查看。' : '登录后查看本人申请、处理反馈与历史回执。'}}</text>
-    <button wx:if="{{!user}}" class="primary" bindtap="login">登录查看我的申请</button>
+    <text class="zj-sheet-title">{{t.ownTitle}}</text>
+    <text class="zj-form-hint">{{user ? t.ownEmpty : t.ownLogin}}</text>
+    <button wx:if="{{!user}}" class="primary" bindtap="login">{{t.loginOwn}}</button>
   </view>
 
   <view wx:if="{{legacy.length || legacyError}}" class="zj-section">
-    <view class="zj-section-head"><view><text class="zj-section-title">外部招新与历史资料</text><text class="zj-small">保留既有批次的报名详情。</text></view></view>
+    <view class="zj-section-head"><view><text class="zj-section-title">{{t.legacyTitle}}</text><text class="zj-small">{{t.legacyLead}}</text></view></view>
     <text wx:if="{{legacyError}}" class="error">{{legacyError}}</text>
-    <template is="cards" data="{{docs:legacy,label:'历史骨干招新'}}" />
+    <template is="cards" data="{{docs:legacy,label:t.legacyLabel,t}}" />
   </view>
 </view>

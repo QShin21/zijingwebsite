@@ -103,8 +103,9 @@ describe('详情配图失败与重新加载', () => {
       expect(evaluate(condition, { item: { url: '' } })).toBeFalsy();
     }
     expect(wxml).toMatch(/swiper-item wx:for="\{\{presentation\.images\}\}" wx:key="index"/);
-    expect(wxml.match(/图片暂时无法显示，可重新加载内容。/g)).toHaveLength(2);
-    expect(wxml.match(/aria-role="alert"><text class="zj-small">图片暂时无法显示，可重新加载内容。<\/text><button class="secondary" bindtap="retry"/g)).toHaveLength(2);
+    expect(wxml.match(/\{\{t\.imageFailedReload\}\}/g)).toHaveLength(2);
+    expect(wxml.match(/aria-role="alert"><text class="zj-small">\{\{t\.imageFailedReload\}\}<\/text><button class="secondary" bindtap="retry"/g)).toHaveLength(2);
+    expect(readFileSync('miniprogram/src/pages/detail/index.js', 'utf8')).toContain("imageFailedReload: ['图片暂时无法显示，可重新加载内容。'");
   });
 });
 
@@ -113,12 +114,14 @@ describe('单选筛选的读屏状态', () => {
     const get = vi.fn().mockResolvedValue({ docs: [], page: 1, hasNextPage: false });
     const page = makePage('events', { '../../lib/theme': theme, '../../lib/page': frame, '../../lib/session': session,
       '../../lib/v2': { get, groupByDay: () => [] }, '../../lib/v2-images': { attach: () => {} } });
+    page.onLoad({}); // binds the interface dictionary (Chinese by default)
     page.setData({ loading: false });
     const wxml = source('events');
     const tags = ['upcoming', 'past'].map(value => wxml.match(new RegExp(`<button\\b[^>]*data-range="${value}"[^>]*>`))![0]);
     const states = () => tags.map(tag => ({ role: attribute(tag, 'aria-role'), checked: evaluate(attribute(tag, 'aria-checked'), page.data),
       label: rendered(attribute(tag, 'aria-label'), page.data) }));
-    expect(wxml).toContain('aria-role="radiogroup" aria-label="活动时间"');
+    expect(wxml).toContain('aria-role="radiogroup" aria-label="{{t.rangeLabel}}"');
+    expect(rendered('{{t.rangeLabel}}', page.data)).toBe('活动时间');
     expect(states()).toEqual([{ role: 'radio', checked: true, label: '即将开始，已选中' }, { role: 'radio', checked: false, label: '已结束，未选中' }]);
     await page.setRange({ currentTarget: { dataset: { range: 'past' } } });
     expect(states()).toEqual([{ role: 'radio', checked: false, label: '即将开始，未选中' }, { role: 'radio', checked: true, label: '已结束，已选中' }]);
@@ -131,9 +134,11 @@ describe('单选筛选的读屏状态', () => {
     page.onLoad({ collection: 'recruitment' });
     const wxml = source('list');
     const tag = wxml.match(/<button\b[^>]*bindtap="changeKind"[^>]*>/)![0];
-    const states = () => page.data.kinds.map((item: string) => ({ item, checked: evaluate(attribute(tag, 'aria-checked'), { ...page.data, item }),
-      label: rendered(attribute(tag, 'aria-label'), { ...page.data, item }) }));
-    expect(wxml).toContain('aria-role="radiogroup" aria-label="招新分类"');
+    // wx:for supplies both item and index (labels are localized per index).
+    const states = () => page.data.kinds.map((item: string, index: number) => ({ item, checked: evaluate(attribute(tag, 'aria-checked'), { ...page.data, item, index }),
+      label: rendered(attribute(tag, 'aria-label'), { ...page.data, item, index }) }));
+    expect(wxml).toContain('aria-role="radiogroup" aria-label="{{t.kindAria}}"');
+    expect(rendered('{{t.kindAria}}', page.data)).toBe('招新分类');
     expect(attribute(tag, 'aria-role')).toBe('radio');
     expect(states().filter((state: Data) => state.checked).map((state: Data) => state.item)).toEqual(['全部']);
     page.changeKind({ currentTarget: { dataset: { kind: '骨干招新' } } });

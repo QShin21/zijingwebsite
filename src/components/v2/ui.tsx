@@ -4,6 +4,7 @@ import type { CommunityRef, ImageRef } from "@/lib/v2";
 import { Icon, type IconName } from "./Icon";
 import { hueStyle, initial } from "./format";
 import styles from "./ui.module.css";
+import { LabeledNav, LabeledSpan, PageStatus, Tr } from "./LocalText";
 
 type Width = "max" | "workspace" | "form" | "reading";
 export function Wrap({ children, width = "max", className }: { children: ReactNode; width?: Width; className?: string }) {
@@ -40,12 +41,12 @@ export function PageHero({
     >
       <div className={styles.heroInner}>
         {back && (
-          <nav aria-label="面包屑" className={styles.crumbs}>
+          <LabeledNav zh="面包屑" en="Breadcrumb" className={styles.crumbs}>
             <Link href={back.href} className={styles.back}>
               <Icon name="back" size={16} />
               {back.label}
             </Link>
-          </nav>
+          </LabeledNav>
         )}
         {eyebrow && <p className={styles.eyebrow}>{eyebrow}</p>}
         <div className={styles.heroRow}>
@@ -171,7 +172,7 @@ export function StatusPill({ tone = "neutral", children }: { tone?: Tone; childr
   );
 }
 export function DemoPill() {
-  return <span className={`${styles.pill} ${styles.pill_warning}`}>演示资料</span>;
+  return <span className={`${styles.pill} ${styles.pill_warning}`}><Tr zh="演示资料" en="Demo content" /></span>;
 }
 
 export function EmptyState({
@@ -205,11 +206,13 @@ export function ErrorState({ message, retryHref }: { message: string; retryHref?
       <Icon name="close" size={20} />
       <div>
         <strong>{message}</strong>
-        <p>如刚提交过资料，请到「我的」核对记录。</p>
+        <p>
+          <Tr zh="如刚提交过资料，请到「我的」核对记录。" en="If you just submitted something, check your records under “Me”." />
+        </p>
       </div>
       {retryHref && (
         <Link href={retryHref} className={buttonClass("ghost", "small")}>
-          重新加载
+          <Tr zh="重新加载" en="Reload" />
         </Link>
       )}
     </div>
@@ -236,27 +239,27 @@ export function Pager({
     return search ? `${path}?${search}` : path;
   };
   return (
-    <nav className={styles.pager} aria-label="分页">
+    <LabeledNav className={styles.pager} zh="分页" en="Pagination">
       {page > 1 ? (
         <Link href={href(page - 1)} rel="prev" className={buttonClass("ghost", "small")}>
           <Icon name="back" size={16} />
-          上一页
+          <Tr zh="上一页" en="Previous" />
         </Link>
       ) : (
         <span />
       )}
       <span className={styles.pagerStatus}>
-        第 <strong>{page}</strong> / {totalPages} 页
+        <PageStatus page={page} totalPages={totalPages} />
       </span>
       {page < totalPages ? (
         <Link href={href(page + 1)} rel="next" className={buttonClass("ghost", "small")}>
-          下一页
+          <Tr zh="下一页" en="Next" />
           <Icon name="arrow" size={16} />
         </Link>
       ) : (
         <span />
       )}
-    </nav>
+    </LabeledNav>
   );
 }
 
@@ -285,10 +288,10 @@ export function LoginWall({ title, children, returnTo }: { title: string; childr
       {children && <p>{children}</p>}
       <div className={styles.emptyActions}>
         <ButtonLink href={`/login${query}`} icon="login">
-          登录
+          <Tr zh="登录" en="Sign in" />
         </ButtonLink>
         <ButtonLink href={`/register${query}`} tone="ghost">
-          注册账号
+          <Tr zh="注册账号" en="Create account" />
         </ButtonLink>
       </div>
     </div>
@@ -334,14 +337,14 @@ export function AvatarStack({ people, total }: { people: { name: string; avatar:
   if (!people.length) return null;
   const rest = (total ?? people.length) - people.length;
   return (
-    <span className={styles.stack} aria-label={`公开队员 ${total ?? people.length} 位`}>
+    <LabeledSpan className={styles.stack} zh={`公开队员 ${total ?? people.length} 位`} en={`${total ?? people.length} public members`}>
       {people.map((person, index) => (
         <span key={`${person.name}-${index}`} title={person.name}>
           <Avatar name={person.name} image={person.avatar} size={32} />
         </span>
       ))}
       {rest > 0 && <span className={styles.stackMore}>+{rest}</span>}
-    </span>
+    </LabeledSpan>
   );
 }
 

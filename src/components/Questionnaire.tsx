@@ -21,6 +21,8 @@ import { PublicationImages } from "./PublicationImages";
 import type { PublicationImage } from "@/lib/publication-images";
 import surface from "./activity-pages/QuestionnaireSurface.module.css";
 import { SubmissionSteps } from "./activity-pages/SubmissionSteps";
+import { useQuestionText, useT } from "./i18n/LocaleProvider";
+import { localizeMessage } from "@/lib/i18n/messages";
 
 export function Questionnaire({
   form,
@@ -31,7 +33,7 @@ export function Questionnaire({
   preview = false,
   draftKey,
   initialAnswers,
-  submitLabel = "提交并确认报名",
+  submitLabel,
 }: {
   form: SignupForm;
   images?: PublicationImage[];
@@ -43,6 +45,11 @@ export function Questionnaire({
   initialAnswers?: Answers;
   submitLabel?: string;
 }) {
+  const t = useT(),
+    text = useQuestionText();
+  // Validation messages start with the original label; show them in the reader's language.
+  const problem = (q: { label: string }, message: string | undefined) =>
+    message ? localizeMessage(message.startsWith(q.label + "：") ? message.slice(q.label.length + 1) : message, text.locale) : "";
   const prefix = useId(),
     root = useRef<HTMLDivElement>(null),
     submitLock = useRef(false);
@@ -117,9 +124,9 @@ export function Questionnaire({
           draftKey,
           JSON.stringify({ at: Date.now(), answers }),
         );
-        setDraftMessage("草稿已保存在此浏览器，有效期 7 天。");
+        setDraftMessage(t("草稿已保存在此浏览器，有效期 7 天。", "Draft saved in this browser for 7 days."));
       } catch {
-        setDraftMessage("浏览器无法保存草稿，请保持此页面打开。");
+        setDraftMessage(t("浏览器无法保存草稿，请保持此页面打开。", "This browser cannot save drafts. Keep this page open."));
       }
     }, 600);
     return () => clearTimeout(timer);
@@ -158,7 +165,7 @@ export function Questionnaire({
     if (submitLock.current || locked || !check(true)) return;
     if (preview) {
       setMessageKind("status");
-      setMessage("预览验证通过，未提交报名。");
+      setMessage(t("预览验证通过，未提交报名。", "Preview check passed. Nothing was submitted."));
       return;
     }
     submitLock.current = true;
@@ -175,7 +182,7 @@ export function Questionnaire({
       }
     } catch (e) {
       setMessageKind("error");
-      setMessage((e as Error).message);
+      setMessage(localizeMessage((e as Error).message, text.locale));
     } finally {
       submitLock.current = false;
       setSending(false);
@@ -187,19 +194,19 @@ export function Questionnaire({
       ref={root}
       aria-busy={locked}
     >
-      <aside className={surface.answerRail} aria-label="填写进度与草稿">
+      <aside className={surface.answerRail} aria-label={t("填写进度与草稿", "Progress and draft")}>
         <SubmissionSteps current={review ? "review" : "fill"} />
         <div className="questionnaire-progress">
-          <strong>{review ? "等待你确认提交" : "填写进度"}</strong>
+          <strong>{review ? t("等待你确认提交", "Ready for your confirmation") : t("填写进度", "Progress")}</strong>
           <span>
-            已填写 {completed} / {answerable.length} 题
+            {t(`已填写 ${completed} / ${answerable.length} 题`, `${completed} of ${answerable.length} answered`)}
           </span>
           <progress
-            aria-label="填写进度"
+            aria-label={t("填写进度", "Progress")}
             value={completed}
             max={Math.max(1, answerable.length)}
           />
-          <small>带 * 为必填。题目随答案显示，返回上一步会保留内容。</small>
+          <small>{t("带 * 为必填。题目随答案显示，返回上一步会保留内容。", "* marks required questions. Questions appear based on your answers; going back keeps what you entered.")}</small>
         </div>
         {draftKey && !preview && (
           <div className="questionnaire-draft">
@@ -216,11 +223,11 @@ export function Questionnaire({
                       /* Storage can be disabled by the browser. */
                     }
                     setSavedDraft(null);
-                    setDraftMessage("已关闭并清除此浏览器草稿");
+                    setDraftMessage(t("已关闭并清除此浏览器草稿", "Browser draft turned off and cleared"));
                   }
                 }}
               />
-              在此浏览器保存草稿（公用设备请勿开启）
+              {t("在此浏览器保存草稿（公用设备请勿开启）", "Save a draft in this browser (not on shared devices)")}
             </label>
             {savedDraft && (
               <button
@@ -240,7 +247,7 @@ export function Questionnaire({
                   setReview(false);
                 }}
               >
-                恢复未提交的草稿
+                {t("恢复未提交的草稿", "Restore unsubmitted draft")}
               </button>
             )}
             <small role="status">{draftMessage}</small>
@@ -251,18 +258,18 @@ export function Questionnaire({
         {preview && <PublicationImages images={images.filter((image) => !image.questionId)} />}
         <h3 className="questionnaire-step" tabIndex={-1}>
           {review
-            ? "核对填写内容"
+            ? t("核对填写内容", "Review your answers")
             : pages === 1
-              ? "填写信息"
-              : `填写信息 · 第 ${current + 1} / ${pages} 页`}
+              ? t("填写信息", "Your answers")
+              : t(`填写信息 · 第 ${current + 1} / ${pages} 页`, `Your answers · page ${current + 1} of ${pages}`)}
         </h3>
         {Object.keys(errors).length > 0 && (
           <div
             className={surface.errorSummary}
             role="alert"
-            aria-label="请核对以下题目"
+            aria-label={t("请核对以下题目", "Please check these questions")}
           >
-            <p>有 {Object.keys(errors).length} 题需要核对，已填写内容保留。</p>
+            <p>{t(`有 ${Object.keys(errors).length} 题需要核对，已填写内容保留。`, `${Object.keys(errors).length} question(s) need attention. Your answers are kept.`)}</p>
             <ul>
               {visible
                 .filter((q) => errors[q.id])
@@ -282,7 +289,7 @@ export function Questionnaire({
                         );
                       }}
                     >
-                      {q.label}：{errors[q.id]}
+                      {text.label(q)}{t("：", ": ")}{problem(q, errors[q.id])}
                     </button>
                   </li>
                 ))}
@@ -291,12 +298,12 @@ export function Questionnaire({
         )}
         {review ? (
           <>
-            <p>请核对每项内容。点击下方确认按钮后才会提交。</p>
+            <p>{t("请核对每项内容。点击下方确认按钮后才会提交。", "Check each answer. Nothing is submitted until you confirm below.")}</p>
             <dl className="questionnaire-review">
               {answerable.map((q) => (
                 <div key={q.id}>
-                  <dt>{q.label}</dt>
-                  <dd>{formatAnswer(answers[q.id], q) || "未填写"}</dd>
+                  <dt>{text.label(q)}</dt>
+                  <dd>{text.locale === "en" ? text.answer(answers[q.id], q) : formatAnswer(answers[q.id], q) || "未填写"}</dd>
                 </div>
               ))}
             </dl>
@@ -315,17 +322,20 @@ export function Questionnaire({
             const value = answers[q.id],
               fieldId = `${prefix}-${q.id}`;
             const hint = [
-              q.help,
-              q.minLength ? `至少 ${q.minLength} 字` : "",
+              text.help(q),
+              q.minLength ? t(`至少 ${q.minLength} 字`, `At least ${q.minLength} characters`) : "",
               q.type === "multiple"
-                ? `可选 ${q.minChoices || 1}–${q.maxChoices || q.options.length} 项${q.required ? "" : "，可留空"}${q.exclusiveOption ? `；“${q.exclusiveOption}”单独选择` : ""}`
+                ? t(
+                    `可选 ${q.minChoices || 1}–${q.maxChoices || q.options.length} 项${q.required ? "" : "，可留空"}${q.exclusiveOption ? `；“${q.exclusiveOption}”单独选择` : ""}`,
+                    `Choose ${q.minChoices || 1}–${q.maxChoices || q.options.length}${q.required ? "" : " (optional)"}${q.exclusiveOption ? `; “${text.option(q, q.exclusiveOption)}” must be chosen alone` : ""}`,
+                  )
                 : "",
               q.format === "phone"
-                ? "11 位中国大陆手机号"
+                ? t("11 位中国大陆手机号", "11-digit mainland China mobile number")
                 : q.format === "email"
-                  ? "请填写完整邮箱地址"
+                  ? t("请填写完整邮箱地址", "Enter a full email address")
                   : q.format === "number"
-                    ? "填写数字，可含小数或负号"
+                    ? t("填写数字，可含小数或负号", "Enter a number (decimals and minus allowed)")
                     : "",
             ]
               .filter(Boolean)
@@ -334,8 +344,8 @@ export function Questionnaire({
             if (q.type === "description")
               return (
                 <section className="questionnaire-description" key={q.id}>
-                  <h4>{q.label}</h4>
-                  <p className="preserve">{q.help}</p>
+                  <h4>{text.label(q)}</h4>
+                  <p className="preserve">{text.help(q)}</p>
                   <PublicationImages images={illustrations} />
                 </section>
               );
@@ -349,8 +359,8 @@ export function Questionnaire({
                 aria-describedby={`${fieldId}-hint${errors[q.id] ? ` ${fieldId}-error` : ""}`}
               >
                 <legend>
-                  {visible.findIndex((v) => v.id === q.id) + 1}. {q.label}
-                  {q.required ? " *" : "（选填）"}
+                  {visible.findIndex((v) => v.id === q.id) + 1}. {text.label(q)}
+                  {q.required ? " *" : t("（选填）", " (optional)")}
                 </legend>
                 <p id={`${fieldId}-hint`} className="muted">
                   {hint}
@@ -366,22 +376,22 @@ export function Questionnaire({
                   <>
                     {q.type === "textarea" ? (
                       <textarea
-                        aria-label={q.label}
+                        aria-label={text.label(q)}
                         aria-invalid={Boolean(errors[q.id])}
                         aria-describedby={`${fieldId}-hint ${fieldId}-error`}
                         value={typeof value === "string" ? value : ""}
-                        placeholder={q.placeholder}
+                        placeholder={text.placeholder(q)}
                         maxLength={q.maxLength || 2000}
                         rows={4}
                         onChange={(e) => update(q.id, e.target.value)}
                       />
                     ) : (
                       <input
-                        aria-label={q.label}
+                        aria-label={text.label(q)}
                         aria-invalid={Boolean(errors[q.id])}
                         aria-describedby={`${fieldId}-hint ${fieldId}-error`}
                         value={typeof value === "string" ? value : ""}
-                        placeholder={q.placeholder}
+                        placeholder={text.placeholder(q)}
                         maxLength={q.maxLength || 200}
                         inputMode={
                           q.format === "email"
@@ -397,7 +407,7 @@ export function Questionnaire({
                     )}
                     <small className="questionnaire-counter">
                       {typeof value === "string" ? value.length : 0} /{" "}
-                      {q.maxLength || (q.type === "textarea" ? 2000 : 200)} 字
+                      {q.maxLength || (q.type === "textarea" ? 2000 : 200)}{t(" 字", "")}
                     </small>
                   </>
                 )}
@@ -438,12 +448,12 @@ export function Questionnaire({
                           }
                         }}
                       />
-                      {option}
+                      {text.option(q, option)}
                     </label>
                   ))}
                 {q.type === "single" && !q.required && (
                   <button type="button" onClick={() => update(q.id, "")}>
-                    清除此题选择
+                    {t("清除此题选择", "Clear selection")}
                   </button>
                 )}
                 <p
@@ -451,7 +461,7 @@ export function Questionnaire({
                   className="questionnaire-error"
                   role={errors[q.id] ? "alert" : undefined}
                 >
-                  {errors[q.id]}
+                  {problem(q, errors[q.id])}
                 </p>
               </fieldset>
             );
@@ -464,8 +474,14 @@ export function Questionnaire({
                 .filter((j) => questions.some((q) => q.id === j.from))
                 .map((j) =>
                   j.target === endTarget
-                    ? "当前答案将提前结束问卷，下一步核对并提交。"
-                    : `当前答案将进入“${form.questions.find((q) => q.id === j.target)?.label || "后续题目"}”，跳过中间 ${j.skipped} 题。`,
+                    ? t("当前答案将提前结束问卷，下一步核对并提交。", "This answer ends the questionnaire early; next you review and submit.")
+                    : (() => {
+                        const target = form.questions.find((q) => q.id === j.target);
+                        return t(
+                          `当前答案将进入“${target?.label || "后续题目"}”，跳过中间 ${j.skipped} 题。`,
+                          `This answer continues at “${target ? text.label(target) : "a later question"}”, skipping ${j.skipped} question(s).`,
+                        );
+                      })(),
                 )
                 .join(" ")}
             </p>
@@ -496,17 +512,17 @@ export function Questionnaire({
                   try {
                     await onSaveDraft(answers);
                     setMessageKind("status");
-                    setMessage("草稿已保存，尚未提交人工审核。");
+                    setMessage(t("草稿已保存，尚未提交人工审核。", "Draft saved. It has not been submitted for review."));
                   } catch (error) {
                     setMessageKind("error");
-                    setMessage((error as Error).message);
+                    setMessage(localizeMessage((error as Error).message, text.locale));
                   } finally {
                     submitLock.current = false;
                     setSending(false);
                   }
                 }}
               >
-                保存草稿
+                {t("保存草稿", "Save draft")}
               </button>
             )}
             {(review || current > 0) && (
@@ -519,7 +535,7 @@ export function Questionnaire({
                   focusHeading();
                 }}
               >
-                {review ? "返回修改" : "上一步"}
+                {review ? t("返回修改", "Back to edit") : t("上一步", "Previous")}
               </button>
             )}
             {!review && (
@@ -534,7 +550,7 @@ export function Questionnaire({
                   focusHeading();
                 }}
               >
-                {current < pages - 1 ? "下一步" : "核对并提交"}
+                {current < pages - 1 ? t("下一步", "Next") : t("核对并提交", "Review and submit")}
               </button>
             )}
             {review && (
@@ -544,13 +560,13 @@ export function Questionnaire({
                 disabled={locked}
                 onClick={() => void submit()}
               >
-                {locked ? "正在提交…" : preview ? "验证预览答案" : submitLabel}
+                {locked ? t("正在提交…", "Submitting…") : preview ? t("验证预览答案", "Check preview answers") : submitLabel ?? t("提交并确认报名", "Submit and confirm")}
               </button>
             )}
           </div>
           {locked && (
             <p className={surface.saving} role="status">
-              正在保存，请保持页面打开…
+              {t("正在保存，请保持页面打开…", "Saving. Keep this page open…")}
             </p>
           )}
         </div>

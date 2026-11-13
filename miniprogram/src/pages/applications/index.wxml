@@ -4,136 +4,136 @@
   <view class="zj-hero">
     <view class="zj-stage-stripes"></view>
     <view class="zj-hero-inner">
-      <button class="zj-hero-back" bindtap="back">‹ 返回</button>
-      <text class="zj-hero-kicker">COMMUNITY · 社群管理员</text>
-      <text class="zj-hero-title">社群管理员申请</text>
-      <text class="zj-hero-lead">组织一个游戏社群，或参与已有社群的日常管理。申请进度和负责人反馈会保留在本页。</text>
+      <button class="zj-hero-back" bindtap="back">{{t.back}}</button>
+      <text class="zj-hero-kicker">{{t.kicker}}</text>
+      <text class="zj-hero-title">{{t.heroTitle}}</text>
+      <text class="zj-hero-lead">{{t.heroLead}}</text>
     </view>
   </view>
-  <template is="feedback" data="{{needsLogin}}" />
+  <template is="feedback" data="{{needsLogin,t}}" />
   <block wx:if="{{!needsLogin}}">
     <view wx:if="{{done}}" class="zj-callout zj-callout-success" aria-role="status">
       <text class="applications-done">{{done}}</text>
-      <text>微信群仍由管理员人工建立与拉群。</text>
+      <text>{{t.doneNote}}</text>
     </view>
     <view class="applications-entry">
-      <button class="{{apply ? 'secondary' : 'primary'}}" bindtap="toggle" disabled="{{busy || imageBusy}}">{{apply ? '收起填写内容' : mode === 'card' ? '继续调整名片与展示' : (realName || reason ? '继续填写申请' : '填写管理员申请')}}</button>
-      <button wx:if="{{mode !== 'submit'}}" class="plain" bindtap="newApplication" disabled="{{busy || imageBusy}}">填写另一份申请</button>
+      <button class="{{apply ? 'secondary' : 'primary'}}" bindtap="toggle" disabled="{{busy || imageBusy}}">{{apply ? t.collapseForm : mode === 'card' ? t.continueCard : (realName || reason ? t.continueApply : t.startApply)}}</button>
+      <button wx:if="{{mode !== 'submit'}}" class="plain" bindtap="newApplication" disabled="{{busy || imageBusy}}">{{t.anotherApply}}</button>
     </view>
 
     <view wx:if="{{apply}}" id="application-editor" class="applications-editor">
       <view class="applications-editor-head">
-        <text class="zj-section-title">{{mode === 'card' ? '名片与展示设置' : mode === 'edit' ? '修改并重新提交' : '填写申请资料'}}</text>
-        <text class="zj-small">{{mode === 'card' ? '管理已批准申请的进群联系方式。' : mode === 'edit' ? '根据处理意见补充资料，提交后重新进入审核。' : '请填写本人资料，并说明希望承担的社群工作。'}}</text>
-        <text wx:if="{{editId}}" class="zj-pill zj-pill-action">回执 {{editId}}，本次保存沿用这份申请。</text>
+        <text class="zj-section-title">{{mode === 'card' ? t.headCard : mode === 'edit' ? t.headEdit : t.headSubmit}}</text>
+        <text class="zj-small">{{mode === 'card' ? t.leadCard : mode === 'edit' ? t.leadEdit : t.leadSubmit}}</text>
+        <text wx:if="{{editId}}" class="zj-pill zj-pill-action">{{t.receiptPrefix}}{{editId}}{{t.receiptKeepSuffix}}</text>
       </view>
 
       <block wx:if="{{mode !== 'card'}}">
         <view class="zj-sheet">
-          <text class="zj-sheet-title">① 社群与组织计划</text>
+          <text class="zj-sheet-title">{{t.section1}}</text>
           <view class="field">
-            <text class="field-label">游戏社群 <text class="field-required">必选</text></text>
+            <text class="field-label">{{t.gameLabel}}<text class="field-required">{{t.requiredPick}}</text></text>
             <picker range="{{games}}" range-key="title" value="{{gameIndex}}" bindchange="game" disabled="{{busy || gamesLoading}}">
               <view class="picker-value applications-picker"><text>{{games[gameIndex].title}}</text><text aria-hidden="true">▾</text></view>
             </picker>
-            <text wx:if="{{gamesLoading}}" class="zj-form-hint" aria-role="status">正在读取社群选项…</text>
+            <text wx:if="{{gamesLoading}}" class="zj-form-hint" aria-role="status">{{t.gamesLoading}}</text>
             <view wx:if="{{gamesError}}">
-              <text class="error" aria-role="alert">社群选项加载失败：{{gamesError}}</text>
-              <button class="plain" bindtap="loadGames" disabled="{{gamesLoading || busy}}">重试社群选项</button>
+              <text class="error" aria-role="alert">{{t.gamesErrorPrefix}}{{gamesError}}</text>
+              <button class="plain" bindtap="loadGames" disabled="{{gamesLoading || busy}}">{{t.retryGames}}</button>
             </view>
           </view>
           <view wx:if="{{!games[gameIndex].id}}" class="field">
-            <text class="field-label">新游戏名称 <text class="field-required">必填</text></text>
-            <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{proposedGame}}" bindinput="input" data-field="proposedGame" maxlength="80" placeholder="2–80 字" disabled="{{busy}}" />
+            <text class="field-label">{{t.newGameLabel}}<text class="field-required">{{t.required}}</text></text>
+            <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{proposedGame}}" bindinput="input" data-field="proposedGame" maxlength="80" placeholder="{{t.newGamePlaceholder}}" disabled="{{busy}}" />
           </view>
           <view class="field">
-            <text class="field-label">申请说明 <text class="field-required">必填</text></text>
-            <textarea class="application-reason" cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{reason}}" bindinput="input" data-field="reason" placeholder="介绍组织计划、管理经验与可投入时间" maxlength="3000" disabled="{{busy}}" />
-            <text class="zj-form-hint">10–3000 字。写清活动安排和日常管理计划，方便负责人评估。</text>
+            <text class="field-label">{{t.reasonLabel}}<text class="field-required">{{t.required}}</text></text>
+            <textarea class="application-reason" cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{reason}}" bindinput="input" data-field="reason" placeholder="{{t.reasonPlaceholder}}" maxlength="3000" disabled="{{busy}}" />
+            <text class="zj-form-hint">{{t.reasonHint}}</text>
           </view>
         </view>
         <view class="zj-sheet">
-          <text class="zj-sheet-title">② 审核联系资料</text>
-          <text class="zj-form-hint">姓名与手机号仅供本人及有权限的负责人审核使用。</text>
+          <text class="zj-sheet-title">{{t.section2}}</text>
+          <text class="zj-form-hint">{{t.privateHint}}</text>
           <view class="field">
-            <text class="field-label">姓名 <text class="field-required">必填</text></text>
-            <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{realName}}" bindinput="input" data-field="realName" maxlength="80" placeholder="填写本人姓名" disabled="{{busy}}" />
+            <text class="field-label">{{t.nameLabel}}<text class="field-required">{{t.required}}</text></text>
+            <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{realName}}" bindinput="input" data-field="realName" maxlength="80" placeholder="{{t.namePlaceholder}}" disabled="{{busy}}" />
           </view>
           <view class="field">
-            <text class="field-label">手机号 <text class="field-required">必填</text></text>
-            <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{phone}}" bindinput="input" data-field="phone" maxlength="21" placeholder="可含 + 国际区号" disabled="{{busy}}" />
+            <text class="field-label">{{t.phoneLabel}}<text class="field-required">{{t.required}}</text></text>
+            <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{phone}}" bindinput="input" data-field="phone" maxlength="21" placeholder="{{t.phonePlaceholder}}" disabled="{{busy}}" />
           </view>
         </view>
       </block>
 
       <view class="zj-sheet">
-        <text class="zj-sheet-title">{{mode === 'card' ? '进群联系方式' : '③ 进群联系方式'}}</text>
-        <text class="zj-form-hint">获批并在任期间，已授权名片用于同学联系你申请加入微信群。</text>
+        <text class="zj-sheet-title">{{mode === 'card' ? t.contactCard : t.contactStep}}</text>
+        <text class="zj-form-hint">{{t.contactHint}}</text>
         <view class="field">
-          <text class="field-label">微信个人名片二维码 <text wx:if="{{mode !== 'card'}}" class="field-required">必填</text></text>
-          <button wx:if="{{qr && !qrFailed}}" class="image-button applications-qr" hover-class="zj-pressed" bindtap="previewImage" data-url="{{qr}}" aria-label="预览微信名片"><image class="qr" src="{{qr}}" mode="aspectFit" binderror="qrImageError" data-url="{{qr}}" data-scope="{{qrPreviewScope}}" /></button>
-          <view wx:if="{{qr && qrFailed}}" class="zj-alert"><text class="zj-small" aria-role="alert">名片预览暂时无法显示。原图片与已填资料已保留，可重试预览或重新选择图片。</text><button class="secondary" bindtap="retryQrPreview" data-url="{{qr}}" data-scope="{{qrPreviewScope}}" disabled="{{busy || imageBusy}}">重试名片预览</button></view>
-          <text wx:if="{{savedQr && !qr}}" class="zj-callout">已保存的名片会继续保留，可主动查看或更换。</text>
+          <text class="field-label">{{t.qrLabel}}<text wx:if="{{mode !== 'card'}}" class="field-required">{{t.required}}</text></text>
+          <button wx:if="{{qr && !qrFailed}}" class="image-button applications-qr" hover-class="zj-pressed" bindtap="previewImage" data-url="{{qr}}" aria-label="{{t.previewCard}}"><image class="qr" src="{{qr}}" mode="aspectFit" binderror="qrImageError" data-url="{{qr}}" data-scope="{{qrPreviewScope}}" /></button>
+          <view wx:if="{{qr && qrFailed}}" class="zj-alert"><text class="zj-small" aria-role="alert">{{t.previewFailed}}</text><button class="secondary" bindtap="retryQrPreview" data-url="{{qr}}" data-scope="{{qrPreviewScope}}" disabled="{{busy || imageBusy}}">{{t.retryPreview}}</button></view>
+          <text wx:if="{{savedQr && !qr}}" class="zj-callout">{{t.savedKept}}</text>
           <view class="applications-qr-actions">
-            <button class="secondary" bindtap="chooseQr" disabled="{{busy || imageBusy}}" loading="{{imageBusy}}">{{imageBusy ? '正在读取名片…' : qr || savedQr ? '选择新二维码图片' : '选择二维码图片'}}</button>
-            <button wx:if="{{savedQr}}" class="plain" bindtap="inspectSaved" disabled="{{busy || imageBusy}}">查看已保存名片</button>
+            <button class="secondary" bindtap="chooseQr" disabled="{{busy || imageBusy}}" loading="{{imageBusy}}">{{imageBusy ? t.readingCard : qr || savedQr ? t.chooseNewQr : t.chooseQr}}</button>
+            <button wx:if="{{savedQr}}" class="plain" bindtap="inspectSaved" disabled="{{busy || imageBusy}}">{{t.viewSaved}}</button>
           </view>
-          <text class="zj-form-hint">PNG、JPEG 或 WebP，2 MB 以内。取消选择或拒绝授权后，已填内容保留，可再次主动选择。</text>
+          <text class="zj-form-hint">{{t.qrHint}}</text>
         </view>
         <view id="contact-consent" class="applications-consent">
-          <text class="field-label">名片展示同意</text>
+          <text class="field-label">{{t.consentTitle}}</text>
           <checkbox-group bindchange="consent">
-            <label class="consent"><checkbox color="{{themePrimary}}" value="contact" checked="{{contactConsent}}" disabled="{{busy}}" aria-label="我同意展示我的微信名片作为进群联系方式" /><text>我同意展示我的微信名片作为进群联系方式</text></label>
+            <label class="consent"><checkbox color="{{themePrimary}}" value="contact" checked="{{contactConsent}}" disabled="{{busy}}" aria-label="{{t.consentLabel}}" /><text>{{t.consentLabel}}</text></label>
           </checkbox-group>
-          <text class="zj-form-hint">{{mode === 'card' ? '取消勾选并保存，即关闭名片展示。' : '由本人主动勾选；获批后可在本回执关闭展示。'}}</text>
-          <text wx:if="{{formError === '由于入社流程规定，必须展示管理联系方式'}}" class="error" aria-role="alert">{{formError}}</text>
-          <text class="zj-form-hint">选择图片需另行完成微信隐私授权；完成该授权后，仍需在此主动确认名片展示。</text>
+          <text class="zj-form-hint">{{mode === 'card' ? t.consentCardHint : t.consentHint}}</text>
+          <text wx:if="{{formError === t.consentMessage}}" class="error" aria-role="alert">{{formError}}</text>
+          <text class="zj-form-hint">{{t.privacyAuthHint}}</text>
         </view>
       </view>
 
-      <text class="zj-form-hint applications-note">{{mode === 'card' ? '保存后，按本次勾选更新名片展示设置。' : '申请资料用于审核。提交和批准均不会自动加入微信群。'}}</text>
-      <view class="applications-privacy"><button class="plain" bindtap="openContract">微信隐私指引</button><button class="plain" bindtap="openPage" data-page="fixed" data-params="{{ {key: 'privacy'} }}">社团隐私说明</button></view>
-      <block wx:if="{{formError !== '由于入社流程规定，必须展示管理联系方式'}}"><text wx:if="{{formError}}" class="error" aria-role="alert">{{formError}}</text></block>
+      <text class="zj-form-hint applications-note">{{mode === 'card' ? t.noteCard : t.noteSubmit}}</text>
+      <view class="applications-privacy"><button class="plain" bindtap="openContract">{{t.wechatPrivacy}}</button><button class="plain" bindtap="openPage" data-page="fixed" data-params="{{ {key: 'privacy'} }}">{{t.clubPrivacy}}</button></view>
+      <block wx:if="{{formError !== t.consentMessage}}"><text wx:if="{{formError}}" class="error" aria-role="alert">{{formError}}</text></block>
       <view class="zj-dock">
-        <button class="primary" bindtap="submit" loading="{{busy}}" disabled="{{busy || imageBusy || loading || (mode !== 'card' && gamesLoading)}}">{{busy ? '正在保存…' : mode === 'card' ? '保存名片与展示设置' : mode === 'edit' ? '保存并重新提交' : '提交申请'}}</button>
+        <button class="primary" bindtap="submit" loading="{{busy}}" disabled="{{busy || imageBusy || loading || (mode !== 'card' && gamesLoading)}}">{{busy ? t.saving : mode === 'card' ? t.saveCard : mode === 'edit' ? t.saveEdit : t.submit}}</button>
       </view>
     </view>
 
     <text wx:if="{{operationError || (!apply && formError)}}" class="error" aria-role="alert">{{operationError || formError}}</text>
     <view class="zj-section">
-      <view class="zj-section-head"><view><text class="zj-section-title">我的申请回执</text><text class="zj-small">查看处理意见，或继续原申请。</text></view><button class="plain zj-more" bindtap="retry" disabled="{{loading || busy}}">刷新核对</button></view>
+      <view class="zj-section-head"><view><text class="zj-section-title">{{t.receiptsTitle}}</text><text class="zj-small">{{t.receiptsLead}}</text></view><button class="plain zj-more" bindtap="retry" disabled="{{loading || busy}}">{{t.refresh}}</button></view>
       <text wx:if="{{error}}" class="error" aria-role="alert">{{error}}</text>
-      <text wx:if="{{done && error}}" class="zj-form-hint">已确认保存的回执仍保留在下方，刷新后再核对最新可用操作。</text>
-      <view wx:if="{{loading}}" class="zj-skeleton" aria-role="status" aria-label="正在读取回执"><view wx:if="{{!docs.length}}" class="zj-skeleton-row"><view class="zj-skeleton-date"></view><view class="zj-skeleton-lines"><view></view><view></view><view></view></view></view></view>
+      <text wx:if="{{done && error}}" class="zj-form-hint">{{t.savedKeptBelow}}</text>
+      <view wx:if="{{loading}}" class="zj-skeleton" aria-role="status" aria-label="{{t.readingReceipts}}"><view wx:if="{{!docs.length}}" class="zj-skeleton-row"><view class="zj-skeleton-date"></view><view class="zj-skeleton-lines"><view></view><view></view><view></view></view></view></view>
       <view wx:for="{{docs}}" wx:key="id" class="zj-record applications-record">
         <view class="zj-record-head"><text class="zj-pill zj-pill-{{item.status === 'approved' ? 'success' : item.status === 'returned' ? 'warning' : item.status === 'rejected' ? 'danger' : item.status === 'withdrawn' ? 'neutral' : 'info'}}">{{item.statusText}}</text><text class="zj-small">{{item.dateText}}</text></view>
-        <text class="zj-record-title">{{item.proposedGame || item.game.title || '游戏社群申请'}}</text>
-        <text class="zj-small">回执 {{item.id}}</text>
-        <view class="applications-steps" aria-label="办理进度">
-          <text class="applications-step done">已提交</text>
-          <text class="applications-step {{item.status === 'pending' ? 'current' : item.status === 'approved' || item.status === 'rejected' ? 'done' : ''}}">审核中</text>
-          <text class="applications-step {{item.status === 'approved' || item.status === 'rejected' ? 'current' : ''}}">{{item.status === 'rejected' ? '未通过' : '结果'}}</text>
+        <text class="zj-record-title">{{item.proposedGame || item.game.title || t.gameFallback}}</text>
+        <text class="zj-small">{{t.receiptPrefix}}{{item.id}}</text>
+        <view class="applications-steps" aria-label="{{t.progressLabel}}">
+          <text class="applications-step done">{{t.stepSubmitted}}</text>
+          <text class="applications-step {{item.status === 'pending' ? 'current' : item.status === 'approved' || item.status === 'rejected' ? 'done' : ''}}">{{t.stepReview}}</text>
+          <text class="applications-step {{item.status === 'approved' || item.status === 'rejected' ? 'current' : ''}}">{{item.status === 'rejected' ? t.stepRejected : t.stepResult}}</text>
         </view>
-        <text class="zj-callout">{{item.status === 'pending' ? '等待负责人审核，处理意见会显示在这份回执中。' : item.status === 'approved' ? '申请已获批。微信群的建立和成员邀请仍需人工完成。' : item.status === 'returned' ? '请按反馈补充资料，再从这份回执重新提交。' : item.status === 'withdrawn' ? '网站申请已撤回，可按可用操作修改并重新提交。' : item.status === 'rejected' ? '负责人已完成审核，请查看处理意见。' : '请刷新回执，核对最新申请状态。'}}</text>
-        <view wx:if="{{item.reviewNote}}" class="applications-note-box"><text class="field-label">负责人反馈</text><text class="body" selectable>{{item.reviewNote}}</text></view>
-        <button class="plain applications-disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy || imageBusy}}" aria-expanded="{{expandedId === item.id}}"><text>{{expandedId === item.id ? '收起申请资料' : '查看已提交资料'}}</text><text aria-hidden="true">{{expandedId === item.id ? '−' : '＋'}}</text></button>
+        <text class="zj-callout">{{item.status === 'pending' ? t.notePending : item.status === 'approved' ? t.noteApproved : item.status === 'returned' ? t.noteReturned : item.status === 'withdrawn' ? t.noteWithdrawn : item.status === 'rejected' ? t.noteRejected : t.noteUnknown}}</text>
+        <view wx:if="{{item.reviewNote}}" class="applications-note-box"><text class="field-label">{{t.reviewerFeedback}}</text><text class="body" selectable>{{item.reviewNote}}</text></view>
+        <button class="plain applications-disclosure" bindtap="toggleRecord" data-id="{{item.id}}" disabled="{{busy || imageBusy}}" aria-expanded="{{expandedId === item.id}}"><text>{{expandedId === item.id ? t.collapseDetails : t.viewDetails}}</text><text aria-hidden="true">{{expandedId === item.id ? '−' : '＋'}}</text></button>
         <view wx:if="{{expandedId === item.id}}" class="applications-detail">
-          <text class="field-label">组织计划</text><text class="body" selectable>{{item.reason}}</text>
+          <text class="field-label">{{t.plan}}</text><text class="body" selectable>{{item.reason}}</text>
           <view class="zj-kv">
-            <view class="zj-kv-row"><text class="zj-kv-label">姓名</text><text class="zj-kv-value" selectable>{{item.realName}}</text></view>
-            <view class="zj-kv-row"><text class="zj-kv-label">手机号</text><text class="zj-kv-value" selectable>{{item.phone}}</text></view>
-            <view class="zj-kv-row"><text class="zj-kv-label">名片展示</text><text class="zj-kv-value">{{item.contactConsent === true ? '已授权在任期间展示' : '未授权展示'}}</text></view>
+            <view class="zj-kv-row"><text class="zj-kv-label">{{t.name}}</text><text class="zj-kv-value" selectable>{{item.realName}}</text></view>
+            <view class="zj-kv-row"><text class="zj-kv-label">{{t.phone}}</text><text class="zj-kv-value" selectable>{{item.phone}}</text></view>
+            <view class="zj-kv-row"><text class="zj-kv-label">{{t.cardDisplay}}</text><text class="zj-kv-value">{{item.contactConsent === true ? t.cardAuthorized : t.cardNotAuthorized}}</text></view>
           </view>
-          <button class="secondary" bindtap="inspect" data-id="{{item.id}}" disabled="{{busy || imageBusy}}">查看已提交二维码</button>
+          <button class="secondary" bindtap="inspect" data-id="{{item.id}}" disabled="{{busy || imageBusy}}">{{t.viewSubmittedQr}}</button>
         </view>
         <view wx:if="{{item.actions.edit || item.actions.card || item.actions.withdraw}}" class="zj-record-actions">
-          <button wx:if="{{item.actions.edit}}" class="secondary" bindtap="openForm" data-id="{{item.id}}" data-action="edit" disabled="{{busy || imageBusy}}">修改并重新提交</button>
-          <button wx:if="{{item.actions.card}}" class="secondary" bindtap="openForm" data-id="{{item.id}}" data-action="card" disabled="{{busy || imageBusy}}">更新名片与授权</button>
-          <button wx:if="{{item.actions.withdraw}}" class="danger" bindtap="withdraw" data-id="{{item.id}}" disabled="{{busy || imageBusy}}">撤回网站申请</button>
+          <button wx:if="{{item.actions.edit}}" class="secondary" bindtap="openForm" data-id="{{item.id}}" data-action="edit" disabled="{{busy || imageBusy}}">{{t.editResubmit}}</button>
+          <button wx:if="{{item.actions.card}}" class="secondary" bindtap="openForm" data-id="{{item.id}}" data-action="card" disabled="{{busy || imageBusy}}">{{t.updateCard}}</button>
+          <button wx:if="{{item.actions.withdraw}}" class="danger" bindtap="withdraw" data-id="{{item.id}}" disabled="{{busy || imageBusy}}">{{t.withdraw}}</button>
         </view>
       </view>
-      <view wx:if="{{!docs.length && !loading && !error}}" class="zj-empty"><text class="zj-empty-icon">📮</text><text class="zj-empty-title">尚未提交申请</text><text class="zj-small">填写社群与组织计划后，回执会保留在这里。</text></view>
-      <button wx:if="{{hasMore}}" class="secondary applications-more" bindtap="onReachBottom" disabled="{{loading || busy}}" loading="{{loading}}">加载更多回执</button>
+      <view wx:if="{{!docs.length && !loading && !error}}" class="zj-empty"><text class="zj-empty-icon">📮</text><text class="zj-empty-title">{{t.emptyTitle}}</text><text class="zj-small">{{t.emptyBody}}</text></view>
+      <button wx:if="{{hasMore}}" class="secondary applications-more" bindtap="onReachBottom" disabled="{{loading || busy}}" loading="{{loading}}">{{t.more}}</button>
     </view>
   </block>
 </view>

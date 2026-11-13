@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon, type IconName } from "./Icon";
 import styles from "./Shell.module.css";
+import { useT } from "@/components/i18n/LocaleProvider";
 
 export type NavItem = { href: string; label: string; icon: IconName; match: string[] };
 
@@ -30,10 +31,11 @@ export function TopLinks({ items }: { items: NavItem[] }) {
 }
 
 /** Mobile bottom tab bar (< 1024px). No hamburger: five fixed destinations. */
-export function BottomTabs({ items }: { items: NavItem[] }) {
+export function BottomTabs({ items, label }: { items: NavItem[]; label?: string }) {
+  const t = useT();
   const path = usePathname() ?? "/";
   return (
-    <nav className={styles.tabs} aria-label="主要栏目">
+    <nav className={styles.tabs} aria-label={label ?? t("主要栏目", "Main sections")}>
       <ul>
         {items.map((item) => {
           const current = active(path, item);

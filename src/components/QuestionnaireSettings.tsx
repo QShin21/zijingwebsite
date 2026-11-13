@@ -1,6 +1,7 @@
 "use client";
 import type { Question } from "@/lib/signup-schema";
 import { hasOptions, hasRows } from "@/lib/questionnaire-model";
+import { useT } from "./i18n/LocaleProvider";
 export function QuestionnaireSettings({
   q,
   onChange,
@@ -8,11 +9,12 @@ export function QuestionnaireSettings({
   q: Question;
   onChange: (value: Partial<Question>) => void;
 }) {
+  const t = useT();
   return (
     <div className="questionnaire-settings">
       {hasRows(q.type) && (
         <label>
-          子题（每行一个）
+          {t("子题（每行一个）", "Sub-questions (one per line)")}
           <textarea
             value={(q.rows || []).join("\n")}
             onChange={(e) => onChange({ rows: e.target.value.split("\n") })}
@@ -25,7 +27,7 @@ export function QuestionnaireSettings({
             .filter((key) => key !== "step" || q.type === "number")
             .map((key) => (
               <label key={key}>
-                {{ min: "最小值", max: "最大值", step: "步长" }[key]}
+                {{ min: t("最小值", "Minimum"), max: t("最大值", "Maximum"), step: t("步长", "Step") }[key]}
                 <input
                   type="number"
                   step="any"
@@ -48,7 +50,7 @@ export function QuestionnaireSettings({
           checked={Boolean(q.pageBreak)}
           onChange={(e) => onChange({ pageBreak: e.target.checked })}
         />
-        从新的一页开始
+        {t("从新的一页开始", "Start on a new page")}
       </label>
       {hasOptions(q.type) && q.type !== "ranking" && (
         <label className="signup-choice">
@@ -57,7 +59,7 @@ export function QuestionnaireSettings({
             checked={Boolean(q.randomize)}
             onChange={(e) => onChange({ randomize: e.target.checked })}
           />
-          随机排列选项
+          {t("随机排列选项", "Shuffle options")}
         </label>
       )}
     </div>

@@ -1,4 +1,6 @@
 import { RouteLoading } from "@/components/activity-pages/RouteLoading";
-export default function Loading() {
-  return <RouteLoading label="招新管理" />;
+import { getT } from "@/lib/i18n/server";
+export default async function Loading() {
+  const { t } = await getT();
+  return <RouteLoading label={t("招新管理", "Recruitment management")} />;
 }

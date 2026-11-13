@@ -5,7 +5,8 @@ import {
   endTarget,
   type ConditionGroup,
 } from "@/lib/questionnaire-flow";
-import { questionTypes } from "@/lib/questionnaire-model";
+import { useLocale, useT } from "./i18n/LocaleProvider";
+import { conditionLabel, questionTypeLabel } from "@/lib/i18n/labels-manage";
 
 export function ConditionEditor({
   value,
@@ -16,6 +17,8 @@ export function ConditionEditor({
   sources: Question[];
   onChange: (value: ConditionGroup | undefined) => void;
 }) {
+  const t = useT(),
+    locale = useLocale();
   const eligible = sources.filter(
     (q) =>
       !["description", "matrix", "matrixMultiple", "blanks", "group"].includes(
@@ -25,15 +28,15 @@ export function ConditionEditor({
   return (
     <div className="condition-editor">
       <label>
-        条件关系
+        {t("条件关系", "Condition logic")}
         <select
           value={value.mode}
           onChange={(e) =>
             onChange({ ...value, mode: e.target.value as "all" | "any" })
           }
         >
-          <option value="all">全部满足（且）</option>
-          <option value="any">任一满足（或）</option>
+          <option value="all">{t("全部满足（且）", "Match all (AND)")}</option>
+          <option value="any">{t("任一满足（或）", "Match any (OR)")}</option>
         </select>
       </label>
       {value.rules.map((rule, i) => {
@@ -50,7 +53,7 @@ export function ConditionEditor({
         return (
           <div className="condition-row" key={i}>
             <label>
-              条件题目
+              {t("条件题目", "Question")}
               <select
                 value={rule.questionId}
                 onChange={(e) =>
@@ -63,13 +66,13 @@ export function ConditionEditor({
               >
                 {eligible.map((q) => (
                   <option key={q.id} value={q.id}>
-                    {q.label || "未命名题目"}
+                    {q.label || t("未命名题目", "Untitled question")}
                   </option>
                 ))}
               </select>
             </label>
             <label>
-              判断方式
+              {t("判断方式", "Operator")}
               <select
                 value={rule.operator}
                 onChange={(e) =>
@@ -84,22 +87,22 @@ export function ConditionEditor({
                     ([key]) =>
                       numeric || !["gt", "gte", "lt", "lte"].includes(key),
                   )
-                  .map(([key, label]) => (
+                  .map(([key]) => (
                     <option value={key} key={key}>
-                      {label}
+                      {conditionLabel(key as keyof typeof conditionLabels, locale)}
                     </option>
                   ))}
               </select>
             </label>
             {!["answered", "notAnswered"].includes(rule.operator) && (
               <label>
-                条件值
+                {t("条件值", "Value")}
                 {source?.options.length ? (
                   <select
                     value={rule.value}
                     onChange={(e) => patch({ value: e.target.value })}
                   >
-                    <option value="">请选择选项</option>
+                    <option value="">{t("请选择选项", "Select an option")}</option>
                     {source.options.map((option, n) => (
                       <option key={n} value={option}>
                         {option}
@@ -118,13 +121,13 @@ export function ConditionEditor({
             )}
             <button
               type="button"
-              aria-label={`删除条件 ${i + 1}`}
+              aria-label={t(`删除条件 ${i + 1}`, `Delete condition ${i + 1}`)}
               onClick={() => {
                 const rules = value.rules.filter((_, n) => n !== i);
                 onChange(rules.length ? { ...value, rules } : undefined);
               }}
             >
-              删除条件
+              {t("删除条件", "Delete condition")}
             </button>
           </div>
         );
@@ -142,7 +145,7 @@ export function ConditionEditor({
           })
         }
       >
-        添加条件
+        {t("添加条件", "Add condition")}
       </button>
     </div>
   );
@@ -158,6 +161,8 @@ export function QuestionnaireLogic({
   following: Question[];
   onChange: (value: Partial<Question>) => void;
 }) {
+  const t = useT(),
+    locale = useLocale();
   const sources = [...previous, q].filter(
     (p) =>
       !["description", "matrix", "matrixMultiple", "blanks", "group"].includes(
@@ -182,10 +187,12 @@ export function QuestionnaireLogic({
     <div className="question-logic">
       <details className="questionnaire-settings">
         <summary>
-          显示条件
-          {display ? ` · ${display.rules.length} 个条件` : " · 始终显示"}
+          {t("显示条件", "Display condition")}
+          {display
+            ? t(` · ${display.rules.length} 个条件`, ` · ${display.rules.length} condition${display.rules.length === 1 ? "" : "s"}`)
+            : t(" · 始终显示", " · always shown")}
         </summary>
-        <p>引用前置题决定本题是否显示。前置题被隐藏或跳过时，条件不成立。</p>
+        <p>{t("引用前置题决定本题是否显示。前置题被隐藏或跳过时，条件不成立。", "Earlier answers decide whether this question is shown. If the earlier question is hidden or skipped, the condition is not met.")}</p>
         {display && (
           <ConditionEditor
             value={display}
@@ -233,17 +240,19 @@ export function QuestionnaireLogic({
               })
             }
           >
-            设置显示条件
+            {t("设置显示条件", "Set display condition")}
           </button>
         )}
       </details>
       <details className="questionnaire-settings">
         <summary>
-          条件跳转
-          {q.jumps?.length ? ` · ${q.jumps.length} 个分支` : " · 顺序填写"}
+          {t("条件跳转", "Conditional jumps")}
+          {q.jumps?.length
+            ? t(` · ${q.jumps.length} 个分支`, ` · ${q.jumps.length} branch${q.jumps.length === 1 ? "" : "es"}`)
+            : t(" · 顺序填写", " · in order")}
         </summary>
         <p>
-          完成本题后按从上到下的顺序判断，执行第一条匹配的分支。可跳到后续题或提前结束；未匹配时继续下一题。
+          {t("完成本题后按从上到下的顺序判断，执行第一条匹配的分支。可跳到后续题或提前结束；未匹配时继续下一题。", "After this question, branches are checked top to bottom and the first match runs. A branch can jump ahead or end early; with no match, the next question follows.")}
         </p>
         {q.jumps?.map((jump, i) => {
           const patch = (change: Partial<typeof jump>) =>
@@ -255,8 +264,8 @@ export function QuestionnaireLogic({
           return (
             <fieldset className="jump-rule" key={i}>
               <legend>
-                分支 {i + 1}
-                {!jump.when ? " · 默认分支" : ""}
+                {t(`分支 ${i + 1}`, `Branch ${i + 1}`)}
+                {!jump.when ? t(" · 默认分支", " · default branch") : ""}
               </legend>
               {jump.when && (
                 <ConditionEditor
@@ -273,18 +282,18 @@ export function QuestionnaireLogic({
                   }}
                 />
               )}
-              {!jump.when && <p>其他分支均未匹配时执行此跳转。</p>}
+              {!jump.when && <p>{t("其他分支均未匹配时执行此跳转。", "Runs when no other branch matches.")}</p>}
               <label>
-                跳转到
+                {t("跳转到", "Jump to")}
                 <select
                   value={jump.target}
                   onChange={(e) => patch({ target: e.target.value })}
                 >
-                  <option value={endTarget}>结束问卷并核对提交</option>
+                  <option value={endTarget}>{t("结束问卷并核对提交", "End and review before submitting")}</option>
                   {following.map((next, n) => (
                     <option key={next.id} value={next.id}>
-                      第 {previous.length + n + 2} 题 ·{" "}
-                      {next.label || questionTypes[next.type]}
+                      {t(`第 ${previous.length + n + 2} 题 · `, `Q${previous.length + n + 2} · `)}
+                      {next.label || questionTypeLabel(next.type, locale)}
                     </option>
                   ))}
                 </select>
@@ -300,7 +309,7 @@ export function QuestionnaireLogic({
                       onChange({ jumps });
                     }}
                   >
-                    提高分支优先级
+                    {t("提高分支优先级", "Move branch up")}
                   </button>
                 )}
                 <button
@@ -310,7 +319,7 @@ export function QuestionnaireLogic({
                     onChange({ jumps: jumps.length ? jumps : undefined });
                   }}
                 >
-                  删除分支
+                  {t("删除分支", "Delete branch")}
                 </button>
               </div>
             </fieldset>
@@ -339,7 +348,7 @@ export function QuestionnaireLogic({
               onChange({ jumps });
             }}
           >
-            添加条件分支
+            {t("添加条件分支", "Add conditional branch")}
           </button>
           <button
             type="button"
@@ -356,11 +365,11 @@ export function QuestionnaireLogic({
               })
             }
           >
-            添加默认分支
+            {t("添加默认分支", "Add default branch")}
           </button>
         </div>
         <small>
-          有跳转的题目会独立结束当前填写页；提前结束仍需核对并提交。
+          {t("有跳转的题目会独立结束当前填写页；提前结束仍需核对并提交。", "A question with jumps ends the current page; ending early still requires review and submission.")}
         </small>
       </details>
     </div>

@@ -7,25 +7,42 @@ const club = require('../../lib/club');
 const session = require('../../lib/session');
 const reading = require('../../lib/native-reading');
 const { actions, error, labels } = require('../../lib/page');
+const i18n = (() => { try { const value = require('../../lib/i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { t: zh => zh, message: value => value, locale: () => 'zh', bind() {}, unbind() {}, navTitle() {}, subscribe: () => () => {} }; })();
+const kindsEn = { '全部': 'All', '普通社员': 'Members', '代表队选拔': 'Team trials', '骨干招新': 'Staff recruitment' };
+const allGames = () => ({ id: '', title: i18n.t('全部项目', 'All games') });
+const text = { back: ['‹ 返回', '‹ Back'], kicker: ['FEED · 动态', 'FEED · Updates'], teamAffairs: ['代表队事务', 'Team affairs'], teamEntryTitle: ['招新与我的队伍', 'Recruitment and my teams'], teamEntryBody: ['查看选拔批次、本人申请与成员关系。', 'See trials, your applications and memberships.'],
+  searchPrefix: ['搜索', 'Search '], searchSuffix: ['标题关键词', ' by title'], searchAria: ['搜索当前栏目标题', 'Search titles in this section'], search: ['搜索', 'Search'], year: ['赛事年份', 'Year'], game: ['游戏项目', 'Game'], allYears: ['全部年份', 'All years'],
+  kindAria: ['招新分类', 'Recruitment type'], ariaSep: ['，', ', '], selected: ['已选中', 'selected'], unselected: ['未选中', 'not selected'], clear: ['清除筛选', 'Clear filters'], yearHonorsSuffix: ['年荣誉', ' honors'],
+  showcaseEmpty: ['暂无已审批社群风采', 'No approved community showcase yet'], showcaseEmptyBody: ['新的记录发布后会出现在这里。', 'New posts will appear here once published.'],
+  eventsEmpty: ['暂无符合条件的活动', 'No matching events'], contentEmpty: ['暂无符合条件的内容', 'No matching content'], emptyHint: ['可清除筛选查看全部，或稍后下拉刷新。', 'Clear filters to see everything, or pull down to refresh later.'],
+  retryMore: ['重试加载更多', 'Retry loading more'], loadMore: ['加载更多', 'Load more'], end: ['— 已展示全部结果 —', '— End of results —'] };
 Page(withVisualTheme({
   data: { loading: true, error: '', needsLogin: false, collection: '', title: '', docs: [], page: 1, hasMore: false,
     catalog: {}, loadingMore: false, loadMoreError: '', search: '', years: ['全部年份'], year: '全部年份', yearIndex: 0, kinds: ['全部', '普通社员', '代表队选拔', '骨干招新'], kind: '全部', games: [{ id: '', title: '全部项目' }], gameIndex: 0 },
   ...actions,
   onLoad(options) {
+    i18n.bind(this, text);
     const catalog = reading.catalog(options.collection);
     this._hidden = false; this._unloaded = false;
     this.setData({ collection: options.collection, title: labels[options.collection] || catalog.title, catalog });
     wx.setNavigationBarTitle({ title: labels[options.collection] || catalog.title });
+    this.setData({ kindLabels: this.data.kinds.map(kind => i18n.t(kind, kindsEn[kind])), games: [allGames()] });
     const now = new Date().getFullYear();
     this.setData({ years: ['全部年份', ...Array.from({ length: 15 }, (_, i) => String(now - i))] });
+    this.setData({ yearLabels: [i18n.t('全部年份', 'All years'), ...this.data.years.slice(1)] });
     this._unsubscribe = session.subscribe(user => {
       this._ticket = (this._ticket || 0) + 1; this._gamesTicket = (this._gamesTicket || 0) + 1;
-      this.setData({ loading: false, loadingMore: false, error: '', loadMoreError: '', docs: [], page: 1, hasMore: false, games: [{ id: '', title: '全部项目' }], gameIndex: 0, needsLogin: !user });
+      this.setData({ loading: false, loadingMore: false, error: '', loadMoreError: '', docs: [], page: 1, hasMore: false, games: [allGames()], gameIndex: 0, needsLogin: !user });
     });
   },
-  onShow() { this._hidden = false; this.load(); if (session.campus()) this.loadGames(); },
+  onShow() { wx.setNavigationBarTitle({ title: this.data.title || i18n.t('资料档案', 'Archive') }); this._hidden = false; this.load(); if (session.campus()) this.loadGames(); },
   onHide() { this._hidden = true; this._ticket = (this._ticket || 0) + 1; this._gamesTicket = (this._gamesTicket || 0) + 1; },
-  onUnload() { this._unloaded = true; this.onHide(); if (this._unsubscribe) this._unsubscribe(); },
+  onLocaleChange() {
+    const catalog = reading.catalog(this.data.collection), title = labels[this.data.collection] || catalog.title;
+    this.setData({ catalog, title, yearLabels: [i18n.t('全部年份', 'All years'), ...this.data.years.slice(1)], kindLabels: this.data.kinds.map(kind => i18n.t(kind, kindsEn[kind])), games: [allGames(), ...this.data.games.slice(1)] });
+    wx.setNavigationBarTitle({ title });
+  },
+  onUnload() { this._unloaded = true; this.onHide(); i18n.unbind(this); if (this._unsubscribe) this._unsubscribe(); },
   async loadGames() {
     const ticket = this._gamesTicket = (this._gamesTicket || 0) + 1;
     const user = session.user(), userId = user && user.id;
@@ -34,7 +51,7 @@ Page(withVisualTheme({
       const result = await cms.list('games', { limit: 50 });
       const current = session.user();
       if (ticket === this._gamesTicket && !this._hidden && !this._unloaded && current && String(current.id) === String(userId))
-        this.setData({ games: [{ id: '', title: '全部项目' }, ...result.docs] });
+        this.setData({ games: [allGames(), ...result.docs] });
     } catch { /* Main query presents authentication errors. */ }
   },
   onPullDownRefresh() { this.load().finally(() => wx.stopPullDownRefresh()); },
@@ -71,9 +88,9 @@ Page(withVisualTheme({
       this.setData({ loading: false, loadingMore: false, docs: more ? this.data.docs.concat(docs) : docs, page: result.page, hasMore: result.hasNextPage });
     } catch (cause) {
       if (ticket !== this._ticket) return;
-      if (more && (!cause || cause.status !== 401)) this.setData({ loadingMore: false, loadMoreError: cause && cause.message || '下一页暂时未能读取，请重试。' });
+      if (more && (!cause || cause.status !== 401)) this.setData({ loadingMore: false, loadMoreError: cause && cause.message || i18n.t('下一页暂时未能读取，请重试。', 'The next page could not be loaded. Please try again.') });
       else { error(this, cause); this.setData({ loadingMore: false, ...(cause && cause.status === 401 ? { docs: [], hasMore: false } : {}) }); }
     }
   },
-  onShareAppMessage() { return { title: `竞在紫荆 · ${this.data.title}`, path: `/pages/list/index?collection=${this.data.collection}` }; },
+  onShareAppMessage() { return { title: `${i18n.t('竞在紫荆', 'Zijing Esports')} · ${this.data.title}`, path: `/pages/list/index?collection=${this.data.collection}` }; },
 }));

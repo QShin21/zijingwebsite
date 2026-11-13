@@ -12,11 +12,11 @@ export const themeCookieName = "zijing_theme";
 export type ThemeName = "classic" | "summer" | "winter" | "simple";
 export type ColorScheme = "light" | "dark";
 
-export const themes: readonly { name: ThemeName; label: string; scheme: ColorScheme; color: string }[] = [
-  { name: "classic", label: "清华经典", scheme: "dark", color: "#2a1f3d" },
-  { name: "summer", label: "清凉夏夜", scheme: "dark", color: "#0f2530" },
-  { name: "winter", label: "温煦冬日", scheme: "light", color: "#f3eee4" },
-  { name: "simple", label: "简约", scheme: "light", color: "#f7f7f5" },
+export const themes: readonly { name: ThemeName; label: string; labelEn: string; scheme: ColorScheme; color: string }[] = [
+  { name: "classic", label: "清华经典", labelEn: "Tsinghua Classic", scheme: "dark", color: "#2a1f3d" }, // i18n-exempt: paired with labelEn
+  { name: "summer", label: "清凉夏夜", labelEn: "Summer Night", scheme: "dark", color: "#0f2530" }, // i18n-exempt: paired with labelEn
+  { name: "winter", label: "温煦冬日", labelEn: "Warm Winter", scheme: "light", color: "#f3eee4" }, // i18n-exempt: paired with labelEn
+  { name: "simple", label: "简约", labelEn: "Simple", scheme: "light", color: "#f7f7f5" }, // i18n-exempt: paired with labelEn
 ];
 
 /** First visit and the legacy "light" preference both resolve here (light first). */
@@ -33,8 +33,9 @@ export function themeScheme(theme: ThemeName): ColorScheme {
   return themes.find((entry) => entry.name === theme)?.scheme ?? "light";
 }
 
-export function themeLabel(theme: ThemeName): string {
-  return themes.find((entry) => entry.name === theme)?.label ?? theme;
+export function themeLabel(theme: ThemeName, locale: "zh" | "en" = "zh"): string {
+  const entry = themes.find((item) => item.name === theme);
+  return (locale === "en" ? entry?.labelEn : entry?.label) ?? theme;
 }
 
 /** Browser chrome colour: the page paper of each palette. */

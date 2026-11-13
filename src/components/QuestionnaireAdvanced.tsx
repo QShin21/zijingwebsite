@@ -2,6 +2,7 @@
 import type { Answer, Question } from "@/lib/signup-schema";
 import { hasRows } from "@/lib/questionnaire-model";
 import { QuestionnaireGroup } from "./QuestionnaireGroup";
+import { useQuestionText, useT } from "./i18n/LocaleProvider";
 export function QuestionnaireAdvanced({
   q,
   value,
@@ -13,19 +14,22 @@ export function QuestionnaireAdvanced({
   onChange: (value: Answer) => void;
   name: string;
 }) {
+  const t = useT(),
+    text = useQuestionText(),
+    label = text.label(q);
   if (q.type === "group")
     return <QuestionnaireGroup q={q} value={value} onChange={onChange} />;
   if (q.type === "select")
     return (
       <select
-        aria-label={q.label}
+        aria-label={label}
         value={typeof value === "string" ? value : ""}
         onChange={(e) => onChange(e.target.value)}
       >
-        <option value="">请选择</option>
+        <option value="">{t("请选择", "Select")}</option>
         {q.options.map((v) => (
           <option key={v} value={v}>
-            {v}
+            {text.option(q, v)}
           </option>
         ))}
       </select>
@@ -33,7 +37,7 @@ export function QuestionnaireAdvanced({
   if (["number", "date", "time"].includes(q.type))
     return (
       <input
-        aria-label={q.label}
+        aria-label={label}
         type={q.type}
         min={q.min}
         max={q.max}
@@ -47,8 +51,8 @@ export function QuestionnaireAdvanced({
       <div className="questionnaire-scale">
         <small>
           {q.type === "nps"
-            ? "0 = 完全不会推荐，10 = 非常愿意推荐"
-            : `${q.min} = 最低，${q.max} = 最高`}
+            ? t("0 = 完全不会推荐，10 = 非常愿意推荐", "0 = not at all likely to recommend, 10 = extremely likely")
+            : t(`${q.min} = 最低，${q.max} = 最高`, `${q.min} = lowest, ${q.max} = highest`)}
         </small>
         <div>
           {Array.from(
@@ -68,7 +72,7 @@ export function QuestionnaireAdvanced({
         </div>
         {!q.required && (
           <button type="button" onClick={() => onChange("")}>
-            清除此题选择
+            {t("清除此题选择", "Clear selection")}
           </button>
         )}
       </div>
@@ -79,12 +83,12 @@ export function QuestionnaireAdvanced({
       : [];
     return (
       <div className="questionnaire-ranking">
-        <p>按偏好从高到低选择，第一项为最高优先级。</p>
+        <p>{t("按偏好从高到低选择，第一项为最高优先级。", "Rank from most to least preferred; the first is the top priority.")}</p>
         {q.options.map((_, i) => (
           <label key={i}>
-            第 {i + 1} 名
+            {t(`第 ${i + 1} 名`, `Rank ${i + 1}`)}
             <select
-              aria-label={`第 ${i + 1} 名`}
+              aria-label={t(`第 ${i + 1} 名`, `Rank ${i + 1}`)}
               value={ranked[i] || ""}
               onChange={(e) => {
                 const next = Array.from(
@@ -95,21 +99,21 @@ export function QuestionnaireAdvanced({
                 onChange(next);
               }}
             >
-              <option value="">请选择</option>
+              <option value="">{t("请选择", "Select")}</option>
               {q.options.map((option) => (
                 <option
                   value={option}
                   key={option}
                   disabled={ranked.includes(option) && ranked[i] !== option}
                 >
-                  {option}
+                  {text.option(q, option)}
                 </option>
               ))}
             </select>
           </label>
         ))}
         <button type="button" onClick={() => onChange([])}>
-          清空排序
+          {t("清空排序", "Clear ranking")}
         </button>
       </div>
     );
@@ -121,10 +125,10 @@ export function QuestionnaireAdvanced({
       <div className="questionnaire-matrix">
         {q.rows!.map((row, i) => (
           <fieldset key={row}>
-            <legend>{row}</legend>
+            <legend>{text.row(q, row)}</legend>
             {q.type === "blanks" ? (
               <input
-                aria-label={`${q.label}：${row}`}
+                aria-label={`${label}${t("：", ": ")}${text.row(q, row)}`}
                 maxLength={200}
                 value={
                   typeof rows[row] === "string" ? (rows[row] as string) : ""
@@ -161,7 +165,7 @@ export function QuestionnaireAdvanced({
                       });
                     }}
                   />
-                  {option}
+                  {text.option(q, option)}
                 </label>
               ))
             )}

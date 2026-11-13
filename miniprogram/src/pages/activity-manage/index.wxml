@@ -4,42 +4,42 @@
   <view class="zj-hero">
     <view class="zj-stage-stripes"></view>
     <view class="zj-hero-inner">
-      <button class="zj-hero-back" bindtap="back">‹ 返回</button>
-      <text class="zj-hero-kicker">WORKBENCH · 活动工作台</text>
-      <text class="zj-hero-title">问卷与报名</text>
-      <text class="zj-hero-lead">选择活动，处理报名问卷与已提交资料。</text>
+      <button class="zj-hero-back" bindtap="back">{{t.back}}</button>
+      <text class="zj-hero-kicker">{{t.kicker}}</text>
+      <text class="zj-hero-title">{{t.title}}</text>
+      <text class="zj-hero-lead">{{t.lead}}</text>
     </view>
   </view>
 
   <view class="zj-segments" aria-role="tablist">
-    <button class="zj-segment {{kind === 'community-posts' ? 'active' : ''}}" bindtap="area" data-kind="community-posts" hover-class="zj-pressed" disabled="{{loading}}">社群活动</button>
-    <button class="zj-segment {{kind === 'events' ? 'active' : ''}}" bindtap="area" data-kind="events" hover-class="zj-pressed" disabled="{{loading}}">站点活动与草稿</button>
+    <button class="zj-segment {{kind === 'community-posts' ? 'active' : ''}}" bindtap="area" data-kind="community-posts" hover-class="zj-pressed" disabled="{{loading}}">{{t.communityEvents}}</button>
+    <button class="zj-segment {{kind === 'events' ? 'active' : ''}}" bindtap="area" data-kind="events" hover-class="zj-pressed" disabled="{{loading}}">{{t.siteEvents}}</button>
   </view>
-  <text class="zj-form-hint">{{kind === 'community-posts' ? '当前社群范围内的活动，按活动授权开放问卷与名单。' : '包含当前账号有权访问的站点活动与草稿。'}}</text>
-  <template is="feedback" data="{{loading,error,needsLogin}}" />
+  <text class="zj-form-hint">{{kind === 'community-posts' ? t.communityHint : t.siteHint}}</text>
+  <template is="feedback" data="{{loading,error,needsLogin,t}}" />
 
   <block wx:if="{{!loading && !error && !needsLogin}}">
-    <view class="zj-section-head"><text class="zj-section-title">{{kind === 'community-posts' ? '社群活动' : '站点活动'}}</text><text class="zj-small">第 {{page}} 页</text></view>
+    <view class="zj-section-head"><text class="zj-section-title">{{kind === 'community-posts' ? t.communityEvents : t.siteTitle}}</text><text class="zj-small">{{t.pagePrefix}}{{page}}{{t.pageSuffix}}</text></view>
     <view class="zj-list">
       <button wx:for="{{docs}}" wx:key="id" class="content-link zj-record manage-item {{!item.canManage && !item.canViewSignups ? 'manage-readonly' : ''}}" bindtap="open" data-id="{{item.id}}" hover-class="zj-pressed" disabled="{{!item.canManage && !item.canViewSignups}}">
         <view class="zj-record-head">
-          <text class="zj-pill {{item._status === 'draft' ? 'zj-pill-warning' : item.status === 'hidden' ? 'zj-pill-neutral' : 'zj-pill-success'}}">{{item._status === 'draft' ? '草稿' : item.status === 'hidden' ? '已隐藏' : '已公开'}}</text>
+          <text class="zj-pill {{item._status === 'draft' ? 'zj-pill-warning' : item.status === 'hidden' ? 'zj-pill-neutral' : 'zj-pill-success'}}">{{item._status === 'draft' ? t.draft : item.status === 'hidden' ? t.hidden : t.public}}</text>
           <text class="zj-arrow">›</text>
         </view>
         <text class="zj-record-title">{{item.title}}</text>
-        <text wx:if="{{item._status === 'draft'}}" class="zj-form-hint">发布前需完成审核</text>
-        <text class="manage-capability">{{item.canManage ? item.canViewSignups ? '管理问卷与报名' : '编辑报名问卷' : item.canViewSignups ? '查看报名名单' : '当前只读'}}</text>
+        <text wx:if="{{item._status === 'draft'}}" class="zj-form-hint">{{t.draftHint}}</text>
+        <text class="manage-capability">{{item.canManage ? item.canViewSignups ? t.manageBoth : t.editForm : item.canViewSignups ? t.viewList : t.readonly}}</text>
       </button>
     </view>
     <view wx:if="{{!docs.length}}" class="zj-empty">
       <text class="zj-empty-icon">📋</text>
-      <text class="zj-empty-title">此范围暂无可管理活动</text>
-      <text class="zj-small">已有活动授权后会显示在这里。可切换活动范围；创建活动或保存草稿请前往网站。</text>
+      <text class="zj-empty-title">{{t.emptyTitle}}</text>
+      <text class="zj-small">{{t.emptyBody}}</text>
     </view>
     <view wx:if="{{page > 1 || hasNextPage}}" class="manage-pager">
-      <button class="secondary" bindtap="previous" disabled="{{page <= 1 || loading}}">上一页</button>
-      <text class="manage-page">第 {{page}} 页</text>
-      <button class="secondary" bindtap="next" disabled="{{!hasNextPage || loading}}">下一页</button>
+      <button class="secondary" bindtap="previous" disabled="{{page <= 1 || loading}}">{{t.previous}}</button>
+      <text class="manage-page">{{t.pagePrefix}}{{page}}{{t.pageSuffix}}</text>
+      <button class="secondary" bindtap="next" disabled="{{!hasNextPage || loading}}">{{t.next}}</button>
     </view>
   </block>
 </view>

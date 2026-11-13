@@ -12,7 +12,10 @@ import { ArticleView, FeedView, feedKinds, type FeedKind } from "@/components/v2
 import { RecruitmentTile } from "@/components/v2/cards";
 import { RichText, Sections } from "@/components/v2/RichText";
 import { ButtonLink, EmptyState, KeyValues, LinkTabs, PageHero, Pager, Section, Wrap } from "@/components/v2/ui";
-import { joinPaths } from "@/components/v2/copy";
+import { joinPathsCopy } from "@/components/v2/copy";
+import { getT } from "@/lib/i18n/server";
+import type { Translate } from "@/lib/i18n/locale";
+import { publicLabel } from "@/lib/i18n/labels-public";
 import { formatDate } from "@/components/v2/format";
 import layout from "@/components/v2/layout.module.css";
 import styles from "./fixed.module.css";
@@ -49,6 +52,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { path } = await params;
   const kind = route(path);
   if (!kind) notFound();
+  const { t } = await getT();
   const url = `/${path.join("/")}`;
   if (kind === "newsDetail") {
     const { article } = await read(getArticle, { kind: "news", idOrSlug: path[1] }, url, { redirects: true });
@@ -58,49 +62,75 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const doc = await resolveLegacy(legacyCollections[path[0]], path);
     return { title: doc.seoTitle || doc.title, description: doc.seoDescription || doc.summary, alternates: { canonical: url } };
   }
-  const titles: Record<string, string> = { news: "动态", about: "关于紫荆", contact: "联系与合作", privacy: "隐私说明", join: "加入紫荆", members: "加入游戏社群", teams: "代表队选拔" };
-  return { title: titles[path[1] ?? path[0]] ?? "紫荆", alternates: { canonical: url } };
+  const titles: Record<string, string> = {
+    news: t("动态", "Updates"),
+    about: t("关于紫荆", "About Zijing"),
+    contact: t("联系与合作", "Contact & partner"),
+    privacy: t("隐私说明", "Privacy"),
+    join: t("加入紫荆", "Join Zijing"),
+    members: t("加入游戏社群", "Join a game community"),
+    teams: t("代表队选拔", "Team tryouts"),
+  };
+  return { title: titles[path[1] ?? path[0]] ?? t("紫荆", "Zijing"), alternates: { canonical: url } };
 }
 
-function FixedNav({ current }: { current: string }) {
+function FixedNav({ current, t }: { current: string; t: Translate }) {
   return (
     <LinkTabs
-      label="关于紫荆"
+      label={t("关于紫荆", "About Zijing")}
       items={[
-        { href: "/about", label: "关于我们", current: current === "about" },
-        { href: "/contact", label: "联系与合作", current: current === "contact" },
-        { href: "/privacy", label: "隐私说明", current: current === "privacy" },
-        { href: "/join", label: "加入紫荆", current: current === "join" },
+        { href: "/about", label: t("关于我们", "About us"), current: current === "about" },
+        { href: "/contact", label: t("联系与合作", "Contact & partner"), current: current === "contact" },
+        { href: "/privacy", label: t("隐私说明", "Privacy"), current: current === "privacy" },
+        { href: "/join", label: t("加入紫荆", "Join Zijing"), current: current === "join" },
       ]}
     />
   );
 }
 
-function PrivacyFallback() {
+function PrivacyFallback({ t }: { t: Translate }) {
   return (
     <div className={styles.fallback}>
-      <h2>已确认的运营与资料安排</h2>
-      <p>完整隐私正文尚待通过网站发布流程公开。以下为已确认的运营信息与资料安排；提交资料前，请同时阅读具体表单中的用途与展示说明。</p>
-      <h3>运营者与联系渠道</h3>
+      <h2>{t("已确认的运营与资料安排", "Confirmed operations and data practices")}</h2>
       <p>
-        运营者为叶佳鑫（清华大学学生紫荆电竞社社长），个人信息与隐私联系微信为 yejx2003。查看、更正、停止展示或删除资料，可通过此微信联系叶佳鑫；删除申请由叶佳鑫审核处理。
+        {t(
+          "完整隐私正文尚待通过网站发布流程公开。以下为已确认的运营信息与资料安排；提交资料前，请同时阅读具体表单中的用途与展示说明。",
+          "The full privacy policy is still going through the publishing process. Below are the confirmed operator details and data practices; before submitting anything, also read the purpose and display notes on each form.",
+        )}
       </p>
-      <h3>报名与本人回执</h3>
+      <h3>{t("运营者与联系渠道", "Operator and contact")}</h3>
       <p>
-        活动报名保存本人账号、提交时间、填写的答案及表单快照，供本人和具备当前相应权限的管理人员查看，用于活动组织与报名处理。外部平台受理的报名，请同时阅读对应平台的隐私说明。
+        {t(
+          "运营者为叶佳鑫（清华大学学生紫荆电竞社社长），个人信息与隐私联系微信为 yejx2003。查看、更正、停止展示或删除资料，可通过此微信联系叶佳鑫；删除申请由叶佳鑫审核处理。",
+          "The operator is Ye Jiaxin (President of the Tsinghua Zijing Esports Club); the WeChat contact for personal data and privacy is yejx2003. To view, correct, stop displaying or delete your data, contact Ye Jiaxin on WeChat; deletion requests are reviewed by Ye Jiaxin.",
+        )}
       </p>
-      <h3>资料保留与人工处理</h3>
+      <h3>{t("报名与本人回执", "Sign-ups and your receipts")}</h3>
       <p>
-        活动、社群活动、骨干招新及代表队等报名资料的运营保留政策为 1 年。成员关系记录长期保留，原始报名答案、联系方式与完整申请不会因此一并适用长期保留。
+        {t(
+          "活动报名保存本人账号、提交时间、填写的答案及表单快照，供本人和具备当前相应权限的管理人员查看，用于活动组织与报名处理。外部平台受理的报名，请同时阅读对应平台的隐私说明。",
+          "Event sign-ups store your account, submission time, answers and a snapshot of the form. They are visible to you and to staff with the relevant permissions, and used to organize events and process sign-ups. For sign-ups handled by external platforms, also read that platform's privacy policy.",
+        )}
+      </p>
+      <h3>{t("资料保留与人工处理", "Retention and manual handling")}</h3>
+      <p>
+        {t(
+          "活动、社群活动、骨干招新及代表队等报名资料的运营保留政策为 1 年。成员关系记录长期保留，原始报名答案、联系方式与完整申请不会因此一并适用长期保留。",
+          "Sign-up data for events, community events, staff recruitment and teams is kept for 1 year. Membership records are kept long term; original answers, contact details and full applications are not kept long term as a result.",
+        )}
       </p>
       <p>
-        当前系统尚未启用自动到期删除。超过保留期的资料需要由叶佳鑫人工复核处理，1 年保留政策需人工落实。撤回、关闭展示或退出登录不表示服务器资料已经删除。
+        {t(
+          "当前系统尚未启用自动到期删除。超过保留期的资料需要由叶佳鑫人工复核处理，1 年保留政策需人工落实。撤回、关闭展示或退出登录不表示服务器资料已经删除。",
+          "Automatic deletion is not enabled yet. Data past the retention period is reviewed manually by Ye Jiaxin, so the 1-year policy is applied by hand. Withdrawing, hiding or signing out does not mean the data has been deleted from the server.",
+        )}
       </p>
     </div>
   );
 }
 
 async function FixedPageView({ name }: { name: string }) {
+  const { t, locale } = await getT();
   const page = await read(getFixedPage, { key: fixedKeys[name] }, `/${name}`);
   const privacy = name === "privacy",
     contact = name === "contact";
@@ -108,24 +138,34 @@ async function FixedPageView({ name }: { name: string }) {
     <>
       <PageHero
         tone="stage"
-        eyebrow={privacy ? "资料用途 · 展示选择 · 联系方式" : contact ? "CONTACT · 联系社团" : "ABOUT · 关于紫荆"}
-        title={page.title}
-        description={
-          privacy ? "我们如何使用、展示与保留你提交的资料。" : contact ? "活动咨询、社团交流与合作，欢迎与我们联系。" : "了解紫荆，找到与你并肩的伙伴。"
+        eyebrow={
+          privacy
+            ? t("资料用途 · 展示选择 · 联系方式", "Data use · Display choices · Contact")
+            : contact
+              ? t("CONTACT · 联系社团", "CONTACT")
+              : t("ABOUT · 关于紫荆", "ABOUT ZIJING")
         }
-        meta={page.updatedAt ? <span>更新于 {formatDate(page.updatedAt)}</span> : undefined}
+        title={publicLabel(page.title, locale)}
+        description={
+          privacy
+            ? t("我们如何使用、展示与保留你提交的资料。", "How we use, display and keep the information you submit.")
+            : contact
+              ? t("活动咨询、社团交流与合作，欢迎与我们联系。", "Questions about events, club exchanges or partnerships? Get in touch.")
+              : t("了解紫荆，找到与你并肩的伙伴。", "Get to know Zijing and find your teammates.")
+        }
+        meta={page.updatedAt ? <span>{t(`更新于 ${formatDate(page.updatedAt)}`, `Updated ${formatDate(page.updatedAt, locale)}`)}</span> : undefined}
       />
       <Wrap className={layout.pageBody}>
-        <FixedNav current={name} />
+        <FixedNav current={name} t={t} />
         <div className={layout.sidebarLayout}>
           <article className={styles.article}>
             {privacy && (
-              <section className={styles.retention} aria-label="已确认的资料保留安排">
+              <section className={styles.retention} aria-label={t("已确认的资料保留安排", "Confirmed retention")}>
                 <KeyValues
                   items={[
-                    { label: "报名资料保留", value: "1 年" },
-                    { label: "成员关系记录", value: "长期保留" },
-                    { label: "资料删除申请", value: "联系负责人，人工处理" },
+                    { label: t("报名资料保留", "Sign-up data kept"), value: t("1 年", "1 year") },
+                    { label: t("成员关系记录", "Membership records"), value: t("长期保留", "Kept long term") },
+                    { label: t("资料删除申请", "Deletion requests"), value: t("联系负责人，人工处理", "Contact the lead; handled manually") },
                   ]}
                 />
               </section>
@@ -133,9 +173,11 @@ async function FixedPageView({ name }: { name: string }) {
             {page.body ? (
               <RichText body={page.body} />
             ) : privacy ? (
-              <PrivacyFallback />
+              <PrivacyFallback t={t} />
             ) : !contact ? (
-              <EmptyState title="内容整理中">社团介绍正在整理，确认后的内容会在这里发布。</EmptyState>
+              <EmptyState title={t("内容整理中", "Content in progress")}>
+                {t("社团介绍正在整理，确认后的内容会在这里发布。", "The club introduction is being prepared and will be published here once confirmed.")}
+              </EmptyState>
             ) : null}
             <Sections sections={page.sections} />
             {contact && (
@@ -147,30 +189,35 @@ async function FixedPageView({ name }: { name: string }) {
                       <p className="preserve">{entry.text}</p>
                       {entry.url && (
                         <a href={entry.url} rel="noopener noreferrer" className="text-link">
-                          查看联系渠道 ↗
+                          {t("查看联系渠道 ↗", "Open contact channel ↗")}
                         </a>
                       )}
                     </article>
                   ))
                 ) : (
                   <article className={layout.panel}>
-                    <h2>从游戏社群联系管理员</h2>
-                    <p>当前尚未配置额外公共联系渠道。已有游戏社群可查看在任管理员名片，想组织新的游戏项目，可提交站内申请并查看负责人意见。</p>
+                    <h2>{t("从游戏社群联系管理员", "Contact admins through game communities")}</h2>
+                    <p>
+                      {t(
+                        "当前尚未配置额外公共联系渠道。已有游戏社群可查看在任管理员名片，想组织新的游戏项目，可提交站内申请并查看负责人意见。",
+                        "No extra public contact channel is set up yet. Existing communities show their admins' contact cards; to start a new game, submit an application on the site and follow the lead's feedback.",
+                      )}
+                    </p>
                     <p className={styles.links}>
-                      <Link href="/community">查看社群与管理员名片</Link>
-                      <Link href="/community/apply">申请组织社群</Link>
+                      <Link href="/community">{t("查看社群与管理员名片", "Communities & admin contacts")}</Link>
+                      <Link href="/community/apply">{t("申请组织社群", "Start a community")}</Link>
                     </p>
                   </article>
                 )}
                 <article className={layout.panel}>
-                  <h2>隐私与资料处理</h2>
+                  <h2>{t("隐私与资料处理", "Privacy & data handling")}</h2>
                   <p>
-                    运营者：叶佳鑫（清华大学学生紫荆电竞社社长）
+                    {t("运营者：叶佳鑫（清华大学学生紫荆电竞社社长）", "Operator: Ye Jiaxin (President, Tsinghua Zijing Esports Club)")}
                     <br />
-                    隐私联系微信：yejx2003
+                    {t("隐私联系微信：yejx2003", "Privacy contact on WeChat: yejx2003")}
                   </p>
                   <Link href="/privacy" className="text-link">
-                    查看隐私说明 →
+                    {t("查看隐私说明 →", "Read the privacy notice →")}
                   </Link>
                 </article>
               </div>
@@ -178,8 +225,8 @@ async function FixedPageView({ name }: { name: string }) {
           </article>
           <aside className={`${layout.panel} ${layout.sticky} ${styles.aside}`}>
             {page.sections.length > 0 && (
-              <nav aria-label="本页目录" className={styles.toc}>
-                <h2>本页内容</h2>
+              <nav aria-label={t("本页目录", "Contents")} className={styles.toc}>
+                <h2>{t("本页内容", "On this page")}</h2>
                 {page.sections.map((section) => (
                   <a key={section.id} href={`#section-${section.id}`}>
                     {section.heading}
@@ -189,32 +236,42 @@ async function FixedPageView({ name }: { name: string }) {
             )}
             {privacy ? (
               <>
-                <h2>资料处理与联系</h2>
-                <p>报名资料保留政策为 1 年，成员关系记录长期保留。到期与删除申请均需人工处理。</p>
+                <h2>{t("资料处理与联系", "Data handling & contact")}</h2>
                 <p>
-                  隐私负责人：叶佳鑫
+                  {t(
+                    "报名资料保留政策为 1 年，成员关系记录长期保留。到期与删除申请均需人工处理。",
+                    "Sign-up data is kept for 1 year and membership records long term. Expiry and deletion requests are handled manually.",
+                  )}
+                </p>
+                <p>
+                  {t("隐私负责人：叶佳鑫", "Privacy lead: Ye Jiaxin")}
                   <br />
-                  微信：yejx2003
+                  {t("微信：yejx2003", "WeChat: yejx2003")}
                 </p>
                 <Link href="/account" className="text-link">
-                  查看本人记录 →
+                  {t("查看本人记录 →", "View my records →")}
                 </Link>
               </>
             ) : contact ? (
               <>
-                <h2>加入游戏社群</h2>
-                <p>好友申请、建群和拉群由成员与管理员在微信中人工完成。网站记录帮助你查看当前进度。</p>
+                <h2>{t("加入游戏社群", "Join a game community")}</h2>
+                <p>
+                  {t(
+                    "好友申请、建群和拉群由成员与管理员在微信中人工完成。网站记录帮助你查看当前进度。",
+                    "Friend requests, group creation and invitations happen manually on WeChat between members and admins. The site helps you track progress.",
+                  )}
+                </p>
                 <Link href="/community" className="text-link">
-                  查看游戏社群 →
+                  {t("查看游戏社群 →", "Browse game communities →")}
                 </Link>
               </>
             ) : (
               <>
-                <h2>一起参与紫荆</h2>
-                <p>关注社团活动、寻找游戏同好，或了解代表队选拔与骨干招新。</p>
+                <h2>{t("一起参与紫荆", "Get involved with Zijing")}</h2>
+                <p>{t("关注社团活动、寻找游戏同好，或了解代表队选拔与骨干招新。", "Follow club events, find fellow players, or learn about team tryouts and staff recruitment.")}</p>
                 <p className={styles.links}>
-                  <Link href="/events">日程</Link>
-                  <Link href="/join">加入紫荆</Link>
+                  <Link href="/events">{t("日程", "Schedule")}</Link>
+                  <Link href="/join">{t("加入紫荆", "Join Zijing")}</Link>
                 </p>
               </>
             )}
@@ -226,12 +283,30 @@ async function FixedPageView({ name }: { name: string }) {
 }
 
 async function JoinView({ sub, page }: { sub: string; page: number }) {
+  const { t } = await getT();
   const { user } = await request();
   if (!sub && !canUseCampus(user)) {
-    return <PageHero tone="stage" title="加入紫荆"
-      description="验证邮箱后可报名当前账号有权参加的活动。"
-      actions={<><ButtonLink href="/events" tone="ghost">查看日程</ButtonLink>{!user && <ButtonLink href="/register" tone="accent">注册账号</ButtonLink>}</>} />;
+    return (
+      <PageHero
+        tone="stage"
+        title={t("加入紫荆", "Join Zijing")}
+        description={t("验证邮箱后可报名当前账号有权参加的活动。", "After verifying your email you can sign up for events open to your account.")}
+        actions={
+          <>
+            <ButtonLink href="/events" tone="ghost">
+              {t("查看日程", "View schedule")}
+            </ButtonLink>
+            {!user && (
+              <ButtonLink href="/register" tone="accent">
+                {t("注册账号", "Create account")}
+              </ButtonLink>
+            )}
+          </>
+        }
+      />
+    );
   }
+  const joinPaths = joinPathsCopy(t);
   const key = joinKeys[sub];
   const path = sub ? `/join/${sub}` : "/join";
   const [doc, center, legacy] = await Promise.all([
@@ -244,14 +319,14 @@ async function JoinView({ sub, page }: { sub: string; page: number }) {
     <>
       <PageHero
         tone="stage"
-        eyebrow="JOIN · 加入紫荆"
-        title={selected ? selected.title : "加入紫荆"}
-        description={selected ? selected.body : "一起玩，认真赢。三条路径，选一条开始。"}
-        back={sub ? { href: "/join", label: "加入紫荆" } : undefined}
+        eyebrow={t("JOIN · 加入紫荆", "JOIN ZIJING")}
+        title={selected ? selected.title : t("加入紫荆", "Join Zijing")}
+        description={selected ? selected.body : t("一起玩，认真赢。三条路径，选一条开始。", "Play together, win for real. Pick one of three paths to start.")}
+        back={sub ? { href: "/join", label: t("加入紫荆", "Join Zijing") } : undefined}
         actions={
           user ? undefined : (
             <ButtonLink href={`/register?returnTo=${encodeURIComponent(path)}`} tone="accent" icon="arrow">
-              注册账号
+              {t("注册账号", "Create account")}
             </ButtonLink>
           )
         }
@@ -271,7 +346,7 @@ async function JoinView({ sub, page }: { sub: string; page: number }) {
                     {open.length ? (
                       open.slice(0, 2).map((call) => <RecruitmentTile key={call.key} call={call} />)
                     ) : (
-                      <p className={styles.muted}>当前没有开放批次，可先浏览社群与活动。</p>
+                      <p className={styles.muted}>{t("当前没有开放批次，可先浏览社群与活动。", "No open rounds right now. Browse communities and events meanwhile.")}</p>
                     )}
                   </div>
                 )}
@@ -283,13 +358,13 @@ async function JoinView({ sub, page }: { sub: string; page: number }) {
           })}
         </ol>
         {(doc.body || doc.sections.length > 0) && (
-          <Section id="join-faq" title="常见问题">
+          <Section id="join-faq" title={t("常见问题", "FAQ")}>
             <RichText body={doc.body} />
             <Sections sections={doc.sections} />
           </Section>
         )}
         {legacy && legacy.docs.length > 0 && (
-          <Section id="join-archive" title="往期招新记录">
+          <Section id="join-archive" title={t("往期招新记录", "Past recruitment")}>
             <ul className={styles.archive}>
               {legacy.docs.map((item) => (
                 <li key={item.id}>
@@ -307,14 +382,15 @@ async function JoinView({ sub, page }: { sub: string; page: number }) {
 }
 
 async function NewsView({ search }: { search: Awaited<Search> }) {
+  const { t } = await getT();
   const raw = single(search.kind);
   const kind: FeedKind = feedKinds.some((entry) => entry.kind === raw) ? (raw as FeedKind) : "all";
   const page = pageNumber(search.page);
   const result = await read(getFeed, { kind, page, limit: 18 }, "/news");
   return (
     <FeedView
-      title="动态"
-      description="公告、社群通知、新闻、影像、风采与荣誉，汇成一条阅读流。"
+      title={t("动态", "Updates")}
+      description={t("公告、社群通知、新闻、影像、风采与荣誉，汇成一条阅读流。", "Notices, community news, articles, galleries, showcase posts and honors in one stream.")}
       kind={kind}
       result={result}
       signedIn

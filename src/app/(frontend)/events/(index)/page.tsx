@@ -3,14 +3,20 @@ import { getCalendar, getCommunities } from "@/lib/v2";
 import { pageNumber, read, readOptional, request, single, type Search } from "@/components/v2/data";
 import { ButtonLink, EmptyState, LinkTabs, PageHero, Pager, Wrap } from "@/components/v2/ui";
 import { MatchCard, groupByDay } from "@/components/v2/cards";
-import { empty } from "@/components/v2/copy";
+import { emptyCopy } from "@/components/v2/copy";
+import { getT } from "@/lib/i18n/server";
+import { publicLabel } from "@/lib/i18n/labels-public";
 import { dayKey } from "@/components/v2/format";
 import layout from "@/components/v2/layout.module.css";
 
-export const metadata = { title: "日程", alternates: { canonical: "/events" } };
+export async function generateMetadata() {
+  const { t } = await getT();
+  return { title: t("日程", "Schedule"), alternates: { canonical: "/events" } };
+}
 
 const scopes = ["all", "club", "community", "mine"] as const;
 const ranges = ["upcoming", "past", "month"] as const;
+// i18n-exempt: CMS select option values used in queries; labels via publicLabel
 const categories = ["比赛", "观赛", "交流", "训练", "其他"] as const;
 type Scope = (typeof scopes)[number];
 type Range = (typeof ranges)[number];
@@ -20,6 +26,8 @@ function currentMonth() {
 }
 
 export default async function Calendar({ searchParams }: { searchParams: Search }) {
+  const { t, locale } = await getT();
+  const empty = emptyCopy(t);
   const search = await searchParams;
   const { user } = await request();
   const signedIn = Boolean(user);
@@ -47,7 +55,7 @@ export default async function Calendar({ searchParams }: { searchParams: Search 
     read(getCalendar, { scope, range, month, category, community, signupOpen: signupOpen === "1", page, limit: 24 }, "/events"),
     signedIn ? readOptional(getCommunities, { limit: 50 }) : null,
   ]);
-  const groups = groupByDay(result.docs);
+  const groups = groupByDay(result.docs, locale);
   const today = dayKey(new Date().toISOString());
   const filtered = Boolean(query.scope || query.category || query.community || query.signupOpen || range !== "upcoming");
 
@@ -55,68 +63,73 @@ export default async function Calendar({ searchParams }: { searchParams: Search 
     <>
       <PageHero
         tone="stage"
-        eyebrow="SCHEDULE · 日程"
-        title="日程"
+        eyebrow={t("SCHEDULE · 日程", "SCHEDULE")}
+        title={t("日程", "Schedule")}
         description={
           signedIn
-            ? "社团活动与各游戏社群的活动汇成一条时间线。报名、回执与历史安排都从这里找。"
-            : "社团活动与精选社群活动。登录后可查看全部社群活动与本人报名。"
+            ? t(
+                "社团活动与各游戏社群的活动汇成一条时间线。报名、回执与历史安排都从这里找。",
+                "Club and community events in one timeline. Find sign-ups, receipts and past events here.",
+              )
+            : t("社团活动与精选社群活动。登录后可查看全部社群活动与本人报名。", "Club events and featured community events. Sign in to see all community events and your sign-ups.")
         }
         actions={
           signedIn ? (
             <ButtonLink href={href({ scope: "mine" })} tone="accent" icon="ticket">
-              我的报名
+              {t("我的报名", "My sign-ups")}
             </ButtonLink>
           ) : (
             <ButtonLink href="/login?returnTo=%2Fevents" tone="accent" icon="login">
-              登录查看全部
+              {t("登录查看全部", "Sign in to see all")}
             </ButtonLink>
           )
         }
       />
       <Wrap className={layout.pageBody}>
         <LinkTabs
-          label="日程范围"
+          label={t("日程范围", "Schedule scope")}
           items={[
-            { href: href({ scope: undefined, signupOpen: undefined }), label: "全部", current: scope === "all" && !signupOpen },
-            { href: href({ scope: undefined, signupOpen: "1" }), label: "可报名", current: scope === "all" && Boolean(signupOpen) },
-            { href: href({ scope: "club", signupOpen: undefined }), label: "社团活动", current: scope === "club" },
-            { href: href({ scope: "community", signupOpen: undefined }), label: "社群活动", current: scope === "community" },
-            ...(signedIn ? [{ href: href({ scope: "mine", signupOpen: undefined }), label: "已报名", current: scope === "mine" }] : []),
+            { href: href({ scope: undefined, signupOpen: undefined }), label: t("全部", "All"), current: scope === "all" && !signupOpen },
+            { href: href({ scope: undefined, signupOpen: "1" }), label: t("可报名", "Open for sign-up"), current: scope === "all" && Boolean(signupOpen) },
+            { href: href({ scope: "club", signupOpen: undefined }), label: t("社团活动", "Club events"), current: scope === "club" },
+            { href: href({ scope: "community", signupOpen: undefined }), label: t("社群活动", "Community events"), current: scope === "community" },
+            ...(signedIn ? [{ href: href({ scope: "mine", signupOpen: undefined }), label: t("已报名", "Signed up"), current: scope === "mine" }] : []),
           ]}
         />
-        <form className={layout.filters} method="get" action="/events" aria-label="筛选日程">
+        <form className={layout.filters} method="get" action="/events" aria-label={t("筛选日程", "Filter schedule")}>
           {query.scope && <input type="hidden" name="scope" value={query.scope} />}
           <label className={layout.filterCheck}>
             <input type="checkbox" name="signupOpen" value="1" defaultChecked={Boolean(signupOpen)} />
-            只看报名开放
+            {t("只看报名开放", "Sign-up open only")}
           </label>
           <label>
-            时间
+            {t("时间", "Time")}
             <select name="range" defaultValue={range}>
-              <option value="upcoming">即将开始</option>
-              <option value="past">已结束</option>
-              <option value="month">按月份</option>
+              <option value="upcoming">{t("即将开始", "Upcoming")}</option>
+              <option value="past">{t("已结束", "Ended")}</option>
+              <option value="month">{t("按月份", "By month")}</option>
             </select>
           </label>
           <label>
-            月份（按月份时）
+            {t("月份（按月份时）", "Month (when by month)")}
             <input type="month" name="month" defaultValue={month ?? currentMonth()} />
           </label>
           <label>
-            活动类型
+            {t("活动类型", "Event type")}
             <select name="category" defaultValue={category ?? ""}>
-              <option value="">全部类型</option>
+              <option value="">{t("全部类型", "All types")}</option>
               {categories.map((value) => (
-                <option key={value}>{value}</option>
+                <option key={value} value={value}>
+                  {publicLabel(value, locale)}
+                </option>
               ))}
             </select>
           </label>
           {communities && communities.docs.length > 0 && (
             <label>
-              游戏社群
+              {t("游戏社群", "Game community")}
               <select name="community" defaultValue={community ?? ""}>
-                <option value="">全部社群</option>
+                <option value="">{t("全部社群", "All communities")}</option>
                 {communities.docs.map((card) => (
                   <option key={card.community.id} value={card.community.slug}>
                     {card.community.title}
@@ -127,21 +140,22 @@ export default async function Calendar({ searchParams }: { searchParams: Search 
           )}
           <div className={layout.filterActions}>
             <button type="submit" className="button">
-              筛选
+              {t("筛选", "Filter")}
             </button>
             {filtered && (
               <Link href="/events" className="text-link">
-                清除筛选
+                {t("清除筛选", "Clear filters")}
               </Link>
             )}
           </div>
         </form>
         <p className={layout.resultMeta}>
           <span>
-            {range === "past" ? "已结束" : range === "month" ? `${month} 月份` : "即将开始"} · 共 {result.totalDocs} 场
+            {range === "past" ? t("已结束", "Ended") : range === "month" ? t(`${month} 月份`, `Month ${month}`) : t("即将开始", "Upcoming")}
+            {t(` · 共 ${result.totalDocs} 场`, ` · ${result.totalDocs} events`)}
           </span>
-          {category && <span>类型：{category}</span>}
-          {signupOpen && <span>仅报名开放</span>}
+          {category && <span>{t(`类型：${category}`, `Type: ${publicLabel(category, locale)}`)}</span>}
+          {signupOpen && <span>{t("仅报名开放", "Sign-up open only")}</span>}
         </p>
         {groups.length ? (
           groups.map((group) => (
@@ -155,7 +169,7 @@ export default async function Calendar({ searchParams }: { searchParams: Search 
             </section>
           ))
         ) : scope === "mine" ? (
-          <EmptyState title={empty.mySignups.title} actions={<ButtonLink href="/events" tone="ghost" size="small">查看可报名活动</ButtonLink>}>
+          <EmptyState title={empty.mySignups.title} actions={<ButtonLink href="/events" tone="ghost" size="small">{t("查看可报名活动", "Events open for sign-up")}</ButtonLink>}>
             {empty.mySignups.body}
           </EmptyState>
         ) : (
@@ -164,11 +178,11 @@ export default async function Calendar({ searchParams }: { searchParams: Search 
             actions={
               filtered ? (
                 <ButtonLink href="/events" tone="ghost" size="small">
-                  清除筛选
+                  {t("清除筛选", "Clear filters")}
                 </ButtonLink>
               ) : (
                 <ButtonLink href="/announcements" tone="ghost" size="small">
-                  查看公告
+                  {t("查看公告", "View notices")}
                 </ButtonLink>
               )
             }

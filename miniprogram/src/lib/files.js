@@ -1,17 +1,18 @@
+const i18n = (() => { try { const value = require('./i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { t: zh => zh, message: value => value, locale: () => 'zh' }; })();
 let privateFiles = [];
 let privateEpoch = 0;
 function readImage(path, maxBytes = 2 * 1024 * 1024) {
   return new Promise((resolve, reject) => wx.getFileSystemManager().readFile({
     filePath: path, success(result) {
-      if (!result.data || result.data.byteLength > maxBytes) return reject(new Error(`图片请控制在 ${maxBytes / 1024 / 1024} MB 以内`));
+      if (!result.data || result.data.byteLength > maxBytes) return reject(new Error(i18n.t(`图片请控制在 ${maxBytes / 1024 / 1024} MB 以内`, `Images must be ${maxBytes / 1024 / 1024} MB or smaller`)));
       const bytes = new Uint8Array(result.data);
       const mime = bytes[0] === 0xff && bytes[1] === 0xd8 ? 'jpeg'
         : bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47 ? 'png'
           : bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[8] === 0x57 && bytes[9] === 0x45 ? 'webp'
             : bytes[0] === 0x47 && bytes[1] === 0x49 && maxBytes > 2 * 1024 * 1024 ? 'gif' : '';
-      if (!mime) return reject(new Error('请选择 PNG、JPEG 或 WebP 图片'));
+      if (!mime) return reject(new Error(i18n.t('请选择 PNG、JPEG 或 WebP 图片', 'Choose a PNG, JPEG or WebP image.')));
       resolve(`data:image/${mime};base64,${wx.arrayBufferToBase64(result.data)}`);
-    }, fail() { reject(new Error('图片读取失败，请重新选择')); },
+    }, fail() { reject(new Error(i18n.t('图片读取失败，请重新选择', 'The image could not be read. Choose again.'))); },
   }));
 }
 function localImage(data) {
@@ -45,7 +46,7 @@ function choose(count = 1) {
     success(result) {
       const selected = result && Array.isArray(result.tempFiles) ? result.tempFiles : [];
       if (!selected.length || selected.some(file => !file || typeof file.tempFilePath !== 'string' || !file.tempFilePath)) {
-        reject(Object.assign(new Error('未获取到所选图片，请重新选择'), { code: 'MEDIA_PICK_FAILED' }));
+        reject(Object.assign(new Error(i18n.t('未获取到所选图片，请重新选择', 'The selected image was not received. Choose again.')), { code: 'MEDIA_PICK_FAILED' }));
         return;
       }
       resolve(selected.map(file => file.tempFilePath));
@@ -54,7 +55,7 @@ function choose(count = 1) {
       const detail = result && typeof result.errMsg === 'string' ? result.errMsg : '';
       const cancelled = /cancel/i.test(detail);
       const denied = /auth(?:orization)?\s*(?:deny|denied)|permission\s*(?:deny|denied)/i.test(detail);
-      const message = cancelled ? '未选择图片' : denied ? '图片选择权限不可用，请检查微信相册或相机权限' : '图片选择失败，请重新选择';
+      const message = cancelled ? i18n.t('未选择图片', 'No image selected') : denied ? i18n.t('图片选择权限不可用，请检查微信相册或相机权限', 'Image access is unavailable. Check WeChat album or camera permissions.') : i18n.t('图片选择失败，请重新选择', 'Image selection failed. Choose again.');
       reject(Object.assign(new Error(message), { code: cancelled ? 'MEDIA_PICK_CANCELLED' : 'MEDIA_PICK_FAILED' }));
     },
   }));
