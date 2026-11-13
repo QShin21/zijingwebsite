@@ -219,7 +219,7 @@
 
       <view wx:if="{{editable && !manage && !adding && !changing}}" class="zj-sheet seat-form">
         <text class="zj-sheet-title">{{editing ? '修改选座申请' : '提交选座申请'}}</text>
-        <view wx:if="{{mode === 'random'}}" class="field"><text class="field-label">订座数量</text><input type="number" value="{{requestedCount}}" bindinput="countInput" disabled="{{busy || loading}}" /><text class="zj-form-hint">可申请 1–{{seatLimit}} 个座位，审核后安排。</text></view>
+        <view wx:if="{{mode === 'random'}}" class="field"><text class="field-label">订座数量</text><input type="number" cursor-spacing="24" value="{{requestedCount}}" bindinput="countInput" disabled="{{busy || loading}}" /><text class="zj-form-hint">可申请 1–{{seatLimit}} 个座位，审核后安排。</text></view>
         <view wx:else class="seat-count"><text class="seat-count-value">{{selected.length}}</text><text class="zj-small">/ {{seatLimit}} 个座位</text></view>
         <view wx:if="{{mode !== 'random' && chips.length}}" class="seat-chips">
           <button wx:for="{{chips}}" wx:key="id" class="seat-chip" data-seat="{{item.id}}" bindtap="unpick" disabled="{{busy || loading}}" aria-label="取消 {{item.label}}">{{item.label}} ×</button>

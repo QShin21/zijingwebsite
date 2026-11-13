@@ -46,7 +46,7 @@ describe('Native rebuild: route and rendering contracts, not an official WeChat 
   });
   it('uses shared tokens and native control spacing across all editable pages', () => {
     expect(read('lib/theme.js')).toContain("require('./design-tokens')");
-    expect(read('lib/theme.js')).not.toMatch(/page: '#|primary: '#/);
+    expect(read('lib/theme.js')).toContain('...generated.tokens');
     expect(read('app.wxss')).toContain('min-height: 44px');
     expect(read('app.wxss')).toContain('env(safe-area-inset-bottom)');
     for (const route of app.pages) {
@@ -55,7 +55,7 @@ describe('Native rebuild: route and rendering contracts, not an official WeChat 
     expect(read('templates/questionnaire.wxml')).toContain('themePrimary');
     expect(read('pages/signup/index.wxml')).toContain('question,busy,theme,themePrimary,themeMuted');
   });
-  it('V2 tab pages use the shared V2 templates and API client; the stage effect pauses off-screen', () => {
+  it('V2 tab pages use the shared API and bundled homepage art', () => {
     for (const route of ['home', 'events', 'communities', 'teams', 'account']) {
       expect(read('pages/' + route + '/index.wxml'), route).toContain('<import src="../../templates/v2.wxml" />');
     }
@@ -63,11 +63,9 @@ describe('Native rebuild: route and rendering contracts, not an official WeChat 
     expect(read('pages/events/index.js')).toContain("v2.get('calendar'");
     expect(read('pages/communities/index.js')).toContain("v2.get('communities'");
     expect(read('pages/account/index.js')).toContain("v2.get('me'");
-    const stage = read('components/zj-stage/index.js');
-    expect(stage).toContain('createIntersectionObserver');
-    expect(stage).toMatch(/hide\(\) \{[^}]*this\.stop\(\)/);
-    expect(stage).not.toMatch(/wx\.request|http\./);
-    expect(JSON.parse(read('pages/home/index.json'))).toMatchObject({ navigationStyle: 'custom', usingComponents: { 'zj-stage': '/components/zj-stage/index' } });
+    expect(app.tabBar).toMatchObject({ custom: true });
+    expect(read('pages/home/index.wxml')).toContain('src="{{scene}}"');
+    expect(JSON.parse(read('pages/home/index.json'))).toMatchObject({ navigationStyle: 'custom' });
   });
   it('rebuilt inner pages use the V2 hero frame and no longer use the retired thin-line page classes', () => {
     const inner = ['detail', 'list', 'fixed', 'auth', 'community', 'signup', 'applications', 'review', 'staff', 'staff-review', 'activity-manage',

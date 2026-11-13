@@ -11,7 +11,7 @@ const navigation = require('../../lib/navigation');
 const files = require('../../lib/files');
 const video = require('../../lib/video');
 const reading = require('../../lib/native-reading');
-const v2 = require('../../lib/v2');
+const images = require('../../lib/v2-images');
 const { actions, error } = require('../../lib/page');
 const socialCollections = ['community-posts', 'community-showcase'];
 const seatLabels = { pending: '待审核', confirmed: '已确认', rejected: '已驳回' };
@@ -49,26 +49,24 @@ Page(withVisualTheme({
     const user = session.user(); this._userId = user && user.id;
     this.setData({ loading: true, error: '', needsLogin: false, user, signupInfo: null, seatInfo: null, signupFailed: false, signupStartText: '', signupEndText: '', doc: {}, reading: {}, photos: [], nodes: [], links: [], related: [], previewImages: [], presentation: null, coverImage: null, coverImageFailed: false, qr: null, qrFailed: false, videoSource: '', videoError: false, registration: '' });
     try {
-      const { collection, id, slug } = this._options;
+      const { collection, id, slug, category } = this._options;
       const social = socialCollections.includes(collection);
-      const doc = social ? await cms.socialDetail(collection, id) : await cms.detail(collection, id, slug);
+      const scoped = ['events', 'announcements', 'community-posts'].includes(collection);
+      const detail = scoped ? await cms.publishedDetail(collection, id, slug, category) : null;
+      const doc = detail ? detail.doc : social ? await cms.socialDetail(collection, id) : await cms.detail(collection, id, slug);
+      const layout = detail?.presentation || (detail?.images?.length ? { mode: 'gallery', blocks: [] } : null);
+      const coverPromise = detail ? images.media(detail.cover) : cms.media(doc.cover);
+      const qrPromise = detail ? images.media(detail.qr) : cms.media(doc.qrCode);
       let presentation = null;
-      if (collection === 'community-posts') try {
-        const path = doc.category === 'event' ? 'events/community/' + id : 'articles/communityNotice/' + id;
-        const detail = await v2.get(path, {}, { required: true });
-        const layout = detail.presentation || (detail.images && detail.images.length ? { mode: 'gallery', blocks: [] } : null);
-        if (layout) {
-          const urls = {};
-          const refs = layout.mode === 'article' ? layout.blocks.filter(block => block.type === 'image').map(block => block.image) : detail.images;
-          for (const image of refs) {
-            if (!urls[image.src]) urls[image.src] = await http.download(image.src).catch(() => '');
-          }
-          presentation = { mode: layout.mode, images: (detail.images || []).map(image => ({ url: urls[image.src] || '', alt: image.alt || '' })),
-            blocks: (layout.blocks || []).map(block => block.type === 'image' ? { type: 'image', url: urls[block.image.src] || '', alt: block.image.alt || '' } : block) };
-        }
-      } catch { /* Preserve the legacy detail if the newer projection is unavailable. */ }
+      if (layout) {
+        const refs = layout.mode === 'article' ? layout.blocks.filter(block => block.type === 'image').map(block => block.image) : detail.images;
+        const entries = await Promise.all([...new Set(refs.map(image => image.src))].map(async src => [src, await images.load(src)]));
+        const urls = Object.fromEntries(entries);
+        presentation = { mode: layout.mode, images: (detail.images || []).map(image => ({ url: urls[image.src] || '', alt: image.alt || '' })),
+          blocks: (layout.blocks || []).map(block => block.type === 'image' ? { type: 'image', url: urls[block.image.src] || '', alt: block.image.alt || '' } : block) };
+      }
       const rendered = typeof doc.body === 'object' ? render(doc.body) : { nodes: [], links: [] };
-      const coverImage = await cms.media(doc.cover);
+      const coverImage = await coverPromise;
       const photos = [];
       for (const image of (doc.images || [])) {
         const url = await files.localImage(image.source);
@@ -78,7 +76,7 @@ Page(withVisualTheme({
         const image = await cms.media(photo.image);
         if (image) photos.push({ ...image, caption: photo.caption || '' });
       }
-      const qr = await cms.media(doc.qrCode);
+      const qr = await qrPromise;
       let related = [];
       if (collection === 'teams') {
         const [seasons, honors] = await Promise.all([cms.list('seasons', { team: doc.id }), cms.list('honors', { team: doc.id })]);
@@ -96,10 +94,10 @@ Page(withVisualTheme({
       if (collection === 'events' || (collection === 'community-posts' && doc.category === 'event')) {
         // Seat entry (public occupancy + own status only). Independent of the signup read; a
         // failure stays quiet so the detail page never blocks on seating.
-        http.request('/api/activities/' + collection + '/' + doc.id + '/seating', { raw: true })
+        if (collection === 'events' || user) http.request('/api/activities/' + collection + '/' + doc.id + '/seating', { raw: true })
           .then(info => { if (ticket === this._ticket) this.setData({ seatInfo: seatSummary(info) }); })
           .catch(() => { /* Seating is optional on this page; the seating page reports errors. */ });
-        try { const signupInfo = await http.request('/api/activities/'+collection+'/'+doc.id+'/signup'); if(ticket===this._ticket)this.setData({signupInfo,registration:signupInfo.form.enabled?'':this.data.registration,
+        try { const signupInfo = await http.request('/api/activities/'+collection+'/'+doc.id+'/signup', { questionnaire: true }); if(ticket===this._ticket)this.setData({signupInfo,registration:signupInfo.form.enabled?'':this.data.registration,
           signupStartText: signupInfo.form.start ? format.date(signupInfo.form.start) : '', signupEndText: signupInfo.form.end ? format.date(signupInfo.form.end) : ''}); }
         catch { if(ticket===this._ticket)this.setData({signupFailed:true}); }
       }

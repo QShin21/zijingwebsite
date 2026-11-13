@@ -10,8 +10,10 @@ const config = require('../../config');
 const { actions } = require('../../lib/page');
 const roleLabels = { president: '社长', vicePresident: '副社长', backbone: '社团骨干', communityAdmin: '社群管理员', honoraryBackbone: '荣誉骨干', member: '社团成员' };
 
+const affiliations = { tsinghua: '清华用户', peer: '友校学生', external: '校外人士' };
+
 function profile(user) {
-  return { user, initial: user ? v2.initial(user.name) : 'Z',
+  return { user, campus: session.campus(user), affiliation: user ? affiliations[user.affiliation || 'tsinghua'] : '', initial: user ? v2.initial(user.name) : 'Z',
     role: user ? (user.roles.length ? user.roles : ['member']).map(role => roleLabels[role] || role).join('、') : '' };
 }
 // webOnly is declared by the server per capability (ManageQueue/TodoItem); the client keeps no path whitelist.
@@ -33,7 +35,7 @@ Page(withVisualTheme({
     const ticket = this._ticket = (this._ticket || 0) + 1;
     const user = session.user();
     const current = () => ticket === this._ticket && String(session.user() && session.user().id) === String(user && user.id);
-    this.setData({ ...profile(user), error: '', refreshing: Boolean(user), me: user ? this.data.me : null, queues: user ? this.data.queues : [] });
+    this.setData({ ...profile(user), error: '', refreshing: Boolean(user), me: user && this.data.user?.id === user.id ? this.data.me : null, queues: session.campus(user) && this.data.user?.id === user.id ? this.data.queues : [] });
     if (!user) return;
     try {
       const result = await http.request('/api/users/me', { required: true });

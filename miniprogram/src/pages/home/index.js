@@ -5,7 +5,7 @@ function withVisualTheme(definition) {
 // V2 主场. Startup stays independent of business modules so failures remain visible.
 Page(withVisualTheme({
   data: { loading: true, error: '', user: null, home: null, img: {}, statusBar: 20, navHeight: 44, modules: [],
-    links: { join: { key: 'join' }, about: { key: 'about' }, announcements: { collection: 'announcements' }, news: { collection: 'news' } } },
+    links: { about: { key: 'about' }, announcements: { collection: 'announcements' }, news: { collection: 'news' } } },
   onShow: function () { this._nativeVisible = true; return this.load(); },
   onHide: function () { this._nativeVisible = false; this._ticket = (this._ticket || 0) + 1; },
   onUnload: function () { this._nativeVisible = false; },

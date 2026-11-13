@@ -28,12 +28,14 @@ function promoted(value) {
   return { events, notices, showcases, count: events.length + notices.length + showcases.length };
 }
 function view(home) {
+  const campus = session.campus(home.viewer);
   return {
+    campus,
     sections: sections(home.sections),
     promoted: promoted(home.promoted),
     today: v2.today(home.today),
     title: home.site.heroTitle || '',
-    subtitle: home.site.heroSubtitle || '一起玩，认真赢。社团活动、游戏社群、代表队与骨干招新，都在这里开场。',
+    subtitle: campus && home.site.heroSubtitle || '查看紫荆近期活动与公告。',
     spotlight: home.spotlight ? v2.event(home.spotlight) : null,
     upcoming: home.upcoming.map(v2.event),
     openSignups: home.openSignups.map(v2.event),
@@ -48,7 +50,11 @@ function view(home) {
 async function load(page) {
   const ticket = page._ticket = (page._ticket || 0) + 1;
   const alive = () => page._ticket === ticket && page._nativeVisible !== false;
-  page.setData({ loading: true, error: '', user: session.user(), ...chrome() });
+  const user = session.user();
+  const identity = user ? String(user.id) : '';
+  const previous = page._homeIdentity;
+  page._homeIdentity = identity;
+  page.setData({ loading: true, error: '', user, ...(previous !== identity ? { home: null, img: {} } : {}), ...chrome() });
   try {
     const data = await v2.get('home');
     if (!alive()) return;

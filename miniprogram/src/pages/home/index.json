@@ -1,7 +1,4 @@
 {
-  "usingComponents": {
-    "zj-stage": "/components/zj-stage/index"
-  },
   "navigationStyle": "custom",
   "backgroundColor": "#f3eee4",
   "backgroundTextStyle": "dark",

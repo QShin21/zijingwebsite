@@ -20,7 +20,7 @@
       <text wx:if="{{coverImage.credit}}" class="zj-credit">{{coverImage.credit}}</text>
     </view>
 
-    <view wx:if="{{key === 'join'}}" class="fixed-paths">
+    <view wx:if="{{key === 'join' && campus}}" class="fixed-paths">
       <view class="fixed-path" hover-class="zj-pressed" bindtap="openWebsite" data-url="/join/members" aria-role="link" aria-label="寻找游戏社群">
         <text class="fixed-path-index">01</text>
         <view class="fixed-path-copy"><text class="fixed-path-title">寻找游戏社群</text><text class="zj-small">联系管理员，申请加入微信群。</text><text class="zj-card-action">查看游戏社群 ›</text></view>

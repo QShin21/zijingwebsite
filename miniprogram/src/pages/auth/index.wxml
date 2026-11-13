@@ -35,19 +35,17 @@
         <text class="zj-form-hint">2–40 字，昵称不区分大小写。</text>
       </view>
       <view class="field">
-        <text class="field-label">清华邮箱 *</text>
+        <text class="field-label">邮箱 *</text>
         <view class="auth-email">
           <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{emailPrefix}}" bindinput="input" data-field="emailPrefix" aria-label="邮箱前缀" placeholder="@ 前的邮箱名" maxlength="64" />
-          <picker class="auth-domain-picker" range="{{domains}}" bindchange="domain" aria-label="选择清华邮箱后缀">
-            <view class="auth-domain"><text>@{{emailDomain}}</text><text class="auth-domain-action">▾</text></view>
-          </picker>
+          <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{emailDomain}}" bindinput="input" data-field="emailDomain" aria-label="邮箱后缀" placeholder="@ 后的邮箱域名" maxlength="253" />
         </view>
-        <text class="zj-form-hint">确认邮箱后缀。此邮箱用于账号验证与密码恢复。</text>
+        <text class="zj-form-hint">填写 @ 前后的两部分。清华及校友邮箱对应清华用户，其他教育邮箱对应友校学生，普通邮箱对应校外人士。</text>
       </view>
     </block>
     <view wx:if="{{mode === 'reset'}}" class="field">
-      <text class="field-label">完整清华邮箱 *</text>
-      <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{email}}" bindinput="input" data-field="email" aria-label="完整清华邮箱" placeholder="输入注册使用的邮箱" maxlength="254" />
+      <text class="field-label">完整邮箱 *</text>
+      <input cursor-spacing="24" placeholder-style="color:{{themeMuted}}" value="{{email}}" bindinput="input" data-field="email" aria-label="完整邮箱" placeholder="输入注册使用的邮箱" maxlength="254" />
     </view>
     <view class="field">
       <view class="auth-password-head">

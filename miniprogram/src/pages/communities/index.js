@@ -19,8 +19,8 @@ Page(withVisualTheme({
       this._ticket = (this._ticket || 0) + 1;
       this._loaded = false;
       this._identity = user ? String(user.id) : '';
-      this.setData({ user: user || null, needsLogin: !user, docs: [], page: 0, hasMore: false, total: 0, loading: false, loadingMore: false, error: '', loadMoreError: '', img: {} });
-      if (user && this._visible) this.load();
+      this.setData({ campus: session.campus(user), user: user || null, needsLogin: !user, docs: [], page: 0, hasMore: false, total: 0, loading: false, loadingMore: false, error: '', loadMoreError: '', img: {} });
+      if (session.campus(user) && this._visible) this.load();
     });
   },
   onUnload() {
@@ -29,8 +29,12 @@ Page(withVisualTheme({
     if (this._unsubscribe) this._unsubscribe();
   },
   onShow() {
-    this._visible = true;
-    const user = session.user(), identity = user ? String(user.id) : '';
+    const user = session.user();
+    const campus = session.campus(user);
+    this._visible = campus;
+    this.setData({ campus });
+    if (!campus) return navigation.go('events');
+    const identity = String(user.id);
     if (this._identity === identity && this._loaded) return;
     this._identity = identity;
     this.setData({ user, needsLogin: !user, docs: [], error: '' });

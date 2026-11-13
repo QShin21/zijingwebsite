@@ -62,6 +62,8 @@
       </view>
     </view>
 
+    <button wx:if="{{!user && collection === 'community-posts' && doc.category === 'event' && !signupInfo.form.enabled && !signupFailed}}" class="primary" bindtap="login">登录参与活动</button>
+
     <view wx:if="{{registration}}" class="zj-sheet">
       <view class="zj-record-head"><text class="zj-sheet-title">参与方式</text><text class="zj-pill zj-pill-action">{{registration}}</text></view>
       <text wx:if="{{doc.requirements}}" class="body">{{doc.requirements}}</text>

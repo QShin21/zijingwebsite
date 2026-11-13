@@ -68,7 +68,7 @@ function idOf(ref, key) { return ref && ref.id ? ref.id : Number(String(key || '
 function eventTarget(card) {
   const ref = card.ref || {};
   return ref.source === 'community'
-    ? { page: 'detail', params: { collection: 'community-posts', id: idOf(ref, card.key) } }
+    ? { page: 'detail', params: { collection: 'community-posts', id: idOf(ref, card.key), category: 'event' } }
     : { page: 'detail', params: { collection: 'events', id: idOf(ref, card.key), slug: ref.slug || '' } };
 }
 function event(card) {
@@ -91,7 +91,7 @@ function event(card) {
 }
 function articleTarget(card) {
   const ref = card.ref || {};
-  if (card.kind === 'communityNotice') return { page: 'detail', params: { collection: 'community-posts', id: idOf(ref, card.key) } };
+  if (card.kind === 'communityNotice') return { page: 'detail', params: { collection: 'community-posts', id: idOf(ref, card.key), category: 'notice' } };
   const collection = { announcement: 'announcements', news: 'news', album: 'albums' }[card.kind] || 'announcements';
   return { page: 'detail', params: { collection, id: idOf(ref, card.key), slug: ref.slug || '' } };
 }

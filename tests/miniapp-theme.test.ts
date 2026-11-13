@@ -1,13 +1,13 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 
 const source = readFileSync('miniprogram/src/lib/theme.js', 'utf8');
-const generated = { exports: {} as { tokens: Record<Mode, Record<string, string>>; chrome: Record<Mode, Record<string, string>> } };
+const generated = { exports: {} as { tokens: Record<'light' | 'dark', Record<string, string>>; chrome: Record<'light' | 'dark', Record<string, string>> } };
 runInNewContext(readFileSync('miniprogram/src/lib/design-tokens.js', 'utf8'), { module: generated });
-type Mode = 'light' | 'dark';
+type Mode = 'light' | 'dark' | 'summer' | 'simple';
 type ThemePage = { data: Record<string, unknown>; setData(value: Record<string, unknown>): void; onLoad(...args: unknown[]): unknown; onShow(): unknown; onHide(): unknown; onUnload(): unknown; setVisualTheme(event: unknown): void };
-type Theme = { KEY: string; get(): Mode; init(): Mode; set(value: string): { ok: boolean; persisted: boolean }; style(mode: Mode): string; page(definition: Record<string, unknown>): Record<string, unknown>; tokens: Record<Mode, Record<string, string>> };
+type Theme = { KEY: string; get(): Mode; init(): Mode; set(value: string): { ok: boolean; persisted: boolean }; style(mode: Mode): string; page(definition: Record<string, unknown>): Record<string, unknown>; tokens: Record<Mode, Record<string, string>>; chrome: Record<Mode, Record<string, string>> };
 function harness(storage = new Map<string, unknown>(), options: { readFails?: boolean; writeFails?: boolean; chromeFails?: boolean; itemFails?: boolean } = {}) {
   const calls: { name: string; args: Record<string, unknown> }[] = [];
   let systemReads = 0;
@@ -53,7 +53,7 @@ describe('Explicit native light/dark appearance', () => {
     expect(first.theme.set('dark')).toMatchObject({ ok: true, persisted: true });
     const restartedDark = harness(storage);
     expect(restartedDark.theme.init()).toBe('dark');
-    expect(restartedDark.calls.find(c => c.name === 'setTabBarStyle')?.args).toMatchObject({ backgroundColor: '#3a2b52', selectedColor: '#f6c453' });
+    expect(restartedDark.theme.chrome.dark).toMatchObject({ tabBg: '#3a2b52', tabSelected: '#f6c453' });
     restartedDark.theme.set('light');
     expect(harness(storage).theme.init()).toBe('light');
   });
@@ -109,12 +109,16 @@ describe('Explicit native light/dark appearance', () => {
     expect(() => page.onLoad()).not.toThrow();
     expect(() => page.onShow()).not.toThrow();
   });
-  it('retries tab icon paint when the native tab bar was not ready', () => {
-    const h = harness(new Map([['zijing_theme', 'dark']]), { itemFails: true });
-    h.theme.init();
-    const page = nativePage(h.theme); page.onLoad(); page.onShow();
-    expect(h.calls.filter(c => c.name === 'setTabBarItem')).toHaveLength(15);
-    expect(h.calls.find(c => c.name === 'setTabBarItem')?.args.selectedIconPath).toBe('/assets/home-dark-active.png');
+  it.each([
+    ['dark', 'dark', '/assets/tsinghua-second-gate.webp'],
+    ['summer', 'dark', '/assets/tsinghua-lotus-pond.webp'],
+    ['light', 'light', '/assets/tsinghua-auditorium-snow.webp'],
+    ['simple', 'light', ''],
+  ])('restores %s with its scheme and bundled homepage scene', (palette, theme, scene) => {
+    const h = harness(new Map([['zijing_theme', palette]]));
+    const page = nativePage(h.theme);
+    expect(page.data).toMatchObject({ palette, theme, scene });
+    if (scene) expect(existsSync('miniprogram/src' + scene)).toBe(true);
   });
   it('rejects unrecognized modes and never writes a guessed preference', () => {
     const h = harness();

@@ -1,6 +1,6 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/v2.wxml" />
-<view class="page mini-page {{theme === 'dark' ? 'zj-dark' : ''}}">
+<view wx:if="{{campus}}" class="page mini-page zj-tab-page {{theme === 'dark' ? 'zj-dark' : ''}}">
   <view class="page-heading">
     <text class="eyebrow">COMMUNITIES · 游戏社群</text>
     <text class="title">找到同好，从这里开场</text>

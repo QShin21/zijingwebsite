@@ -8,7 +8,6 @@ const navigation = require('../../lib/navigation');
 const { actions } = require('../../lib/page');
 Page(withVisualTheme({
   data: { mode: 'login', identifier: '', password: '', name: '', emailPrefix: '', emailDomain: 'mails.tsinghua.edu.cn',
-    domains: ['mails.tsinghua.edu.cn', 'tsinghua.org.cn', 'tsinghua.edu.cn', 'mail.tsinghua.edu.cn', 'mail.tsinghua.org.cn'],
     email: '', confirm: '', code: '', error: '', busy: false, sent: false, countdown: 0, bridge: true, showPassword: false },
   ...actions,
   onLoad(options) {
@@ -26,9 +25,8 @@ Page(withVisualTheme({
   switchMode(event) { this.setMode(event.currentTarget.dataset.mode); },
   togglePassword() { this.setData({ showPassword: !this.data.showPassword }); },
   input(event) { this.setData({ [event.currentTarget.dataset.field]: event.detail.value, error: '' }); },
-  domain(event) { this.setData({ emailDomain: this.data.domains[Number(event.detail.value)] }); },
   values() { return { identifier: this.data.identifier.trim(), password: this.data.password, confirm: this.data.confirm,
-    name: this.data.name.trim(), emailPrefix: this.data.emailPrefix.trim(), emailDomain: this.data.emailDomain,
+    name: this.data.name.trim(), emailPrefix: this.data.emailPrefix.trim(), emailDomain: this.data.emailDomain.trim(),
     email: this.data.email.trim(), code: this.data.code.trim() }; },
   async submit() {
     if (this.data.busy) return;
@@ -64,8 +62,8 @@ Page(withVisualTheme({
       if (!this.data.bridge) throw new Error('邮箱验证需要更新网站服务接口');
       const values = this.values();
       if (this.data.mode === 'register') {
-        if (!values.name || !values.emailPrefix || values.password.length < 8 || values.password !== values.confirm) throw new Error('请先填写昵称、邮箱和两次相同的密码');
-      } else if (!values.email.includes('@')) throw new Error('请填写完整清华邮箱');
+        if (!values.name || !values.emailPrefix || !values.emailDomain || values.password.length < 8 || values.password !== values.confirm) throw new Error('请先填写昵称、邮箱和两次相同的密码');
+      } else if (!values.email.includes('@')) throw new Error('请填写注册时验证的完整邮箱');
       await http.request(this.data.mode === 'register' ? '/api/miniapp/auth/register/begin' : '/api/miniapp/auth/password/code', { auth: false, method: 'POST', data: values });
       this.setData({ sent: true, countdown: 60 });
       clearInterval(this._countdown);

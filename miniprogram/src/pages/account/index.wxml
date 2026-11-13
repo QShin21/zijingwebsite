@@ -1,6 +1,6 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/v2.wxml" />
-<view class="page mini-page account-v2 {{theme === 'dark' ? 'zj-dark' : ''}}">
+<view class="page mini-page zj-tab-page account-v2 {{theme === 'dark' ? 'zj-dark' : ''}}">
   <view class="account-card">
     <view class="zj-stage-stripes"></view>
     <view class="account-card-inner">
@@ -9,9 +9,9 @@
         <view class="account-avatar">{{initial}}</view>
         <view class="account-who">
           <text class="account-name">{{user ? user.name : '还未登录'}}</text>
-          <text wx:if="{{user}}" class="account-role">{{role}}</text>
+          <text wx:if="{{user}}" class="account-role">{{affiliation}}{{campus ? ' · ' + role : ''}}</text>
           <text wx:if="{{user}}" class="account-email" selectable>{{user.email}}</text>
-          <view wx:if="{{me.communities.length}}" class="account-offices">
+          <view wx:if="{{campus && me.communities.length}}" class="account-offices">
             <text wx:for="{{me.communities}}" wx:key="*this" class="account-office">{{item}}</text>
           </view>
         </view>
@@ -19,7 +19,7 @@
       <view wx:if="{{me}}" class="zj-scoreboard">
         <view class="zj-score"><text class="zj-score-value">{{me.todo.length}}</text><text class="zj-score-label">待办</text></view>
         <view class="zj-score"><text class="zj-score-value">{{me.counts.signups}}</text><text class="zj-score-label">报名</text></view>
-        <view class="zj-score"><text class="zj-score-value">{{me.counts.applications}}</text><text class="zj-score-label">申请</text></view>
+        <view wx:if="{{campus}}" class="zj-score"><text class="zj-score-value">{{me.counts.applications}}</text><text class="zj-score-label">申请</text></view>
       </view>
       <view wx:if="{{!user}}" class="actions">
         <button class="accent" bindtap="login">登录账号</button>
@@ -30,7 +30,7 @@
 
   <view wx:if="{{refreshing}}" class="account-refresh" aria-role="status"><view class="state-dot"></view><text class="muted">正在核对账号与管理权限</text></view>
   <view wx:if="{{error}}"><text class="error" aria-role="alert">{{error}}</text><button class="secondary" bindtap="refresh">重新获取账号资料</button></view>
-  <text wx:if="{{!user}}" class="muted account-hint">网站与小程序使用同一紫荆账号，注册时验证清华邮箱。</text>
+  <text wx:if="{{!user}}" class="muted account-hint">网站与小程序使用同一紫荆账号，注册时验证邮箱。</text>
 
   <block wx:if="{{user && me}}">
     <view class="zj-section">
@@ -52,7 +52,7 @@
       <template wx:else is="zj-empty" data="{{title: '还没有报名记录', body: '报名开放的活动会标注「报名开放」。', icon: '🎫', action: '查看活动', page: 'events'}}" />
     </view>
 
-    <view class="zj-section">
+    <view wx:if="{{campus}}" class="zj-section">
       <template is="zj-section" data="{{title: '申请进度', count: me.applications.length}}" />
       <view wx:if="{{me.applications.length}}" class="zj-list"><block wx:for="{{me.applications}}" wx:key="key"><template is="zj-application" data="{{item}}" /></block></view>
       <template wx:else is="zj-empty" data="{{title: '还没有申请记录', body: '社群管理员、骨干招新、建队与入队申请都会记录在这里。', icon: '📮'}}" />
@@ -64,7 +64,7 @@
       </view>
     </view>
 
-    <view class="zj-section">
+    <view wx:if="{{campus}}" class="zj-section">
       <template is="zj-section" data="{{title: '我的队伍'}}" />
       <view wx:if="{{me.memberships.length}}" class="zj-list">
         <view wx:for="{{me.memberships}}" wx:key="id" class="account-team">
@@ -79,7 +79,7 @@
       <template wx:else is="zj-empty" data="{{title: '暂无代表队成员记录', body: '入队由社群管理员人工选拔，录取不授予管理权限。', icon: '🏆', action: '查看选拔中心', page: 'recruitment'}}" />
     </view>
 
-    <view class="zj-section">
+    <view wx:if="{{campus}}" class="zj-section">
       <template is="zj-section" data="{{title: '管理台'}}" />
       <text class="muted">按当前任职核对可处理的社群、队伍与对象。</text>
       <view class="zj-list account-queues">
@@ -97,10 +97,12 @@
 
   <view class="zj-section account-appearance">
     <template is="zj-section" data="{{title: '外观'}}" />
-    <text class="muted">默认日场（浅色），记住你的选择，不自动跟随系统。</text>
+    <text class="muted">选择首页风格</text>
     <view class="theme-choices">
-      <button class="theme-choice {{theme === 'light' ? 'selected' : ''}}" bindtap="setVisualTheme" data-theme="light" disabled="{{themeUnavailable}}" aria-label="浅色主题{{theme === 'light' ? '，已选择' : ''}}"><view class="theme-swatch theme-swatch-light" aria-hidden="true"><view></view><view></view><view></view></view><view class="theme-choice-title"><text>日场</text><text wx:if="{{theme === 'light'}}" class="theme-check">✓</text></view></button>
-      <button class="theme-choice {{theme === 'dark' ? 'selected' : ''}}" bindtap="setVisualTheme" data-theme="dark" disabled="{{themeUnavailable}}" aria-label="深色主题{{theme === 'dark' ? '，已选择' : ''}}"><view class="theme-swatch theme-swatch-dark" aria-hidden="true"><view></view><view></view><view></view></view><view class="theme-choice-title"><text>夜场</text><text wx:if="{{theme === 'dark'}}" class="theme-check">✓</text></view></button>
+      <button wx:for="{{themeChoices}}" wx:key="id" class="theme-choice {{palette === item.id ? 'selected' : ''}}" bindtap="setVisualTheme" data-theme="{{item.id}}" disabled="{{themeUnavailable}}" aria-label="{{item.label}}{{palette === item.id ? '，已选择' : ''}}">
+        <view class="theme-swatch theme-swatch-{{item.id}}" aria-hidden="true"><view></view><view></view><view></view></view>
+        <view class="theme-choice-title"><text>{{item.label}}</text><text wx:if="{{palette === item.id}}" class="theme-check">✓</text></view>
+      </button>
     </view>
     <text wx:if="{{themeNotice}}" class="theme-message" aria-role="status">{{themeNotice}}</text>
     <text wx:if="{{themeError}}" class="error" aria-role="alert">{{themeError}}</text>
@@ -110,7 +112,7 @@
     <button class="shortcut" bindtap="openWebsite" data-url="/privacy"><view class="shortcut-main"><text class="shortcut-title">隐私说明</text></view><text class="shortcut-sign">›</text></button>
     <button class="shortcut" bindtap="openWebsite" data-url="/contact"><view class="shortcut-main"><text class="shortcut-title">联系与合作</text></view><text class="shortcut-sign">›</text></button>
     <button wx:if="{{user}}" class="shortcut" bindtap="reset"><view class="shortcut-main"><text class="shortcut-title">重设密码</text></view><text class="shortcut-sign">›</text></button>
-    <button wx:if="{{queues.length}}" class="shortcut" bindtap="openAdmin"><view class="shortcut-main"><text class="shortcut-title">内容管理后台</text><text class="muted">复制网页链接</text></view><text class="shortcut-sign">⧉</text></button>
+    <button wx:if="{{campus && queues.length}}" class="shortcut" bindtap="openAdmin"><view class="shortcut-main"><text class="shortcut-title">内容管理后台</text><text class="muted">复制网页链接</text></view><text class="shortcut-sign">⧉</text></button>
     <button wx:if="{{user}}" class="plain account-logout" bindtap="logout">退出账号</button>
   </view>
   <text class="bottom-note">竞在紫荆 / v{{version}}</text>

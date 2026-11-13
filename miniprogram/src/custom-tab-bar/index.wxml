@@ -1,0 +1,6 @@
+<view class="tab-bar" style="background-color:{{chrome.tabBg}};border-top-color:{{line}}" aria-role="tablist">
+  <button wx:for="{{items}}" wx:key="page" class="tab-item" style="color:{{item.selected ? chrome.tabSelected : chrome.tabText}}" bindtap="change" data-url="{{item.url}}" aria-role="tab" aria-selected="{{item.selected}}" aria-label="{{item.label}}">
+    <image class="tab-icon" src="{{item.image}}" mode="aspectFit" aria-hidden="true" />
+    <text class="{{item.selected ? 'tab-active' : ''}}">{{item.label}}</text>
+  </button>
+</view>

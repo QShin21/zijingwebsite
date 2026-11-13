@@ -25,8 +25,12 @@ Page(withVisualTheme({
   ...actions,
   onLoad(options) { if (views.includes(options && options.view)) this.setData({ view: options.view }); },
   onShow() {
-    this._visible = true;
-    const user = session.user(), identity = user ? String(user.id) : '';
+    const user = session.user();
+    const campus = session.campus(user);
+    this._visible = campus;
+    this.setData({ campus });
+    if (!campus) return navigation.go('events');
+    const identity = String(user.id);
     if (this._identity === identity && this._loaded) return;
     this._identity = identity;
     this.setData({ user });
@@ -51,7 +55,7 @@ Page(withVisualTheme({
     if (more && (this.data.loadingMore || !this.data.hasMore)) return;
     const ticket = this._ticket = (this._ticket || 0) + 1;
     const alive = () => ticket === this._ticket && this._visible !== false && view === this.data.view;
-    if (view !== 'recruitment' && !session.user()) { this._loaded = true; this.setData({ loading: false, docs: [], groups: [] }); return; }
+    if (!session.campus()) { this._loaded = true; this.setData({ loading: false, docs: [], groups: [] }); return; }
     this.setData(more ? { loadingMore: true, loadMoreError: '' } : { loading: true, error: '' });
     try {
       if (view === 'recruitment') {

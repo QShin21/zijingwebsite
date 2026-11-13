@@ -1,8 +1,9 @@
 const http = require('./http');
 const config = require('../config');
 const { card } = require('./format');
+const v2 = require('./v2');
+const images = require('./v2-images');
 const collections = ['events', 'announcements', 'games', 'teams', 'seasons', 'honors', 'news', 'albums', 'recruitment', 'pages'];
-const publicCollections = ['events', 'announcements', 'pages'];
 const fields = ['title', 'slug', 'summary', 'body', 'cover', 'demo', 'type', 'kind', 'game', 'team', 'season', 'startAt', 'endAt',
   'location', 'date', 'competition', 'division', 'placing', 'sourceURL', 'verified', 'requirements', 'contact', 'channelCheckedAt',
   'qrCode', 'event', 'members', 'positions', 'photos', 'sections', 'archived', 'lifecycle', 'registrationClosed',
@@ -39,11 +40,12 @@ function publicProjection(doc) {
   return value;
 }
 async function list(collection, options = {}) {
-  const data = await http.request(`/api/${collection}?${query(contentQuery(collection, options))}`, {
-    auth: !publicCollections.includes(collection), required: !publicCollections.includes(collection),
-    // A privacy notice must preserve the published operator/contact wording.
-    ...(collection === 'pages' && options.key === 'privacy' ? { raw: true } : {}),
-  });
+  if (collection === 'announcements') return notices(options);
+  if (collection === 'pages' && options.key) {
+    const page = await fixed(options.key);
+    return { docs: page.updatedAt ? [card({ ...page, _status: 'published' }, collection)] : [], page: 1, hasNextPage: false };
+  }
+  const data = await http.request(`/api/${collection}?${query(contentQuery(collection, options))}`, { required: true });
   if (!data || !Array.isArray(data.docs)) throw new Error('栏目数据暂不可用');
   const docs = data.docs.filter(doc => doc._status === 'published' && (collection !== 'honors' || doc.verified === true));
   return { docs: docs.map(doc => card(publicProjection(doc), collection)), hasNextPage: Boolean(data.hasNextPage), page: data.page || 1, totalDocs: data.totalDocs || 0 };
@@ -53,31 +55,21 @@ async function detail(collection, id, slug) {
   if (!result.docs[0]) throw new Error('内容尚未公开或已移除');
   return result.docs[0];
 }
-async function site() {
-  const raw = await http.request('/api/globals/site?depth=0', { auth: false });
-  return { name: raw.name || '竞在紫荆', heroTitle: raw.heroTitle || '因热爱相遇。',
-    heroSubtitle: raw.heroSubtitle || '', heroImage: raw.heroImage, heroButtonLabel: raw.heroButtonLabel || '加入紫荆',
-    heroButtonURL: raw.heroButtonURL || '/join', footer: raw.footer || '', description: raw.description || '',
-    contacts: (raw.contacts || []).map(contact => ({ label: contact.label, text: contact.text, url: contact.url })),
-    modules: raw.modules || [], navigation: raw.navigation || [], featuredEvents: raw.featuredEvents || [], featuredHonors: raw.featuredHonors || [] };
-}
-const mediaCache = {};
 async function media(id) {
   if (!id) return null;
   const key = typeof id === 'object' ? id.id : id;
-  if (mediaCache[key]) return mediaCache[key];
   try {
-    const data = await http.request(`/api/media/${encodeURIComponent(key)}?depth=0&${query(selection(['url', 'alt', 'credit', 'sizes']))}`, { auth: false });
+    const data = await http.request(`/api/media/${encodeURIComponent(key)}?depth=0&${query(selection(['url', 'alt', 'credit', 'sizes']))}`, { required: true });
     const path = data.sizes && data.sizes.card && data.sizes.card.url || data.url || '';
     const url = /^\/(?!\/)/.test(path) ? config.origin + path : path;
     // Media hosted elsewhere needs an explicit allowlist and domain configuration.
     if (!url.startsWith(config.origin + '/')) return null;
-    mediaCache[key] = { url, alt: data.alt || '', credit: data.credit || '' };
-    return mediaCache[key];
+    const image = await images.media({ src: url.slice(config.origin.length), alt: data.alt });
+    return image ? { ...image, credit: data.credit || '' } : null;
   } catch { return null; }
 }
 async function decorate(docs) {
-  return Promise.all(docs.map(async doc => ({ ...doc, coverImage: await media(doc.cover) })));
+  return Promise.all(docs.map(async doc => ({ ...doc, coverImage: doc.coverImage || await media(doc.cover) })));
 }
 function socialQuery(options = {}) {
   return { depth: 0, limit: options.limit || 20, page: options.page || 1, sort: options.sort || '-createdAt',
@@ -101,4 +93,66 @@ async function socialDetail(collection, id) {
   if (value.status !== 'visible') throw new Error('内容暂不可用');
   return { ...value, collection };
 }
-module.exports = { list, detail, site, media, decorate, social, socialDetail, query, selection, contentQuery, publicProjection };
+async function eventDetail(ref, collection) {
+  const source = collection === 'events' ? 'club' : 'community';
+  const detail = await v2.get('events/' + source + '/' + encodeURIComponent(ref));
+  const event = detail.event, registration = detail.registration || {};
+  return {
+    doc: card({ id: event.ref.id, slug: event.ref.slug, title: event.title, summary: event.summary,
+      body: detail.body || detail.bodyText, game: event.community, type: event.category, demo: event.demo,
+      startAt: event.startAt, endAt: event.endAt, location: event.location, publishedAt: event.publishedAt,
+      category: 'event', _status: 'published', archived: event.archived, lifecycle: event.state,
+      registrationStart: event.signup.opensAt, registrationEnd: event.signup.deadline,
+      registrationURL: registration.url, channelText: registration.channelText, contact: registration.contact,
+      requirements: registration.requirements, channelCheckedAt: registration.checkedAt }, collection),
+    cover: event.cover, qr: registration.qrCode, images: detail.images, presentation: detail.presentation,
+  };
+}
+async function articleDetail(ref, collection) {
+  const community = collection === 'community-posts';
+  const detail = await v2.get('articles/' + (community ? 'communityNotice/' : 'announcement/') + encodeURIComponent(ref));
+  const article = detail.article;
+  return {
+    doc: card({ id: article.ref.id, slug: article.ref.slug, title: article.title, summary: article.summary,
+      body: detail.body || detail.bodyText, game: article.community, demo: article.demo, publishedAt: article.publishedAt,
+      category: community ? 'notice' : undefined, _status: 'published' }, collection),
+    cover: article.cover, images: detail.images, presentation: detail.presentation,
+  };
+}
+function publishedDetail(collection, id, slug, category) {
+  const ref = id || slug;
+  if (collection === 'events') return eventDetail(ref, collection);
+  if (collection === 'announcements' || category === 'notice') return articleDetail(ref, collection);
+  if (category === 'event') return eventDetail(ref, collection);
+  // Older community share links only include an ID.
+  return eventDetail(ref, collection).catch(cause => {
+    if (cause?.status !== 404) throw cause;
+    return articleDetail(ref, collection);
+  });
+}
+function fixed(key) {
+  return http.request('/api/v2/pages/' + encodeURIComponent(key), { raw: key === 'privacy' });
+}
+async function notices(options) {
+  const read = (page, limit) => v2.get('feed', { kind: 'announcements', page, limit });
+  const page = options.page || 1, limit = options.limit || 12;
+  const search = options.search?.trim().toLowerCase();
+  let data = await read(search ? 1 : page, search ? 50 : limit);
+  if (search) {
+    const all = data.docs.slice();
+    while (data.hasNextPage) {
+      data = await read(data.page + 1, 50);
+      all.push(...data.docs);
+    }
+    const matching = all.filter(({ item }) => item.title.toLowerCase().includes(search));
+    data = { docs: matching.slice((page - 1) * limit, page * limit), page, hasNextPage: matching.length > page * limit, totalDocs: matching.length };
+  }
+  const docs = await Promise.all(data.docs.map(async ({ item }) => {
+    const target = v2.article(item);
+    return card({ id: target.params.id, slug: target.params.slug, title: item.title, summary: item.summary,
+      publishedAt: item.publishedAt, kindText: item.label, demo: item.demo,
+      coverImage: await images.media(item.cover) }, target.params.collection);
+  }));
+  return { ...data, docs };
+}
+module.exports = { list, detail, publishedDetail, fixed, media, decorate, social, socialDetail, query, selection, contentQuery, publicProjection };

@@ -1,5 +1,5 @@
 // Image resolution for V2 views.
-// - Public media library files load directly from the site origin.
+// - Media-library files load with the current credential when signed in.
 // - Controlled /api/v2/images/* sources need the account: signed-in reads exchange
 //   them in batches (≤ 20) for short-lived signed URLs bound to the current session
 //   (POST /api/v2/images/sign); every GET is still authorized by the server.
@@ -55,8 +55,12 @@ function flush() {
 }
 function load(src) {
   if (typeof src !== 'string' || !/^\/(?!\/)/.test(src)) return Promise.resolve('');
-  // Public files and guest reads use the plain URL (the server decides what a guest may see).
-  if (!controlled(src) || !session.token()) return Promise.resolve(config.origin + src);
+  if (!session.token()) return Promise.resolve(config.origin + src);
+  if (src.startsWith('/api/media/file/')) {
+    const run = generation;
+    return http.download(src).then(path => run === generation ? path : '', () => '');
+  }
+  if (!controlled(src)) return Promise.resolve(config.origin + src);
   const entry = signed[src];
   if (fresh(entry)) return Promise.resolve(entry.url);
   delete signed[src];
@@ -69,14 +73,21 @@ function load(src) {
  * Adds `coverKey` to every view with a `coverSrc`, then fills page.data.img[key]
  * progressively. `alive()` lets a page drop late results after hide/unload/reload.
  */
+async function media(image) {
+  if (!image) return null;
+  const url = await load(image.src);
+  return url ? { url, alt: image.alt || '' } : null;
+}
 function attach(page, views, alive) {
   const sources = page._imageSources || (page._imageSources = {});
   page._imageAlive = alive;
+  const pending = new Map();
   (views || []).forEach(view => {
     if (!view || !view.coverSrc) return;
     view.coverKey = key(view.coverSrc);
     sources[view.coverKey] = view.coverSrc;
-    load(view.coverSrc).then(path => {
+    if (!pending.has(view.coverSrc)) pending.set(view.coverSrc, load(view.coverSrc));
+    pending.get(view.coverSrc).then(path => {
       if (!path || (alive && !alive())) return;
       if (page.data.img && page.data.img[view.coverKey] === path) return;
       page.setData({ ['img.' + view.coverKey]: path });
@@ -117,4 +128,4 @@ function clear() {
 }
 // Account changes invalidate every signed URL (logout or identity switch).
 session.subscribe(() => clear());
-module.exports = { key, load, attach, failed, clear };
+module.exports = { key, load, media, attach, failed, clear };

@@ -14,12 +14,12 @@ Page(withVisualTheme({
   onLoad(options) {
     this._hidden = false; this._unloaded = false;
     const user = session.user(); this._userId = user && user.id;
-    this.setData({ key: options.key, isJoin: options.key && options.key.startsWith('join'), title: names[options.key] || '社团资料' });
+    this.setData({ key: options.key, isJoin: options.key && options.key.startsWith('join-'), title: names[options.key] || '社团资料' });
     wx.setNavigationBarTitle({ title: names[options.key] || '社团资料' });
     this._unsubscribe = session.subscribe(user => {
       if (String(user && user.id) === String(this._userId)) return;
       this._userId = user && user.id; this._ticket = (this._ticket || 0) + 1;
-      this.setData({ loading: false, error: '', needsLogin: this.data.key !== 'privacy' && !user, doc: null, reading: {}, nodes: [], links: [], contacts: [], batches: [], coverImage: null, coverImageFailed: false });
+      this.setData({ loading: false, error: '', needsLogin: this.data.isJoin && !user, doc: null, reading: {}, nodes: [], links: [], contacts: [], batches: [], coverImage: null, coverImageFailed: false });
     });
   },
   onShow() { this._hidden = false; this.load(); },
@@ -33,25 +33,25 @@ Page(withVisualTheme({
     const user = session.user(), userId = user && user.id; this._userId = userId;
     const current = () => { const actor = session.user(); return ticket === this._ticket && !this._hidden && !this._unloaded && String(actor && actor.id) === String(userId); };
     const cleared = { doc: null, reading: {}, nodes: [], links: [], contacts: [], batches: [], coverImage: null, coverImageFailed: false };
-    if (this.data.key !== 'privacy' && !user) { this.setData({ ...cleared, loading: false, error: '', needsLogin: true }); return; }
+    if (this.data.isJoin && !session.campus(user)) {
+      this.setData({ ...cleared, loading: false, error: user ? '此栏目仅面向清华账号' : '', needsLogin: !user });
+      return;
+    }
     this.setData({ ...cleared, loading: true, error: '', needsLogin: false });
     try {
       if (!names[this.data.key]) throw new Error('页面不存在');
-      const result = await cms.list('pages', { key: this.data.key, limit: 1 });
+      const page = await cms.fixed(this.data.key);
       if (!current()) return;
-      const doc = result.docs[0] || null;
+      const doc = page.updatedAt ? page : null;
       const rendered = render(doc && doc.body);
-      const coverImage = await cms.media(doc && doc.cover);
-      if (!current()) return;
-      let contacts = []; let batches = [];
-      if (this.data.key === 'contact') contacts = (await cms.site()).contacts;
-      if (!current()) return;
-      if (this.data.key.startsWith('join')) {
+      const contacts = page.contacts || [];
+      let batches = [];
+      if (this.data.isJoin) {
         const kind = this.data.key.split('-')[1];
         batches = (await cms.list('recruitment', { kind, limit: 12 })).docs.map(reading.entry);
       }
       if (!current()) return;
-      this.setData({ loading: false, doc, reading: doc ? reading.article(doc, 'pages') : {}, nodes: reading.prose(rendered.nodes), links: rendered.links, contacts, batches, coverImage });
+      this.setData({ loading: false, doc, reading: doc ? reading.article(doc, 'pages') : {}, nodes: reading.prose(rendered.nodes), links: rendered.links, contacts, batches, campus: session.campus(user) });
     } catch (cause) { if (current()) error(this, cause); }
   },
   readingImageError(event) {

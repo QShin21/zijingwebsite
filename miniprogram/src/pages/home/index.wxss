@@ -3,15 +3,14 @@
 .home-nav { position: absolute; left: 32rpx; z-index: 3; display: flex; align-items: center; gap: 14rpx; }
 .home-mark { display: flex; align-items: center; justify-content: center; width: 56rpx; height: 56rpx; border-radius: 16rpx; background: var(--z-primary); color: #fff; font-size: 30rpx; font-weight: 900; box-shadow: inset -10rpx 10rpx 0 -6rpx var(--z-accent); }
 .home-brand { color: #fff; font-size: 32rpx; font-weight: 900; letter-spacing: 2rpx; }
-.home-spotlight { position: relative; z-index: 2; margin-top: -36rpx; }
+.home-campus-art { display: block; width: calc(100% + 64rpx); height: 50vw; margin: 0 -32rpx; background: var(--z-stage); }
+.home-simple .home-stage { background: var(--z-stage); border-bottom: 1rpx solid var(--z-line); }
+.home-simple .home-brand { color: var(--z-stage-ink); }
+.home-simple .zj-stage-title { text-shadow: none; }
+.home-simple .zj-stage-actions button, .home-simple .home-mark { box-shadow: none; }
+.home-spotlight { position: relative; margin-top: 24rpx; }
 .home-spotlight-label { display: inline-block; margin: 0 0 12rpx 8rpx; padding: 4rpx 18rpx; border-radius: 999rpx; background: var(--z-accent); color: var(--z-on-accent); font-size: 22rpx; font-weight: 900; }
 .home-spotlight .zj-match { box-shadow: 0 24rpx 60rpx rgba(28, 18, 64, .18); border-color: transparent; }
-.home-promoted-note { display: block; margin: -8rpx 0 18rpx; }
 [data-section="promoted"] .zj-list, [data-section="promoted"] .zj-panel { margin-bottom: 20rpx; }
 .home-join { padding: 36rpx 32rpx; border-radius: 18rpx; background: radial-gradient(80% 120% at 100% 100%, rgba(102, 8, 116, .55), transparent 70%), linear-gradient(160deg, var(--z-stage2), var(--z-stage)); box-shadow: inset 0 0 0 1rpx rgba(240, 192, 96, .3); color: var(--z-stage-ink); }
-.home-join-kicker { display: block; color: var(--z-accent); font-size: 22rpx; font-weight: 900; letter-spacing: 6rpx; }
 .home-join-title { display: block; margin: 8rpx 0 20rpx; }
-.home-join-step { display: flex; align-items: center; gap: 20rpx; padding: 18rpx 0; border-bottom: 1rpx solid var(--z-stage-line); }
-.home-join-index { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 72rpx; height: 72rpx; border-radius: 20rpx; background: var(--z-accent); color: var(--z-on-accent); font-size: 28rpx; font-weight: 900; }
-.home-join-name { display: block; font-size: 30rpx; font-weight: 800; }
-.home-join .home-join-desc { color: var(--z-stage-muted); }

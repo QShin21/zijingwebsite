@@ -1,10 +1,10 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/v2.wxml" />
-<view class="page mini-page {{theme === 'dark' ? 'zj-dark' : ''}}">
+<view class="page mini-page zj-tab-page {{theme === 'dark' ? 'zj-dark' : ''}}">
   <view class="page-heading">
     <text class="eyebrow">SCHEDULE · 日程</text>
     <text class="title">日程</text>
-    <text class="subtitle">{{user ? '社团活动与各社群活动汇成一条时间线。' : '社团活动与精选社群活动，登录后查看全部与本人报名。'}}</text>
+    <text class="subtitle">{{user ? '查看可参与的社团和社群活动。' : '浏览公开活动，登录后报名。'}}</text>
   </view>
   <view class="zj-segments" aria-role="tablist">
     <button class="zj-segment {{scope === 'all' ? 'active' : ''}}" bindtap="setScope" data-scope="all" aria-selected="{{scope === 'all'}}">全部</button>

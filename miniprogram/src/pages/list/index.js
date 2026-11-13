@@ -23,7 +23,7 @@ Page(withVisualTheme({
       this.setData({ loading: false, loadingMore: false, error: '', loadMoreError: '', docs: [], page: 1, hasMore: false, games: [{ id: '', title: '全部项目' }], gameIndex: 0, needsLogin: !user });
     });
   },
-  onShow() { this._hidden = false; this.load(); if (session.user()) this.loadGames(); },
+  onShow() { this._hidden = false; this.load(); if (session.campus()) this.loadGames(); },
   onHide() { this._hidden = true; this._ticket = (this._ticket || 0) + 1; this._gamesTicket = (this._gamesTicket || 0) + 1; },
   onUnload() { this._unloaded = true; this.onHide(); if (this._unsubscribe) this._unsubscribe(); },
   async loadGames() {
@@ -66,7 +66,7 @@ Page(withVisualTheme({
         search: this.data.search, kind, sort: this.data.collection === 'honors' ? '-date' : undefined,
         game: this.data.games[this.data.gameIndex] && this.data.games[this.data.gameIndex].id,
         year: this.data.collection === 'honors' && this.data.year !== '全部年份' ? this.data.year : undefined });
-      const docs = (await cms.decorate(result.docs)).map(reading.entry);
+      const docs = (this.data.collection === 'announcements' ? result.docs : await cms.decorate(result.docs)).map(reading.entry);
       if (ticket !== this._ticket) return;
       this.setData({ loading: false, loadingMore: false, docs: more ? this.data.docs.concat(docs) : docs, page: result.page, hasMore: result.hasNextPage });
     } catch (cause) {

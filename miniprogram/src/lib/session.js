@@ -12,11 +12,12 @@ function read() {
   return saved;
 }
 function user() { const saved = read(); return saved ? saved.user : null; }
+function campus(value = user()) { return Boolean(value && (!value.affiliation || value.affiliation === 'tsinghua')); }
 function token() { const saved = read(); return saved ? saved.token : ''; }
 function project(value) {
   return {
     id: value.id, name: value.name || '社团成员', email: value.email || '',
-    roles: value.roles || [], accountStatus: value.accountStatus,
+    roles: value.roles || [], accountStatus: value.accountStatus, affiliation: value.affiliation || 'tsinghua',
     communities: (value.communities || []).map(v => typeof v === 'object' ? v.id : v),
     publishCommunities: (value.capabilities && value.capabilities.publishCommunities) || [],
   };
@@ -54,8 +55,8 @@ function subscribe(callback) {
 }
 function manages(game) {
   const current = user();
-  return Boolean(current && (current.roles.some(role => ['president', 'vicePresident'].includes(role)) ||
+  return Boolean(campus(current) && (current.roles.some(role => ['president', 'vicePresident'].includes(role)) ||
     (current.publishCommunities || []).some(id => String(id) === String(game))));
 }
-function reviewer() { const current = user(); return Boolean(current && current.roles.some(role => ['president', 'vicePresident'].includes(role))); }
-module.exports = { read, user, token, save, refreshUser, clear, subscribe, manages, reviewer };
+function reviewer() { const current = user(); return Boolean(campus(current) && current.roles.some(role => ['president', 'vicePresident'].includes(role))); }
+module.exports = { read, user, token, save, refreshUser, clear, subscribe, manages, reviewer, campus };

@@ -47,7 +47,7 @@ function imagesHarness() {
   let clock = Date.parse('2026-11-12T00:00:00.000Z'), token: string | null = 'synthetic-jwt';
   const listeners: (() => void)[] = [];
   const replies: { resolve(value: Data): void; reject(error: Error): void }[] = [];
-  const http = { download: vi.fn(), request: vi.fn((_path: string, _options: Data) => new Promise<Data>((resolve, reject) => { replies.push({ resolve, reject }); })) };
+  const http = { download: vi.fn().mockResolvedValue('/synthetic/media.webp'), request: vi.fn((_path: string, _options: Data) => new Promise<Data>((resolve, reject) => { replies.push({ resolve, reject }); })) };
   const logs = { log: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() };
   const wx = { setStorageSync: vi.fn(), setStorage: vi.fn() };
   const module = { exports: {} as ImagesModule };
@@ -89,7 +89,7 @@ describe('原生社团展示与既有活动权限合同', () => {
     const api = v2Api();
     const attach = vi.fn((_page: NativePage, views: Data[]) => views);
     const module = { exports: {} as { load(page: NativePage): Promise<void> } };
-    const dependencies: Data = { './v2': api, './v2-images': { attach }, './session': { user: () => null } };
+    const dependencies: Data = { './v2': api, './v2-images': { attach }, './session': { user: () => null, campus: () => false } };
     runInNewContext(readFileSync('miniprogram/src/lib/home.js', 'utf8'), { module, require: (key: string) => dependencies[key], wx: { getWindowInfo: () => ({ statusBarHeight: 20 }), getMenuButtonBoundingClientRect: () => ({ top: 24, height: 32 }) } });
     const target = { data: {}, setData(next: Data) { Object.assign(this.data, next); } } as NativePage;
     api.get.mockRejectedValueOnce(new Error('合成弱网'));
@@ -139,7 +139,7 @@ describe('原生社团展示与既有活动权限合同', () => {
   it('V2 主场按服务端 sections 的顺序、标题与显隐投影，社团精选独立于赛程前六', () => {
     const api = v2Api(), module = { exports: {} as { view(home: Data): Data } };
     runInNewContext(readFileSync('miniprogram/src/lib/home.js', 'utf8'), { module, wx: {},
-      require: (key: string) => ({ './v2': api, './v2-images': { attach: vi.fn() }, './session': { user: () => null } } as Data)[key] });
+      require: (key: string) => ({ './v2': api, './v2-images': { attach: vi.fn() }, './session': { user: () => null, campus: () => false } } as Data)[key] });
     const promotedEvent = { ...eventCard(41, 'community'), promoted: true, startAt: null, endAt: null };
     const view = module.exports.view({ ...homeFixture(),
       sections: [{ kind: 'promoted', enabled: true, title: '合成精选' }, { kind: 'upcoming', enabled: true, title: '合成赛程' }, { kind: 'notices', enabled: false, title: '社团公告' }],
@@ -173,7 +173,7 @@ describe('原生社团展示与既有活动权限合同', () => {
     expect(markup).toContain("loadMoreError ? '重试加载更多' : '加载更多'");
   });
 
-  it('V2 图片：受控图按 ≤20 批量换取短时签名，公开媒体直连；隐藏后迟到回复不写回，签名不持久化不打印', async () => {
+  it('V2 图片：受控图按 ≤20 批量换取短时签名，媒体按身份请求；隐藏后迟到回复不写回，签名不持久化不打印', async () => {
     const h = imagesHarness(), target = pathTarget({ img: {} });
     let visible = true;
     const controlled = Array.from({ length: 25 }, (_, index) => ({ coverSrc: imageSrc(index + 1) }));
@@ -185,8 +185,9 @@ describe('原生社团展示与既有活动权限合同', () => {
     expect(batches.map(batch => batch.length)).toEqual([20, 5]);
     expect(new Set(batches.flat()).size).toBe(25);
     expect(h.http.request.mock.calls[0]).toEqual(['/api/v2/images/sign', { method: 'POST', data: { sources: batches[0] }, required: true }]);
-    expect(h.http.download).not.toHaveBeenCalled();
-    await vi.waitFor(() => expect(Object.values(target.data.img as Data)).toContain('https://synthetic.invalid/api/media/file/public.webp'));
+    expect(h.http.download).toHaveBeenCalledWith('/api/media/file/public.webp');
+    await vi.waitFor(() => expect(Object.values(target.data.img as Data)).toContain('/synthetic/media.webp'));
+
     h.replies[0].resolve(h.signed(batches[0]));
     await vi.waitFor(() => expect(Object.values(target.data.img as Data)).toContain('https://synthetic.invalid' + h.ticketURL(batches[0][0])));
     visible = false;
@@ -310,14 +311,16 @@ describe('原生社团展示与既有活动权限合同', () => {
   it.each(['gallery', 'article'])('社群活动原生详情读取%s内容与受控图片', async mode => {
     const src = '/api/v2/images/community-post/12/0?v=0123456789abcdef';
     const detail = { presentation: { mode, blocks: mode === 'article' ? [{ type: 'text', text: '合成段落' }, { type: 'image', image: { src, alt: '合成配图' } }] : [] }, images: [{ src, alt: '合成配图' }] };
-    const cms = { socialDetail: vi.fn().mockResolvedValue({ id: 12, title: '合成活动', body: '合成段落', status: 'visible', category: 'event', startAt: '2099-03-25T12:30:00.000Z', location: '合成地点' }), media: async () => null, list: vi.fn() };
-    const http = { request: vi.fn().mockResolvedValue({ form: { enabled: false } }), download: vi.fn().mockResolvedValue('/synthetic/download.webp') };
-    const api = { get: vi.fn().mockResolvedValue(detail) };
-    const target = page('detail', { '../../lib/cms': cms, '../../lib/http': http, '../../lib/v2': api,
+    const publishedDetail = vi.fn().mockResolvedValue({ ...detail,
+      doc: { id: 12, title: '合成活动', body: '合成段落', category: 'event', startAt: '2099-03-25T12:30:00.000Z', location: '合成地点' } });
+    const http = { request: vi.fn().mockResolvedValue({ form: { enabled: false } }) };
+    const images = { media: async () => null, load: vi.fn().mockResolvedValue('/synthetic/download.webp') };
+    const target = page('detail', { '../../lib/cms': { publishedDetail }, '../../lib/http': http, '../../lib/v2-images': images,
       '../../lib/session': { user: () => ({ id: 1 }), subscribe: () => () => {} }, '../../lib/page': frame }, { setNavigationBarTitle: vi.fn() });
     target.onLoad!({ collection: 'community-posts', id: '12' }); await target.load();
-    expect(api.get).toHaveBeenCalledWith('events/community/12', {}, { required: true });
-    expect(http.download).toHaveBeenCalledWith(src);
+    expect(publishedDetail).toHaveBeenCalledWith('community-posts', '12', undefined, undefined);
+    expect(images.load).toHaveBeenCalledWith(src);
+    expect(http.request).toHaveBeenCalledWith('/api/activities/community-posts/12/signup', { questionnaire: true });
     expect(target.data.presentation).toMatchObject({ mode, images: [{ url: '/synthetic/download.webp', alt: '合成配图' }] });
     if (mode === 'article') expect(target.data.presentation).toMatchObject({ blocks: [{ type: 'text', text: '合成段落' }, { type: 'image', url: '/synthetic/download.webp' }] });
     expect(target.data.doc).toMatchObject({ location: '合成地点' });
