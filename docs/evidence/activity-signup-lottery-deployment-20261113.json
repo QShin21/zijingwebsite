@@ -1,0 +1,38 @@
+{
+  "deployedAt": "2026-11-13T14:49:30+08:00",
+  "revision": "c8a7c174b70f3af8f6772fe70ce941c59f96556b",
+  "previousRevision": "e63c2bc5513e2fb3c48fe5c143d7d1ca7c6209aa",
+  "buildId": "DZ4i8XywND93v7Oy87Kr0",
+  "release": "/srv/zijingwebsite/releases/activity-lottery-20261113-c8a7c17",
+  "backup": "/srv/zijingwebsite/backups/activity-lottery-20261113-c8a7c17",
+  "offsiteBackupConfigured": false,
+  "migration": "20261113_000500_activity_signup_lotteries",
+  "rowCountsBeforeAndAfter": {
+    "users": 656,
+    "roles": 656,
+    "communityPosts": 2,
+    "communityShowcase": 1,
+    "promotions": 2,
+    "staffApplications": 5,
+    "activitySignups": 505,
+    "seatRequests": 148,
+    "pendingUploads": 1
+  },
+  "verification": {
+    "isolatedMigration": "passed",
+    "lotteryIntegration": "6 passed: authorization, records, receipt projection, late entries and concurrency",
+    "existingSignupAndMiniappTests": "passed",
+    "browser": "administrator draw and two participant receipts passed on isolated data",
+    "productionBuild": "passed",
+    "productionService": "active; readiness passed",
+    "productionMigrationAndUniqueActivityKey": "verified",
+    "publicReadyHttp": 200,
+    "publicHomeHttp": 200,
+    "publicBuildAssetHttp": 200,
+    "anonymousLotteryRequest": "404 controlled JSON for synthetic nonexistent activity",
+    "productionAuthenticatedDraw": "not tested",
+    "miniappRealDevice": "not tested"
+  },
+  "miniapp": { "changed": false, "upload": false },
+  "deploymentOutput": "Successful candidate and production readiness checks followed transient connection-retry errors; independent live and public checks passed."
+}
