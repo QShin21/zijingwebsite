@@ -1,5 +1,5 @@
 module.exports = {
   origin: 'https://home.thuzijing.top',
-  version: '0.5.22',
+  version: '0.5.23',
   sessionKey: 'zijing-miniapp-session-v1',
 };

@@ -357,15 +357,14 @@
 }
 .seat[data-state="available"],
 .swatch[data-state="available"] {
-  border-color: #a69db5;
-  background: #302a42;
-  color: #f1eef6;
+  border-color: #9df4d3;
+  background: #3bb38e;
+  color: #052f21;
 }
 .row[data-accent] .seat[data-state="available"],
 .swatch[data-state="available"][data-accent] {
-  border-color: #e5b65b;
-  background: #4c3a25;
-  color: #ffefc9;
+  border-width: 2px;
+  border-color: #f5c252;
 }
 .seat[data-state="selected"],
 .swatch[data-state="selected"] {
@@ -385,9 +384,7 @@
 .seat[data-state="confirmed"],
 .swatch[data-state="confirmed"] {
   border-color: #a69db5;
-  background:
-    linear-gradient(135deg, transparent 43%, #5b5366 43% 57%, transparent 57%),
-    #3b3549;
+  background: repeating-linear-gradient(135deg, #3b3549 0 5px, #696071 5px 7px);
   color: #f9f4ff;
 }
 .seat[data-state="blocked"],
@@ -402,15 +399,11 @@
 }
 :global(:root[data-z-theme="light"]) .seat[data-state="available"],
 :global(:root[data-z-theme="light"]) .swatch[data-state="available"] {
-  border-color: #586475;
-  background: #f6f8fb;
-  color: #293542;
+  border-color: #146e50;
 }
 :global(:root[data-z-theme="light"]) .row[data-accent] .seat[data-state="available"],
 :global(:root[data-z-theme="light"]) .swatch[data-state="available"][data-accent] {
   border-color: #8a5b10;
-  background: #ffedbf;
-  color: #553800;
 }
 :global(:root[data-z-theme="light"]) .seat[data-state="selected"],
 :global(:root[data-z-theme="light"]) .swatch[data-state="selected"] {
@@ -460,7 +453,7 @@
   cursor: pointer;
 }
 .seat:enabled:hover {
-  border-color: var(--z-accent);
+  filter: brightness(1.12);
   transform: translateY(-2px);
 }
 .seat:focus-visible {
