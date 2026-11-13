@@ -3,6 +3,7 @@
 <view class="page mini-page zj-tab-page account-v2 {{theme === 'dark' ? 'zj-dark' : ''}}">
   <view class="account-card">
     <view class="zj-stage-stripes"></view>
+    <zj-campus scene="{{scene}}" palette="{{palette}}" />
     <view class="account-card-inner">
       <text class="account-kicker">MY ZIJING · 我的</text>
       <view class="account-identity">

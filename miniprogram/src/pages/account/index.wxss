@@ -22,3 +22,5 @@
 
 .mini-page .account-team-link { flex: 1; min-width: 44px; min-height: 44px; padding: 8rpx 12rpx 8rpx 0; border: 0; background: transparent; box-shadow: none; color: var(--z-link); text-align: left; font-size: 30rpx; font-weight: 800; word-break: break-word; overflow-wrap: anywhere; }
 @media (max-width: 359px) { .mini-page .account-team-link { font-size: 15px; } }
+/* 校园美术 (2026-11-13) */
+.account-card { border-radius: 0 0 36rpx 36rpx; }
