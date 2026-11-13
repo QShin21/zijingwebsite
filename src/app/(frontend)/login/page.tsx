@@ -22,7 +22,7 @@ export default async function Login({
   return (
     <AuthLayout
       title="登录"
-      description="使用昵称或已验证的清华邮箱登录。"
+      description="使用昵称或已验证的邮箱登录。"
       mode="login"
       returnTo={returnTo}
     >

@@ -6,7 +6,7 @@ import { canPublish, canReviewShowcase, communityIDs, managesGame } from "../rul
 import { communityVideo } from "../community-video";
 import { promotionStatusLabels } from "../promotion-model";
 import { controlledImageRef } from "./images";
-import { requireViewer } from "./identity";
+import { requireCampusViewer } from "./identity";
 import { communityRef, mediaRef, txt, rel, iso, readRows, findRow, publicWhere, paginate, safeBody, notFound, rows, type Row, type Input } from "./shared";
 import { eventFields, eventCard, submittedKeys } from "./events";
 import type { ArticleCard, CommunityCard, CommunityDetail, CommunityHeader, CommunityRef, EventCard, Page, ShowcaseCard } from "./types";
@@ -33,7 +33,7 @@ export async function communityCard(p: Payload, viewer: User, row: Row): Promise
   return { community, summary: txt(row.summary), cover, demo: row.demo === true, counts: { upcomingEvents, teams, showcase }, viewer: { isOfficer: communityIDs(viewer).includes(String(row.id)), canManageIcon: canManageCommunityIcon(viewer, row.id) } };
 }
 export async function getCommunities(p: Payload, viewer: User | null, input: Input = {}): Promise<Page<CommunityCard>> {
-  const actor = await requireViewer(p, viewer), q = String(input.q ?? "").trim();
+  const actor = await requireCampusViewer(p, viewer), q = String(input.q ?? "").trim();
   if (q.length > 80) throw new APIError("搜索文字最多80字", 400);
   const where: Where = q ? { or: [{ title: { contains: q } }, { summary: { contains: q } }] } : {};
   const docs = await readRows(p, "games", ["title", "slug", "summary", "cover", "demo"], publicWhere(where), null, 500, "sort");
@@ -45,7 +45,7 @@ async function gameFor(p: Payload, input: Input, withBody = false) {
   return game;
 }
 export async function getShowcase(p: Payload, viewer: User | null, input: Input): Promise<Page<ShowcaseCard>> {
-  const actor = await requireViewer(p, viewer), game = await gameFor(p, input), view = String(input.view ?? "public");
+  const actor = await requireCampusViewer(p, viewer), game = await gameFor(p, input), view = String(input.view ?? "public");
   if (!["public", "mine", "review"].includes(view)) throw new APIError("风采筛选无效", 400);
   if (view === "review" && !canReviewShowcase(actor, game.id)) throw new APIError("无权审核此社群", 403);
   const where: Where = { and: [{ game: { equals: game.id } }, view === "mine" ? { author: { equals: actor.id } } : { status: { equals: view === "review" ? "pending" : "visible" } }] };
@@ -53,7 +53,7 @@ export async function getShowcase(p: Payload, viewer: User | null, input: Input)
   return paginate(await Promise.all(docs.map(row => showcaseCard(p, actor, row))), input);
 }
 export async function getCommunityPosts(p: Payload, viewer: User | null, input: Input): Promise<Page<EventCard | ArticleCard>> {
-  const actor = await requireViewer(p, viewer), game = await gameFor(p, input), category = String(input.category ?? "event");
+  const actor = await requireCampusViewer(p, viewer), game = await gameFor(p, input), category = String(input.category ?? "event");
   if (!["event", "notice"].includes(category)) throw new APIError("内容类别无效", 400);
   const where: Where = { and: [{ game: { equals: game.id } }, { category: { equals: category } }, ...(!managesGame(actor, game.id) ? [{ status: { equals: "visible" } }] : [])] };
   const docs = await readRows(p, "community-posts", eventFields, where, actor);
@@ -74,7 +74,7 @@ export async function contactRows(p: Payload, gameID: number) {
   return users.flatMap(user => { const application = apps.docs.find(row => rel(row.applicant) === user.id && row.wechatQr); return application ? [{ id: user.id, name: user.name, source: application.wechatQr! }] : []; });
 }
 export async function getContacts(p: Payload, viewer: User | null, input: Input) {
-  await requireViewer(p, viewer); const game = await gameFor(p, input);
+  await requireCampusViewer(p, viewer); const game = await gameFor(p, input);
   return { contacts: (await contactRows(p, game.id)).flatMap(row => { const qr = controlledImageRef("contact", game.id, row.id, row.source, row.name); return qr ? [{ id: row.id, name: row.name, qr }] : []; }) };
 }
 async function communityHeader(p: Payload, actor: User, game: Row): Promise<CommunityHeader> {
@@ -89,11 +89,11 @@ async function communityHeader(p: Payload, actor: User, game: Row): Promise<Comm
     canApplyOfficer: !communityIDs(actor).includes(String(game.id)) } };
 }
 export async function getCommunityHeader(p: Payload, viewer: User | null, input: Input): Promise<CommunityHeader> {
-  const actor = await requireViewer(p, viewer);
+  const actor = await requireCampusViewer(p, viewer);
   return communityHeader(p, actor, await gameFor(p, input));
 }
 export async function getCommunity(p: Payload, viewer: User | null, input: Input): Promise<CommunityDetail> {
-  const actor = await requireViewer(p, viewer), game = await gameFor(p, input, true);
+  const actor = await requireCampusViewer(p, viewer), game = await gameFor(p, input, true);
   const [header, contacts, events, notices, showcase, teams] = await Promise.all([
     communityHeader(p, actor, game), contactRows(p, game.id), getCommunityPosts(p, actor, { ...input, slug: game.slug, category: "event", limit: 50 }), getCommunityPosts(p, actor, { ...input, slug: game.slug, category: "notice", limit: 3 }), getShowcase(p, actor, { ...input, slug: game.slug, limit: 6, view: "public" }), import("./teams").then(({ getTeams }) => getTeams(p, actor, { community: game.slug, limit: 50 })),
   ]);

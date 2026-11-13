@@ -7,7 +7,7 @@ import {
   type Where,
 } from "payload";
 import {
-  canParticipate,
+  canUseCampus,
   canPublish,
   canReviewShowcase,
   communityIDs,
@@ -17,7 +17,7 @@ import { currentHonorReader } from "./team-honor-records";
 
 const legacyUpdate: Access = async ({ req }) => {
   const actor = await currentHonorReader(req);
-  if (!canParticipate(actor)) return false;
+  if (!canUseCampus(actor)) return false;
   if (canPublish(actor)) return true;
   const games = communityIDs(actor, "reviewShowcase");
   if (!games.length) return false;

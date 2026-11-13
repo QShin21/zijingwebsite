@@ -4,7 +4,7 @@ import { notFound, permanentRedirect, redirect } from "next/navigation";
 import type { Payload } from "payload";
 import type { User } from "@/payload-types";
 import { cms } from "@/lib/content";
-import { canParticipate } from "@/lib/rules";
+import { canParticipate, canUseCampus } from "@/lib/rules";
 import { getSession } from "@/lib/v2";
 import type { Viewer } from "@/lib/v2";
 
@@ -46,7 +46,8 @@ function statusOf(error: unknown) {
 
 /** Published CMS redirects keep old shared links working (public, anonymous read). */
 async function legacyRedirect(from: string) {
-  const { payload } = await request();
+  const { payload, user } = await request();
+  if (!canUseCampus(user)) return;
   const result = await payload
     .find({ collection: "redirects", overrideAccess: false, user: null, depth: 0, limit: 1, where: { from: { equals: from } } })
     .catch(() => null);

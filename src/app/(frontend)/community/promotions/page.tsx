@@ -58,7 +58,7 @@ export default async function Promotions({
   const candidates =
     review || query.source === "community-showcase"
       ? { docs: [] }
-      : await p.find({ collection: "community-posts", user: null, overrideAccess: false, depth: 0, limit: 20, sort: "-createdAt", where: { and: scope }, select: { title: true } });
+      : await p.find({ collection: "community-posts", user, overrideAccess: false, depth: 0, limit: 20, sort: "-createdAt", where: { and: scope }, select: { title: true } });
   const showcaseScope: Where[] = [{ status: { equals: "visible" } }];
   if (!reviewer) showcaseScope.push({ game: { in: communityIDs(user, "publishContent") } });
   if (query.source === "community-showcase" && /^\d+$/.test(query.id ?? "")) showcaseScope.push({ id: { equals: Number(query.id) } });

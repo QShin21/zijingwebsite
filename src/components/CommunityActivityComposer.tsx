@@ -8,6 +8,7 @@ import { PublicationArticleEditor } from "./PublicationArticleEditor";
 import { publicationImageInput, type PublicationImage } from "@/lib/publication-images";
 import type { PublicationBlock } from "@/lib/publication-content";
 import { SubmitButton } from "./SubmitButton";
+import { audiences, audienceLabels } from "@/lib/content-audience";
 import { ActionForm } from "./activity-pages/ActionForm";
 import { publishCommunityResultAction } from "@/app/(frontend)/community/actions";
 export function CommunityActivityComposer({ game }: { game: number }) {
@@ -57,6 +58,12 @@ export function CommunityActivityComposer({ game }: { game: number }) {
               >
                 <option value="event">社群活动</option>
                 <option value="notice">社群通知</option>
+              </select>
+            </label>
+            <label>
+              可见范围
+              <select name="audience" defaultValue="campus">
+                {audiences.map(value => <option key={value} value={value}>{audienceLabels[value]}</option>)}
               </select>
             </label>
             <label>

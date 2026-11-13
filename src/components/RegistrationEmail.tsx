@@ -15,7 +15,7 @@ export function RegistrationEmail() {
   const [active, setActive] = useState(-1);
   return (
     <div className={styles.field}>
-      <label htmlFor={`${id}-prefix`}>清华邮箱</label>
+      <label htmlFor={`${id}-prefix`}>邮箱</label>
       <div className={styles.emailRow}>
         <input
           id={`${id}-prefix`}
@@ -123,7 +123,7 @@ export function RegistrationEmail() {
         </div>
       </div>
       <span id={`${id}-hint`} className={styles.hint}>
-        后缀可选择学生或校友邮箱，也可直接输入其他清华邮箱后缀。
+        可输入任意可接收验证码的邮箱。清华及校友邮箱对应清华用户，其他教育邮箱对应友校学生，普通邮箱对应校外人士。
       </span>
     </div>
   );

@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 import { workflowFeedback } from "@/components/activity-pages/action-feedback";
 import { redirect } from "next/navigation";
 import { cms } from "@/lib/content";
-import { canPublish, canSubmitClubContent, canReviewShowcase, managesGame } from "@/lib/rules";
+import { canUseCampus, canPublish, canSubmitClubContent, canReviewShowcase, managesGame } from "@/lib/rules";
 import { discardVideo, saveVideo, VIDEO_MAX_BYTES, SUBMISSION_MAX_BYTES } from '@/lib/showcase-videos';
 import { decideCommunityApplication, editCommunityApplication, updateCommunityCard } from "@/lib/community-operations";
+import { readAudience } from "@/lib/content-audience";
 import { applicationError } from "@/lib/application-error";
 import { workflowTransaction } from "@/lib/workflow-transactions";
 import { APIError } from "payload";
@@ -25,6 +26,7 @@ async function current() {
   const p = await cms();
   const { user } = await p.auth({ headers: await headers() });
   if (!user || user.accountStatus === "suspended") redirect("/login");
+  if (!canUseCampus(user)) redirect("/events");
   return { p, user };
 }
 async function gamePath(id: number) {
@@ -70,6 +72,9 @@ async function createCommunityPost(
 ) {
   const game = numeric(form, "game");
   if (!managesGame(user, game)) throw new APIError("无权在此社群发布", 403);
+  const requestedAudience = value(form, "audience");
+  const audience = readAudience(requestedAudience || "campus");
+  if (!audience) throw new APIError("请选择有效的可见范围", 400);
   const signupForm = category === "event" && value(form, "signupForm")
     ? JSON.parse(value(form, "signupForm"))
     : undefined;
@@ -91,6 +96,7 @@ async function createCommunityPost(
       title: value(form, "title"),
       body: value(form, "body"),
       category,
+      audience,
       contentMode: value(form, "contentMode") || "gallery",
       contentBlocks: value(form, "contentMode") === "article" ? JSON.parse(value(form, "contentBlocks") || "[]") : null,
       ...communitySchedule({ startAt: beijingScheduleTime(value(form, "startAt")),
@@ -100,6 +106,25 @@ async function createCommunityPost(
       signupImages,
     },
   });
+}
+export async function updateCommunityAudienceAction(form: FormData) {
+  const { p, user } = await current();
+  const id = numeric(form, "id"), game = numeric(form, "game");
+  const gameURL = await gamePath(game);
+  const path = `${gameURL}/updates/${id}`;
+  const audience = readAudience(value(form, "audience"));
+  if (!audience || !managesGame(user, game)) problem(path, "请选择有效的可见范围");
+  try {
+    await workflowTransaction(p, user, {}, async req => {
+      const post = await p.findByID({ collection: "community-posts", id, req,
+        overrideAccess: false, depth: 0, select: { game: true } });
+      if (Number(post.game) !== game || !managesGame(req.user, game))
+        throw new APIError("无权管理此活动或通知", 403);
+      await p.update({ collection: "community-posts", id, req, overrideAccess: false, data: { audience: audience! } });
+    });
+  } catch (error) { problem(path, applicationError(error)); }
+  revalidatePath(path);
+  redirect(path + "?message=" + encodeURIComponent("已保存可见范围"));
 }
 export async function publishCommunityAction(form: FormData) {
   const { p, user } = await current();

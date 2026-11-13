@@ -4,12 +4,13 @@ import { normalizeShowcaseImage } from "../lib/showcase-images";
 import { controlledVideoName } from "../lib/showcase-videos";
 import { isReservedHonorVideo } from "../lib/team-honor-videos";
 import { APIError, type CollectionConfig, type CollectionBeforeChangeHook, type Access, type Where } from "payload";
-import { canParticipate, canPublish, communityIDs, canReviewShowcase, canSubmitClubContent, managesGame, type Identity } from "../lib/rules";
+import { canUseCampus, canPublish, communityIDs, canReviewShowcase, canSubmitClubContent, managesGame, type Identity } from "../lib/rules";
 import { CommunityApplications, CommunityJoins } from "./community-operations";
 import { promotionSourceChanged, promotionSourceDeleted } from "../lib/content-promotions";
 import { postImagesField, validatePostImages } from "./publication-images";
 import { validateCommunitySchedule } from "../lib/v2/schedule";
 import { validatePublicationContent } from "../lib/publication-content";
+import { audienceField, audienceWhere } from "../lib/content-audience";
 
 const relation = (name: string, to: "games" | "users") =>
   ({ name, type: "relationship" as const, relationTo: to, required: true, maxDepth: 0,
@@ -23,7 +24,7 @@ const moderatorWhere: Access = ({ req }) => {
 };
 const visibleToPublic: Access = ({ req }) => {
   if (canPublish(req.user as Identity)) return true;
-  const scope: Where[] = [{ status: { equals: "visible" } }];
+  const scope: Where[] = [{ and: [{ status: { equals: "visible" } }, req.context.internalPromotionSource ? {} : audienceWhere(req.user)] }];
   const editors = communityIDs(req.user as Identity, "publishContent");
   const readers = communityIDs(req.user as Identity, "viewSignups");
   if (editors.length) scope.push({ game: { in: editors } });
@@ -81,7 +82,7 @@ const participationGuard = (kind: "local" | "showcase"): CollectionBeforeChangeH
       }
       return data;
     }
-    if (!canParticipate(user)) throw new APIError("请先登录可用账号", 403);
+    if (!canUseCampus(user)) throw new APIError("请先登录可用账号", 403);
     const game = data.game;
     if (game) {
       data.game = await openGame(req, game);
@@ -117,7 +118,7 @@ function social(slug: string, title: string, kind: "local" | "showcase"): Collec
       { name: "caption", label: "图片说明", type: "text", maxLength: 200 },
     ] },
   );
-  if (kind === "local") fields.push(postImagesField, ...signupFields);
+  if (kind === "local") fields.push(audienceField, postImagesField, ...signupFields);
   if (kind === "local") fields.push(
     { name: "contentMode", type: "text", admin: { hidden: true } },
     { name: "contentBlocks", type: "json", admin: { hidden: true } },
@@ -134,13 +135,14 @@ function social(slug: string, title: string, kind: "local" | "showcase"): Collec
     slug, labels: { singular: title, plural: title }, admin: { useAsTitle: "title" },
     access: {
       read: kind === "showcase" ? ({ req }) => {
+        if (req.user && !canUseCampus(req.user)) return false;
         if (canPublish(req.user as Identity)) return true;
         const scope: Where[] = [{ status: { equals: "visible" } }];
-        if (canParticipate(req.user as Identity)) scope.push({ author: { equals: req.user!.id } });
+        if (canUseCampus(req.user as Identity)) scope.push({ author: { equals: req.user!.id } });
         if (communityIDs(req.user as Identity, "reviewShowcase").length) scope.push({ game: { in: communityIDs(req.user as Identity, "reviewShowcase") } });
         return { or: scope };
       } : visibleToPublic,
-      create: ({ req }) => canParticipate(req.user as Identity) && (kind !== "showcase" || req.context.webShowcaseWrite === true),
+      create: ({ req }) => canUseCampus(req.user as Identity) && (kind !== "showcase" || req.context.webShowcaseWrite === true),
       update: kind === "showcase" ? (args) => args.req.context.webShowcaseWrite === true ? (canPublish(args.req.user as Identity) || { game: { in: communityIDs(args.req.user as Identity, "reviewShowcase") } }) : false : moderatorWhere,
       delete: ({ req }) => canPublish(req.user as Identity) && (kind !== "showcase" || req.context.webShowcaseWrite === true),
     },
@@ -152,7 +154,7 @@ function social(slug: string, title: string, kind: "local" | "showcase"): Collec
 
 const bans: CollectionConfig = {
   slug: "community-bans", labels: { singular: "社群禁言", plural: "社群禁言" },
-  access: { read: moderatorWhere, create: ({ req }) => canParticipate(req.user as Identity) &&
+  access: { read: moderatorWhere, create: ({ req }) => canUseCampus(req.user as Identity) &&
     canSubmitClubContent(req.user as Identity),
     update: moderatorWhere, delete: moderatorWhere },
   hooks: { beforeChange: [async ({ data, originalDoc, req, operation }) => {

@@ -1,6 +1,6 @@
 import { APIError, createLocalReq, type Payload } from "payload";
 import type { TeamHonorRecord, User } from "../payload-types";
-import { canParticipate, canReviewShowcase, relationID } from "./rules";
+import { canUseCampus, canReviewShowcase, relationID } from "./rules";
 import { currentTeamActor, getActiveTeamMembership } from "./team-memberships";
 import { createCoreTeamHonorAuthority } from "./team-honor-core-adapter";
 import type { HonorMembership, HonorTeam } from "./team-honor-authority";
@@ -17,7 +17,7 @@ const noActions = () => ({ edit: false, save: false, submit: false, withdraw: fa
 // Read hints only. Every mutation still rechecks the same authority and state in its original transaction.
 export async function miniappTeamHonorReads(p: Payload, actor: User, scope: Scope = {}) {
   const fresh = await currentTeamActor(p, actor);
-  if (!canParticipate(fresh)) throw new APIError("账号已停用或不可用，请联系负责人", 403);
+  if (!canUseCampus(fresh)) throw new APIError("账号已停用或不可用，请联系负责人", 403);
   const user: User = { ...actor, ...fresh!, collection: "users" };
   const req = await createLocalReq({ user }, p);
   const available = await teamHonorService.availableTeams(p, user);

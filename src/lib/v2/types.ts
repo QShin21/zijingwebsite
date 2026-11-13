@@ -1,4 +1,6 @@
 // Shared V2 view contracts. Published by the Opus product brief.
+import type { Affiliation } from "../affiliation";
+
 export type ID = number;
 export type ISODateTime = string;
 export type BeijingDate = string;
@@ -33,6 +35,7 @@ export type CommunityCapabilities = {
   viewSignups: boolean; exportSignups: boolean; contactCard: boolean;
 };
 export type Viewer = {
+  affiliation: Affiliation;
   id: ID; name: string; email: string; roles: PlatformRole[]; department: "execution" | "publicity" | null;
   capabilities: {
     publishClub: boolean; submitClubContent: boolean; reviewCommunityApplications: boolean;

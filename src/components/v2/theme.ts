@@ -5,7 +5,7 @@
  *   - stored "dark" keeps a dark page → 清华经典
  * `data-z-theme` on <html> stays the light/dark colour scheme that tokens.css and existing
  * modules already key on; `data-z-palette` selects the web-only pixel palette (pixel.css).
- * The mini program and src/design/tokens.json are not involved.
+ * The mini program maps its stored light/dark preferences to the same landmark themes.
  */
 export const themeCookieName = "zijing_theme";
 

@@ -37,7 +37,12 @@ export async function GET() {
     await db.pool.query("SELECT dedupe_key,form_version FROM event_signups LIMIT 0");
     await db.pool.query("SELECT key FROM auth_codes LIMIT 0");
     await db.pool.query("SELECT key FROM auth_rate_limits LIMIT 0");
-    await db.pool.query("SELECT department FROM users LIMIT 0");
+    await db.pool.query("SELECT department, affiliation FROM users LIMIT 0");
+    for (const table of ["events", "announcements", "community_posts"]) {
+      await db.pool.query(`SELECT audience FROM ${table} LIMIT 0`);
+    }
+    await db.pool.query("SELECT version_audience FROM _events_v LIMIT 0");
+    await db.pool.query("SELECT version_audience FROM _announcements_v LIMIT 0");
     await db.pool.query("SELECT game_id,view_signups,export_signups FROM users_community_offices LIMIT 0");
     await db.pool.query("SELECT status,confirmed_at FROM community_joins LIMIT 0");
     await db.pool.query("SELECT source_key,approved_version,history FROM content_promotions LIMIT 0");

@@ -16,6 +16,7 @@ import {
   publisherField,
   readContent,
   readEventContent,
+  readAnnouncementContent,
   staff,
 } from "../access";
 import {
@@ -41,6 +42,8 @@ import { nicknameKey, validNickname } from "../lib/nickname";
 import { postImagesField, validatePostImages } from "./publication-images";
 import { guardTeamSlug, validateTeamSlug } from "../lib/team-slugs";
 import { userPermissionFields, userPermissionUnchanged } from "../lib/user-permissions";
+import { accountEmail, affiliations, affiliationLabels, classifyEmail } from "../lib/affiliation";
+import { audienceField } from "../lib/content-audience";
 
 const text = (name: string, label: string, required = false): TextField => ({
   name,
@@ -353,7 +356,7 @@ function content(
     },
     versions: { drafts: true, maxPerDoc: 30 },
     access: {
-      read: slug === "events" ? readEventContent : readContent(scoped, slug === "honors", self),
+      read: slug === "events" ? readEventContent : slug === "announcements" ? readAnnouncementContent : readContent(scoped, slug === "honors", self),
       create: ({ req }) =>
         canSubmitClubContent(req.user as Identity),
       update: editContent(scoped, self),
@@ -391,7 +394,7 @@ function content(
     fields: [
       ...common.map(field => slug === "teams" && "name" in field && field.name === "slug" && field.type === "text"
         ? { ...field, validate: validateTeamSlug } : field),
-      ...(hasPostImages ? [postImagesField] : []),
+      ...(hasPostImages ? [audienceField, postImagesField] : []),
       ...fields,
       {
         name: "_status",
@@ -462,16 +465,23 @@ export const Users: CollectionConfig = {
         )
           throw new APIError("账号必须经过邮箱验证", 403);
         if (operation === "create" && req.context.signupVerified) {
-          const bootstrap = req.context.presidentClaim &&
-            data.email === process.env.PRESIDENT_CLAIM_EMAIL?.trim().toLowerCase();
+          const email = accountEmail(data.email);
+          if (!email) throw new APIError("邮箱格式无效", 400);
+          data.email = email;
+          data.affiliation = classifyEmail(email);
+          const bootstrap = data.affiliation === "tsinghua" && req.context.presidentClaim &&
+            email === process.env.PRESIDENT_CLAIM_EMAIL?.trim().toLowerCase();
           data.roles = [bootstrap ? "president" : "member"];
           data.accountStatus = "active";
           data.communityOffices = [];
           data.communities = [];
+          data.teams = [];
           data.department = undefined;
         }
         if (operation === "update" && !req.context.system) {
           const submitted = req.context.userSubmittedPermissions as Record<string, unknown> ?? {};
+          if ("affiliation" in submitted && !userPermissionUnchanged("affiliation", submitted.affiliation, originalDoc?.affiliation))
+            throw new APIError("邮箱身份由验证邮箱确定", 403);
           const retirement = hasRole(req.user as Identity, "vicePresident") &&
             Array.isArray(submitted.roles) && submitted.roles.length === 1 && submitted.roles[0] === "honoraryBackbone" &&
             !hasRole(originalDoc as Identity, "president") &&
@@ -496,6 +506,12 @@ export const Users: CollectionConfig = {
         if (data.roles && (data.roles.length !== 1 ||
           !["president", "vicePresident", "backbone", "communityAdmin", "honoraryBackbone", "member"].includes(data.roles[0])))
           throw new APIError("账号必须且只能拥有一个等级", 400);
+        const affiliation = data.affiliation ?? originalDoc?.affiliation;
+        if (affiliation && affiliation !== "tsinghua" && (data.roles?.some((role: string) => role !== "member") ||
+            data.teams?.length || data.communities?.length || data.department ||
+            data.communityOffices?.some((office: { status?: string }) => office.status === "active"))) {
+          throw new APIError("社团任职和代表队权限仅适用于清华账号", 403);
+        }
         if (operation === "update" && data.roles?.[0] === "honoraryBackbone" && originalDoc?.roles?.[0] !== "honoraryBackbone") {
           data.department = null;
           data.teams = [];
@@ -554,6 +570,17 @@ export const Users: CollectionConfig = {
       // Derived by the hook; Local API callers should only provide the display name.
       typescriptSchema: [({ jsonSchema }) => ({ ...jsonSchema, required: false })],
       admin: { hidden: true }, access: { read: () => false } },
+    {
+      name: "affiliation",
+      label: "邮箱身份",
+      type: "select",
+      required: true,
+      defaultValue: "tsinghua",
+      typescriptSchema: [({ jsonSchema }) => ({ ...jsonSchema, required: false })],
+      options: affiliations.map(value => ({ value, label: affiliationLabels[value] })),
+      access: { create: () => false, update: () => false },
+      admin: { readOnly: true, description: "由已验证邮箱确定，与平台角色和社群任职分开。" },
+    },
     {
       name: "roles",
       label: "平台角色（与社群任职分开）",
@@ -614,6 +641,11 @@ export const Media: CollectionConfig = {
     mimeTypes: ["image/jpeg", "image/png", "image/webp"],
     imageSizes: [{ name: "card", width: 800, height: 600, position: "centre" }],
     adminThumbnail: "card",
+    modifyResponseHeaders: ({ headers }) => {
+      headers.set("Cache-Control", "private, no-store");
+      headers.set("Vary", "Cookie, Authorization");
+      return headers;
+    },
   },
   hooks: {
     beforeOperation: [

@@ -16,7 +16,7 @@ export default async function Register({
   return (
     <AuthLayout
       title="注册社团账号"
-      description="填写账号资料后验证清华邮箱，即可完成注册。"
+      description="填写账号资料并验证邮箱。平台按邮箱类型确定清华用户、友校学生或校外人士身份。"
       mode="register"
       returnTo={returnTo}
     >

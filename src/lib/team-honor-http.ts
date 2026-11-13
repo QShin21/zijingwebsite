@@ -1,7 +1,7 @@
 import { APIError, type Payload } from "payload";
 import type { TeamHonorRecord, User } from "../payload-types";
 import { serverURL } from "./environment";
-import { canParticipate, canReviewShowcase, relationID } from "./rules";
+import { canUseCampus, canReviewShowcase, relationID } from "./rules";
 import { teamHonorService } from "./team-honor-service";
 import { honorError, honorWorkspace, saveHonorForm } from "./team-honor-web";
 import { honorID, type HonorAction, type HonorInput } from "./team-honor-model";
@@ -105,7 +105,7 @@ export async function teamHonorHTTP(
       : new Headers(request.headers);
     if (nativeToken(request)) authHeaders.delete("cookie");
     const { user } = await p.auth({ headers: authHeaders });
-    if (!canParticipate(user)) throw new APIError("请登录可用账号", 401);
+    if (!canUseCampus(user)) throw new APIError("请登录可用账号", 401);
     const actor = user!,
       id = idValue === undefined ? undefined : honorID(idValue);
     if (!mutate) {

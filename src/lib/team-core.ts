@@ -6,7 +6,7 @@ import type {
   TeamJoinApplication,
   TeamRecruitment,
 } from "../payload-types";
-import { canParticipate, canPublish } from "./rules";
+import { canUseCampus, canPublish } from "./rules";
 import { workflowTransaction, uniqueFieldError } from "./workflow-transactions";
 import { lockTeamLifecycle } from "./team-locks";
 import { formVersion } from "./activity-signups";
@@ -570,7 +570,7 @@ export async function teamRecruitmentInfo(
   req?: PayloadRequest,
 ) {
   const fresh = await currentTeamActor(p, actor, req);
-  if (!canParticipate(fresh)) throw new APIError("请先登录可用账号", 401);
+  if (!canUseCampus(fresh)) throw new APIError("请先登录可用账号", 401);
   const fullActor: User = { ...actor!, ...fresh!, collection: "users" };
   const currentReq = req ? { ...req, user: fullActor } : undefined;
   const own =
@@ -835,7 +835,7 @@ export async function decideTeamJoinApplication(
         { id: teamID(doc.applicant) },
         req,
       );
-      if (!canParticipate(applicant))
+      if (!canUseCampus(applicant))
         throw new APIError("申请者账号已停用，不能录取", 409);
       const existing = await getTeamMembership(p, {
         teamID: idTeam,

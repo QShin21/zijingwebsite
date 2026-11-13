@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getArticle, getEventDetail } from "@/lib/v2";
 import { CommunityPostImageEditor } from "@/components/CommunityPostImageEditor";
 import { CommunityArticleEditor } from "@/components/CommunityArticleEditor";
+import { updateCommunityAudienceAction } from "../../../actions";
+import { audiences, audienceLabels } from "@/lib/content-audience";
 import { publicationBlocks } from "@/lib/publication-content";
 import { publicationImages } from "@/lib/publication-images";
 import { bySlug } from "@/lib/content";
@@ -20,27 +22,40 @@ export default async function Update({ params, searchParams }: { params: Promise
   const path = `/community/${slug}/updates/${id}`;
   const [game, { payload, user }, search] = await Promise.all([bySlug("games", slug), request(), searchParams]);
   if (!game) notFound();
-  // Minimal anonymous read decides which view applies (hidden posts stay hidden).
+  // Use the viewer's audience before resolving the detail and any editing controls.
   const post = await payload
     .findByID({
       collection: "community-posts",
       id: Number(id),
       overrideAccess: false,
-      user: null,
+      user,
       depth: 0,
-      select: { game: true, category: true, postImages: true, contentMode: true, contentBlocks: true, updatedAt: true },
+      select: { game: true, category: true, audience: true, status: true, postImages: true, contentMode: true, contentBlocks: true, updatedAt: true },
     })
     .catch(() => null);
-  if (!post || Number(post.game) !== game.id) notFound();
+  if (!post || post.status !== "visible" || Number(post.game) !== game.id) notFound();
   const message = single(search.message);
   const notice = message ? <Notice>{message}</Notice> : undefined;
   const canEdit = managesGame(user, game.id);
   const images = publicationImages(post.postImages);
   const editor = canEdit ? (
+    <>
+    <form action={updateCommunityAudienceAction} className={layout.panel}>
+      <input name="id" type="hidden" value={post.id} />
+      <input name="game" type="hidden" value={game.id} />
+      <label>
+        可见范围
+        <select name="audience" defaultValue={post.audience ?? "campus"}>
+          {audiences.map(value => <option key={value} value={value}>{audienceLabels[value]}</option>)}
+        </select>
+      </label>
+      <button type="submit" className={buttonClass("ghost", "small")}>保存范围</button>
+    </form>
     <section className={layout.panel} aria-label={post.contentMode === "article" ? "编辑文章" : "编辑配图"}>
       {post.contentMode === "article" ? <CommunityArticleEditor key={post.updatedAt} id={post.id} game={game.id} images={images} blocks={publicationBlocks(post.contentBlocks, images.length)} revision={post.updatedAt} />
         : <CommunityPostImageEditor key={post.id} id={post.id} game={game.id} images={images} revision={post.updatedAt} />}
     </section>
+    </>
   ) : null;
   if (post.category === "event") {
     const detail = await read(getEventDetail, { source: "community", idOrSlug: id }, path);

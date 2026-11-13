@@ -1,6 +1,6 @@
 import { APIError, type Payload } from "payload";
 import type { Team, TeamEstablishmentApplication, TeamJoinApplication, TeamMembership, TeamRecruitment, User } from "../payload-types";
-import { canParticipate, canPublish, communityIDs } from "./rules";
+import { canUseCampus, canPublish, communityIDs } from "./rules";
 import { canManageTeam, canProposeTeam, currentTeamActor, isEstablishedTeam, positiveID } from "./team-memberships";
 import { normalizeTeamForm, teamID, teamJoinReceipt, teamRecruitmentInfo, teamRecruitmentState } from "./team-core";
 
@@ -27,7 +27,7 @@ async function context(p: Payload, request: Request) {
   const { user: authenticated } = await p.auth({ headers: request.headers });
   if (!authenticated?.id) throw new APIError("请先登录可用账号", 401);
   const fresh = await currentTeamActor(p, authenticated);
-  if (!canParticipate(fresh)) throw new APIError("账号已停用或不可用，请联系负责人", 403);
+  if (!canUseCampus(fresh)) throw new APIError("账号已停用或不可用，请联系负责人", 403);
   const user: User = { ...authenticated!, ...fresh!, roles: fresh!.roles, accountStatus: fresh!.accountStatus,
     communityOffices: fresh!.communityOffices, collection: "users" };
   const infos = new Map<number, Promise<Awaited<ReturnType<typeof teamRecruitmentInfo>> | null>>();
@@ -168,7 +168,7 @@ async function workbench(ctx: Context, id: number, query: URLSearchParams) {
         currentTeamActor(ctx.p, { id: teamID(row.applicant) }),
         ctx.p.findByID({ collection: "team-recruitments", id: teamID(row.recruitment), user: ctx.user, overrideAccess: false, depth: 0, select: { status: true } }),
       ]);
-      decisions = [...(established && batch.status !== "archived" && canParticipate(applicant) ? ["approved"] : []), "returned", "rejected"];
+      decisions = [...(established && batch.status !== "archived" && canUseCampus(applicant) ? ["approved"] : []), "returned", "rejected"];
     }
     return { ...teamJoinReceipt(row), actions: { reviewDecisions: decisions } };
   }));

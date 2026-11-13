@@ -1,14 +1,15 @@
 import { cms } from '@/lib/content';
 import { miniappLogin } from '@/lib/miniapp-auth';
 import { beginRegistrationAction, registerAction } from '@/app/(frontend)/account/actions';
-import { schoolEmail, validPassword, issueCode, consumeCode } from '@/lib/verification';
+import { validPassword, issueCode, consumeCode } from '@/lib/verification';
+import { accountEmail } from '@/lib/affiliation';
 import { miniappClubGET, miniappClubPOST, miniappClubReadPath, miniappClubWritePath } from '@/lib/miniapp-club';
 import { applicationError } from '@/lib/application-error';
 import { miniappTeamGET, miniappTeamReadPath } from '@/lib/miniapp-team';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-const headers = { 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' };
+const headers = { 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff', Vary: 'Cookie, Authorization' };
 const reply = (value: unknown, status = 200) => Response.json(value, { status, headers });
 type Context = { params: Promise<{ path: string[] }> };
 const text = (value: unknown) => typeof value === 'string' ? value : '';
@@ -63,8 +64,8 @@ export async function POST(request: Request, context: Context) {
     return reply(result, 'error' in result ? 400 : 200);
   }
   if (path === 'auth/password/code' || path === 'auth/password/reset') {
-    const email = schoolEmail(data.email);
-    if (!email) return reply({ error: '请使用清华师生或校友邮箱' }, 400);
+    const email = accountEmail(data.email);
+    if (!email) return reply({ error: '请输入注册时验证的完整邮箱' }, 400);
     try {
       const p = await cms();
       if (path.endsWith('/reset') && (!validPassword(data.password) || data.password !== data.confirm))

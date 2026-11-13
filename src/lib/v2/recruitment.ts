@@ -5,6 +5,7 @@ import { normalizeSignup } from "../signup-schema";
 import { normalizeTeamForm, teamRecruitmentState } from "../team-core";
 import { isEstablishedTeam } from "../team-memberships";
 import { ownApplicationItems } from "./account";
+import { canUseCampus } from "../rules";
 import { refreshViewer } from "./identity";
 import { communityRef, iso, pageInput, publicWhere, rel, selectFields, teamRef, txt, type Input, type Row } from "./shared";
 import type { RecruitmentCard, RecruitmentCenter } from "./types";
@@ -42,6 +43,7 @@ export async function teamRecruitmentCard(p: Payload, row: Row, viewer: User | n
 
 export async function getRecruitmentCenter(p: Payload, viewer: User | null, input: Input = {}): Promise<RecruitmentCenter> {
   const user = await refreshViewer(p, viewer);
+  if (!user || !canUseCampus(user)) return { staff: [], teams: null, mine: null };
   const [batches, mine] = await Promise.all([
     p.find({ collection: "staff-batches", user: null, overrideAccess: false, draft: false, depth: 0, pagination: false, limit: 0, sort: "-createdAt",
       where: { state: { in: ["open", "closed"] } }, select: { title: true, description: true, state: true, startAt: true, endAt: true, signupForm: true } }),
@@ -49,7 +51,6 @@ export async function getRecruitmentCenter(p: Payload, viewer: User | null, inpu
   ]);
   const applicationByHref = new Map((mine ?? []).map(item => [item.href, { status: item.status, statusLabel: item.statusLabel }]));
   const staff = batches.docs.filter(batch => ["open", "closed"].includes(batch.state)).map(batch => staffRecruitmentCard(batch as unknown as Row, applicationByHref.get(`/join/staff/batches/${batch.id}`) ?? null));
-  if (!user) return { staff, teams: null, mine: null };
 
   // Apply the public parent-object projection before paginating batches, even for high-privilege viewers.
   const publicTeams = await p.find({ collection: "teams", user: null, overrideAccess: false, draft: false, depth: 0, pagination: false, limit: 0,

@@ -12,8 +12,7 @@
   min-height: clamp(400px, 44vw, 600px);
   overflow: hidden;
 }
-/* The art box keeps the 480×200 drawing's ratio and is anchored bottom-right, so crops only
-   remove calm sky (wide screens) or the empty left lawn (narrow screens). */
+/* The 2:1 artwork keeps the full landmark in view. On wide screens it aligns right. */
 .scene {
   position: absolute;
   z-index: -1;
@@ -25,25 +24,26 @@
 .art {
   position: absolute;
   right: 0;
-  bottom: 0;
-  width: max(100cqw, 240cqh);
-  aspect-ratio: 12 / 5;
-  background: center / 100% 100% no-repeat;
+  inset-block: 0;
+  width: min(100%, 200cqh);
+  background: right center / auto 100% no-repeat;
+  mask-image: linear-gradient(90deg, transparent, #000 18%);
   image-rendering: pixelated;
 }
 :global(:root[data-z-palette="classic"]) .art {
-  background-image: url("./pixel-art/campus-classic.png");
+  background-image: url("./pixel-art/tsinghua-second-gate.webp");
 }
 :global(:root[data-z-palette="summer"]) .art {
-  background-image: url("./pixel-art/campus-summer.png");
+  background-image: url("./pixel-art/tsinghua-lotus-pond.webp");
 }
 :global(:root[data-z-palette="winter"]) .art {
-  background-image: url("./pixel-art/campus-winter.png");
+  background-image: url("./pixel-art/tsinghua-auditorium-snow.webp");
 }
 :global(:root[data-z-palette="simple"]) .art {
   display: none;
 }
 .customImage {
+  display: none;
   position: absolute;
   inset: 0;
   width: 100%;
@@ -64,7 +64,10 @@
   );
   pointer-events: none;
 }
-.scene[data-custom]::after {
+:global(:root[data-z-palette="simple"]) .customImage {
+  display: block;
+}
+:global(:root[data-z-palette="simple"]) .scene[data-custom]::after {
   background: linear-gradient(
     90deg,
     color-mix(in srgb, var(--z-stage) 92%, transparent) 0 36%,
@@ -437,11 +440,17 @@
     z-index: 0;
     inset: auto;
     order: 2;
-    height: 190px;
+    height: clamp(164px, 49vw, 360px);
     border-top: 3px solid var(--z-px-outline);
   }
+  .art {
+    width: 100%;
+    mask-image: none;
+    background-size: cover;
+    background-position: 70% center;
+  }
   .scene::after,
-  .scene[data-custom]::after {
+  :global(:root[data-z-palette="simple"]) .scene[data-custom]::after {
     background: none;
   }
 }
@@ -467,9 +476,6 @@
 /* ===== Fable 阶段 (2026-11-13): pointer depth, extra pixel light effects. Client-only, decorative. ===== */
 .art {
   transform-origin: right bottom;
-  scale: 1.03;
-  translate: calc(var(--mx, 0) * -8px) calc(var(--my, 0) * -4px);
-  transition: translate 240ms steps(6, end);
 }
 .star,
 .shootingStar,

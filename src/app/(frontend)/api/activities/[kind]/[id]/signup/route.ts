@@ -33,6 +33,7 @@ const reply = (data: unknown, status = 200) =>
     status,
     headers: {
       "Cache-Control": "private, no-store",
+      Vary: "Cookie, Authorization",
       "X-Content-Type-Options": "nosniff",
     },
   });

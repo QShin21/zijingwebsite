@@ -1,7 +1,7 @@
 import { APIError, type Payload, type PayloadRequest } from "payload";
 import type { User, TeamMembership } from "../payload-types";
 import {
-  canParticipate,
+  canUseCampus,
   canPublish,
   communityIDs,
   relationID,
@@ -51,7 +51,7 @@ export async function currentTeamActor(
 export function canProposeTeam(actor: Identity | null, gameID: number) {
   return (
     canPublish(actor) ||
-    (canParticipate(actor) &&
+    (canUseCampus(actor) &&
       ["publishContent", "handleJoins"].some((capability) =>
         communityIDs(
           actor,
@@ -67,7 +67,7 @@ export async function canManageTeam(
   req?: PayloadRequest,
 ) {
   const user = await currentTeamActor(p, actor, req);
-  if (!canParticipate(user) || !positiveID(teamID)) return false;
+  if (!canUseCampus(user) || !positiveID(teamID)) return false;
   const team = await p
     .findByID({
       collection: "teams",
@@ -271,7 +271,7 @@ export async function getActiveTeamMembership(
   )
     return null;
   const user = await currentTeamActor(p, { id: input.userID }, input.req);
-  return canParticipate(user) ? row : null;
+  return canUseCampus(user) ? row : null;
 }
 export async function listActiveTeamMemberships(
   p: Payload,

@@ -7,9 +7,9 @@ import { cms } from "@/lib/content";
 import {
   consumeCode,
   issueCode,
-  schoolEmail,
   validPassword,
 } from "@/lib/verification";
+import { accountEmail, classifyEmail } from "@/lib/affiliation";
 import { nicknameKey, validNickname } from "@/lib/nickname";
 import { safeReturnPath } from "@/components/account-pages/auth-return";
 
@@ -33,9 +33,9 @@ export async function sendCodeAction(form: FormData) {
 export async function requestPasswordCodeAction(
   form: FormData,
 ): Promise<AuthResult> {
-  const email = schoolEmail(field(form, "email"));
+  const email = accountEmail(field(form, "email"));
   const purpose = "password";
-  if (!email) return { error: "请使用清华师生或校友邮箱" };
+  if (!email) return { error: "请输入注册时验证的完整邮箱" };
   try {
     const p = await cms();
     const existing = await p.find({
@@ -67,7 +67,7 @@ export async function requestPasswordCodeAction(
   return { success: true };
 }
 async function registrationDetails(form: FormData) {
-  const email = schoolEmail(
+  const email = accountEmail(
     `${field(form, "emailPrefix")}@${field(form, "emailDomain")}`,
   );
   const name = field(form, "name");
@@ -79,10 +79,10 @@ async function registrationDetails(form: FormData) {
     password !== form.get("confirm")
   )
     return {
-      error: "请核对清华邮箱、昵称和密码；密码至少 8 位，两次输入需一致。",
+      error: "请核对邮箱、昵称和密码；密码至少 8 位，两次输入需一致。",
     } as const;
   const p = await cms();
-  const claim = ownerEmail(email);
+  const claim = classifyEmail(email) === "tsinghua" && ownerEmail(email);
   const existing = await p.find({
     collection: "users",
     overrideAccess: true,
@@ -224,7 +224,7 @@ export async function resetAction(form: FormData) {
 export async function updatePasswordAction(
   form: FormData,
 ): Promise<AuthResult> {
-  const email = schoolEmail(field(form, "email"));
+  const email = accountEmail(field(form, "email"));
   const password = String(form.get("password") ?? "");
   if (!email || !validPassword(password) || password !== form.get("confirm"))
     return { error: "请核对注册邮箱与新密码；密码至少 8 位，两次输入需一致。" };

@@ -3,20 +3,6 @@ import { Pool } from "pg";
 import type { Payload } from "payload";
 
 export type Purpose = "register" | "password";
-const allowed = new Set([
-  "tsinghua.edu.cn",
-  "mails.tsinghua.edu.cn",
-  "mail.tsinghua.edu.cn",
-  "tsinghua.org.cn",
-  "mail.tsinghua.org.cn",
-]);
-export function schoolEmail(input: unknown): string | null {
-  if (typeof input !== "string") return null;
-  const email = input.trim().toLowerCase();
-  if (email.length > 254 || !/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]{1,64}@[a-z0-9.-]+$/.test(email)) return null;
-  const domain = email.split("@")[1];
-  return allowed.has(domain) ? email : null;
-}
 export function validPassword(value: unknown): value is string {
   return typeof value === "string" && value.length >= 8;
 }

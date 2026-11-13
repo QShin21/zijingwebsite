@@ -35,6 +35,8 @@ const guestTabs: NavItem[] = [
   { href: "/login", label: "登录", icon: "login", match: ["/login", "/register", "/account/reset"] },
 ];
 
+const visitorTabs: NavItem[] = [...guestTabs.slice(0, 3), memberTabs[4]];
+
 export function Brand({ name }: { name: string }) {
   return (
     <Link href="/" className={styles.brand} aria-label={`${name} 主场`}>
@@ -63,14 +65,14 @@ export function TopBar({
 }: {
   name: string;
   theme: ThemeName;
-  viewer: { name: string } | null;
+  viewer: { name: string; campus?: boolean } | null;
 }) {
   return (
     <header className={styles.bar}>
       <div className={styles.barInner}>
         <Brand name={name} />
         <nav className={styles.topNav} aria-label="主导航">
-          <TopLinks items={viewer ? memberTop : guestTop} />
+          <TopLinks items={viewer && viewer.campus !== false ? memberTop : guestTop} />
         </nav>
         <div className={styles.barActions}>
           <ThemeToggle initialTheme={theme} />
@@ -97,11 +99,11 @@ export function TopBar({
   );
 }
 
-export function MobileTabs({ signedIn }: { signedIn: boolean }) {
-  return <BottomTabs items={signedIn ? memberTabs : guestTabs} />;
+export function MobileTabs({ signedIn, campus = signedIn }: { signedIn: boolean; campus?: boolean }) {
+  return <BottomTabs items={campus ? memberTabs : signedIn ? visitorTabs : guestTabs} />;
 }
 
-export function Footer({ name, footer }: { name: string; footer?: string | null }) {
+export function Footer({ name, footer, campus = false }: { name: string; footer?: string | null; campus?: boolean }) {
   return (
     <footer className={styles.footer}>
       <span className={styles.footerSkyline} aria-hidden="true" />
@@ -122,12 +124,12 @@ export function Footer({ name, footer }: { name: string; footer?: string | null 
             <p>参与</p>
             <Link href="/events">日程</Link>
             <Link href="/join">加入紫荆</Link>
-            <Link href="/join/staff">骨干招新</Link>
+            {campus && <Link href="/join/staff">骨干招新</Link>}
           </div>
           <div>
             <p>记录</p>
             <Link href="/announcements">公告</Link>
-            <Link href="/teams/honors">荣誉墙</Link>
+            {campus && <Link href="/teams/honors">荣誉墙</Link>}
             <Link href="/account">我的</Link>
           </div>
         </nav>

@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { getCommunityHeader } from "@/lib/v2";
-import { read } from "@/components/v2/data";
+import { read, request } from "@/components/v2/data";
+import { canUseCampus } from "@/lib/rules";
 import { CommunityJoin } from "@/components/CommunityJoin";
 import { CommunityNav } from "@/components/CommunityNav";
 import { CommunityGameIcon } from "@/components/CommunityGameIcon";
@@ -14,6 +15,8 @@ import styles from "@/components/v2/community.module.css";
  * V2 header projection (card + viewer): no body, contacts or activity lists.
  */
 export default async function CommunityLayout({ params, children }: { params: Promise<{ slug: string }>; children: ReactNode }) {
+  const { user } = await request();
+  if (!canUseCampus(user)) return children;
   const { slug } = await params;
   const { card, viewer } = await read(getCommunityHeader, { slug }, `/community/${slug}`, { redirects: true });
   const { community, counts } = card;

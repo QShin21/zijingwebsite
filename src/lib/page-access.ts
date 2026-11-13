@@ -1,6 +1,19 @@
-const publicPaths = ["/events", "/announcements", "/login", "/register", "/account/reset", "/privacy", "/about", "/contact", "/join/staff"];
+const publicPaths = ["/events", "/announcements", "/login", "/register", "/account/reset", "/privacy", "/about", "/contact"];
+const publicCommunityDetail = /^\/community\/[a-z0-9-]+\/updates\/[1-9]\d*\/?$/;
 export function isGuestPage(path: string) {
-  return path === "/" || path === "/join" || publicPaths.some(root => path === root || path.startsWith(`${root}/`));
+  return path === "/" || path === "/join" || publicCommunityDetail.test(path) ||
+    publicPaths.some(root => path === root || path.startsWith(`${root}/`));
+}
+
+export function isCampusPage(path: string) {
+  return /^\/(teams|honors|recruitment|staff|news|gallery|design-preview)(\/|$)/.test(path) ||
+    /^\/join\/(staff|members|teams)(\/|$)/.test(path) ||
+    (/^\/community(\/|$)/.test(path) && !publicCommunityDetail.test(path));
+}
+
+export function isCampusAPI(path: string) {
+  return /^\/api\/(events|announcements|games|teams|seasons|honors|news|albums|recruitment|pages|community-[^/]+|team-[^/]+|staff|staff-batches|staff-applications|pending-uploads|redirects|globals|content-promotions|showcase-videos|private-team-honor-videos|graphql)(\/|$)/.test(path) ||
+    /^\/api\/media(?:$|\/(?!file\/))/i.test(path);
 }
 
 // Retired URLs remain closed for guests and authenticated callers, including old clients.

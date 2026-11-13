@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { CollectionSlug } from "payload";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
+import { canUseCampus } from "@/lib/rules";
 import { bySlug, cms, list } from "@/lib/content";
 import { getArticle, getFeed, getFixedPage, getRecruitmentCenter, type FixedPageKey } from "@/lib/v2";
 import { Detail } from "@/components/Content";
@@ -225,6 +226,12 @@ async function FixedPageView({ name }: { name: string }) {
 }
 
 async function JoinView({ sub, page }: { sub: string; page: number }) {
+  const { user } = await request();
+  if (!sub && !canUseCampus(user)) {
+    return <PageHero tone="stage" title="加入紫荆"
+      description="验证邮箱后可报名当前账号有权参加的活动。"
+      actions={<><ButtonLink href="/events" tone="ghost">查看日程</ButtonLink>{!user && <ButtonLink href="/register" tone="accent">注册账号</ButtonLink>}</>} />;
+  }
   const key = joinKeys[sub];
   const path = sub ? `/join/${sub}` : "/join";
   const [doc, center, legacy] = await Promise.all([
@@ -232,7 +239,6 @@ async function JoinView({ sub, page }: { sub: string; page: number }) {
     sub ? null : read(getRecruitmentCenter, {}, path),
     sub ? list("recruitment", { kind: { equals: sub } }, page) : null,
   ]);
-  const { user } = await request();
   const selected = joinPaths.find((entry) => entry.key === sub);
   return (
     <>

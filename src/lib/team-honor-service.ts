@@ -6,7 +6,7 @@ import {
   type PayloadRequest,
 } from "payload";
 import type { TeamHonorRecord, User } from "../payload-types";
-import { canParticipate, canReviewShowcase, relationID } from "./rules";
+import { canUseCampus, canReviewShowcase, relationID } from "./rules";
 import { workflowTransaction } from "./workflow-transactions";
 import { controlledVideoName } from "./showcase-videos";
 import {
@@ -267,7 +267,7 @@ export function createTeamHonorService(authority: HonorMembershipAuthority) {
     return (await publicEvidence(p, id))?.record || null;
   }
   async function availableTeams(p: Payload, actor: User | null) {
-    if (!canParticipate(actor)) return [];
+    if (!canUseCampus(actor)) return [];
     // Fresh actor and same authority as writes; never accept the session's cached membership list.
     return workflowTransaction(p, actor, {}, (req) =>
       authority.activeMemberships(req, req.user!.id as number),

@@ -1,5 +1,5 @@
 import { APIError, type CollectionConfig, type Where } from "payload";
-import { canParticipate, relationID } from "../lib/rules";
+import { canUseCampus, relationID } from "../lib/rules";
 import { parseTeamProfile } from "../lib/team-profiles-model";
 import {
   profileMembershipAuthority,
@@ -15,7 +15,7 @@ export const TeamMemberProfiles: CollectionConfig = {
   access: {
     read: ({ req }) => {
       if (
-        canParticipate(req.user) &&
+        canUseCampus(req.user) &&
         Number.isSafeInteger(req.context.teamProfileOwn)
       )
         return { membership: { equals: req.context.teamProfileOwn } } as Where;
@@ -39,9 +39,9 @@ export const TeamMemberProfiles: CollectionConfig = {
       } as Where;
     },
     create: ({ req }) =>
-      canParticipate(req.user) && req.context.teamProfileWrite === true,
+      canUseCampus(req.user) && req.context.teamProfileWrite === true,
     update: ({ req }) =>
-      canParticipate(req.user) && req.context.teamProfileWrite === true
+      canUseCampus(req.user) && req.context.teamProfileWrite === true
         ? ({
             membership: { equals: req.context.teamProfileMembership },
           } as Where)
@@ -51,7 +51,7 @@ export const TeamMemberProfiles: CollectionConfig = {
   hooks: {
     beforeChange: [
       async ({ data, originalDoc, req }) => {
-        if (req.context.teamProfileWrite !== true || !canParticipate(req.user))
+        if (req.context.teamProfileWrite !== true || !canUseCampus(req.user))
           throw new APIError("请通过本人队内简介页面修改", 403);
         const active = await profileMembershipAuthority.active(req.payload, {
           teamID: Number(req.context.teamProfileTeam),

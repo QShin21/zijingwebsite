@@ -13,6 +13,7 @@ import { staffStatusLabels } from "../staff-recruitment-model";
 import { teamApplicationLabels } from "../team-core";
 import { isEstablishedTeam } from "../team-memberships";
 import { eventCard, eventFields, getCalendar } from "./events";
+import { canUseCampus } from "../rules";
 import { refreshViewer, requireViewer, viewerProjection } from "./identity";
 import { iso, pageInput, publicWhere, rel, selectFields, teamRef, txt, type Input, type Row } from "./shared";
 import type { ApplicationItem, EventCard, ManageQueue, MembershipView, MeResponse, Page, SignupReceiptCard, TodoItem } from "./types";
@@ -70,6 +71,7 @@ async function applicationRows(p: Payload, user: User, source: Source, where: Wh
 /** Internal helper: the caller must pass a freshly loaded account. */
 export async function ownApplicationPage(p: Payload, user: User, input: Input = {}, activeFirst = false): Promise<Page<ApplicationItem>> {
   const { page, limit } = pageInput(input), end = page * limit;
+  if (!canUseCampus(user)) return { docs: [], page, totalDocs: 0, totalPages: 0, hasNextPage: false };
   const counts = await Promise.all(sources.map(source => p.count({ collection: source.collection, user, overrideAccess: false, where: ownWhere(user) })));
   const totalDocs = counts.reduce((total, count) => total + count.totalDocs, 0), totalPages = Math.ceil(totalDocs / limit);
   if ((page - 1) * limit >= totalDocs) return { docs: [], page, totalPages, totalDocs, hasNextPage: false };
@@ -93,6 +95,7 @@ export async function ownApplicationPage(p: Payload, user: User, input: Input = 
 
 /** Owner-only headers for unpaginated recruitment/todo surfaces; no private answers are read. */
 export async function ownApplicationItems(p: Payload, user: User, kinds?: ApplicationKind[], statuses?: string[]): Promise<ApplicationItem[]> {
+  if (!canUseCampus(user)) return [];
   const records = await Promise.all(sources.filter(source => !kinds || kinds.includes(source.kind)).map(async source => {
     // Different collections use different PostgreSQL enums. Only team joins
     // have a draft state; passing it to staff/community enums is a DB error.
@@ -119,7 +122,7 @@ export async function getMySignups(p: Payload, viewer: User | null, input: Input
   const ids = (kind: string) => [...new Set(receipts.filter(row => row.activityType === kind).map(row => rel(row.activityID)).filter((id): id is number => id !== null))];
   const clubIDs = ids("events"), communityIDs = ids("community-posts");
   const [club, community] = await Promise.all([
-    clubIDs.length ? p.find({ collection: "events", user: null, overrideAccess: false, draft: false, depth: 0, pagination: false, limit: 0,
+    clubIDs.length ? p.find({ collection: "events", user, overrideAccess: false, draft: false, depth: 0, pagination: false, limit: 0,
       where: publicWhere({ id: { in: clubIDs } }), select: selectFields(eventFields) }) : { docs: [] },
     communityIDs.length ? p.find({ collection: "community-posts", user, overrideAccess: false, draft: false, depth: 0, pagination: false, limit: 0,
       where: { and: [{ id: { in: communityIDs } }, { category: { equals: "event" } }, { status: { equals: "visible" } }] }, select: selectFields(eventFields) }) : { docs: [] },
@@ -136,7 +139,7 @@ export async function getMySignups(p: Payload, viewer: User | null, input: Input
     const kind = row.activityType === "events" ? "club" : row.activityType === "community-posts" ? "community" : null;
     const event = kind ? cards.get(`${kind}:${row.activityID}`) ?? null : null;
     return { key: `signup:${row.id}`, eventTitle: row.eventTitle, event, submittedAt: row.createdAt, updatedAt: row.updatedAt,
-      href: kind ? `/activities/${row.activityType}/${row.activityID}/fill` : "/account", editable: Boolean(event && event.signup.mode === "form" && event.signup.state === "open") };
+      href: kind && event ? `/activities/${row.activityType}/${row.activityID}/fill` : "/account", editable: Boolean(event && event.signup.mode === "form" && event.signup.state === "open") };
   });
   return { docs, page, totalDocs: result.totalDocs, totalPages: result.totalPages, hasNextPage: result.hasNextPage };
 }
@@ -184,18 +187,19 @@ async function manageQueues(p: Payload, user: User): Promise<ManageQueue[]> {
 export async function getManage(p: Payload, viewer: User | null, input: Input = {}): Promise<{ queues: ManageQueue[] }> {
   void input;
   const user = await refreshViewer(p, viewer);
-  return { queues: user ? await manageQueues(p, user) : [] };
+  return { queues: user && canUseCampus(user) ? await manageQueues(p, user) : [] };
 }
 
 export async function getMe(p: Payload, viewer: User | null, input: Input = {}): Promise<MeResponse> {
   void input;
   const user = await requireViewer(p, viewer);
+  const campus = canUseCampus(user);
   const [projection, applications, attention, memberships, upcoming, signups, queues, honors] = await Promise.all([
     viewerProjection(p, user), ownApplicationPage(p, user, { limit: 8 }, true), ownApplicationItems(p, user, undefined, ["draft", "returned"]),
-    ownMemberships(p, user), getCalendar(p, user, { scope: "mine", range: "upcoming", page: 1, limit: 5 }),
-    p.count({ collection: "event-signups", user, overrideAccess: false, where: { member: { equals: user.id } } }), manageQueues(p, user),
-    p.find({ collection: "team-honor-records", user, overrideAccess: false, depth: 0, pagination: false, limit: 0, sort: "-updatedAt",
-      where: { and: [{ author: { equals: user.id } }, { state: { equals: "returned" } }] }, select: { author: true, title: true, state: true, updatedAt: true } }),
+    campus ? ownMemberships(p, user) : [], getCalendar(p, user, { scope: "mine", range: "upcoming", page: 1, limit: 5 }),
+    p.count({ collection: "event-signups", user, overrideAccess: false, where: { member: { equals: user.id } } }), campus ? manageQueues(p, user) : [],
+    campus ? p.find({ collection: "team-honor-records", user, overrideAccess: false, depth: 0, pagination: false, limit: 0, sort: "-updatedAt",
+      where: { and: [{ author: { equals: user.id } }, { state: { equals: "returned" } }] }, select: { author: true, title: true, state: true, updatedAt: true } }) : { docs: [] },
   ]);
   const todo: TodoItem[] = [
     ...attention.map(row => ({ key: row.key, kind: row.status === "draft" ? "applicationDraft" as const : "applicationReturned" as const,

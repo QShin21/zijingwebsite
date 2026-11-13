@@ -1,7 +1,7 @@
 import { APIError, type Payload, type PayloadRequest, type Where } from "payload";
 import { sql, type PostgresAdapter } from "@payloadcms/db-postgres";
 import type { StaffApplication, StaffBatch, User } from "../payload-types";
-import { canManageStaffRecruitment, relationID } from "./rules";
+import { canUseCampus, canManageStaffRecruitment, relationID } from "./rules";
 import { workflowTransaction } from "./workflow-transactions";
 import { formVersion } from "./activity-signups";
 import { visibleQuestions } from "./signup-schema";
@@ -66,6 +66,7 @@ export async function changeStaffApplication(p: Payload, actor: User | null, bat
   options: { id?: number; revision?: unknown; version?: unknown; answers?: unknown; status?: unknown; feedback?: unknown; reviewNotes?: unknown } = {}) {
   checkedID(batchID);
   return workflowTransaction(p, actor, { staffApplicationWrite: true }, async req => {
+    if (!canUseCampus(req.user)) throw new APIError("骨干申请仅面向清华账号", 403);
     const user = req.user as User;
     if (action === "review" && !canManageStaffRecruitment(user)) throw new APIError("无权审核骨干候选资料", 403);
     await batchLock(req, batchID);

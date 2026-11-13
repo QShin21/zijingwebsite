@@ -1,9 +1,12 @@
+import type { Affiliation } from "./affiliation";
+
 export type Identity = {
   id: number | string;
   roles?: string[] | null;
   teams?: (number | string | { id: number | string })[] | null;
   communities?: (number | string | { id: number | string })[] | null;
   accountStatus?: string | null;
+  affiliation?: Affiliation | null;
   department?: string | null;
   communityOffices?: CommunityOffice[] | null;
 };
@@ -24,13 +27,18 @@ export const hasRole = (
   user: Identity | null | undefined,
   ...roles: string[]
 ) => Boolean(user?.accountStatus !== "suspended" &&
-  user?.roles?.some((role) => roles.includes(role)));
+  user && isCampusAccount(user) && user.roles?.some((role) => roles.includes(role)));
 export const canPublish = (user: Identity | null | undefined) =>
   hasRole(user, "president", "vicePresident");
 export const canParticipate = (user: Identity | null | undefined) =>
   Boolean(user?.id && user.accountStatus !== "suspended");
+// Existing accounts were admitted under the previous campus-only registration rules.
+export const isCampusAccount = (user: Identity | null | undefined) =>
+  Boolean(user && (user.affiliation == null || user.affiliation === "tsinghua"));
+export const canUseCampus = (user: Identity | null | undefined) =>
+  canParticipate(user) && isCampusAccount(user);
 export const communityIDs = (user: Identity | null | undefined, capability?: CommunityCapability) =>
-  canParticipate(user) ? (user?.communityOffices ?? [])
+  canUseCampus(user) ? (user?.communityOffices ?? [])
     .filter(office => office.game != null && office.status === "active" && (!capability || office[capability] === true))
     .map(office => String(relationID(office.game))) : [];
 export const hasCommunityOffice = (user: Identity | null | undefined) => communityIDs(user).length > 0;
@@ -57,7 +65,7 @@ export const canExportActivitySignups = (user: Identity | null | undefined, kind
     ? communityIDs(user, "exportSignups").includes(String(relationID(game)))
     : signupScope(user, game, "exportSignups")));
 export const teamIDs = (user: Identity | null | undefined) =>
-  (user?.teams ?? []).map((t) => String(typeof t === "object" ? t.id : t));
+  canUseCampus(user) ? (user?.teams ?? []).map((t) => String(typeof t === "object" ? t.id : t)) : [];
 export function safeURL(value: unknown): boolean {
   if (typeof value !== "string" || !value) return false;
   try {

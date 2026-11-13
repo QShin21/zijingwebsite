@@ -5,7 +5,7 @@ import { readTeamProfiles } from "../team-profiles";
 import { teamHonorService, type HonorArchive } from "../team-honor-service";
 import { teamLifecycleLabels, normalizeTeamForm, teamRecruitmentState } from "../team-core";
 import { controlledImageRef } from "./images";
-import { requireViewer } from "./identity";
+import { requireCampusViewer } from "./identity";
 import { teamRef, mediaRef, txt, iso, rows, readRows, findRow, publicWhere, paginate, safeBody, notFound, type Row, type Input } from "./shared";
 import type { HonorCard, MembershipView, Page, RecruitmentCard, TeamCard, TeamDetail, TeamProfileCard } from "./types";
 
@@ -14,7 +14,7 @@ export function honorsFromArchives(archives: HonorArchive[]): HonorCard[] {
   return archives.flatMap(archive => archive.records.map(record => ({ key: record.key, ref: { type: "honor" as const, key: record.key, team: String(archive.team.id) }, href: record.sourceHref ?? archive.href, team: { id: archive.team.id, slug: String(archive.team.id), title: archive.team.title, community: { id: archive.team.game, slug: archive.team.gameSlug, title: archive.team.gameTitle, hue: archive.team.game * 137 % 360 } }, title: record.title, competition: record.competition, placing: record.placing, date: record.date, description: txt(record.description), images: record.images.flatMap((image, index) => { const ref = controlledImageRef("honor", Number(record.key.split(":")[1]), index, image.source, image.caption); return ref ? [ref] : []; }), video: record.videoHref ? { src: record.videoHref } : null, legacy: record.legacy, demo: false, approvedAt: record.approvedAt })));
 }
 export async function getHonors(p: Payload, viewer: User | null, input: Input = {}): Promise<Page<HonorCard> & { years: number[] }> {
-  await requireViewer(p, viewer);
+  await requireCampusViewer(p, viewer);
   const game = input.community ? await findRow(p, "games", input.community, ["title", "slug"], null, publicWhere()) : null;
   const team = input.team ? await findRow(p, "teams", input.team, ["title", "slug"], null, publicWhere()) : null;
   if ((input.community && !game) || (input.team && !team)) return { ...paginate([], input), years: [] };
@@ -42,7 +42,7 @@ export async function teamCard(p: Payload, actor: User, row: Row, honorCount?: n
 }
 export async function getTeams(p: Payload, viewer: User | null, input: Input = {}): Promise<Page<TeamCard>> {
   if (input.status != null && !["active", "resting", "archived"].includes(String(input.status))) throw new APIError("代表队筛选无效", 400);
-  const actor = await requireViewer(p, viewer), game = input.community ? await findRow(p, "games", input.community, ["slug"], null, publicWhere()) : null;
+  const actor = await requireCampusViewer(p, viewer), game = input.community ? await findRow(p, "games", input.community, ["slug"], null, publicWhere()) : null;
   if (input.community && !game) return paginate([], input);
   const docs = await readRows(p, "teams", teamFields, publicWhere({ and: [...(game ? [{ game: { equals: game.id } }] : []), ...(input.status ? [{ teamStatus: { equals: String(input.status) } }] : [])] }), null);
   const allowed = await Promise.all(docs.map(async row => await teamRef(p, row.id) ? row : null));
@@ -50,7 +50,7 @@ export async function getTeams(p: Payload, viewer: User | null, input: Input = {
   return paginate(await Promise.all(allowed.filter((row): row is Row => row !== null).map(row => teamCard(p, actor, row, archives.find(archive => archive.team.id === row.id)?.records.length ?? 0))), input);
 }
 export async function getTeam(p: Payload, viewer: User | null, input: Input): Promise<TeamDetail> {
-  const actor = await requireViewer(p, viewer), row = await findRow(p, "teams", input.slug ?? input.team, teamFields, null, publicWhere());
+  const actor = await requireCampusViewer(p, viewer), row = await findRow(p, "teams", input.slug ?? input.team, teamFields, null, publicWhere());
   if (!row) notFound();
   const [card, roster, honors, seasonRows, recruitment] = await Promise.all([teamCard(p, actor, row), profiles(p, actor, row.id), getHonors(p, actor, { team: row.id, limit: 50 }), readRows(p, "seasons", ["title", "team", "startAt", "members", "demo"], publicWhere({ team: { equals: row.id } }), null, 500, "-startAt"), (async () => {
     const { teamRecruitmentCard, teamRecruitmentFields } = await import("./recruitment");

@@ -68,7 +68,7 @@ export function AuthLayout({
         </ul>
         {mode === "register" ? (
           <div className={styles.authGuidance}>
-            <h2>用清华邮箱完成注册</h2>
+            <h2>验证邮箱后完成注册</h2>
             <ol>
               <li>填写邮箱、昵称与密码。</li>
               <li>选择“验证并注册”，查收六位验证码。</li>

@@ -7,6 +7,7 @@ export const userPermissionFields = [
   "communityOffices",
   "department",
   "accountStatus",
+  "affiliation",
   "teams",
 ] as const;
 

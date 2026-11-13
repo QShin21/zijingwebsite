@@ -59,16 +59,16 @@ function PersonalPanel({ home }: { home: HomeResponse }) {
               <strong>{home.me?.upcomingSignups ?? 0}</strong>
             </Link>
           </li>
-          <li>
+          {viewer.affiliation === "tsinghua" && <li>
             <Link href="/teams/recruitment">
               <Icon name="trophy" />
               代表队选拔与我的申请
             </Link>
-          </li>
+          </li>}
           <li>
-            <Link href="/news">
+            <Link href={viewer.affiliation === "tsinghua" ? "/news" : "/announcements"}>
               <Icon name="news" />
-              全部动态
+              {viewer.affiliation === "tsinghua" ? "全部动态" : "查看公告"}
             </Link>
           </li>
         </ul>
@@ -253,6 +253,7 @@ function HomeBlock({ section, home }: { section: HomeSection; home: HomeResponse
 export default async function Home() {
   const home = await read(getHome, {});
   const { site, viewer, spotlight } = home;
+  const campus = viewer?.affiliation === "tsinghua";
   const title = site.heroTitle?.trim() || null;
   const ticker = home.upcoming
     .filter((event) => event.startAt)
@@ -265,8 +266,13 @@ export default async function Home() {
       </p>
       <MatchCard event={spotlight} variant="spotlight" headingLevel={2} eager />
     </div>
-  ) : (
+  ) : campus ? (
     <JoinPathsCard />
+  ) : (
+    <div className={styles.spotlight}>
+      <p className={styles.asideLabel}>校园电竞活动</p>
+      <ButtonLink href="/events" tone="ghost">浏览日程</ButtonLink>
+    </div>
   );
 
   // CMS order, titles and visibility are kept; only blocks that render take part in the layout.
@@ -294,7 +300,7 @@ export default async function Home() {
             </>
           )}
         </HeroTitle>
-        <HeroLead>{site.heroSubtitle || "一起玩，认真赢。社团活动、游戏社群、代表队与骨干招新，都在这里开场。"}</HeroLead>
+        <HeroLead>{site.heroSubtitle || (campus ? "一起玩，认真赢。社团活动、游戏社群、代表队与骨干招新，都在这里开场。" : "查看紫荆电竞社的活动日程与公告。")}</HeroLead>
         <HeroActions>
           {viewer ? (
             <ButtonLink href="/events" tone="accent" icon="arrow">
@@ -330,19 +336,19 @@ export default async function Home() {
                 <strong>{home.me.upcomingSignups}</strong>
               </Link>
             </li>
-            <li>
+            {campus && <li>
               <Link href="/account#manage">
                 <span>待审核</span>
                 <strong>{home.me.reviewPending}</strong>
               </Link>
-            </li>
+            </li>}
           </ul>
         )}
       </CampusHero>
 
       <Wrap>
         <div className={styles.personal}>
-          <PersonalPanel home={home} />
+          {(viewer || campus) && <PersonalPanel home={home} />}
         </div>
         {pairHomeBlocks(blocks).map((row) => (
           <div key={row.map((block) => block.kind).join("+")} className={row.length === 2 ? styles.pair : undefined}>

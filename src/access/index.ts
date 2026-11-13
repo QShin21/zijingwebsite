@@ -1,5 +1,6 @@
 import type { Access, FieldAccess, Where } from "payload";
-import { canPublish, canSubmitClubContent, communityIDs, hasRole, type Identity } from "../lib/rules";
+import { audienceWhere } from "../lib/content-audience";
+import { canPublish, canSubmitClubContent, canUseCampus, communityIDs, hasRole, type Identity } from "../lib/rules";
 export const admin: Access = ({ req }) =>
   hasRole(req.user as Identity, "president");
 export const adminField: FieldAccess = ({ req }) =>
@@ -20,6 +21,7 @@ export const readContent =
   (_scoped: boolean, honor = false, _self = false): Access =>
   ({ req }) => {
     const user = req.user as Identity;
+    if (user && !canUseCampus(user)) return false;
     if (canPublish(user)) return true;
     if (canSubmitClubContent(user))
       return { or: [publicWhere(honor), { submittedBy: { equals: user.id } }] } as Where;
@@ -43,5 +45,12 @@ export const readEventContent: Access = ({ req }) => {
   if (games.length) return { or: [publicWhere(), { and: [
     { submittedBy: { equals: user.id } }, { or: [{ game: { in: games } }, { game: { exists: false } }] },
   ] }] } as Where;
-  return publicWhere();
+  return { and: [publicWhere(), audienceWhere(user)] };
+};
+export const readAnnouncementContent: Access = ({ req }) => {
+  const user = req.user as Identity;
+  if (canPublish(user)) return true;
+  if (canSubmitClubContent(user))
+    return { or: [publicWhere(), { submittedBy: { equals: user.id } }] } as Where;
+  return { and: [publicWhere(), audienceWhere(user)] };
 };

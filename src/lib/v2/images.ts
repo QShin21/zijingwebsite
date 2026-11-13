@@ -3,8 +3,7 @@ import sharp from "sharp";
 import { APIError, createLocalReq, type Payload } from "payload";
 import type { User } from "../../payload-types";
 import type { ImageRef } from "./types";
-import { canParticipate, canPublish, canReviewShowcase, communityIDs, relationID } from "../rules";
-import { readPromotionSource } from "../content-promotions";
+import { canUseCampus, canPublish, canReviewShowcase, communityIDs, relationID } from "../rules";
 import { getActiveTeamMembership, getTeamMembershipByID } from "../team-memberships";
 import { teamHonorService } from "../team-honor-service";
 import { refreshViewer, requireViewer } from "./identity";
@@ -72,20 +71,8 @@ async function publicGame(p: Payload, id: unknown) {
   return game?._status === "published" && !(process.env.APP_ENV === "production" && game.demo) ? game : null;
 }
 
-async function publicCommunityPost(p: Payload, id: number) {
-  const rows = await p.find({
-    collection: "content-promotions", overrideAccess: false, user: null, depth: 0, limit: 1,
-    context: { publicPromotionProjection: true },
-    where: { and: [{ sourceKey: { equals: `community-posts:${id}` } }, { status: { equals: "approved" } }] },
-    select: { approvedVersion: true },
-  });
-  if (!rows.docs[0]?.approvedVersion) return null;
-  const source = await readPromotionSource(p, "community-posts", id, undefined, true).catch(() => null);
-  return source?.doc ?? null;
-}
-
 async function contactSource(p: Payload, viewer: User | null, communityID: number, userID: number) {
-  if (!canParticipate(viewer) || !positiveID(userID) || !await publicGame(p, communityID)) return null;
+  if (!canUseCampus(viewer) || !positiveID(userID) || !await publicGame(p, communityID)) return null;
   const options = { user: null, overrideAccess: false as const, depth: 0, context: { publicCommunityContacts: communityID } };
   const user = await p.findByID({ collection: "users", id: userID, ...options,
     select: { communityOffices: true } }).catch(() => null);
@@ -109,7 +96,7 @@ async function profileSource(p: Payload, viewer: User | null, id: number, index:
   if (!membership) return null;
   const active = await getActiveTeamMembership(p, { teamID: membership.teamID, userID: membership.userID });
   if (!active || active.id !== membershipID) return null;
-  const own = canParticipate(viewer) && viewer!.id === active.userID;
+  const own = canUseCampus(viewer) && viewer!.id === active.userID;
   const req = await createLocalReq({ context: own
     ? { teamProfileOwn: membershipID }
     : { teamProfilePublic: [active] } }, p);
@@ -121,10 +108,10 @@ async function profileSource(p: Payload, viewer: User | null, id: number, index:
 
 async function imageSource(p: Payload, viewer: User | null, kind: ControlledImageKind, id: number, index: number) {
   if (kind === "contact") return contactSource(p, viewer, id, index);
-  if (kind === "profile") return profileSource(p, viewer, id, index);
-  if (kind === "honor") return (await teamHonorService.publicRecord(p, id))?.images[index]?.source ?? null;
+  if (kind === "profile") return canUseCampus(viewer) ? profileSource(p, viewer, id, index) : null;
+  if (kind === "honor") return canUseCampus(viewer) ? (await teamHonorService.publicRecord(p, id))?.images[index]?.source ?? null : null;
   if (kind === "upload") {
-    if (!viewer || index !== 0) return null;
+    if (!viewer || !canUseCampus(viewer) || index !== 0) return null;
     const fields = { data: true, owner: true, purpose: true, expiresAt: true, consumedAt: true } as const;
     const own = await p.findByID({ collection: "pending-uploads", id, user: viewer,
       overrideAccess: false, depth: 0, select: fields }).catch(() => null);
@@ -136,18 +123,19 @@ async function imageSource(p: Payload, viewer: User | null, kind: ControlledImag
   }
   if (kind === "event-post" || kind === "announcement-post") {
     const row = await p.findByID({ collection: kind === "event-post" ? "events" : "announcements", id,
-      overrideAccess: false, user: null, depth: 0, draft: false,
+      overrideAccess: false, user: viewer, depth: 0, draft: false,
       select: { postImages: true, _status: true, demo: true } }).catch(() => null);
     if (!row || row._status !== "published" || process.env.APP_ENV === "production" && row.demo) return null;
     return publicationAssetData(p, publicationImages(row.postImages)[index]?.source);
   }
   if (kind === "community-post") {
-    const row = viewer ? await p.findByID({ collection: "community-posts", id, overrideAccess: false, user: viewer, depth: 0,
-      select: { postImages: true, game: true } }).catch(() => null) : await publicCommunityPost(p, id);
-    if (!row || !await publicGame(p, row.game)) return null;
+    const row = await p.findByID({ collection: "community-posts", id, overrideAccess: false, user: viewer, depth: 0,
+      select: { postImages: true, game: true, status: true } }).catch(() => null);
+    if (!row || !await publicGame(p, row.game) || row.status !== "visible" && !canUseCampus(viewer)) return null;
     const images = "postImages" in row ? row.postImages : null;
     return publicationAssetData(p, publicationImages(images)[index]?.source);
   }
+  if (!canUseCampus(viewer)) return null;
   const row = await p.findByID({ collection: "community-showcase", id, overrideAccess: false, user: viewer, depth: 0,
     select: { images: true, status: true, game: true, author: true } }).catch(() => null);
   if (!row || !await publicGame(p, row.game) || !(row.status === "visible" || viewer &&

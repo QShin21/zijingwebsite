@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import type { Metadata, Viewport } from "next";
 import { site } from "@/lib/content";
+import { canUseCampus } from "@/lib/rules";
 import { serverURL } from "@/lib/environment";
 import { Footer, MobileTabs, TopBar } from "@/components/v2/Shell";
 import { request } from "@/components/v2/data";
@@ -34,7 +35,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const [s, { user }, store] = await Promise.all([site(), request(), cookies()]);
   const theme = themeFromPreference(store.get(themeCookieName)?.value);
-  const viewer = user ? { name: user.name || "成员" } : null;
+  const campus = canUseCampus(user);
+  const viewer = user ? { name: user.name || "成员", campus } : null;
   return (
     <html lang="zh-CN" data-z-theme={themeScheme(theme)} data-z-palette={theme} className={pixelFont.variable}>
       <body>
@@ -48,8 +50,8 @@ export default async function Layout({ children }: { children: React.ReactNode }
         <main id="main" tabIndex={-1} className={shell.main}>
           {children}
         </main>
-        <Footer name={s.name} footer={s.footer} />
-        <MobileTabs signedIn={Boolean(viewer)} />
+        <Footer name={s.name} footer={s.footer} campus={campus} />
+        <MobileTabs signedIn={Boolean(viewer)} campus={campus} />
       </body>
     </html>
   );

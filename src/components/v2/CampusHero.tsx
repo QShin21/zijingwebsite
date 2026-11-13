@@ -4,12 +4,7 @@ import { Img } from "./ui";
 import { MotionScene } from "./CampusMotion";
 import styles from "./campus.module.css";
 
-/*
- * 像素校园 home stage. Back → front: the CMS hero image when configured, otherwise the original
- * pixel campus for the active palette (pixel-art/*.png, drawn by scripts/pixel-campus-art.mjs),
- * client-gated ambient sprites, a legibility shade, then the copy. Sprite coordinates are given
- * in source-art pixels (480×200) so they stay aligned with the drawing at every crop.
- */
+// Decorative effects sit above the landmark image, with copy in its own layer.
 const at = (x: number, y: number, extra?: Record<string, string | number>) =>
   ({ "--x": `${(x / 480) * 100}%`, "--y": `${(y / 200) * 100}%`, ...extra }) as CSSProperties;
 
@@ -17,7 +12,6 @@ const stars: [number, number, number][] = [
   [36, 24, 0], [88, 12, 1.2], [130, 40, 2.1], [168, 18, 0.6], [214, 46, 1.7], [300, 14, 2.6],
   [330, 34, 0.9], [382, 10, 1.4], [420, 40, 2.3], [452, 20, 0.3], [60, 58, 1.9], [150, 70, 2.8], [238, 64, 1.1],
 ];
-const lamps = [150, 252, 356, 452];
 const leaves: [number, number, number][] = [
   [186, 128, 0], [196, 132, 2.2], [466, 128, 1.1], [474, 134, 3.4], [320, 144, 1.7], [118, 136, 2.8],
 ];
@@ -37,10 +31,6 @@ function Ambience() {
       {stars.map(([x, y, delay]) => (
         <span key={`star-${x}`} className={styles.star} style={at(x, y, { "--delay": `${delay}s` })} />
       ))}
-      {lamps.map((x, index) => (
-        <span key={`lamp-${x}`} className={styles.lamp} style={at(x + 1, 148, { "--delay": `${index * 0.7}s` })} />
-      ))}
-      <span className={styles.screen} style={at(346, 101)} />
       {leaves.map(([x, y, delay]) => (
         <span key={`leaf-${x}-${y}`} className={styles.leaf} style={at(x, y, { "--delay": `${delay}s` })} />
       ))}
@@ -76,13 +66,10 @@ export function CampusHero({
     <section className={styles.hero} aria-label={label}>
       <div className={styles.window}>
         <div className={styles.scene} data-scene="" data-custom={heroImage ? "" : undefined}>
-          {heroImage ? (
-            <Img image={heroImage} className={styles.customImage} eager sizes="100vw" />
-          ) : (
-            <span className={styles.art}>
-              <Ambience />
-            </span>
-          )}
+          {heroImage && <Img image={heroImage} className={styles.customImage} eager sizes="100vw" />}
+          <span className={styles.art}>
+            <Ambience />
+          </span>
         </div>
         <div className={styles.copyWrap}>
           <div className={styles.copy}>{children}</div>

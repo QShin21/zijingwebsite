@@ -5,7 +5,7 @@ import {
   type PayloadRequest,
 } from "payload";
 import type { User } from "../payload-types";
-import { canParticipate } from "./rules";
+import { canUseCampus } from "./rules";
 import { workflowTransaction } from "./workflow-transactions";
 import { normalizeTeamProfileAvatar } from "./team-profiles-images";
 import {
@@ -112,7 +112,7 @@ export async function readTeamProfiles(
   teamID: number,
   authority: ProfileMembershipAuthority = profileMembershipAuthority,
 ): Promise<TeamProfilesView> {
-  if (!canParticipate(actor)) throw new APIError("请登录后查看代表队", 401);
+  if (!canUseCampus(actor)) throw new APIError("请登录后查看代表队", 401);
   const req = await createLocalReq({}, p);
   const user = await p.findByID({
     collection: "users",
@@ -121,7 +121,7 @@ export async function readTeamProfiles(
     overrideAccess: true,
     depth: 0,
   });
-  if (!canParticipate(user)) throw new APIError("账号已停用", 403);
+  if (!canUseCampus(user)) throw new APIError("账号已停用", 403);
   req.user = { ...user, collection: "users" };
   await profileTeam(p, teamID, req);
   const memberships = await authority.list(p, { teamID, req });
@@ -176,7 +176,7 @@ export async function saveTeamProfile(
   membershipVersion: unknown,
   authority: ProfileMembershipAuthority = profileMembershipAuthority,
 ): Promise<OwnTeamProfile> {
-  if (!canParticipate(actor)) throw new APIError("请登录后编辑队内简介", 401);
+  if (!canUseCampus(actor)) throw new APIError("请登录后编辑队内简介", 401);
   if (
     revision !== null &&
     (!Number.isSafeInteger(revision) || Number(revision) < 1)

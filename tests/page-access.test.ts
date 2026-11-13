@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isGuestPage, isRemovedCommunityChatPath, isRemovedCommunityInteractionPath } from "../src/lib/page-access";
+import { isCampusAPI, isCampusPage, isGuestPage, isRemovedCommunityChatPath, isRemovedCommunityInteractionPath } from "../src/lib/page-access";
 
 describe("已移除的社群聊天访问", () => {
   it("旧页面、推送、图片、表情及消息集合入口全部关闭", () => {
@@ -10,7 +10,7 @@ describe("已移除的社群聊天访问", () => {
       "/admin/collections/community-messages", "/admin/collections/community-messages/1",
     ]) expect(isRemovedCommunityChatPath(path), path).toBe(true);
   });
-  it("社群活动及风采继续使用原有权限", () => {
+  it("活动详情按可见范围读取，社群栏目保留清华账号入口", () => {
     for (const path of [
       "/community/lol", "/community/lol/updates",
       "/community/lol/showcase", "/community/lol/contacts",
@@ -21,6 +21,12 @@ describe("已移除的社群聊天访问", () => {
     }
     expect(isGuestPage("/events")).toBe(true);
     expect(isGuestPage("/announcements")).toBe(true);
+    expect(isGuestPage("/community/lol/updates/7")).toBe(true);
+    expect(isCampusPage("/community/lol/updates/7")).toBe(false);
+    expect(isCampusPage("/teams/recruitment")).toBe(true);
+    expect(isCampusPage("/join/staff")).toBe(true);
+    expect(isCampusAPI("/api/events/7")).toBe(true);
+    expect(isCampusAPI("/api/v2/events/club/test")).toBe(false);
   });
 });
 

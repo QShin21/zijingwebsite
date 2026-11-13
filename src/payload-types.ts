@@ -145,6 +145,10 @@ export interface User {
    */
   name: string;
   nameKey?: string;
+  /**
+   * 由已验证邮箱确定，与平台角色和社群任职分开。
+   */
+  affiliation?: 'tsinghua' | 'peer' | 'external';
   roles: ('president' | 'vicePresident' | 'backbone' | 'communityAdmin' | 'honoraryBackbone' | 'member')[];
   accountStatus?: ('active' | 'suspended') | null;
   department?: ('execution' | 'publicity') | null;
@@ -410,6 +414,10 @@ export interface CommunityPost {
   author: number | User;
   authorName?: string | null;
   status?: ('visible' | 'hidden') | null;
+  /**
+   * 发布后按所选范围显示。活动报名仍须登录，并遵守报名时间和活动要求。
+   */
+  audience?: 'campus' | 'peer' | 'public';
   postImages?:
     | {
         [k: string]: unknown;
@@ -918,6 +926,10 @@ export interface Event {
   internalNotes?: string | null;
   submittedBy?: (number | null) | User;
   reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
+  /**
+   * 发布后按所选范围显示。活动报名仍须登录，并遵守报名时间和活动要求。
+   */
+  audience?: 'campus' | 'peer' | 'public';
   postImages?:
     | {
         [k: string]: unknown;
@@ -1121,6 +1133,10 @@ export interface Announcement {
   internalNotes?: string | null;
   submittedBy?: (number | null) | User;
   reviewState?: ('editing' | 'submitted' | 'rejected' | 'approved') | null;
+  /**
+   * 发布后按所选范围显示。活动报名仍须登录，并遵守报名时间和活动要求。
+   */
+  audience?: 'campus' | 'peer' | 'public';
   postImages?:
     | {
         [k: string]: unknown;
@@ -1491,6 +1507,7 @@ export interface PayloadMigration {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   nameKey?: T;
+  affiliation?: T;
   roles?: T;
   accountStatus?: T;
   department?: T;
@@ -1648,6 +1665,7 @@ export interface CommunityPostsSelect<T extends boolean = true> {
   author?: T;
   authorName?: T;
   status?: T;
+  audience?: T;
   postImages?: T;
   signupForm?: T;
   signupImages?: T;
@@ -1986,6 +2004,7 @@ export interface EventsSelect<T extends boolean = true> {
   internalNotes?: T;
   submittedBy?: T;
   reviewState?: T;
+  audience?: T;
   postImages?: T;
   signupForm?: T;
   signupImages?: T;
@@ -2093,6 +2112,7 @@ export interface AnnouncementsSelect<T extends boolean = true> {
   internalNotes?: T;
   submittedBy?: T;
   reviewState?: T;
+  audience?: T;
   postImages?: T;
   publishedAt?: T;
   game?: T;

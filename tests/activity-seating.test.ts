@@ -144,7 +144,7 @@ beforeAll(async () => {
   second = await actor("second", ["member"]);
   const seeded = await p.create({
     collection: "events", user: president.user, overrideAccess: false,
-    data: { title: "合成影院选座活动", slug: "seats-" + suffix, game: scope, _status: "published" },
+    data: { title: "合成影院选座活动", slug: "seats-" + suffix, game: scope, audience: "public", _status: "published" },
   });
   event = { kind: "events", id: seeded.id };
   activities.push(event);
@@ -263,7 +263,7 @@ it("社群活动接受 10 张凭证与 10 个座位，启停独立于站点活�
 
 async function extraActivity(label: string, kind: SeatingKind = 'events'): Promise<Activity> {
   const doc = kind === 'events' ? await p.create({ collection: kind, user: president.user, overrideAccess: false,
-    data: { title: '合成选座边界-' + label, slug: 'seat-check-' + label + '-' + suffix, game: mainScope, _status: 'published' } })
+    data: { title: '合成选座边界-' + label, slug: 'seat-check-' + label + '-' + suffix, game: mainScope, audience: 'public', _status: 'published' } })
     : await p.create({ collection: kind, user: president.user, overrideAccess: true,
       data: { title: '合成社群选座-' + label, game: mainScope, author: president.user.id, category: 'event', body: '合成边界资料' } });
   const activity = { kind, id: doc.id };
@@ -440,7 +440,7 @@ it('等待座位行锁自然跨过截止时间也必须拒绝，保留未消费�
     pending = submit(activity, first, ['7-1'], [proof]);
     let waiting = false;
     for (let attempt = 0; attempt < 80; attempt++) {
-      const waits = await pool.query("SELECT count(*)::int n FROM pg_stat_activity WHERE datname = current_database() AND wait_event_type = 'Lock' AND query LIKE 'SELECT id, enabled, opens_at FROM activity_seatings WHERE%FOR UPDATE'");
+      const waits = await pool.query("SELECT count(*)::int n FROM pg_stat_activity WHERE datname = current_database() AND wait_event_type = 'Lock' AND query LIKE 'SELECT id, enabled, opens_at, mode FROM activity_seatings WHERE%FOR UPDATE'");
       if (waits.rows[0].n) { waiting = true; break; }
       await new Promise(resolve => setTimeout(resolve, 20));
     }

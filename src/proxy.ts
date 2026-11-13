@@ -1,14 +1,17 @@
 import { proxyMember } from "@/lib/proxy-member";
-import { canParticipate } from "@/lib/rules";
-import { isGuestPage, isRemovedCommunityChatPath, isRemovedCommunityInteractionPath } from "@/lib/page-access";
+import { canParticipate, canUseCampus } from "@/lib/rules";
+import { isCampusAPI, isCampusPage, isGuestPage, isRemovedCommunityChatPath, isRemovedCommunityInteractionPath } from "@/lib/page-access";
 import { NextResponse, type NextRequest } from "next/server";
 export async function proxy(request: NextRequest) {
-  const path = request.nextUrl.pathname;
+  let path: string;
+  try { path = decodeURIComponent(request.nextUrl.pathname); }
+  catch { return NextResponse.json({ error: "链接无效" }, { status: 400 }); }
   if (isRemovedCommunityChatPath(path) || isRemovedCommunityInteractionPath(path)) return NextResponse.json({ error: "此社群互动功能已移除" }, {
     status: 404, headers: { "Cache-Control": "private, no-store" },
   });
-  const privateAPI = /^\/api\/(games|teams|seasons|honors|news|albums|recruitment|community-[^/]+|graphql)(\/|$)/.test(path);
-  if (privateAPI || (!isGuestPage(path) && !path.startsWith("/admin") && !path.startsWith("/preview") && !path.startsWith("/api/") && path !== "/favicon.ico")) {
+  const privateAPI = isCampusAPI(path);
+  const campusPage = isCampusPage(path);
+  if (privateAPI || campusPage || (!isGuestPage(path) && !path.startsWith("/admin") && !path.startsWith("/preview") && !path.startsWith("/api/") && path !== "/favicon.ico")) {
     let user;
     try { user = await proxyMember(request.headers); }
     catch { return NextResponse.json({ error: "暂时无法验证登录状态，请稍后重试" }, { status: 503, headers: { "Cache-Control": "private, no-store" } }); }
@@ -18,6 +21,13 @@ export async function proxy(request: NextRequest) {
       target.searchParams.set("message", "请登录后访问此栏目");
       target.searchParams.set("returnTo", path + request.nextUrl.search);
       const response = NextResponse.redirect(target);
+      response.headers.set("Cache-Control", "private, no-store");
+      return response;
+    }
+    if ((privateAPI || campusPage) && !canUseCampus(user)) {
+      const response = privateAPI || /\/(contacts|qr)$/.test(path)
+        ? NextResponse.json({ error: "此栏目仅面向清华账号" }, { status: 403 })
+        : NextResponse.redirect(new URL("/events", request.url));
       response.headers.set("Cache-Control", "private, no-store");
       return response;
     }

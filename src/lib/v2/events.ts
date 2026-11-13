@@ -2,7 +2,8 @@ import { APIError, type Payload, type Where } from "payload";
 import type { User } from "@/payload-types";
 import { activity, signupState } from "../activity-signups";
 import { normalizeSignup } from "../signup-schema";
-import { eventState, registrationState, safeURL, managesGame } from "../rules";
+import { eventState, registrationState, safeURL, managesGame, canUseCampus } from "../rules";
+import { audienceWhere } from "../content-audience";
 import { promotedContent } from "../content-promotions";
 import { publicationImages } from "../publication-images";
 import { controlledImageRef } from "./images";
@@ -30,7 +31,7 @@ export async function eventCard(p: Payload, row: Row, source: "club" | "communit
   const community = await communityRef(p, row.game), label = eventState({ lifecycle: txt(row.lifecycle), startAt: iso(row.startAt), endAt: iso(row.endAt) }), key = `${source}:${row.id}`;
   const cover = await mediaRef(p, row.cover, String(row.title ?? "")) ?? publicationImages(row.postImages).map((image, index) => controlledImageRef(source === "club" ? "event-post" : "community-post", row.id, index, image.source, image.alt)).find(Boolean) ?? null;
   const category = ["比赛", "观赛", "交流", "训练", "其他"].includes(String(row.type)) ? row.type as EventCard["category"] : null;
-  return { key, ref: source === "club" ? { type: "event", source, id: row.id, slug: String(row.slug ?? row.id) } : { type: "event", source, id: row.id, community: community?.slug ?? "" }, href: source === "club" ? `/events/${row.slug ?? row.id}` : `/community/${community?.slug ?? ""}/updates/${row.id}`, title: String(row.title ?? ""), summary: txt(row.summary) ?? (source === "community" ? txt(row.body)?.slice(0, 180) ?? null : null), cover, community, team: source === "club" ? await teamRef(p, row.team) : null, category, startAt: iso(row.startAt), endAt: iso(row.endAt), location: txt(row.location), state: stateKeys[label] ?? "upcoming", stateLabel: label, signup: signupSummary(row, source, viewer ? submitted?.has(key) ?? false : null), promoted, demo: row.demo === true, archived: row.archived === true, publishedAt: iso(row.publishedAt) ?? iso(row.createdAt) };
+  return { key, ref: source === "club" ? { type: "event", source, id: row.id, slug: String(row.slug ?? row.id) } : { type: "event", source, id: row.id, community: community?.slug ?? "" }, href: source === "club" ? `/events/${row.slug ?? row.id}` : `/community/${community?.slug ?? ""}/updates/${row.id}`, title: String(row.title ?? ""), summary: txt(row.summary) ?? (source === "community" ? txt(row.body)?.slice(0, 180) ?? null : null), cover, community, team: source === "club" && canUseCampus(viewer) ? await teamRef(p, row.team) : null, category, startAt: iso(row.startAt), endAt: iso(row.endAt), location: txt(row.location), state: stateKeys[label] ?? "upcoming", stateLabel: label, signup: signupSummary(row, source, viewer ? submitted?.has(key) ?? false : null), promoted, demo: row.demo === true, archived: row.archived === true, publishedAt: iso(row.publishedAt) ?? iso(row.createdAt) };
 }
 export async function submittedKeys(p: Payload, viewer: User | null): Promise<Set<string>> {
   if (!viewer) return new Set();
@@ -70,18 +71,19 @@ export async function getCalendar(p: Payload, viewer: User | null, input: Input 
   const game = input.community ? await findRow(p, "games", String(input.community), ["slug", "_status", "demo"], null, publicWhere()) : null;
   if (input.community && !game) return paginate([], input);
   const gameWhere: Where = game ? { game: { equals: game.id } } : {};
+  if (input.team != null && !canUseCampus(viewer)) return paginate([], input);
   const teamID = input.team == null ? null : rel(input.team);
   if (input.team != null && !teamID) throw new APIError("代表队筛选无效", 400);
   const [clubRows, promotionRows, submissions] = await Promise.all([
-    scope === "community" ? [] : readRows(p, "events", eventFields, publicWhere({ and: [gameWhere, timeWhere("club"), ...(teamID ? [{ team: { equals: teamID } }] : []), ...(category ? [{ type: { equals: category } }] : [])] }), null, 500, range === "past" ? "-startAt" : "startAt"),
-    scope === "club" || category || teamID ? [] : promotedContent(p, "event", 500),
+    scope === "community" ? [] : readRows(p, "events", eventFields, publicWhere({ and: [audienceWhere(viewer), gameWhere, timeWhere("club"), ...(teamID ? [{ team: { equals: teamID } }] : []), ...(category ? [{ type: { equals: category } }] : [])] }), viewer, 500, range === "past" ? "-startAt" : "startAt"),
+    scope === "club" || category || teamID ? [] : promotedContent(p, "event", 500, viewer),
     submittedKeys(p, viewer),
   ]);
   const promotedIDs = new Set(promotionRows.map(row => Number(row.sourceKey.split(":")[1])));
   let communityRows: Row[] = [];
   if (scope !== "club" && !category && !teamID) {
-    const where: Where = { and: [{ category: { equals: "event" } }, { status: { equals: "visible" } }, gameWhere, timeWhere("community"), ...(!viewer ? [{ id: { in: [...promotedIDs] } }] : [])] };
-    if (viewer || promotedIDs.size) communityRows = await readRows(p, "community-posts", eventFields, where, null, 500, range === "past" ? "-startAt" : "startAt");
+    const where: Where = { and: [{ category: { equals: "event" } }, { status: { equals: "visible" } }, audienceWhere(viewer), gameWhere, timeWhere("community")] };
+    communityRows = await readRows(p, "community-posts", eventFields, where, viewer, 500, range === "past" ? "-startAt" : "startAt");
   }
   const parentIDs = [...new Set(communityRows.map(row => rel(row.game)).filter((id): id is number => id !== null))];
   const parents = parentIDs.length ? await readRows(p, "games", ["_status", "demo"], publicWhere({ id: { in: parentIDs } }), null, 500) : [];
@@ -102,16 +104,15 @@ export async function getEventDetail(p: Payload, viewer: User | null, input: Inp
   viewer = await refreshViewer(p, viewer);
   const source = input.source === "community" ? "community" : input.source === "club" ? "club" : null;
   if (!source) notFound();
-  if (source === "community") viewer = await requireViewer(p, viewer);
   if (source === "community" && !rel(input.idOrSlug ?? input.id)) notFound();
-  const row = await findRow(p, source === "club" ? "events" : "community-posts", input.idOrSlug ?? input.id, source === "community" ? [...eventFields, "contentMode", "contentBlocks"] : eventFields, null, source === "club" ? publicWhere() : { and: [{ status: { equals: "visible" } }, { category: { equals: "event" } }] });
+  const row = await findRow(p, source === "club" ? "events" : "community-posts", input.idOrSlug ?? input.id, source === "community" ? [...eventFields, "contentMode", "contentBlocks"] : eventFields, viewer, source === "club" ? publicWhere(audienceWhere(viewer)) : { and: [audienceWhere(viewer), { status: { equals: "visible" } }, { category: { equals: "event" } }] });
   if (!row || source === "community" && !await communityRef(p, row.game)) notFound();
   const submissions = await submittedKeys(p, viewer), event = await eventCard(p, row, source, viewer, submissions);
   const permissions = viewer ? await activity(p, source === "club" ? "events" : "community-posts", row.id, viewer).catch(() => null) : null;
   const indexedImages = publicationImages(row.postImages).map((image, index) => controlledImageRef(source === "club" ? "event-post" : "community-post", row.id, index, image.source, image.alt));
   const images = indexedImages.filter((image): image is NonNullable<typeof image> => image !== null);
   // Related content follows member-only article rules, even on a public event page.
-  const relatedRows = viewer && source === "club" ? await Promise.all([readRows(p, "news", ["title", "slug", "summary", "cover", "publishedAt", "type", "game", "demo"], publicWhere({ event: { equals: row.id } }), null, 12), readRows(p, "albums", ["title", "slug", "summary", "cover", "publishedAt", "date", "game", "demo"], publicWhere({ event: { equals: row.id } }), null, 12)]) : [[], []];
+  const relatedRows = canUseCampus(viewer) && source === "club" ? await Promise.all([readRows(p, "news", ["title", "slug", "summary", "cover", "publishedAt", "type", "game", "demo"], publicWhere({ event: { equals: row.id } }), null, 12), readRows(p, "albums", ["title", "slug", "summary", "cover", "publishedAt", "date", "game", "demo"], publicWhere({ event: { equals: row.id } }), null, 12)]) : [[], []];
   const { articleCard } = await import("./feed");
   return { event, body: source === "club" ? safeBody(row.body) : null, bodyText: source === "community" ? txt(row.body) : null, images, presentation: source === "community" ? projectPublicationContent(row.contentMode, row.contentBlocks, indexedImages) : null, registration: source === "club" ? { url: safeURL(row.registrationURL) ? String(row.registrationURL) : null, channelText: txt(row.channelText), qrCode: await mediaRef(p, row.qrCode), contact: txt(row.contact), requirements: txt(row.requirements), checkedAt: iso(row.channelCheckedAt) } : null, related: { news: await Promise.all(relatedRows[0].map(row => articleCard(p, row, "news"))), albums: await Promise.all(relatedRows[1].map(row => articleCard(p, row, "album"))) }, viewer: viewer ? { canManageSignup: permissions?.manager ?? false, canViewSignups: permissions?.canView ?? false, canExportSignups: permissions?.canExport ?? false, canRequestPromotion: source === "community" && managesGame(viewer, rel(row.game)) } : null };
 }

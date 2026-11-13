@@ -8,6 +8,7 @@ import {
   type SeatDecision, type SeatRequest, type SeatReview, type SeatStatus, type SeatingKind, type SeatingMode, type SeatingState,
   type SeatAssignment, type SeatingAvailability, type SeatingWorkbench,
 } from "./activity-seating-model";
+import { canSeeAudience } from "./content-audience";
 import { beijingInputTime, canParticipate, canPublish, communityIDs, relationID } from "./rules";
 import { normalizeImageBytes } from "./showcase-images";
 import { refreshViewer } from "./v2/identity";
@@ -69,10 +70,10 @@ export async function seatActivity(
   if (kind === "events") {
     const event = await p.findByID({
       collection: kind, ...access, draft: false,
-      select: { title: true, game: true, _status: true, demo: true, lifecycle: true, archived: true, endAt: true },
+      select: { title: true, game: true, audience: true, _status: true, demo: true, lifecycle: true, archived: true, endAt: true },
     });
     if (!event) throw new APIError("活动未公开或已移除", 404);
-    const visible = event._status === "published" && !(process.env.APP_ENV === "production" && event.demo);
+    const visible = canSeeAudience(viewer, event.audience) && event._status === "published" && !(process.env.APP_ENV === "production" && event.demo);
     return {
       kind, id, title: event.title, game: event.game, public: visible, endAt: event.endAt ? Date.parse(event.endAt) : null,
       open: visible && !event.archived &&
@@ -82,7 +83,7 @@ export async function seatActivity(
   }
   const post = await p.findByID({
     collection: kind, ...access,
-    select: { title: true, game: true, category: true, status: true, endAt: true },
+    select: { title: true, game: true, audience: true, category: true, status: true, endAt: true },
   });
   if (!post || post.category !== "event") throw new APIError("活动未公开或已移除", 404);
   const gameID = relationID(post.game);
@@ -90,7 +91,7 @@ export async function seatActivity(
     collection: "games", id: gameID, user: null, overrideAccess: false, draft: false, depth: 0,
     disableErrors: true, select: { _status: true, demo: true },
   }) : null;
-  const visible = post.status === "visible" && game?._status === "published" &&
+  const visible = canSeeAudience(viewer, post.audience) && post.status === "visible" && game?._status === "published" &&
     !(process.env.APP_ENV === "production" && game.demo);
   return { kind, id, title: post.title, game: post.game, public: visible, endAt: post.endAt ? Date.parse(post.endAt) : null,
     open: visible && (!post.endAt || Date.parse(post.endAt) > Date.now()) };
@@ -147,8 +148,8 @@ async function lockedActivity(p: Payload, activity: SeatActivity, user: User | n
   void p;
   if (!user) throw new APIError("请先登录可用账号", 401);
   await client.query("SELECT id FROM users WHERE id = $1 FOR SHARE", [user.id]);
-  const users = await client.query<{ id: number; name: string; accountStatus: User["accountStatus"]; roles: User["roles"]; communityOffices: User["communityOffices"] }>(`
-    SELECT u.id, u.name, u.account_status AS "accountStatus",
+  const users = await client.query<{ id: number; name: string; accountStatus: User["accountStatus"]; affiliation: User["affiliation"]; roles: User["roles"]; communityOffices: User["communityOffices"] }>(`
+    SELECT u.id, u.name, u.account_status AS "accountStatus", u.affiliation,
       COALESCE((SELECT jsonb_agg(value ORDER BY "order") FROM users_roles WHERE parent_id = u.id), '[]') AS roles,
       COALESCE((SELECT jsonb_agg(jsonb_build_object('game', game_id, 'status', status))
         FROM users_community_offices WHERE _parent_id = u.id), '[]') AS "communityOffices"
@@ -158,8 +159,8 @@ async function lockedActivity(p: Payload, activity: SeatActivity, user: User | n
   const table = activity.kind === "events" ? "events" : "community_posts";
   await client.query(`SELECT id FROM ${table} WHERE id = $1 FOR SHARE`, [activity.id]);
   const fields = activity.kind === "events" ? "_status, demo, archived, lifecycle" : "status, category";
-  const records = await client.query<{ title: string; game_id: number | null; _status?: string; demo?: boolean; archived?: boolean; lifecycle?: string; status?: string; category?: string; end_at: Date | null }>(
-    `SELECT title, game_id, end_at, ${fields} FROM ${table} WHERE id = $1`, [activity.id]);
+  const records = await client.query<{ title: string; game_id: number | null; audience: unknown; _status?: string; demo?: boolean; archived?: boolean; lifecycle?: string; status?: string; category?: string; end_at: Date | null }>(
+    `SELECT title, game_id, end_at, audience, ${fields} FROM ${table} WHERE id = $1`, [activity.id]);
   const record = records.rows[0];
   if (!record || activity.kind === "community-posts" && record.category !== "event")
     throw new APIError("活动未公开或已移除", 404);
@@ -171,9 +172,9 @@ async function lockedActivity(p: Payload, activity: SeatActivity, user: User | n
   } else if (activity.kind === "community-posts") publicGame = false;
   // Standalone club events retain their existing public event contract. Community
   // events additionally inherit the V2 parent-community visibility boundary.
-  const visible = activity.kind === "events"
+  const visible = canSeeAudience(actor, record.audience) && (activity.kind === "events"
     ? record._status === "published" && !(process.env.APP_ENV === "production" && record.demo)
-    : record.status === "visible" && publicGame;
+    : record.status === "visible" && publicGame);
   const current: SeatActivity = { ...activity, title: record.title, game: record.game_id, public: visible, endAt: record.end_at?.getTime() ?? null,
     open: visible && !record.archived && !["cancelled", "postponed", "ended"].includes(record.lifecycle || "") &&
       (!record.end_at || record.end_at.getTime() > Date.now()) };

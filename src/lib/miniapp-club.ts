@@ -1,9 +1,10 @@
 import { APIError, type Payload } from "payload";
 import type { CommunityApplication, StaffApplication, StaffBatch, User } from "../payload-types";
-import { canManageStaffRecruitment, canParticipate, canReviewCommunityApplication, relationID } from "./rules";
+import { canManageStaffRecruitment, canParticipate, canUseCampus, canReviewCommunityApplication, relationID } from "./rules";
 import { currentStaffBatches, ownStaffApplication, publicStaffBatch, readStaffApplications } from "./staff-recruitment";
 import { canReviewStaffTransition, staffDeadlinePolicy, staffForm, staffPrivacy, staffWindow } from "./staff-recruitment-model";
 import { formVersion } from "./activity-signups";
+import { refreshViewer } from "./v2/identity";
 import { promotedContent } from "./content-promotions";
 import { decideCommunityApplication, editCommunityApplication, updateCommunityCard } from "./community-operations";
 import { applicationContactConsentRequiredMessage } from "./community-status";
@@ -29,7 +30,7 @@ async function currentUser(p: Payload, request: Request): Promise<User> {
   const { user } = await p.auth({ headers: request.headers });
   if (!user?.id) throw new APIError("请先登录可用账号", 401);
   const fresh = await p.findByID({ collection: "users", id: user.id, overrideAccess: true, depth: 0,
-    select: { name: true, email: true, createdAt: true, updatedAt: true, roles: true, accountStatus: true, communityOffices: true } }).catch(() => null);
+    select: { name: true, email: true, createdAt: true, updatedAt: true, roles: true, accountStatus: true, affiliation: true, communityOffices: true } }).catch(() => null);
   if (!canParticipate(fresh)) throw new APIError("账号已停用或不可用，请联系负责人", 403);
   return { ...fresh!, collection: "users" };
 }
@@ -55,16 +56,23 @@ function staffBatchReceipt(batch: Pick<StaffBatch, "id" | "title" | "description
 }
 export async function miniappClubGET(p: Payload, request: Request, path: string) {
   if (path === "club") {
-    const [batches, event, notice, showcase] = await Promise.all([currentStaffBatches(p), promotedContent(p, "event"), promotedContent(p, "notice"), promotedContent(p, "showcase")]);
+    const { user } = await p.auth({ headers: request.headers });
+    const viewer = await refreshViewer(p, user);
+    const [batches, event, notice, showcase] = await Promise.all([
+      canUseCampus(viewer) ? currentStaffBatches(p) : [],
+      promotedContent(p, "event", 6, viewer), promotedContent(p, "notice", 6, viewer), promotedContent(p, "showcase", 6, viewer),
+    ]);
     return { staffBatches: batches.map(staffBatchReceipt), promotions: { event, notice, showcase } };
   }
+  const user = await currentUser(p, request);
+  if (!canUseCampus(user)) throw new APIError("此栏目仅面向清华账号", 403);
   if (path === "staff") {
     const result = await p.find({ collection: "staff-batches", overrideAccess: false, user: null, depth: 0, limit: 12,
       page: pageNumber(new URL(request.url).searchParams), sort: "-createdAt",
       select: { title: true, description: true, state: true, startAt: true, endAt: true, signupForm: true } });
     return pageResult(result, result.docs.map(staffBatchReceipt));
   }
-  const user = await currentUser(p, request), query = new URL(request.url).searchParams;
+  const query = new URL(request.url).searchParams;
   if (path === "workbench") return { reviewCommunity: canReviewCommunityApplication(user), reviewStaff: canManageStaffRecruitment(user) };
   const staff = staffPath.exec(path);
   if (staff) {
@@ -100,6 +108,7 @@ export async function miniappClubGET(p: Payload, request: Request, path: string)
 
 export async function miniappClubPOST(p: Payload, request: Request, path: string, data: Record<string, unknown>) {
   const user = await currentUser(p, request), action = text(data.action);
+  if (!canUseCampus(user)) throw new APIError("此栏目仅面向清华账号", 403);
   if (path === applicationPath) {
     let saved: CommunityApplication;
     if (action === "submit" || action === "edit") {

@@ -1,13 +1,13 @@
 import { createHash } from "node:crypto";
 import { APIError, type Access, type CollectionConfig, type CollectionAfterChangeHook, type Where } from "payload";
-import { canParticipate, canReviewCommunityApplication, relationID, type Identity } from "../lib/rules";
+import { canUseCampus, canReviewCommunityApplication, relationID, type Identity } from "../lib/rules";
 import { MAX_WECHAT_QR_TEXT_LENGTH, normalizeWechatQr, validApplicantName, validApplicantPhone } from "../lib/application-details";
 import { applicationContactConsentLabel, applicationContactConsentRequiredMessage } from "../lib/community-status";
 
 const ownApplication: Access = ({ req }) => {
   if (req.context.publicCommunityContacts) return { and: [{ game: { equals: req.context.publicCommunityContacts } }, { status: { equals: "approved" } }, { contactConsent: { equals: true } }] } as Where;
   if (canReviewCommunityApplication(req.user as Identity)) return true;
-  return canParticipate(req.user as Identity) ? { applicant: { equals: req.user!.id } } : false;
+  return canUseCampus(req.user as Identity) ? { applicant: { equals: req.user!.id } } : false;
 };
 // Payload 3 beforeValidate merges unchanged original fields into data before collection hooks.
 const changedOutside = (data: Record<string, unknown>, original: Record<string, unknown> | undefined, allowed: string[]) =>
@@ -27,9 +27,9 @@ export const CommunityApplications: CollectionConfig = {
   admin: { useAsTitle: "proposedGame", description: "在网站社群申请审核页处理决定、退回及初始化；批准后授予对应社群权限。" },
   access: {
     read: ownApplication,
-    create: ({ req }) => canParticipate(req.user as Identity),
+    create: ({ req }) => canUseCampus(req.user as Identity),
     update: ({ req }) => req.context.applicationResolved === true || (req.context.communityApplicationDecision === true && canReviewCommunityApplication(req.user as Identity))
-      ? true : (req.context.communityApplicationEdit === true || req.context.communityContactEdit === true) && canParticipate(req.user as Identity) ? { applicant: { equals: req.user!.id } } : false,
+      ? true : (req.context.communityApplicationEdit === true || req.context.communityContactEdit === true) && canUseCampus(req.user as Identity) ? { applicant: { equals: req.user!.id } } : false,
     delete: () => false,
   },
   hooks: {
@@ -38,7 +38,7 @@ export const CommunityApplications: CollectionConfig = {
       // Check the caller's raw value before Payload turns checkbox strings into
       // booleans or merges old consent into an omitted resubmission field.
       if (operation === "create" || operation === "update" && req.context.communityApplicationEdit === true) {
-        if (!canParticipate(req.user as Identity)) throw new APIError("请登录可用账号", 403);
+        if (!canUseCampus(req.user as Identity)) throw new APIError("请登录可用账号", 403);
         const data = "data" in args ? args.data : undefined;
         if (operation === "update" && data?.status === "withdrawn") return args;
         if (data?.contactConsent !== true) throw new APIError(applicationContactConsentRequiredMessage, 400);
@@ -47,7 +47,7 @@ export const CommunityApplications: CollectionConfig = {
     }],
     beforeChange: [async ({ data, originalDoc, req, operation }) => {
       if (req.context.applicationResolved === true) return data;
-      if (!canParticipate(req.user as Identity)) throw new APIError("请登录可用账号", 403);
+      if (!canUseCampus(req.user as Identity)) throw new APIError("请登录可用账号", 403);
       if (operation === "update" && req.context.communityContactEdit === true) {
         if (originalDoc?.status !== "approved" || String(relationID(originalDoc.applicant)) !== String(req.user!.id)) throw new APIError("只能更新本人已批准的名片", 403);
         if (changedOutside(data, originalDoc, ["wechatQr", "contactConsent", "updatedAt"])) throw new APIError("名片设置不能修改审核资料", 403);
@@ -66,7 +66,7 @@ export const CommunityApplications: CollectionConfig = {
           throw new APIError("由于入社流程规定，必须展示管理联系方式；请退回申请，由本人勾选同意后重新提交", 409);
         if (data.status === "approved" && (!originalDoc.realName || !originalDoc.phone || !originalDoc.wechatQr)) throw new APIError("旧申请资料不全，请退回后由申请人重新提交", 400);
         const applicant = await req.payload.findByID({ collection: "users", id: Number(relationID(originalDoc.applicant)), req, overrideAccess: true, depth: 0 });
-        if (!canParticipate(applicant)) throw new APIError("申请者账号已停用，不能批准任职", 409);
+        if (!canUseCampus(applicant)) throw new APIError("申请者账号已停用，不能批准任职", 409);
         data.reviewedBy = req.user!.id;
         data.reviewedAt = new Date().toISOString();
         return data;

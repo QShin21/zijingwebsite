@@ -2,7 +2,7 @@ import { APIError } from "payload";
 import type { Payload } from "payload";
 import type { TeamHonorRecord, User } from "../payload-types";
 import {
-  canParticipate,
+  canUseCampus,
   canReviewShowcase,
   communityIDs,
   canPublish,
@@ -52,7 +52,7 @@ export async function honorWorkspace(
   page = 1,
   scope: { team?: number; game?: number } = {},
 ) {
-  if (!canParticipate(user)) throw new APIError("请先登录", 401);
+  if (!canUseCampus(user)) throw new APIError("请先登录", 401);
   // The collection re-reads current scope before returning any private content.
   const records = await p.find({
     collection: "team-honor-records",

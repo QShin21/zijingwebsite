@@ -4,6 +4,7 @@ import {
   canAppoint,
   canManageStaffRecruitment,
   canParticipate,
+  canUseCampus,
   canPublish,
   canReviewCommunityApplication,
   canReviewPromotion,
@@ -25,7 +26,7 @@ export async function refreshViewer(p: Payload, viewer: User | null): Promise<Us
   try {
     const current = await p.findByID({
       collection: "users", id, overrideAccess: true, depth: 0,
-      select: { name: true, email: true, roles: true, department: true, accountStatus: true, communityOffices: true, createdAt: true, updatedAt: true },
+      select: { name: true, email: true, roles: true, department: true, accountStatus: true, affiliation: true, communityOffices: true, createdAt: true, updatedAt: true },
     });
     if (!canParticipate(current)) return null;
     // Do not merge stale token fields, including revoked offices and removed platform roles.
@@ -39,6 +40,12 @@ export async function refreshViewer(p: Payload, viewer: User | null): Promise<Us
 export async function requireViewer(p: Payload, viewer: User | null): Promise<User> {
   const current = await refreshViewer(p, viewer);
   if (!current) throw new APIError("请先登录可用账号", 401);
+  return current;
+}
+
+export async function requireCampusViewer(p: Payload, viewer: User | null): Promise<User> {
+  const current = await requireViewer(p, viewer);
+  if (!canUseCampus(current)) throw new APIError("此栏目仅面向清华账号", 403);
   return current;
 }
 
@@ -67,7 +74,7 @@ export async function viewerProjection(p: Payload, user: User): Promise<Viewer> 
     }
   }
   return {
-    id: user.id, name: user.name, email: user.email,
+    id: user.id, name: user.name, email: user.email, affiliation: user.affiliation ?? "tsinghua",
     roles: (user.roles ?? []).filter((role): role is PlatformRole => roles.has(role)),
     department: user.department === "execution" || user.department === "publicity" ? user.department : null,
     capabilities: {

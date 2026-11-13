@@ -7,7 +7,7 @@ import {
   type Where,
 } from "payload";
 import {
-  canParticipate,
+  canUseCampus,
   canPublish,
   canReviewShowcase,
   communityIDs,
@@ -41,19 +41,19 @@ export async function currentHonorReader(req: PayloadRequest) {
   return actor;
 }
 const privateRead: FieldAccess = ({ req, doc }) =>
-  canParticipate(req.user as Identity) &&
+  canUseCampus(req.user as Identity) &&
   (Number(relationID(doc?.author)) === req.user!.id ||
     canReviewShowcase(req.user as Identity, doc?.game));
 // The collection already limits authenticated reads to author/current reviewer scope.
 // Payload evaluates query-field permissions without a doc when filtering "my records" by author.
 const versionRead: FieldAccess = ({ req }) =>
-  honorProjectionGranted(req) || canParticipate(req.user as Identity);
+  honorProjectionGranted(req) || canUseCampus(req.user as Identity);
 const privateAccess = { read: privateRead };
 const readRecords: Access = async ({ req }) => {
   if (honorProjectionGranted(req))
     return { state: { equals: "approved" } } as Where;
   const actor = await currentHonorReader(req);
-  if (!canParticipate(actor)) return false;
+  if (!canUseCampus(actor)) return false;
   if (canPublish(actor)) return true;
   const games = communityIDs(actor, "reviewShowcase");
   return {
@@ -84,7 +84,7 @@ export const TeamHonorRecords: CollectionConfig = {
         if (
           !grant ||
           !req.transactionID ||
-          !canParticipate(req.user as Identity) ||
+          !canUseCampus(req.user as Identity) ||
           (operation === "update" && grant.id !== originalDoc?.id) ||
           (operation === "create" && grant.id)
         )

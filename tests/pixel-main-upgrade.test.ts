@@ -73,9 +73,10 @@ describe("original art and licensed font", () => {
   it("regenerates every committed pixel image from code", () => {
     expect(execFileSync(process.execPath, ["scripts/pixel-campus-art.mjs", "--check"], { encoding: "utf8" })).toContain("Checked 4");
   });
-  it("ships only generated art plus the OFL font, without PR photos, landmarks or game marks", () => {
+  it("ships the generated landmark scenes, skyline assets and OFL font", () => {
     expect(readdirSync("src/components/v2/pixel-art").sort()).toEqual([
       "ASSET-PROVENANCE.json", "campus-classic.png", "campus-summer.png", "campus-winter.png", "skyline-mask.png",
+      "tsinghua-auditorium-snow.webp", "tsinghua-lotus-pond.webp", "tsinghua-second-gate.webp",
     ]);
     expect(existsSync("public/pixel-campus")).toBe(false);
     const license = readFileSync("src/components/v2/fonts/OFL.txt", "utf8");
@@ -89,7 +90,7 @@ describe("shared contracts stay with main", () => {
     expect(readFileSync("src/lib/v2/home-sections.ts", "utf8")).toContain('{ kind: "upcoming", enabled: true, title: "接下来的赛程" }');
     expect(readFileSync("src/lib/v2/account.ts", "utf8")).toContain('queues.push({ key: "showcase", title: "社群风采审核", href: "/community", webOnly: false');
     const access = readFileSync("src/lib/page-access.ts", "utf8");
-    expect(access).toContain('const publicPaths = ["/events", "/announcements", "/login", "/register", "/account/reset", "/privacy", "/about", "/contact", "/join/staff"];');
+    expect(access).toContain('const publicPaths = ["/events", "/announcements", "/login", "/register", "/account/reset", "/privacy", "/about", "/contact"];');
     expect(access).not.toContain("pixel");
   });
 });

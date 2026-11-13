@@ -3,7 +3,7 @@ import { APIError, type Payload, type PayloadRequest } from "payload";
 import { sql, type PostgresAdapter } from "@payloadcms/db-postgres";
 import type { CommunityShowcase, User } from "../../payload-types";
 import type { ShowcaseCard, UploadReceipt } from "./types";
-import { requireViewer } from "./identity";
+import { requireCampusViewer } from "./identity";
 import { controlledImageRef } from "./images";
 import { showcaseCard } from "./community";
 import { canReviewShowcase, relationID } from "../rules";
@@ -35,7 +35,7 @@ export async function createUpload(
   viewer: User | null,
   input: { file: unknown; purpose: unknown },
 ): Promise<{ upload: UploadReceipt }> {
-  const actor = await requireViewer(p, viewer);
+  const actor = await requireCampusViewer(p, viewer);
   if (input.purpose !== "showcase" && input.purpose !== "publication") throw new APIError("上传用途无效", 400);
   const purpose = input.purpose;
   const file = input.file;
@@ -94,7 +94,7 @@ export async function createShowcase(
   viewer: User | null,
   input: ShowcaseInput & { slug: string; images: unknown },
 ): Promise<{ showcase: ShowcaseCard }> {
-  const actor = await requireViewer(p, viewer), content = showcaseContent(input);
+  const actor = await requireCampusViewer(p, viewer), content = showcaseContent(input);
   if (!Array.isArray(input.images) || input.images.length > 6) throw new APIError("最多上传 6 张照片", 400);
   const images = input.images.map(value => {
     if (!value || typeof value !== "object" || !("upload" in value)) throw new APIError("图片信息无效", 400);
@@ -132,7 +132,7 @@ export async function reviewShowcase(
   viewer: User | null,
   input: { id: number; decision: unknown; reviewNote?: unknown; revision: unknown },
 ): Promise<{ showcase: ShowcaseCard }> {
-  const actor = await requireViewer(p, viewer), id = identifier(input.id);
+  const actor = await requireCampusViewer(p, viewer), id = identifier(input.id);
   if (!["visible", "rejected", "hidden"].includes(String(input.decision))) throw new APIError("审核决定无效", 400);
   const decision = input.decision as "visible" | "rejected" | "hidden", reviewNote = text(input.reviewNote, 500, "审核说明");
   if (decision !== "visible" && !reviewNote) throw new APIError("拒绝或隐藏需填写具体原因", 400);

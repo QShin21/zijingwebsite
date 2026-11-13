@@ -4,7 +4,7 @@ import { canParticipate, canReviewPromotion, communityIDs, managesGame, relation
 async function currentReader(req: PayloadRequest) {
   if (!req.user?.id) return null;
   const user = await req.payload.findByID({ collection: "users", id: req.user.id, req, overrideAccess: true, depth: 0,
-    select: { roles: true, accountStatus: true, communityOffices: true } }).catch(() => null);
+    select: { roles: true, accountStatus: true, affiliation: true, communityOffices: true } }).catch(() => null);
   if (user) req.user = { ...req.user, ...user, collection: "users" };
   return user;
 }

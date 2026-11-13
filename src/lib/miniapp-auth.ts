@@ -1,16 +1,16 @@
 import type { Payload } from 'payload';
 import type { User } from '@/payload-types';
 import { validNickname, nicknameKey } from '@/lib/nickname';
-import { canParticipate, canReviewPromotion, canReviewCommunityApplication, canAppoint, communityIDs } from '@/lib/rules';
+import { canParticipate, canUseCampus, canReviewPromotion, canReviewCommunityApplication, canAppoint, communityIDs } from '@/lib/rules';
 
 export function miniappUser(user: User) {
-  return { id: user.id, name: user.name, email: user.email, roles: user.roles,
+  return { id: user.id, name: user.name, email: user.email, roles: user.roles, affiliation: user.affiliation ?? "tsinghua",
     accountStatus: user.accountStatus, department: user.department,
-    teams: (user.teams || []).map(value => typeof value === "object" ? value.id : value),
+    teams: canUseCampus(user) ? (user.teams || []).map(value => typeof value === "object" ? value.id : value) : [],
     capabilities: { reviewPromotion: canReviewPromotion(user), reviewCommunityApplication: canReviewCommunityApplication(user), appoint: canAppoint(user),
       publishCommunities: communityIDs(user, "publishContent"), reviewShowcaseCommunities: communityIDs(user, "reviewShowcase"),
       viewSignupCommunities: communityIDs(user, "viewSignups"), exportSignupCommunities: communityIDs(user, "exportSignups") },
-    communities: (user.communities || []).map(value => typeof value === 'object' ? value.id : value) };
+    communities: canUseCampus(user) ? (user.communities || []).map(value => typeof value === 'object' ? value.id : value) : [] };
 }
 
 /** Identity resolution stays on the server and never exposes another user's email. */

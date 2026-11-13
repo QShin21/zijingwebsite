@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
-import { APIError, createLocalReq, type Payload, type PayloadRequest } from "payload";
+import { APIError, type Payload, type PayloadRequest } from "payload";
 import type { User } from "@/payload-types";
-import { canParticipate, canPublish, canSubmitClubContent, canReadActivitySignups, canExportActivitySignups, managesGame } from "./rules";
+import { canParticipate, canPublish, canSubmitClubContent, canReadActivitySignups, canExportActivitySignups, managesGame, relationID } from "./rules";
+import { canSeeAudience } from "./content-audience";
 import { workflowTransaction } from "./workflow-transactions";
 import { publicationImages } from "./publication-images";
 import { publicationImageRevision } from "./publication-image-storage";
@@ -39,23 +40,22 @@ export async function activity(
   if (edit && user) {
     // Private-data actions must honor revocation even when an internal caller has an old identity.
     const fresh = await p.findByID({ collection: "users", id: user.id, overrideAccess: true, req, depth: 0,
-      select: { roles: true, accountStatus: true, communityOffices: true } }).catch(() => null);
+      select: { roles: true, accountStatus: true, affiliation: true, communityOffices: true } }).catch(() => null);
     user = fresh ? { ...user, ...fresh, accountStatus: fresh.accountStatus, communityOffices: fresh.communityOffices } : null;
   }
-  if (kind === "community-posts" && !canParticipate(user))
-    throw new APIError("请先登录", 401);
   const doc = await p
     .findByID({
       collection: kind,
       id,
       overrideAccess: false,
-      user: edit ? user : null,
-      req: req ? (edit ? req : { ...req, user: null }) : undefined,
+      user,
+      req,
       draft: edit,
       depth: 0,
       ...(includeImages ? { context: { ...req?.context, readSignupImages: true } } : {}),
       select: {
         title: true,
+        audience: true,
         signupForm: true,
         ...(includeImages ? { signupImages: true } : {}),
         game: true,
@@ -78,14 +78,23 @@ export async function activity(
     !doc ||
     (kind === "community-posts" &&
       (!("category" in doc) || doc.category !== "event")) ||
-    (!edit &&
+    (!edit && (!canSeeAudience(user, doc.audience) ||
       (kind === "events"
         ? !("_status" in doc) ||
           doc._status !== "published" ||
           (process.env.APP_ENV === "production" && "demo" in doc && doc.demo)
-        : !("status" in doc) || doc.status !== "visible"))
+        : !("status" in doc) || doc.status !== "visible")))
   )
     throw new APIError("活动未公开或已移除", 404);
+  if (!edit && kind === "community-posts") {
+    const gameID = Number(relationID(doc.game));
+    if (!Number.isSafeInteger(gameID) || gameID <= 0) throw new APIError("活动未公开或已移除", 404);
+    const game = await p.findByID({ collection: "games", id: gameID, depth: 0,
+      overrideAccess: false, user: null, req: req ? { ...req, user: null } : undefined, draft: false,
+      disableErrors: true, select: { _status: true, demo: true } });
+    if (!game || game._status !== "published" || process.env.APP_ENV === "production" && game.demo)
+      throw new APIError("活动未公开或已移除", 404);
+  }
   // Narrow internal lookup for authorization/stamping only; never included in public responses.
   const organizer =
     kind === "events"
@@ -178,36 +187,29 @@ export async function submitSignup(
   answers: unknown,
 ) {
   if (!canParticipate(user)) throw new APIError("请先登录可用账号", 401);
-  const {
-    doc,
-    form,
-    version: current,
-    organizer,
-  } = await activity(p, kind, id, user);
-  const existing = await ownSignup(p, kind, id, user);
-  if (existing) return existing;
-  const state = signupState(form, doc);
-  if (state !== "报名开放") throw new APIError(state, 409);
-  if (version !== current)
-    throw new APIError("报名问卷已更新，请刷新并重新填写", 409);
-  let clean;
   try {
-    clean = validateAnswers(form, answers);
-  } catch (error) {
-    throw new APIError((error as Error).message, 400);
-  }
-  try {
-    const saved = await p.create({
+    return await workflowTransaction(p, user, { submitEventSignup: true }, async req => {
+      const actor = req.user as User;
+      const { doc, form, version: current, organizer } = await activity(p, kind, id, actor, false, req);
+      const existing = await ownSignup(p, kind, id, actor, req);
+      if (existing) return existing;
+      const state = signupState(form, doc);
+      if (state !== "报名开放") throw new APIError(state, 409);
+      if (version !== current)
+        throw new APIError("报名问卷已更新，请刷新并重新填写", 409);
+      let clean;
+      try { clean = validateAnswers(form, answers); }
+      catch (error) { throw new APIError((error as Error).message, 400); }
+      const saved = await p.create({
       collection: "event-signups",
       overrideAccess: false,
-      user,
-      context: { submitEventSignup: true },
+      req,
       data: {
         activityType: kind,
         activityID: id,
-        dedupeKey: `${kind}:${id}:${user!.id}`,
-        member: user!.id,
-        memberName: user!.name,
+        dedupeKey: `${kind}:${id}:${actor.id}`,
+        member: actor.id,
+        memberName: actor.name,
         organizer: Number(organizer) || undefined,
         game: Number(idOf(doc.game)) || undefined,
         eventTitle: doc.title,
@@ -224,10 +226,15 @@ export async function submitSignup(
       questions: saved.questions,
       answers: saved.answers,
     };
+    });
   } catch (error) {
     // Database uniqueness also covers simultaneous submissions and network retries.
-    const duplicate = await ownSignup(p, kind, id, user);
-    if (duplicate) return duplicate;
+    if (error instanceof APIError && error.status === 409) {
+      // Re-check the activity before returning an existing receipt on a retry.
+      await activity(p, kind, id, user);
+      const duplicate = await ownSignup(p, kind, id, user);
+      if (duplicate) return duplicate;
+    }
     throw error;
   }
 }
@@ -241,25 +248,16 @@ export async function updateSignupAnswers(
   answers: unknown,
 ) {
   if (!canParticipate(user)) throw new APIError("请先登录可用账号", 401);
-  const { doc, form, version: current } = await activity(p, kind, id, user);
-  const state = signupState(form, doc);
-  if (state !== "报名开放") throw new APIError(state + "，暂不能修改作答", 409);
-  if (version !== current)
-    throw new APIError("报名问卷已更新，请刷新后再修改作答", 409);
-  let clean;
-  try {
-    clean = validateAnswers(form, answers);
-  } catch (error) {
-    throw new APIError((error as Error).message, 400);
-  }
-  // Payload bulk updates query rows before writing. Use a serializable transaction
-  // so concurrent edits cannot both pass the receipt revision check and overwrite.
-  const transactionID = await p.db.beginTransaction({ isolationLevel: "serializable" });
-  if (transactionID == null) throw new APIError("暂时无法保存修改，请稍后重试", 503);
-  const req = await createLocalReq({ user: user!, context: { updateEventSignup: true } }, p);
-  req.transactionID = transactionID;
-  try {
-    const existing = await ownSignup(p, kind, id, user, req);
+  return workflowTransaction(p, user, { updateEventSignup: true }, async req => {
+    const actor = req.user as User;
+    const { doc, form, version: current } = await activity(p, kind, id, actor, false, req);
+    const state = signupState(form, doc);
+    if (state !== "报名开放") throw new APIError(state + "，暂不能修改作答", 409);
+    if (version !== current) throw new APIError("报名问卷已更新，请刷新后再修改作答", 409);
+    let clean;
+    try { clean = validateAnswers(form, answers); }
+    catch (error) { throw new APIError((error as Error).message, 400); }
+    const existing = await ownSignup(p, kind, id, actor, req);
     if (!existing) throw new APIError("尚未提交报名，请先填写问卷", 404);
     if (typeof revision !== "string" || revision !== existing.updatedAt)
       throw new APIError("作答记录已更新，请重新加载上次提交的内容后修改", 409);
@@ -275,7 +273,6 @@ export async function updateSignupAnswers(
         answers: clean,
       },
     });
-    await p.db.commitTransaction(transactionID);
     return {
       id: saved.id,
       createdAt: saved.createdAt,
@@ -284,16 +281,7 @@ export async function updateSignupAnswers(
       questions: saved.questions,
       answers: saved.answers,
     };
-  } catch (error) {
-    await p.db.rollbackTransaction(transactionID);
-    let cause: unknown = error;
-    for (let depth = 0; depth < 6 && cause && typeof cause === "object"; depth++) {
-      if ("code" in cause && cause.code === "40001")
-        throw new APIError("作答记录已更新，请重新加载上次提交的内容后修改", 409);
-      cause = "cause" in cause ? cause.cause : null;
-    }
-    throw error;
-  }
+  });
 }
 export async function saveSignupForm(
   p: Payload,

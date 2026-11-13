@@ -10,7 +10,7 @@ import {
 } from "payload";
 import type { User } from "../payload-types";
 import {
-  canParticipate,
+  canUseCampus,
   canPublish,
   communityIDs,
   relationID,
@@ -35,7 +35,7 @@ const privateRead =
   ): Access =>
   async ({ req }) => {
     const { actor, games } = await actorScope(req);
-    if (!canParticipate(actor)) return false;
+    if (!canUseCampus(actor)) return false;
     if (canPublish(actor)) return true;
     return {
       or: [
@@ -56,7 +56,7 @@ const privateRead =
     } as Where;
   };
 const write: Access = ({ req }) =>
-  canParticipate(req.user as User) && req.context.teamCoreWrite === true;
+  canUseCampus(req.user as User) && req.context.teamCoreWrite === true;
 const audit: NonNullable<CollectionConfig["hooks"]>["afterChange"] = [
   async ({ doc, previousDoc, req, collection, operation }) => {
     await req.payload.create({
@@ -174,7 +174,7 @@ export const TeamRecruitments = workflow(
   "代表队招新批次",
   async ({ req }) => {
     const { actor, games } = await actorScope(req);
-    if (!canParticipate(actor)) return false;
+    if (!canUseCampus(actor)) return false;
     if (canPublish(actor)) return true;
     const teams = await req.payload.find({
       collection: "teams",

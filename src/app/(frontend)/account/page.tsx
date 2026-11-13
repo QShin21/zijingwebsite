@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getManage, getMe, getMyApplications, getMySignups, type PlatformRole } from "@/lib/v2";
+import { affiliationLabels } from "@/lib/affiliation";
 import { LogoutButton } from "@/components/account-pages/AuthForms";
 import { pageNumber, read, readOptional, single, type Search } from "@/components/v2/data";
 import { ButtonLink, CommunityChip, EmptyState, KeyValues, LinkTabs, Pager, Section, Wrap } from "@/components/v2/ui";
@@ -25,17 +26,19 @@ export default async function Account({ searchParams }: { searchParams: Search }
   const search = await searchParams;
   // Historic notification links used ?view=history#applications-title for the full application list.
   const requested = single(search.view);
-  const view = requested === "history" ? "applications" : requested;
+  const view = requested === "signups" ? "signups" : requested === "applications" || requested === "history" ? "applications" : undefined;
   const page = pageNumber(search.page);
   const me = await read(getMe, {}, "/account");
   const { viewer } = me;
+  const campus = viewer.affiliation === "tsinghua";
+  const recordView = !campus && view === "applications" ? undefined : view;
   const tabs = (
     <LinkTabs
       label="我的记录"
       items={[
-        { href: "/account", label: "总览", current: view !== "signups" && view !== "applications" },
+        { href: "/account", label: "总览", current: !recordView },
         { href: "/account?view=signups", label: "我的报名", current: view === "signups", count: me.counts.signups },
-        { href: "/account?view=applications", label: "我的申请", current: view === "applications", count: me.counts.applications },
+        ...(campus ? [{ href: "/account?view=applications", label: "我的申请", current: view === "applications", count: me.counts.applications }] : []),
       ]}
     />
   );
@@ -49,7 +52,8 @@ export default async function Account({ searchParams }: { searchParams: Search }
           <p className={styles.kicker}>MY ZIJING · 我的</p>
           <h1>{viewer.name}</h1>
           <p className={styles.roles}>
-            {(viewer.roles.length ? viewer.roles : (["member"] as PlatformRole[])).map((role) => (
+            <span>{affiliationLabels[viewer.affiliation]}</span>
+            {campus && (viewer.roles.length ? viewer.roles : (["member"] as PlatformRole[])).map((role) => (
               <span key={role}>{roleLabels[role] ?? role}</span>
             ))}
             {viewer.department && <span>{departments[viewer.department]}</span>}
@@ -76,7 +80,7 @@ export default async function Account({ searchParams }: { searchParams: Search }
     </header>
   );
 
-  if (view === "signups" || view === "applications") {
+  if (recordView) {
     const signups = view === "signups" ? await read(getMySignups, { page, limit: 20 }, "/account?view=signups") : null;
     const applications = view === "applications" ? await read(getMyApplications, { page, limit: 20 }, "/account?view=applications") : null;
     return (
@@ -150,7 +154,7 @@ export default async function Account({ searchParams }: { searchParams: Search }
                 </EmptyState>
               )}
             </Section>
-            <Section id="applications" title="申请进度" more={{ href: "/account?view=applications", label: "全部申请" }}>
+            {campus && <Section id="applications" title="申请进度" more={{ href: "/account?view=applications", label: "全部申请" }}>
               {me.applications.length ? (
                 <div className={layout.grid2}>
                   {me.applications.map((item) => (
@@ -162,8 +166,8 @@ export default async function Account({ searchParams }: { searchParams: Search }
                   社群管理员、骨干招新、建队与入队申请都会记录在这里。
                 </EmptyState>
               )}
-            </Section>
-            <Section id="teams" title="我的队伍">
+            </Section>}
+            {campus && <Section id="teams" title="我的队伍">
               {me.memberships.length ? (
                 <div className={layout.grid2}>
                   {me.memberships.map((membership) => (
@@ -175,7 +179,7 @@ export default async function Account({ searchParams }: { searchParams: Search }
                   入队申请由社群管理员人工选拔，录取不授予平台或社群管理权限。
                 </EmptyState>
               )}
-            </Section>
+            </Section>}
             {manage && manage.queues.length > 0 && (
               <Section id="manage" title="管理台" description="按当前授权显示，进入后继续按对象与所属社群判断可处理范围。">
                 <QueueGrid queues={manage.queues} />
@@ -188,21 +192,22 @@ export default async function Account({ searchParams }: { searchParams: Search }
               items={[
                 { label: "昵称", value: viewer.name },
                 { label: "已验证邮箱", value: viewer.email },
-                {
+                { label: "邮箱身份", value: affiliationLabels[viewer.affiliation] },
+                ...(campus ? [{
                   label: "平台身份",
                   value: `${(viewer.roles.length ? viewer.roles : (["member"] as PlatformRole[])).map((role) => roleLabels[role] ?? role).join("、")}${viewer.department ? `（${departments[viewer.department]}）` : ""}`,
                 },
                 {
                   label: "社群任职",
                   value: viewer.capabilities.communities.length ? viewer.capabilities.communities.map((office) => office.community.title).join("、") : "暂无在任社群",
-                },
+                }] : []),
               ]}
             />
-            <p className={styles.hint}>平台角色、社群任职与队伍成员关系分别记录。骨干录用后自动授予骨干身份。</p>
+            {campus && <p className={styles.hint}>平台角色、社群任职与队伍成员关系分别记录。骨干录用后自动授予骨干身份。</p>}
             <nav className={styles.settingLinks} aria-label="账号设置">
               <Link href="/account/reset">修改登录密码</Link>
               <Link href="/privacy">隐私说明</Link>
-              <Link href="/community/apply">社群管理员申请</Link>
+              {campus && <Link href="/community/apply">社群管理员申请</Link>}
             </nav>
             <LogoutButton />
           </aside>

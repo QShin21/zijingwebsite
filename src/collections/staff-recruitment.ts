@@ -1,10 +1,10 @@
 import { APIError, type CollectionConfig, type FieldAccess, type PayloadRequest, type Where } from "payload";
-import { canParticipate, canManageStaffRecruitment, type Identity } from "../lib/rules";
+import { canUseCampus, canManageStaffRecruitment, type Identity } from "../lib/rules";
 
 async function currentReader(req: PayloadRequest) {
   if (!req.user?.id) return null;
   const user = await req.payload.findByID({ collection: "users", id: req.user.id, req, overrideAccess: true, depth: 0,
-    select: { roles: true, accountStatus: true } }).catch(() => null);
+    select: { roles: true, accountStatus: true, affiliation: true } }).catch(() => null);
   if (user) req.user = { ...req.user, ...user, collection: "users" };
   return user;
 }
@@ -37,7 +37,7 @@ export const StaffApplications: CollectionConfig = {
   access: {
     read: async ({ req }) => {
       const user = await currentReader(req);
-      if (!canParticipate(user)) return false;
+      if (!canUseCampus(user)) return false;
       if (canManageStaffRecruitment(user)) {
         if (!req.context.staffReadAudited) {
           req.context.staffReadAudited = true;
@@ -49,12 +49,12 @@ export const StaffApplications: CollectionConfig = {
       }
       return { applicant: { equals: user!.id } } as Where;
     },
-    create: ({ req }) => req.context.staffApplicationWrite === true && canParticipate(req.user as Identity),
-    update: ({ req }) => req.context.staffApplicationWrite === true && canParticipate(req.user as Identity),
+    create: ({ req }) => req.context.staffApplicationWrite === true && canUseCampus(req.user as Identity),
+    update: ({ req }) => req.context.staffApplicationWrite === true && canUseCampus(req.user as Identity),
     delete: () => false,
   },
   hooks: { beforeChange: [({ req, data, originalDoc, operation }) => {
-    if (!req.transactionID || req.context.staffApplicationWrite !== true || !canParticipate(req.user as Identity)) throw new APIError("请从本人申请或管理工作台操作", 403);
+    if (!req.transactionID || req.context.staffApplicationWrite !== true || !canUseCampus(req.user as Identity)) throw new APIError("请从本人申请或管理工作台操作", 403);
     if (operation === "update") for (const key of ["batch", "applicant", "requestKey"]) {
       if (data[key] !== undefined && JSON.stringify(data[key]) !== JSON.stringify(originalDoc?.[key])) throw new APIError("不能转移申请批次或申请人", 403);
     }
