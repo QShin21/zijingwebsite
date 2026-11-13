@@ -18,6 +18,8 @@ export default buildConfig({
   email,
   secret: process.env.PAYLOAD_SECRET,
   serverURL,
+  // No anonymous usage events leave the server; behaviour and access are unchanged.
+  telemetry: false,
   admin: {
     user: "users",
     importMap: { baseDir: path.resolve(process.cwd()) },

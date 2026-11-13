@@ -1021,3 +1021,317 @@
     transform: none;
   }
 }
+
+/* ===== 像素校园 (2026-11-13): calendar tiles, outlined plates with hard shadows, inventory slots. ===== */
+.date,
+.date_lg {
+  border: 3px solid var(--z-px-outline);
+  border-radius: 0;
+  background: var(--z-stage);
+  color: var(--z-stage-ink);
+  box-shadow: inset 0 -4px 0 color-mix(in srgb, var(--z-stage-ink) 10%, transparent);
+}
+.date::before {
+  height: 8px;
+  background:
+    linear-gradient(90deg, transparent 0 14%, var(--z-px-outline) 14% 24%, transparent 24% 76%, var(--z-px-outline) 76% 86%, transparent 86%) top / 100% 3px no-repeat,
+    var(--z-accent);
+}
+.date_accent {
+  background: var(--z-accent);
+  color: var(--z-accent-ink);
+}
+.date_accent::before {
+  background:
+    linear-gradient(90deg, transparent 0 14%, var(--z-px-outline) 14% 24%, transparent 24% 76%, var(--z-px-outline) 76% 86%, transparent 86%) top / 100% 3px no-repeat,
+    var(--z-action);
+}
+.dateMonth,
+.dateWeek,
+.dateTbd {
+  font-family: var(--z-pixel);
+  font-weight: 400;
+}
+.dateMonth {
+  margin-top: 6px;
+}
+.dateDay {
+  font-family: var(--z-pixel);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.date_sm .dateDay {
+  font-size: 24px;
+}
+.date_md .dateDay {
+  font-size: 36px;
+}
+.date_lg .dateDay {
+  font-size: 60px;
+}
+.match,
+.match_spotlight,
+.article,
+.community,
+.showcase,
+.team,
+.call,
+.application,
+.membership {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+  background: var(--z-surface);
+  box-shadow: var(--z-shadow);
+  transition:
+    transform 90ms steps(2, end),
+    box-shadow 90ms steps(2, end);
+}
+.match:hover,
+.article:hover,
+.community:hover,
+.showcase:hover,
+.team:hover,
+.call:hover {
+  border-color: var(--z-px-outline);
+  box-shadow: 6px 6px 0 0 var(--z-px-shadow);
+  transform: translate(-2px, -2px);
+}
+.match:active,
+.article:active,
+.community:active,
+.showcase:active,
+.team:active,
+.call:active {
+  box-shadow: 2px 2px 0 0 var(--z-px-shadow);
+  transform: translate(2px, 2px);
+}
+.match[data-community]::before {
+  top: -2px;
+  bottom: -2px;
+  left: -2px;
+  width: 6px;
+  border-radius: 0;
+  background: hsl(var(--hue) 62% 56%);
+}
+.match_spotlight {
+  border-color: var(--z-px-outline);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--z-accent) 16%, transparent) 0 12px, transparent 12px),
+    var(--z-surface);
+  box-shadow: var(--z-shadow-strong);
+}
+.clubTag,
+.category,
+.promoted,
+.kindTag,
+.officer {
+  border-radius: 0;
+}
+.category {
+  border: 2px solid var(--z-line-strong);
+}
+.promoted {
+  box-shadow: inset 0 -2px 0 var(--z-accent-base);
+}
+.countdown,
+.noticeDate {
+  font-family: var(--z-pixel);
+  font-weight: 400;
+}
+.noticeDate {
+  font-size: 18px;
+}
+.matchCover {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+}
+.matchArrow {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+  background: var(--z-tint);
+  transition: transform 90ms steps(2, end);
+}
+.match:hover .matchArrow {
+  background: var(--z-action);
+  color: var(--z-action-ink);
+  transform: translateX(4px);
+}
+.notice {
+  border-bottom: 2px dashed var(--z-line);
+}
+/* Covers and media frames: a pixel slot with a hue tint and a 4px grid. */
+.cover {
+  border-bottom: 2px solid var(--z-px-outline);
+  background:
+    linear-gradient(color-mix(in srgb, #ffffff 7%, transparent) 1px, transparent 1px) 0 0 / 8px 8px,
+    linear-gradient(90deg, color-mix(in srgb, #ffffff 7%, transparent) 1px, transparent 1px) 0 0 / 8px 8px,
+    linear-gradient(180deg, hsl(var(--hue) 42% 30%) 0 50%, hsl(var(--hue) 46% 22%) 50% 78%, hsl(var(--hue) 50% 16%) 78%);
+}
+.coverLg {
+  border: 3px solid var(--z-px-outline);
+  border-radius: 0;
+}
+.gameIcon {
+  padding: 6px;
+  border: 3px solid var(--z-px-outline);
+  background: color-mix(in srgb, #ffffff 92%, hsl(var(--hue) 50% 50%));
+  box-shadow: 4px 4px 0 0 rgba(0, 0, 0, 0.35);
+}
+.cover .gameIcon img {
+  border-radius: 0;
+  filter: none;
+}
+.articleCover,
+.showcaseMedia {
+  border-bottom: 2px solid var(--z-px-outline);
+}
+.articleBadge,
+.todoIcon,
+.queueIcon {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+}
+.coverInitial,
+.teamCrest {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+  clip-path: none;
+  background: hsl(var(--hue, 290) 46% 30%);
+  color: #ffffff;
+  font-family: var(--z-pixel);
+  font-weight: 400;
+  text-shadow: none;
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.28), inset 0 3px 0 rgba(255, 255, 255, 0.22);
+}
+.honor {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, var(--z-accent) 0 6px, transparent 6px),
+    var(--z-stage);
+  color: var(--z-stage-ink);
+  box-shadow: var(--z-shadow);
+}
+.honor .small,
+.honorCompetition {
+  color: var(--z-stage-muted);
+}
+.honor:hover {
+  box-shadow: 6px 6px 0 0 var(--z-px-shadow);
+  transform: translate(-2px, -2px);
+}
+.trophy {
+  border-radius: 0;
+}
+.placing {
+  border-radius: 0;
+  font-family: var(--z-pixel);
+  font-weight: 400;
+}
+.honorImage {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+}
+.steps li > span {
+  border-radius: 0;
+}
+.queues li,
+.todo li,
+.receipt {
+  border-radius: 0;
+}
+.queueCount,
+.todoCount {
+  border-radius: 0;
+  font-family: var(--z-pixel);
+  font-weight: 400;
+}
+.mediaCount {
+  border-radius: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .match:hover,
+  .article:hover,
+  .community:hover,
+  .showcase:hover,
+  .team:hover,
+  .call:hover,
+  .honor:hover,
+  .match:active,
+  .article:active,
+  .community:active,
+  .showcase:active,
+  .team:active,
+  .call:active {
+    transform: none;
+  }
+}
+:global(:root[data-z-palette="simple"]) .match,
+:global(:root[data-z-palette="simple"]) .match_spotlight,
+:global(:root[data-z-palette="simple"]) .article,
+:global(:root[data-z-palette="simple"]) .community,
+:global(:root[data-z-palette="simple"]) .showcase,
+:global(:root[data-z-palette="simple"]) .team,
+:global(:root[data-z-palette="simple"]) .call,
+:global(:root[data-z-palette="simple"]) .application,
+:global(:root[data-z-palette="simple"]) .membership,
+:global(:root[data-z-palette="simple"]) .honor {
+  border-width: 1px;
+  border-color: var(--z-line);
+  border-radius: var(--z-radius);
+  box-shadow: none;
+}
+:global(:root[data-z-palette="simple"]) .match:hover,
+:global(:root[data-z-palette="simple"]) .article:hover,
+:global(:root[data-z-palette="simple"]) .community:hover,
+:global(:root[data-z-palette="simple"]) .showcase:hover,
+:global(:root[data-z-palette="simple"]) .team:hover,
+:global(:root[data-z-palette="simple"]) .call:hover,
+:global(:root[data-z-palette="simple"]) .honor:hover {
+  border-color: var(--z-action);
+  box-shadow: none;
+  transform: none;
+}
+:global(:root[data-z-palette="simple"]) .date,
+:global(:root[data-z-palette="simple"]) .gameIcon,
+:global(:root[data-z-palette="simple"]) .coverInitial,
+:global(:root[data-z-palette="simple"]) .teamCrest {
+  border-width: 1px;
+  border-radius: var(--z-radius-small);
+  box-shadow: none;
+}
+
+/* ===== Fable 阶段 (2026-11-13): accent edge light on hover/focus for card plates. ===== */
+.match:hover,
+.article:hover,
+.community:hover,
+.showcase:hover,
+.team:hover,
+.call:hover,
+.match:focus-within,
+.article:focus-within,
+.community:focus-within,
+.showcase:focus-within,
+.team:focus-within,
+.call:focus-within {
+  box-shadow:
+    6px 6px 0 0 var(--z-px-shadow),
+    inset 0 -4px 0 var(--z-accent);
+}
+.community:hover .gameIcon {
+  transform: translateY(-4px);
+  transition: transform 90ms steps(2, end);
+}
+@media (prefers-reduced-motion: reduce) {
+  .community:hover .gameIcon {
+    transform: none;
+  }
+}
+:global(:root[data-z-palette="simple"]) .match:hover,
+:global(:root[data-z-palette="simple"]) .article:hover,
+:global(:root[data-z-palette="simple"]) .community:hover,
+:global(:root[data-z-palette="simple"]) .showcase:hover,
+:global(:root[data-z-palette="simple"]) .team:hover,
+:global(:root[data-z-palette="simple"]) .call:hover {
+  box-shadow: none;
+}

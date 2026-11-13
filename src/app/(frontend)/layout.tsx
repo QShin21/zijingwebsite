@@ -4,16 +4,18 @@ import { site } from "@/lib/content";
 import { serverURL } from "@/lib/environment";
 import { Footer, MobileTabs, TopBar } from "@/components/v2/Shell";
 import { request } from "@/components/v2/data";
-import { themeColors, themeCookieName, themeFromPreference } from "@/components/v2/theme";
+import { themeColors, themeCookieName, themeFromPreference, themeScheme } from "@/components/v2/theme";
+import { pixelFont } from "@/components/v2/pixel-font";
 import shell from "@/components/v2/Shell.module.css";
 import "./tokens.css";
 import "./v2.css";
+import "./pixel.css";
 
 export const dynamic = "force-dynamic";
 
 export async function generateViewport(): Promise<Viewport> {
   const theme = themeFromPreference((await cookies()).get(themeCookieName)?.value);
-  return { themeColor: themeColors[theme], colorScheme: theme };
+  return { themeColor: themeColors[theme], colorScheme: themeScheme(theme) };
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -34,7 +36,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
   const theme = themeFromPreference(store.get(themeCookieName)?.value);
   const viewer = user ? { name: user.name || "成员" } : null;
   return (
-    <html lang="zh-CN" data-z-theme={theme}>
+    <html lang="zh-CN" data-z-theme={themeScheme(theme)} data-z-palette={theme} className={pixelFont.variable}>
       <body>
         <a className={shell.skip} href="#main">
           跳到正文

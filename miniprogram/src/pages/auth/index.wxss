@@ -56,3 +56,7 @@
 .auth-code button { flex-shrink: 0; }
 .auth-busy { text-align: center; }
 .auth-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8rpx 28rpx; margin-top: 20rpx; }
+/* 像素校园: square plates; the two-line email layout above is unchanged. */
+.auth-modes, .mini-page .auth-mode, .auth-domain { border-radius: 0; }
+.auth-modes { border: 4rpx solid var(--z-stage-line); }
+.auth-domain { border-width: 4rpx; }

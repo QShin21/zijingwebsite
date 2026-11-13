@@ -39,17 +39,13 @@ export function Brand({ name }: { name: string }) {
   return (
     <Link href="/" className={styles.brand} aria-label={`${name} 主场`}>
       <span className={styles.mark} aria-hidden="true">
-        <svg viewBox="0 0 40 40" width="36" height="36">
-          <rect x="1" y="1" width="38" height="38" rx="11" fill="var(--z-action)" />
-          <path d="M26.5 1H28a11 11 0 0 1 11 11v1.5z" fill="var(--z-accent)" />
-          <path
-            d="M12 13.5h13.5L13 26.5h15"
-            fill="none"
-            stroke="var(--z-action-ink)"
-            strokeWidth="3.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+        {/* 8×8 pixel badge with the site's decorative Z (not an institutional mark). */}
+        <svg viewBox="0 0 8 8" width="32" height="32" shapeRendering="crispEdges">
+          <rect width="8" height="8" fill="var(--z-px-outline)" />
+          <rect x="0.5" y="0.5" width="7" height="7" fill="var(--z-action)" />
+          <rect x="7" y="0" width="1" height="1" fill="var(--z-accent)" />
+          <path d="M1.5 1.5h5v1h-1v1h-1v1h-1v1h-1v-1h1v-1h1v-1h-3z" fill="var(--z-action-ink)" />
+          <path d="M1.5 5.5h5v1h-5z" fill="var(--z-action-ink)" />
         </svg>
       </span>
       <span className={styles.wordmark}>
@@ -108,6 +104,7 @@ export function MobileTabs({ signedIn }: { signedIn: boolean }) {
 export function Footer({ name, footer }: { name: string; footer?: string | null }) {
   return (
     <footer className={styles.footer}>
+      <span className={styles.footerSkyline} aria-hidden="true" />
       <div className={styles.footerInner}>
         <div className={styles.footerBrand}>
           <p className={styles.footerKicker}>紫荆赛场 · MATCHDAY</p>

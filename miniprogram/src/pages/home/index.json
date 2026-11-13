@@ -3,7 +3,7 @@
     "zj-stage": "/components/zj-stage/index"
   },
   "navigationStyle": "custom",
-  "backgroundColor": "#f2f1f5",
+  "backgroundColor": "#f3eee4",
   "backgroundTextStyle": "dark",
   "navigationBarTitleText": "竞在紫荆"
 }

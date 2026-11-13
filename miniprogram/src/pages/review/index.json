@@ -1,8 +1,8 @@
 {
   "usingComponents": {},
-  "navigationBarBackgroundColor": "#f2f1f5",
+  "navigationBarBackgroundColor": "#f3eee4",
   "navigationBarTextStyle": "black",
-  "backgroundColor": "#f2f1f5",
+  "backgroundColor": "#f3eee4",
   "backgroundTextStyle": "dark",
   "navigationBarTitleText": "申请审核"
 }

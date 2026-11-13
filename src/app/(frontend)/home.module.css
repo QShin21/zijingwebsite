@@ -269,3 +269,118 @@
     grid-template-columns: minmax(0, 1fr) auto;
   }
 }
+
+/* ===== 像素校园 (2026-11-13): paired half-width rows, dock cards, pixel counters. ===== */
+.block {
+  min-width: 0;
+}
+@media (min-width: 1024px) {
+  .pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 32px;
+    align-items: start;
+  }
+}
+.asideLabel {
+  color: var(--z-stage-ink);
+  font-family: var(--z-pixel);
+  font-weight: 400;
+}
+.asideLabel svg {
+  color: var(--z-accent);
+}
+.spotlight {
+  animation: none;
+}
+.joinCard {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+  background: var(--z-surface);
+  color: var(--z-ink);
+  box-shadow: var(--z-shadow);
+  backdrop-filter: none;
+}
+.joinCard p {
+  color: var(--z-muted);
+}
+.joinCard a:hover {
+  color: var(--z-action);
+}
+.joinIndex,
+.joinSteps li::before {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+  font-family: var(--z-pixel);
+  font-weight: 400;
+}
+.scoreboard a {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+  background: var(--z-surface);
+  color: var(--z-ink);
+  box-shadow: 3px 3px 0 var(--z-px-shadow);
+}
+.scoreboard a:hover {
+  border-color: var(--z-px-outline);
+  background: var(--z-tint);
+}
+.scoreboard span {
+  color: var(--z-muted);
+}
+.scoreboard strong {
+  font-family: var(--z-pixel);
+  font-size: 24px;
+  font-weight: 400;
+}
+.mePanel {
+  background: var(--z-surface);
+}
+.quick a {
+  border: 2px solid var(--z-line-strong);
+  border-radius: 0;
+}
+.quick a:hover {
+  border-color: var(--z-px-outline);
+  background: var(--z-tint);
+  transform: translateX(4px);
+}
+.quick strong {
+  border-radius: 0;
+  font-family: var(--z-pixel);
+  font-weight: 400;
+}
+.joinPanel {
+  border-color: var(--z-px-outline);
+  background: var(--z-stage-2);
+  color: var(--z-stage-ink);
+}
+.joinSteps p {
+  color: var(--z-stage-muted);
+}
+.about {
+  border: 3px solid var(--z-px-outline);
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, var(--z-accent) 0 8px, transparent 8px),
+    var(--z-stage);
+  color: var(--z-stage-ink);
+  box-shadow: var(--z-shadow);
+}
+.about p {
+  color: var(--z-stage-muted);
+}
+.aboutKicker {
+  color: var(--z-accent) !important;
+  font-family: var(--z-pixel);
+  font-weight: 400;
+  letter-spacing: 0.16em;
+}
+:global(:root[data-z-palette="simple"]) .joinCard,
+:global(:root[data-z-palette="simple"]) .scoreboard a,
+:global(:root[data-z-palette="simple"]) .about {
+  border-width: 1px;
+  border-color: var(--z-line);
+  border-radius: var(--z-radius);
+  box-shadow: none;
+}

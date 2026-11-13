@@ -193,3 +193,22 @@ video, .evidence-video, .honor-video, .showcase-video { display: block; width: 1
   .content-record .card-title, .shortcut-title, .fact-value { font-size: 16px; }
   .content-record .date-label { font-size: 12px; }
 }
+
+/* ===== 像素校园 (2026-11-13): square plates, dark outlines and hard shadows; same tokens as the web palettes. ===== */
+page { --zp-outline: #1d1430; --zp-shadow: rgba(29, 20, 48, .22); }
+.mini-page button { border: 4rpx solid var(--zp-outline); border-radius: 0; box-shadow: inset 0 -8rpx 0 rgba(0, 0, 0, .14), 0 6rpx 0 var(--zp-shadow); }
+.zj-dark { --zp-outline: #140d24; --zp-shadow: #140d24; }
+.mini-page button.button-hover { transform: translateY(6rpx); box-shadow: inset 0 6rpx 0 rgba(0, 0, 0, .16); }
+.mini-page button[disabled] { border-color: var(--z-line-strong); box-shadow: none; }
+.mini-page .primary, .mini-page .accent, .mini-page .secondary, .mini-page .danger { border-color: var(--zp-outline); }
+.mini-page .plain { border-color: transparent; box-shadow: none; }
+.mini-page .plain.button-hover { transform: none; box-shadow: none; opacity: .7; }
+.panel, .form-sheet, .status-panel, .notice-panel, .card, .filters { border: 4rpx solid var(--zp-outline); border-radius: 0; box-shadow: 8rpx 8rpx 0 var(--zp-shadow); }
+.form-sheet .panel { border: 0; border-top: 4rpx dashed var(--z-line); box-shadow: none; }
+.mini-page .chip { border: 4rpx solid var(--z-line-strong); border-radius: 0; }
+.mini-page .chip.active { background: var(--z-primary); color: var(--z-on-primary); border-color: var(--zp-outline); }
+input, textarea, .field picker, .picker-value, .search input { border-width: 4rpx; border-radius: 0; box-shadow: inset 6rpx 6rpx 0 rgba(0, 0, 0, .06); }
+.badge { border-radius: 0; }
+.error, .privacy-note, .branch-notice, .consent { border-radius: 0; }
+.state-dot { border-radius: 0; }
+.page-heading { border-bottom: 6rpx solid var(--zp-outline); }

@@ -2,9 +2,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { getHome, type HomeResponse, type HomeSection } from "@/lib/v2";
 import { read } from "@/components/v2/data";
-import { artAsset } from "@/components/v2/art";
-import { Stage, StageActions, StageKicker, StageLead, StageTitle, Ticker } from "@/components/v2/Stage";
-import { ButtonLink, EmptyState, Img, Section, Wrap } from "@/components/v2/ui";
+import { CampusHero, HeroActions, HeroKicker, HeroLead, HeroTitle } from "@/components/v2/CampusHero";
+import { HighlightsCarousel, NextUpStrip } from "@/components/v2/CampusMotion";
+import { pairHomeBlocks } from "@/components/v2/home-layout";
+import { ButtonLink, EmptyState, Section, Wrap } from "@/components/v2/ui";
 import { CommunityTile, FeedTile, MatchCard, NoticeRow, RecruitmentTile, ShowcaseTile } from "@/components/v2/cards";
 import { Icon } from "@/components/v2/Icon";
 import { empty, joinPaths } from "@/components/v2/copy";
@@ -216,18 +217,18 @@ function HomeBlock({ section, home }: { section: HomeSection; home: HomeResponse
       if (!home.highlights?.length) return null;
       return (
         <Section id="highlights" title={section.title} description="最新荣誉、精选风采与社团影像。" more={{ href: "/news", label: "全部动态" }}>
-          <div className={`${layout.mosaic} ${styles.highlights}`}>
-            {home.highlights.map((item) => (
+          <HighlightsCarousel
+            title={section.title}
+            labels={home.highlights.map((item) => (item.kind === "honor" ? item.item.title || item.item.competition : item.item.title))}
+            slides={home.highlights.map((item) => (
               <FeedTile key={item.item.key} item={item} promoted />
             ))}
-          </div>
+          />
         </Section>
       );
     case "about": {
-      const art = artAsset("monolith-detail.webp");
       return (
         <section className={styles.about} aria-labelledby="about-title">
-          {art && <span className={styles.aboutArt} aria-hidden="true" style={{ backgroundImage: `url(${art})` }} />}
           <div>
             <p className={styles.aboutKicker}>ABOUT ZIJING</p>
             <h2 id="about-title">{section.title}</h2>
@@ -255,13 +256,9 @@ export default async function Home() {
   const title = site.heroTitle?.trim() || null;
   const ticker = home.upcoming
     .filter((event) => event.startAt)
-    .map((event) => ({ key: event.key, text: `${formatShort(event.startAt)} · ${event.title}` }));
+    .map((event) => ({ key: event.key, href: event.href, text: `${formatShort(event.startAt)} · ${event.title}` }));
 
-  const aside = site.heroImage ? (
-    <figure className={styles.heroImage}>
-      <Img image={site.heroImage} eager sizes="(min-width: 1024px) 40vw, 100vw" />
-    </figure>
-  ) : spotlight ? (
+  const feature = spotlight ? (
     <div className={styles.spotlight}>
       <p className={styles.asideLabel}>
         <Icon name="spark" size={16} /> 焦点活动
@@ -272,22 +269,33 @@ export default async function Home() {
     <JoinPathsCard />
   );
 
+  // CMS order, titles and visibility are kept; only blocks that render take part in the layout.
+  const blocks = home.sections
+    .filter((section) => section.enabled)
+    .map((section) => ({ kind: section.kind, node: HomeBlock({ section, home }) }))
+    .filter((block) => block.node !== null && block.node !== undefined && block.node !== false);
+
   return (
     <>
-      <Stage label="主场" aside={aside} ticker={ticker.length > 1 ? <Ticker label="NEXT UP" items={ticker} /> : undefined}>
-        <StageKicker>
+      <CampusHero
+        label="主场"
+        heroImage={site.heroImage}
+        feature={feature}
+        side={ticker.length ? <NextUpStrip items={ticker} /> : undefined}
+      >
+        <HeroKicker>
           <strong>MATCHDAY</strong>
           清华大学学生紫荆电竞社 · 今天 {todayLabel(home.today)}
-        </StageKicker>
-        <StageTitle>
+        </HeroKicker>
+        <HeroTitle>
           {title ?? (
             <>
               竞在<em>紫荆</em>
             </>
           )}
-        </StageTitle>
-        <StageLead>{site.heroSubtitle || "一起玩，认真赢。社团活动、游戏社群、代表队与骨干招新，都在这里开场。"}</StageLead>
-        <StageActions>
+        </HeroTitle>
+        <HeroLead>{site.heroSubtitle || "一起玩，认真赢。社团活动、游戏社群、代表队与骨干招新，都在这里开场。"}</HeroLead>
+        <HeroActions>
           {viewer ? (
             <ButtonLink href="/events" tone="accent" icon="arrow">
               查看日程
@@ -307,7 +315,7 @@ export default async function Home() {
               查看日程
             </ButtonLink>
           )}
-        </StageActions>
+        </HeroActions>
         {home.me && (
           <ul className={styles.scoreboard} aria-label="我的主场">
             <li>
@@ -330,24 +338,21 @@ export default async function Home() {
             </li>
           </ul>
         )}
-      </Stage>
+      </CampusHero>
 
       <Wrap>
-        {site.heroImage && spotlight && (
-          <Section id="spotlight" title="焦点活动">
-            <MatchCard event={spotlight} variant="row" headingLevel={3} />
-          </Section>
-        )}
         <div className={styles.personal}>
           <PersonalPanel home={home} />
         </div>
-        {home.sections
-          .filter((section) => section.enabled)
-          .map((section) => (
-            <div key={section.kind} data-section={section.kind}>
-              <HomeBlock section={section} home={home} />
-            </div>
-          ))}
+        {pairHomeBlocks(blocks).map((row) => (
+          <div key={row.map((block) => block.kind).join("+")} className={row.length === 2 ? styles.pair : undefined}>
+            {row.map((block) => (
+              <div key={block.kind} data-section={block.kind} className={styles.block}>
+                {block.node}
+              </div>
+            ))}
+          </div>
+        ))}
       </Wrap>
     </>
   );

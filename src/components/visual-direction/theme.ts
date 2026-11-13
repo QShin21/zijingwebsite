@@ -6,5 +6,6 @@ export const themeColors = {
   dark: tokens.dark["header-bg"],
 };
 export function themeFromPreference(value: string | undefined): ThemeName {
-  return value === "dark" ? "dark" : "light";
+  // The public site stores palette names (清华经典/清凉夏夜 are dark) in the same cookie.
+  return value === "dark" || value === "classic" || value === "summer" ? "dark" : "light";
 }

@@ -664,3 +664,363 @@ a.communityChip:hover {
 .tabCount {
   border-radius: 4px;
 }
+
+/* ===== 像素校园 (2026-11-13): pixel plates, stepped sky headers, inventory tabs. ===== */
+.hero {
+  border-bottom: 3px solid var(--z-line);
+}
+.heroStage,
+.heroStage[data-hue] {
+  isolation: isolate;
+  border-bottom: 3px solid var(--z-px-outline);
+  background:
+    linear-gradient(
+      180deg,
+      var(--z-stage) 0 34%,
+      color-mix(in srgb, var(--z-stage) 70%, var(--z-stage-2)) 34% 58%,
+      color-mix(in srgb, var(--z-stage) 40%, var(--z-stage-2)) 58% 78%,
+      var(--z-stage-2) 78%
+    );
+  color: var(--z-stage-ink);
+}
+.heroStage[data-hue] {
+  background:
+    linear-gradient(
+      180deg,
+      hsl(var(--hue) 46% 18%) 0 34%,
+      hsl(var(--hue) 50% 23%) 34% 58%,
+      hsl(var(--hue) 54% 28%) 58% 78%,
+      hsl(var(--hue) 56% 33%) 78%
+    );
+  color: #fbf8ff;
+}
+/* Pixel skyline silhouette along the floor of every stage header. */
+.heroStage::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 36px;
+  background: var(--z-skyline);
+  -webkit-mask: url("./pixel-art/skyline-mask.png") left bottom / 240px 36px repeat-x;
+  mask: url("./pixel-art/skyline-mask.png") left bottom / 240px 36px repeat-x;
+  pointer-events: none;
+}
+.heroStage[data-hue]::after {
+  background: hsl(var(--hue) 50% 14% / 0.55);
+}
+.heroStage h1 {
+  text-shadow: none;
+}
+.heroStage[data-hue] .heroDescription,
+.heroStage[data-hue] .eyebrow,
+.heroStage[data-hue] .back {
+  color: rgba(251, 248, 255, 0.86);
+}
+.heroStage[data-hue] .back:hover {
+  color: #ffffff;
+}
+.eyebrow {
+  font-family: var(--z-pixel);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+}
+.eyebrow::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 0;
+  background: var(--z-accent);
+  box-shadow: 4px 4px 0 var(--z-action);
+}
+.heroStage .eyebrow {
+  color: var(--z-stage-muted);
+}
+.back {
+  font-family: var(--z-pixel);
+  font-weight: 400;
+}
+.sectionHead {
+  padding-bottom: 10px;
+  border-bottom: 3px solid var(--z-line);
+}
+.sectionHead h2 {
+  padding-left: 22px;
+}
+.sectionHead h2::before {
+  top: 50%;
+  bottom: auto;
+  width: 10px;
+  height: 10px;
+  margin-top: -7px;
+  background: var(--z-accent);
+  box-shadow: 4px 4px 0 var(--z-action);
+}
+.count {
+  border-radius: 0;
+  background: var(--z-accent);
+  color: var(--z-accent-ink);
+  font-family: var(--z-pixel);
+  font-weight: 400;
+}
+.more {
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+}
+.more:hover {
+  border-bottom-color: currentColor;
+}
+/* Buttons: outlined plates with a highlight, a shade and a 4px base that presses down. */
+.button {
+  --base: var(--z-button-base);
+  border: 3px solid var(--z-px-outline);
+  border-radius: 0;
+  box-shadow:
+    inset 0 3px 0 var(--z-px-hi),
+    inset 0 -4px 0 var(--z-px-lo),
+    0 4px 0 0 var(--base);
+  letter-spacing: 0.02em;
+  transition:
+    transform 80ms steps(2, end),
+    box-shadow 80ms steps(2, end),
+    background-color 120ms steps(3, end);
+}
+.button:hover {
+  transform: none;
+}
+.button:active {
+  transform: translateY(4px);
+  box-shadow:
+    inset 0 3px 0 var(--z-px-lo),
+    0 0 0 0 var(--base);
+}
+.primary,
+.primary:hover {
+  --base: var(--z-button-base);
+  background: var(--z-action);
+  color: var(--z-action-ink);
+}
+.primary:hover {
+  background: var(--z-action-hover);
+}
+.accent,
+.accent:hover {
+  --base: var(--z-accent-base);
+  background: var(--z-accent);
+  color: var(--z-accent-ink);
+}
+.accent:hover {
+  background: color-mix(in srgb, var(--z-accent) 88%, #ffffff);
+}
+.ghost {
+  --base: var(--z-line-strong);
+  border-color: var(--z-px-outline);
+  background: var(--z-surface);
+  color: var(--z-ink);
+}
+.ghost:hover {
+  border-color: var(--z-px-outline);
+  background: var(--z-tint);
+}
+.stage {
+  --base: color-mix(in srgb, var(--z-stage-ink) 28%, transparent);
+  border-color: var(--z-stage-ink);
+  background: color-mix(in srgb, var(--z-stage) 72%, var(--z-stage-ink));
+  color: var(--z-stage-ink);
+  backdrop-filter: none;
+}
+.stage:hover {
+  border-color: var(--z-stage-ink);
+  background: color-mix(in srgb, var(--z-stage) 60%, var(--z-stage-ink));
+}
+.danger {
+  --base: var(--z-danger-line);
+  border-color: var(--z-danger);
+}
+.chip,
+.communityChip,
+.pill {
+  border-radius: 0;
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, currentColor 22%, transparent);
+}
+.chipDot,
+.pillDot {
+  border-radius: 0;
+}
+.pill_live .pillDot {
+  animation: blink 1.2s steps(2, jump-none) infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+.empty {
+  border: 3px dashed var(--z-line-strong);
+  background: var(--z-surface);
+}
+.emptyIcon,
+.wallIcon {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+  box-shadow: 3px 3px 0 var(--z-px-shadow);
+}
+.empty h3 {
+  font-family: var(--z-pixel);
+  font-weight: 400;
+}
+.error,
+.notice {
+  border-radius: 0;
+  border-left-width: 6px;
+  border-left-style: solid;
+}
+.notice_info {
+  border-left-color: var(--z-info-line);
+}
+.notice_warning {
+  border-left-color: var(--z-warning-line);
+}
+.notice_success {
+  border-left-color: var(--z-success-line);
+}
+.notice_danger {
+  border-left-color: var(--z-danger-line);
+}
+.pagerStatus strong {
+  font-family: var(--z-pixel);
+  font-weight: 400;
+}
+/* Link tabs: an inventory bar; the current tab is a pressed plate with a check mark. */
+.tabs {
+  gap: 6px;
+  padding: 6px;
+  border: 3px solid var(--z-px-outline);
+  border-bottom-width: 3px;
+  background: var(--z-slot);
+}
+.tab {
+  min-height: 44px;
+  margin: 0;
+  padding: 6px 14px;
+  border: 2px solid transparent;
+  background: transparent;
+  color: var(--z-muted);
+  font-weight: 800;
+}
+.tab:hover {
+  border-color: var(--z-line-strong);
+  border-bottom-color: var(--z-line-strong);
+  background: var(--z-surface);
+  color: var(--z-ink);
+}
+.tab[aria-current="page"] {
+  border-color: var(--z-px-outline);
+  background: var(--z-action);
+  color: var(--z-action-ink);
+  box-shadow: inset 0 3px 0 var(--z-px-lo);
+}
+.tab[aria-current="page"]::before {
+  content: "▸";
+}
+.tabCount {
+  border-radius: 0;
+}
+.wall {
+  border: 3px solid var(--z-px-outline);
+  border-radius: 0;
+  background: var(--z-surface);
+  box-shadow: var(--z-shadow);
+}
+.avatar {
+  border-radius: 0;
+}
+.stack > span {
+  border-radius: 0;
+}
+.kv > div {
+  border-bottom: 2px dashed var(--z-line);
+}
+:global(:root[data-z-palette="simple"]) .heroStage,
+:global(:root[data-z-palette="simple"]) .tabs,
+:global(:root[data-z-palette="simple"]) .wall {
+  border-width: 1px;
+  border-color: var(--z-line);
+}
+:global(:root[data-z-palette="simple"]) .heroStage::after {
+  display: none;
+}
+:global(:root[data-z-palette="simple"]) .button {
+  border-width: 1.5px;
+  border-color: transparent;
+  border-radius: var(--z-radius-pill);
+  box-shadow: none;
+}
+:global(:root[data-z-palette="simple"]) .ghost {
+  border-color: var(--z-line-strong);
+}
+:global(:root[data-z-palette="simple"]) .button:active {
+  transform: none;
+}
+:global(:root[data-z-palette="simple"]) .tab {
+  border-radius: var(--z-radius-pill);
+}
+:global(:root[data-z-palette="simple"]) .tab[aria-current="page"] {
+  box-shadow: none;
+}
+:global(:root[data-z-palette="simple"]) .emptyIcon,
+:global(:root[data-z-palette="simple"]) .wallIcon {
+  border-width: 0;
+  box-shadow: none;
+}
+
+/* ===== Fable 阶段 (2026-11-13): button light sweep and section reveal. ===== */
+.button {
+  position: relative;
+  overflow: hidden;
+}
+.button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -40%;
+  width: 24%;
+  background: var(--z-px-hi);
+  transform: skewX(-20deg);
+  opacity: 0;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .button:hover::after,
+  .button:focus-visible::after {
+    opacity: 1;
+    animation: shine 480ms steps(8, end) 1 both;
+  }
+  @supports (animation-timeline: view()) {
+    .section {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+}
+@keyframes shine {
+  to {
+    left: 120%;
+  }
+}
+@keyframes reveal {
+  from {
+    opacity: 0.2;
+    transform: translateY(18px);
+  }
+}
+:global(:root[data-z-palette="simple"]) .button::after {
+  display: none;
+}
+:global(:root[data-z-palette="simple"]) .section {
+  animation: none;
+}

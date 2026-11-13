@@ -4,8 +4,8 @@
   "usingComponents": {
     "privacy-consent": "/components/privacy-consent/index"
   },
-  "navigationBarBackgroundColor": "#f2f1f5",
+  "navigationBarBackgroundColor": "#f3eee4",
   "navigationBarTextStyle": "black",
-  "backgroundColor": "#f2f1f5",
+  "backgroundColor": "#f3eee4",
   "backgroundTextStyle": "dark"
 }

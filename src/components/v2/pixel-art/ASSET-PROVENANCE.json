@@ -1,0 +1,19 @@
+{
+  "generatedBy": "scripts/pixel-campus-art.mjs",
+  "method": "Every pixel is drawn by project code (rectangles, discs, ordered dithering, seeded PRNG). No photographs, downloads, AI generation or third-party artwork are used.",
+  "contentLimits": "Invented hall, clock tower, esports arena, trees, lamps and benches. No real landmark, school emblem or plaque, game title or logo, brand mark, or person. The 'Z' pennant/banner repeats the site's own decorative Z mark.",
+  "reproduce": "node scripts/pixel-campus-art.mjs (write) / node scripts/pixel-campus-art.mjs --check (decoded pixels must match)",
+  "files": {
+    "campus-classic.png": "480×200 autumn night campus for 清华经典",
+    "campus-summer.png": "480×200 summer night campus with a pond for 清凉夏夜",
+    "campus-winter.png": "480×200 winter day campus with snow for 温煦冬日",
+    "skyline-mask.png": "320×48 white silhouette used as a CSS mask (header and footer skyline)"
+  },
+  "font": {
+    "file": "../fonts/fusion-pixel-12px.woff2",
+    "name": "Fusion Pixel Font 12px (TakWolf, https://github.com/TakWolf/fusion-pixel-font)",
+    "license": "SIL Open Font License 1.1, full text in ../fonts/OFL.txt",
+    "sha256": "4f0ccc75b874c97b79d0cbfa5babcd51d1fdc7da5be4ddc7f2895ccae3bc301d",
+    "note": "Same file as the reviewed PR #1 asset; carried over with its license only. PR photos, campus gate paintings and game icons were not carried over."
+  }
+}

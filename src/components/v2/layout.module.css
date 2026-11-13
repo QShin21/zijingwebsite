@@ -232,3 +232,88 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+/* ===== 像素校园 (2026-11-13): outlined panels, inset fields, pixel day headers. ===== */
+.panel {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+  box-shadow: var(--z-shadow);
+}
+.panelTitle {
+  font-family: var(--z-pixel);
+  font-size: 24px;
+  font-weight: 400;
+}
+.panelTitle a {
+  font-family: var(--z-sans);
+}
+.filters {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+  background: var(--z-slot);
+  box-shadow: var(--z-shadow);
+}
+.filters select,
+.filters input {
+  border-width: 2px;
+  border-radius: 0;
+  box-shadow: inset 3px 3px 0 color-mix(in srgb, var(--z-ink) 8%, transparent);
+}
+.filters label.filterCheck input {
+  border-radius: 0;
+}
+.dayHead {
+  padding: 12px 0 10px;
+  font-family: var(--z-pixel);
+  font-size: 18px;
+  font-weight: 400;
+}
+.dayHead::after {
+  height: 4px;
+  border-radius: 0;
+  background: repeating-linear-gradient(90deg, var(--z-line-strong) 0 8px, transparent 8px 12px);
+}
+.dayHead[data-today]::before {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+  box-shadow: 2px 2px 0 var(--z-px-shadow);
+}
+.rail::-webkit-scrollbar-thumb {
+  border-radius: 0;
+}
+:global(:root[data-z-palette="simple"]) .panel,
+:global(:root[data-z-palette="simple"]) .filters {
+  border-width: 1px;
+  border-color: var(--z-line);
+  border-radius: var(--z-radius);
+  box-shadow: none;
+}
+:global(:root[data-z-palette="simple"]) .filters select,
+:global(:root[data-z-palette="simple"]) .filters input {
+  border-width: 1.5px;
+  border-radius: var(--z-radius-small);
+  box-shadow: none;
+}
+:global(:root[data-z-palette="simple"]) .dayHead::after {
+  height: 1px;
+  background: var(--z-line);
+}
+
+/* Phones: every filter control takes a full row so selects never exceed the panel. */
+@media (max-width: 640px) {
+  .filters {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+  .filters label,
+  .filters label.filterCheck,
+  .filterActions {
+    flex: 1 1 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .filters select,
+  .filters input:not([type="checkbox"]) {
+    max-width: 100%;
+  }
+}

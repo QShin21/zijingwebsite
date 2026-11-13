@@ -1,0 +1,618 @@
+/* 像素校园 home stage, ambient sprites, next-up strip and highlights carousel (2026-11-13). */
+.hero {
+  position: relative;
+  border-bottom: 3px solid var(--z-px-outline);
+  background: var(--z-stage);
+  color: var(--z-stage-ink);
+}
+.window {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  min-height: clamp(400px, 44vw, 600px);
+  overflow: hidden;
+}
+/* The art box keeps the 480×200 drawing's ratio and is anchored bottom-right, so crops only
+   remove calm sky (wide screens) or the empty left lawn (narrow screens). */
+.scene {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  overflow: hidden;
+  container-type: size;
+  background: var(--z-stage);
+}
+.art {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: max(100cqw, 240cqh);
+  aspect-ratio: 12 / 5;
+  background: center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+}
+:global(:root[data-z-palette="classic"]) .art {
+  background-image: url("./pixel-art/campus-classic.png");
+}
+:global(:root[data-z-palette="summer"]) .art {
+  background-image: url("./pixel-art/campus-summer.png");
+}
+:global(:root[data-z-palette="winter"]) .art {
+  background-image: url("./pixel-art/campus-winter.png");
+}
+:global(:root[data-z-palette="simple"]) .art {
+  display: none;
+}
+.customImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Legibility shade behind the copy (left), stepped rather than smooth. */
+.scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--z-stage) 88%, transparent) 0 30%,
+    color-mix(in srgb, var(--z-stage) 62%, transparent) 30% 42%,
+    color-mix(in srgb, var(--z-stage) 30%, transparent) 42% 52%,
+    transparent 52%
+  );
+  pointer-events: none;
+}
+.scene[data-custom]::after {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--z-stage) 92%, transparent) 0 36%,
+    color-mix(in srgb, var(--z-stage) 70%, transparent) 36% 54%,
+    color-mix(in srgb, var(--z-stage) 20%, transparent) 54%
+  );
+}
+.copyWrap {
+  display: flex;
+  align-items: center;
+  width: min(100%, var(--z-max));
+  margin: 0 auto;
+  padding: clamp(40px, 6vw, 84px) var(--z-gutter) clamp(44px, 6vw, 92px);
+}
+.copy {
+  display: grid;
+  gap: 18px;
+  max-width: 620px;
+}
+.kicker {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  color: var(--z-stage-muted);
+  font-size: 14px;
+  font-weight: 800;
+}
+.kicker strong {
+  padding: 4px 10px;
+  border: 2px solid var(--z-px-outline);
+  background: var(--z-accent);
+  color: var(--z-accent-ink);
+  font-family: var(--z-pixel);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  box-shadow: 3px 3px 0 var(--z-px-shadow);
+}
+.title {
+  font-family: var(--z-pixel);
+  font-size: var(--z-text-display);
+  font-weight: 400;
+  line-height: 1.17;
+  letter-spacing: 0.02em;
+  text-shadow: 3px 3px 0 color-mix(in srgb, var(--z-px-outline) 70%, transparent);
+  overflow-wrap: anywhere;
+}
+.title em {
+  color: var(--z-accent);
+  font-style: normal;
+}
+.lead {
+  max-width: 34em;
+  color: var(--z-stage-muted);
+  font-size: clamp(16px, 1.4vw, 18px);
+  font-weight: 600;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding-bottom: 4px;
+}
+
+/* ---------- ambient sprites (decorative; CSS only, gated by data-motion) ---------- */
+.ambience {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ambience > span {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  display: none;
+  animation-delay: var(--delay, 0s);
+}
+.ambience[data-motion="pause"] > span {
+  animation-play-state: paused;
+}
+.star {
+  width: 0.42%;
+  aspect-ratio: 1;
+  background: #fff7dc;
+  animation: twinkle 3.2s steps(4, end) infinite;
+}
+.lamp {
+  width: 2.4%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, #ffe2a0 70%, transparent), transparent);
+  animation: glow 2.6s steps(3, end) infinite alternate;
+}
+.screen {
+  width: 23.75%;
+  height: 14%;
+  overflow: hidden;
+  display: block !important;
+}
+.screen::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 7%;
+  background: color-mix(in srgb, #ffffff 22%, transparent);
+  animation: scan 3.4s steps(14, end) infinite;
+}
+:global(:root[data-z-palette="simple"]) .screen {
+  display: none !important;
+}
+.leaf {
+  width: 0.42%;
+  aspect-ratio: 1;
+  background: #f4c94f;
+  box-shadow: 1px 1px 0 #c6861f;
+  animation: fall 6s steps(18, end) infinite;
+}
+.firefly {
+  width: 0.42%;
+  aspect-ratio: 1;
+  background: #fff3a0;
+  box-shadow: 0 0 6px 2px rgba(255, 236, 140, 0.55);
+  animation: drift 5.5s steps(10, end) infinite alternate;
+}
+.snow {
+  inset: 0;
+  left: 0 !important;
+  top: 0 !important;
+  background-image:
+    radial-gradient(circle at 20% 30%, #ffffff 0 1px, transparent 1.6px),
+    radial-gradient(circle at 70% 60%, #ffffff 0 1px, transparent 1.6px),
+    radial-gradient(circle at 45% 85%, #ffffff 0 1.2px, transparent 1.8px);
+  background-size: 64px 64px;
+  opacity: 0.8;
+  animation: snowfall 9s linear infinite;
+}
+.snowNear {
+  background-size: 96px 96px;
+  opacity: 0.95;
+  animation-duration: 6s;
+}
+:global(:root[data-z-palette="classic"]) .star,
+:global(:root[data-z-palette="summer"]) .star,
+:global(:root[data-z-palette="classic"]) .lamp,
+:global(:root[data-z-palette="summer"]) .lamp,
+:global(:root[data-z-palette="classic"]) .leaf,
+:global(:root[data-z-palette="summer"]) .firefly,
+:global(:root[data-z-palette="winter"]) .snow {
+  display: block;
+}
+@keyframes twinkle {
+  50% {
+    opacity: 0.15;
+  }
+}
+@keyframes glow {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scan {
+  from {
+    top: -10%;
+  }
+  to {
+    top: 105%;
+  }
+}
+@keyframes fall {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-260%, 1400%);
+  }
+}
+@keyframes drift {
+  0% {
+    opacity: 0.2;
+    transform: translate(0, 0);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.3;
+    transform: translate(240%, -380%);
+  }
+}
+@keyframes snowfall {
+  from {
+    background-position: 0 0, 0 0, 0 0;
+  }
+  to {
+    background-position: 16px 64px, -12px 64px, 8px 64px;
+  }
+}
+.snowNear {
+  animation-name: snowfallNear;
+}
+@keyframes snowfallNear {
+  from {
+    background-position: 0 0, 0 0, 0 0;
+  }
+  to {
+    background-position: -20px 96px, 14px 96px, -6px 96px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ambience > span,
+  .screen::after {
+    animation: none !important;
+  }
+  .screen::after,
+  .leaf,
+  .firefly {
+    visibility: hidden;
+  }
+}
+
+/* ---------- dock under the scene: feature card + side panel ---------- */
+.dock {
+  border-top: 3px solid var(--z-px-outline);
+  background: var(--z-stage-2);
+}
+.dockInner {
+  display: grid;
+  gap: 20px;
+  align-items: start;
+  width: min(100%, var(--z-max));
+  margin: 0 auto;
+  padding: 22px var(--z-gutter) 26px;
+}
+.feature,
+.side {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+@media (min-width: 960px) {
+  .dockInner[data-side] {
+    grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr);
+  }
+}
+
+/* ---------- next-up strip ---------- */
+.nextUp {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px 12px;
+  padding: 10px 12px;
+  border: 2px solid var(--z-px-outline);
+  background: var(--z-surface);
+  color: var(--z-ink);
+  box-shadow: var(--z-shadow);
+}
+.nextLabel {
+  padding: 3px 8px;
+  background: var(--z-px-outline);
+  color: #fff7dc;
+  font-family: var(--z-pixel);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+.nextViewport {
+  min-width: 0;
+}
+.nextItem {
+  display: block;
+  overflow: hidden;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nextItem:hover {
+  color: var(--z-action);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.controls {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.counter {
+  margin-right: auto;
+  color: var(--z-muted);
+  font-family: var(--z-pixel);
+  font-size: 12px;
+}
+.control {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--z-px-outline);
+  background: var(--z-raised);
+  color: var(--z-ink);
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--z-ink) 14%, transparent);
+}
+.control:hover {
+  background: var(--z-tint);
+}
+.control:active {
+  box-shadow: inset 0 3px 0 color-mix(in srgb, var(--z-ink) 14%, transparent);
+}
+
+/* ---------- highlights carousel ---------- */
+.carousel {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 3px solid var(--z-px-outline);
+  background: var(--z-stage);
+  box-shadow: var(--z-shadow);
+}
+.slides {
+  min-width: 0;
+}
+.slide[hidden] {
+  display: none;
+}
+.carouselBar {
+  display: grid;
+  gap: 8px;
+}
+.carouselBar .counter {
+  color: var(--z-stage-muted);
+}
+.dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.dot {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--z-px-outline);
+  background: var(--z-raised);
+}
+.dot[aria-current="true"] {
+  background: var(--z-accent);
+}
+
+/* ---------- narrow screens: copy first, then a cropped scene strip ---------- */
+@media (max-width: 759px) {
+  .window {
+    min-height: 0;
+  }
+  .copyWrap {
+    order: 1;
+    padding-top: 32px;
+    padding-bottom: 24px;
+  }
+  .scene {
+    position: relative;
+    z-index: 0;
+    inset: auto;
+    order: 2;
+    height: 190px;
+    border-top: 3px solid var(--z-px-outline);
+  }
+  .scene::after,
+  .scene[data-custom]::after {
+    background: none;
+  }
+}
+:global(:root[data-z-palette="simple"]) .window {
+  min-height: 0;
+}
+:global(:root[data-z-palette="simple"]) .scene:not([data-custom]) {
+  display: none;
+}
+:global(:root[data-z-palette="simple"]) .hero,
+:global(:root[data-z-palette="simple"]) .dock,
+:global(:root[data-z-palette="simple"]) .carousel,
+:global(:root[data-z-palette="simple"]) .nextUp {
+  border-width: 1px;
+  border-color: var(--z-line);
+  box-shadow: none;
+}
+:global(:root[data-z-palette="simple"]) .title {
+  font-weight: 800;
+  text-shadow: none;
+}
+
+/* ===== Fable 阶段 (2026-11-13): pointer depth, extra pixel light effects. Client-only, decorative. ===== */
+.art {
+  transform-origin: right bottom;
+  scale: 1.03;
+  translate: calc(var(--mx, 0) * -8px) calc(var(--my, 0) * -4px);
+  transition: translate 240ms steps(6, end);
+}
+.star,
+.shootingStar,
+.cloud {
+  translate: calc(var(--mx, 0) * 10px) calc(var(--my, 0) * 5px);
+}
+.spark,
+.leaf,
+.firefly {
+  translate: calc(var(--mx, 0) * -22px) calc(var(--my, 0) * -10px);
+}
+.shootingStar {
+  width: 0.42%;
+  aspect-ratio: 1;
+  background: #ffffff;
+  box-shadow: -4px 2px 0 rgba(255, 255, 255, 0.7), -8px 4px 0 rgba(255, 255, 255, 0.45), -12px 6px 0 rgba(255, 255, 255, 0.2);
+  opacity: 0;
+  animation: shoot 11s steps(24, end) infinite 3s;
+}
+.cloud {
+  width: 9%;
+  height: 4%;
+  background:
+    linear-gradient(#ffffff, #ffffff) 25% 0 / 50% 34% no-repeat,
+    linear-gradient(#ffffff, #ffffff) 50% 50% / 76% 34% no-repeat,
+    linear-gradient(#e3eaf1, #e3eaf1) 0 100% / 100% 34% no-repeat;
+  opacity: 0.9;
+  animation: cloud 46s linear infinite;
+}
+.spark {
+  width: 0.42%;
+  aspect-ratio: 1;
+  background: var(--z-accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--z-accent) 40%, transparent);
+  animation: sparkle 2.8s steps(4, end) infinite;
+}
+:global(:root[data-z-palette="classic"]) .shootingStar,
+:global(:root[data-z-palette="summer"]) .shootingStar,
+:global(:root[data-z-palette="winter"]) .cloud,
+:global(:root[data-z-palette="classic"]) .spark,
+:global(:root[data-z-palette="summer"]) .spark,
+:global(:root[data-z-palette="winter"]) .spark {
+  display: block;
+}
+@keyframes shoot {
+  0%,
+  88% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(4200%, 1500%);
+  }
+}
+@keyframes cloud {
+  from {
+    transform: translateX(-40%);
+  }
+  to {
+    transform: translateX(520%);
+  }
+}
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(2);
+  }
+}
+/* Title accent: a slow stepped light sweep across the highlighted word. */
+.title em {
+  background: linear-gradient(100deg, var(--z-accent) 0 42%, #ffffff 50%, var(--z-accent) 58% 100%) 100% 0 / 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(3px 3px 0 color-mix(in srgb, var(--z-px-outline) 70%, transparent));
+  animation: sweep 6s steps(30, end) infinite;
+}
+@keyframes sweep {
+  0%,
+  60% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+/* CRT scanlines over the scene, very faint; static. */
+.scene:not([data-custom])::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(0, 0, 0, 0.05) 3px 4px);
+  pointer-events: none;
+}
+/* Dock cards rise in once when scrolled into view (scroll-driven, no script). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .feature,
+    .side {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .art {
+    scale: 1;
+    translate: none;
+    transition: none;
+  }
+  .shootingStar,
+  .spark {
+    visibility: hidden;
+  }
+  .title em {
+    animation: none;
+    background-position: 100% 0;
+  }
+}
+:global(:root[data-z-palette="simple"]) .title em {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  color: var(--z-accent);
+  filter: none;
+}
+:global(:root[data-z-palette="simple"]) .scene::before {
+  display: none;
+}

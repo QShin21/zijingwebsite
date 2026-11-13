@@ -473,3 +473,251 @@
   color: var(--z-accent);
   letter-spacing: 0.32em;
 }
+
+/* ===== 像素校园 (2026-11-13): solid HUD bar, pixel tabs, palette menu, skyline footer. ===== */
+.skip {
+  border: 3px solid var(--z-px-outline);
+  border-radius: 0;
+}
+.bar {
+  border-bottom: 3px solid var(--z-px-outline);
+  background: var(--z-bar);
+  color: var(--z-header-ink);
+  box-shadow: 0 3px 0 0 color-mix(in srgb, var(--z-action) 30%, transparent);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.mark {
+  image-rendering: pixelated;
+}
+.brand:hover .mark {
+  transform: translateY(-2px);
+}
+.wordmark strong {
+  color: var(--z-header-ink);
+  font-family: var(--z-pixel);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+.wordmark small {
+  color: color-mix(in srgb, var(--z-header-ink) 72%, transparent);
+  letter-spacing: 0.22em;
+}
+.topLink {
+  min-height: 44px;
+  border-radius: 0;
+  color: color-mix(in srgb, var(--z-header-ink) 78%, transparent);
+  font-weight: 800;
+}
+.topLink:hover {
+  background: color-mix(in srgb, var(--z-action) 14%, transparent);
+  color: var(--z-header-ink);
+}
+.topLink[aria-current="page"] {
+  color: var(--z-header-ink);
+}
+.topLink[aria-current="page"]::after {
+  right: 16px;
+  bottom: -11px;
+  left: 16px;
+  height: 4px;
+  border-radius: 0;
+  background: var(--z-accent);
+  box-shadow: 4px 0 0 var(--z-action), -4px 0 0 var(--z-action);
+}
+.iconButton {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+  background: var(--z-surface);
+  color: var(--z-ink);
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--z-ink) 12%, transparent);
+}
+.iconButton:hover,
+.iconButton[aria-expanded="true"] {
+  border-color: var(--z-px-outline);
+  background: var(--z-tint);
+}
+.loginLink {
+  color: var(--z-header-ink);
+}
+.loginLink:hover {
+  color: var(--z-action);
+}
+.joinPill {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+  background: var(--z-accent);
+  color: var(--z-accent-ink);
+  box-shadow: inset 0 2px 0 var(--z-px-hi), 0 3px 0 0 var(--z-accent-base);
+  clip-path: none;
+}
+.joinPill:hover {
+  box-shadow: inset 0 2px 0 var(--z-px-hi), 0 3px 0 0 var(--z-accent-base);
+  transform: translateY(-1px);
+}
+.avatarLink {
+  border: 2px solid var(--z-px-outline);
+  border-radius: 0;
+  background: var(--z-surface);
+  color: var(--z-ink);
+}
+.avatarLink:hover {
+  border-color: var(--z-px-outline);
+  background: var(--z-tint);
+}
+.avatar {
+  border-radius: 0;
+  background: var(--z-action);
+  color: var(--z-action-ink);
+  box-shadow: inset 0 -3px 0 var(--z-px-lo);
+}
+/* Palette menu: a disclosure that drops a pixel panel under the trigger. */
+.themeMenu {
+  position: relative;
+}
+.themeOptions {
+  position: absolute;
+  z-index: calc(var(--z-layer-nav) + 1);
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  gap: 4px;
+  min-width: 168px;
+  padding: 6px;
+  border: 3px solid var(--z-px-outline);
+  background: var(--z-surface);
+  box-shadow: var(--z-shadow-strong);
+}
+.themeOptions[hidden] {
+  display: none;
+}
+.themeOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 2px solid transparent;
+  background: transparent;
+  color: var(--z-ink);
+  font-weight: 800;
+  text-align: left;
+}
+.themeOption:hover {
+  background: var(--z-tint);
+}
+.themeOption[aria-pressed="true"] {
+  border-color: var(--z-px-outline);
+  background: var(--z-action);
+  color: var(--z-action-ink);
+}
+.themeOption[aria-pressed="true"]::after {
+  content: "✓";
+  margin-left: auto;
+}
+.themeSwatch {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--z-px-outline);
+}
+.themeOption[data-palette="classic"] .themeSwatch {
+  background: linear-gradient(135deg, #2a1f3d 50%, #f6c453 50%);
+}
+.themeOption[data-palette="summer"] .themeSwatch {
+  background: linear-gradient(135deg, #0f2530 50%, #8fe8c9 50%);
+}
+.themeOption[data-palette="winter"] .themeSwatch {
+  background: linear-gradient(135deg, #fffaf2 50%, #5b2b7a 50%);
+}
+.themeOption[data-palette="simple"] .themeSwatch {
+  background: linear-gradient(135deg, #ffffff 50%, #5a2d82 50%);
+}
+.tabs {
+  border-top: 3px solid var(--z-px-outline);
+  background: var(--z-bar);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.tab {
+  color: color-mix(in srgb, var(--z-header-ink) 76%, transparent);
+}
+.tab[aria-current="page"] {
+  color: var(--z-header-ink);
+}
+.tabIcon {
+  border-radius: 0;
+}
+.tab[aria-current="page"] .tabIcon {
+  background: var(--z-tint);
+  box-shadow: inset 0 -3px 0 var(--z-accent);
+  color: var(--z-ink);
+}
+/* Footer: palette floor with a repeating pixel skyline along its top edge. */
+.footer {
+  margin-top: 36px;
+  overflow: visible;
+  border-top: 3px solid var(--z-px-outline);
+  background: var(--z-footer-bg);
+  color: var(--z-footer-ink);
+}
+.footerSkyline {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 3px);
+  left: 0;
+  height: 36px;
+  background: var(--z-skyline);
+  -webkit-mask: url("./pixel-art/skyline-mask.png") left bottom / 240px 36px repeat-x;
+  mask: url("./pixel-art/skyline-mask.png") left bottom / 240px 36px repeat-x;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+.footerBrand strong {
+  font-family: var(--z-pixel);
+  font-size: 24px;
+  font-weight: 400;
+}
+.footerBrand p:last-child,
+.footerNav p,
+.footerLegal {
+  color: var(--z-stage-muted);
+}
+.footerKicker {
+  color: var(--z-accent);
+  font-family: var(--z-pixel);
+  letter-spacing: 0.12em;
+}
+.footerLegal {
+  border-top: 2px dashed color-mix(in srgb, var(--z-footer-ink) 24%, transparent);
+}
+.footerNav a:hover,
+.records a:hover {
+  color: var(--z-action);
+}
+:global(:root[data-z-palette="classic"]) .footerNav a:hover,
+:global(:root[data-z-palette="summer"]) .footerNav a:hover,
+:global(:root[data-z-palette="classic"]) .records a:hover,
+:global(:root[data-z-palette="summer"]) .records a:hover {
+  color: var(--z-accent);
+}
+:global(:root[data-z-palette="simple"]) .bar,
+:global(:root[data-z-palette="simple"]) .tabs,
+:global(:root[data-z-palette="simple"]) .footer {
+  border-width: 1px;
+  border-color: var(--z-line);
+  box-shadow: none;
+}
+:global(:root[data-z-palette="simple"]) .iconButton,
+:global(:root[data-z-palette="simple"]) .avatarLink,
+:global(:root[data-z-palette="simple"]) .joinPill,
+:global(:root[data-z-palette="simple"]) .themeOptions {
+  border-width: 1.5px;
+  border-color: var(--z-line-strong);
+  border-radius: 8px;
+  box-shadow: none;
+}
+:global(:root[data-z-palette="simple"]) .footerSkyline {
+  display: none;
+}

@@ -5,17 +5,19 @@ import { notFound } from "next/navigation";
 import { site } from "@/lib/content";
 import { Footer, MobileTabs, TopBar } from "@/components/v2/Shell";
 import { request } from "@/components/v2/data";
-import { themeColors, themeCookieName, themeFromPreference } from "@/components/v2/theme";
+import { themeColors, themeCookieName, themeFromPreference, themeScheme } from "@/components/v2/theme";
+import { pixelFont } from "@/components/v2/pixel-font";
 import shell from "@/components/v2/Shell.module.css";
 import "../(frontend)/tokens.css";
 import "../(frontend)/v2.css";
+import "../(frontend)/pixel.css";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "紫荆 · V2 组件样张", robots: { index: false, follow: false } };
 
 export async function generateViewport(): Promise<Viewport> {
   const theme = themeFromPreference((await cookies()).get(themeCookieName)?.value);
-  return { themeColor: themeColors[theme], colorScheme: theme };
+  return { themeColor: themeColors[theme], colorScheme: themeScheme(theme) };
 }
 
 /** Non-production specimen of the V2 system for signed-in reviewers. */
@@ -25,7 +27,7 @@ export default async function DesignLayout({ children }: { children: ReactNode }
   if (!user) notFound();
   const theme = themeFromPreference(store.get(themeCookieName)?.value);
   return (
-    <html lang="zh-CN" data-z-theme={theme}>
+    <html lang="zh-CN" data-z-theme={themeScheme(theme)} data-z-palette={theme} className={pixelFont.variable}>
       <body>
         <a className={shell.skip} href="#design-main">
           跳到正文

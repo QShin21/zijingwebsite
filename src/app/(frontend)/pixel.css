@@ -1,0 +1,457 @@
+/*
+ * 像素校园 · web-only palette layer (2026-11-13).
+ * Loaded after tokens.css and v2.css. src/design/tokens.json, the generated tokens.css and the
+ * mini program are unchanged; this file overrides the same --z-* variables per palette:
+ *   :root[data-z-palette="classic|summer|winter|simple"]
+ * `data-z-theme` keeps the light/dark scheme for every existing [data-z-theme="dark"] rule.
+ * Contrast pairs are checked by tests/pixel-main-upgrade.test.ts.
+ */
+html:root {
+  --z-px: 4px;
+  --z-pixel: var(--z-pixel-font, "PingFang SC"), var(--z-sans);
+  --z-px-outline: #1c1430;
+  --z-px-shadow: #1c1430;
+  --z-px-hi: rgba(255, 255, 255, 0.34);
+  --z-px-lo: rgba(0, 0, 0, 0.26);
+  --z-button-base: #3a1650;
+  --z-accent-base: #8a5a14;
+  --z-skyline: rgba(0, 0, 0, 0.2);
+  --z-slot: var(--z-raised);
+  --z-text-display: 48px;
+  --z-text-h1: 36px;
+  --z-text-h2: 24px;
+  --z-leading-title: 1.25;
+  --z-radius: 0px;
+  --z-radius-small: 0px;
+  --z-radius-sheet: 0px;
+  --z-radius-pill: 0px;
+}
+
+/* ---------- 清华经典 · deep grape night, autumn gold ---------- */
+html:root[data-z-palette="classic"] {
+  color-scheme: dark;
+  --z-paper: #2a1f3d;
+  --z-surface: #3a2b52;
+  --z-raised: #47365f;
+  --z-ink: #fbf6ff;
+  --z-muted: #d9cbe8;
+  --z-action: #f6c453;
+  --z-action-hover: #ffd77a;
+  --z-action-ink: #2a1a08;
+  --z-tint: #4b3a66;
+  --z-accent: #ff8fc8;
+  --z-accent-ink: #2a0f22;
+  --z-line: #5b4778;
+  --z-line-strong: #8f78ad;
+  --z-field: #24193a;
+  --z-field-border: #a891c7;
+  --z-focus: #7ff0d0;
+  --z-danger: #ffb0a6;
+  --z-danger-bg: #4a2230;
+  --z-danger-line: #a4606c;
+  --z-success: #9be8c4;
+  --z-success-bg: #1f3d36;
+  --z-success-line: #4f8a78;
+  --z-warning: #ffd88a;
+  --z-warning-bg: #45361f;
+  --z-warning-line: #9a7b45;
+  --z-info: #a9d4ff;
+  --z-info-bg: #22344c;
+  --z-info-line: #5a7fa6;
+  --z-disabled-bg: #4a3d5c;
+  --z-disabled-ink: #cbbfda;
+  --z-stage: #1d1430;
+  --z-stage-2: #2b1d48;
+  --z-stage-ink: #fbf6ff;
+  --z-stage-muted: #d2c4e6;
+  --z-stage-line: rgba(251, 246, 255, 0.16);
+  --z-bar: rgba(29, 20, 48, 0.96);
+  --z-overlay: rgba(10, 6, 20, 0.7);
+  --z-shadow: 4px 4px 0 0 #140d24;
+  --z-shadow-strong: 6px 6px 0 0 #140d24;
+  --z-purple: #d3a8f5;
+  --z-hover: #e4c6fa;
+  --z-lilac: #d3a8f5;
+  --z-amber: #ffd88a;
+  --z-header-bg: #1d1430;
+  --z-header-ink: #fbf6ff;
+  --z-footer-bg: #1d1430;
+  --z-footer-ink: #fbf6ff;
+  --z-media: #241a37;
+  --z-dark: #1d1430;
+  --z-dark-muted: #d2c4e6;
+  --z-px-outline: #140d24;
+  --z-px-shadow: #140d24;
+  --z-button-base: #8d5f0f;
+  --z-accent-base: #a8457a;
+  --z-skyline: #3b2a58;
+  --z-slot: #2f2346;
+}
+
+/* ---------- 清凉夏夜 · teal night, mint and firefly yellow ---------- */
+html:root[data-z-palette="summer"] {
+  color-scheme: dark;
+  --z-paper: #0f2530;
+  --z-surface: #16323f;
+  --z-raised: #1d3f4e;
+  --z-ink: #eef8f3;
+  --z-muted: #b9d3d3;
+  --z-action: #8fe8c9;
+  --z-action-hover: #b4f3dc;
+  --z-action-ink: #0b2a24;
+  --z-tint: #1f4655;
+  --z-accent: #ffd36e;
+  --z-accent-ink: #2a2208;
+  --z-line: #2c5262;
+  --z-line-strong: #5a8796;
+  --z-field: #0c1f28;
+  --z-field-border: #7fa8b4;
+  --z-focus: #ffd36e;
+  --z-danger: #ffaaa0;
+  --z-danger-bg: #3d2226;
+  --z-danger-line: #9a5c60;
+  --z-success: #9be8c4;
+  --z-success-bg: #163a33;
+  --z-success-line: #4c8a77;
+  --z-warning: #ffd88a;
+  --z-warning-bg: #3a3220;
+  --z-warning-line: #8f7845;
+  --z-info: #a6d8ff;
+  --z-info-bg: #17344a;
+  --z-info-line: #4f7ea0;
+  --z-disabled-bg: #24414d;
+  --z-disabled-ink: #b3c8cc;
+  --z-stage: #08202a;
+  --z-stage-2: #0f3240;
+  --z-stage-ink: #eef8f3;
+  --z-stage-muted: #b6d0cf;
+  --z-stage-line: rgba(238, 248, 243, 0.15);
+  --z-bar: rgba(8, 32, 42, 0.96);
+  --z-overlay: rgba(3, 12, 16, 0.72);
+  --z-shadow: 4px 4px 0 0 #04141b;
+  --z-shadow-strong: 6px 6px 0 0 #04141b;
+  --z-purple: #9fdcff;
+  --z-hover: #c3eaff;
+  --z-lilac: #9fdcff;
+  --z-amber: #ffd88a;
+  --z-header-bg: #08202a;
+  --z-header-ink: #eef8f3;
+  --z-footer-bg: #08202a;
+  --z-footer-ink: #eef8f3;
+  --z-media: #0c2029;
+  --z-dark: #08202a;
+  --z-dark-muted: #b6d0cf;
+  --z-px-outline: #04141b;
+  --z-px-shadow: #04141b;
+  --z-button-base: #3a8a70;
+  --z-accent-base: #a8802c;
+  --z-skyline: #123542;
+  --z-slot: #12303c;
+}
+
+/* ---------- 温煦冬日 · warm ivory day, plum actions, evergreen accents (default) ---------- */
+html:root[data-z-palette="winter"] {
+  color-scheme: light;
+  --z-paper: #f3eee4;
+  --z-surface: #fffaf2;
+  --z-raised: #ffffff;
+  --z-ink: #24302b;
+  --z-muted: #56635c;
+  --z-action: #5b2b7a;
+  --z-action-hover: #4a1f66;
+  --z-action-ink: #ffffff;
+  --z-tint: #ece3f1;
+  --z-accent: #2f6b55;
+  --z-accent-ink: #ffffff;
+  --z-line: #ddd5c6;
+  --z-line-strong: #b9ae9b;
+  --z-field: #fffdf8;
+  --z-field-border: #7d7466;
+  --z-focus: #5b2b7a;
+  --z-danger: #a3322a;
+  --z-danger-bg: #fbe6e1;
+  --z-danger-line: #e0a59b;
+  --z-success: #276445;
+  --z-success-bg: #e3f1e5;
+  --z-success-line: #8fbf9c;
+  --z-warning: #7d5210;
+  --z-warning-bg: #f8ebcf;
+  --z-warning-line: #d4b06a;
+  --z-info: #245b85;
+  --z-info-bg: #e2edf5;
+  --z-info-line: #8fb0cb;
+  --z-disabled-bg: #e7e1d6;
+  --z-disabled-ink: #635d54;
+  --z-stage: #dfe9f0;
+  --z-stage-2: #f6e7d3;
+  --z-stage-ink: #24302b;
+  --z-stage-muted: #4b5852;
+  --z-stage-line: rgba(36, 48, 43, 0.18);
+  --z-bar: rgba(255, 250, 242, 0.96);
+  --z-overlay: rgba(36, 48, 43, 0.45);
+  --z-shadow: 4px 4px 0 0 #d8cdb9;
+  --z-shadow-strong: 6px 6px 0 0 #cbbfa8;
+  --z-purple: #5b2b7a;
+  --z-hover: #4a1f66;
+  --z-lilac: #5b2b7a;
+  --z-amber: #7d5210;
+  --z-header-bg: #fffaf2;
+  --z-header-ink: #24302b;
+  --z-footer-bg: #e1e7ec;
+  --z-footer-ink: #24302b;
+  --z-media: #e6e1d6;
+  --z-dark: #24302b;
+  --z-dark-muted: #4b5852;
+  --z-px-outline: #3b3346;
+  --z-px-shadow: #d2c6b2;
+  --z-px-hi: rgba(255, 255, 255, 0.4);
+  --z-px-lo: rgba(0, 0, 0, 0.22);
+  --z-button-base: #331345;
+  --z-accent-base: #1b4537;
+  --z-skyline: #c4d3de;
+  --z-slot: #f1ebe0;
+}
+
+/* ---------- 简约 · system fonts, flat controls, no scenery or motion ---------- */
+html:root[data-z-palette="simple"] {
+  color-scheme: light;
+  --z-pixel: var(--z-sans);
+  --z-paper: #f7f7f5;
+  --z-surface: #ffffff;
+  --z-raised: #ffffff;
+  --z-ink: #1c1c21;
+  --z-muted: #57585f;
+  --z-action: #5a2d82;
+  --z-action-hover: #48226b;
+  --z-action-ink: #ffffff;
+  --z-tint: #efe9f4;
+  --z-accent: #8f5d00;
+  --z-accent-ink: #ffffff;
+  --z-line: #e3e3e0;
+  --z-line-strong: #c4c4c0;
+  --z-field: #ffffff;
+  --z-field-border: #77777e;
+  --z-focus: #5a2d82;
+  --z-danger: #a3322a;
+  --z-danger-bg: #fbe6e1;
+  --z-danger-line: #e0a59b;
+  --z-success: #276445;
+  --z-success-bg: #e3f1e5;
+  --z-success-line: #8fbf9c;
+  --z-warning: #7d5210;
+  --z-warning-bg: #f8ebcf;
+  --z-warning-line: #d4b06a;
+  --z-info: #245b85;
+  --z-info-bg: #e2edf5;
+  --z-info-line: #8fb0cb;
+  --z-disabled-bg: #ececea;
+  --z-disabled-ink: #5f6067;
+  --z-stage: #f0edf4;
+  --z-stage-2: #f7f7f5;
+  --z-stage-ink: #1c1c21;
+  --z-stage-muted: #57585f;
+  --z-stage-line: rgba(28, 28, 33, 0.12);
+  --z-bar: rgba(255, 255, 255, 0.97);
+  --z-overlay: rgba(28, 28, 33, 0.45);
+  --z-shadow: 0 1px 2px rgba(28, 28, 33, 0.08);
+  --z-shadow-strong: 0 8px 24px rgba(28, 28, 33, 0.12);
+  --z-purple: #5a2d82;
+  --z-hover: #48226b;
+  --z-lilac: #5a2d82;
+  --z-amber: #7d5210;
+  --z-header-bg: #ffffff;
+  --z-header-ink: #1c1c21;
+  --z-footer-bg: #efefec;
+  --z-footer-ink: #1c1c21;
+  --z-media: #ececea;
+  --z-dark: #1c1c21;
+  --z-dark-muted: #57585f;
+  --z-px-outline: #c4c4c0;
+  --z-px-shadow: transparent;
+  --z-px-hi: transparent;
+  --z-px-lo: transparent;
+  --z-button-base: transparent;
+  --z-accent-base: transparent;
+  --z-skyline: transparent;
+  --z-slot: #f3f2f6;
+  --z-radius: 8px;
+  --z-radius-small: 6px;
+  --z-radius-sheet: 12px;
+  --z-radius-pill: 999px;
+  --z-leading-title: 1.2;
+}
+
+@media (min-width: 768px) {
+  html:root {
+    --z-text-h1: 48px;
+    --z-text-display: 60px;
+  }
+}
+@media (min-width: 1100px) {
+  html:root {
+    --z-text-display: 72px;
+  }
+}
+
+/* ---------- base ---------- */
+body {
+  background-color: var(--z-paper);
+}
+html:root:not([data-z-palette="simple"]) body {
+  /* Faint 4px pixel grid on the page paper; content surfaces stay solid. */
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--z-ink) 3.5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--z-ink) 3.5%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+h1,
+h2 {
+  font-family: var(--z-pixel);
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0.02em;
+}
+html:root[data-z-palette="simple"] h1,
+html:root[data-z-palette="simple"] h2 {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+:where(a, button, summary, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--z-focus);
+  outline-offset: 3px;
+  border-radius: 0;
+}
+html:root[data-z-palette="simple"] :where(a, button, summary, input, select, textarea, [tabindex]):focus-visible {
+  border-radius: 6px;
+}
+::selection {
+  background: var(--z-accent);
+  color: var(--z-accent-ink);
+}
+
+/* ---------- form kit: pixel plates for the retained global classes ---------- */
+.button {
+  position: relative;
+  border: 3px solid var(--z-px-outline);
+  border-radius: 0;
+  background: var(--z-action);
+  color: var(--z-action-ink);
+  box-shadow:
+    inset 0 3px 0 var(--z-px-hi),
+    inset 0 -4px 0 var(--z-px-lo),
+    0 4px 0 0 var(--z-button-base);
+  transition:
+    transform 80ms steps(2, end),
+    box-shadow 80ms steps(2, end),
+    background-color 120ms steps(3, end);
+}
+.button:not(:disabled):not([aria-disabled="true"]):hover {
+  border-color: var(--z-px-outline);
+  background: var(--z-action-hover);
+  box-shadow:
+    inset 0 3px 0 var(--z-px-hi),
+    inset 0 -4px 0 var(--z-px-lo),
+    0 4px 0 0 var(--z-button-base);
+  transform: none;
+}
+.button:not(:disabled):not([aria-disabled="true"]):active {
+  box-shadow:
+    inset 0 3px 0 var(--z-px-lo),
+    0 0 0 0 var(--z-button-base);
+  transform: translateY(4px);
+}
+.button.light {
+  background: var(--z-surface);
+  border-color: var(--z-px-outline);
+  color: var(--z-ink);
+  box-shadow:
+    inset 0 3px 0 var(--z-px-hi),
+    inset 0 -4px 0 color-mix(in srgb, var(--z-ink) 10%, transparent),
+    0 4px 0 0 var(--z-line-strong);
+}
+.button.light:not(:disabled):not([aria-disabled="true"]):hover {
+  background: var(--z-tint);
+  border-color: var(--z-px-outline);
+  box-shadow:
+    inset 0 3px 0 var(--z-px-hi),
+    inset 0 -4px 0 color-mix(in srgb, var(--z-ink) 10%, transparent),
+    0 4px 0 0 var(--z-line-strong);
+}
+.button:disabled,
+.button[aria-disabled="true"] {
+  border-color: var(--z-line-strong);
+  background: var(--z-disabled-bg);
+  color: var(--z-disabled-ink);
+  box-shadow: none;
+  transform: none;
+}
+.member-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.member-form select,
+.member-form textarea {
+  border-width: 2px;
+  border-radius: 0;
+  box-shadow: inset 3px 3px 0 color-mix(in srgb, var(--z-ink) 7%, transparent);
+}
+.member-form fieldset {
+  border-radius: 0;
+}
+.empty,
+.questionnaire-option,
+.questionnaire .signup-question {
+  border-radius: 0;
+}
+html:root[data-z-palette="simple"] .button {
+  border-width: 1.5px;
+  border-color: var(--z-action);
+  border-radius: var(--z-radius-pill);
+  box-shadow: none;
+  transition: background-color var(--z-duration) var(--z-ease);
+}
+html:root[data-z-palette="simple"] .button:not(:disabled):not([aria-disabled="true"]):hover,
+html:root[data-z-palette="simple"] .button:not(:disabled):not([aria-disabled="true"]):active,
+html:root[data-z-palette="simple"] .button.light,
+html:root[data-z-palette="simple"] .button.light:not(:disabled):not([aria-disabled="true"]):hover {
+  box-shadow: none;
+  transform: none;
+}
+html:root[data-z-palette="simple"] .button.light {
+  border-color: var(--z-line-strong);
+}
+html:root[data-z-palette="simple"] .member-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html:root[data-z-palette="simple"] .member-form select,
+html:root[data-z-palette="simple"] .member-form textarea {
+  border-width: 1.5px;
+  border-radius: var(--z-radius-small);
+  box-shadow: none;
+}
+
+/* ---------- theme switch: short stepped wipe (skipped by the script for 简约 / reduced motion) ---------- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) {
+  animation: z-pixel-wipe 320ms steps(8, end) both;
+}
+@keyframes z-pixel-wipe {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+html:root[data-z-palette="simple"] *,
+html:root[data-z-palette="simple"] *::before,
+html:root[data-z-palette="simple"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+}

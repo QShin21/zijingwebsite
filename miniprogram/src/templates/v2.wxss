@@ -243,3 +243,44 @@
 .mini-page .zj-segment.active { background: transparent; box-shadow: none; color: var(--z-text); font-weight: 900; border-bottom-color: var(--z-accent); }
 .zj-pill-live { background: linear-gradient(135deg, #f6d98b, var(--z-accent)); }
 .zj-dock { border-top-color: var(--z-line-strong); }
+
+/* ===== 像素校园 (2026-11-13) native layer: pixel stage, calendar tiles, outlined cards, inventory segments. ===== */
+.zj-stage { padding-bottom: 40rpx; background: linear-gradient(180deg, var(--z-stage) 0, var(--z-stage) 40%, var(--z-stage2) 40%, var(--z-stage2) 100%); clip-path: none; border-bottom: 6rpx solid var(--zp-outline); }
+.zj-stage::after { display: none; }
+.zj-stage-stripes { background: none; }
+.zj-stage-badge { padding: 6rpx 14rpx; border: 4rpx solid var(--zp-outline); background: var(--z-accent); color: var(--z-on-accent); letter-spacing: 4rpx; box-shadow: 6rpx 6rpx 0 rgba(0, 0, 0, .35); }
+.zj-stage-title { font-size: 84rpx; letter-spacing: 2rpx; text-shadow: 6rpx 6rpx 0 rgba(20, 13, 36, .7); }
+.zj-stage-title-accent { color: var(--z-accent); }
+.mini-page .zj-stage-ghost { border-color: var(--z-stage-ink); background: rgba(251, 246, 255, .12); color: var(--z-stage-ink); }
+.zj-score { border: 4rpx solid var(--zp-outline); border-radius: 0; background: var(--z-surface); box-shadow: 6rpx 6rpx 0 rgba(0, 0, 0, .3); }
+.zj-score-value { color: var(--z-text); }
+.zj-score-label { color: var(--z-muted); }
+.zj-hero, .zj-hero-hue { border-radius: 0; clip-path: none; border-bottom: 6rpx solid var(--zp-outline); background: linear-gradient(180deg, var(--z-stage) 0, var(--z-stage) 46%, var(--z-stage2) 46%, var(--z-stage2) 100%); }
+.zj-hero-hue { background: linear-gradient(180deg, hsl(var(--hue), 46%, 18%) 0, hsl(var(--hue), 46%, 18%) 46%, hsl(var(--hue), 52%, 26%) 46%, hsl(var(--hue), 52%, 26%) 100%); }
+.zj-hero-kicker { border-left: 0; padding-left: 0; letter-spacing: 4rpx; }
+.zj-hero-kicker::before { content: ''; display: inline-block; width: 14rpx; height: 14rpx; margin-right: 14rpx; background: var(--z-accent); box-shadow: 6rpx 6rpx 0 var(--z-primary); }
+.zj-section-title::before { top: 50%; bottom: auto; width: 16rpx; height: 16rpx; margin-top: -10rpx; background: var(--z-accent); box-shadow: 6rpx 6rpx 0 var(--z-primary); }
+.zj-section-title { padding-left: 36rpx; }
+.zj-section-head { padding-bottom: 14rpx; border-bottom: 4rpx solid var(--z-line); }
+.zj-count, .zj-tag, .zj-pill, .zj-community-chip, .zj-media-count, .zj-date-chip { border-radius: 0; }
+.zj-date, .zj-date-lg { border: 4rpx solid var(--zp-outline); border-radius: 0; background: var(--z-stage); box-shadow: inset 0 -6rpx 0 rgba(255, 255, 255, .08); }
+.zj-date::before { height: 12rpx; background: var(--z-accent); }
+.zj-date-accent { background: var(--z-accent); }
+.zj-match, .zj-card, .zj-record, .zj-team, .zj-call, .zj-application, .zj-panel, .zj-sheet, .zj-callout, .zj-alert, .zj-notice { border-radius: 0; }
+.zj-match, .zj-card, .zj-record, .zj-team, .zj-call, .zj-application, .zj-panel, .zj-sheet { border: 4rpx solid var(--zp-outline); background: var(--z-surface); box-shadow: 8rpx 8rpx 0 var(--zp-shadow); }
+.zj-match.zj-pressed, .zj-card.zj-pressed, .zj-team.zj-pressed, .zj-call.zj-pressed, .zj-record.zj-pressed { transform: translate(4rpx, 4rpx); box-shadow: 2rpx 2rpx 0 var(--zp-shadow); }
+.zj-match-featured { background: linear-gradient(90deg, var(--z-accent) 0, var(--z-accent) 12rpx, var(--z-surface) 12rpx); }
+.zj-cover { border-bottom: 4rpx solid var(--zp-outline); background: linear-gradient(180deg, hsl(var(--hue), 42%, 30%) 0, hsl(var(--hue), 42%, 30%) 50%, hsl(var(--hue), 46%, 22%) 50%, hsl(var(--hue), 46%, 22%) 78%, hsl(var(--hue), 50%, 16%) 78%); }
+.zj-cover-initial, .zj-crest { border: 4rpx solid var(--zp-outline); border-radius: 0; clip-path: none; background: hsl(var(--hue), 46%, 30%); box-shadow: inset 0 -8rpx 0 rgba(0, 0, 0, .28), inset 0 6rpx 0 rgba(255, 255, 255, .22); }
+.zj-honor { border: 4rpx solid var(--zp-outline); border-radius: 0; box-shadow: 8rpx 8rpx 0 var(--zp-shadow); background: linear-gradient(90deg, var(--z-accent) 0, var(--z-accent) 12rpx, var(--z-stage) 12rpx); }
+.zj-trophy, .zj-step-dot, .zj-roster-avatar, .zj-empty-icon { border-radius: 0; }
+.zj-empty, .zj-wall { border: 4rpx dashed var(--z-line-strong); border-radius: 0; }
+.zj-segments { padding: 8rpx; border: 4rpx solid var(--zp-outline); background: var(--z-raised); }
+.mini-page .zj-segment { border: 4rpx solid transparent; box-shadow: none; }
+.mini-page .zj-segment.active { border-color: var(--zp-outline); background: var(--z-primary); color: var(--z-on-primary); box-shadow: inset 0 6rpx 0 rgba(0, 0, 0, .2); }
+.zj-pill-live { background: var(--z-accent); }
+.zj-day-head { font-weight: 900; }
+.zj-today { border: 4rpx solid var(--zp-outline); border-radius: 0; }
+.zj-dock { border-top: 6rpx solid var(--zp-outline); }
+.zj-skeleton, .zj-skeleton-date, .zj-skeleton-lines view { border-radius: 0; }
+.zj-gallery-image, .zj-card-thumb, .zj-honor-image, .zj-match-cover { border-radius: 0; }
