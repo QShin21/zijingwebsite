@@ -1,0 +1,34 @@
+{
+  "web": {
+    "revision": "30d1813b4f67050837562bfa8158d512aeac3eaf",
+    "deployedAt": "2026-11-13T17:03:33+08:00",
+    "buildId": "9U5_mtLq02OCxEdTIvD3d",
+    "release": "/srv/zijingwebsite/releases/seat-state-20261113-30d1813",
+    "previousRelease": "/srv/zijingwebsite/releases/community-card-20261113-a134037",
+    "rollback": "/srv/zijingwebsite/backups/seat-state-20261113-30d1813/rollback.sh",
+    "migration": "none; migration source and dependency lock match previous release",
+    "candidateAndProductionReadiness": "passed",
+    "publicHealth": "ready",
+    "publicSeatCssMatchesBuild": true,
+    "startupConnectionRetries": "initial connection attempts failed while services started; subsequent checks passed"
+  },
+  "miniapp": {
+    "revision": "30d1813b4f67050837562bfa8158d512aeac3eaf",
+    "version": "0.5.23",
+    "uploadedAt": "2026-11-13T17:04:49+08:00",
+    "packageBytes": 857524,
+    "developmentUpload": "success",
+    "reviewSubmitted": false,
+    "published": false,
+    "realDevice": "not tested"
+  },
+  "verification": {
+    "targetedTestsPassed": 32,
+    "miniappStaticCheck": "passed: 29 pages",
+    "productionBuild": "passed including TypeScript",
+    "visualChecks": "four themes, compact and standard seat views, desktop and narrow layouts with synthetic data",
+    "minimumWebSeatTextContrast": 5.53,
+    "miniappCompiler": "activity-seating WXSS compiled using the WeChat developer tool compiler",
+    "authenticatedProductionFlows": "not tested"
+  }
+}
