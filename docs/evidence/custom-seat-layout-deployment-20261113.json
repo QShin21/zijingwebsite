@@ -15,7 +15,7 @@
   },
   "verification": {
     "syntheticDatabase": "Migration compatibility and 35 seating cases passed, including permissions, custom gaps, protected claims/blocks/tickets, concurrent layout edits and selection, old layouts, random allocation and owner receipt visibility.",
-    "targetedTests": "Eight test files and 61 tests passed. After reducing native map payload, 14 related tests were repeated and passed.",
+    "targetedTests": "Eight test files and 61 tests passed. After reducing native map payload, 14 related tests were repeated and passed. After merging concurrent artwork, six files and 47 tests passed, including native input spacing and seating coverage.",
     "largeMiniProgramMap": "A 100 by 100 map serialized to approximately 780702 bytes for empty seats and 950702 bytes for confirmed seats; the tested rows payload stays below the 1 MiB per-setData limit.",
     "static": "TypeScript, changed-file lint, mini-program package check and production build passed. The build was checked for local database URL and local Payload secret values before transfer.",
     "migrationResult": "The new migration was recorded; all existing activity layouts remained null. The post-migration counts were 1 seating activity, 163 requests, 268 claims and 360 ticket images. The old application stayed online during backup and additive migration.",
@@ -27,11 +27,13 @@
     "realDevice": "not tested"
   },
   "miniProgram": {
-    "version": "0.5.25",
-    "uploadedAt": "2026-11-13T22:48:00+08:00",
+    "version": "0.5.26",
+    "uploadedAt": "2026-11-13T22:50:08+08:00",
     "platformStatus": "developmentVersionUploaded",
     "officialTool": "WeChat Developer Tools CLI",
-    "sizeBytes": 879605,
+    "sizeBytes": 879645,
+    "source": "Application revision 39973e7 plus the three-file native input spacing/version change in df4563d; uploaded from an isolated worktree. The concurrent campus artwork remains unuploaded as recorded in its own task.",
+    "earlierUpload": "0.5.25 uploaded at 22:48:00 before the native input-spacing fix.",
     "reviewSubmitted": false,
     "publicReleaseExecuted": false
   }
