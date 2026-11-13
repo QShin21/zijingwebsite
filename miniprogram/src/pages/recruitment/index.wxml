@@ -1,7 +1,8 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/v2.wxml" />
 <view class="page mini-page {{theme === 'dark' ? 'zj-dark' : ''}}">
-  <view class="page-heading">
+  <view class="page-heading {{scene ? 'page-heading-scenic' : ''}}">
+    <zj-campus scene="{{scene}}" palette="{{palette}}" />
     <text class="eyebrow">TRYOUTS · 选拔中心</text>
     <text class="title">选拔中心</text>
     <text class="subtitle">代表队选拔与骨干招新。提交后可随时查看本人回执，由管理员人工处理。</text>

@@ -1,7 +1,8 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/v2.wxml" />
 <view class="page mini-page zj-tab-page home-v2 {{theme === 'dark' ? 'zj-dark' : ''}} {{palette === 'simple' ? 'home-simple' : ''}}">
-  <view class="zj-stage home-stage" style="padding-top: {{statusBar + navHeight + 8}}px">
+  <view class="zj-stage home-stage {{scene ? 'home-stage-scenic' : ''}}" style="padding-top: {{statusBar + navHeight + 8}}px">
+    <zj-campus scene="{{scene}}" palette="{{palette}}" variant="home" />
     <view class="home-nav" style="top: {{statusBar}}px; height: {{navHeight}}px">
       <text class="home-mark">紫</text>
       <text class="home-brand">竞在紫荆</text>
@@ -26,7 +27,6 @@
     </view>
   </view>
 
-  <image wx:if="{{scene}}" class="home-campus-art" src="{{scene}}" mode="aspectFit" aria-hidden="true" />
   <template wx:if="{{loading && !home}}" is="zj-loading" />
   <template wx:if="{{error}}" is="zj-error" data="{{error}}" />
 

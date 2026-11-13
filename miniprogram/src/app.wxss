@@ -220,3 +220,19 @@ input, textarea, .field picker, .picker-value, .search input { border-width: 4rp
 .error, .privacy-note, .branch-notice, .consent { border-radius: 0; }
 .state-dot { border-radius: 0; }
 .page-heading { border-bottom: 6rpx solid var(--zp-outline); }
+
+/* ===== 校园美术 (2026-11-13): campus scenery in headings, softer plates; text stays plain and readable. ===== */
+.page-heading { position: relative; overflow: hidden; border-bottom: 0; border-radius: 0 0 36rpx 36rpx; background: linear-gradient(160deg, var(--z-stage) 0%, var(--z-stage2) 100%); }
+.page-heading > text, .page-heading > view, .page-heading > button { position: relative; z-index: 1; }
+.page-heading-scenic { padding-top: 56rpx; padding-bottom: 56rpx; min-height: 300rpx; }
+.page-heading-scenic .title, .page-heading-scenic .subtitle { text-shadow: 0 2rpx 16rpx rgba(10, 6, 20, .55); }
+.page-heading-scenic .subtitle { max-width: 72%; }
+.mini-page button { border-width: 2rpx; border-radius: 18rpx; box-shadow: 0 6rpx 0 var(--zp-shadow); }
+.mini-page button.button-hover { transform: translateY(4rpx); box-shadow: 0 2rpx 0 var(--zp-shadow); }
+.mini-page .plain, .mini-page .plain.button-hover { box-shadow: none; }
+.panel, .form-sheet, .status-panel, .notice-panel, .card, .filters { border: 2rpx solid var(--z-line-strong); border-radius: 24rpx; box-shadow: 0 12rpx 32rpx var(--zp-shadow); }
+.form-sheet .panel { border: 0; border-top: 2rpx dashed var(--z-line); border-radius: 0; box-shadow: none; }
+.mini-page .chip { border-width: 2rpx; border-radius: 999rpx; }
+input, textarea, .field picker, .picker-value, .search input { border-width: 2rpx; border-radius: 16rpx; box-shadow: none; }
+.badge { border-radius: 10rpx; }
+.error, .privacy-note, .branch-notice, .consent { border-radius: 16rpx; }

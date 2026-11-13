@@ -292,3 +292,28 @@
 .zj-dock { border-top: 6rpx solid var(--zp-outline); }
 .zj-skeleton, .zj-skeleton-date, .zj-skeleton-lines view { border-radius: 0; }
 .zj-gallery-image, .zj-card-thumb, .zj-honor-image, .zj-match-cover { border-radius: 0; }
+
+/* ===== 校园美术 (2026-11-13): thin outlines, soft depth and rounded plates replace the heavy pixel frames. ===== */
+.zj-stage { border-bottom: 0; border-radius: 0 0 40rpx 40rpx; background: linear-gradient(180deg, var(--z-stage) 0%, var(--z-stage2) 100%); }
+.zj-stage-title { letter-spacing: 0; text-shadow: 0 4rpx 24rpx rgba(10, 6, 20, .6); }
+.zj-stage-badge { border-width: 2rpx; border-radius: 10rpx; box-shadow: none; }
+.zj-score { border: 2rpx solid rgba(255, 255, 255, .55); border-radius: 22rpx; background: var(--z-surface); box-shadow: 0 12rpx 28rpx rgba(10, 6, 20, .28); }
+.zj-hero, .zj-hero-hue { border-bottom: 0; border-radius: 0 0 36rpx 36rpx; }
+.zj-section-head { border-bottom-width: 2rpx; }
+.zj-section-title::before { border-radius: 4rpx; }
+.zj-count, .zj-tag, .zj-pill, .zj-community-chip, .zj-media-count, .zj-date-chip { border-radius: 10rpx; }
+.zj-date, .zj-date-lg { border: 2rpx solid var(--zp-outline); border-radius: 18rpx; overflow: hidden; }
+.zj-match, .zj-card, .zj-record, .zj-team, .zj-call, .zj-application, .zj-panel, .zj-sheet, .zj-honor { border: 2rpx solid var(--z-line-strong); border-radius: 24rpx; box-shadow: 0 12rpx 32rpx var(--zp-shadow); }
+.zj-callout, .zj-alert, .zj-notice { border-radius: 18rpx; }
+.zj-card, .zj-honor, .zj-team { overflow: hidden; }
+.zj-match.zj-pressed, .zj-card.zj-pressed, .zj-team.zj-pressed, .zj-call.zj-pressed, .zj-record.zj-pressed { transform: translateY(4rpx); box-shadow: 0 4rpx 12rpx var(--zp-shadow); }
+.zj-cover { border-bottom-width: 2rpx; }
+.zj-cover-initial, .zj-crest { border-width: 2rpx; border-radius: 18rpx; }
+.zj-trophy, .zj-step-dot, .zj-roster-avatar, .zj-empty-icon { border-radius: 14rpx; }
+.zj-empty, .zj-wall { border-width: 2rpx; border-radius: 24rpx; }
+.zj-segments { border: 2rpx solid var(--z-line-strong); border-radius: 22rpx; }
+.mini-page .zj-segment { border-width: 2rpx; border-radius: 16rpx; }
+.mini-page .zj-segment.active { box-shadow: none; }
+.zj-today { border-width: 2rpx; border-radius: 10rpx; }
+.zj-dock { border-top-width: 2rpx; }
+.zj-gallery-image, .zj-card-thumb, .zj-honor-image, .zj-match-cover { border-radius: 14rpx; }

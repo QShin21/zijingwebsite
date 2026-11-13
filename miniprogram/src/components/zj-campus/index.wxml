@@ -1,0 +1,16 @@
+<!-- The root is always rendered so the visibility observer stays bound across palette changes. -->
+<view id="zj-campus" class="campus campus-{{variant}} campus-{{palette}} {{paused ? 'campus-paused' : ''}}" aria-hidden="true">
+  <block wx:if="{{src || fallback}}">
+    <view class="campus-sky">
+      <view class="campus-moon"></view>
+      <view class="campus-hill campus-hill-far"></view>
+      <view class="campus-hill campus-hill-mid"></view>
+      <view class="campus-hill campus-hill-near"></view>
+    </view>
+    <image wx:if="{{src}}" class="campus-art {{loaded ? 'campus-art-ready' : ''}}" src="{{src}}" mode="aspectFill" lazy-load="{{false}}" bindload="shown" binderror="failed" />
+    <view class="campus-glow"></view>
+    <view class="campus-sheen"></view>
+    <view wx:for="{{motes}}" wx:key="index" class="campus-mote" style="left: {{item.x}}%; top: {{item.y}}%; width: {{item.size}}rpx; height: {{item.size}}rpx; animation-delay: -{{item.delay}}s; animation-duration: {{item.duration}}s;"></view>
+    <view class="campus-shade"></view>
+  </block>
+</view>

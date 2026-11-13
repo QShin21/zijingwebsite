@@ -1,7 +1,8 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/v2.wxml" />
 <view wx:if="{{campus}}" class="page mini-page zj-tab-page {{theme === 'dark' ? 'zj-dark' : ''}} {{palette === 'simple' ? 'communities-simple' : ''}}">
-  <view class="page-heading">
+  <view class="page-heading {{scene ? 'page-heading-scenic' : ''}}">
+    <zj-campus scene="{{scene}}" palette="{{palette}}" />
     <text class="eyebrow">COMMUNITIES · 游戏社群</text>
     <text class="title">找到同好，从这里开场</text>
     <text class="subtitle">选择你玩的游戏，看看活动与风采，再联系管理员人工拉你进群。</text>

@@ -1,7 +1,8 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/v2.wxml" />
 <view wx:if="{{campus}}" class="page mini-page zj-tab-page {{theme === 'dark' ? 'zj-dark' : ''}}">
-  <view class="page-heading">
+  <view class="page-heading {{scene ? 'page-heading-scenic' : ''}}">
+    <zj-campus scene="{{scene}}" palette="{{palette}}" />
     <text class="eyebrow">TEAMS · 代表队中心</text>
     <text class="title">代表队</text>
     <text class="subtitle">队伍、荣誉墙与选拔中心。想上场？到选拔中心找开放批次。</text>

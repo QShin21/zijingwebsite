@@ -1,0 +1,50 @@
+/* Campus scenery. Colours come from the page palette variables; everything here is decorative. */
+/* The host fills the positioned parent (stage or heading) and sits under its content (z-index 1+). */
+:host { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 0; display: block; overflow: hidden; pointer-events: none; }
+.campus { position: absolute; left: 0; right: 0; bottom: 0; overflow: hidden; pointer-events: none; }
+.campus-banner { top: 0; }
+.campus-home { height: 62vw; }
+.campus view, .campus image { position: absolute; }
+/* Drawn sky: always visible under the illustration. */
+.campus-sky { left: 0; top: 0; right: 0; bottom: 0; background: radial-gradient(60% 70% at 74% 42%, rgba(255, 226, 160, .30), transparent 70%), linear-gradient(180deg, var(--z-stage) 0%, var(--z-stage2) 55%, #6b3a78 100%); }
+.campus-summer .campus-sky { background: radial-gradient(50% 60% at 76% 30%, rgba(214, 255, 236, .32), transparent 70%), linear-gradient(180deg, var(--z-stage) 0%, var(--z-stage2) 55%, #2c6d69 100%); }
+.campus-light .campus-sky { background: radial-gradient(55% 65% at 72% 48%, rgba(255, 232, 190, .55), transparent 70%), linear-gradient(180deg, var(--z-stage) 0%, #4a3a6e 46%, #9fb6d6 100%); }
+/* Drawn scenery that stays readable on its own when no illustration can be shown: moon, three ridges. */
+.campus-moon { right: 16%; top: 16%; width: 72rpx; height: 72rpx; border-radius: 50%; background: #fff4d0; box-shadow: 0 0 48rpx rgba(255, 240, 200, .65), inset -14rpx -10rpx 0 rgba(227, 201, 141, .55); }
+.campus-summer .campus-moon { background: #f4f8e4; box-shadow: 0 0 48rpx rgba(214, 255, 236, .6), inset -14rpx -10rpx 0 rgba(180, 210, 190, .5); }
+.campus-hill { left: -10%; right: -10%; bottom: -18%; height: 52%; border-radius: 50% 50% 0 0; }
+.campus-hill-far { background: rgba(214, 190, 255, .30); transform: translateX(14%); }
+.campus-hill-mid { left: -30%; right: 20%; bottom: -22%; height: 58%; background: rgba(120, 86, 160, .55); }
+.campus-hill-near { bottom: -30%; background: rgba(20, 10, 34, .62); transform: translateX(-12%); }
+.campus-summer .campus-hill-far { background: rgba(150, 240, 205, .26); }
+.campus-summer .campus-hill-mid { background: rgba(44, 109, 105, .6); }
+.campus-light .campus-hill-far { background: rgba(255, 255, 255, .42); }
+.campus-light .campus-hill-mid { background: rgba(190, 206, 232, .6); }
+.campus-summer .campus-hill-near { background: rgba(4, 22, 28, .62); }
+.campus-art { left: 0; top: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .6s ease; }
+.campus-art-ready { opacity: 1; }
+/* Home: the 2:1 illustration fills the bottom of the stage at full width. */
+.campus-home .campus-art { top: auto; bottom: 0; height: 50vw; }
+/* Warm light around the landmark, frost-cyan sheen drifting across. */
+.campus-glow { left: 36%; right: -8%; top: 8%; bottom: 0; background: radial-gradient(closest-side, rgba(255, 220, 150, .34), transparent); animation: campus-breathe 6s ease-in-out infinite alternate; }
+.campus-summer .campus-glow { background: radial-gradient(closest-side, rgba(150, 240, 205, .30), transparent); }
+.campus-light .campus-glow { background: radial-gradient(closest-side, rgba(255, 240, 210, .46), transparent); }
+.campus-sheen { top: -20%; bottom: -20%; left: -60%; width: 46%; background: linear-gradient(100deg, transparent, rgba(190, 236, 255, .20) 45%, rgba(214, 190, 255, .16) 60%, transparent); transform: skewX(-18deg); animation: campus-sheen 11s ease-in-out infinite; }
+.campus-mote { border-radius: 50%; background: #ffe2a0; opacity: 0; box-shadow: 0 0 12rpx rgba(255, 226, 160, .8); animation-name: campus-rise; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+.campus-summer .campus-mote { background: #e9ff9a; box-shadow: 0 0 14rpx rgba(210, 255, 170, .9); animation-name: campus-drift; }
+.campus-light .campus-mote { background: #ffffff; box-shadow: 0 0 8rpx rgba(255, 255, 255, .8); animation-name: campus-snow; animation-timing-function: linear; }
+/* Legibility: the copy side and the seam with the stage fade into the stage colour. */
+.campus-shade { left: 0; top: 0; right: 0; bottom: 0; }
+.campus-banner .campus-shade { background: linear-gradient(90deg, var(--z-stage) 0%, var(--z-stage) 30%, rgba(0, 0, 0, 0) 78%), linear-gradient(0deg, rgba(0, 0, 0, .28), rgba(0, 0, 0, 0) 40%); opacity: .92; }
+.campus-home .campus-shade { background: linear-gradient(180deg, var(--z-stage) 0%, var(--z-stage) 16%, rgba(0, 0, 0, 0) 46%); }
+.campus-paused .campus-glow, .campus-paused .campus-sheen, .campus-paused .campus-mote { animation-play-state: paused; }
+@keyframes campus-breathe { from { opacity: .55; } to { opacity: 1; } }
+@keyframes campus-sheen { 0%, 35% { transform: translateX(0) skewX(-18deg); opacity: 0; } 50% { opacity: 1; } 80%, 100% { transform: translateX(520%) skewX(-18deg); opacity: 0; } }
+@keyframes campus-rise { 0% { opacity: 0; transform: translate(0, 40rpx) scale(.6); } 30% { opacity: .9; } 100% { opacity: 0; transform: translate(24rpx, -120rpx) scale(1); } }
+@keyframes campus-drift { 0% { opacity: 0; transform: translate(0, 0); } 25% { opacity: 1; } 60% { opacity: .5; transform: translate(60rpx, -36rpx); } 100% { opacity: 0; transform: translate(-20rpx, -80rpx); } }
+@keyframes campus-snow { 0% { opacity: 0; transform: translate(0, -60rpx); } 15% { opacity: .95; } 100% { opacity: 0; transform: translate(-40rpx, 260rpx); } }
+/* System reduced-motion preference: keep the still scenery, drop moving light. */
+@media (prefers-reduced-motion: reduce) {
+  .campus-glow, .campus-sheen, .campus-mote { animation: none; }
+  .campus-sheen, .campus-mote { display: none; }
+}

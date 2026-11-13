@@ -14,3 +14,6 @@
 [data-section="promoted"] .zj-list, [data-section="promoted"] .zj-panel { margin-bottom: 20rpx; }
 .home-join { padding: 36rpx 32rpx; border-radius: 18rpx; background: radial-gradient(80% 120% at 100% 100%, rgba(102, 8, 116, .55), transparent 70%), linear-gradient(160deg, var(--z-stage2), var(--z-stage)); box-shadow: inset 0 0 0 1rpx rgba(240, 192, 96, .3); color: var(--z-stage-ink); }
 .home-join-title { display: block; margin: 8rpx 0 20rpx; }
+/* 校园美术 (2026-11-13): the landmark sits inside the stage, under the copy, with no seam. */
+.home-stage-scenic { padding-bottom: calc(44vw + 24rpx); }
+.home-stage-scenic .zj-scoreboard { margin-bottom: 8rpx; }

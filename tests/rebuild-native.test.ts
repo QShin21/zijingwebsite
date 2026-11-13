@@ -64,7 +64,7 @@ describe('Native rebuild: route and rendering contracts, not an official WeChat 
     expect(read('pages/communities/index.js')).toContain("v2.get('communities'");
     expect(read('pages/account/index.js')).toContain("v2.get('me'");
     expect(app.tabBar).toMatchObject({ custom: true });
-    expect(read('pages/home/index.wxml')).toContain('src="{{scene}}"');
+    expect(read('pages/home/index.wxml')).toContain('<zj-campus scene="{{scene}}"');
     expect(JSON.parse(read('pages/home/index.json'))).toMatchObject({ navigationStyle: 'custom' });
   });
   it('rebuilt inner pages use the V2 hero frame and no longer use the retired thin-line page classes', () => {
