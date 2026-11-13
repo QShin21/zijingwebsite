@@ -1,5 +1,11 @@
 # 部署、迁移与恢复
 
+## 2026-11-13 首页粒子与点击效果增强
+
+北京时间 19:13:24，应用 `8b0a96b` 已部署至 `home.thuzijing.top`，构建 `G8De9ZylWcLMewviYiUI6`。首页粒子数量、大小和亮度增强，地标与指针光晕加强，点击或触屏会产生扩散光环和火花。沿用现有数据库结构；上一应用及回退脚本保留在服务器，回退脚本为 `/srv/zijingwebsite/backups/atmosphere-visible-20261113-8b0a96b/rollback.sh`。
+
+10 项定向测试、改动文件 lint 和生产构建通过。候选版本在 Chromium 中检查四主题、桌面点击、移动端模拟触碰、减少动画及离屏暂停；正式服务、数据库和公网健康检查正常，公网首页的粒子和点击光环通过浏览器检查，首页 10 个 CSS/JS 资源与构建摘要一致。移动检查使用浏览器模拟，真实手机未检查。详见[发布记录](evidence/atmosphere-visibility-deployment-20261113.json)。
+
 ## 2026-11-13 网页客户端特效
 
 北京时间 18:59:30，网页应用 `0ede7dc` 已部署至 `home.thuzijing.top`，构建 `1SlX6BFU1oL_2gXDEn31c`。新增首页主题粒子、地标光晕、卡片指针光和滚动进度。发布沿用现有数据库结构，迁移目录及依赖锁与上一运行版本一致；上一应用和回退脚本保存在服务器，回退脚本为 `/srv/zijingwebsite/backups/web-effects-20261113-0ede7dc/rollback.sh`。

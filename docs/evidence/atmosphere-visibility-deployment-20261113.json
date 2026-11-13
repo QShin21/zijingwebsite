@@ -1,0 +1,26 @@
+{
+  "deployedAt": "2026-11-13T19:13:24+08:00",
+  "revision": "8b0a96bbd20bdf5a6b86692f71a6995cbc5698a3",
+  "previousRevision": "0ede7dc27fb00900e574aae74d5eb85d3eec7e38",
+  "buildId": "G8De9ZylWcLMewviYiUI6",
+  "release": "/srv/zijingwebsite/releases/atmosphere-visible-20261113-8b0a96b",
+  "previousRelease": "/srv/zijingwebsite/releases/web-effects-20261113-0ede7dc",
+  "rollback": "/srv/zijingwebsite/backups/atmosphere-visible-20261113-8b0a96b/rollback.sh",
+  "migration": "none; migration directory and dependency lock match the previous release",
+  "verification": {
+    "focusedTests": "10 passed across client-effects and atmosphere-canvas tests, including burst expiry and repeated-click limits",
+    "changedFileLint": "passed",
+    "productionBuild": "passed including TypeScript",
+    "candidate": "ready; anonymous home, login, privacy and static CSS returned 200",
+    "candidateBrowser": "Chromium: four desktop themes, classic mouse click, winter 390px mobile simulation and touch, reduced motion, scroll progress and offscreen canvas checked",
+    "productionService": "active; database active; readiness passed",
+    "publicRoutes": "health, home, login and privacy returned 200",
+    "publicHomeBuildAssets": "10 matched the build by SHA-256: 5 CSS and 5 JavaScript",
+    "publicBrowser": "Chromium: classic theme particles drew and clicking produced a ring without page errors",
+    "freeKillHttp": 200,
+    "mobileRealDevice": "not tested",
+    "authenticatedProductionFlows": "not tested"
+  },
+  "miniapp": { "changed": false, "upload": false },
+  "startup": "An initial port 3100 connection failed while the service started; retry, production readiness and subsequent public checks passed."
+}
