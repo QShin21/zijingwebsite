@@ -1350,3 +1350,48 @@
 :global(:root[data-z-palette="simple"]) .call:hover {
   box-shadow: none;
 }
+
+/* ===== 客户端特效 (2026-11-13): pointer light on plates and staggered entry. ===== */
+.match:not(.match_spotlight),
+.article,
+.community,
+.showcase,
+.team,
+.call {
+  background-image: radial-gradient(
+    220px circle at var(--gx, -400px) var(--gy, -400px),
+    color-mix(in srgb, var(--z-accent) 20%, transparent),
+    transparent 72%
+  );
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .match,
+    .article,
+    .community,
+    .showcase,
+    .team,
+    .call,
+    .honor {
+      animation: plateIn linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+  }
+}
+@keyframes plateIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.97);
+  }
+}
+:global(:root[data-z-palette="simple"]) .match,
+:global(:root[data-z-palette="simple"]) .article,
+:global(:root[data-z-palette="simple"]) .community,
+:global(:root[data-z-palette="simple"]) .showcase,
+:global(:root[data-z-palette="simple"]) .team,
+:global(:root[data-z-palette="simple"]) .call,
+:global(:root[data-z-palette="simple"]) .honor {
+  background-image: none;
+  animation: none;
+}

@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import type { ImageRef } from "@/lib/v2";
 import { Img } from "./ui";
 import { MotionScene } from "./CampusMotion";
+import { AtmosphereCanvas } from "./AtmosphereCanvas";
 import styles from "./campus.module.css";
 
 // Decorative effects sit above the landmark image, with copy in its own layer.
@@ -70,6 +71,8 @@ export function CampusHero({
           <span className={styles.art}>
             <Ambience />
           </span>
+          <span className={styles.bloom} aria-hidden="true" />
+          <AtmosphereCanvas className={styles.atmosphere} />
         </div>
         <div className={styles.copyWrap}>
           <div className={styles.copy}>{children}</div>

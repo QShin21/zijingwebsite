@@ -721,3 +721,42 @@
 :global(:root[data-z-palette="simple"]) .footerSkyline {
   display: none;
 }
+
+/* ===== 客户端特效 (2026-11-13): reading progress and a lifted bar on scroll (CSS scroll timeline, no script). ===== */
+@supports (animation-timeline: scroll()) {
+  .bar::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: -3px;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--z-action), var(--z-accent));
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: progress linear both;
+    animation-timeline: scroll(root);
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .bar {
+      animation: barLift linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 220px;
+    }
+  }
+}
+@keyframes progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes barLift {
+  to {
+    box-shadow: 0 3px 0 0 color-mix(in srgb, var(--z-action) 30%, transparent), 0 14px 28px -12px rgba(0, 0, 0, 0.45);
+  }
+}
+:global(:root[data-z-palette="simple"]) .bar::after {
+  height: 2px;
+  bottom: -1px;
+}

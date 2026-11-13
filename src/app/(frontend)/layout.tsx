@@ -7,6 +7,7 @@ import { Footer, MobileTabs, TopBar } from "@/components/v2/Shell";
 import { request } from "@/components/v2/data";
 import { themeColors, themeCookieName, themeFromPreference, themeScheme } from "@/components/v2/theme";
 import { pixelFont } from "@/components/v2/pixel-font";
+import { ClientEffects } from "@/components/v2/ClientEffects";
 import shell from "@/components/v2/Shell.module.css";
 import "./tokens.css";
 import "./v2.css";
@@ -52,6 +53,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
         </main>
         <Footer name={s.name} footer={s.footer} campus={campus} />
         <MobileTabs signedIn={Boolean(viewer)} campus={campus} />
+        <ClientEffects />
       </body>
     </html>
   );
