@@ -1,0 +1,26 @@
+{
+  "deployedAt": "2026-11-13T20:36:19+08:00",
+  "revision": "e20fcd80c3f127777c37bb101021def5c9e7aa55",
+  "previousRevision": "8b0a96bbd20bdf5a6b86692f71a6995cbc5698a3",
+  "buildId": "9zXL0aVOFbMeRveKT8ecl",
+  "release": "/srv/zijingwebsite/releases/lottery-showcase-20261113-e20fcd8",
+  "previousRelease": "/srv/zijingwebsite/releases/atmosphere-visible-20261113-8b0a96b",
+  "rollback": "/srv/zijingwebsite/backups/lottery-showcase-20261113-e20fcd8/rollback.sh",
+  "migration": "none; migration directory and dependency lock match the previous release",
+  "verification": {
+    "localIntegration": "6 isolated PostgreSQL lottery tests passed, including export authorization, late registrations and redraw",
+    "localUnit": "54 questionnaire and video tests passed; changed-file lint and TypeScript passed",
+    "localBrowser": "CSV downloads, format choices, theme and mobile layouts, Bilibili card interaction, title navigation and synthetic H.264 MP4 playback passed",
+    "externalVideo": "a public Bilibili embed played for more than 12 seconds in Chromium with the same autoplay parameters",
+    "productionBuild": "passed with production origin configuration and synthetic build-only database settings",
+    "candidate": "ready; homepage, login, privacy, feature chunks and anonymous export rejection checked",
+    "productionService": "active; database active; readiness passed; candidate stopped",
+    "publicRoutes": "health, home, login and privacy returned 200; anonymous request for a nonexistent activity export returned 404",
+    "publicFeatureAssets": "lottery and showcase JavaScript returned 200 and both SHA-256 digests matched the build",
+    "freeKillHttp": 200,
+    "authenticatedProductionFlows": "not tested",
+    "mobileRealDevice": "not tested"
+  },
+  "miniapp": { "changed": false, "upload": false },
+  "startup": "Candidate and production readiness checks printed initial connection-refused messages during startup; retry and independent post-cutover checks succeeded. One external privacy request timed out at 15 seconds, while a subsequent request returned 200."
+}

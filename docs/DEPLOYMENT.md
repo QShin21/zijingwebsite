@@ -1,5 +1,11 @@
 # 部署、迁移与恢复
 
+## 2026-11-13 抽签结果导出与风采视频
+
+北京时间 20:36:19，应用 `e20fcd8` 已部署至 `home.thuzijing.top`，构建 `9zXL0aVOFbMeRveKT8ecl`。本次未新增数据库迁移，依赖锁和迁移目录与上一版本一致；上一应用及回退脚本保留在 `/srv/zijingwebsite/backups/lottery-showcase-20261113-e20fcd8/rollback.sh`。
+
+隔离数据库验证抽签导出权限及状态，浏览器验证下载、格式选择、风采播放和移动布局；本地公开 B 站样例及合成 MP4 播放通过。候选和正式服务就绪，公网首页、登录、隐私和健康接口返回 200，抽签与风采功能的两个公网 JS 资源与构建 SHA-256 一致。线上登录态导出与视频页面尚未实测，移动检查使用浏览器模拟。详见[发布记录](evidence/lottery-showcase-deployment-20261113.json)。
+
 ## 2026-11-13 首页粒子与点击效果增强
 
 北京时间 19:13:24，应用 `8b0a96b` 已部署至 `home.thuzijing.top`，构建 `G8De9ZylWcLMewviYiUI6`。首页粒子数量、大小和亮度增强，地标与指针光晕加强，点击或触屏会产生扩散光环和火花。沿用现有数据库结构；上一应用及回退脚本保留在服务器，回退脚本为 `/srv/zijingwebsite/backups/atmosphere-visible-20261113-8b0a96b/rollback.sh`。
