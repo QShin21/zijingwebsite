@@ -52,6 +52,18 @@
       <template wx:else is="zj-empty" data="{{title: '还没有报名记录', body: '报名开放的活动会标注「报名开放」。', icon: '🎫', action: '查看活动', page: 'events'}}" />
     </view>
 
+    <view class="zj-section">
+      <template is="zj-section" data="{{title: '我的选座回执'}}" />
+      <view wx:if="{{seatReceipts.length}}" class="zj-list">
+        <view wx:for="{{seatReceipts}}" wx:key="key" class="account-todo" bindtap="openSeatReceipt" data-kind="{{item.kind}}" data-id="{{item.id}}" aria-role="link">
+          <view class="account-todo-main"><text class="account-todo-title">{{item.title}}</text><text class="zj-small">{{item.summary}}</text></view><text wx:if="{{item.id}}" class="zj-arrow">›</text>
+        </view>
+      </view>
+      <text wx:elif="{{!seatError}}" class="muted">提交选座申请后可在这里查看状态与票据。</text>
+      <text wx:if="{{seatError}}" class="error">选座记录加载失败，请刷新后重试。</text>
+      <button wx:if="{{seatHasNext}}" class="secondary" bindtap="moreSeatReceipts" loading="{{seatLoading}}" disabled="{{seatLoading}}">查看更多选座记录</button>
+    </view>
+
     <view wx:if="{{campus}}" class="zj-section">
       <template is="zj-section" data="{{title: '申请进度', count: me.applications.length}}" />
       <view wx:if="{{me.applications.length}}" class="zj-list"><block wx:for="{{me.applications}}" wx:key="key"><template is="zj-application" data="{{item}}" /></block></view>

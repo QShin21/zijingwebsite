@@ -20,6 +20,14 @@ function renderMap(props: Partial<Parameters<typeof SeatMap>[0]> = {}) {
 }
 
 describe("座位图键盘入口", () => {
+  it("自定义空格保留位置，键盘焦点落在第一个真实座位", () => {
+    const html = renderMap({ state: { rows: [{ row: 1, count: 3, offset: 0 }], occupancy: { "1-1": "confirmed", "1-3": "confirmed" },
+      blockedSeats: ["1-1", "1-3"], missingSeats: ["1-1", "1-3"] } });
+    expect(html).not.toContain('data-seat="1-1"');
+    expect(html).not.toContain('data-seat="1-3"');
+    expect(html).toMatch(/data-seat="1-2"[^>]*tabindex="0"[^>]*aria-label="1排2座 · 可选"/);
+    expect((html.match(/aria-hidden="true"/g) || []).length).toBeGreaterThanOrEqual(2);
+  });
   it("满座时允许键盘聚焦滚动区域，并保留各座位的状态说明", () => {
     const html = renderMap();
     expect(html).toMatch(/role="group" aria-label="座位图" tabindex="0"/);

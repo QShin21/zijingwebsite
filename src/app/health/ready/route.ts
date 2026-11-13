@@ -72,7 +72,7 @@ export async function GET() {
     await db.pool.query("SELECT version_post_images FROM _announcements_v LIMIT 0");
     const imagesMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261110_000000_publication_images"]);
     if (imagesMigration.rowCount !== 1) throw new Error("Required publication images migration unavailable");
-    await db.pool.query("SELECT id,event_id,post_id,enabled,opens_at,mode FROM activity_seatings LIMIT 0");
+    await db.pool.query("SELECT id,event_id,post_id,enabled,opens_at,mode,layout,layout_revision FROM activity_seatings LIMIT 0");
     await db.pool.query("SELECT seating_id,seat,request_id FROM activity_seat_claims LIMIT 0");
     await db.pool.query("SELECT seating_id,seat,blocked_by,created_at FROM activity_seat_blocks LIMIT 0");
     await db.pool.query("SELECT seating_id,request_id,seat,released_by,released_at,revision FROM activity_seat_releases LIMIT 0");

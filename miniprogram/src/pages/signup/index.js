@@ -13,9 +13,11 @@ const team = require('../../lib/team');
 const { actions, protect, error } = require('../../lib/page');
 const types = ['text', 'textarea', 'single', 'multiple'];
 const receipt = questionnaire.receipt;
+const seatStatusLabels = { pending: '待审核', confirmed: '已确认', rejected: '已驳回', cancelled: '已取消', revoked: '已撤销' };
+const seatLabel = value => String(value).split('-').join('排') + '座';
 function localParts(value) { if (!value) return { date: '', time: '' }; const d = new Date(value), pad = v => String(v).padStart(2,'0'); return { date: d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()), time: pad(d.getHours())+':'+pad(d.getMinutes()) }; }
 Page(withVisualTheme({
-  data: { expandedEntryId: '', loading: true, error: '', needsLogin: false, busy: false, message: '', info: null, form: {}, answers: {}, questions: [], receipt: null, responseEditing: false, review: false, reviewRows: [], recoveryRows: [], answerErrors: {}, step: 0, answerPages: 1, completed: 0, answerTotal: 0, progress: 0, branchNotice: '', advancedEditing: false, edit: false, tab: 'edit', entries: [], page: 1, pages: 0, total: 0, typeLabels: ['单行文本','多行文本','单选','多选'] },
+  data: { expandedEntryId: '', loading: true, error: '', needsLogin: false, busy: false, message: '', info: null, form: {}, answers: {}, questions: [], receipt: null, seatReceipt: null, seatTickets: [], responseEditing: false, review: false, reviewRows: [], recoveryRows: [], answerErrors: {}, step: 0, answerPages: 1, completed: 0, answerTotal: 0, progress: 0, branchNotice: '', advancedEditing: false, edit: false, tab: 'edit', entries: [], page: 1, pages: 0, total: 0, typeLabels: ['单行文本','多行文本','单选','多选'] },
   ...actions,
   toggleEntry(event) {
     if (this.data.busy || this.data.loading) return;
@@ -24,28 +26,53 @@ Page(withVisualTheme({
   },
   onLoad(options) {
     if(this._unsubscribe)this._unsubscribe();
-    this._ticket=(this._ticket||0)+1;this._context=(this._context||0)+1;this._loaded=false;this._hidden=false;this._disposed=false;this._resumeRead=false;this._recoveryDraft=null;this._teamConfirmation=null;
+    this._ticket=(this._ticket||0)+1;this._seatTicket=(this._seatTicket||0)+1;this._context=(this._context||0)+1;this._loaded=false;this._hidden=false;this._disposed=false;this._resumeRead=false;this._recoveryDraft=null;this._teamConfirmation=null;
     this._options=options; this._seed=String(Math.random()); this._staff=options.kind==='staff';this._team=options.kind==='team';
     this._endpoint=this._team?'/api/team-core':this._staff?'/api/staff/batches/'+encodeURIComponent(options.id)+'/application':'/api/activities/'+encodeURIComponent(options.kind)+'/'+encodeURIComponent(options.id)+'/signup';
     this._readEndpoint=this._team?'/api/miniapp/team/recruitment/'+encodeURIComponent(options.id):this._staff?'/api/miniapp/staff/'+encodeURIComponent(options.id):this._endpoint;
     this.setData({staff:this._staff,team:this._team,applicationMode:this._staff||this._team,edit:!this._staff&&!this._team&&['manage','view'].includes(options.mode),loading:false,error:'',info:null,form:{},receipt:null,confirmedReceipt:null,confirmationMessage:'',answers:{},questions:[],reviewRows:[],recoveryRows:[],entries:[],responseEditing:false,review:false});
     if(session.subscribe)this._unsubscribe=session.subscribe(user=>{
       if(String(user&&user.id)===String(this._userId))return;
-      this._ticket=(this._ticket||0)+1;this._context=(this._context||0)+1;this._loaded=false;this._resumeRead=false;this._recoveryDraft=null;this._teamConfirmation=null;
-      this.setData({loading:false,info:null,receipt:null,confirmedReceipt:null,confirmationMessage:'',answers:{},questions:[],reviewRows:[],recoveryRows:[],entries:[],responseEditing:false,review:false,needsLogin:!user});
+      this._ticket=(this._ticket||0)+1;this._seatTicket=(this._seatTicket||0)+1;this._context=(this._context||0)+1;this._loaded=false;this._resumeRead=false;this._recoveryDraft=null;this._teamConfirmation=null;
+      this.setData({loading:false,info:null,receipt:null,seatReceipt:null,seatTickets:[],confirmedReceipt:null,confirmationMessage:'',answers:{},questions:[],reviewRows:[],recoveryRows:[],entries:[],responseEditing:false,review:false,needsLogin:!user});
+      if(user&&!this._hidden)void this.loadSeatReceipt();
     });
   },
   onShow() {
-    if(this._disposed)return;this._hidden=false;const user=session.user();
+    if(this._disposed)return;this._hidden=false;const user=session.user();void this.loadSeatReceipt();
     const needsRead=!this._loaded||!this.data.info||String(user&&user.id)!==String(this._userId);
     if(this.data.busy){if(needsRead)this._resumeRead=true;return;}
     if(needsRead)return this.load();
     if(this._team){if(this.data.responseEditing||!this.data.receipt)this._recoveryDraft=this.draftSnapshot();return this.load();}
   },
-  onHide() { this._hidden=true;this._resumeRead=false;this._ticket=(this._ticket||0)+1;if(this.data.loading||this.data.busy)this._loaded=false;this.setData({loading:false}); },
+  onHide() { this._hidden=true;this._resumeRead=false;this._ticket=(this._ticket||0)+1;this._seatTicket=(this._seatTicket||0)+1;if(this.data.loading||this.data.busy)this._loaded=false;this.setData({loading:false,seatReceipt:null,seatTickets:[]}); },
   onUnload() { this.onHide();this._disposed=true;this._recoveryDraft=null;this._teamConfirmation=null;if(this._unsubscribe)this._unsubscribe(); },
   retry() { return this.load(); },
-  onPullDownRefresh() { return this.load().finally(()=>wx.stopPullDownRefresh()); },
+  async loadSeatReceipt() {
+    const user=session.user(), options=this._options || {};
+    if(!user || this.data.edit || !['events','community-posts'].includes(options.kind)) { this.setData({seatReceipt:null,seatTickets:[]}); return; }
+    const ticket=this._seatTicket=(this._seatTicket||0)+1, userId=user.id;
+    const current=()=>!this._hidden&&!this._disposed&&ticket===this._seatTicket&&String(session.user()&&session.user().id)===String(userId);
+    const endpoint='/api/activities/'+encodeURIComponent(options.kind)+'/'+encodeURIComponent(options.id)+'/seating';
+    try {
+      const result=await http.request(endpoint,{raw:true,required:true});
+      if(!current())return;
+      const mine=result.mine;
+      if(!mine){this.setData({seatReceipt:null,seatTickets:[]});return;}
+      const seats=Array.isArray(mine.seats)?mine.seats:[];
+      this.setData({seatReceipt:{status:mine.status,statusText:seatStatusLabels[mine.status]||'处理中',seats:seats.length?seats.map(seatLabel).join('、'):(mine.requestedCount||0)+' 个座位'},seatTickets:[]});
+      if(mine.status!=='confirmed')return;
+      const versions=new Map((result.ticketImages||[]).map(item=>[item.seat,item.version]));
+      const tickets=await Promise.all(seats.map(async seat=>{
+        const version=versions.get(seat);let path='';
+        if(version)try{path=await http.download(endpoint+'/tickets/'+encodeURIComponent(seat)+'?v='+encodeURIComponent(version));}catch{}
+        return {seat,label:seatLabel(seat),path,uploaded:Boolean(version)};
+      }));
+      if(current())this.setData({seatTickets:tickets});
+    } catch { if(current())this.setData({seatReceipt:null,seatTickets:[]}); }
+  },
+  openSeatReceipt() { const options=this._options||{}; if(['events','community-posts'].includes(options.kind))navigation.go('activity-seating',{kind:options.kind,id:options.id}); },
+  onPullDownRefresh() { void this.loadSeatReceipt(); return this.load().finally(()=>wx.stopPullDownRefresh()); },
   draftSnapshot() { const saved=this.data.receipt;return {userId:this._userId,context:this._context,endpoint:this._readEndpoint,version:this.data.info.version,receiptId:saved&&saved.id,
     revision:saved&&saved.updatedAt,answers:this.data.answers,responseEditing:this.data.responseEditing,review:this.data.review,step:this.data.step}; },
   validRead(ticket,userId,endpoint) { return !this._hidden&&!this._disposed&&ticket===this._ticket&&endpoint===this._readEndpoint&&String(session.user()&&session.user().id)===String(userId); },

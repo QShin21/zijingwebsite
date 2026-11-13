@@ -36,6 +36,7 @@ import * as migration_20260927_182940_community_showcase from './20260927_182940
 import * as contentAudience from "./20261113_000400_content_audience";
 import * as activitySignupLotteries from "./20261113_000500_activity_signup_lotteries";
 import * as activitySeatTickets from "./20261113_000600_activity_seat_tickets";
+import * as customSeatLayout from "./20261113_000700_custom_seat_layout";
 
 export const migrations = [
 
@@ -109,4 +110,5 @@ export const migrations = [
   { up: contentAudience.up, down: contentAudience.down, name: "20261113_000400_content_audience" },
   { up: activitySignupLotteries.up, down: activitySignupLotteries.down, name: "20261113_000500_activity_signup_lotteries" },
   { up: activitySeatTickets.up, down: activitySeatTickets.down, name: "20261113_000600_activity_seat_tickets" },
+  { up: customSeatLayout.up, down: customSeatLayout.down, name: "20261113_000700_custom_seat_layout" },
 ];

@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { ActivitySignup } from "@/components/ActivitySignup";
+import { SeatReceiptPanel } from "@/components/activity-pages/SeatReceiptPanel";
+import type { SeatingKind } from "@/lib/activity-seating-model";
 import { TaskFrame, TaskNote } from "@/components/v2/TaskFrame";
 
 export const metadata = { title: "活动报名" };
@@ -11,7 +13,7 @@ export default async function Page({ params }: { params: Promise<{ kind: string;
     <TaskFrame
       eyebrow="SIGN UP · 活动报名"
       title="活动报名与本人回执"
-      description="填写后核对提交，已报名同学可在这里查看记录并按开放规则修改。"
+      description="填写后核对提交，并在这里查看本人报名与选座回执。"
       back={{ href: "/events", label: "日程" }}
       steps={["填写资料", "核对提交", "查看回执"]}
       aside={
@@ -30,6 +32,7 @@ export default async function Page({ params }: { params: Promise<{ kind: string;
       }
     >
       <ActivitySignup kind={kind} id={Number(id)} />
+      <SeatReceiptPanel kind={kind as SeatingKind} id={Number(id)} />
     </TaskFrame>
   );
 }

@@ -56,3 +56,5 @@
   .signup-stage { font-size: 11px; }
   .signup-datetime { gap: 8rpx; }
 }
+.signup-seat-ticket { margin: 18rpx 0; }
+.signup-seat-image { display: block; width: 100%; max-width: 640rpx; background: #fff; }

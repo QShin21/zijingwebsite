@@ -37,10 +37,10 @@ export async function seatingHTTP<T extends SeatRouteContext>(
   }
 }
 
-export async function seatingJSON(request: Request): Promise<Record<string, unknown>> {
+export async function seatingJSON(request: Request, maximum = 8192): Promise<Record<string, unknown>> {
   if (!/^application\/json(?:;|$)/i.test(request.headers.get("content-type") ?? ""))
     throw new APIError("请提交 JSON 请求", 415);
-  const body = await boundedBody(request, 8192);
+  const body = await boundedBody(request, maximum);
   try {
     const value: unknown = JSON.parse(body.toString("utf8"));
     if (value && typeof value === "object" && !Array.isArray(value)) return value as Record<string, unknown>;

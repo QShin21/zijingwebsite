@@ -100,3 +100,18 @@
 .seat-ticket-manager, .seat-tickets, .seat-ticket { display: flex; flex-direction: column; gap: 16rpx; }
 .seat-ticket { padding-top: 16rpx; border-top: 1rpx solid var(--z-line); }
 .seat-ticket-image { width: 100%; max-width: 640rpx; background: #fff; }
+.seat-gap { flex: none; margin: 0 6px 0 0; }
+.zoom-0 .seat-gap { width: 44px; height: 44px; }
+.zoom-1 .seat-gap { width: 52px; height: 52px; }
+.zoom-2 .seat-gap { width: 60px; height: 60px; }
+.seat-layout-editor { display: flex; flex-direction: column; gap: 16rpx; }
+.seat-layout-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12rpx; }
+.seat-layout-field { width: 130rpx; }
+.seat-layout-field input { border: 1rpx solid var(--z-line); border-radius: 10rpx; padding: 12rpx; }
+.seat-layout-scroll { max-height: 650rpx; height: 500rpx; width: 100%; border: 1rpx solid var(--z-line); }
+.seat-layout-grid { padding: 12px; }
+.seat-layout-row { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+.seat-layout-row-label { width: 38px; min-width: 38px; font-size: 11px; }
+.seat-layout-cell { width: 38px; min-width: 38px; height: 38px; padding: 0; line-height: 38px; font-size: 11px; border: 1px dashed var(--z-line); background: var(--z-surface); color: var(--z-muted); }
+.seat-layout-cell.present { border-style: solid; background: var(--z-success-bg); color: var(--z-success); }
+.seat-layout-cell.protected { border-color: var(--z-action); }

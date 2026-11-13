@@ -27,8 +27,16 @@ const chipsFor = selected => selected.map(id => ({ id, label: seatLabel(id) }));
 const memberOf = user => (user && user.id ? String(user.id) : '');
 const step = zoom => zooms[zoom].size + GAP;
 const boardWidth = (rows, zoom) => Math.max(...rows.map(row => row.offset + row.count)) * step(zoom) + 24;
+const draftCells = (grid, protectedSeats, lockedLegacy) => {
+  const gaps = new Set(grid.gaps || []), locked = new Set(protectedSeats || []);
+  return Array.from({ length: grid.rowCount }, (_, row) => ({ row: row + 1,
+    cells: Array.from({ length: grid.columnCount }, (_, column) => {
+      const id = (row + 1) + '-' + (column + 1);
+      return { id, number: column + 1, present: !gaps.has(id), locked: !lockedLegacy && locked.has(id) };
+    }) }));
+};
 // Everything private or account-bound that must disappear when the account changes.
-const cleared = () => ({ rows: [], chips: [], selected: [], phone: '', drafts: [], mine: null, tickets: [], ticketSeats: [], ticketUploadErrors: [], docs: [], counts: null, busy: '', error: '', notice: '', proofError: '', proofNotice: '',
+const cleared = () => ({ rows: [], chips: [], selected: [], phone: '', drafts: [], mine: null, tickets: [], ticketSeats: [], ticketUploadErrors: [], layoutOpen: false, layoutInfo: null, layoutGrid: null, layoutCells: [], docs: [], counts: null, busy: '', error: '', notice: '', proofError: '', proofNotice: '',
   editable: false, editing: false, editRevision: null, editProofs: [], canEditMine: false, loggedIn: false, canReview: false, enabled: false, mode: 'selection', requestedCount: 1, open: false, scheduled: false, opensAt: null, openingLabel: '', openingDate: '', openingTime: '', title: '', loadError: '', selectedBlocked: 0, selectedAvailable: 0, requestNumber: null, existingCount: 0, seatReview: null, inspectedSeat: '', changeReady: false });
 
 function seatCell(id, number, taken, picked, accent, blocked, manage, own) {
@@ -38,9 +46,11 @@ function seatCell(id, number, taken, picked, accent, blocked, manage, own) {
   return { id, number, style, picked, locked: Boolean(taken && !(manage && blocked) && !own && !inspect), label: seatLabel(id) + (accent ? ' · 中心区' : '') + ' · ' + state + (picked && (blocked || own) ? ' · 已选' : '') + (inspect ? ' · 查看申请' : '') };
 }
 function counts(state) {
-  const total = state.rows.reduce((sum, row) => sum + row.count, 0);
-  const blocked = (state.blockedSeats || []).length;
-  const values = Object.keys(state.occupancy || {}).filter(key => !(state.blockedSeats || []).includes(key)).map(key => state.occupancy[key]);
+  const missing = new Set(state.missingSeats || []);
+  const locked = new Set(state.blockedSeats || []);
+  const total = state.rows.reduce((sum, row) => sum + row.count, 0) - missing.size;
+  const blocked = (state.blockedSeats || []).filter(key => !missing.has(key)).length;
+  const values = Object.keys(state.occupancy || {}).filter(key => !locked.has(key) && !missing.has(key)).map(key => state.occupancy[key]);
   const pending = values.filter(value => value === 'pending').length, confirmed = values.filter(value => value === 'confirmed').length;
   return { rows: state.rows.length, total, pending, confirmed, blocked, free: Math.max(0, total - pending - confirmed - blocked) };
 }
@@ -62,6 +72,7 @@ Page(withVisualTheme({
   data: { review: false, manage: false, adding: false, changing: false, changeReady: false, requestNumber: null, existingCount: 0, seatReview: null, inspectedSeat: '', kind: '', title: '', loading: true, busy: '', error: '', loadError: '', notice: '', proofError: '', proofNotice: '', needsLogin: false,
     enabled: false, mode: 'selection', requestedCount: 1, open: false, scheduled: false, opensAt: null, openingLabel: '', openingDate: '', openingTime: '', loggedIn: false, canReview: false, editable: false, editing: false, editRevision: null, editProofs: [], canEditMine: false, counts: null,
     rows: [], boardWidth: 0, zoom: 1, zoomLabel: zooms[1].label, selected: [], selectedBlocked: 0, selectedAvailable: 0, chips: [], phone: '', drafts: [], mine: null, tickets: [], ticketSeats: [], ticketUploadErrors: [],
+    layoutOpen: false, layoutInfo: null, layoutGrid: null, layoutCells: [], layoutRowInput: '10', layoutColumnInput: '10', layoutWidth: 0, layoutCount: 0, layoutLegacyLocked: false,
     seatLimit: 10, proofLimit: 10, proofMB: 8,
     filters, status: 'pending', statusLabel: labels.pending, pageNumber: 1, hasNextPage: false, docs: [] },
   ...actions,
@@ -182,7 +193,7 @@ Page(withVisualTheme({
       canReview: Boolean(data.canReview), editable, editing, canEditMine, mine, drafts: (data.drafts || []).filter(id => proofPattern.test(String(id))),
       ...(!editing && this.data.editing ? { editRevision: null, editProofs: [], phone: '' } : {}),
       seatLimit: data.seatLimit, proofLimit: data.proofLimit, proofMB: Math.round(data.proofBytes / 1024 / 1024),
-      selected, selectedBlocked: 0, selectedAvailable: 0, chips: chipsFor(selected), counts: showMap ? counts(data) : null, seatReview: null, inspectedSeat: '',
+      selected, selectedBlocked: 0, selectedAvailable: 0, chips: chipsFor(selected), counts: showMap ? counts(data) : null, hasAccent: data.rows.some(row => row.accent), seatReview: null, inspectedSeat: '',
       rows: showMap && (data.enabled || manage || editing) ? this.layout(data, selected, this.data.zoom, editing) : [], boardWidth: showMap && (data.enabled || manage || editing) ? boardWidth(data.rows, this.data.zoom) : 0 });
     this.scheduleModeRefresh();
   },
@@ -250,13 +261,13 @@ Page(withVisualTheme({
       if (!selected.length || !this.current(revision)) return false;
       const counts = {};
       for (const file of selected) {
-        const match = /^(\d{1,2})排(\d{1,2})座\.(jpg|jpeg|png)$/i.exec(file.name || '');
+        const match = /^(\d{1,3})排(\d{1,3})座\.(jpg|jpeg|png)$/i.exec(file.name || '');
         if (match) { const seat = Number(match[1]) + '-' + Number(match[2]); counts[seat] = (counts[seat] || 0) + 1; }
       }
       const errors = []; let saved = 0;
       for (const file of selected) {
         if (!this.current(revision)) return false;
-        const match = /^(\d{1,2})排(\d{1,2})座\.(jpg|jpeg|png)$/i.exec(file.name || '');
+        const match = /^(\d{1,3})排(\d{1,3})座\.(jpg|jpeg|png)$/i.exec(file.name || '');
         const seat = match && (Number(match[1]) + '-' + Number(match[2]));
         if (!match || !file.path) { errors.push((file.name || '文件') + '：文件名无效'); continue; }
         if (counts[seat] > 1) { errors.push(file.name + '：本次选择中同一座位有多个文件'); continue; }
@@ -288,18 +299,82 @@ Page(withVisualTheme({
     const selected = changing && !same ? data.request.seats.slice() : this.data.selected.filter(id => !data.occupancy[id] || (changing && data.request.seats.includes(id))).slice(0, limit);
     const changeReady = Boolean(changing && selected.length === limit && data.request.seats.some(id => !selected.includes(id)));
     this.setData({ title: data.title || (changing ? '更换座位' : '增加座位'), requestNumber: data.request.id, existingCount: data.request.seats.length,
-      seatLimit: limit, editable: changing || remaining > 0, canReview: true, selected, changeReady, chips: chipsFor(selected), counts: counts(data),
+      seatLimit: limit, editable: changing || remaining > 0, canReview: true, selected, changeReady, chips: chipsFor(selected), counts: counts(data), hasAccent: data.rows.some(row => row.accent),
       rows: this.layout(data, selected, this.data.zoom, false), boardWidth: boardWidth(data.rows, this.data.zoom) });
+  },
+  openLayout() {
+    if (!this.data.review || this.data.busy || this.data.loading) return;
+    if (this.data.layoutOpen) { this.setData({ layoutOpen: false }); return; }
+    return this.work('正在读取座位图', async revision => {
+      const info = await http.request(this._endpoint + '/layout', { required: true, raw: true });
+      if (!this.current(revision)) return false;
+      const grid = info.layout || { rowCount: 10, columnCount: 10, gaps: [] };
+      const protectedSeats = Array.isArray(info.protectedSeats) ? info.protectedSeats : [];
+      const locked = !info.layout && protectedSeats.length > 0;
+      this.setData({ layoutOpen: true, layoutInfo: info, layoutGrid: grid, layoutCells: draftCells(grid, protectedSeats, locked),
+        layoutRowInput: String(grid.rowCount), layoutColumnInput: String(grid.columnCount), layoutWidth: grid.columnCount * 42 + 52,
+        layoutCount: grid.rowCount * grid.columnCount - grid.gaps.length, layoutLegacyLocked: locked });
+      return false;
+    }, false);
+  },
+  layoutInput(event) {
+    const key = event.currentTarget.dataset.key;
+    if (key === 'row' || key === 'column') this.setData({ [key === 'row' ? 'layoutRowInput' : 'layoutColumnInput']: event.detail.value });
+  },
+  layoutResize() {
+    const rows = Number(this.data.layoutRowInput), columns = Number(this.data.layoutColumnInput);
+    const info = this.data.layoutInfo, old = this.data.layoutGrid;
+    if (!info || !old || this.data.layoutLegacyLocked) return;
+    if (!Number.isInteger(rows) || !Number.isInteger(columns) || rows < 1 || columns < 1 || rows > 100 || columns > 100) {
+      this.setData({ error: '行数和列数请填写 1–100 的整数。' }); return;
+    }
+    if (info.layout && (info.protectedSeats || []).some(id => { const p = id.split('-').map(Number); return p[0] > rows || p[1] > columns; })) {
+      this.setData({ error: '调整范围需保留已有申请、锁定或票据的座位。' }); return;
+    }
+    const grid = { rowCount: rows, columnCount: columns, gaps: old.gaps.filter(id => { const p = id.split('-').map(Number); return p[0] <= rows && p[1] <= columns; }) };
+    this.setData({ layoutGrid: grid, layoutCells: draftCells(grid, info.protectedSeats, false), layoutWidth: columns * 42 + 52,
+      layoutCount: rows * columns - grid.gaps.length, error: '', notice: '方格已调整，请确认座位后保存。' });
+  },
+  layoutToggle(event) {
+    if (this.data.busy || this.data.loading || this.data.layoutLegacyLocked) return;
+    const r = Number(event.currentTarget.dataset.row), c = Number(event.currentTarget.dataset.column);
+    const cell = this.data.layoutCells[r] && this.data.layoutCells[r].cells[c], grid = this.data.layoutGrid;
+    if (!cell || cell.locked || !grid) return;
+    const gaps = cell.present ? grid.gaps.concat(cell.id) : grid.gaps.filter(id => id !== cell.id);
+    this.setData({ layoutGrid: { ...grid, gaps }, ['layoutCells[' + r + '].cells[' + c + '].present']: !cell.present,
+      layoutCount: grid.rowCount * grid.columnCount - gaps.length, error: '', notice: '' });
+  },
+  layoutAll(event) {
+    const info = this.data.layoutInfo, old = this.data.layoutGrid;
+    if (!info || !old || this.data.layoutLegacyLocked) return;
+    const present = event.currentTarget.dataset.present === true;
+    const locked = new Set(info.layout ? info.protectedSeats || [] : []);
+    const gaps = present ? [] : Array.from({ length: old.rowCount }, (_, row) => Array.from({ length: old.columnCount }, (_, col) => (row + 1) + '-' + (col + 1))).flat().filter(id => !locked.has(id));
+    const grid = { ...old, gaps };
+    this.setData({ layoutGrid: grid, layoutCells: draftCells(grid, info.protectedSeats, false), layoutCount: grid.rowCount * grid.columnCount - gaps.length, error: '', notice: '' });
+  },
+  saveLayout() {
+    const info = this.data.layoutInfo, grid = this.data.layoutGrid;
+    if (!info || !grid || this.data.layoutLegacyLocked || !this.data.layoutCount) return;
+    return this.work('正在保存座位图', async revision => {
+      const result = await http.request(this._endpoint + '/layout', { method: 'PUT', required: true, raw: true,
+        data: { layout: grid, revision: info.revision } });
+      if (this.current(revision)) this.setData({ layoutInfo: result, layoutGrid: result.layout, layoutCells: draftCells(result.layout, result.protectedSeats, false), notice: '座位图已保存，成员端和工作台已更新。' });
+      return true;
+    }, true);
   },
   layout(state, selected, zoom, editing = this.data.editing) {
     const index = {};
+    const missing = new Set(state.missingSeats || []);
+    const locked = new Set(state.blockedSeats || []);
     const rows = state.rows.map((row, r) => {
       const accent = Boolean(row.accent);
       return { row: row.row, accent, indent: row.offset * step(zoom), seats: Array.from({ length: row.count }, (_, s) => {
         const id = row.row + '-' + (s + 1);
+        if (missing.has(id)) return { id, missing: true };
         index[id] = [r, s, accent];
         const own = Boolean((editing && state.mine && state.mine.seats.includes(id)) || (this.data.changing && state.request && state.request.seats.includes(id)));
-        return seatCell(id, s + 1, state.occupancy[id], selected.includes(id), accent, (state.blockedSeats || []).includes(id), this.data.manage, own);
+        return seatCell(id, s + 1, state.occupancy[id], selected.includes(id), accent, locked.has(id), this.data.manage, own);
       }) };
     });
     this._seats = index;

@@ -100,7 +100,7 @@ let view: BrowserPage;
 describe('小程序座位图细节', () => {
   it('保留实际页面的原生按钮、无障碍状态和横向滚动绑定', () => {
     expect(markup).toMatch(/<scroll-view\s+scroll-x\b/);
-    expect(markup).toMatch(/<button wx:for="\{\{row\.seats\}\}"[^>]*bindtap="toggle"[^>]*aria-label="\{\{seat\.label\}\}"[^>]*aria-disabled=[^>]*aria-selected=/s);
+    expect(markup).toMatch(/<block wx:for="\{\{row\.seats\}\}"[^>]*>\s*<view wx:if="\{\{seat\.missing\}\}"[^>]*><\/view>\s*<button wx:else[^>]*bindtap="toggle"[^>]*aria-label="\{\{seat\.label\}\}"[^>]*aria-disabled=[^>]*aria-selected=/s);
     expect(markup).toContain('width: {{boardWidth}}px');
     expect(markup).toContain('padding-left: {{row.indent}}px');
   });

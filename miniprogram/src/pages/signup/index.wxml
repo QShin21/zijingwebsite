@@ -12,6 +12,14 @@
     </view>
   </view>
   <template is="feedback" data="{{loading,error,needsLogin}}" />
+  <view wx:if="{{seatReceipt && !needsLogin && !edit}}" class="zj-sheet signup-receipt">
+    <view class="zj-record-head"><text class="zj-sheet-title">我的选座回执</text><text class="zj-pill zj-pill-action">{{seatReceipt.statusText}}</text></view>
+    <text class="body">{{seatReceipt.seats}}</text>
+    <block wx:for="{{seatTickets}}" wx:key="seat">
+      <view class="signup-seat-ticket"><text class="field-label">{{item.label}}电子票据</text><image wx:if="{{item.path}}" src="{{item.path}}" mode="widthFix" class="signup-seat-image" /><text wx:elif="{{item.uploaded}}" class="zj-form-hint">图片加载失败，请进入选座页面重试。</text><text wx:else class="zj-form-hint">票据上传后将在这里显示。</text></view>
+    </block>
+    <button class="secondary" bindtap="openSeatReceipt">查看选座详情与保存票据</button>
+  </view>
   <view wx:if="{{team && error && confirmedReceipt && !needsLogin}}" class="zj-sheet signup-receipt">
     <view class="zj-record-head"><text class="zj-sheet-title">上次保存已确认</text><text class="zj-pill zj-pill-success">{{confirmedReceipt.statusText}}</text></view>
     <text class="body">{{confirmationMessage}}</text>

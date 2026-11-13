@@ -29,7 +29,7 @@ export const seatZooms = [20, 26, 34] as const;
 export const seatGap = 4;
 const zoomNames = ["紧凑", "标准", "放大"];
 const proofTypes = ["image/jpeg", "image/png", "image/webp"];
-type SeatLayout = Pick<SeatingState, "rows" | "occupancy"> & Partial<Pick<SeatingState, "blockedSeats">>;
+type SeatLayout = Pick<SeatingState, "rows" | "occupancy"> & Partial<Pick<SeatingState, "blockedSeats" | "missingSeats">>;
 
 /** Widest zoom whose whole board fits `width`; narrow screens keep the touch-friendly standard step and scroll. */
 export function fittedZoom(rows: SeatLayout["rows"], width: number) {
@@ -39,7 +39,7 @@ export function fittedZoom(rows: SeatLayout["rows"], width: number) {
 }
 
 /** Legend and centre-zone key, shared by the member map, the workbench and the visual specimen. */
-export function SeatLegend() {
+export function SeatLegend({ showAccent = true }: { showAccent?: boolean }) {
   return (
     <ul className={styles.legend} aria-label="座位状态图例">
       {seatLegend.map(([value, label]) => (
@@ -48,10 +48,10 @@ export function SeatLegend() {
           {label}
         </li>
       ))}
-      <li>
+      {showAccent && <li>
         <span className={styles.swatch} data-state="available" data-accent="true" aria-hidden="true" />
         中心区 8–10 排
-      </li>
+      </li>}
     </ul>
   );
 }
@@ -98,7 +98,8 @@ export function SeatMap({
   onInspect?: (seat: string) => void;
 }) {
   const [focused, setFocused] = useState("");
-  const keys = state.rows.flatMap(({ row, count }) => Array.from({ length: count }, (_, index) => `${row}-${index + 1}`));
+  const missing = new Set(state.missingSeats || []);
+  const keys = state.rows.flatMap(({ row, count }) => Array.from({ length: count }, (_, index) => `${row}-${index + 1}`)).filter(seat => !missing.has(seat));
   const blocked = new Set(state.blockedSeats || []);
   const inspectable = (seat: string) => Boolean(onInspect && state.occupancy[seat] && !blocked.has(seat) && !own.includes(seat));
   const selectable = (seat: string) => !state.occupancy[seat] || (manage && blocked.has(seat)) || own.includes(seat) || inspectable(seat);
@@ -151,6 +152,7 @@ export function SeatMap({
               <div className={styles.rowSeats} style={{ "--offset": row.offset } as CSSProperties}>
                 {Array.from({ length: row.count }, (_, index) => {
                   const seat = `${row.row}-${index + 1}`;
+                  if (missing.has(seat)) return <span key={seat} className={styles.seatGap} aria-hidden="true" />;
                   const taken = state.occupancy[seat];
                   const picked = selected.includes(seat);
                   const value: SeatVisual = blocked.has(seat) ? "blocked" : own.includes(seat) && picked ? "selected" : taken || (picked ? "selected" : "available");
@@ -396,7 +398,7 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
   const activeEdit = editing && state.mine?.status === "pending" && state.mineDetails?.canEdit === true;
   const editable = Boolean(activeEdit || (state.open && state.loggedIn && (!state.mine || state.mine.status === "rejected" || state.mine.status === "cancelled" || state.mine.status === "revoked")));
   const visibleProofs = activeEdit ? editProofs : state.drafts;
-  const total = state.rows.reduce((sum, row) => sum + row.count, 0);
+  const total = state.rows.reduce((sum, row) => sum + row.count, 0) - (state.missingSeats?.length || 0);
   const randomMode = state.mode === "random";
 
   /** One action at a time; failures keep the form; errors and conflicts (409) refresh the map. */
@@ -594,7 +596,7 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
       {(state.enabled || activeEdit) && (!randomMode || state.canReview) && (
         <div className={styles.mapBlock} ref={mapRef}>
           <div className={styles.mapTools}>
-            <SeatLegend />
+            <SeatLegend showAccent={state.rows.some(row => row.accent)} />
             <SeatZoom zoom={zoom} onChange={setZoom} />
           </div>
           <SeatMap state={state} selected={selected} editable={!randomMode && editable && !busy} own={activeEdit && !randomMode ? state.mine?.seats : []} toggle={toggle} zoom={zoom} label="活动座位图" />

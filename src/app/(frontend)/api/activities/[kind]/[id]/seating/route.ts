@@ -40,7 +40,7 @@ export function PUT(request: Request, context: SeatRouteContext) {
 
 export function POST(request: Request, context: SeatRouteContext) {
   return seatingHTTP(request, context, async (p, kind, id, user) => {
-    const data = await seatingJSON(request);
+    const data = await seatingJSON(request, 128 * 1024);
     if (data.action === "random-count") {
       seatingFields(data, ["action", "id", "revision", "count"]);
       return seatReply({ request: await setRandomSeatCount(p, await seatActivity(p, kind, id, user), user, data.id, data.revision, data.count) });

@@ -8,6 +8,7 @@ export { getCommunities, getCommunity, getCommunityHeader, getContacts, getShowc
 export { getTeams, getTeam, getHonors } from "./teams";
 export { getRecruitmentCenter } from "./recruitment";
 export { getMe, getMySignups, getMyApplications, getManage } from "./account";
+export { getMySeatReceipts } from "../activity-seating";
 export { getFixedPage } from "./pages";
 export { getImage, signImages } from "./images";
 export { createUpload, createShowcase, reviewShowcase } from "./writes";

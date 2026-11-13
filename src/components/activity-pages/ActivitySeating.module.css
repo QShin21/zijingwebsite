@@ -154,6 +154,17 @@
 .ticketUpload { display: grid; gap: 8px; font-weight: 800; }
 .ticketUpload input { max-width: 100%; }
 .ticketErrors { margin: 0; padding-left: 1.3em; overflow-wrap: anywhere; }
+.layoutEditor { display: grid; gap: 12px; padding: 18px; border: 1px solid var(--z-line); border-radius: var(--z-radius-small); background: var(--z-raised); }
+.layoutHeading, .layoutControls { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
+.layoutHeading { justify-content: space-between; }
+.layoutControls input { width: 86px; }
+.layoutGridViewport { max-width: 100%; max-height: 460px; overflow: auto; border: 1px solid var(--z-line); border-radius: 8px; padding: 10px; }
+.layoutGrid { display: grid; gap: 5px; width: max-content; }
+.layoutGridRow { display: flex; gap: 5px; align-items: center; }
+.layoutRowNumber { position: sticky; left: 0; width: 42px; flex: 0 0 42px; background: var(--z-raised); font-size: 12px; }
+.layoutCell { width: 32px; height: 32px; border: 1px dashed var(--z-line-strong); border-radius: 6px; background: var(--z-surface); color: var(--z-muted); font-size: 11px; }
+.layoutCell[data-present] { border-style: solid; border-color: var(--z-success-line); background: var(--z-success-bg); color: var(--z-success); font-weight: 800; }
+.layoutCell[data-protected] { border-color: var(--z-action); opacity: 0.8; }
 .badge {
   display: inline-flex;
   align-items: center;
@@ -364,6 +375,7 @@
   gap: var(--seat-gap);
   margin-inline-start: calc(var(--offset) * var(--seat-step));
 }
+.seatGap { display: block; width: var(--seat-size); min-width: var(--seat-size); height: var(--seat-size); }
 .seat {
   box-sizing: border-box;
   display: grid;

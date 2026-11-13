@@ -15,6 +15,8 @@ import { POST as uploadProof } from "@/app/(frontend)/api/activities/[kind]/[id]
 import * as proofRoute from "@/app/(frontend)/api/activities/[kind]/[id]/seating/proofs/[proof]/route";
 import * as ticketRoute from "@/app/(frontend)/api/activities/[kind]/[id]/seating/tickets/route";
 import * as ticketImageRoute from "@/app/(frontend)/api/activities/[kind]/[id]/seating/tickets/[seat]/route";
+import * as layoutRoute from "@/app/(frontend)/api/activities/[kind]/[id]/seating/layout/route";
+import { v2Request } from "@/lib/v2/http";
 
 const locator = vi.hoisted(() => ({ cms: vi.fn() }));
 vi.mock("../src/lib/content", () => ({ cms: locator.cms }));
@@ -442,7 +444,7 @@ it('等待座位行锁自然跨过截止时间也必须拒绝，保留未消费�
     pending = submit(activity, first, ['7-1'], [proof]);
     let waiting = false;
     for (let attempt = 0; attempt < 80; attempt++) {
-      const waits = await pool.query("SELECT count(*)::int n FROM pg_stat_activity WHERE datname = current_database() AND wait_event_type = 'Lock' AND query LIKE 'SELECT id, enabled, opens_at, mode FROM activity_seatings WHERE%FOR UPDATE'");
+      const waits = await pool.query("SELECT count(*)::int n FROM pg_stat_activity WHERE datname = current_database() AND wait_event_type = 'Lock' AND query LIKE 'SELECT id, enabled, opens_at, mode, layout, layout_revision FROM activity_seatings WHERE%FOR UPDATE'");
       if (waits.rows[0].n) { waiting = true; break; }
       await new Promise(resolve => setTimeout(resolve, 20));
     }
@@ -1023,4 +1025,104 @@ it("座位票据按活动和当前确认的座位分发，支持先上传、补�
   expect((await revokeOne(activity, reviewer, pending.id, state.mine!.revision, "1-3")).status).toBe(200);
   expect((await ticket(first, "1-3")).status).toBe(404);
   expect((await ticket(first, "1-2")).status).toBe(200);
+});
+
+it("自定义方格保护座位、票据及旧版客户端，同时支持超过原座位图的编号", async () => {
+  const activity = await extraActivity("custom-grid");
+  const get = (who?: Actor) => layoutRoute.GET(request(activity, "GET", who, undefined, "/layout"), context(activity));
+  const save = (who: Actor | undefined, layout: unknown, revision = 0) =>
+    layoutRoute.PUT(request(activity, "PUT", who, { layout, revision }, "/layout"), context(activity));
+  const initial = { rowCount: 14, columnCount: 50, gaps: ["1-2", "14-49"] };
+  expect((await get()).status).toBe(401);
+  expect((await get(first)).status).toBe(403);
+  expect((await save(otherReviewer, initial)).status).toBe(403);
+  for (const invalid of [
+    { rowCount: 0, columnCount: 2, gaps: [] }, { rowCount: 101, columnCount: 1, gaps: [] },
+    { rowCount: 1, columnCount: 1, gaps: ["1-1"] }, { rowCount: 1, columnCount: 2, gaps: ["1-3"] },
+    { rowCount: 2, columnCount: 2, gaps: ["1-1", "1-1"] },
+  ]) expect((await save(reviewer, invalid)).status).toBe(400);
+  const saved = await save(reviewer, initial);
+  expect(saved.status).toBe(200);
+  expect(await saved.json()).toMatchObject({ layout: initial, revision: 1 });
+  expect((await save(reviewer, initial)).status).toBe(409);
+  const state = await map(activity, first);
+  expect(state.rows).toHaveLength(14);
+  expect(state.rows[13]).toMatchObject({ row: 14, count: 50, offset: 0 });
+  expect(state.missingSeats).toEqual(initial.gaps);
+  expect(state.blockedSeats).toEqual(expect.arrayContaining(initial.gaps));
+  expect(state.occupancy["14-49"]).toBe("confirmed");
+  const proof = await added(activity, first);
+  expect((await submit(activity, first, ["14-49"], [proof])).status).toBe(409);
+  const created = await submit(activity, first, ["14-50"], [proof]);
+  expect(created.status).toBe(200);
+  const mine = (await created.json()).mine;
+  expect((await save(reviewer, { ...initial, gaps: [...initial.gaps, "14-50"] }, 1)).status).toBe(409);
+  expect((await save(reviewer, { rowCount: 13, columnCount: 50, gaps: [] }, 1)).status).toBe(409);
+  expect((await decide(activity, reviewer, mine.id, "confirmed")).status).toBe(200);
+  const form = new FormData(); form.set("file", new File([picture], "14排50座.png", { type: "image/png" })); form.set("filename", "14排50座.png");
+  expect((await ticketRoute.POST(request(activity, "POST", reviewer, form, "/tickets"), context(activity))).status).toBe(201);
+  const unusedTicket = new FormData(); unusedTicket.set("file", new File([picture], "01排04座.png", { type: "image/png" })); unusedTicket.set("filename", "01排04座.png");
+  expect((await ticketRoute.POST(request(activity, "POST", reviewer, unusedTicket, "/tickets"), context(activity))).status).toBe(201);
+  expect((await save(reviewer, { ...initial, gaps: [...initial.gaps, "1-4"] }, 1)).status).toBe(409);
+  const confirmed = await map(activity, first);
+  expect(confirmed.ticketImages).toMatchObject([{ seat: "14-50", extension: "png" }]);
+  const image = await ticketImageRoute.GET(request(activity, "GET", first, undefined, "/tickets/14-50"),
+    { params: context(activity).params.then(params => ({ ...params, seat: "14-50" })) });
+  expect(image.status).toBe(200);
+  expect((await block(activity, reviewer, ["1-3"], true)).status).toBe(200);
+  expect((await save(reviewer, { ...initial, gaps: [...initial.gaps, "1-3"] }, 1)).status).toBe(409);
+  expect((await save(reviewer, { rowCount: 15, columnCount: 51, gaps: initial.gaps }, 1)).status).toBe(200);
+});
+
+it("原座位图已有占用时保留原布局，并发编辑与选座不会删除已占用格子", async () => {
+  const legacy = await extraActivity("legacy-protected");
+  expect((await block(legacy, reviewer, ["1-1"], true)).status).toBe(200);
+  const grid: { rowCount: number; columnCount: number; gaps: string[] } = { rowCount: 2, columnCount: 2, gaps: [] };
+  const save = (activity: Activity, value: typeof grid, revision: number) =>
+    layoutRoute.PUT(request(activity, "PUT", reviewer, { layout: value, revision }, "/layout"), context(activity));
+  expect((await save(legacy, grid, 0)).status).toBe(409);
+  expect((await map(legacy)).rows.map(row => row.count)).toEqual([27,31,35,37,37,37,37,26,26,24,31,33]);
+  const activity = await extraActivity("layout-race");
+  expect((await save(activity, grid, 0)).status).toBe(200);
+  const [firstEdit, secondEdit] = await Promise.all([
+    save(activity, { ...grid, gaps: ["2-1"] }, 1), save(activity, { ...grid, gaps: ["2-2"] }, 1),
+  ]);
+  expect([firstEdit.status, secondEdit.status].sort()).toEqual([200, 409]);
+  const proof = await added(activity, second);
+  const [selection, editLayout] = await Promise.all([
+    submit(activity, second, ["1-1"], [proof]), save(activity, { ...grid, gaps: ["1-1"] }, 2),
+  ]);
+  expect([selection.status, editLayout.status].sort()).toEqual([200, 409]);
+  const current = await map(activity, second);
+  expect(!(current.mine?.seats.includes("1-1") && current.missingSeats?.includes("1-1"))).toBe(true);
+});
+
+it("自定义方格的随机分配跳过空位，本人回执列表只返回本人可见资料", async () => {
+  const activity = await extraActivity("custom-random");
+  const grid = { rowCount: 3, columnCount: 3, gaps: ["1-2", "2-2", "3-2"] };
+  expect((await layoutRoute.PUT(request(activity, "PUT", reviewer, { layout: grid, revision: 0 }, "/layout"), context(activity))).status).toBe(200);
+  expect((await mode(activity, reviewer, "random")).status).toBe(200);
+  const proof = await added(activity, first);
+  const mine = (await (await randomSubmit(activity, first, 2, [proof])).json()).mine;
+  const ownList = async (who?: Actor) => v2Request(p, new Request(origin + "/api/v2/me/seat-requests", {
+    headers: who ? { Authorization: `JWT ${who.token}` } : {},
+  }), ["me", "seat-requests"]);
+  expect((await ownList()).status).toBe(401);
+  let list = await (await ownList(first)).json();
+  let item = list.docs.find((value: { activityID: number }) => value.activityID === activity.id);
+  expect(item.request).toMatchObject({ status: "pending", seats: [], requestedCount: 2 });
+  expect(JSON.stringify(item)).not.toContain("phone");
+  expect(JSON.stringify(item)).not.toContain("proof");
+  expect((await (await ownList(second)).json()).docs.some((value: { activityID: number }) => value.activityID === activity.id)).toBe(false);
+  expect((await decide(activity, reviewer, mine.id, "confirmed", 2)).status).toBe(200);
+  const confirmed = await map(activity, first);
+  expect(confirmed.mine?.seats).toHaveLength(2);
+  expect(confirmed.mine?.seats.some(seat => grid.gaps.includes(seat))).toBe(false);
+  list = await (await ownList(first)).json();
+  item = list.docs.find((value: { activityID: number }) => value.activityID === activity.id);
+  expect(item).toMatchObject({ href: `/activities/events/${activity.id}/fill#seat-receipt`, request: { status: "confirmed", seats: confirmed.mine?.seats } });
+  await p.db.drizzle.execute(sql`UPDATE events SET _status = 'draft' WHERE id = ${activity.id}`);
+  list = await (await ownList(first)).json();
+  item = list.docs.find((value: { key: string }) => value.key === `seat:${mine.id}`);
+  expect(item).toMatchObject({ title: "活动暂不可访问", href: null, request: null, activityID: null });
 });

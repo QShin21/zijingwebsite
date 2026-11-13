@@ -76,7 +76,7 @@ export async function v2Request(p: Payload, request: Request, path: string[]): P
         session: service.getSession, home: service.getHome, calendar: service.getCalendar, feed: service.getFeed,
         communities: service.getCommunities, teams: service.getTeams, honors: service.getHonors,
         recruitment: service.getRecruitmentCenter, me: service.getMe, "me/signups": service.getMySignups,
-        "me/applications": service.getMyApplications, manage: service.getManage,
+        "me/applications": service.getMyApplications, "me/seat-requests": service.getMySeatReceipts, manage: service.getManage,
       };
       const read = Object.hasOwn(reads, route) ? reads[route as keyof typeof reads] : undefined;
       if (read) return reply(await read(p, viewer, query));

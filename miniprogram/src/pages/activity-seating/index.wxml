@@ -50,6 +50,30 @@
           <button class="secondary" bindtap="openManage" disabled="{{busy || loading}}">管理座位和查看申请</button>
         </view>
       </view>
+      <view class="zj-sheet seat-layout-editor">
+        <view class="zj-record-head"><text class="zj-sheet-title">自定义座位图</text><button class="secondary" bindtap="openLayout" disabled="{{busy || loading}}">{{layoutOpen ? '收起' : '编辑座位图'}}</button></view>
+        <text class="zj-form-hint">设置排数、列数，点击方格切换座位与空位。</text>
+        <block wx:if="{{layoutOpen && layoutInfo}}">
+          <text wx:if="{{layoutLegacyLocked}}" class="zj-callout">当前原座位图已有占用、锁定或票据，继续保留原图。新活动可配置自定义座位图。</text>
+          <text wx:elif="{{!layoutInfo.layout}}" class="zj-form-hint">保存后按方格的排号、列号作为座位编号；票据文件名与座位编号对应。</text>
+          <view class="seat-layout-controls">
+            <view class="seat-layout-field"><text class="field-label">排数</text><input type="number" value="{{layoutRowInput}}" data-key="row" bindinput="layoutInput" disabled="{{busy || loading || layoutLegacyLocked}}" /></view>
+            <view class="seat-layout-field"><text class="field-label">每排列数</text><input type="number" value="{{layoutColumnInput}}" data-key="column" bindinput="layoutInput" disabled="{{busy || loading || layoutLegacyLocked}}" /></view>
+            <button class="secondary" bindtap="layoutResize" disabled="{{busy || loading || layoutLegacyLocked}}">应用行列</button>
+          </view>
+          <view class="zj-record-actions"><button class="secondary" bindtap="layoutAll" data-present="{{true}}" disabled="{{busy || loading || layoutLegacyLocked}}">全部设为座位</button><button class="secondary" bindtap="layoutAll" data-present="{{false}}" disabled="{{busy || loading || layoutLegacyLocked}}">清空方格</button></view>
+          <text class="zj-form-hint">当前 {{layoutGrid.rowCount}} 排 × {{layoutGrid.columnCount}} 列，{{layoutCount}} 个座位。已有申请、锁定或票据的座位保持不变。</text>
+          <scroll-view wx:if="{{!layoutLegacyLocked}}" scroll-x scroll-y class="seat-layout-scroll">
+            <view class="seat-layout-grid" style="width: {{layoutWidth}}px;">
+              <view wx:for="{{layoutCells}}" wx:key="row" wx:for-item="layoutRow" wx:for-index="rowIndex" class="seat-layout-row">
+                <text class="seat-layout-row-label">{{layoutRow.row}}排</text>
+                <button wx:for="{{layoutRow.cells}}" wx:key="id" wx:for-item="cell" wx:for-index="columnIndex" class="seat-layout-cell {{cell.present ? 'present' : ''}} {{cell.locked ? 'protected' : ''}}" data-row="{{rowIndex}}" data-column="{{columnIndex}}" bindtap="layoutToggle" disabled="{{busy || loading || cell.locked}}" aria-label="第 {{layoutRow.row}} 排第 {{cell.number}} 列，{{cell.present ? '座位' : '空位'}}">{{cell.number}}</button>
+              </view>
+            </view>
+          </scroll-view>
+          <view class="zj-record-actions"><button class="primary" bindtap="saveLayout" disabled="{{busy || loading || layoutLegacyLocked || !layoutCount}}">保存座位图</button></view>
+        </block>
+      </view>
       <view class="zj-sheet seat-ticket-manager">
         <text class="zj-sheet-title">座位电子票据</text>
         <text class="zj-form-hint">从微信聊天文件中批量选择 JPG 或 PNG，文件名例如 01排01座.jpg。单张最多 8 MB；重新上传会更新对应座位的票据。</text>
@@ -142,7 +166,7 @@
             <view class="seat-key"><view class="seat-swatch pending"></view><text>待审核</text></view>
             <view class="seat-key"><view class="seat-swatch confirmed"></view><text>已确认</text></view>
             <view class="seat-key"><view class="seat-swatch blocked"></view><text>未开放</text></view>
-            <view class="seat-key"><view class="seat-swatch available accent"></view><text>中心区</text></view>
+            <view wx:if="{{hasAccent}}" class="seat-key"><view class="seat-swatch available accent"></view><text>中心区</text></view>
           </view>
           <view class="seat-zoom" aria-label="座位图缩放">
             <button class="seat-zoom-step" data-delta="-1" bindtap="rescale" disabled="{{zoom === 0}}" aria-label="缩小座位图">−</button>
@@ -159,8 +183,8 @@
             <view class="seat-grid" style="width: {{boardWidth}}px;">
               <view class="seat-stage"><view class="seat-stage-arc"></view><text class="seat-stage-label">舞台 · 屏幕</text></view>
               <view wx:for="{{rows}}" wx:key="row" wx:for-item="row" class="seat-row {{row.accent ? 'accent' : ''}}" style="padding-left: {{row.indent}}px;">
-                <button wx:for="{{row.seats}}" wx:key="id" wx:for-item="seat" class="seat {{seat.style}} {{seat.picked ? 'chosen' : ''}}" data-seat="{{seat.id}}" bindtap="toggle" hover-class="none"
-                  aria-label="{{seat.label}}" aria-disabled="{{busy || loading || !editable || seat.locked || (mode === 'random' && !manage && !adding && !changing)}}" aria-selected="{{seat.picked}}">{{seat.number}}</button>
+                <block wx:for="{{row.seats}}" wx:key="id" wx:for-item="seat"><view wx:if="{{seat.missing}}" class="seat-gap"></view><button wx:else class="seat {{seat.style}} {{seat.picked ? 'chosen' : ''}}" data-seat="{{seat.id}}" bindtap="toggle" hover-class="none"
+                  aria-label="{{seat.label}}" aria-disabled="{{busy || loading || !editable || seat.locked || (mode === 'random' && !manage && !adding && !changing)}}" aria-selected="{{seat.picked}}">{{seat.number}}</button></block>
               </view>
             </view>
           </scroll-view>

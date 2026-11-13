@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getManage, getMe, getMyApplications, getMySignups, type PlatformRole } from "@/lib/v2";
+import { getManage, getMe, getMyApplications, getMySignups, getMySeatReceipts, type PlatformRole } from "@/lib/v2";
+import { seatLabel, seatStatusLabels } from "@/lib/activity-seating-model";
 import { affiliationLabels } from "@/lib/affiliation";
 import { LogoutButton } from "@/components/account-pages/AuthForms";
 import { pageNumber, read, readOptional, single, type Search } from "@/components/v2/data";
@@ -37,7 +38,7 @@ export default async function Account({ searchParams }: { searchParams: Search }
       label="我的记录"
       items={[
         { href: "/account", label: "总览", current: !recordView },
-        { href: "/account?view=signups", label: "我的报名", current: view === "signups", count: me.counts.signups },
+        { href: "/account?view=signups", label: "报名与选座", current: view === "signups", count: me.counts.signups },
         ...(campus ? [{ href: "/account?view=applications", label: "我的申请", current: view === "applications", count: me.counts.applications }] : []),
       ]}
     />
@@ -82,6 +83,8 @@ export default async function Account({ searchParams }: { searchParams: Search }
 
   if (recordView) {
     const signups = view === "signups" ? await read(getMySignups, { page, limit: 20 }, "/account?view=signups") : null;
+    const seatPage = pageNumber(search.seatPage);
+    const seats = view === "signups" ? await read(getMySeatReceipts, { page: seatPage, limit: 20 }, "/account?view=signups") : null;
     const applications = view === "applications" ? await read(getMyApplications, { page, limit: 20 }, "/account?view=applications") : null;
     return (
       <>
@@ -119,6 +122,20 @@ export default async function Account({ searchParams }: { searchParams: Search }
             ))}
           {applications && <Pager page={applications.page} totalPages={applications.totalPages} path="/account" query={{ view: "applications" }} />}
           </section>
+          {seats && <section aria-labelledby="seat-receipts-title">
+            <h2 id="seat-receipts-title" className={styles.viewTitle}>我的选座回执</h2>
+            {seats.docs.length ? <ul className={`${layout.list} ${layout.panel}`}>
+              {seats.docs.map(item => <li key={item.key}>
+                {item.href ? <Link href={item.href}><strong>{item.title}</strong> · {item.request && seatStatusLabels[item.request.status]} · {item.request?.seats.length ? item.request.seats.map(seatLabel).join("、") : `${item.request?.requestedCount ?? 0} 个座位`} · 查看回执与票据 ›</Link>
+                  : <span>{item.title}</span>}
+              </li>)}
+            </ul> : <EmptyState title="暂无选座记录" icon="ticket" compact>提交选座申请后可在这里查看状态与票据。</EmptyState>}
+            {(seatPage > 1 || seats.hasNextPage) && <p>
+              {seatPage > 1 && <Link href={`/account?view=signups&page=${page}&seatPage=${seatPage - 1}#seat-receipts-title`}>上一页</Link>}{" "}
+              第 {seatPage} 页{" "}
+              {seats.hasNextPage && <Link href={`/account?view=signups&page=${page}&seatPage=${seatPage + 1}#seat-receipts-title`}>下一页</Link>}
+            </p>}
+          </section>}
         </Wrap>
       </>
     );

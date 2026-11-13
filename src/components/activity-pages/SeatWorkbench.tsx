@@ -21,6 +21,7 @@ import { formatDateTime } from "@/components/v2/format";
 import work from "@/components/v2/work.module.css";
 import { SeatLegend, SeatMap, SeatSelection, SeatZoom } from "./ActivitySeating";
 import { SeatTicketManager } from "./SeatTicketManager";
+import { SeatLayoutEditor } from "./SeatLayoutEditor";
 import { SeatRequestError, seatJSON, seatRequest } from "./seat-request";
 import styles from "./ActivitySeating.module.css";
 
@@ -30,10 +31,11 @@ export const seatTone: Record<SeatStatus, Tone> = { pending: "warning", confirme
 const recordState: Record<SeatStatus, string> = { pending: "pending", confirmed: "approved", rejected: "rejected", cancelled: "rejected", revoked: "rejected" };
 
 /** Seat counts for the overview: pending holds, confirmed locks and what is still free. */
-export function seatCounts(state: Pick<SeatingState, "rows" | "occupancy"> & Partial<Pick<SeatingState, "blockedSeats">>) {
-  const total = state.rows.reduce((sum, row) => sum + row.count, 0);
-  const blockedSeats = new Set(state.blockedSeats || []);
-  const values = Object.entries(state.occupancy).filter(([seat]) => !blockedSeats.has(seat)).map(([, status]) => status);
+export function seatCounts(state: Pick<SeatingState, "rows" | "occupancy"> & Partial<Pick<SeatingState, "blockedSeats" | "missingSeats">>) {
+  const missing = new Set(state.missingSeats || []);
+  const total = state.rows.reduce((sum, row) => sum + row.count, 0) - missing.size;
+  const blockedSeats = new Set((state.blockedSeats || []).filter(seat => !missing.has(seat)));
+  const values = Object.entries(state.occupancy).filter(([seat]) => !blockedSeats.has(seat) && !missing.has(seat)).map(([, status]) => status);
   const pending = values.filter((value) => value === "pending").length;
   const confirmed = values.filter((value) => value === "confirmed").length;
   const blocked = blockedSeats.size;
@@ -502,7 +504,7 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
           <h3>为 {review.memberName} 的申请 #{review.id} {changing ? "更换" : "增加"}座位</h3>
           <p>{changing ? `先取消要换出的座位，再选择新座位，保留 ${limit} 个座位。` : `已有 ${assignment.request.seats.length} 个座位，最多还可增加 ${limit} 个。`}申请状态保持{seatStatusLabels[assignment.request.status]}。</p>
           <div className={styles.mapBlock}>
-            <div className={styles.mapTools}><SeatLegend /><SeatZoom zoom={zoom} onChange={setZoom} /></div>
+            <div className={styles.mapTools}><SeatLegend showAccent={assignment.rows.some(row => row.accent)} /><SeatZoom zoom={zoom} onChange={setZoom} /></div>
             <SeatMap state={assignment} selected={adding} editable={!disabled} zoom={zoom} own={changing ? assignment.request.seats : []} label={changing ? "选择更换后的座位" : "选择要增加的座位"} toggle={seat => {
               setAdding(current => current.includes(seat) ? current.filter(value => value !== seat) : current.length < limit ? [...current, seat] : current);
             }} />
@@ -553,6 +555,7 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
         </section>
       )}
 
+      {data && <SeatLayoutEditor endpoint={endpoint} disabled={disabled} onSaved={() => { void load(view).catch(cause => forget(cause, false)); }} />}
       {data && <SeatTicketManager endpoint={endpoint} disabled={disabled} />}
 
       {counts && (
@@ -582,7 +585,7 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
           <p className={styles.blockHint}>点击待审核或已确认的座位查看申请；点选空座锁定，或点选未开放的座位解锁。</p>
           <div className={styles.mapBlock}>
             <div className={styles.mapTools}>
-              <SeatLegend />
+              <SeatLegend showAccent={layout.rows.some(row => row.accent)} />
               <SeatZoom zoom={zoom} onChange={setZoom} />
             </div>
             <SeatMap state={layout} selected={selected} editable={!disabled} manage zoom={zoom} label="管理座位和查看申请" onInspect={inspectSeat} toggle={seat => setSelected(current => current.includes(seat) ? current.filter(value => value !== seat) : [...current, seat])} />

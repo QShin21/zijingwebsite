@@ -5,9 +5,10 @@ import { APIError, type Payload } from "payload";
 import sharp from "sharp";
 import type { User } from "@/payload-types";
 import {
-  seatKeys, seatLimit, seatPhonePattern, seatProofBytes, seatProofID, seatProofLimit, seatRows, seatTicketBytes, seatTicketFilename,
+  seatLimit, seatPhonePattern, seatProofBytes, seatProofID, seatProofLimit, seatGridLimit, seatTicketBytes, seatTicketFilename,
+  keysForGrid, rowsForGrid, seatInGrid, validSeatKey,
   type SeatDecision, type SeatRequest, type SeatReview, type SeatStatus, type SeatingKind, type SeatingMode, type SeatingState,
-  type SeatAssignment, type SeatingAvailability, type SeatingWorkbench,
+  type SeatAssignment, type SeatGrid, type SeatingAvailability, type SeatingWorkbench,
 } from "./activity-seating-model";
 import { canSeeAudience } from "./content-audience";
 import { beijingInputTime, canParticipate, canPublish, communityIDs, relationID } from "./rules";
@@ -15,6 +16,7 @@ import { normalizeImageBytes } from "./showcase-images";
 import { refreshViewer } from "./v2/identity";
 import { databaseCode } from "./workflow-transactions";
 import { allocateRandomSeats } from "./activity-seat-allocation";
+import { pageInput, type Input } from "./v2/shared";
 
 type SeatActivity = {
   kind: SeatingKind;
@@ -32,7 +34,7 @@ type SeatDatabase = {
   ): Promise<{ rows: T[]; rowCount: number | null }>;
 };
 
-type SeatScope = { id: number; enabled: boolean; opens_at: Date | null; mode: SeatingMode };
+type SeatScope = { id: number; enabled: boolean; opens_at: Date | null; mode: SeatingMode; layout: SeatGrid | null; layout_revision: number };
 type ActiveStatus = "pending" | "confirmed";
 type RequestRow = {
   id: number;
@@ -55,8 +57,12 @@ const reviewFields = `r.id, r.seats, r.allocation_mode, r.requested_count, r.sta
     FROM activity_seat_releases s WHERE s.seating_id = r.seating_id AND s.request_id = r.id), '[]'::jsonb) AS released_seats,
   COALESCE((SELECT jsonb_agg(jsonb_build_object('seat', a.seat, 'addedAt', a.added_at) ORDER BY a.id)
     FROM activity_seat_additions a WHERE a.seating_id = r.seating_id AND a.request_id = r.id), '[]'::jsonb) AS added_seats`;
-const validSeats = new Set(seatKeys);
 const pool = (p: Payload) => (p.db as unknown as PostgresAdapter).pool;
+
+function assertSeatsInLayout(setting: SeatScope, seats: readonly string[]) {
+  const available = new Set(keysForGrid(setting.layout));
+  if (seats.some(seat => !available.has(seat))) throw new APIError("座位图已变化，请刷新后重新选择", 409);
+}
 
 export function canReviewActivitySeats(user: User | null, game: unknown) {
   return canPublish(user) || communityIDs(user).includes(String(relationID(game)));
@@ -119,7 +125,7 @@ const scopeColumn = (activity: SeatActivity) => activity.kind === "events" ? "ev
 
 async function scope(p: Payload, activity: SeatActivity, client?: SeatDatabase, lock: "update" | "share" = "update") {
   const result = await ((client ?? pool(p)) as SeatDatabase).query<SeatScope>(
-    `SELECT id, enabled, opens_at, mode FROM activity_seatings WHERE ${scopeColumn(activity)} = $1${client ? lock === "share" ? " FOR SHARE" : " FOR UPDATE" : ""}`,
+    `SELECT id, enabled, opens_at, mode, layout, layout_revision FROM activity_seatings WHERE ${scopeColumn(activity)} = $1${client ? lock === "share" ? " FOR SHARE" : " FOR UPDATE" : ""}`,
     [activity.id],
   );
   return result.rows[0];
@@ -200,6 +206,37 @@ function memberRequestDTO(row: RequestRow, mode: SeatingMode): SeatRequest {
   return result;
 }
 
+/** Latest request per activity, scoped to the current account and current visibility. */
+export async function getMySeatReceipts(p: Payload, viewer: User | null, input: Input = {}) {
+  const user = await requireMember(p, viewer), { page, limit } = pageInput(input);
+  type ReceiptRow = RequestRow & { event_id: number | null; post_id: number | null; mode: SeatingMode; total: string };
+  const result = await pool(p).query<ReceiptRow>(`
+    WITH latest AS (
+      SELECT DISTINCT ON (r.seating_id) r.id, r.seats, r.allocation_mode, r.requested_count,
+        r.status, r.revision, r.cancelled_at, r.revoked_at, r.created_at, r.reviewed_at,
+        s.event_id, s.post_id, s.mode
+      FROM activity_seat_requests r JOIN activity_seatings s ON s.id = r.seating_id
+      WHERE r.member_id = $1 ORDER BY r.seating_id, r.id DESC
+    )
+    SELECT *, COUNT(*) OVER()::text AS total FROM latest
+    ORDER BY created_at DESC, id DESC LIMIT $2 OFFSET $3`, [user.id, limit, (page - 1) * limit]);
+  const docs = await Promise.all(result.rows.map(async row => {
+    const kind: SeatingKind = row.event_id ? "events" : "community-posts";
+    const activityID = row.event_id ?? row.post_id;
+    if (!activityID) return null;
+    let activity: SeatActivity | null = null;
+    try { activity = await seatActivity(p, kind, activityID, user); }
+    catch (error) {
+      if (!(error instanceof APIError) || ![401, 403, 404].includes(error.status)) throw error;
+    }
+    if (!activity?.public) return { key: `seat:${row.id}`, title: "活动暂不可访问", kind: null, activityID: null, request: null, href: null };
+    return { key: `seat:${row.id}`, title: activity.title, kind, activityID, request: memberRequestDTO(row, row.mode),
+      href: `/activities/${kind}/${activityID}/fill#seat-receipt` };
+  }));
+  const totalDocs = Number(result.rows[0]?.total ?? 0);
+  return { docs: docs.filter(item => item !== null), page, totalDocs, totalPages: Math.ceil(totalDocs / limit), hasNextPage: page * limit < totalDocs };
+}
+
 function reviewDTO(row: ReviewRow): SeatReview {
   return { ...requestDTO(row), memberName: row.member_name, phone: row.phone, proofs: row.proofs,
     releasedSeats: row.released_seats, addedSeats: row.added_seats };
@@ -253,7 +290,7 @@ export async function seatingState(p: Payload, activity: SeatActivity, user: Use
     const loggedIn = Boolean(user && canParticipate(user));
     const state: SeatingState = {
       ...availability(activity, setting), loggedIn,
-      canReview: canReviewActivitySeats(user, activity.game), title: activity.title, rows: seatRows,
+      canReview: canReviewActivitySeats(user, activity.game), title: activity.title, rows: rowsForGrid(setting?.layout),
       seatLimit, proofLimit: seatProofLimit, proofBytes: seatProofBytes, occupancy: {}, blockedSeats: [], mine: null, ticketImages: [], mineDetails: null, drafts: [],
     };
     if (!setting) return state;
@@ -282,7 +319,8 @@ export async function seatingState(p: Payload, activity: SeatActivity, user: Use
         WHERE seating_id = $1 AND member_id = $2 AND request_id = $3 ORDER BY created_at, id`,
         [setting.id, user!.id, own.id]) : null;
     state.occupancy = Object.fromEntries(claims?.rows.map(({ seat, status }) => [seat, status]) || []);
-    state.blockedSeats = blocks?.rows.map(({ seat }) => seat) || [];
+    state.missingSeats = showMap ? setting.layout?.gaps || [] : [];
+    state.blockedSeats = [...(blocks?.rows.map(({ seat }) => seat) || []), ...(showMap && (setting.enabled || state.canReview || pending) ? state.missingSeats : [])];
     // Older released clients already treat confirmed seats as unavailable.
     for (const seat of state.blockedSeats) state.occupancy[seat] = "confirmed";
     if (own) {
@@ -322,9 +360,10 @@ export async function seatingAssignment(p: Payload, activity: SeatActivity, user
     pool(p).query<{ seat: string }>("SELECT seat FROM activity_seat_blocks WHERE seating_id = $1 ORDER BY seat", [setting.id]),
   ]);
   const occupancy: SeatAssignment["occupancy"] = Object.fromEntries(claims.rows.map(({ seat, status }) => [seat, status]));
-  const blockedSeats = blocks.rows.map(({ seat }) => seat);
+  const missingSeats = setting.layout?.gaps || [];
+  const blockedSeats = [...blocks.rows.map(({ seat }) => seat), ...missingSeats];
   for (const seat of blockedSeats) occupancy[seat] = "confirmed";
-  return { title: activity.title, request: requestDTO(request), rows: seatRows, seatLimit, occupancy, blockedSeats };
+  return { title: activity.title, request: requestDTO(request), rows: rowsForGrid(setting.layout), seatLimit, occupancy, blockedSeats, missingSeats };
 }
 
 export async function seatingReviewMap(p: Payload, activity: SeatActivity, user: User | null): Promise<SeatingState> {
@@ -333,7 +372,7 @@ export async function seatingReviewMap(p: Payload, activity: SeatActivity, user:
   await requireReviewer(p, activity, user);
   const setting = await scope(p, activity);
   const result: SeatingState = {
-    ...availability(activity, setting), loggedIn: true, canReview: true, title: activity.title, rows: seatRows,
+    ...availability(activity, setting), loggedIn: true, canReview: true, title: activity.title, rows: rowsForGrid(setting?.layout),
     seatLimit, proofLimit: seatProofLimit, proofBytes: seatProofBytes, occupancy: {}, blockedSeats: [],
     mine: null, ticketImages: [], mineDetails: null, drafts: [],
   };
@@ -344,7 +383,8 @@ export async function seatingReviewMap(p: Payload, activity: SeatActivity, user:
     pool(p).query<{ seat: string }>("SELECT seat FROM activity_seat_blocks WHERE seating_id = $1 ORDER BY seat", [setting.id]),
   ]);
   result.occupancy = Object.fromEntries(claims.rows.map(({ seat, status }) => [seat, status]));
-  result.blockedSeats = blocks.rows.map(({ seat }) => seat);
+  result.missingSeats = setting.layout?.gaps || [];
+  result.blockedSeats = [...blocks.rows.map(({ seat }) => seat), ...result.missingSeats];
   for (const seat of result.blockedSeats) result.occupancy[seat] = "confirmed";
   return result;
 }
@@ -353,9 +393,10 @@ export async function seatingReviewForSeat(p: Payload, activity: SeatActivity, u
   user = await requireMember(p, user);
   activity = await seatActivity(p, activity.kind, activity.id, user);
   await requireReviewer(p, activity, user);
-  if (!seat || !validSeats.has(seat)) throw new APIError("座位信息无效，请刷新后重试", 400);
+  if (!seat || !validSeatKey(seat)) throw new APIError("座位信息无效，请刷新后重试", 400);
   const setting = await scope(p, activity);
   if (!setting) return { seat, request: null };
+  if (!seatInGrid(setting.layout, seat)) throw new APIError("座位信息无效，请刷新后重试", 400);
   const result = await pool(p).query<ReviewRow>(`SELECT ${reviewFields}
     FROM activity_seat_claims c JOIN activity_seat_requests r ON r.id = c.request_id AND r.seating_id = c.seating_id
     WHERE c.seating_id = $1 AND c.seat = $2 AND r.status IN ('pending', 'confirmed')`, [setting.id, seat]);
@@ -395,12 +436,73 @@ export async function setSeatingMode(p: Payload, activity: SeatActivity, user: U
   });
 }
 
+async function protectedLayoutSeats(client: SeatDatabase, seatingID: number) {
+  const result = await client.query<{ seat: string }>(`
+    SELECT seat FROM activity_seat_claims WHERE seating_id = $1
+    UNION SELECT seat FROM activity_seat_blocks WHERE seating_id = $1
+    UNION SELECT seat FROM activity_seat_tickets WHERE seating_id = $1`, [seatingID]);
+  return result.rows.map(row => row.seat);
+}
+
+export async function seatingLayout(p: Payload, activity: SeatActivity, user: User | null) {
+  const actor = await requireReviewer(p, activity, user);
+  activity = await seatActivity(p, activity.kind, activity.id, actor);
+  if (!canReviewActivitySeats(actor, activity.game)) throw new APIError("无权管理此活动的座位图", 403);
+  const setting = await scope(p, activity);
+  const protectedSeats = setting ? await protectedLayoutSeats(pool(p), setting.id) : [];
+  return { layout: setting?.layout || null, revision: setting?.layout_revision || 0, protectedSeats };
+}
+
+function validatedGrid(value: unknown): SeatGrid {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new APIError("请输入有效的行数和列数", 400);
+  const input = value as Record<string, unknown>;
+  if (Object.keys(input).some(key => !["rowCount", "columnCount", "gaps"].includes(key))) throw new APIError("座位图格式无效", 400);
+  const { rowCount, columnCount, gaps } = input;
+  if (typeof rowCount !== "number" || !Number.isInteger(rowCount) || rowCount < 1 || rowCount > seatGridLimit ||
+      typeof columnCount !== "number" || !Number.isInteger(columnCount) || columnCount < 1 || columnCount > seatGridLimit ||
+      !Array.isArray(gaps) || gaps.length >= rowCount * columnCount ||
+      gaps.some(seat => typeof seat !== "string" || !validSeatKey(seat) || Number(seat.split("-")[0]) > rowCount || Number(seat.split("-")[1]) > columnCount) ||
+      new Set(gaps).size !== gaps.length)
+    throw new APIError(`请输入 1 至 ${seatGridLimit} 的行数和列数，并至少保留一个座位`, 400);
+  return { rowCount, columnCount, gaps: (gaps as string[]).sort((a, b) => {
+    const [ar, ac] = a.split("-").map(Number), [br, bc] = b.split("-").map(Number);
+    return ar - br || ac - bc;
+  }) };
+}
+
+export async function saveSeatingLayout(p: Payload, activity: SeatActivity, user: User | null, value: unknown, revision: unknown) {
+  const reviewer = await requireReviewer(p, activity, user);
+  const layout = validatedGrid(value);
+  if (typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 0 || revision >= 2147483647)
+    throw new APIError("座位图版本无效，请刷新后重试", 400);
+  return transaction(p, async client => {
+    const current = await lockedActivity(p, activity, reviewer, client);
+    assertLockedReviewer(current.activity, current.actor);
+    const column = scopeColumn(current.activity);
+    await client.query(`INSERT INTO activity_seatings (${column}, enabled) VALUES ($1, false) ON CONFLICT (${column}) DO NOTHING`, [current.activity.id]);
+    const setting = await scope(p, current.activity, client);
+    if (!setting) throw new APIError("选座设置读取失败，请重试", 409);
+    if (setting.layout_revision !== revision) throw new APIError("座位图已被其他管理员修改，请重新读取后再保存", 409);
+    const protectedSeats = await protectedLayoutSeats(client, setting.id);
+    if (!setting.layout && protectedSeats.length)
+      throw new APIError("原座位图已有占用、锁定或票据，请保留当前布局；新活动可使用自定义座位图", 409);
+    const allowed = new Set(keysForGrid(layout));
+    const lost = protectedSeats.filter(seat => !allowed.has(seat));
+    if (lost.length) throw new APIError(`请保留已有申请、锁定或票据的座位：${lost.slice(0, 5).join("、")}`, 409);
+    const saved = await client.query<{ layout_revision: number }>(
+      "UPDATE activity_seatings SET layout = $2::jsonb, layout_revision = layout_revision + 1 WHERE id = $1 RETURNING layout_revision",
+      [setting.id, JSON.stringify(layout)],
+    );
+    return { layout, revision: saved.rows[0].layout_revision, protectedSeats };
+  });
+}
+
 export async function setSeatBlocks(
   p: Payload, activity: SeatActivity, user: User | null, seats: unknown, blocked: unknown,
 ) {
   await requireReviewer(p, activity, user);
-  if (typeof blocked !== "boolean" || !Array.isArray(seats) || !seats.length || seats.length > seatKeys.length ||
-      seats.some(seat => typeof seat !== "string" || !validSeats.has(seat)) || new Set(seats).size !== seats.length)
+  if (typeof blocked !== "boolean" || !Array.isArray(seats) || !seats.length || seats.length > seatGridLimit * seatGridLimit ||
+      seats.some(seat => typeof seat !== "string" || !validSeatKey(seat)) || new Set(seats).size !== seats.length)
     throw new APIError("请选择不同的有效座位和锁定状态", 400);
   return transaction(p, async client => {
     const current = await lockedActivity(p, activity, user, client);
@@ -411,6 +513,7 @@ export async function setSeatBlocks(
       ON CONFLICT (${column}) DO NOTHING`, [current.activity.id]);
     const setting = await scope(p, current.activity, client);
     if (!setting) throw new APIError("选座设置读取失败，请重试", 409);
+    assertSeatsInLayout(setting, seats);
     if (blocked) {
       const occupied = await client.query(
         "SELECT 1 FROM activity_seat_claims WHERE seating_id = $1 AND seat = ANY($2::text[]) LIMIT 1",
@@ -433,7 +536,7 @@ function submission(data: Record<string, unknown>) {
   if (mode === "random" && data.seats !== undefined && (!Array.isArray(data.seats) || data.seats.length))
     throw new APIError("随机模式请填写座位数量", 400);
   if (!Array.isArray(seats) || (mode === "selection" && (!seats.length || seats.length > seatLimit ||
-      seats.some(seat => typeof seat !== "string" || !validSeats.has(seat)) || new Set(seats).size !== seats.length)))
+      seats.some(seat => typeof seat !== "string" || !validSeatKey(seat)) || new Set(seats).size !== seats.length)))
     throw new APIError(`请选择 1 至 ${seatLimit} 个不同的有效座位`, 400);
   const count = mode === "random" ? data.count : seats.length;
   if (typeof count !== "number" || !Number.isInteger(count) || count < 1 || count > seatLimit)
@@ -462,6 +565,7 @@ export async function submitSeats(
     if (setting.mode !== mode) throw new APIError(setting.mode === "random" ? "当前为随机座位模式，请刷新；旧版小程序请更新或使用网站提交" : "座位模式已变化，请刷新后重新填写", 409);
     const existing = await activeRequest(client, setting.id, actor.id);
     if (existing) return memberRequestDTO(existing, setting.mode);
+    assertSeatsInLayout(setting, seats);
     const busy = await client.query(
       `SELECT 1 FROM activity_seat_claims WHERE seating_id = $1 AND seat = ANY($2::text[])
        UNION ALL SELECT 1 FROM activity_seat_blocks WHERE seating_id = $1 AND seat = ANY($2::text[]) LIMIT 1`,
@@ -507,6 +611,7 @@ export async function editPendingSeats(p: Payload, activity: SeatActivity, user:
     const setting = await scope(p, current.activity, client);
     if (!setting) throw new APIError("选座申请不存在", 404);
     if (setting.mode !== mode) throw new APIError(setting.mode === "random" ? "当前为随机座位模式，请刷新；旧版小程序请更新或使用网站提交" : "座位模式已变化，请刷新后重新填写", 409);
+    assertSeatsInLayout(setting, seats);
     const result = await client.query<RequestRow>(`SELECT ${rowFields} FROM activity_seat_requests
       WHERE seating_id = $1 AND id = $2 AND member_id = $3`, [setting.id, id, actor.id]);
     const own = result.rows[0];
@@ -592,7 +697,7 @@ export async function revokeConfirmedSeat(p: Payload, activity: SeatActivity, us
   const reviewer = await requireReviewer(p, activity, user);
   if (typeof id !== "number" || !Number.isSafeInteger(id) || id < 1 || id > 2147483647 ||
       typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 0 || revision >= 2147483647 ||
-      typeof seat !== "string" || !validSeats.has(seat))
+      typeof seat !== "string" || !validSeatKey(seat))
     throw new APIError("申请或座位信息无效，请刷新后重试", 400);
   return transaction(p, async client => {
     const current = await lockedActivity(p, activity, reviewer, client);
@@ -629,13 +734,14 @@ export async function addSeats(p: Payload, activity: SeatActivity, user: User | 
   if (typeof id !== "number" || !Number.isSafeInteger(id) || id < 1 || id > 2147483647 ||
       typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 0 || revision >= 2147483647 ||
       (status !== "pending" && status !== "confirmed") || !Array.isArray(seats) || !seats.length || seats.length > seatLimit ||
-      seats.some(seat => typeof seat !== "string" || !validSeats.has(seat)) || new Set(seats).size !== seats.length)
+      seats.some(seat => typeof seat !== "string" || !validSeatKey(seat)) || new Set(seats).size !== seats.length)
     throw new APIError("请选择有效申请及不同的有效座位", 400);
   return transaction(p, async client => {
     const current = await lockedActivity(p, activity, reviewer, client);
     assertLockedReviewer(current.activity, current.actor);
     const setting = await scope(p, current.activity, client);
     if (!setting) throw new APIError("选座申请不存在", 404);
+    assertSeatsInLayout(setting, seats);
     const found = await client.query<RequestRow>(`SELECT ${rowFields} FROM activity_seat_requests
       WHERE seating_id = $1 AND id = $2`, [setting.id, id]);
     const request = found.rows[0];
@@ -665,13 +771,14 @@ export async function changeSeats(p: Payload, activity: SeatActivity, user: User
   if (typeof id !== "number" || !Number.isSafeInteger(id) || id < 1 || id > 2147483647 ||
       typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 0 || revision >= 2147483647 ||
       (status !== "pending" && status !== "confirmed") || !Array.isArray(seats) || !seats.length || seats.length > seatLimit ||
-      seats.some(seat => typeof seat !== "string" || !validSeats.has(seat)) || new Set(seats).size !== seats.length)
+      seats.some(seat => typeof seat !== "string" || !validSeatKey(seat)) || new Set(seats).size !== seats.length)
     throw new APIError("请选择有效申请及不同的有效座位", 400);
   return transaction(p, async client => {
     const current = await lockedActivity(p, activity, reviewer, client);
     assertLockedReviewer(current.activity, current.actor);
     const setting = await scope(p, current.activity, client);
     if (!setting) throw new APIError("选座申请不存在", 404);
+    assertSeatsInLayout(setting, seats);
     const found = await client.query<RequestRow>(`SELECT ${rowFields} FROM activity_seat_requests
       WHERE seating_id = $1 AND id = $2`, [setting.id, id]);
     const request = found.rows[0];
@@ -783,7 +890,7 @@ export async function decideSeats(
       const occupied = await client.query<{ seat: string }>(`SELECT seat FROM activity_seat_claims WHERE seating_id = $1
         UNION SELECT seat FROM activity_seat_blocks WHERE seating_id = $1`, [setting.id]);
       const unavailable = new Set(occupied.rows.map(row => row.seat));
-      const seats = allocateRandomSeats(new Set(seatKeys.filter(seat => !unavailable.has(seat))), current.rows[0].requested_count);
+      const seats = allocateRandomSeats(new Set(keysForGrid(setting.layout).filter(seat => !unavailable.has(seat))), current.rows[0].requested_count, rowsForGrid(setting.layout));
       if (!seats) throw new APIError("可用座位不足，暂时无法通过申请；请调整数量或释放座位", 409);
       await client.query(`UPDATE activity_seat_requests SET seats = $3, status = 'confirmed', reviewed_at = now(), reviewer_id = $4,
         revision = revision + 1 WHERE seating_id = $1 AND id = $2`, [setting.id, id, seats, reviewer.id]);
@@ -841,6 +948,7 @@ export async function uploadSeatTicket(p: Payload, activity: SeatActivity, user:
     await client.query(`INSERT INTO activity_seatings (${column}, enabled) VALUES ($1, false) ON CONFLICT (${column}) DO NOTHING`, [activity.id]);
     const setting = await scope(p, current.activity, client);
     if (!setting) throw new APIError("活动选座设置暂不可用", 409);
+    if (!seatInGrid(setting.layout, match.seat)) throw new APIError("文件名对应的座位不在当前座位图中", 400);
     const version = randomUUID();
     await client.query(`INSERT INTO activity_seat_tickets (seating_id, seat, picture, mime, version, uploaded_by)
       VALUES ($1, $2, $3, $4, $5, $6)
@@ -855,7 +963,7 @@ export async function seatTicketImage(p: Payload, activity: SeatActivity, user: 
   const actor = await requireMember(p, user);
   activity = await seatActivity(p, activity.kind, activity.id, actor);
   requirePublic(activity);
-  if (!validSeats.has(seat)) throw new APIError("票据不存在", 404);
+  if (!validSeatKey(seat)) throw new APIError("票据不存在", 404);
   const setting = await scope(p, activity);
   if (!setting) throw new APIError("票据不存在", 404);
   const result = await pool(p).query<{ picture: Buffer; mime: string }>(`
