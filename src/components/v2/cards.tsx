@@ -29,6 +29,7 @@ import {
   initial,
 } from "./format";
 import styles from "./cards.module.css";
+import { ShowcaseVideoPlayer } from "./ShowcaseVideoPlayer";
 
 /* ---------- scoreboard date ---------- */
 export function DateBlock({ iso, size = "md", tone = "plain" }: { iso: string | null; size?: "sm" | "md" | "lg"; tone?: "plain" | "stage" | "accent" }) {
@@ -386,19 +387,20 @@ export function ShowcaseTile({ item, showStatus, promoted }: { item: ShowcaseCar
   const image = item.images[0]?.image;
   return (
     <article className={styles.showcase} style={hueStyle(item.community.hue)} data-promotion-source={promoted ? `community-showcase:${item.id}` : undefined}>
-      <span className={styles.showcaseMedia} data-empty={image ? undefined : ""}>
+      <div className={styles.showcaseMedia} data-empty={image ? undefined : ""}>
         {image ? (
           <Img image={image} alt="" />
-        ) : (
+        ) : !item.video ? (
           <span className={styles.coverInitial} aria-hidden="true">
-            {item.video ? <Icon name="play" size={34} /> : initial(item.title)}
+            {initial(item.title)}
           </span>
-        )}
+        ) : null}
         {item.images.length > 1 && <span className={styles.mediaCount}>{item.images.length} 张</span>}
-      </span>
+        {item.video && <ShowcaseVideoPlayer video={item.video} title={item.title} />}
+      </div>
       <div className={styles.showcaseBody}>
         <h3>
-          <Link href={item.href} className={styles.stretch}>
+          <Link href={item.href} className={item.video ? styles.showcaseTitleLink : styles.stretch}>
             {item.title}
           </Link>
         </h3>

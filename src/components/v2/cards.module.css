@@ -705,6 +705,55 @@
     repeating-radial-gradient(ellipse at 50% 118%, transparent 0 34px, rgba(241, 238, 246, 0.1) 35px 36px, transparent 37px 40px),
     linear-gradient(135deg, hsl(var(--hue) 65% 34%), hsl(calc(var(--hue) + 30) 70% 16%));
 }
+.showcaseVideoControl {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--z-radius-small);
+  background: rgba(20, 12, 36, 0.75);
+  color: #fff;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+.showcaseVideoControl:hover {
+  background: var(--z-action);
+  border-color: var(--z-action);
+  color: var(--z-action-ink);
+}
+.showcaseVideoControl:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.showcaseVideoControl:focus-visible,
+.showcaseTitleLink:focus-visible {
+  outline: 3px solid var(--z-focus);
+  outline-offset: 3px;
+}
+.showcaseVideoPlayer {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #0b0718;
+  object-fit: contain;
+}
+.showcaseTitleLink {
+  color: var(--z-action);
+}
+.showcaseTitleLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .mediaCount {
   position: absolute;
   top: 10px;

@@ -10,6 +10,7 @@ import { drawLottery, lotteryReceipt, readLottery } from "../src/lib/activity-si
 import { up as migrateLottery } from "../src/migrations/20261113_000500_activity_signup_lotteries";
 import { GET as readSignup, POST as writeSignup } from "../src/app/(frontend)/api/activities/[kind]/[id]/signup/route";
 import { GET as readWorkbench, POST as writeLottery } from "../src/app/(frontend)/api/activities/[kind]/[id]/lottery/route";
+import { readCSV } from "./csv";
 
 vi.mock("../src/lib/content", async () => {
   const { getPayload } = await import("payload");
@@ -82,6 +83,9 @@ describe("活动报名抽签：隔离 PostgreSQL 与真实请求处理", () => {
     expect((await readWorkbench(request("lottery", tokens[0]), context())).status).toBe(403);
     expect((await writeLottery(request("lottery", tokens[0], { count: 1, expectedTotal: 3, revision: null }), context())).status).toBe(403);
     expect((await readSignup(request("signup?mode=entries", tokens[0]), context())).status).toBe(403);
+    expect((await readSignup(request("signup?mode=export&lottery=1", tokens[0]), context())).status).toBe(403);
+    expect((await readSignup(request("signup?mode=export&lottery=1", presidentToken), context())).status).toBe(400);
+    expect(readCSV(await (await readSignup(request("signup?mode=export", presidentToken), context())).text()).headers).not.toContain("抽签结果");
     expect((await writeLottery(request("lottery", presidentToken, { count: 4, expectedTotal: 3, revision: null }), context())).status).toBe(400);
     expect(await readLottery(p, "events", event)).toBeNull();
   });
@@ -109,6 +113,15 @@ describe("活动报名抽签：隔离 PostgreSQL 与真实请求处理", () => {
     expect(labels.filter(label => label === "已中签")).toHaveLength(1);
     const entries = await readSignup(request("signup?mode=entries", presidentToken), context());
     expect((await entries.json()).docs.filter((row: { lotteryStatus: string }) => row.lotteryStatus === "已中签")).toHaveLength(1);
+    const lotteryExport = await readSignup(request("signup?mode=export&lottery=1", presidentToken), context());
+    expect(lotteryExport.status).toBe(200);
+    expect(lotteryExport.headers.get("cache-control")).toContain("no-store");
+    expect(lotteryExport.headers.get("content-disposition")).toContain(encodeURIComponent("抽签结果"));
+    const exported = readCSV(await lotteryExport.text());
+    expect(exported.records).toHaveLength(3);
+    expect(exported.records.filter(row => row["抽签结果"] === "已中签")).toHaveLength(1);
+    expect(exported.records.filter(row => row["抽签结果"] === "未中签")).toHaveLength(2);
+    expect(exported.records[0]["Q2. 原始题目"]).toBe("保留原题0");
   });
 
   it("修改作答保留中签状态；抽签后报名标明未参与，过期操作被拒绝", async () => {
@@ -123,6 +136,17 @@ describe("活动报名抽签：隔离 PostgreSQL 与真实请求处理", () => {
     await submitSignup(p, "events", event, users[3], version, { name: "后续报名", __lottery_result__: "保留" });
     const late = await (await readSignup(request("signup", tokens[3]), context())).json();
     expect(late.signup.lotteryStatus).toBe("未参与本次抽签");
+    for (const layout of ["responses", "members", "long"]) {
+      const response = await readSignup(request(`signup?mode=export&layout=${layout}`, presidentToken), context());
+      expect(response.status).toBe(200);
+      const result = readCSV(await response.text());
+      expect(result.headers).toContain("抽签结果");
+      if (layout !== "members") expect(result.records.filter(row => row["抽签结果"] === "未参与本次抽签").length).toBeGreaterThan(0);
+    }
+    const filtered = await readSignup(request(`signup?mode=export&name=${encodeURIComponent(users[3].name)}`, presidentToken), context());
+    const filteredRows = readCSV(await filtered.text()).records;
+    expect(filteredRows).toHaveLength(1);
+    expect(filteredRows[0]["抽签结果"]).toBe("未参与本次抽签");
     const workbench = await (await readWorkbench(request("lottery", presidentToken), context())).json();
     expect(workbench.total).toBe(4);
     const stale = await writeLottery(request("lottery", presidentToken, { count: 1, expectedTotal: 3, revision: workbench.draw.revision }), context());
@@ -142,6 +166,9 @@ describe("活动报名抽签：隔离 PostgreSQL 与真实请求处理", () => {
     expect(current?.candidates).toHaveLength(4);
     expect(current?.history).toHaveLength(1);
     expect(current?.history[0]).toMatchObject({ revision: previous!.revision, candidates: previous!.candidates, winners: previous!.winners });
+    const exported = readCSV(await (await readSignup(request("signup?mode=export&lottery=1", presidentToken), context())).text());
+    expect(exported.records.filter(row => row["抽签结果"] === "已中签")).toHaveLength(2);
+    expect(exported.records.filter(row => row["抽签结果"] === "未参与本次抽签")).toHaveLength(0);
   });
 
   it("社群活动管理者可抽签，未获名单权限时仍不能读取其他人的报名", async () => {
@@ -163,9 +190,11 @@ describe("活动报名抽签：隔离 PostgreSQL 与真实请求处理", () => {
     expect(workbench.status).toBe(200);
     expect(await workbench.json()).toEqual({ total: 1, draw: null });
     expect((await readSignup(req("signup?mode=entries", editor.token), ctx)).status).toBe(403);
+    expect((await readSignup(req("signup?mode=export&lottery=1", editor.token), ctx)).status).toBe(403);
     expect((await writeLottery(req("lottery", editor.token, { count: 1, expectedTotal: 1, revision: null }), ctx)).status).toBe(200);
     const own = await (await readSignup(req("signup", tokens[1]), ctx)).json();
     expect(own.signup.lotteryStatus).toBe("已中签");
     expect(own.signup.answers.name).toBe("社群合成报名");
+    expect((await readSignup(req("signup?mode=export&lottery=1", editor.token), ctx)).status).toBe(403);
   });
 });

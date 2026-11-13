@@ -84,7 +84,7 @@ test("只读成员可从详情与工作台查看报名，独立导出且不可�
     await page.reload();
     await page.getByRole("navigation", { name: "当前问卷任务", exact: true }).getByRole("button", { name: "统计与导出", exact: true }).click();
     await expect(page.getByRole("heading", { name: "统计与导出", exact: true })).toBeVisible();
-    await page.locator(".questionnaire-results summary").filter({ hasText: /^导出筛选答卷$/ }).click();
+    await expect(page.getByRole("heading", { name: "导出筛选答卷", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "导出筛选答卷 CSV", exact: true })).toBeEnabled();
     const downloadPromise = page.waitForEvent("download"); await page.getByRole("button", { name: "导出筛选答卷 CSV", exact: true }).click(); expect((await downloadPromise).suggestedFilename()).toMatch(/\.csv$/);
     await expect(page.getByRole("button", { name: "保存报名问卷", exact: true })).toHaveCount(0);

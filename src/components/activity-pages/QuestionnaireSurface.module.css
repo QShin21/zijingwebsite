@@ -106,6 +106,106 @@
   border-radius: var(--z-radius);
   background: var(--z-surface);
 }
+.resultsFilter label,
+.exportPanel label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  font-weight: 700;
+}
+.resultsFilter input,
+.resultsFilter select {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 9px 12px;
+  border: 1.5px solid var(--z-line-strong);
+  border-radius: var(--z-radius-small);
+  background: var(--z-raised);
+  color: var(--z-ink);
+}
+.resultsFilter select {
+  cursor: pointer;
+}
+.resultsFilter input:focus-visible,
+.resultsFilter select:focus-visible,
+.secondaryButton:focus-visible {
+  outline: 3px solid var(--z-focus);
+  outline-offset: 2px;
+}
+.resultsFilter input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.secondaryButton {
+  min-height: 44px;
+  padding: 9px 16px;
+  border: 1.5px solid var(--z-line-strong);
+  border-radius: var(--z-radius-small);
+  background: var(--z-raised);
+  color: var(--z-ink);
+  font-weight: 800;
+  cursor: pointer;
+}
+.secondaryButton:hover:not(:disabled) {
+  border-color: var(--z-action);
+  background: var(--z-tint);
+}
+.secondaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.exportPanel {
+  border-color: var(--z-line-strong);
+  background: var(--z-raised);
+}
+.exportPanel h3,
+.exportPanel p {
+  margin: 0;
+}
+.exportPanel p {
+  color: var(--z-muted);
+  font-size: 14px;
+}
+.exportOptions {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.exportOptions legend {
+  margin-bottom: 6px;
+  font-weight: 800;
+}
+.resultsFilter .exportOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 10px;
+  border: 1.5px solid var(--z-line-strong);
+  border-radius: var(--z-radius-small);
+  background: var(--z-surface);
+  cursor: pointer;
+}
+.resultsFilter .exportOptionSelected {
+  border-color: var(--z-action);
+  background: var(--z-tint);
+}
+.resultsFilter .exportOption input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  margin: 3px 0 0;
+  padding: 0;
+  accent-color: var(--z-action);
+}
+.exportPanel :global(.button) {
+  width: 100%;
+  white-space: normal;
+}
 .resultsMain {
   display: grid;
   gap: 16px;

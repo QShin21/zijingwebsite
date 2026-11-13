@@ -9,7 +9,7 @@ type Workbench = {
   draw: null | { candidates: number; winners: number; drawnAt: string; revision: string };
 };
 
-export function QuestionnaireLottery({ kind, id }: { kind: string; id: number }) {
+export function QuestionnaireLottery({ kind, id, canExport }: { kind: string; id: number; canExport: boolean }) {
   const endpoint = `/api/activities/${kind}/${id}/lottery`;
   const [data, setData] = useState<Workbench | null>(null);
   const [count, setCount] = useState("");
@@ -54,11 +54,34 @@ export function QuestionnaireLottery({ kind, id }: { kind: string; id: number })
     finally { lock.current = false; setBusy(false); }
   }
 
+  async function exportLottery() {
+    if (!data?.draw || busy || !canExport) return;
+    setBusy(true); setMessage("");
+    try {
+      const response = await fetch(`/api/activities/${kind}/${id}/signup?mode=export&lottery=1`, { cache: "no-store" });
+      if (!response.ok) {
+        const body = await response.json();
+        throw new Error(body.error || "导出失败");
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const filename = response.headers.get("content-disposition")?.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+      link.href = url;
+      link.download = filename ? decodeURIComponent(filename) : "lottery-results.csv";
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setFailed(false); setMessage("抽签结果已导出，请妥善保管个人信息。");
+    } catch (error) {
+      setFailed(true); setMessage((error as Error).message);
+    } finally { setBusy(false); }
+  }
+
   return (
     <section className={styles.section} aria-busy={busy}>
       <header className={styles.sectionHeader}>
         <div><h2>报名抽签</h2><p>每份报名有一次抽签机会，中签人数由活动管理员设置。</p></div>
-        <button type="button" disabled={busy} onClick={() => void load()}>刷新报名与抽签状态</button>
+        <button className={styles.secondaryButton} type="button" disabled={busy} onClick={() => void load()}>刷新报名与抽签状态</button>
       </header>
       {message && <p className={failed ? styles.error : styles.feedback} role={failed ? "alert" : "status"}>{message}</p>}
       {!data && !message && <p role="status">正在读取报名人数…</p>}
@@ -69,13 +92,18 @@ export function QuestionnaireLottery({ kind, id }: { kind: string; id: number })
         <p className={styles.scope}>结果立即显示在网页和小程序的本人报名回执。抽签后新增的报名显示“未参与本次抽签”。</p>
         <form className={styles.actionForm} onSubmit={draw}>
           <label htmlFor="lottery-winners">中签人数</label>
-          <input id="lottery-winners" type="number" min={1} max={data.total || 1} step={1} required
+          <input className={styles.lotteryInput} id="lottery-winners" type="number" min={1} max={data.total || 1} step={1} required
+            placeholder={data.total ? `请输入 1–${data.total} 的人数` : "暂无报名"}
             value={count} onChange={event => setCount(event.target.value)} disabled={busy || data.total === 0} />
           <button className="button" disabled={busy || data.total === 0} type="submit">
             {busy ? "处理中…" : data.draw ? "重新抽签并更新结果" : "抽签并公布结果"}
           </button>
         </form>
         {data.draw && <p className={styles.scope}>重新抽签会更新所有报名人的结果，历史抽签记录会保留。</p>}
+        {canExport ? <div className={styles.lotteryExport}>
+          <button className={styles.secondaryButton} type="button" disabled={busy || !data.draw} onClick={() => void exportLottery()}>导出抽签结果 CSV</button>
+          <p className={styles.scope}>{data.draw ? "导出全部报名及最新抽签结果，包含抽签后新增的报名。" : "完成抽签后即可导出全部报名及抽签结果。"}</p>
+        </div> : <p className={styles.scope}>导出抽签结果需要单独授权。</p>}
       </>}
     </section>
   );

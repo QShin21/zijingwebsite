@@ -573,7 +573,7 @@ export function SignupManager({
               {message}
             </p>
           )}
-          {!readOnly && info.canManage && view === "lottery" && <QuestionnaireLottery kind={kind} id={id} />}
+          {!readOnly && info.canManage && view === "lottery" && <QuestionnaireLottery kind={kind} id={id} canExport={info.canExportSignups} />}
           {!readOnly && info.canManage && (
             <div hidden={view !== "edit"}>
               <form

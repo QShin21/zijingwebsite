@@ -199,6 +199,57 @@
   gap: 10px;
   min-width: 0;
 }
+.lotteryInput {
+  width: min(100%, 320px);
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 2px solid var(--z-action);
+  border-radius: var(--z-radius-small);
+  background: var(--z-raised);
+  color: var(--z-ink);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--z-action) 24%, transparent),
+    0 0 18px color-mix(in srgb, var(--z-action) 25%, transparent);
+}
+.lotteryInput::placeholder {
+  color: var(--z-muted);
+  opacity: 1;
+}
+.lotteryInput:focus-visible {
+  outline: 3px solid var(--z-focus);
+  outline-offset: 4px;
+}
+.secondaryButton {
+  min-height: 44px;
+  padding: 9px 16px;
+  border: 1.5px solid var(--z-action);
+  border-radius: var(--z-radius-small);
+  background: var(--z-raised);
+  color: var(--z-ink);
+  font-weight: 800;
+  cursor: pointer;
+}
+.secondaryButton:hover:not(:disabled) {
+  background: var(--z-tint);
+}
+.secondaryButton:focus-visible {
+  outline: 3px solid var(--z-focus);
+  outline-offset: 3px;
+}
+.secondaryButton:disabled,
+.lotteryInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.lotteryExport {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--z-line);
+}
+.lotteryExport p {
+  margin: 0;
+}
 .actionFields {
   display: grid;
   gap: 10px;

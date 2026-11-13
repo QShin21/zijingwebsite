@@ -378,6 +378,15 @@
 .video {
   display: grid;
   gap: 10px;
+  min-width: 0;
+}
+.video iframe,
+.video video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  background: #0b0718;
 }
 
 /* showcase */

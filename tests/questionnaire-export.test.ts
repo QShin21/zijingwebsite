@@ -244,3 +244,19 @@ it("uses explicit layout validation and activity/time filenames", () => {
     ),
   ).toBe("测试_报名-成员明细-20261012000102.csv");
 });
+
+it("adds the latest lottery result to each exported layout without changing ordinary exports", () => {
+  const questions = [q("姓名", "text"), group];
+  const r = record(questions, { 姓名: "报名人", 成员名单: [{ name: "队员", student: "0001" }] },
+    { lotteryStatus: "已中签" });
+  for (const layout of ["responses", "members", "long"] as const) {
+    const ordinary = readCSV(responseCSV([r], questions, layout));
+    expect(ordinary.headers).not.toContain("抽签结果");
+    const exported = readCSV(responseCSV([r], questions, layout, { includeLotteryStatus: true }));
+    expect(exported.records.length).toBeGreaterThan(0);
+    expect(exported.records.every(row => row["抽签结果"] === "已中签")).toBe(true);
+    expect(readCSV(responseCSV([], questions, layout, { includeLotteryStatus: true })).headers).toContain("抽签结果");
+  }
+  expect(responseExportFilename("合成活动", "lottery", new Date("2026-11-13T12:00:00Z")))
+    .toBe("合成活动-抽签结果-20261113200000.csv");
+});

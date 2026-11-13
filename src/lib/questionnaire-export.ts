@@ -77,13 +77,18 @@ const metadataHeaders = [
   "最后修改时间（北京时间）",
   "问卷版本",
 ];
-const metadata = (r: ResponseRecord): Cell[] => [
+const exportMetadataHeaders = (includeLotteryStatus: boolean) => [
+  ...metadataHeaders,
+  ...(includeLotteryStatus ? ["抽签结果"] : []),
+];
+const metadata = (r: ResponseRecord, includeLotteryStatus = false): Cell[] => [
   r.id,
   r.memberName || "",
   r.memberEmail || "",
   beijingTime(r.createdAt),
   beijingTime(r.updatedAt || r.createdAt),
   r.formVersion || "",
+  ...(includeLotteryStatus ? [r.lotteryStatus || ""] : []),
 ];
 
 // Merge by identity, retaining deleted questions, options and fields from snapshots.
@@ -200,13 +205,13 @@ function reader(record: ResponseRecord) {
       : "";
   };
 }
-function* responseRows(records: ResponseRecord[], defs: Definition[]) {
+function* responseRows(records: ResponseRecord[], defs: Definition[], includeLotteryStatus: boolean) {
   const cols = columns(defs);
-  yield uniqueHeaders([...metadataHeaders, ...cols.map((c) => c.heading)]);
+  yield uniqueHeaders([...exportMetadataHeaders(includeLotteryStatus), ...cols.map((c) => c.heading)]);
   for (const record of records)
-    yield [...metadata(record), ...cols.map(reader(record))];
+    yield [...metadata(record, includeLotteryStatus), ...cols.map(reader(record))];
 }
-function* memberRows(records: ResponseRecord[], defs: Definition[]) {
+function* memberRows(records: ResponseRecord[], defs: Definition[], includeLotteryStatus: boolean) {
   const context = columns(defs.filter((d) => d.question.type !== "group"));
   const groups = defs.filter((d) => d.question.type === "group");
   const shared = new Map<
@@ -232,14 +237,14 @@ function* memberRows(records: ResponseRecord[], defs: Definition[]) {
     });
   const fields = [...shared.values()];
   yield uniqueHeaders([
-    ...metadataHeaders,
+    ...exportMetadataHeaders(includeLotteryStatus),
     ...context.map((c) => c.heading),
     "信息组题目",
     "组内序号",
     ...fields.map((f) => f.heading),
   ]);
   for (const record of records) {
-    const prefix = [...metadata(record), ...context.map(reader(record))];
+    const prefix = [...metadata(record, includeLotteryStatus), ...context.map(reader(record))];
     for (const q of record.questions.filter((q) => q.type === "group")) {
       const entries = record.answers[q.id];
       if (!Array.isArray(entries)) continue;
@@ -266,13 +271,13 @@ function uniqueHeaders(headers: string[]) {
     return result;
   });
 }
-function* longRows(records: ResponseRecord[]) {
-  yield [...metadataHeaders, "题目标识", "题目", "题型", "答案"];
+function* longRows(records: ResponseRecord[], includeLotteryStatus: boolean) {
+  yield [...exportMetadataHeaders(includeLotteryStatus), "题目标识", "题目", "题型", "答案"];
   for (const r of records)
     for (const q of r.questions)
       if (q.type !== "description" && Object.hasOwn(r.answers, q.id))
         yield [
-          ...metadata(r),
+          ...metadata(r, includeLotteryStatus),
           q.id,
           q.label,
           q.type,
@@ -283,18 +288,20 @@ export function responseCSV(
   records: ResponseRecord[],
   currentQuestions: Question[] = [],
   layout: ResponseExportLayout = "responses",
+  options: { includeLotteryStatus?: boolean } = {},
 ) {
-  if (layout === "long") return csv(longRows(records));
+  const includeLotteryStatus = options.includeLotteryStatus === true;
+  if (layout === "long") return csv(longRows(records, includeLotteryStatus));
   const defs = definitions(records, currentQuestions);
   return csv(
     layout === "members"
-      ? memberRows(records, defs)
-      : responseRows(records, defs),
+      ? memberRows(records, defs, includeLotteryStatus)
+      : responseRows(records, defs, includeLotteryStatus),
   );
 }
 export function responseExportFilename(
   title: string,
-  layout: ResponseExportLayout,
+  layout: ResponseExportLayout | "lottery",
   now = new Date(),
 ) {
   const name =
@@ -306,7 +313,7 @@ export function responseExportFilename(
     ]
       .slice(0, 60)
       .join("") || "问卷";
-  const label = { responses: "答卷表", members: "成员明细", long: "按题明细" }[
+  const label = { responses: "答卷表", members: "成员明细", long: "按题明细", lottery: "抽签结果" }[
     layout
   ];
   const timestamp = beijingTime(now.toISOString()).replaceAll(/[- :]/g, "");

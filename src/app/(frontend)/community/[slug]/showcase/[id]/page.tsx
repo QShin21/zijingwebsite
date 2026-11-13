@@ -76,7 +76,7 @@ export default async function ShowcaseDetail({
           </>
         }
       />
-      <Wrap width="reading" className={layout.pageBody}>
+      <Wrap width="workspace" className={layout.pageBody}>
       <p className={work.status} role="status">{(await searchParams).message}</p>
       <div className={`${styles.article} ${work.flow}`}>
         <ShowcaseCard

@@ -21,7 +21,7 @@ import { lotteryReceipt, readLottery } from "@/lib/activity-signup-lottery";
 import { boundedBody } from "@/lib/site-request";
 import { publicationAssetData } from "@/lib/v2/images";
 import type { PublicationImage } from "@/lib/publication-images";
-import type { Payload } from "payload";
+import { APIError, type Payload } from "payload";
 import {
   responseExportFilename,
   responseExportLayout,
@@ -91,11 +91,19 @@ async function run(
           mode === "export",
         );
         if (mode === "export") {
+          const lottery = await readLottery(p, kind, id);
+          const lotteryExport = url.searchParams.get("lottery") === "1";
+          if (lotteryExport && !lottery) throw new APIError("当前活动尚未抽签，请抽签后导出结果", 400);
+          const candidates = new Set(lottery?.candidates), winners = new Set(lottery?.winners);
+          const exportRecords = lottery ? records.map(record => ({
+            ...record,
+            lotteryStatus: !candidates.has(record.id) ? "未参与本次抽签" : winners.has(record.id) ? "已中签" : "未中签",
+          })) : records;
           await p.create({ collection: "audit", overrideAccess: true, data: { actor: String(user!.id), action: "export-signups", object: `${kind}:${id}`, status: "authorized" } });
-          const layout = responseExportLayout(url.searchParams.get("layout"));
-          const filename = responseExportFilename(value.doc.title, layout);
+          const layout = lotteryExport ? "responses" : responseExportLayout(url.searchParams.get("layout"));
+          const filename = responseExportFilename(value.doc.title, lotteryExport ? "lottery" : layout);
           return new Response(
-            responseCSV(records, value.form.questions, layout),
+            responseCSV(exportRecords, value.form.questions, layout, { includeLotteryStatus: Boolean(lottery) }),
             {
               headers: {
                 "Content-Type": "text/csv; charset=utf-8",

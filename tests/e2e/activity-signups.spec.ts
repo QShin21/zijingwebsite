@@ -774,10 +774,8 @@ test("organizer downloads one-row responses and member details with filters and 
     await page.goto(`/activities/events/${target}/manage`);
     await selectQuestionnaireTask(page, "统计与导出");
     const results = page.locator(".questionnaire-results");
-    await results.locator("summary").filter({ hasText: /^导出筛选答卷$/ }).click();
-    await expect(results.getByRole("combobox", { name: "导出格式", exact: true })).toHaveValue(
-      "responses",
-    );
+    await expect(results.getByRole("heading", { name: "导出筛选答卷", exact: true })).toBeVisible();
+    await expect(results.getByRole("radio", { name: "答卷表：每份答卷一行（推荐）", exact: true })).toBeChecked();
     const downloading = page.waitForEvent("download");
     await results.getByRole("button", { name: "导出筛选答卷 CSV" }).click();
     const download = await downloading;
@@ -808,9 +806,7 @@ test("organizer downloads one-row responses and member details with filters and 
       /^\d{4}-\d{2}-\d{2} /,
     );
     await expect(results.getByRole("status")).toContainText("已导出");
-    await results
-      .getByRole("combobox", { name: "导出格式", exact: true })
-      .selectOption("members");
+    await results.getByRole("radio", { name: "成员明细：每条信息组记录一行", exact: true }).check();
     const memberDownloading = page.waitForEvent("download");
     await results.getByRole("button", { name: "导出筛选答卷 CSV" }).click();
     const memberDownload = await memberDownloading;

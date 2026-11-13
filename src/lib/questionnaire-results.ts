@@ -10,6 +10,7 @@ export type ResponseRecord = {
   updatedAt?: string;
   memberName?: string;
   memberEmail?: string;
+  lotteryStatus?: string;
   formVersion?: string;
   questions: Question[];
   answers: Answers;

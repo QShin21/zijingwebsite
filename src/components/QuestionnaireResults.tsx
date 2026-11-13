@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useId, useState } from "react";
 import surface from "./activity-pages/QuestionnaireSurface.module.css";
 import type { Question } from "@/lib/signup-schema";
 import type { QuestionSummary } from "@/lib/questionnaire-results";
@@ -13,6 +13,7 @@ export function QuestionnaireResults({
   questions: Question[];
   canExport?: boolean;
 }) {
+  const layoutGroup = useId();
   const [filters, setFilters] = useState({
     name: "",
     from: "",
@@ -154,6 +155,7 @@ export function QuestionnaireResults({
             </button>
             <button
               type="button"
+              className={surface.secondaryButton}
               disabled={busy}
               onClick={() => {
                 setFilters({
@@ -174,23 +176,21 @@ export function QuestionnaireResults({
             </button>
           </div>
           {canExport ? (
-            <details className={surface.exportPanel}>
-              <summary>导出筛选答卷</summary>
-              <label>
-                导出格式
-                <select
-                  value={layout}
-                  onChange={(e) =>
-                    setLayout(e.target.value as ResponseExportLayout)
-                  }
-                >
-                  <option value="responses">
-                    答卷表：每份答卷一行（推荐）
-                  </option>
-                  <option value="members">成员明细：每条信息组记录一行</option>
-                  <option value="long">按题明细：每个答案一行</option>
-                </select>
-              </label>
+            <section className={surface.exportPanel} aria-labelledby="questionnaire-export-heading">
+              <h3 id="questionnaire-export-heading">导出筛选答卷</h3>
+              <fieldset className={surface.exportOptions}>
+                <legend>导出格式</legend>
+                {([
+                  ["responses", "答卷表：每份答卷一行（推荐）"],
+                  ["members", "成员明细：每条信息组记录一行"],
+                  ["long", "按题明细：每个答案一行"],
+                ] as const).map(([value, label]) => (
+                  <label className={`${surface.exportOption} ${layout === value ? surface.exportOptionSelected : ""}`} key={value}>
+                    <input type="radio" name={layoutGroup} value={value} checked={layout === value} onChange={() => setLayout(value)} />
+                    <span>{label}</span>
+                  </label>
+                ))}
+              </fieldset>
               <p>
                 {layout === "responses"
                   ? "每题分列；多项填空和矩阵按子题拆列，成员名单按序号和字段拆列。多选 1 表示选中、0 表示未选；空白表示未填写或未显示。排序以数字记录名次。"
@@ -201,18 +201,20 @@ export function QuestionnaireResults({
               <p>
                 导出包含填写者当前的账号邮箱。
               </p>
+              <p>活动完成抽签后，导出文件包含每份报名的最新抽签结果。</p>
               <p>
                 学号、电话等列在 Excel
                 导入时请选择文本格式，保留前导零和长数字。
               </p>
               <button
                 type="button"
+                className="button"
                 disabled={busy || !canExport}
                 onClick={() => void run(true)}
               >
                 导出筛选答卷 CSV
               </button>
-            </details>
+            </section>
           ) : (
             <p role="note">当前账号可读取名单。导出需要单独授权。</p>
           )}
