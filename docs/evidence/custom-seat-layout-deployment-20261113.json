@@ -1,0 +1,38 @@
+{
+  "deployedAt": "2026-11-13T22:47:42+08:00",
+  "revision": "39973e77711d5742ca8c74972363fe5f76459a52",
+  "featureRevision": "9799e3e337188edf7f117ac1ae827d73c9539298",
+  "previousRevision": "e9afd91f517dd814a8ad790cbaa17a87cfaa6004",
+  "buildId": "dxbYTq9xcrypn4CeUmlyp",
+  "release": "/srv/zijingwebsite/releases/custom-layout-20261113-39973e7",
+  "migration": "20261113_000700_custom_seat_layout",
+  "backup": {
+    "storage": "server-local",
+    "snapshot": "/srv/zijingwebsite/backups/custom-layout-20261113-39973e7/database/zijing-2026-11-13T14-47-01.705Z",
+    "rollback": "/srv/zijingwebsite/backups/custom-layout-20261113-39973e7/rollback.sh",
+    "rollbackGuard": "Stops the application and refuses an older release if any custom layout exists; restarts the current release on refusal.",
+    "restoreVerified": false
+  },
+  "verification": {
+    "syntheticDatabase": "Migration compatibility and 35 seating cases passed, including permissions, custom gaps, protected claims/blocks/tickets, concurrent layout edits and selection, old layouts, random allocation and owner receipt visibility.",
+    "targetedTests": "Eight test files and 61 tests passed. After reducing native map payload, 14 related tests were repeated and passed.",
+    "largeMiniProgramMap": "A 100 by 100 map serialized to approximately 780702 bytes for empty seats and 950702 bytes for confirmed seats; the tested rows payload stays below the 1 MiB per-setData limit.",
+    "static": "TypeScript, changed-file lint, mini-program package check and production build passed. The build was checked for local database URL and local Payload secret values before transfer.",
+    "migrationResult": "The new migration was recorded; all existing activity layouts remained null. The post-migration counts were 1 seating activity, 163 requests, 268 claims and 360 ticket images. The old application stayed online during backup and additive migration.",
+    "candidateAndProduction": "Candidate and production readiness, homepage, login, privacy, compiled seating asset SHA-256 and anonymous layout/receipt boundaries passed.",
+    "public": "Health, home, login and privacy returned 200; seating asset SHA-256 matched; anonymous receipt and layout reads returned 401 with no-store; FreeKill homepage returned 200.",
+    "startup": "The first readiness connection during candidate and production startup was refused; retries and independent checks succeeded.",
+    "initialPreparation": "An earlier staging attempt stopped before migration because the next systemd drop-in filename would exceed the filesystem limit. The existing service stayed active. A shorter later-sorting drop-in was prepared for the deployed revision.",
+    "authenticatedProductionFlows": "not tested",
+    "realDevice": "not tested"
+  },
+  "miniProgram": {
+    "version": "0.5.25",
+    "uploadedAt": "2026-11-13T22:48:00+08:00",
+    "platformStatus": "developmentVersionUploaded",
+    "officialTool": "WeChat Developer Tools CLI",
+    "sizeBytes": 879605,
+    "reviewSubmitted": false,
+    "publicReleaseExecuted": false
+  }
+}
