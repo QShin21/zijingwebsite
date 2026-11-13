@@ -16,8 +16,10 @@ const video = require('../../lib/video');
 const { hasContactImage } = require('../../lib/native-presentation');
 const areas = { updates: 'community-posts', showcase: 'community-showcase' };
 const identity = () => String((session.user() || {}).id || '');
+// These five server-prepared defaults have a padded 512px transparent canvas.
+const isDefaultIcon = src => typeof src === 'string' && /^\/api\/game-icons\/default\/(honor-of-kings|cs2|stardew-valley|eggy-party|league-of-legends)(?:\?.*)?$/.test(src);
 Page(withVisualTheme({
-  data: { loading: true, error: '', needsLogin: false, game: {}, iconKey: '', img: {}, area: 'contacts', introOpen: false, docs: [], page: 1,
+  data: { loading: true, error: '', needsLogin: false, game: {}, iconKey: '', iconIsDefault: false, img: {}, area: 'contacts', introOpen: false, docs: [], page: 1,
     hasMore: false, loadingMore: false, nodes: [], contentError: '', contacts: [], contactAvailable: false, contactsLoading: false, contactsError: '',
     clubLoading: false, clubError: '', staffBatches: [], promotions: [], honorPins: [], honorsLoading: false, honorsError: '' },
   ...actions,
@@ -33,7 +35,7 @@ Page(withVisualTheme({
   },
   invalidate() { this._scope = (this._scope || 0) + 1; },
   valid(scope) { return !this._disposed && this._visible !== false && scope === (this._scope || 0) && this._identity === identity() && Boolean(identity()); },
-  resetPrivate() { this.setData({ needsLogin: !session.user(), loading: false, error: '', game: {}, iconKey: '', img: {}, introOpen: false, docs: [], nodes: [], page: 1,
+  resetPrivate() { this.setData({ needsLogin: !session.user(), loading: false, error: '', game: {}, iconKey: '', iconIsDefault: false, img: {}, introOpen: false, docs: [], nodes: [], page: 1,
     hasMore: false, loadingMore: false, contentError: '', contacts: [], contactAvailable: false, contactsLoading: false, contactsError: '',
     clubLoading: false, clubError: '', staffBatches: [], promotions: [], honorPins: [], honorsLoading: false, honorsError: '' }); },
   onShow() {
@@ -57,7 +59,7 @@ Page(withVisualTheme({
       const options = this._options || {};
       const game = await cms.detail('games', options.id, options.slug);
       if (!current()) return;
-      this.setData({ game, loading: false, nodes: render(game.body).nodes, iconKey: '', img: {} });
+      this.setData({ game, loading: false, nodes: render(game.body).nodes, iconKey: '', iconIsDefault: false, img: {} });
       wx.setNavigationBarTitle({ title: game.title });
       await Promise.all([
         this.loadIcon(game.slug, current), this.loadArea(), this.retryContacts(), this.retryClub(),
@@ -74,7 +76,7 @@ Page(withVisualTheme({
     if (!current()) return;
     const icon = { coverSrc: header?.card?.cover?.src };
     images.attach(this, [icon], current);
-    this.setData({ iconKey: icon.coverKey || '' });
+    this.setData({ iconKey: icon.coverKey || '', iconIsDefault: isDefaultIcon(icon.coverSrc) });
   },
   async retryContacts() {
     if (this._disposed || this._visible === false) return;

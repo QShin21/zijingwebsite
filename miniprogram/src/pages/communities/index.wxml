@@ -1,6 +1,6 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/v2.wxml" />
-<view wx:if="{{campus}}" class="page mini-page zj-tab-page {{theme === 'dark' ? 'zj-dark' : ''}}">
+<view wx:if="{{campus}}" class="page mini-page zj-tab-page {{theme === 'dark' ? 'zj-dark' : ''}} {{palette === 'simple' ? 'communities-simple' : ''}}">
   <view class="page-heading">
     <text class="eyebrow">COMMUNITIES · 游戏社群</text>
     <text class="title">找到同好，从这里开场</text>
@@ -18,9 +18,9 @@
     <block wx:elif="{{docs.length}}">
       <view class="zj-grid2">
         <view wx:for="{{docs}}" wx:key="key" class="zj-card zj-community" hover-class="zj-pressed" bindtap="openPage" data-page="{{item.page}}" data-params="{{item.params}}" aria-role="link" aria-label="{{item.title}}社群">
-          <view class="zj-cover" style="--hue: {{item.hue}}">
+          <view class="zj-cover communities-cover">
             <view class="communities-icon" aria-hidden="true">
-              <image wx:if="{{item.coverKey && img[item.coverKey]}}" class="communities-icon-image" src="{{img[item.coverKey]}}" mode="aspectFit" lazy-load binderror="imageError" data-key="{{item.coverKey}}" data-url="{{img[item.coverKey]}}" />
+              <image wx:if="{{item.coverKey && img[item.coverKey]}}" class="communities-icon-image {{item.defaultIcon ? 'communities-icon-default' : ''}}" src="{{img[item.coverKey]}}" mode="aspectFit" lazy-load binderror="imageError" data-key="{{item.coverKey}}" data-url="{{img[item.coverKey]}}" />
               <text wx:else class="communities-icon-initial">{{item.initial}}</text>
             </view>
           </view>

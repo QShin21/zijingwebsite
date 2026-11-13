@@ -56,28 +56,33 @@
 }
 .crest {
   display: inline-grid;
+  position: relative;
+  isolation: isolate;
   flex: 0 0 auto;
   place-items: center;
   width: clamp(72px, 10vw, 112px);
   height: clamp(72px, 10vw, 112px);
-  overflow: hidden;
-  padding: 4px;
-  border: 2px solid var(--z-px-outline);
-  border-radius: var(--z-radius);
-  background: #757575;
   color: #fff;
   font-size: clamp(36px, 5vw, 56px);
   font-weight: 900;
-  box-shadow: var(--z-shadow);
+}
+.crest::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -6px -18px;
+  background: radial-gradient(ellipse, rgba(65, 54, 76, 0.75), rgba(65, 54, 76, 0.45) 44%, transparent 74%);
+  pointer-events: none;
 }
 .crest img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.65));
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 2px rgba(255, 255, 255, 0.8)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
 }
 .crest img[src^="/api/game-icons/default/"] {
   transform: scale(1.25);
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
 }
 .crest svg {
   width: 72%;

@@ -1001,7 +1001,7 @@
 }
 /* Trophy cards: gold rim light, deep plum field. */
 .cover { background: radial-gradient(ellipse at 50% 35%, hsl(var(--hue) 45% 35% / .5), transparent 75%), linear-gradient(150deg, #171922, #0b0c12); }
-.gameIcon { display: grid; place-items: center; width: min(52%, 180px); aspect-ratio: 1; color: #fff; }
+.gameIcon { display: grid; place-items: center; width: 100%; height: 100%; color: #fff; }
 .cover .gameIcon img { position: static; width: 100%; height: 100%; object-fit: contain; border-radius: 20%; filter: drop-shadow(0 10px 18px #0005); }
 .honor {
   border-color: rgba(240, 192, 96, 0.28);
@@ -1158,35 +1158,39 @@
 .notice {
   border-bottom: 2px dashed var(--z-line);
 }
-/* Covers and media frames: a pixel slot with a hue tint and a 4px grid. */
+/* Community art sits on one quiet, hue-tinted stage. */
 .cover {
-  border-bottom: 2px solid var(--z-px-outline);
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  border-bottom: 1px solid var(--z-px-outline);
   background:
-    linear-gradient(color-mix(in srgb, #ffffff 7%, transparent) 1px, transparent 1px) 0 0 / 8px 8px,
-    linear-gradient(90deg, color-mix(in srgb, #ffffff 7%, transparent) 1px, transparent 1px) 0 0 / 8px 8px,
-    linear-gradient(180deg, hsl(var(--hue) 42% 30%) 0 50%, hsl(var(--hue) 46% 22%) 50% 78%, hsl(var(--hue) 50% 16%) 78%);
+    linear-gradient(color-mix(in srgb, #ffffff 3%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, color-mix(in srgb, #ffffff 3%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
+    radial-gradient(ellipse at 50% 48%, rgba(188, 175, 195, 0.5), transparent 72%),
+    linear-gradient(145deg, color-mix(in srgb, #211b2d 88%, hsl(var(--hue, 262) 55% 38%)), #121019);
 }
 .coverLg {
   border: 3px solid var(--z-px-outline);
   border-radius: 0;
 }
 .gameIcon {
-  overflow: hidden;
-  padding: 4px;
-  border: 3px solid var(--z-px-outline);
-  background: #757575;
-  box-shadow: 4px 4px 0 0 rgba(0, 0, 0, 0.35);
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(8px, 3%, 14px);
 }
 .cover .gameIcon img {
+  min-width: 0;
+  min-height: 0;
   border-radius: 0;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.65));
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 2px rgba(255, 255, 255, 0.8)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
 }
 .cover .gameIcon img[src^="/api/game-icons/default/"] {
-  transform: scale(1.25);
+  object-fit: cover;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
 }
 .gameIcon svg {
-  width: 72%;
-  height: 72%;
+  width: clamp(40px, 5vw, 56px);
+  height: auto;
 }
 .articleCover,
 .showcaseMedia {
@@ -1309,7 +1313,7 @@
 }
 :global(:root[data-z-palette="simple"]) .cover {
   border-color: var(--z-line);
-  background: var(--z-stage);
+  background: radial-gradient(ellipse at center, #706674, #27212d 78%);
 }
 
 /* ===== Fable 阶段 (2026-11-13): accent edge light on hover/focus for card plates. ===== */

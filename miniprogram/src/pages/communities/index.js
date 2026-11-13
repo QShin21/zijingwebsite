@@ -7,6 +7,8 @@ const images = require('../../lib/v2-images');
 const session = require('../../lib/session');
 const navigation = require('../../lib/navigation');
 const { actions } = require('../../lib/page');
+// These five server-prepared defaults have a padded 512px transparent canvas.
+const isDefaultIcon = src => typeof src === 'string' && /^\/api\/game-icons\/default\/(honor-of-kings|cs2|stardew-valley|eggy-party|league-of-legends)(?:\?.*)?$/.test(src);
 
 // V2 社群目录 (GET /api/v2/communities). Guests see the login wall; the
 // server keeps the member-only rule regardless of this page.
@@ -59,7 +61,7 @@ Page(withVisualTheme({
       const result = await v2.get('communities', { q: this.data.q, page, limit: 24 }, { required: true });
       if (!alive()) return;
       const seen = more ? this.data.docs.map(doc => doc.key) : [];
-      const fresh = result.docs.map(v2.community).filter(doc => !seen.includes(doc.key));
+      const fresh = result.docs.map(v2.community).filter(doc => !seen.includes(doc.key)).map(doc => ({ ...doc, defaultIcon: isDefaultIcon(doc.coverSrc) }));
       images.attach(this, fresh, alive);
       this._loaded = true;
       this.setData({ docs: more ? this.data.docs.concat(fresh) : fresh, page: result.page, hasMore: result.hasNextPage, total: result.totalDocs, loading: false, loadingMore: false });

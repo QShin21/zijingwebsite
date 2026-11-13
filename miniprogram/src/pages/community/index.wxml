@@ -1,7 +1,7 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
 <import src="../../templates/native.wxml" />
-<view class="page mini-page community-v2 {{theme === 'dark' ? 'zj-dark' : ''}}">
+<view class="page mini-page community-v2 {{theme === 'dark' ? 'zj-dark' : ''}} {{palette === 'simple' ? 'community-simple' : ''}}">
   <view class="zj-hero community-hero">
     <image wx:if="{{scene}}" class="community-hero-scene" src="{{scene}}" mode="aspectFill" aria-hidden="true" />
     <view class="zj-hero-inner">
@@ -9,7 +9,7 @@
       <block wx:if="{{!loading && !error && !needsLogin}}">
         <view class="community-identity">
           <view class="community-crest" aria-hidden="true">
-            <image wx:if="{{iconKey && img[iconKey]}}" class="community-crest-image" src="{{img[iconKey]}}" mode="aspectFit" binderror="imageError" data-key="{{iconKey}}" data-url="{{img[iconKey]}}" />
+            <image wx:if="{{iconKey && img[iconKey]}}" class="community-crest-image {{iconIsDefault ? 'community-crest-default' : ''}}" src="{{img[iconKey]}}" mode="aspectFit" binderror="imageError" data-key="{{iconKey}}" data-url="{{img[iconKey]}}" />
             <text wx:else>{{game.title ? game.title[0] : '紫'}}</text>
           </view>
           <view class="community-titles">
