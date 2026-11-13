@@ -57,8 +57,8 @@
           <text wx:if="{{layoutLegacyLocked}}" class="zj-callout">当前原座位图已有占用、锁定或票据，继续保留原图。新活动可配置自定义座位图。</text>
           <text wx:elif="{{!layoutInfo.layout}}" class="zj-form-hint">保存后按方格的排号、列号作为座位编号；票据文件名与座位编号对应。</text>
           <view class="seat-layout-controls">
-            <view class="seat-layout-field"><text class="field-label">排数</text><input type="number" value="{{layoutRowInput}}" data-key="row" bindinput="layoutInput" disabled="{{busy || loading || layoutLegacyLocked}}" /></view>
-            <view class="seat-layout-field"><text class="field-label">每排列数</text><input type="number" value="{{layoutColumnInput}}" data-key="column" bindinput="layoutInput" disabled="{{busy || loading || layoutLegacyLocked}}" /></view>
+            <view class="seat-layout-field"><text class="field-label">排数</text><input type="number" cursor-spacing="24" value="{{layoutRowInput}}" data-key="row" bindinput="layoutInput" disabled="{{busy || loading || layoutLegacyLocked}}" /></view>
+            <view class="seat-layout-field"><text class="field-label">每排列数</text><input type="number" cursor-spacing="24" value="{{layoutColumnInput}}" data-key="column" bindinput="layoutInput" disabled="{{busy || loading || layoutLegacyLocked}}" /></view>
             <button class="secondary" bindtap="layoutResize" disabled="{{busy || loading || layoutLegacyLocked}}">应用行列</button>
           </view>
           <view class="zj-record-actions"><button class="secondary" bindtap="layoutAll" data-present="{{true}}" disabled="{{busy || loading || layoutLegacyLocked}}">全部设为座位</button><button class="secondary" bindtap="layoutAll" data-present="{{false}}" disabled="{{busy || loading || layoutLegacyLocked}}">清空方格</button></view>
