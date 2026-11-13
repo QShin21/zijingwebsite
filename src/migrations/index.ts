@@ -34,6 +34,7 @@ import * as migration_20260927_181800_forum_curation from './20260927_181800_for
 import * as migration_20260927_182940_community_showcase from './20260927_182940_community_showcase';
 
 import * as contentAudience from "./20261113_000400_content_audience";
+import * as activitySignupLotteries from "./20261113_000500_activity_signup_lotteries";
 
 export const migrations = [
 
@@ -105,4 +106,5 @@ export const migrations = [
   { up: honoraryBackbone.up, down: honoraryBackbone.down, name: "20261113_000200_honorary_backbone" },
   { up: restoreEditedPromotions.up, down: restoreEditedPromotions.down, name: "20261113_000300_restore_edited_promotions" },
   { up: contentAudience.up, down: contentAudience.down, name: "20261113_000400_content_audience" },
+  { up: activitySignupLotteries.up, down: activitySignupLotteries.down, name: "20261113_000500_activity_signup_lotteries" },
 ];

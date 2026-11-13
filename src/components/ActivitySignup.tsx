@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import type { SignupForm, Question, Answers } from "@/lib/signup-schema";
 import { QuestionnaireResults } from "./QuestionnaireResults";
+import { QuestionnaireLottery } from "./QuestionnaireLottery";
 import { SignupBuilder } from "./SignupBuilder";
 import { formatAnswer } from "@/lib/questionnaire-model";
 import { formatDate } from "@/lib/rules";
@@ -27,6 +28,7 @@ type Receipt = {
   updatedAt: string;
   formVersion: string;
   memberName?: string;
+  lotteryStatus?: string;
   questions: Question[];
   answers: Answers;
 };
@@ -424,7 +426,7 @@ export function SignupManager({
     [page, setPage] = useState(1),
     [pages, setPages] = useState(0),
     [total, setTotal] = useState<number | null>(null);
-  const [view, setView] = useState<"edit" | "entries" | "stats">(
+  const [view, setView] = useState<"edit" | "entries" | "stats" | "lottery">(
     readOnly ? "entries" : "edit",
   );
   const [serverVersion, setServerVersion] = useState<string | null>(null),
@@ -535,13 +537,14 @@ export function SignupManager({
           </div>
           <nav className={workspace.taskTabs} aria-label="当前问卷任务">
             {!readOnly && info.canManage && (
-              <button
+              <><button
                 type="button"
                 aria-pressed={view === "edit"}
                 onClick={() => setView("edit")}
               >
                 编辑问卷
               </button>
+              <button type="button" aria-pressed={view === "lottery"} onClick={() => setView("lottery")}>报名抽签</button></>
             )}
             {info.canViewSignups && (
               <>
@@ -570,6 +573,7 @@ export function SignupManager({
               {message}
             </p>
           )}
+          {!readOnly && info.canManage && view === "lottery" && <QuestionnaireLottery kind={kind} id={id} />}
           {!readOnly && info.canManage && (
             <div hidden={view !== "edit"}>
               <form
@@ -749,6 +753,7 @@ export function SignupManager({
                     <summary>
                       <span>{record.memberName || "报名者"}</span>
                       <span>报名编号 {record.id}</span>
+                      {record.lotteryStatus && <span>抽签结果：{record.lotteryStatus}</span>}
                       <time dateTime={record.createdAt}>
                         {formatDate(record.createdAt)}
                       </time>

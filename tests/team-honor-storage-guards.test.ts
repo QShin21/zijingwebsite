@@ -16,7 +16,7 @@ it("公开 Media 只允许静态图片 basename，不能读取私有目录、视
   const read = (name: unknown, isReadingStaticFile = true) => publicMediaRead({
     isReadingStaticFile, data: { filename: name },
     req: { user: null, payload: { db: { pool: { query: async () => ({ rows: [{ allowed: true }] }) } } } },
-  } as AccessArgs);
+  } as unknown as AccessArgs);
   for (const name of ["正常公开图片.png", "image-card.JPG", "public.webp"]) expect(await read(name)).toBe(true);
   for (const name of [null, "", "private.mp4", ".hidden.png", "../public.png", "nested/public.png", "nested\\public.png", ".team-honor-videos/" + filename, ".showcase-videos/" + filename, "bad\0.png"]) expect(await read(name)).toBe(false);
   expect(await read(undefined, false)).toBe(true);

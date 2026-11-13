@@ -17,6 +17,7 @@ import {
 import { applicationError } from "@/lib/application-error";
 import { publicationImageRevision } from "@/lib/publication-image-storage";
 import { publicationImageRequestBytes } from "@/lib/publication-images";
+import { lotteryReceipt, readLottery } from "@/lib/activity-signup-lottery";
 import { boundedBody } from "@/lib/site-request";
 import { publicationAssetData } from "@/lib/v2/images";
 import type { PublicationImage } from "@/lib/publication-images";
@@ -140,13 +141,16 @@ async function run(
             updatedAt: true,
           },
         });
+        const lottery = await readLottery(p, kind, id);
         return reply({
-          docs: records.docs,
+          docs: records.docs.map(record => lotteryReceipt(record, lottery)),
           totalDocs: records.totalDocs,
           page: records.page,
           totalPages: records.totalPages,
         });
       }
+      const signup = await ownSignup(p, kind, id, user);
+      const lottery = signup ? await readLottery(p, kind, id) : null;
       return reply({
         ...(includeImages && mode === "manage"
           ? { images: await withImagePreviews(p, value.images), imageRevision: publicationImageRevision(value.images) }
@@ -166,7 +170,7 @@ async function run(
         draftKey: user
           ? `questionnaire:${kind}:${id}:${user.id}:${value.version}`
           : undefined,
-        signup: await ownSignup(p, kind, id, user),
+        signup: signup ? lotteryReceipt(signup, lottery) : null,
       });
     }
     const editImages = method === "PUT" && includeImages;
@@ -192,13 +196,16 @@ async function run(
         );
       return reply(saved.images ? { ...saved, images: await withImagePreviews(p, saved.images) } : saved);
     }
-    if (method === "PATCH" || (method === "POST" && data.action === "edit"))
+    if (method === "PATCH" || (method === "POST" && data.action === "edit")) {
+      const signup = await updateSignupAnswers(p, kind, id, user, data.version, data.revision, data.answers);
       return reply({
-        signup: await updateSignupAnswers(p, kind, id, user, data.version, data.revision, data.answers),
+        signup: lotteryReceipt(signup, await readLottery(p, kind, id)),
         message: "作答修改已保存",
       });
+    }
+    const signup = await submitSignup(p, kind, id, user, data.version, data.answers);
     return reply({
-      signup: await submitSignup(p, kind, id, user, data.version, data.answers),
+      signup: lotteryReceipt(signup, await readLottery(p, kind, id)),
       message: "报名成功，已确认报名",
     });
   } catch (error) {

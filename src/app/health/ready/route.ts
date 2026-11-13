@@ -35,6 +35,9 @@ export async function GET() {
     const db = p.db as unknown as PostgresAdapter;
     // Verify required structure without loading any private answers or contact data.
     await db.pool.query("SELECT dedupe_key,form_version FROM event_signups LIMIT 0");
+    await db.pool.query("SELECT activity_key,candidates,winners,history,revision,drawn_by FROM event_signup_lotteries LIMIT 0");
+    const lotteryMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261113_000500_activity_signup_lotteries"]);
+    if (lotteryMigration.rowCount !== 1) throw new Error("Required activity lottery migration unavailable");
     await db.pool.query("SELECT key FROM auth_codes LIMIT 0");
     await db.pool.query("SELECT key FROM auth_rate_limits LIMIT 0");
     await db.pool.query("SELECT department, affiliation FROM users LIMIT 0");

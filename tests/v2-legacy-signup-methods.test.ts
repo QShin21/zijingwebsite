@@ -56,12 +56,13 @@ describe.each(['events', 'community-posts'])('V2保留：%s报名路由', kind =
     const response = await read(kind, '?mode=view'), data = await response.json();
     expect(response.status).toBe(200); expect(data).toMatchObject({ canManage: false, canViewSignups: true, canExportSignups: false, signup: receipt });
     expect(mocks.activity).toHaveBeenCalledWith(p, kind, 55, actor, true, undefined, 'view', false);
-    expect(mocks.own).toHaveBeenCalledExactlyOnceWith(p, kind, 55, actor); expect(p.find).not.toHaveBeenCalled();
+    expect(mocks.own).toHaveBeenCalledExactlyOnceWith(p, kind, 55, actor);
+    expect(p.find.mock.calls.filter(([query]) => query.collection === 'event-signups')).toHaveLength(0);
     await read(kind, '?mode=entries&page=2');
-    expect(p.find).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ collection: 'event-signups', overrideAccess: false, user: actor, depth: 0, page: 2, limit: 20,
+    expect(p.find.mock.calls.filter(([query]) => query.collection === 'event-signups')).toEqual([[expect.objectContaining({ collection: 'event-signups', overrideAccess: false, user: actor, depth: 0, page: 2, limit: 20,
       where: { and: [{ activityType: { equals: kind } }, { activityID: { equals: 55 } }] },
       select: { memberName: true, answers: true, questions: true, createdAt: true, updatedAt: true },
-    }));
+    })]]);
   });
   it('已撤销名单权限403，停止私人名单及本人资料查询', async () => {
     mocks.activity.mockRejectedValue(new APIError('无权读取此活动报名', 403));

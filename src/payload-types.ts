@@ -37,6 +37,7 @@ export interface Config {
     'team-member-profiles': TeamMemberProfile;
     'team-honor-records': TeamHonorRecord;
     'event-signups': EventSignup;
+    'event-signup-lotteries': EventSignupLottery;
     games: Game;
     teams: Team;
     seasons: Season;
@@ -75,6 +76,7 @@ export interface Config {
     'team-member-profiles': TeamMemberProfilesSelect<false> | TeamMemberProfilesSelect<true>;
     'team-honor-records': TeamHonorRecordsSelect<false> | TeamHonorRecordsSelect<true>;
     'event-signups': EventSignupsSelect<false> | EventSignupsSelect<true>;
+    'event-signup-lotteries': EventSignupLotteriesSelect<false> | EventSignupLotteriesSelect<true>;
     games: GamesSelect<false> | GamesSelect<true>;
     teams: TeamsSelect<false> | TeamsSelect<true>;
     seasons: SeasonsSelect<false> | SeasonsSelect<true>;
@@ -845,6 +847,45 @@ export interface EventSignup {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-signup-lotteries".
+ */
+export interface EventSignupLottery {
+  id: number;
+  activityKey: string;
+  candidates:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  winners:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  history:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  revision: string;
+  drawnBy: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * 历史荣誉保持原归属。新增、内容修改与复审请使用代表队荣誉工作台；这里只能撤下已有记录。
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1403,6 +1444,10 @@ export interface PayloadLockedDocument {
         value: number | EventSignup;
       } | null)
     | ({
+        relationTo: 'event-signup-lotteries';
+        value: number | EventSignupLottery;
+      } | null)
+    | ({
         relationTo: 'games';
         value: number | Game;
       } | null)
@@ -1876,6 +1921,20 @@ export interface EventSignupsSelect<T extends boolean = true> {
   formVersion?: T;
   questions?: T;
   answers?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-signup-lotteries_select".
+ */
+export interface EventSignupLotteriesSelect<T extends boolean = true> {
+  activityKey?: T;
+  candidates?: T;
+  winners?: T;
+  history?: T;
+  revision?: T;
+  drawnBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }

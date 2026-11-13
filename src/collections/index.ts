@@ -1,4 +1,5 @@
 import { EventSignups, signupFields, validateSignupForm } from './signups';
+import { EventSignupLotteries } from './event-signup-lotteries';
 import type {
   CollectionConfig,
   Where,
@@ -683,6 +684,7 @@ export const Collections: CollectionConfig[] = [
   TeamMemberProfiles,
   TeamHonorRecords,
   EventSignups,
+  EventSignupLotteries,
   content("games", "游戏项目", [
     { name: "sort", label: "排序", type: "number" },
   ]),
