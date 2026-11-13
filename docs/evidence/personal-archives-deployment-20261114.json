@@ -1,0 +1,45 @@
+{
+  "deployedAt": "2026-11-14T05:30:21+08:00",
+  "revision": "a50d1a18470b0e850ac5e0d9d1443451b3bb9ab3",
+  "previousRevision": "39973e77711d5742ca8c74972363fe5f76459a52",
+  "buildId": "Z_rDq47bcgSSRFgxvNjd7",
+  "release": "/srv/zijingwebsite/releases/personal-archives-20261114-a50d1a1",
+  "migration": "20261113_000800_personal_archives",
+  "backup": {
+    "storage": "server-local",
+    "snapshot": "/srv/zijingwebsite/backups/personal-archives-20261114-a50d1a1/database/zijing-2026-11-13T21-29-25.615Z",
+    "rollback": "/srv/zijingwebsite/backups/personal-archives-20261114-a50d1a1/rollback.sh",
+    "rollbackBehavior": "Restores the previous application and retains the new table and production data.",
+    "offsiteConfigured": false,
+    "restoreVerified": false
+  },
+  "seatCountsBeforeAndAfterMigration": {
+    "activities": 1,
+    "requests": 169,
+    "claims": 275,
+    "tickets": 360
+  },
+  "verification": {
+    "priorSyntheticDatabase": "Six isolated integration cases passed before deployment, as recorded in PERSONAL_ARCHIVES_20261114.md.",
+    "targetedTests": "Thirteen mini-program and two website archive tests passed during deployment.",
+    "miniProgramCheck": "Passed: 30 pages, 218 source files, 1358834 bytes; domain checking enabled.",
+    "productionBuild": "Passed using the exact website revision and synthetic build-only settings; deployable output contained no local or synthetic secret values.",
+    "migration": "The expected single pending migration completed and was recorded once. The new archive table was initially empty.",
+    "candidateAndProduction": "Readiness, homepage, login, privacy, account JavaScript digest and anonymous archive and personal-record boundaries passed.",
+    "public": "Homepage, login, readiness and privacy returned 200; account JavaScript SHA-256 matched; anonymous archive write and personal records returned 401 with private no-store; FreeKill homepage returned 200.",
+    "candidateCleanup": "Candidate process stopped and port 3101 was free; the stopped transient unit failure marker was cleared.",
+    "authenticatedProductionFlows": "not tested",
+    "officialSimulatorAndRealDevice": "not tested"
+  },
+  "miniProgram": {
+    "version": "0.5.28",
+    "revision": "5083c39e776edd9d56b4300e21694796ba1ce527",
+    "uploadedAt": "2026-11-14T05:30:39+08:00",
+    "platformStatus": "developmentVersionUploaded",
+    "officialTool": "WeChat Developer Tools CLI",
+    "sizeBytes": 1030767,
+    "reviewSubmitted": false,
+    "publicReleaseExecuted": false
+  },
+  "preparation": "Initial Git fetch stopped on a low-speed timeout. Source and build archives were transferred through GitHub blobs and verified against SHA-256 before use. The first candidate archive request omitted Origin and returned the expected 403; the corrected same-origin anonymous request returned 401. Initial readiness connections during startup were refused before successful retries."
+}
