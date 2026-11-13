@@ -100,3 +100,32 @@ export function localizeMessage(message: string, locale: Locale): string {
   }
   return message;
 }
+
+/*
+ * Error shown for a failed request. Server messages keep their Chinese contract and error
+ * codes; this only changes what English readers see. Known messages are translated; an
+ * unknown server message gets a stable English sentence chosen by error code / HTTP status,
+ * followed by the original text in parentheses so no detail is lost. Nothing is sent to AI.
+ */
+const byCode: Record<string, string> = {
+  VALIDATION: "The request was not accepted. Check your input and try again.",
+  AUTH_REQUIRED: "Please sign in with an active account.",
+  FORBIDDEN: "You do not have permission for this action.",
+  NOT_FOUND: "This content is not available.",
+  CONFLICT: "The content was updated or already handled. Refresh and try again.",
+  PAYLOAD_TOO_LARGE: "The request is too large.",
+  UNSUPPORTED_MEDIA: "This file format is not supported.",
+  RATE_LIMITED: "Too many requests. Please try again later.",
+  UNAVAILABLE: "The service is temporarily unavailable. Please try again later.",
+};
+const byStatus: Record<number, string> = { 400: byCode.VALIDATION, 401: byCode.AUTH_REQUIRED, 403: byCode.FORBIDDEN, 404: byCode.NOT_FOUND,
+  409: byCode.CONFLICT, 413: byCode.PAYLOAD_TOO_LARGE, 415: byCode.UNSUPPORTED_MEDIA, 429: byCode.RATE_LIMITED };
+export function localizeError(message: string, locale: Locale, context: { status?: number; code?: string } = {}): string {
+  if (locale !== "en") return message;
+  const translated = localizeMessage(message, locale);
+  if (translated !== message || !/[㐀-鿿]/.test(message ?? "")) return translated;
+  const generic = (context.code && Object.hasOwn(byCode, context.code) ? byCode[context.code] : undefined)
+    ?? (context.status && context.status >= 500 ? byCode.UNAVAILABLE : context.status ? byStatus[context.status] : undefined)
+    ?? "The action could not be completed.";
+  return message ? `${generic} (${message})` : generic;
+}

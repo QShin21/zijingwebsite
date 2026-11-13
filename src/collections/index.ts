@@ -1,5 +1,8 @@
 import { EventSignups, signupFields, validateSignupForm } from './signups';
 import { queueTranslationAfterChange, removeTranslationAfterDelete } from '../lib/content-translation/hooks';
+import { translatableCollections, type TranslatableCollection } from '../lib/content-translation/segments';
+// Content collections with English caches (seasons, recruitment, honors archives excluded).
+const translated = (slug: string): slug is TranslatableCollection => translatableCollections.includes(slug as TranslatableCollection);
 import { EventSignupLotteries } from './event-signup-lotteries';
 import type {
   CollectionConfig,
@@ -391,8 +394,8 @@ function content(
         },
       ],
       beforeChange: [guard(scoped, self), ...(slug === 'teams' ? [guardTeamSlug, guardTeamLifecycle] : []), ...(slug === 'events' ? [validateSignupForm] : []), ...(hasPostImages ? [validatePostImages] : [])],
-      afterChange: [...(slug === "teams" ? [closeInactiveTeamRecruitments] : []), audit, ...(slug === "events" || slug === "announcements" ? [queueTranslationAfterChange(slug)] : [])],
-      ...(slug === "events" || slug === "announcements" ? { afterDelete: [removeTranslationAfterDelete(slug)] } : {}),
+      afterChange: [...(slug === "teams" ? [closeInactiveTeamRecruitments] : []), audit, ...(translated(slug) ? [queueTranslationAfterChange(slug)] : [])],
+      ...(translated(slug) ? { afterDelete: [removeTranslationAfterDelete(slug)] } : {}),
     },
     fields: [
       ...common.map(field => slug === "teams" && "name" in field && field.name === "slug" && field.type === "text"

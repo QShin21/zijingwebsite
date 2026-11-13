@@ -4,5 +4,9 @@ import type { TranslatableCollection } from "./segments";
 export function publishedForTranslation(collection: TranslatableCollection, doc: Record<string, unknown> | null | undefined): boolean {
   if (!doc || typeof doc !== "object") return false;
   if (collection === "community-posts") return doc.status === "visible" && (doc.category === "event" || doc.category === "notice");
+  if (collection === "community-showcase") return doc.status === "visible";
+  if (collection === "team-honor-records") return doc.state === "approved";
+  // The privacy notice is legal text and stays Chinese only.
+  if (collection === "pages") return doc._status === "published" && doc.key !== "privacy";
   return doc._status === "published";
 }

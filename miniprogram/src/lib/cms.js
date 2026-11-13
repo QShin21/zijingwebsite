@@ -111,7 +111,8 @@ async function eventDetail(ref, collection) {
 }
 async function articleDetail(ref, collection) {
   const community = collection === 'community-posts';
-  const detail = await v2.get('articles/' + (community ? 'communityNotice/' : 'announcement/') + encodeURIComponent(ref));
+  const kind = community ? 'communityNotice' : collection === 'news' ? 'news' : 'announcement';
+  const detail = await v2.get('articles/' + kind + '/' + encodeURIComponent(ref), {}, collection === 'news' ? { required: true } : undefined);
   const article = detail.article;
   return {
     doc: card({ id: article.ref.id, slug: article.ref.slug, title: article.title, summary: article.summary,
@@ -123,6 +124,8 @@ async function articleDetail(ref, collection) {
 function publishedDetail(collection, id, slug, category) {
   const ref = id || slug;
   if (collection === 'events') return eventDetail(ref, collection);
+  // English readers get news through the V2 article read, which carries cached English.
+  if (collection === 'news') return articleDetail(ref, collection);
   if (collection === 'announcements' || category === 'notice') return articleDetail(ref, collection);
   if (category === 'event') return eventDetail(ref, collection);
   // Older community share links only include an ID.

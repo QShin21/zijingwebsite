@@ -86,9 +86,15 @@ Page(withVisualTheme({
     try {
       const { collection, id, slug, category } = this._options;
       const social = socialCollections.includes(collection);
-      const scoped = ['events', 'announcements', 'community-posts'].includes(collection);
+      // News uses the V2 article read only in English (cached English body); Chinese keeps the original REST read.
+      const scoped = ['events', 'announcements', 'community-posts'].includes(collection) || (collection === 'news' && i18n.locale() === 'en');
       const detail = scoped ? await cms.publishedDetail(collection, id, slug, category) : null;
-      const doc = detail ? detail.doc : social ? await cms.socialDetail(collection, id) : await cms.detail(collection, id, slug);
+      let doc = detail ? detail.doc : social ? await cms.socialDetail(collection, id) : await cms.detail(collection, id, slug);
+      // English mode, REST-read records (albums, teams, communities): text from the same-permission V2 read.
+      if (!detail && !social) {
+        const english = await require('../../lib/english-overlay').detail(collection, doc);
+        if (english) doc = { ...doc, title: english.title, summary: english.summary, ...(english.body ? { body: english.body } : {}) };
+      }
       const layout = detail?.presentation || (detail?.images?.length ? { mode: 'gallery', blocks: [] } : null);
       const coverPromise = detail ? images.media(detail.cover) : cms.media(doc.cover);
       const qrPromise = detail ? images.media(detail.qr) : cms.media(doc.qrCode);

@@ -1,5 +1,5 @@
 import { localeCookieName, parseLocale, type Locale } from "@/lib/i18n/locale";
-import { localizeMessage } from "@/lib/i18n/messages";
+import { localizeError } from "@/lib/i18n/messages";
 
 /** Presentation-layer request feedback. A lost response cannot prove a write failed. */
 // i18n-exempt: compared against the legacy Chinese server error
@@ -45,7 +45,7 @@ export async function activityRequest(url: string, method = "GET", data?: unknow
           ? "The server could not confirm the submission. Your input is kept; refresh your receipt or saved records before deciding whether to retry."
           : "服务器暂时无法确认提交结果。填写内容已保留，请先刷新本人回执或已保存记录，再决定是否重试。",
       );
-    if (value.error) throw new Error(localizeMessage(value.error, en ? "en" : "zh"));
+    if (value.error) throw new Error(localizeError(value.error, en ? "en" : "zh", { status: response.status, code: typeof value.code === "string" ? value.code : undefined }));
     throw new Error(
       response.status === 403
         ? en ? "This account does not have permission for this action." : "当前账号没有此操作权限。"

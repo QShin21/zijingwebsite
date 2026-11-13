@@ -67,7 +67,7 @@ async function publishEvent(title: string, extra: Record<string, unknown> = {}, 
 }
 const slugOf = async (id: number) => String((await p.findByID({ collection: "events", id, overrideAccess: true, depth: 0 })).slug);
 
-async function drain(collection: "events" | "community-posts" | "announcements", id: number, rounds = 30, translate?: Translator) {
+async function drain(collection: import("../src/lib/content-translation/segments").TranslatableCollection, id: number, rounds = 30, translate?: Translator) {
   for (let i = 0; i < rounds; i++) {
     const row = await store.readQueueRow(collection, id);
     if (row && ["done", "failed", "obsolete"].includes(row.status)) return row;
@@ -485,5 +485,180 @@ describe("crash recovery and restart", () => {
       vi.stubEnv("CONTENT_TRANSLATION_WORKER", "off");
       await store.closeTranslationPool(); // stops the sweep timer; the pool reopens lazily
     }
+  });
+});
+
+describe("public content sources (news, pages, communities, showcase)", () => {
+  it("publishing news, a community and an about page queues allowlisted text and serves English", async () => {
+    const game = await p.create({ collection: "games", overrideAccess: false, user: president,
+      data: { title: "合成社群乙", slug: `bilingual-game-b-${stamp}`, summary: "合成社群简介", _status: "published" } as never });
+    const news = await p.create({ collection: "news", overrideAccess: false, user: president,
+      data: { title: "合成新闻", slug: `bilingual-news-${stamp}`, summary: "合成新闻摘要", _status: "published" } as never });
+    const about = await p.create({ collection: "pages", overrideAccess: false, user: president,
+      data: { title: "关于合成", slug: `bilingual-about-${stamp}`, key: "about", sections: [{ heading: "合成问题", text: "合成回答" }], _status: "published" } as never });
+    const privacy = await p.create({ collection: "pages", overrideAccess: false, user: president,
+      data: { title: "合成隐私说明", slug: `bilingual-privacy-${stamp}`, key: "privacy", summary: "合成法律条款", _status: "published" } as never });
+    for (const [collection, id] of [["games", game.id], ["news", news.id], ["pages", about.id]] as const)
+      expect((await drain(collection, id as number))?.status).toBe("done");
+    // The privacy notice is never sent: its row is closed without a provider call.
+    expect(["obsolete", undefined]).toContain((await drain("pages", privacy.id as number))?.status);
+    expect(sent()).toEqual(expect.arrayContaining(["合成社群乙", "合成社群简介", "合成新闻", "合成新闻摘要", "关于合成", "合成问题", "合成回答"]));
+    expect(sent()).not.toContain("合成隐私说明");
+    expect(sent()).not.toContain("合成法律条款");
+    const page = await (await v2("pages/about", "en")).json();
+    expect(page).toMatchObject({ key: "about", title: english("关于合成"), sections: [{ heading: english("合成问题"), text: english("合成回答") }] });
+    expect((await (await v2("pages/privacy", "en")).json()).title).toBe("合成隐私说明");
+    const article = await (await v2(`articles/news/${(news as { slug: string }).slug}`, "en", memberToken)).json();
+    expect(article.article).toMatchObject({ title: english("合成新闻"), summary: english("合成新闻摘要") });
+    const communities = await (await v2("communities", "en", memberToken)).json();
+    const card = communities.docs.find((item: { community: { id: number } }) => item.community.id === game.id);
+    expect(card).toMatchObject({ community: { title: english("合成社群乙"), slug: `bilingual-game-b-${stamp}` }, summary: english("合成社群简介") });
+    // Mini program: its REST list keeps ids; the V2 feed it overlays from has the same ids in English.
+    const feed = await (await v2("feed?kind=news&limit=50", "en", memberToken)).json();
+    const newsCard = feed.docs.find((entry: { kind: string; item: { ref: { id: number } } }) => entry.kind === "article" && entry.item.ref.id === news.id);
+    expect(newsCard.item).toMatchObject({ title: english("合成新闻"), summary: english("合成新闻摘要") });
+    const rest = await p.find({ collection: "news", overrideAccess: false, user: member, depth: 0, where: { id: { equals: news.id } } });
+    expect(rest.docs[0].title).toBe("合成新闻");
+    // Chinese readers and identifiers are unchanged.
+    expect((await (await v2("pages/about")).json()).title).toBe("关于合成");
+  });
+
+  it("showcase sends only title and body of visible posts; drafts and pending posts never", async () => {
+    const game = await p.create({ collection: "games", overrideAccess: false, user: president,
+      data: { title: "合成社群丙", slug: `bilingual-game-c-${stamp}`, _status: "published" } as never });
+    const { default: sharp } = await import("sharp");
+    const png = "data:image/png;base64," + (await sharp({ create: { width: 16, height: 16, channels: 3, background: "#777777" } }).png().toBuffer()).toString("base64");
+    const visible = await p.create({ collection: "community-showcase", overrideAccess: false, user: president, context: { webShowcaseWrite: true },
+      data: { title: "合成风采", body: "合成风采正文", game: game.id, images: [{ source: png, caption: "合成配图说明" }] } as never });
+    const row = await drain("community-showcase", visible.id as number);
+    expect(row?.status).toBe("done");
+    expect(sent()).toEqual(expect.arrayContaining(["合成风采", "合成风采正文"]));
+    expect(sent().join("|")).not.toMatch(/合成配图说明|data:image|合成president/);
+    const draft = await p.create({ collection: "news", overrideAccess: false, user: president,
+      data: { title: "合成新闻草稿", slug: `bilingual-news-draft-${stamp}` } as never, draft: true });
+    expect(await store.readQueueRow("news", draft.id as number)).toBeNull();
+  });
+});
+
+describe("bounded history backfill", () => {
+  it("dry-run reports without writing or calling; cursor pages; real run is idempotent and reuses cache", async () => {
+    const ids: number[] = [];
+    for (let i = 0; i < 3; i++)
+      ids.push(((await p.create({ collection: "news", overrideAccess: false, user: president, context: { skipTranslation: true },
+        data: { title: `合成历史新闻${i}`, slug: `bilingual-history-${stamp}-${i}`, _status: "published" } as never })).id) as number);
+    const draft = (await p.create({ collection: "news", overrideAccess: false, user: president, context: { skipTranslation: true },
+      data: { title: "合成历史草稿", slug: `bilingual-history-draft-${stamp}` } as never, draft: true })).id as number;
+    const rowsBefore = (await p.db.drizzle.execute(sql`SELECT count(*)::int AS n FROM content_translations`)).rows[0];
+    // Dry-run, also without a key.
+    vi.stubEnv("QUESTIONNAIRE_AI_API_KEY", "");
+    let report = await store.backfill(p, { collections: ["news"], limit: 2, pageSize: 1 });
+    vi.stubEnv("QUESTIONNAIRE_AI_API_KEY", fakeKey);
+    expect(report.dryRun).toBe(true);
+    expect(report.examined).toBe(2);
+    expect(report.next?.collection).toBe("news");
+    expect((await p.db.drizzle.execute(sql`SELECT count(*)::int AS n FROM content_translations`)).rows[0]).toEqual(rowsBefore);
+    expect(calls).toHaveLength(0);
+    // Resume from the cursor until done: all three history items found, the draft is never eligible.
+    const seen: number[] = [];
+    let cursor = null as typeof report.next;
+    do {
+      report = await store.backfill(p, { collections: ["news"], limit: 2, pageSize: 2, after: cursor });
+      seen.push(report.wouldQueue);
+      cursor = report.next;
+    } while (cursor);
+    expect(seen.reduce((sum, n) => sum + n, 0)).toBeGreaterThanOrEqual(3);
+    expect(await store.readQueueRow("news", draft)).toBeNull();
+    // A real run queues; running again queues nothing new.
+    const first = await store.backfill(p, { dryRun: false, collections: ["news"], limit: 1000 });
+    expect(first.queued).toBeGreaterThanOrEqual(3);
+    for (const id of ids) expect((await store.readQueueRow("news", id))?.status).toBe("pending");
+    expect(await store.readQueueRow("news", draft)).toBeNull();
+    const again = await store.backfill(p, { dryRun: false, collections: ["news"], limit: 1000 });
+    expect(again.queued).toBe(0);
+    expect(again.alreadyQueued).toBeGreaterThanOrEqual(3);
+    for (const id of ids) expect((await drain("news", id))?.status).toBe("done");
+    const settled = await store.backfill(p, { collections: ["news"], limit: 1000 });
+    expect(settled.wouldQueue).toBe(0);
+    expect(settled.reusedSegments).toBeGreaterThanOrEqual(3);
+    expect(settled.estimatedCalls).toBe(0);
+    // A real run requires the key.
+    vi.stubEnv("QUESTIONNAIRE_AI_API_KEY", "");
+    await expect(store.backfill(p, { dryRun: false })).rejects.toBeTruthy();
+    vi.stubEnv("QUESTIONNAIRE_AI_API_KEY", fakeKey);
+  });
+});
+
+describe("team honors use the honor wall's public projection", () => {
+  it("translates only publicly eligible approved honors and applies English to the real projection", async () => {
+    const { seedHonorCoreChain } = await import("./team-honor-core-fixtures");
+    const { teamHonorService } = await import("../src/lib/team-honor-service");
+    const { default: sharp } = await import("sharp");
+    const actor = async (label: string, roles: User["roles"]) => p.create({ collection: "users", overrideAccess: true, context: { system: true },
+      data: { name: `${label}-${stamp}`, email: `${label}-${stamp}@mails.tsinghua.edu.cn`, password, roles, affiliation: "tsinghua" } as never }) as Promise<User>;
+    const leader = await actor("honor-leader", ["president"]);
+    let reviewer = await actor("honor-reviewer", ["member"]);
+    const player = await actor("honor-player", ["member"]);
+    const game = (await p.create({ collection: "games", overrideAccess: true, context: { system: true, skipTranslation: true },
+      data: { title: "合成荣誉社群", slug: `bilingual-honor-game-${stamp}`, _status: "published" } as never })).id as number;
+    reviewer = await p.update({ collection: "users", id: reviewer.id, overrideAccess: false, user: leader,
+      data: { communityOffices: [{ game, status: "active", handleJoins: true, reviewShowcase: true }] } as never }) as User;
+    const chain = await seedHonorCoreChain(p, game, reviewer, [player, reviewer], `bilingual-${stamp}`);
+    const picture = "data:image/png;base64," + (await sharp({ create: { width: 20, height: 20, channels: 3, background: "purple" } }).png().toBuffer()).toString("base64");
+    const submit = async (title: string) => teamHonorService.change(p, player, "submit", { input: { team: chain.team.id, title, competition: "合成联赛",
+      placing: "合成冠军", date: "2026-10-01", description: "合成荣誉说明", images: [{ source: picture, caption: "合成证据说明" }] } });
+    const approve = async (record: { id: number; revision: number; submittedVersion?: string | null }) =>
+      teamHonorService.change(p, reviewer, "approve", { id: record.id, revision: record.revision, submittedVersion: record.submittedVersion });
+
+    // Pending: queued marker may exist only after approval; nothing is sent before.
+    const pending = await submit("合成待审荣誉");
+    await store.processTranslationQueue({ payload: p });
+    expect(sent()).not.toContain("合成待审荣誉");
+    const approved = await approve(pending as never);
+    expect((approved as { state: string }).state).toBe("approved");
+    expect((await drain("team-honor-records", approved.id as number))?.status).toBe("done");
+    expect(sent()).toEqual(expect.arrayContaining(["合成待审荣誉", "合成联赛", "合成冠军", "合成荣誉说明"]));
+    // The honor's own request contains exactly its four allowlisted fields (the public team
+    // name is translated separately as a published team, which is allowed).
+    const honorBatch = calls.find((batch) => Object.values(batch).includes("合成待审荣誉"))!;
+    expect(Object.values(honorBatch).sort()).toEqual(["合成冠军", "合成待审荣誉", "合成联赛", "合成荣誉说明"].sort());
+    expect(sent().join("|")).not.toMatch(/合成证据说明|data:image|honor-player|honor-reviewer|合成确认|合成测试确认/);
+
+    // English reaches the real honor projection (key "team-honor-records:<id>").
+    const zh = await (await v2(`honors?team=${chain.team.id}`, undefined, memberToken)).json();
+    const card = JSON.stringify(zh).includes(`team-honor-records:${approved.id}`);
+    expect(card).toBe(true);
+    const en = await (await v2(`honors?team=${chain.team.id}`, "en", memberToken)).json();
+    const item = en.docs.find((value: Record<string, unknown>) => value.key === `team-honor-records:${approved.id}`);
+    expect(item.team.id).toBe(chain.team.id); // identifiers unchanged
+    // Mini program honor archive route: same English for the same record, Chinese without the header.
+    const { GET: archiveRoute } = await import("../src/app/(frontend)/api/team-honor-archives/[team]/route");
+    const archive = (locale?: string) => archiveRoute(new Request(`http://localhost:3000/api/team-honor-archives/${chain.team.id}`, { headers: locale ? { "x-zijing-locale": locale } : {} }),
+      { params: Promise.resolve({ team: String(chain.team.id) }) });
+    const archiveEn = await (await archive("en")).json();
+    expect(archiveEn.records.find((record: { key: string }) => record.key === `team-honor-records:${approved.id}`)).toMatchObject({ title: english("合成待审荣誉"), placing: english("合成冠军") });
+    const archiveZh = await (await archive()).json();
+    expect(archiveZh.records.find((record: { key: string }) => record.key === `team-honor-records:${approved.id}`).title).toBe("合成待审荣誉");
+    expect(item).toMatchObject({ title: english("合成待审荣誉"), competition: english("合成联赛"), placing: english("合成冠军"), description: english("合成荣誉说明") });
+
+    // Team no longer public: an approved honor of that team is not sent (worker and backfill).
+    // (Direct column change: the synthetic team leaves the public wall without other side effects.)
+    await p.db.drizzle.execute(sql`UPDATE teams SET archived = true WHERE id = ${chain.team.id}`);
+    calls = [];
+    await store.markTranslation(p.db.drizzle as never, "team-honor-records", approved.id as number);
+    expect((await drain("team-honor-records", approved.id as number))?.status).toBe("obsolete");
+    expect(calls).toHaveLength(0);
+    const report = await store.backfill(p, { collections: ["team-honor-records"], limit: 1000 });
+    expect(report.wouldQueue).toBe(0);
+    expect(report.notPublic).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe("backfill estimate matches the worker's batching", () => {
+  it("counts one call per sequential batch, e.g. three 2,500-character segments need three calls", () => {
+    const segment = (n: number, length: number) => String(n) + "合".repeat(length - 1);
+    expect(store.plannedCalls([segment(1, 2500), segment(2, 2500), segment(3, 2500)])).toBe(3);
+    expect(store.plannedCalls([segment(1, 6000)])).toBe(1);
+    expect(store.plannedCalls(Array.from({ length: 41 }, (_, i) => segment(i, 10)))).toBe(2);
+    expect(store.plannedCalls([])).toBe(0);
   });
 });

@@ -10,14 +10,53 @@ import { loadOverlays } from "./store";
  * IDs, slugs, hrefs, states, dates, option values and every other field stay untouched.
  */
 type Ref = { collection: TranslatableCollection; id: number };
+type Shape = "item" | "community" | "team" | "communityCard" | "teamCard" | "communityDetail" | "teamDetail" | "page" | null;
 
-function refOf(value: Record<string, unknown>): Ref | null {
+function itemRef(value: Record<string, unknown>): Ref | null {
   const ref = value.ref as Record<string, unknown> | undefined;
-  if (!ref || typeof ref !== "object" || typeof ref.id !== "number") return null;
+  if (!ref || typeof ref !== "object") return null;
+  if (ref.type === "honor" && typeof ref.key === "string") {
+    // Key from the honor wall projection: "team-honor-records:<id>". Legacy archive
+    // entries ("honors:<id>") are not cached and stay Chinese.
+    const match = /^team-honor-records:(\d+)$/.exec(ref.key);
+    return match ? { collection: "team-honor-records", id: Number(match[1]) } : null;
+  }
+  if (typeof ref.id !== "number") return null;
   if (ref.type === "event") return { collection: ref.source === "club" ? "events" : "community-posts", id: ref.id };
   if (ref.type === "announcement") return { collection: "announcements", id: ref.id };
   if (ref.type === "communityNotice") return { collection: "community-posts", id: ref.id };
+  if (ref.type === "news") return { collection: "news", id: ref.id };
+  if (ref.type === "album") return { collection: "albums", id: ref.id };
+  if (ref.type === "showcase") return { collection: "community-showcase", id: ref.id };
   return null;
+}
+const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
+/** CommunityRef { id, slug, title, hue } and TeamRef { id, slug, title, community } are recognized by shape. */
+function shapeOf(value: Record<string, unknown>): Shape {
+  if (itemRef(value)) return "item";
+  if (typeof value.id === "number" && typeof value.slug === "string" && typeof value.title === "string") {
+    if (typeof value.hue === "number") return "community";
+    if ("community" in value && !("ref" in value)) return "team";
+  }
+  if (isRecord(value.community) && isRecord(value.counts) && "summary" in value && !("team" in value)) return "communityCard";
+  if (isRecord(value.team) && isRecord(value.counts) && "summary" in value) return "teamCard";
+  if (isRecord(value.card) && "body" in value && "officers" in value) return "communityDetail";
+  if (isRecord(value.card) && "body" in value && "positions" in value) return "teamDetail";
+  if (typeof value.key === "string" && typeof value.id === "number" && Array.isArray(value.sections) && "body" in value && "contacts" in value) return "page";
+  return null;
+}
+function refFor(value: Record<string, unknown>, shape: Shape): Ref | null {
+  switch (shape) {
+    case "item": return itemRef(value);
+    case "community": return { collection: "games", id: value.id as number };
+    case "team": return { collection: "teams", id: value.id as number };
+    case "communityCard": return typeof (value.community as Record<string, unknown>).id === "number" ? { collection: "games", id: (value.community as Record<string, number>).id } : null;
+    case "teamCard": return typeof (value.team as Record<string, unknown>).id === "number" ? { collection: "teams", id: (value.team as Record<string, number>).id } : null;
+    case "communityDetail": { const community = (value.card as Record<string, Record<string, unknown>>).community; return community && typeof community.id === "number" ? { collection: "games", id: community.id } : null; }
+    case "teamDetail": { const team = (value.card as Record<string, Record<string, unknown>>).team; return team && typeof team.id === "number" ? { collection: "teams", id: team.id } : null; }
+    case "page": return value.key === "privacy" ? null : { collection: "pages", id: value.id as number };
+    default: return null;
+  }
 }
 const key = (ref: Ref) => `${ref.collection}:${ref.id}`;
 
@@ -27,12 +66,18 @@ function collect(value: unknown, refs: Ref[], depth = 0) {
     for (const item of value) collect(item, refs, depth + 1);
     return;
   }
-  const ref = refOf(value as Record<string, unknown>);
+  const source = value as Record<string, unknown>;
+  const ref = refFor(source, shapeOf(source));
   if (ref) refs.push(ref);
-  for (const child of Object.values(value)) collect(child, refs, depth + 1);
+  for (const child of Object.values(source)) collect(child, refs, depth + 1);
 }
 
-const cardText = ["title", "summary", "location"] as const;
+// Only these fields of a recognized object are ever replaced.
+const replaceable: Record<Exclude<Shape, null>, readonly string[]> = {
+  item: ["title", "summary", "location", "body", "competition", "placing", "description"],
+  community: ["title"], team: ["title"], communityCard: ["summary"], teamCard: ["summary"],
+  communityDetail: [], teamDetail: [], page: ["title"],
+};
 
 function transform(value: unknown, overlays: Map<string, Overlay>, depth = 0): unknown {
   if (!value || typeof value !== "object" || depth > 12) return value;
@@ -40,13 +85,22 @@ function transform(value: unknown, overlays: Map<string, Overlay>, depth = 0): u
   const source = value as Record<string, unknown>;
   const result: Record<string, unknown> = {};
   for (const [field, child] of Object.entries(source)) result[field] = transform(child, overlays, depth + 1);
-  const ref = refOf(source);
+  const shape = shapeOf(source);
+  const ref = refFor(source, shape);
   const overlay = ref && overlays.get(key(ref));
-  if (overlay) for (const field of cardText) if (typeof source[field] === "string") result[field] = overlay.text(source[field]);
+  if (overlay && shape) {
+    for (const field of replaceable[shape]) if (typeof source[field] === "string") result[field] = overlay.text(source[field]);
+    // Showcase cards carry image captions (albums use the detail photo page below).
+    if (shape === "item" && Array.isArray(source.images))
+      result.images = (result.images as Record<string, unknown>[]).map((image) => isRecord(image) && typeof image.caption === "string" ? { ...image, caption: overlay.text(image.caption) } : image);
+    if ((shape === "communityDetail" || shape === "teamDetail" || shape === "page") && source.body && typeof source.body === "object") result.body = overlay.lexical(source.body);
+    if (shape === "page" && Array.isArray(source.sections))
+      result.sections = (source.sections as Record<string, unknown>[]).map((section) => ({ ...section, heading: overlay.text(section.heading), text: overlay.text(section.text) }));
+  }
   // Detail shapes: EventDetail { event, body, bodyText, presentation, registration } and
-  // ArticleDetail { article, body, bodyText, presentation }.
+  // ArticleDetail { article, body, bodyText, presentation, sections, photos }.
   const owner = (source.event ?? source.article) as Record<string, unknown> | undefined;
-  const ownerRef = owner && typeof owner === "object" ? refOf(owner) : null;
+  const ownerRef = owner && typeof owner === "object" ? itemRef(owner) : null;
   const detail = ownerRef && overlays.get(key(ownerRef));
   if (detail && ("body" in source || "bodyText" in source)) {
     if (source.body && typeof source.body === "object") result.body = detail.lexical(source.body);
@@ -57,6 +111,11 @@ function transform(value: unknown, overlays: Map<string, Overlay>, depth = 0): u
     const registration = source.registration as Record<string, unknown> | null | undefined;
     if (registration && typeof registration === "object")
       result.registration = { ...registration, requirements: detail.text(registration.requirements), channelText: detail.text(registration.channelText) };
+    if (Array.isArray(source.sections))
+      result.sections = (source.sections as Record<string, unknown>[]).map((section) => ({ ...section, heading: detail.text(section.heading), text: detail.text(section.text) }));
+    const photos = source.photos as { docs?: Record<string, unknown>[] } | null | undefined;
+    if (photos && Array.isArray(photos.docs))
+      result.photos = { ...(result.photos as object), docs: photos.docs.map((photo) => ({ ...photo, caption: detail.text(photo.caption) })) };
   }
   return result;
 }
@@ -69,6 +128,29 @@ export async function localizeView<T>(value: T, locale: Locale): Promise<T> {
   const overlays = await loadOverlays(refs);
   if (!overlays.size) return value;
   return transform(value, overlays) as T;
+}
+
+/**
+ * Honor archive DTO (`/api/team-honor-archives/<team>`, used by the mini program): records
+ * carry the same "team-honor-records:<id>" key as the V2 cards but no `ref`. Only title,
+ * competition, placing and description of those records are replaced.
+ */
+export async function localizeHonorArchive<T extends { records?: Record<string, unknown>[] }>(archive: T, locale: Locale): Promise<T> {
+  if (locale !== "en" || !archive || !Array.isArray(archive.records)) return archive;
+  const ids = archive.records.flatMap((record) => {
+    const match = typeof record.key === "string" ? /^team-honor-records:(\d+)$/.exec(record.key) : null;
+    return match ? [Number(match[1])] : [];
+  });
+  if (!ids.length) return archive;
+  const overlays = await loadOverlays(ids.map((id) => ({ collection: "team-honor-records" as const, id })));
+  if (!overlays.size) return archive;
+  return { ...archive, records: archive.records.map((record) => {
+    const overlay = typeof record.key === "string" ? overlays.get(record.key) : undefined;
+    if (!overlay) return record;
+    const next = { ...record };
+    for (const field of ["title", "competition", "placing", "description"]) if (typeof record[field] === "string") next[field] = overlay.text(record[field]);
+    return next;
+  }) };
 }
 
 /** English questionnaire labels for a form the caller already read and authorized. */

@@ -38,7 +38,7 @@ function request(path, options = {}) {
           } else resolve(options.raw ? response.data : brand.display(response.data));
         } else {
           if (response.statusCode === 401 && credential && session.token() === credential) session.clear();
-          reject(Object.assign(new Error(i18n.message(message(response.data, response.statusCode))), { status: response.statusCode,
+          reject(Object.assign(new Error(i18n.error ? i18n.error(message(response.data, response.statusCode), response.statusCode) : i18n.message(message(response.data, response.statusCode))), { status: response.statusCode,
             ...(response.statusCode === 409 && response.data && response.data.code === 'PROFILE_PERIOD_CHANGED' ? { code: 'PROFILE_PERIOD_CHANGED' } : {}) }));
         }
       },
@@ -70,7 +70,7 @@ function upload(path, filePath, options = {}) {
         if (response.statusCode >= 200 && response.statusCode < 300) resolve(options.raw ? data : brand.display(data));
         else {
           if (response.statusCode === 401 && session.token() === credential) session.clear();
-          reject(Object.assign(new Error(i18n.message(message(data, response.statusCode))), { status: response.statusCode }));
+          reject(Object.assign(new Error(i18n.error ? i18n.error(message(data, response.statusCode), response.statusCode) : i18n.message(message(data, response.statusCode))), { status: response.statusCode }));
         }
       },
       fail(result) {

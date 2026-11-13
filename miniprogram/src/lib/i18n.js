@@ -47,6 +47,18 @@ function message(chinese) {
   if (locale() !== 'en' || typeof chinese !== 'string' || !chinese) return chinese;
   return require('./i18n-messages').translate(chinese);
 }
+// Server error for display: known messages are translated; an unknown Chinese message gets a
+// stable English sentence by HTTP status plus the original in parentheses. The server
+// contract (Chinese text, status, codes) is unchanged and nothing is sent anywhere.
+const statusEnglish = { 400: 'The request was not accepted. Check your input and try again.', 401: 'Please sign in with an active account.',
+  403: 'You do not have permission for this action.', 404: 'This content is not available.', 409: 'The content was updated or already handled. Refresh and try again.',
+  413: 'The request is too large.', 415: 'This file format is not supported.', 429: 'Too many requests. Please try again later.' };
+function error(chinese, status) {
+  const translated = message(chinese);
+  if (locale() !== 'en' || translated !== chinese || typeof chinese !== 'string' || !/[\u3400-\u9fff]/.test(chinese)) return translated;
+  const generic = status >= 500 ? 'The service is temporarily unavailable. Please try again later.' : statusEnglish[status] || 'The action could not be completed.';
+  return generic + ' (' + chinese + ')';
+}
 
 // Strings shared by templates/*.wxml; merged into every bound page's `t`.
 const common = {
@@ -171,4 +183,4 @@ function navTitle(zh, en) {
   try { wx.setNavigationBarTitle({ title: t(zh, en), fail() {} }); } catch { /* Title is cosmetic. */ }
 }
 
-module.exports = { KEY, locale, setLocale, t, text, message, subscribe, common, bind, unbind, navTitle, refreshIfStale };
+module.exports = { KEY, locale, setLocale, t, text, message, error, subscribe, common, bind, unbind, navTitle, refreshIfStale };

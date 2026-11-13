@@ -17,8 +17,38 @@ import { publicationBlocks } from "../publication-content";
  * them). They are never rewritten; English goes into a separate `display` projection that
  * clients render next to the unchanged value.
  */
-export type TranslatableCollection = "events" | "announcements" | "community-posts";
-export const translatableCollections: readonly TranslatableCollection[] = ["events", "announcements", "community-posts"];
+export type TranslatableCollection =
+  | "events" | "announcements" | "community-posts"
+  // 2026-11-14 public content: news, albums, fixed pages (except privacy), community and
+  // team introductions, visible showcase posts and approved honor records.
+  | "news" | "albums" | "pages" | "games" | "teams" | "community-showcase" | "team-honor-records";
+export const translatableCollections: readonly TranslatableCollection[] = [
+  "events", "announcements", "community-posts", "news", "albums", "pages", "games", "teams", "community-showcase", "team-honor-records",
+];
+/**
+ * Explicit field allowlist per collection: only these fields are ever read for translation
+ * (store.ts selects exactly these) and sent to the provider. Contact details, QR codes,
+ * author names, member profiles and rosters, review notes, internal notes, evidence
+ * images/videos, answers, tickets and drafts are never listed.
+ */
+export const translationFields: Record<TranslatableCollection, readonly string[]> = {
+  events: ["title", "summary", "location", "body", "requirements", "channelText", "signupForm"],
+  announcements: ["title", "summary", "body"],
+  "community-posts": ["title", "summary", "location", "body", "contentMode", "contentBlocks", "signupForm"],
+  news: ["title", "summary", "body"],
+  albums: ["title", "summary", "body", "photos"],
+  pages: ["key", "title", "body", "sections"],
+  games: ["title", "summary", "body"],
+  teams: ["title", "summary", "body"],
+  "community-showcase": ["title", "body"],
+  "team-honor-records": ["title", "competition", "placing", "description"],
+};
+/** Fields that decide whether a document is public; read with the allowlist, never sent. */
+export const publicationFields: Record<TranslatableCollection, readonly string[]> = {
+  events: ["_status"], announcements: ["_status"], "community-posts": ["status", "category"],
+  news: ["_status"], albums: ["_status"], pages: ["_status"], games: ["_status"], teams: ["_status"],
+  "community-showcase": ["status"], "team-honor-records": ["state"],
+};
 /** Stored per segment: `{ [hash]: english }`. */
 export type TranslationTable = Record<string, string>;
 
@@ -68,9 +98,20 @@ export function formTexts(value: unknown): string[] {
 export function sourceTexts(collection: TranslatableCollection, doc: Record<string, unknown>): string[] {
   // Values exactly as the V2 projections display them (trimmed where they trim).
   const trimmed = (value: unknown) => (typeof value === "string" ? value.trim() : value);
+  if (collection === "pages" && doc.key === "privacy") return []; // legal text: Chinese is authoritative
   const texts: unknown[] = [doc.title, trimmed(doc.summary), trimmed(doc.location)];
   if (collection === "events") texts.push(trimmed(doc.requirements), trimmed(doc.channelText));
-  if (collection === "community-posts") {
+  if (collection === "team-honor-records") texts.push(doc.competition, doc.placing, trimmed(doc.description));
+  if (collection === "pages" && Array.isArray(doc.sections))
+    for (const section of doc.sections as Record<string, unknown>[]) texts.push(section?.heading, section?.text);
+  if (collection === "albums" && Array.isArray(doc.photos))
+    for (const photo of doc.photos as Record<string, unknown>[]) texts.push(trimmed(photo?.caption));
+  if (collection === "community-showcase") {
+    const body = trimmed(doc.body);
+    texts.push(body);
+  } else if (collection === "team-honor-records") {
+    // Plain fields only.
+  } else if (collection === "community-posts") {
     const body = trimmed(doc.body);
     // Cards show the first 180 characters of a community post without a summary.
     texts.push(body, typeof body === "string" && body.length > 180 ? body.slice(0, 180) : null);
@@ -80,7 +121,7 @@ export function sourceTexts(collection: TranslatableCollection, doc: Record<stri
       } catch { /* Invalid stored blocks are not displayed either. */ }
     }
   } else texts.push(...lexicalTexts(doc.body));
-  if (collection !== "announcements") texts.push(...formTexts(doc.signupForm));
+  if (collection === "events" || collection === "community-posts") texts.push(...formTexts(doc.signupForm));
   const unique: string[] = [];
   const seen = new Set<string>();
   let total = 0;

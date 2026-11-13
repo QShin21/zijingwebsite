@@ -146,7 +146,8 @@ export type ManageQueue = {
   title: string; href: string; webOnly: boolean; pending: number | null; scope: string;
 };
 export type FixedPage = {
-  key: FixedPageKey; title: string; body: unknown | null;
+  key: FixedPageKey; id: ID | null; // id: CMS page (additive, used only to attach cached English)
+  title: string; body: unknown | null;
   sections: { id: string; heading: string; text: string }[]; updatedAt: ISODateTime | null;
   contacts: { label: string; text: string; url: string | null }[] | null; // 仅 contact 页
 };

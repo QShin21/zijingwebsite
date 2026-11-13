@@ -83,7 +83,9 @@ Page(withVisualTheme({
         search: this.data.search, kind, sort: this.data.collection === 'honors' ? '-date' : undefined,
         game: this.data.games[this.data.gameIndex] && this.data.games[this.data.gameIndex].id,
         year: this.data.collection === 'honors' && this.data.year !== '全部年份' ? this.data.year : undefined });
-      const docs = (this.data.collection === 'announcements' ? result.docs : await cms.decorate(result.docs)).map(reading.entry);
+      // English mode: titles/summaries from the same-permission V2 read (cached English only).
+      const listed = await require('../../lib/english-overlay').list(this.data.collection, result.docs);
+      const docs = (this.data.collection === 'announcements' ? listed : await cms.decorate(listed)).map(reading.entry);
       if (ticket !== this._ticket) return;
       this.setData({ loading: false, loadingMore: false, docs: more ? this.data.docs.concat(docs) : docs, page: result.page, hasMore: result.hasNextPage });
     } catch (cause) {

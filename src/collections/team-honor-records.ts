@@ -1,3 +1,4 @@
+import { queueTranslationAfterChange, removeTranslationAfterDelete } from "../lib/content-translation/hooks";
 import {
   APIError,
   type Access,
@@ -109,6 +110,9 @@ export const TeamHonorRecords: CollectionConfig = {
         return { ...data, ...grant.data };
       },
     ],
+    // English cache for approved honors only (title, competition, placing, description).
+    afterChange: [queueTranslationAfterChange("team-honor-records")],
+    afterDelete: [removeTranslationAfterDelete("team-honor-records")],
   },
   fields: [
     {

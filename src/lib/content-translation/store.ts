@@ -2,7 +2,7 @@ import { createHmac, randomUUID } from "node:crypto";
 import { Pool } from "pg";
 import type { Payload } from "payload";
 import { sql } from "@payloadcms/db-postgres";
-import { Overlay, sourceHash, sourceTexts, textHash, translatableCollections, type TranslatableCollection, type TranslationTable } from "./segments";
+import { Overlay, publicationFields, sourceHash, sourceTexts, textHash, translatableCollections, translationFields, type TranslatableCollection, type TranslationTable } from "./segments";
 import { TranslationError, translateWithQuestionnaireAI, translationAvailability, type Translator } from "./translator";
 import { publishedForTranslation } from "./published";
 
@@ -139,11 +139,24 @@ async function finish(row: QueueRow, values: { translations: TranslationTable; s
   return (result.rowCount ?? 0) === 1;
 }
 
-const selects: Record<TranslatableCollection, Record<string, true>> = {
-  events: { title: true, summary: true, location: true, body: true, requirements: true, channelText: true, signupForm: true, _status: true },
-  announcements: { title: true, summary: true, body: true, _status: true },
-  "community-posts": { title: true, summary: true, location: true, body: true, contentMode: true, contentBlocks: true, signupForm: true, status: true, category: true },
-};
+/**
+ * Honors use the honor wall's own public projection (teamHonorService.publicRecord): the
+ * record must be approved, its team publicly active in the same community, and its current
+ * content must match the approved version. Only the projected title, competition, placing
+ * and description are returned. The state read first throws on database errors so a
+ * temporary fault is retried rather than treated as withdrawal.
+ */
+async function publicHonorSource(p: Payload, id: number): Promise<Record<string, unknown> | null> {
+  const raw = await p.findByID({ collection: "team-honor-records", id, overrideAccess: true, depth: 0, disableErrors: true, select: { state: true } as never });
+  if (!raw || (raw as { state?: unknown }).state !== "approved") return null;
+  const { teamHonorService } = await import("../team-honor-service");
+  const record = await teamHonorService.publicRecord(p, id);
+  return record ? { state: "approved", title: record.title, competition: record.competition, placing: record.placing, description: record.description } : null;
+}
+
+// Exactly the allowlisted text fields plus the publication-state fields.
+const selects = Object.fromEntries(translatableCollections.map((collection) => [collection,
+  Object.fromEntries([...translationFields[collection], ...publicationFields[collection]].map((field) => [field, true]))])) as Record<TranslatableCollection, Record<string, true>>;
 
 /**
  * The committed, published state of a document (no request user, no draft).
@@ -152,10 +165,26 @@ const selects: Record<TranslatableCollection, Record<string, true>> = {
  * instead of treating a temporary fault as an unpublish.
  */
 export async function publishedSource(p: Payload, collection: TranslatableCollection, id: number): Promise<Record<string, unknown> | null> {
+  if (collection === "team-honor-records") return publicHonorSource(p, id);
   const doc = await p.findByID({ collection, id, overrideAccess: true, draft: false, depth: 0, disableErrors: true, select: selects[collection] as never });
   return doc && publishedForTranslation(collection, doc as Record<string, unknown>) ? (doc as Record<string, unknown>) : null;
 }
 
+/**
+ * Number of provider calls a successful run needs for `missing`, using exactly the same
+ * sequential batching as the worker (one batch per claim). Retries are not included.
+ */
+export function plannedCalls(missing: string[]): number {
+  let calls = 0, rest = missing;
+  while (rest.length) {
+    const taken = Object.keys(firstBatch(rest)).length || 1;
+    rest = rest.slice(taken);
+    calls++;
+  }
+  return calls;
+}
+// A batch holds ≤ batchItems segments and ≤ batchCharacters characters, except that a
+// single segment longer than batchCharacters (up to maxSegmentLength) forms its own batch.
 function firstBatch(texts: string[]) {
   const batch: Record<string, string> = {};
   let size = 0, count = 0;
@@ -304,29 +333,91 @@ export function kickTranslationQueue(minimumInterval = 30000) {
   }, 0);
 }
 
+export type BackfillCursor = { collection: TranslatableCollection; id: number };
+export type BackfillOptions = {
+  /** Default true: only reports; writes nothing and never calls the provider. */
+  dryRun?: boolean;
+  collections?: readonly TranslatableCollection[];
+  /** Documents examined in this run (1–1000). */
+  limit?: number;
+  /** Documents per database page (1–100). */
+  pageSize?: number;
+  /** Resume after this document (from the previous report's `next`). */
+  after?: BackfillCursor | null;
+};
+export type BackfillReport = {
+  dryRun: boolean; examined: number; notPublic: number; empty: number; current: number; alreadyQueued: number;
+  queued: number; wouldQueue: number; missingSegments: number; missingCharacters: number; reusedSegments: number;
+  estimatedCalls: number; next: BackfillCursor | null;
+  perCollection: Record<string, { examined: number; wouldQueue: number; missingCharacters: number }>;
+};
+
 /**
- * Explicit recovery for documents published before this feature (or while it was off).
- * Enqueues at most `limit` published documents that have no row yet. Run only by an
- * operator script; never from a request.
+ * Explicit, bounded recovery for documents published before translation existed (or while
+ * it was off). Walks each collection by ascending id with a resumable cursor, re-checks
+ * the publication state of every document (drafts, hidden posts, unapproved honors and the
+ * privacy page are skipped), reuses cached English per text segment, and reports the
+ * provider work it would cause. Dry-run (the default) writes nothing; a real run only
+ * writes queue markers (idempotent: pending rows and current translations are left as
+ * they are). Provider calls still happen later under the worker's hourly budget.
  */
-export async function backfillPublished(p: Payload, limit = 50): Promise<number> {
-  if (translationAvailability() !== "enabled") return 0;
-  let queued = 0;
-  for (const collection of translatableCollections) {
-    if (queued >= limit) break;
-    const where = collection === "community-posts"
-      ? { and: [{ status: { equals: "visible" } }, { category: { in: ["event", "notice"] } }] }
-      : { _status: { equals: "published" } };
-    const known = await db().query<{ doc_id: number }>("SELECT doc_id FROM content_translations WHERE collection = $1 AND locale = $2", [collection, translationLocale]);
-    const skip = known.rows.map((row) => row.doc_id);
-    const docs: { docs: { id: number | string }[] } = await p.find({ collection, overrideAccess: true, draft: false, depth: 0, limit: limit - queued, pagination: false,
-      where: skip.length ? { and: [where as never, { id: { not_in: skip } }] } : (where as never), select: { id: true } as never, sort: "-updatedAt" }) as never;
-    for (const doc of docs.docs) {
-      await markTranslation(p.db.drizzle as unknown as Executor, collection, Number(doc.id));
-      queued++;
+export async function backfill(p: Payload, options: BackfillOptions = {}): Promise<BackfillReport> {
+  const dryRun = options.dryRun !== false;
+  const limit = Math.min(1000, Math.max(1, Math.floor(options.limit ?? 50)));
+  const pageSize = Math.min(100, Math.max(1, Math.floor(options.pageSize ?? 50)));
+  const collections = translatableCollections.filter((collection) => !options.collections || options.collections.includes(collection));
+  if (!dryRun && translationAvailability() !== "enabled") throw new TranslationError("disabled");
+  const report: BackfillReport = { dryRun, examined: 0, notPublic: 0, empty: 0, current: 0, alreadyQueued: 0, queued: 0, wouldQueue: 0,
+    missingSegments: 0, missingCharacters: 0, reusedSegments: 0, estimatedCalls: 0, next: null, perCollection: {} };
+  let start = options.after ? collections.indexOf(options.after.collection) : 0;
+  if (start < 0) start = 0;
+  for (let index = start; index < collections.length; index++) {
+    const collection = collections[index];
+    const stats = (report.perCollection[collection] ??= { examined: 0, wouldQueue: 0, missingCharacters: 0 });
+    let afterId = options.after && index === start && options.after.collection === collection ? options.after.id : 0;
+    for (;;) {
+      if (report.examined >= limit) { report.next = { collection, id: afterId }; return report; }
+      const page = await p.find({ collection, overrideAccess: true, draft: false, depth: 0, pagination: false,
+        limit: Math.min(pageSize, limit - report.examined), sort: "id", where: { id: { greater_than: afterId } } as never,
+        select: selects[collection] as never }) as unknown as { docs: Record<string, unknown>[] };
+      if (!page.docs.length) break;
+      const ids = page.docs.map((doc) => Number(doc.id));
+      const rows = await db().query<{ doc_id: number; status: string; source_hash: string | null; translations: TranslationTable }>(
+        "SELECT doc_id, status, source_hash, translations FROM content_translations WHERE collection = $1 AND locale = $2 AND doc_id = ANY($3::int[])",
+        [collection, translationLocale, ids]);
+      const known = new Map(rows.rows.map((row) => [row.doc_id, row]));
+      for (const listed of page.docs) {
+        const id = Number(listed.id);
+        afterId = id;
+        report.examined++; stats.examined++;
+        // Honors are re-read through their public projection (same rule as the worker).
+        const doc = collection === "team-honor-records" ? await publicHonorSource(p, id) : listed;
+        if (!doc || !publishedForTranslation(collection, doc)) { report.notPublic++; continue; }
+        const texts = sourceTexts(collection, doc);
+        if (!texts.length) { report.empty++; continue; }
+        const row = known.get(id);
+        if (row && ["pending", "processing"].includes(row.status)) { report.alreadyQueued++; continue; }
+        const cached = row?.translations ?? {};
+        const missing = texts.filter((text) => !Object.hasOwn(cached, textHash(text)));
+        report.reusedSegments += texts.length - missing.length;
+        if (!missing.length && row?.source_hash === sourceHash(texts) && row.status === "done") { report.current++; continue; }
+        const characters = missing.reduce((sum, text) => sum + text.length, 0);
+        report.wouldQueue++; stats.wouldQueue++;
+        report.missingSegments += missing.length; report.missingCharacters += characters; stats.missingCharacters += characters;
+        // Same sequential batching as the worker; successful first attempts only (no retries).
+        report.estimatedCalls += plannedCalls(missing);
+        if (!dryRun) { await markTranslation(p.db.drizzle as unknown as Executor, collection, id); report.queued++; }
+      }
+      if (page.docs.length < Math.min(pageSize, limit - report.examined + page.docs.length)) break;
     }
   }
-  return queued;
+  return report;
+}
+
+/** Compatibility wrapper: queue up to `limit` documents (real run). */
+export async function backfillPublished(p: Payload, limit = 50): Promise<number> {
+  if (translationAvailability() !== "enabled") return 0;
+  return (await backfill(p, { dryRun: false, limit: Math.min(1000, limit) })).queued;
 }
 
 /** English overlays for documents the caller already read with its own access rules. */

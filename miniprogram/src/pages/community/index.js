@@ -114,6 +114,16 @@ Page(withVisualTheme({
     const icon = { coverSrc: header?.card?.cover?.src };
     images.attach(this, [icon], current);
     this.setData({ iconKey: icon.coverKey || '', iconIsDefault: isDefaultIcon(icon.coverSrc) });
+    // English: the community name and introduction come from the V2 read (cached English);
+    // the REST record above stays the source for ids, slugs and everything else.
+    if (i18n.locale() === 'en' && header?.card?.community?.title && this.data.game) {
+      this.setData({ 'game.title': header.card.community.title, 'game.summary': header.card.summary || this.data.game.summary });
+      wx.setNavigationBarTitle({ title: header.card.community.title });
+      try {
+        const detail = await v2.get('communities/' + encodeURIComponent(slug), {}, { required: true });
+        if (current() && detail && detail.body) this.setData({ nodes: render(detail.body).nodes });
+      } catch { /* The Chinese introduction stays. */ }
+    }
   },
   async retryContacts() {
     if (this._disposed || this._visible === false) return;
@@ -158,8 +168,12 @@ Page(withVisualTheme({
       const result = await cms.social(areas[area], { game, page, limit: area === 'showcase' ? 4 : 15, sort: '-createdAt' });
       if (!this.valid(scope) || ticket !== this._areaTicket) return;
       if (!result || !Array.isArray(result.docs)) throw new Error(i18n.t('社群内容暂不可用，请重试', 'Community content is unavailable. Please retry.'));
+      // English mode: titles (and showcase text) from the same-permission V2 community reads.
+      const overlay = require('../../lib/english-overlay');
+      const listed = area === 'showcase' ? await overlay.showcase(this.data.game.slug, result.docs) : await overlay.posts(this.data.game.slug, result.docs);
+      if (!this.valid(scope) || ticket !== this._areaTicket) return;
       const docs = [];
-      for (const doc of result.docs) {
+      for (const doc of listed) {
         const images = [];
         for (const image of doc.images || []) {
           images.push({ source: await files.localImage(image.source), caption: image.caption });

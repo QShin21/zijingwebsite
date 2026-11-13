@@ -148,7 +148,7 @@ function social(slug: string, title: string, kind: "local" | "showcase"): Collec
       delete: ({ req }) => canPublish(req.user as Identity) && (kind !== "showcase" || req.context.webShowcaseWrite === true),
     },
     hooks: { beforeChange: [participationGuard(kind), ...(kind === "local" ? [validateCommunitySchedule, validatePostImages, validatePublicationContent, validateSignupForm] : [])],
-      afterChange: [promotionSourceChanged, ...(kind === "local" ? [queueTranslationAfterChange("community-posts")] : [])], afterDelete: [promotionSourceDeleted, ...(kind === "local" ? [removeTranslationAfterDelete("community-posts")] : [])] },
+      afterChange: [promotionSourceChanged, queueTranslationAfterChange(kind === "local" ? "community-posts" : "community-showcase")], afterDelete: [promotionSourceDeleted, removeTranslationAfterDelete(kind === "local" ? "community-posts" : "community-showcase")] },
     fields,
   };
 }
