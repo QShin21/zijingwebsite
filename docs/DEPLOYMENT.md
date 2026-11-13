@@ -1,5 +1,11 @@
 # 部署、迁移与恢复
 
+## 2026-11-13 活动座位电子票据
+
+北京时间 22:02:14，应用 `e9afd91` 部署至 `home.thuzijing.top`，新增票据表迁移 `20261113_000600_activity_seat_tickets`。迁移前创建数据库和媒体备份；备份及应用回退脚本位于 `/srv/zijingwebsite/backups/seat-tickets-20261113-e9afd91`。网站在备份与增量迁移期间保持运行。
+
+候选、正式服务及公网健康检查通过，匿名票据读取返回 401 和 `private, no-store`；公网功能资源与构建摘要一致。小程序 0.5.24 已上传微信开发版。线上登录态业务流程和真机尚未实测，详见[发布记录](evidence/activity-seat-tickets-deployment-20261113.json)。
+
 ## 2026-11-13 抽签结果导出与风采视频
 
 北京时间 20:36:19，应用 `e20fcd8` 已部署至 `home.thuzijing.top`，构建 `9zXL0aVOFbMeRveKT8ecl`。本次未新增数据库迁移，依赖锁和迁移目录与上一版本一致；上一应用及回退脚本保留在 `/srv/zijingwebsite/backups/lottery-showcase-20261113-e20fcd8/rollback.sh`。

@@ -1,0 +1,34 @@
+{
+  "deployedAt": "2026-11-13T22:02:14+08:00",
+  "revision": "e9afd91f517dd814a8ad790cbaa17a87cfaa6004",
+  "previousRevision": "e20fcd80c3f127777c37bb101021def5c9e7aa55",
+  "buildId": "uA5f6RJM-RfhEJlLDzxco",
+  "release": "/srv/zijingwebsite/releases/seat-tickets-20261113-e9afd91",
+  "migration": "20261113_000600_activity_seat_tickets",
+  "backup": {
+    "storage": "server-local",
+    "snapshot": "/srv/zijingwebsite/backups/seat-tickets-20261113-e9afd91/database/zijing-2026-11-13T14-01-32.201Z",
+    "rollback": "/srv/zijingwebsite/backups/seat-tickets-20261113-e9afd91/rollback.sh",
+    "restoreVerified": false
+  },
+  "verification": {
+    "syntheticDatabase": "Migration compatibility and 32 activity seating cases passed, including ticket upload validation, ownership, replacement, late upload, reassignment, revocation and exact image bytes.",
+    "miniapp": "19 related mini-program tests passed across ticket interactions, proof uploads, editing and seating layout; upload and save interactions used simulated WeChat APIs.",
+    "static": "TypeScript, changed-file lint, mini-program package check and production build passed.",
+    "migrationResult": "New table created and migration recorded; after migration 161 seat requests, 264 seat claims and 210 proofs were present. The production site remained online during the backup and additive migration.",
+    "candidateAndProduction": "Candidate and production readiness, homepage, login, privacy, ticket asset SHA-256 and anonymous ticket access boundary passed.",
+    "public": "Health, home, login and privacy returned 200; ticket asset SHA-256 matched the build; anonymous ticket access returned 401 with private, no-store; FreeKill homepage returned 200.",
+    "startup": "Initial candidate and production readiness requests saw connection-refused during startup; retries and independent checks succeeded.",
+    "authenticatedProductionFlows": "not tested",
+    "realDevice": "not tested"
+  },
+  "miniProgram": {
+    "version": "0.5.24",
+    "uploadedAt": "2026-11-13T21:54:45+08:00",
+    "platformStatus": "developmentVersionUploaded",
+    "officialTool": "WeChat Developer Tools CLI",
+    "sizeBytes": 864802,
+    "reviewSubmitted": false,
+    "publicReleaseExecuted": false
+  }
+}
