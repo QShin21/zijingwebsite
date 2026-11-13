@@ -1,0 +1,36 @@
+{
+  "web": {
+    "revision": "a134037cad1971366f4c549b220d304c2dbb75fa",
+    "deployedAt": "2026-11-13T16:45:38+08:00",
+    "buildId": "wy0CDWl9_gLY6nxAztjXZ",
+    "release": "/srv/zijingwebsite/releases/community-card-20261113-a134037",
+    "previousRelease": "/srv/zijingwebsite/releases/ui-detail-20261113-597ab46",
+    "rollback": "/srv/zijingwebsite/backups/community-card-20261113-a134037/rollback.sh",
+    "migration": "none; migration source and dependency lock match previous release",
+    "candidateAndProductionReadiness": "passed",
+    "publicHealth": "ready",
+    "publicCommunityCssMatchesBuild": true,
+    "publicDefaultIconHttp": 200,
+    "startupConnectionRetries": "initial connection attempts failed while services started; subsequent checks passed"
+  },
+  "miniapp": {
+    "revision": "a134037cad1971366f4c549b220d304c2dbb75fa",
+    "version": "0.5.22",
+    "uploadedAt": "2026-11-13T16:46:03+08:00",
+    "packageBytes": 857619,
+    "developmentUpload": "success",
+    "reviewSubmitted": false,
+    "published": false,
+    "realDevice": "not tested"
+  },
+  "verification": {
+    "targetedTestsPassed": 68,
+    "miniappStaticCheck": "passed: 29 pages",
+    "modifiedJsLint": "passed",
+    "cleanSnapshotTypecheck": "passed",
+    "productionBuild": "passed",
+    "visualChecks": "five existing default game icons and synthetic custom images; four web themes and three mini-program themes; desktop and narrow layouts",
+    "miniappCompilers": "community page WXML and WXSS compiled using WeChat developer tool compilers",
+    "authenticatedProductionFlows": "not tested"
+  }
+}
