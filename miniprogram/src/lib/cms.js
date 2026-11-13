@@ -131,7 +131,7 @@ function publishedDetail(collection, id, slug, category) {
   });
 }
 function fixed(key) {
-  return http.request('/api/v2/pages/' + encodeURIComponent(key), { raw: key === 'privacy' });
+  return http.request('/api/v2/pages/' + encodeURIComponent(key), key === 'privacy' ? { auth: false, raw: true } : {});
 }
 async function notices(options) {
   const read = (page, limit) => v2.get('feed', { kind: 'announcements', page, limit });

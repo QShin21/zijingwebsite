@@ -27,9 +27,10 @@ describe('小程序账号与网络边界', () => {
     expect(session.user()).toBeNull(); expect(saved).toBeNull();
     expect(() => session.save({ token: 'fixture-token', exp: 9999999999, user: { id: 5, accountStatus: 'suspended' } })).toThrow();
   });
-  it('匿名内容请求不附带已登录凭据，私有读取先检查登录', async () => {
-    login(); request.mockImplementation(options => options.success({ statusCode: 200, data: { docs: [], page: 1 } }));
-    await cms.list('events');
+  it('隐私说明使用匿名请求，受限栏目读取先检查登录', async () => {
+    login(); request.mockImplementation(options => options.success({ statusCode: 200, data: { key: 'privacy', updatedAt: null } }));
+    await cms.list('pages', { key: 'privacy', limit: 1 });
+    expect(request.mock.calls[0][0].url).toBe('https://home.thuzijing.top/api/v2/pages/privacy');
     expect(request.mock.calls[0][0].header).not.toHaveProperty('Authorization');
     session.clear(); await expect(cms.list('games')).rejects.toMatchObject({ status: 401 });
     expect(request).toHaveBeenCalledTimes(1);

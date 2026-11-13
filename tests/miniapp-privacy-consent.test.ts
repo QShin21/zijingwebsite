@@ -45,7 +45,11 @@ function harness(options: { docs?: Doc[]; needAuthorization?: boolean; autoCMS?:
     });
   }
   function cmsReply(index = requests.length - 1, values = docs, statusCode = 200) {
-    requests[index].success({ statusCode, data: statusCode === 200 ? { docs: values, totalDocs: values.length, hasNextPage: false } : { error: '合成读取失败' } });
+    const published = values.find(doc => doc._status === 'published');
+    const data = statusCode === 200
+      ? { ...published, key: 'privacy', updatedAt: published ? '2026-11-12T00:00:00.000Z' : null }
+      : { error: '合成读取失败' };
+    requests[index].success({ statusCode, data });
   }
   const wx = {
     getStorageSync: () => saved, setStorageSync: (_key: string, value: unknown) => { saved = value; }, removeStorageSync: () => { saved = null; },
@@ -125,8 +129,7 @@ describe('native published privacy content + official consent lifecycle (synthet
     expect(h.dialog.data.loading).toBe(true); expect(h.authorizations).toHaveLength(0); h.agree(); expect(h.resolutions).toHaveLength(0);
     await flush();
     expect(h.requests).toHaveLength(1); const url = new URL(h.requests[0].url);
-    expect(url.pathname).toBe('/api/pages'); expect(url.searchParams.get('where[key][equals]')).toBe('privacy');
-    expect(url.searchParams.get('where[_status][equals]')).toBe('published'); expect(url.searchParams.get('draft')).toBe('false');
+    expect(url.pathname).toBe('/api/v2/pages/privacy');
     expect(h.requests[0].header.Authorization).toBeUndefined();
     expect(h.dialog.data).toMatchObject({ shown: true, docReady: true, sdkReady: true, contractOpened: false, contractName: '合成测试微信平台隐私指引' });
     expect(h.dialog.data.nodes.length).toBeGreaterThan(0);
