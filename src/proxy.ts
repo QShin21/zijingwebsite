@@ -1,6 +1,6 @@
 import { proxyMember } from "@/lib/proxy-member";
 import { canParticipate, canUseCampus } from "@/lib/rules";
-import { isCampusAPI, isCampusPage, isGuestPage, isRemovedCommunityChatPath, isRemovedCommunityInteractionPath } from "@/lib/page-access";
+import { isCampusAPI, isCampusPage, isGuestPage, isLegacyPublicRead, isRemovedCommunityChatPath, isRemovedCommunityInteractionPath } from "@/lib/page-access";
 import { NextResponse, type NextRequest } from "next/server";
 export async function proxy(request: NextRequest) {
   let path: string;
@@ -9,7 +9,9 @@ export async function proxy(request: NextRequest) {
   if (isRemovedCommunityChatPath(path) || isRemovedCommunityInteractionPath(path)) return NextResponse.json({ error: "此社群互动功能已移除" }, {
     status: 404, headers: { "Cache-Control": "private, no-store" },
   });
-  const privateAPI = isCampusAPI(path);
+  const anonymous = !request.headers.has("cookie") && !request.headers.has("authorization");
+  const legacyPublic = anonymous && isLegacyPublicRead(path, request.method, request.nextUrl.searchParams.get("where[key][equals]"));
+  const privateAPI = isCampusAPI(path) && !legacyPublic;
   const campusPage = isCampusPage(path);
   if (privateAPI || campusPage || (!isGuestPage(path) && !path.startsWith("/admin") && !path.startsWith("/preview") && !path.startsWith("/api/") && path !== "/favicon.ico")) {
     let user;

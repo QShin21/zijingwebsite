@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isCampusAPI, isCampusPage, isGuestPage, isRemovedCommunityChatPath, isRemovedCommunityInteractionPath } from "../src/lib/page-access";
+import { isCampusAPI, isCampusPage, isGuestPage, isLegacyPublicRead, isRemovedCommunityChatPath, isRemovedCommunityInteractionPath } from "../src/lib/page-access";
 
 describe("已移除的社群聊天访问", () => {
   it("旧页面、推送、图片、表情及消息集合入口全部关闭", () => {
@@ -27,6 +27,11 @@ describe("已移除的社群聊天访问", () => {
     expect(isCampusPage("/join/staff")).toBe(true);
     expect(isCampusAPI("/api/events/7")).toBe(true);
     expect(isCampusAPI("/api/v2/events/club/test")).toBe(false);
+    expect(isLegacyPublicRead("/api/pages", "GET", "privacy")).toBe(true);
+    expect(isLegacyPublicRead("/api/pages", "GET", "join-teams")).toBe(false);
+    expect(isLegacyPublicRead("/api/pages", "POST", "privacy")).toBe(false);
+    expect(isLegacyPublicRead("/api/events", "GET", null)).toBe(true);
+    expect(isLegacyPublicRead("/api/events/7", "GET", null)).toBe(false);
   });
 });
 

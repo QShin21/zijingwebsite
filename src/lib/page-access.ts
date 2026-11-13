@@ -11,6 +11,13 @@ export function isCampusPage(path: string) {
     (/^\/community(\/|$)/.test(path) && !publicCommunityDetail.test(path));
 }
 
+export function isLegacyPublicRead(path: string, method: string, key: string | null) {
+  if (method !== "GET") return false;
+  const route = path.replace(/\/$/, "");
+  return route === "/api/events" || route === "/api/announcements" ||
+    route === "/api/pages" && key !== null && ["privacy", "about", "contact", "join"].includes(key);
+}
+
 export function isCampusAPI(path: string) {
   return /^\/api\/(events|announcements|games|teams|seasons|honors|news|albums|recruitment|pages|community-[^/]+|team-[^/]+|staff|staff-batches|staff-applications|pending-uploads|redirects|globals|content-promotions|showcase-videos|private-team-honor-videos|graphql)(\/|$)/.test(path) ||
     /^\/api\/media(?:$|\/(?!file\/))/i.test(path);
