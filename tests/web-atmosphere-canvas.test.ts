@@ -10,10 +10,11 @@ vi.mock("react", () => ({
 }));
 
 function setup(options: { reduce?: boolean; palette?: string } = {}) {
-  const calls = { fillRect: 0, clearRect: 0 };
+  const calls = { fillRect: 0, clearRect: 0, stroke: 0 };
   const context = {
     setTransform() {}, clearRect() { calls.clearRect++; }, fillRect() { calls.fillRect++; },
     createRadialGradient: () => ({ addColorStop() {} }),
+    setLineDash() {}, beginPath() {}, arc() {}, stroke() { calls.stroke++; },
     imageSmoothingEnabled: true, globalAlpha: 1, globalCompositeOperation: "source-over", fillStyle: "",
   };
   canvas.current = { getContext: () => context, getBoundingClientRect: () => ({ left: 0, top: 0, width: 800, height: 400 }), width: 0, height: 0 };
@@ -62,10 +63,12 @@ describe("AtmosphereCanvas effect", () => {
     env.emit("pointerdown", { clientX: 300, clientY: 200 });
     env.calls.fillRect = 0; env.tick(48);
     const withSparks = env.calls.fillRect;
-    // Sparks live 0.9 s: after two seconds of frames they are gone and the draw count settles.
+    expect(env.calls.stroke).toBeGreaterThan(0);
+    // Both the click ring and its sparks expire after the animation has played.
     for (let time = 64; time < 2200; time += 40) env.tick(time);
-    env.calls.fillRect = 0; env.tick(2240);
+    env.calls.fillRect = 0; env.calls.stroke = 0; env.tick(2240);
     expect(withSparks).toBeGreaterThan(env.calls.fillRect);
+    expect(env.calls.stroke).toBe(0);
     expect(ambient).toBeGreaterThan(0);
     env.documentStub.hidden = true; env.emit("visibilitychange");
     expect(env.frames.size).toBe(0);
@@ -86,5 +89,21 @@ describe("AtmosphereCanvas effect", () => {
       expect(env.calls.fillRect).toBe(0);
       (cleanup as () => void)();
     }
+  });
+  it("keeps repeated clicks bounded and discards their effects when the scene leaves view", async () => {
+    const env = setup();
+    const cleanup = await mount();
+    env.observers.intersect!([{ isIntersecting: true }]);
+    env.tick(16);
+    for (let index = 0; index < 100; index++) env.emit("pointerdown", { pointerType: "mouse", clientX: 300, clientY: 200 });
+    env.calls.fillRect = 0; env.calls.stroke = 0; env.tick(32);
+    expect(env.calls.stroke).toBeGreaterThan(0);
+    expect(env.calls.stroke).toBeLessThanOrEqual(4);
+    expect(env.calls.fillRect).toBeLessThanOrEqual(600);
+    env.observers.intersect!([{ isIntersecting: false }]);
+    env.observers.intersect!([{ isIntersecting: true }]);
+    env.calls.stroke = 0; env.tick(48);
+    expect(env.calls.stroke).toBe(0);
+    (cleanup as () => void)();
   });
 });

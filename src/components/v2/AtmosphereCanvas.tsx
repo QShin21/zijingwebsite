@@ -10,11 +10,12 @@ import { particleFate, type Particle } from "./atmosphere-particles";
  * no requests. Off for 简约 and reduced motion; paused while off screen or in a background tab.
  */
 type Palette = "classic" | "summer" | "winter";
+type Ripple = { x: number; y: number; age: number };
 
-const looks: Record<Palette, { colors: string[]; light: string; count: number }> = {
-  classic: { colors: ["#ffd98a", "#f6c453", "#ff8fc8", "#fff3cf"], light: "255,214,130", count: 64 },
-  summer: { colors: ["#e9ff9a", "#8fe8c9", "#fff3a0", "#c9fff0"], light: "150,240,205", count: 54 },
-  winter: { colors: ["#ffffff", "#f1f6ff", "#e3ecf8", "#ffffff"], light: "255,236,190", count: 90 },
+const looks: Record<Palette, { colors: string[]; light: string; ring: string; count: number }> = {
+  classic: { colors: ["#ffe4a1", "#ffd16a", "#ff9fd2", "#fff7db"], light: "255,214,130", ring: "#ffe4a1", count: 96 },
+  summer: { colors: ["#edffad", "#a5f5d6", "#fff3a0", "#d4fff2"], light: "150,240,205", ring: "#d4fff2", count: 82 },
+  winter: { colors: ["#ffffff", "#f4f9ff", "#d9edff", "#ffffff"], light: "255,236,190", ring: "#7fa6c8", count: 125 },
 };
 
 export function AtmosphereCanvas({ className }: { className?: string }) {
@@ -28,21 +29,24 @@ export function AtmosphereCanvas({ className }: { className?: string }) {
     const fine = matchMedia("(pointer: fine)").matches;
     let width = 0, height = 0, frame = 0, last = 0, visible = false, palette: Palette | null = null;
     let particles: Particle[] = [];
+    const ripples: Ripple[] = [];
+    const maxParticles = 260;
     const pointer = { x: -9999, y: -9999, px: 0, wind: 0, strength: 0 };
 
     const spawn = (anywhere: boolean, burst?: { x: number; y: number }): Particle => {
       const z = 0.35 + Math.random() * 0.65;
       const base: Particle = { x: Math.random() * width, y: Math.random() * height, z, vx: 0, vy: 0, phase: Math.random() * 6.28, kind: Math.random() < 0.18 ? 1 : 0, life: 0, burst: false };
       if (palette === "winter") { base.vy = 18 + z * 46; base.vx = -6 + Math.random() * 12; if (!anywhere) base.y = -6; }
-      else if (palette === "classic") { base.vy = base.kind ? 14 + z * 22 : -(4 + z * 10); base.vx = base.kind ? -(10 + z * 16) : (Math.random() - 0.5) * 6; if (!anywhere) base.y = base.kind ? -6 : height + 6; }
+      else if (palette === "classic") { base.vy = base.kind ? 18 + z * 26 : -(8 + z * 14); base.vx = base.kind ? -(12 + z * 18) : (Math.random() - 0.5) * 8; if (!anywhere) base.y = base.kind ? -6 : height + 6; }
       else { base.vx = (Math.random() - 0.5) * 16; base.vy = (Math.random() - 0.5) * 10; base.y = height * (0.35 + Math.random() * 0.6); }
-      if (burst) { const angle = Math.random() * 6.28, speed = 40 + Math.random() * 90; base.x = burst.x; base.y = burst.y; base.vx = Math.cos(angle) * speed; base.vy = Math.sin(angle) * speed - 30; base.life = 0.9; base.kind = 2; base.burst = true; }
+      if (burst) { const angle = Math.random() * 6.28, speed = 55 + Math.random() * 105; base.x = burst.x; base.y = burst.y; base.vx = Math.cos(angle) * speed; base.vy = Math.sin(angle) * speed - 30; base.life = 1.35; base.kind = 2; base.burst = true; }
       return base;
     };
     const seed = () => {
       const value = root.dataset.zPalette;
       palette = value === "classic" || value === "summer" || value === "winter" ? value : null;
       particles = palette ? Array.from({ length: Math.round(looks[palette].count * (fine ? 1 : 0.55) * Math.min(1.4, Math.max(0.5, width / 1100))) }, () => spawn(true)) : [];
+      ripples.length = 0;
     };
     const resize = () => {
       const box = canvas.getBoundingClientRect();
@@ -64,13 +68,28 @@ export function AtmosphereCanvas({ className }: { className?: string }) {
       const look = looks[palette];
       pointer.wind *= 0.94; pointer.strength *= 0.985;
       if (pointer.strength > 0.02) {
-        const glow = context.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, 190);
-        glow.addColorStop(0, `rgba(${look.light},${0.2 * pointer.strength})`);
+        const glow = context.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, 250);
+        glow.addColorStop(0, `rgba(${look.light},${0.34 * pointer.strength})`);
+        glow.addColorStop(0.45, `rgba(${look.light},${0.12 * pointer.strength})`);
         glow.addColorStop(1, `rgba(${look.light},0)`);
         context.fillStyle = glow;
-        context.fillRect(pointer.x - 190, pointer.y - 190, 380, 380);
+        context.fillRect(pointer.x - 250, pointer.y - 250, 500, 500);
       }
       context.globalCompositeOperation = palette === "winter" ? "source-over" : "lighter";
+      for (let index = ripples.length - 1; index >= 0; index--) {
+        const ripple = ripples[index];
+        ripple.age += dt;
+        if (ripple.age >= 1.1) { ripples.splice(index, 1); continue; }
+        const progress = ripple.age / 1.1;
+        context.globalAlpha = 0.85 * (1 - progress);
+        context.strokeStyle = look.ring;
+        context.lineWidth = 3;
+        context.setLineDash([8, 6]);
+        context.beginPath();
+        context.arc(ripple.x, ripple.y, 12 + progress * 76, 0, Math.PI * 2);
+        context.stroke();
+      }
+      context.setLineDash([]);
       for (let index = particles.length - 1; index >= 0; index--) {
         const p = particles[index];
         const dx = p.x - pointer.x, dy = p.y - pointer.y, distance = dx * dx + dy * dy;
@@ -82,9 +101,9 @@ export function AtmosphereCanvas({ className }: { className?: string }) {
         const fate = particleFate(p, width, height);
         if (fate === "remove") { particles.splice(index, 1); continue; }
         if (fate === "respawn") { particles[index] = spawn(false); continue; }
-        const size = Math.max(2, Math.round((p.kind === 1 ? 5 : 3) * p.z));
-        const twinkle = palette === "winter" ? 0.55 + 0.45 * p.z : 0.35 + 0.65 * Math.abs(Math.sin(time / 600 + p.phase));
-        context.globalAlpha = (p.burst ? Math.min(1, p.life * 1.6) : twinkle) * (0.5 + 0.5 * p.z);
+        const size = p.burst ? Math.max(4, Math.round(9 * p.z)) : Math.max(3, Math.round((p.kind === 1 ? 8 : 6) * p.z));
+        const twinkle = palette === "winter" ? 0.7 + 0.3 * p.z : 0.55 + 0.45 * Math.abs(Math.sin(time / 600 + p.phase));
+        context.globalAlpha = (p.burst ? Math.min(1, p.life * 1.8) : twinkle) * (0.7 + 0.3 * p.z);
         context.fillStyle = look.colors[(index + p.kind) % look.colors.length];
         const x = Math.round(p.x), y = Math.round(p.y);
         context.fillRect(x, y, size, size);
@@ -96,7 +115,7 @@ export function AtmosphereCanvas({ className }: { className?: string }) {
     const sync = () => {
       const run = visible && !document.hidden && !reduce.matches && root.dataset.zPalette !== "simple";
       if (run && !frame) { last = 0; frame = requestAnimationFrame(draw); }
-      if (!run && frame) { cancelAnimationFrame(frame); frame = 0; context.clearRect(0, 0, width, height); }
+      if (!run && frame) { cancelAnimationFrame(frame); frame = 0; context.clearRect(0, 0, width, height); particles = particles.filter((p) => !p.burst); ripples.length = 0; pointer.strength = 0; }
     };
     const move = (event: PointerEvent) => {
       if (!frame || event.pointerType === "touch") return;
@@ -107,11 +126,15 @@ export function AtmosphereCanvas({ className }: { className?: string }) {
       pointer.px = x; pointer.x = x; pointer.y = y; pointer.strength = 1;
     };
     const burst = (event: PointerEvent) => {
-      if (!frame || particles.length > 220) return;
+      if (!frame || !palette) return;
       const box = canvas.getBoundingClientRect();
       const x = event.clientX - box.left, y = event.clientY - box.top;
       if (x < 0 || y < 0 || x > box.width || y > box.height) return;
-      for (let count = 0; count < 12; count++) particles.push(spawn(true, { x, y }));
+      if (event.pointerType !== "touch") { pointer.x = x; pointer.y = y; pointer.strength = 1; }
+      const count = Math.min(fine ? 24 : 16, Math.max(0, maxParticles - particles.length));
+      for (let index = 0; index < count; index++) particles.push(spawn(true, { x, y }));
+      if (ripples.length >= 4) ripples.shift();
+      ripples.push({ x, y, age: 0 });
     };
     const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); }, { threshold: 0.05 });
     const paletteWatch = new MutationObserver(() => { seed(); sync(); });

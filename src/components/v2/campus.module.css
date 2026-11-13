@@ -638,15 +638,15 @@
   z-index: 1;
   inset: 0;
   background:
-    radial-gradient(38% 46% at 70% 62%, color-mix(in srgb, var(--z-accent) 26%, transparent), transparent 70%),
-    radial-gradient(60% 30% at 70% 100%, color-mix(in srgb, var(--z-action) 22%, transparent), transparent 75%);
+    radial-gradient(42% 50% at 70% 62%, color-mix(in srgb, var(--z-accent) 38%, transparent), transparent 70%),
+    radial-gradient(64% 34% at 70% 100%, color-mix(in srgb, var(--z-action) 32%, transparent), transparent 75%);
   mix-blend-mode: screen;
-  opacity: 0.55;
+  opacity: 0.82;
   pointer-events: none;
 }
 :global(:root[data-z-theme="light"]) .bloom {
   mix-blend-mode: soft-light;
-  opacity: 0.8;
+  opacity: 1;
 }
 :global(:root[data-z-palette="simple"]) .bloom,
 :global(:root[data-z-palette="simple"]) .atmosphere {
@@ -654,7 +654,7 @@
 }
 @media (prefers-reduced-motion: no-preference) {
   .bloom {
-    animation: breathe 7s ease-in-out infinite alternate;
+    animation: breathe 5s ease-in-out infinite alternate;
   }
   /* Scroll depth: as the stage leaves the viewport the landmark sinks slower than the copy. */
   @supports (animation-timeline: view()) {
@@ -665,7 +665,7 @@
       animation-range: exit 0% exit 100%;
     }
     .bloom {
-      animation: breathe 7s ease-in-out infinite alternate, sink linear both;
+      animation: breathe 5s ease-in-out infinite alternate, sink linear both;
       animation-timeline: auto, view();
       animation-range: normal, exit 0% exit 100%;
     }
@@ -678,10 +678,10 @@
 }
 @keyframes breathe {
   from {
-    opacity: 0.35;
+    opacity: 0.6;
   }
   to {
-    opacity: 0.75;
+    opacity: 0.98;
   }
 }
 @keyframes sink {
