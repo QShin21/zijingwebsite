@@ -1,0 +1,45 @@
+{
+  "web": {
+    "initialRevision": "e63c2bc5513e2fb3c48fe5c143d7d1ca7c6209aa",
+    "initialDeployment": "2026-11-13T13:58:07+08:00",
+    "revision": "c154b069de938716e60f1d9e394f50bb85838abe",
+    "deployedAt": "2026-11-13T15:09:51+08:00",
+    "buildId": "a753itoHEfrdkBj5aZEij",
+    "release": "/srv/zijingwebsite/releases/campus-compat-20261113-c154b06",
+    "initialBackup": "/srv/zijingwebsite/backups/campus-access-20261113-e63c2bc",
+    "migration": "20261113_000400_content_audience",
+    "unchangedMigrationCounts": 9,
+    "backupHash": "verified",
+    "publicHealth": "ready",
+    "homeAndRegistrationHttp": 200,
+    "homepageLandmarkImagesHttp": [
+      200,
+      200,
+      200
+    ],
+    "legacyAndCurrentPrivacyHttp": [
+      200,
+      200
+    ],
+    "anonymousTeamAccessHttp": 401,
+    "authenticatedProductionRegistration": "not tested"
+  },
+  "miniapp": {
+    "revision": "73570c11e39fdd851e3754f07d13d586ba2eb71c",
+    "version": "0.5.20",
+    "uploadedAt": "2026-11-13T15:11:23+08:00",
+    "packageBytes": 848221,
+    "developmentUpload": "success",
+    "reviewSubmitted": false,
+    "published": false,
+    "simulator": "verified four homepage themes, guest tabs and public activity detail using 0.5.19",
+    "realDevice": "not tested"
+  },
+  "verification": {
+    "localWebTargetedTests": 64,
+    "localNativeAndPageAccessTargetedTests": 122,
+    "isolatedBrowserAndHttp": "three OTP registration and login flows; four viewer levels across activity and notice list, details and signup; CMS visibility changes; raw media",
+    "legacyCompatibility": "isolated public event/notice/privacy reads and negative draft, private field and mutation checks; live privacy read and restricted routes",
+    "broaderSuite": "some historical tests still reference removed manual joins or the previous access contracts"
+  }
+}
