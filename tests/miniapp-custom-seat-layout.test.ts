@@ -49,6 +49,9 @@ it("小程序编辑方格、保留受保护座位并提交版本", async () => {
   expect(calls.at(-1)?.data).toMatchObject({ revision: 4, layout: { rowCount: 2, columnCount: 4, gaps: ["1-4"] } });
   const rows = page.layout({ rows: [{ row: 1, count: 4, offset: 0 }], missingSeats: ["1-4"], occupancy: { "1-4": "confirmed" }, blockedSeats: ["1-4"] }, [], 1, false);
   expect(rows[0].seats[3]).toMatchObject({ id: "1-4", missing: true });
+  const largeRows = Array.from({ length: 100 }, (_, index) => ({ row: index + 1, count: 100, offset: 0 }));
+  const large = page.layout({ rows: largeRows, missingSeats: [], occupancy: {}, blockedSeats: [] }, [], 1, false);
+  expect(Buffer.byteLength(JSON.stringify({ rows: large }))).toBeLessThan(900000);
 });
 
 it("小程序报名页面显示本人选座和票据，并丢弃换账号后的异步结果", async () => {

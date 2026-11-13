@@ -43,7 +43,8 @@ function seatCell(id, number, taken, picked, accent, blocked, manage, own) {
   const style = blocked ? 'blocked' : own && picked ? 'selected' : taken || (picked ? 'selected' : 'available');
   const state = blocked ? labels.blocked : taken ? labels[taken] : picked ? '已选' : '可选';
   const inspect = Boolean(manage && taken && !blocked && !own);
-  return { id, number, style, picked, locked: Boolean(taken && !(manage && blocked) && !own && !inspect), label: seatLabel(id) + (accent ? ' · 中心区' : '') + ' · ' + state + (picked && (blocked || own) ? ' · 已选' : '') + (inspect ? ' · 查看申请' : '') };
+  const locked = Boolean(taken && !(manage && blocked) && !own && !inspect);
+  return { id, number, style, ...(picked ? { picked: true } : {}), ...(locked ? { locked: true } : {}), label: seatLabel(id) + (accent ? ' · 中心区' : '') + ' · ' + state + (picked && (blocked || own) ? ' · 已选' : '') + (inspect ? ' · 查看申请' : '') };
 }
 function counts(state) {
   const missing = new Set(state.missingSeats || []);
