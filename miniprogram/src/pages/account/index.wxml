@@ -48,9 +48,12 @@
     </view>
 
     <view class="zj-section">
-      <template is="zj-section" data="{{title: '我的赛程', more: '全部日程', page: 'events'}}" />
-      <view wx:if="{{me.upcoming.length}}"><block wx:for="{{me.upcoming}}" wx:key="key"><template is="zj-match" data="{{item, img}}" /></block></view>
+      <template is="zj-section" data="{{title: '我的赛程', more: '全部报名', page: 'records', params: signupRecordParams}}" />
+      <text wx:if="{{me.counts.archivedUpcoming}}" class="muted account-archive-hint">已归档 {{me.counts.archivedUpcoming}} 项赛程，可在“全部报名”中查看并撤销归档。</text>
+      <view wx:if="{{me.upcoming.length}}"><block wx:for="{{me.upcoming}}" wx:key="key"><template is="zj-match" data="{{item, img, archive: true}}" /></block></view>
+      <template wx:elif="{{me.counts.archivedUpcoming}}" is="zj-empty" data="{{title: '近期赛程均已归档', body: '报名仍然有效，撤销归档后会重新显示在这里。', icon: '🎫', action: '查看全部报名', page: 'records', params: signupRecordParams}}" />
       <template wx:else is="zj-empty" data="{{title: '还没有报名记录', body: '报名开放的活动会标注「报名开放」。', icon: '🎫', action: '查看活动', page: 'events'}}" />
+      <button class="plain account-events-link" bindtap="openPage" data-page="events">浏览全部日程 ›</button>
     </view>
 
     <view class="zj-section">
@@ -66,8 +69,10 @@
     </view>
 
     <view wx:if="{{campus}}" class="zj-section">
-      <template is="zj-section" data="{{title: '申请进度', count: me.applications.length}}" />
-      <view wx:if="{{me.applications.length}}" class="zj-list"><block wx:for="{{me.applications}}" wx:key="key"><template is="zj-application" data="{{item}}" /></block></view>
+      <template is="zj-section" data="{{title: '申请进度', count: me.applications.length, more: '全部申请', page: 'records', params: applicationRecordParams}}" />
+      <text wx:if="{{me.counts.archivedApplications}}" class="muted account-archive-hint">已归档 {{me.counts.archivedApplications}} 项申请，可在“全部申请”中查看并撤销归档。</text>
+      <view wx:if="{{me.applications.length}}" class="zj-list"><block wx:for="{{me.applications}}" wx:key="key"><template is="zj-application" data="{{item, archive: true}}" /></block></view>
+      <template wx:elif="{{me.counts.archivedApplications}}" is="zj-empty" data="{{title: '申请均已归档', body: '归档不会撤回申请，撤销归档后会重新显示在这里。', icon: '📮', action: '查看全部申请', page: 'records', params: applicationRecordParams}}" />
       <template wx:else is="zj-empty" data="{{title: '还没有申请记录', body: '社群管理员、骨干招新、建队与入队申请都会记录在这里。', icon: '📮'}}" />
       <view class="account-links">
         <button class="shortcut" bindtap="openPage" data-page="applications"><view class="shortcut-main"><text class="shortcut-title">社群管理员申请</text><text class="muted">处理结果与名片授权</text></view><text class="shortcut-sign">›</text></button>

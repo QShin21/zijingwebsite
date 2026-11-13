@@ -1444,3 +1444,149 @@
   background-image: none;
   animation: none;
 }
+
+/* ===== 个人归档 (2026-11-13): details arrow and archive control stacked on the right. ===== */
+/* The archive control is a personal display preference; it sits above the stretched link. */
+.matchSide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.archiveControl {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.archiveControl[data-variant="text"] {
+  align-items: flex-end;
+}
+.archiveButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 2px solid var(--z-px-outline, var(--z-line));
+  border-radius: 0;
+  background: var(--z-tint);
+  color: var(--z-action);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 90ms steps(2, end),
+    background-color 90ms steps(2, end),
+    color 90ms steps(2, end);
+}
+.archiveButton[data-variant="icon"] {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+}
+.archiveButton[data-variant="text"] {
+  min-height: 34px;
+  padding: 4px 12px;
+  white-space: nowrap;
+}
+/* Same motion as the card's details arrow: action fill plus a 4px nudge. */
+.archiveButton:hover:not(:disabled),
+.archiveButton:focus-visible {
+  background: var(--z-action);
+  color: var(--z-action-ink);
+  transform: translateX(4px);
+}
+.archiveButton:focus-visible {
+  outline: 3px solid var(--z-focus);
+  outline-offset: 2px;
+}
+.archiveButton:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+.archiveError {
+  max-width: 220px;
+  color: var(--z-danger);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+.matchSide .archiveError {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: max-content;
+  margin-top: 4px;
+  padding: 4px 8px;
+  border: 2px solid var(--z-px-outline, var(--z-line));
+  background: var(--z-surface);
+}
+.archivedTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: 2px dashed var(--z-line);
+  color: var(--z-muted);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.applicationPills {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.applicationFoot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.applicationFoot .next {
+  flex: 1;
+  min-width: 0;
+}
+.receiptSide {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.application[data-archived],
+.receipt[data-archived] {
+  opacity: 0.86;
+}
+@media (max-width: 420px) {
+  /* Narrow rows hide the arrow; the archive control moves under the details. */
+  .match_row .matchSide {
+    grid-column: 2;
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+  .applicationFoot {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .applicationFoot .archiveControl {
+    align-items: flex-start;
+  }
+}
+@media (max-width: 480px) {
+  .receiptSide {
+    justify-content: flex-start;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .archiveButton,
+  .archiveButton:hover:not(:disabled),
+  .archiveButton:focus-visible {
+    transition: none;
+    transform: none;
+  }
+}

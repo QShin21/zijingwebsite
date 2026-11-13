@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { CommunityGameIcon } from "../CommunityGameIcon";
 import type {
   ApplicationItem,
@@ -105,11 +106,14 @@ export function MatchCard({
   variant = "row",
   headingLevel = 3,
   eager,
+  archive,
 }: {
   event: EventCard;
   variant?: "row" | "tile" | "spotlight";
   headingLevel?: 2 | 3;
   eager?: boolean;
+  /** Personal archive control; only the account overview passes it. Public schedules never do. */
+  archive?: ReactNode;
 }) {
   const Heading = headingLevel === 2 ? "h2" : "h3";
   const when = event.startAt || event.endAt ? formatRange(event.startAt, event.endAt) : event.publishedAt ? `发布于 ${formatDate(event.publishedAt)}` : "时间待定";
@@ -168,9 +172,18 @@ export function MatchCard({
           <Img image={event.cover} alt="" eager={eager} />
         </span>
       )}
-      <span className={styles.matchArrow} aria-hidden="true">
-        <Icon name="arrow" size={18} />
-      </span>
+      {archive ? (
+        <div className={styles.matchSide}>
+          <span className={styles.matchArrow} aria-hidden="true">
+            <Icon name="arrow" size={18} />
+          </span>
+          {archive}
+        </div>
+      ) : (
+        <span className={styles.matchArrow} aria-hidden="true">
+          <Icon name="arrow" size={18} />
+        </span>
+      )}
     </article>
   );
 }
@@ -421,12 +434,15 @@ export function FeedTile({ item, promoted }: { item: FeedItem; promoted?: boolea
 }
 
 /* ---------- me: applications, todo, queues, receipts ---------- */
-export function ApplicationCard({ item }: { item: ApplicationItem }) {
+export function ApplicationCard({ item, archive }: { item: ApplicationItem; archive?: ReactNode }) {
   return (
-    <article className={styles.application}>
+    <article className={styles.application} data-archived={item.archived ? "" : undefined}>
       <div className={styles.applicationHead}>
         <p className={styles.small}>{item.categoryLabel}</p>
-        <StatusPill tone={item.tone === "neutral" ? "neutral" : item.tone}>{item.statusLabel}</StatusPill>
+        <span className={styles.applicationPills}>
+          {item.archived && <span className={styles.archivedTag}>已归档</span>}
+          <StatusPill tone={item.tone === "neutral" ? "neutral" : item.tone}>{item.statusLabel}</StatusPill>
+        </span>
       </div>
       <h3>
         <Link href={item.href} className={styles.stretch}>
@@ -444,7 +460,14 @@ export function ApplicationCard({ item }: { item: ApplicationItem }) {
           ))}
         </ol>
       )}
-      <p className={styles.next}>{item.next}</p>
+      {archive ? (
+        <div className={styles.applicationFoot}>
+          <p className={styles.next}>{item.next}</p>
+          {archive}
+        </div>
+      ) : (
+        <p className={styles.next}>{item.next}</p>
+      )}
     </article>
   );
 }
@@ -520,9 +543,9 @@ export function QueueGrid({ queues }: { queues: ManageQueue[] }) {
   );
 }
 
-export function ReceiptRow({ receipt }: { receipt: SignupReceiptCard }) {
+export function ReceiptRow({ receipt, archive }: { receipt: SignupReceiptCard; archive?: ReactNode }) {
   return (
-    <li className={styles.receipt}>
+    <li className={styles.receipt} data-archived={receipt.archived ? "" : undefined}>
       <DateBlock iso={receipt.event?.startAt ?? null} size="sm" />
       <div>
         <h3>
@@ -535,7 +558,11 @@ export function ReceiptRow({ receipt }: { receipt: SignupReceiptCard }) {
           {receipt.updatedAt !== receipt.submittedAt && ` · 更新于 ${formatDateTime(receipt.updatedAt)}`}
         </p>
       </div>
-      <StatusPill tone={receipt.editable ? "success" : "neutral"}>{receipt.editable ? "可修改" : receipt.event ? "已提交" : "活动已撤下"}</StatusPill>
+      <div className={styles.receiptSide}>
+        {receipt.archived && <span className={styles.archivedTag}>已归档</span>}
+        <StatusPill tone={receipt.editable ? "success" : "neutral"}>{receipt.editable ? "可修改" : receipt.event ? "已提交" : "活动已撤下"}</StatusPill>
+        {archive}
+      </div>
     </li>
   );
 }

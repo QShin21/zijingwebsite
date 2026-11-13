@@ -38,6 +38,8 @@ const paths = {
   qr: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2M14 18v2h2M18 18h2v2",
   lock: "M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3",
   stack: "M12 3 3 8l9 5 9-5zM3 13l9 5 9-5M3 17.5l9 5 9-5",
+  archive: "M4 5h16v4H4zM5.5 9v10.5h13V9M10 13h4",
+  restore: "M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4v4h4",
 } as const;
 export type IconName = keyof typeof paths;
 export function Icon({ name, size = 20, label, className }: { name: IconName; size?: number; label?: string; className?: string }) {

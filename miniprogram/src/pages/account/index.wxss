@@ -24,3 +24,5 @@
 @media (max-width: 359px) { .mini-page .account-team-link { font-size: 15px; } }
 /* 校园美术 (2026-11-13) */
 .account-card { border-radius: 0 0 36rpx 36rpx; }
+.account-archive-hint { display: block; margin-bottom: 14rpx; font-size: 24rpx; }
+.mini-page .account-events-link { display: block; width: 100%; margin-top: 4rpx; text-align: center; }

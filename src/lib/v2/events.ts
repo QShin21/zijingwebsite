@@ -42,6 +42,10 @@ export async function submittedKeys(p: Payload, viewer: User | null): Promise<Se
   }));
 }
 export async function getCalendar(p: Payload, viewer: User | null, input: Input = {}): Promise<Page<EventCard>> {
+  return paginate(await calendarCards(p, viewer, input), input);
+}
+/** Filtered and ordered calendar before pagination; account surfaces apply personal archive filters here. */
+export async function calendarCards(p: Payload, viewer: User | null, input: Input = {}): Promise<EventCard[]> {
   viewer = await refreshViewer(p, viewer);
   const scope = String(input.scope ?? "all"), range = String(input.range ?? "upcoming"), category = txt(input.category);
   // HTTP query strings and server boolean callers share the same strict flag.
@@ -69,9 +73,9 @@ export async function getCalendar(p: Payload, viewer: User | null, input: Input 
     ] };
   };
   const game = input.community ? await findRow(p, "games", String(input.community), ["slug", "_status", "demo"], null, publicWhere()) : null;
-  if (input.community && !game) return paginate([], input);
+  if (input.community && !game) return [];
   const gameWhere: Where = game ? { game: { equals: game.id } } : {};
-  if (input.team != null && !canUseCampus(viewer)) return paginate([], input);
+  if (input.team != null && !canUseCampus(viewer)) return [];
   const teamID = input.team == null ? null : rel(input.team);
   if (input.team != null && !teamID) throw new APIError("代表队筛选无效", 400);
   const [clubRows, promotionRows, submissions] = await Promise.all([
@@ -98,7 +102,7 @@ export async function getCalendar(p: Payload, viewer: User | null, input: Input 
     return range === "past" ? ["ended", "cancelled"].includes(card.state) || undatedOld : ["upcoming", "live", "postponed"].includes(card.state) && !undatedOld;
   });
   cards.sort((a, b) => range === "past" ? (b.startAt ?? b.publishedAt ?? "").localeCompare(a.startAt ?? a.publishedAt ?? "") : a.startAt && b.startAt ? a.startAt.localeCompare(b.startAt) : a.startAt ? -1 : b.startAt ? 1 : (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""));
-  return paginate(cards, input);
+  return cards;
 }
 export async function getEventDetail(p: Payload, viewer: User | null, input: Input): Promise<EventDetail> {
   viewer = await refreshViewer(p, viewer);

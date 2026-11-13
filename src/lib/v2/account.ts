@@ -12,7 +12,8 @@ import { applicationLabels } from "../community-status";
 import { staffStatusLabels } from "../staff-recruitment-model";
 import { teamApplicationLabels } from "../team-core";
 import { isEstablishedTeam } from "../team-memberships";
-import { eventCard, eventFields, getCalendar } from "./events";
+import { calendarCards, eventCard, eventFields } from "./events";
+import { archivedIDs, archivedTargets } from "./archives";
 import { canUseCampus } from "../rules";
 import { refreshViewer, requireViewer, viewerProjection } from "./identity";
 import { iso, pageInput, publicWhere, rel, selectFields, teamRef, txt, type Input, type Row } from "./shared";
@@ -28,13 +29,19 @@ const sources: Source[] = [
   { kind: "communityOfficer", collection: "community-applications", fields: ["applicant", "proposedGame", "status", "updatedAt"], active: ["pending", "returned"] },
 ];
 const ownWhere = (user: User, extra: Where = {}): Where => ({ and: [{ applicant: { equals: user.id } }, extra] });
+/** Personal archive view: `hide` removes archived rows in the database query, before any count, sort or truncation. */
+type ArchiveView = { archived: Set<string>; hide: boolean };
+const visibleWhere = (source: Source, view: ArchiveView, where: Where = {}): Where => {
+  const ids = view.hide ? archivedIDs(view.archived, source.kind) : [];
+  return ids.length ? { and: [where, { id: { not_in: ids } }] } : where;
+};
 const newest = (a: ApplicationItem, b: ApplicationItem) => b.updatedAt.localeCompare(a.updatedAt) || a.key.localeCompare(b.key);
 const progressSteps = (status: string): ApplicationItem["steps"] => {
   const stage = status === "draft" ? 0 : ["approved", "accepted", "rejected", "withdrawn"].includes(status) ? 2 : 1;
   return ["已提交", "审核中", "结果"].map((label, index) => ({ label, state: index < stage ? "done" : index === stage ? "current" : "todo" }));
 };
 
-function applicationItem(source: Source, row: Row): ApplicationItem {
+function applicationItem(source: Source, row: Row, archived: Set<string>): ApplicationItem {
   const status = txt(row.status) ?? "pending";
   const tone: ApplicationItem["tone"] = ["draft", "returned"].includes(status) ? "warning" : ["approved", "accepted"].includes(status) ? "success" : status === "rejected" ? "danger" : ["pending", "submitted", "reviewing"].includes(status) ? "info" : "neutral";
   let title = txt(row.title) ?? "申请记录", categoryLabel: string, href: string, next: string, labels: Record<string, string>;
@@ -57,7 +64,8 @@ function applicationItem(source: Source, row: Row): ApplicationItem {
     href = ["returned", "withdrawn"].includes(status) ? `/community/apply?edit=${row.id}` : "/community/apply#my-applications-title";
     next = status === "returned" ? "查看反馈，补充申请资料。" : "社群任职独立授权，微信建群与拉群由管理员人工完成。";
   }
-  return { key: `${source.kind}:${row.id}`, kind: source.kind, categoryLabel, title, status, statusLabel: labels[status] ?? "处理中", tone, href, webOnly: false, updatedAt: iso(row.updatedAt) ?? "", next, steps: progressSteps(status) };
+  return { key: `${source.kind}:${row.id}`, kind: source.kind, categoryLabel, title, status, statusLabel: labels[status] ?? "处理中", tone, href, webOnly: false, updatedAt: iso(row.updatedAt) ?? "", next, steps: progressSteps(status),
+    archived: archived.has(`${source.kind}:${row.id}`) };
 }
 
 async function applicationRows(p: Payload, user: User, source: Source, where: Where, limit: number, all = false) {
@@ -69,23 +77,24 @@ async function applicationRows(p: Payload, user: User, source: Source, where: Wh
 }
 
 /** Internal helper: the caller must pass a freshly loaded account. */
-export async function ownApplicationPage(p: Payload, user: User, input: Input = {}, activeFirst = false): Promise<Page<ApplicationItem>> {
+export async function ownApplicationPage(p: Payload, user: User, input: Input = {}, activeFirst = false, view?: ArchiveView): Promise<Page<ApplicationItem>> {
   const { page, limit } = pageInput(input), end = page * limit;
   if (!canUseCampus(user)) return { docs: [], page, totalDocs: 0, totalPages: 0, hasNextPage: false };
-  const counts = await Promise.all(sources.map(source => p.count({ collection: source.collection, user, overrideAccess: false, where: ownWhere(user) })));
+  const archive = view ?? { archived: await archivedTargets(p, user), hide: false };
+  const counts = await Promise.all(sources.map(source => p.count({ collection: source.collection, user, overrideAccess: false, where: ownWhere(user, visibleWhere(source, archive)) })));
   const totalDocs = counts.reduce((total, count) => total + count.totalDocs, 0), totalPages = Math.ceil(totalDocs / limit);
   if ((page - 1) * limit >= totalDocs) return { docs: [], page, totalPages, totalDocs, hasNextPage: false };
   const primary = await Promise.all(sources.map(async source => {
-    const result = await applicationRows(p, user, source, activeFirst ? { status: { in: source.active } } : {}, end);
+    const result = await applicationRows(p, user, source, visibleWhere(source, archive, activeFirst ? { status: { in: source.active } } : {}), end);
     return { source, ...result };
   }));
-  let docs = primary.flatMap(({ source, rows }) => rows.map(row => applicationItem(source, row))).sort(newest);
+  let docs = primary.flatMap(({ source, rows }) => rows.map(row => applicationItem(source, row, archive.archived))).sort(newest);
   if (activeFirst) {
     const activeTotal = primary.reduce((total, result) => total + result.totalDocs, 0);
     if (activeTotal < end) {
       const history = await Promise.all(sources.map(async source => {
-        const result = await applicationRows(p, user, source, { status: { not_in: source.active } }, end - activeTotal);
-        return result.rows.map(row => applicationItem(source, row));
+        const result = await applicationRows(p, user, source, visibleWhere(source, archive, { status: { not_in: source.active } }), end - activeTotal);
+        return result.rows.map(row => applicationItem(source, row, archive.archived));
       }));
       docs = [...docs, ...history.flat().sort(newest)];
     }
@@ -93,9 +102,16 @@ export async function ownApplicationPage(p: Payload, user: User, input: Input = 
   return { docs: docs.slice((page - 1) * limit, end), page, totalPages, totalDocs, hasNextPage: page < totalPages };
 }
 
+async function ownApplicationCount(p: Payload, user: User): Promise<number> {
+  if (!canUseCampus(user)) return 0;
+  const counts = await Promise.all(sources.map(source => p.count({ collection: source.collection, user, overrideAccess: false, where: ownWhere(user) })));
+  return counts.reduce((total, count) => total + count.totalDocs, 0);
+}
+
 /** Owner-only headers for unpaginated recruitment/todo surfaces; no private answers are read. */
 export async function ownApplicationItems(p: Payload, user: User, kinds?: ApplicationKind[], statuses?: string[]): Promise<ApplicationItem[]> {
   if (!canUseCampus(user)) return [];
+  const archived = await archivedTargets(p, user);
   const records = await Promise.all(sources.filter(source => !kinds || kinds.includes(source.kind)).map(async source => {
     // Different collections use different PostgreSQL enums. Only team joins
     // have a draft state; passing it to staff/community enums is a DB error.
@@ -105,7 +121,7 @@ export async function ownApplicationItems(p: Payload, user: User, kinds?: Applic
     const matching = statuses?.filter(status => allowed.includes(status));
     if (matching && !matching.length) return [];
     const { rows } = await applicationRows(p, user, source, matching ? { status: { in: matching } } : {}, 0, true);
-    return rows.map(row => applicationItem(source, row));
+    return rows.map(row => applicationItem(source, row, archived));
   }));
   return records.flat().sort(newest);
 }
@@ -115,7 +131,7 @@ export async function getMyApplications(p: Payload, viewer: User | null, input: 
 }
 
 export async function getMySignups(p: Payload, viewer: User | null, input: Input = {}): Promise<Page<SignupReceiptCard>> {
-  const user = await requireViewer(p, viewer), { page, limit } = pageInput(input);
+  const user = await requireViewer(p, viewer), { page, limit } = pageInput(input), archived = await archivedTargets(p, user);
   const result = await p.find({ collection: "event-signups", user, overrideAccess: false, depth: 0, page, limit, sort: "-updatedAt",
     where: { member: { equals: user.id } }, select: { member: true, activityType: true, activityID: true, eventTitle: true, createdAt: true, updatedAt: true } });
   const receipts = result.docs.filter(row => rel(row.member) === user.id);
@@ -138,8 +154,11 @@ export async function getMySignups(p: Payload, viewer: User | null, input: Input
   const docs = receipts.map(row => {
     const kind = row.activityType === "events" ? "club" : row.activityType === "community-posts" ? "community" : null;
     const event = kind ? cards.get(`${kind}:${row.activityID}`) ?? null : null;
+    // The archive target is derived from the own receipt, so it survives an activity being withdrawn.
+    const archiveTarget = kind && Number.isSafeInteger(row.activityID) && row.activityID > 0 ? `${kind}:${row.activityID}` : null;
     return { key: `signup:${row.id}`, eventTitle: row.eventTitle, event, submittedAt: row.createdAt, updatedAt: row.updatedAt,
-      href: kind && event ? `/activities/${row.activityType}/${row.activityID}/fill` : "/account", editable: Boolean(event && event.signup.mode === "form" && event.signup.state === "open") };
+      href: kind && event ? `/activities/${row.activityType}/${row.activityID}/fill` : "/account", editable: Boolean(event && event.signup.mode === "form" && event.signup.state === "open"),
+      archiveTarget, archived: archiveTarget !== null && archived.has(archiveTarget) };
   });
   return { docs, page, totalDocs: result.totalDocs, totalPages: result.totalPages, hasNextPage: result.hasNextPage };
 }
@@ -193,10 +212,13 @@ export async function getManage(p: Payload, viewer: User | null, input: Input = 
 export async function getMe(p: Payload, viewer: User | null, input: Input = {}): Promise<MeResponse> {
   void input;
   const user = await requireViewer(p, viewer);
-  const campus = canUseCampus(user);
-  const [projection, applications, attention, memberships, upcoming, signups, queues, honors] = await Promise.all([
-    viewerProjection(p, user), ownApplicationPage(p, user, { limit: 8 }, true), ownApplicationItems(p, user, undefined, ["draft", "returned"]),
-    campus ? ownMemberships(p, user) : [], getCalendar(p, user, { scope: "mine", range: "upcoming", page: 1, limit: 5 }),
+  const campus = canUseCampus(user), archived = await archivedTargets(p, user);
+  const [projection, applications, allApplications, attention, memberships, mine, signups, queues, honors] = await Promise.all([
+    // Archived records are excluded inside the queries, before the 8/5 overview limits.
+    viewerProjection(p, user), ownApplicationPage(p, user, { limit: 8 }, true, { archived, hide: true }), ownApplicationCount(p, user),
+    // Todo keeps every draft/returned application: archiving only tidies the progress list.
+    ownApplicationItems(p, user, undefined, ["draft", "returned"]),
+    campus ? ownMemberships(p, user) : [], calendarCards(p, user, { scope: "mine", range: "upcoming" }),
     p.count({ collection: "event-signups", user, overrideAccess: false, where: { member: { equals: user.id } } }), campus ? manageQueues(p, user) : [],
     campus ? p.find({ collection: "team-honor-records", user, overrideAccess: false, depth: 0, pagination: false, limit: 0, sort: "-updatedAt",
       where: { and: [{ author: { equals: user.id } }, { state: { equals: "returned" } }] }, select: { author: true, title: true, state: true, updatedAt: true } }) : { docs: [] },
@@ -209,6 +231,8 @@ export async function getMe(p: Payload, viewer: User | null, input: Input = {}):
     ...queues.filter(queue => queue.pending !== null && queue.pending > 0).map(queue => ({ key: `review:${queue.key}`, kind: "review" as const,
       title: queue.title, detail: `待处理 ${queue.pending} 项。`, href: queue.href, webOnly: queue.webOnly, updatedAt: null, count: queue.pending })),
   ];
-  return { viewer: projection, todo, upcoming: upcoming.docs.slice(0, 5), applications: applications.docs.slice(0, 8), memberships,
-    counts: { signups: signups.totalDocs, applications: applications.totalDocs } };
+  const upcoming = mine.filter(card => !archived.has(card.key));
+  return { viewer: projection, todo, upcoming: upcoming.slice(0, 5), applications: applications.docs.slice(0, 8), memberships,
+    counts: { signups: signups.totalDocs, applications: allApplications, archivedApplications: Math.max(0, allApplications - applications.totalDocs),
+      archivedUpcoming: mine.length - upcoming.length } };
 }

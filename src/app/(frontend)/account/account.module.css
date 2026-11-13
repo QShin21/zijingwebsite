@@ -117,6 +117,11 @@
   display: grid;
   gap: 8px;
 }
+.archiveHint {
+  margin: 0 0 12px;
+  color: var(--z-muted);
+  font-size: 13px;
+}
 .viewTitle {
   margin: 20px 0 14px;
   font-size: var(--z-text-h2);

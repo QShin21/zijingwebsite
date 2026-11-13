@@ -96,6 +96,11 @@ export async function v2Request(p: Payload, request: Request, path: string[]): P
     } else if (request.method === "POST") {
       const actor = await refreshViewer(p, viewer);
       if (!actor) throw new APIError("请登录可用账号", viewer ? 403 : 401);
+      if (route === "me/archive") {
+        // Personal display preference only; the target must be the caller's own record.
+        const data = await json(request); keys(data, ["target", "archived"]);
+        return reply(await service.setArchive(p, actor, { target: data.target, archived: data.archived }));
+      }
       if (route === "images/sign") {
         const data = await json(request); keys(data, ["sources"]);
         return reply(await signImages(p, viewer, { sources: data.sources }));

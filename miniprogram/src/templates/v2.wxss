@@ -317,3 +317,11 @@
 .zj-today { border-width: 2rpx; border-radius: 10rpx; }
 .zj-dock { border-top-width: 2rpx; }
 .zj-gallery-image, .zj-card-thumb, .zj-honor-image, .zj-match-cover { border-radius: 14rpx; }
+/* 个人归档 (2026-11-13): 仅本人展示偏好；按钮使用 catchtap，不触发卡片详情。 */
+.zj-archive-side { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12rpx; flex-shrink: 0; }
+.zj-archive-row { display: flex; align-items: center; justify-content: flex-end; gap: 14rpx; }
+.mini-page .zj-archive { display: inline-flex; align-items: center; justify-content: center; min-width: 88rpx; min-height: 64rpx; margin: 0; padding: 0 20rpx; border: 2rpx solid var(--z-line-strong, var(--z-line)); border-radius: 14rpx; background: var(--z-tint); color: var(--z-primary); font-size: 24rpx; font-weight: 800; line-height: 1.2; box-shadow: none; }
+.mini-page .zj-archive::after { border: 0; }
+.mini-page .zj-archive[disabled] { opacity: .6; }
+.zj-archived-tag { padding: 2rpx 14rpx; border: 2rpx dashed var(--z-line); border-radius: 10rpx; color: var(--z-muted); font-size: 22rpx; font-weight: 800; white-space: nowrap; }
+.zj-record-archived { opacity: .86; }

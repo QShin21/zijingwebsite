@@ -27,6 +27,10 @@
       </view>
       <text wx:if="{{item.deadline}}" class="zj-small">{{item.deadline}}</text>
     </view>
+    <view wx:if="{{archive && item.archiveTarget}}" class="zj-archive-side">
+      <text class="zj-arrow" aria-hidden="true">›</text>
+      <button class="zj-archive" catchtap="setArchive" data-target="{{item.archiveTarget}}" data-archived="{{item.archived}}" disabled="{{item.archiving}}" loading="{{item.archiving}}" aria-label="{{item.archived ? '撤销归档' : '归档'}}：{{item.title}}">{{item.archived ? '撤销归档' : '归档'}}</button>
+    </view>
   </view>
 </template>
 
@@ -165,6 +169,10 @@
       </view>
     </view>
     <text class="zj-small">{{item.next}}</text>
+    <view wx:if="{{archive && item.archiveTarget}}" class="zj-archive-row">
+      <text wx:if="{{item.archived}}" class="zj-archived-tag">已归档</text>
+      <button class="zj-archive" catchtap="setArchive" data-target="{{item.archiveTarget}}" data-archived="{{item.archived}}" disabled="{{item.archiving}}" loading="{{item.archiving}}" aria-label="{{item.archived ? '撤销归档' : '归档'}}：{{item.title}}">{{item.archived ? '撤销归档' : '归档'}}</button>
+    </view>
   </view>
 </template>
 

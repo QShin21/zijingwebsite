@@ -1,0 +1,44 @@
+<page-meta page-style="{{themePageStyle}}" />
+<import src="../../templates/v2.wxml" />
+<view class="page mini-page records-v2 {{theme === 'dark' ? 'zj-dark' : ''}}">
+  <view class="zj-hero">
+    <view class="zj-stage-stripes"></view>
+    <view class="zj-hero-inner">
+      <button class="zj-hero-back" bindtap="back">‹ 返回</button>
+      <text class="zj-hero-kicker">MY RECORDS · 我的记录</text>
+      <text class="zj-hero-title">{{title}}</text>
+      <text class="zj-hero-lead">{{hint}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{needsLogin}}" class="zj-empty" aria-role="status">
+    <text class="zj-empty-title">请先登录</text>
+    <text class="zj-small">登录后查看本人报名与申请记录。</text>
+    <button class="accent" bindtap="login">登录账号</button>
+  </view>
+  <view wx:elif="{{error}}"><text class="error" aria-role="alert">{{error}}</text><button wx:if="{{mode === 'signups' || campus}}" class="secondary" bindtap="retry">重新读取</button></view>
+  <template wx:elif="{{loading && !docs.length}}" is="zj-loading" />
+  <block wx:else>
+    <view class="zj-section-head records-head"><text class="zj-section-title">{{title}}</text><text wx:if="{{totalDocs}}" class="zj-count">{{totalDocs}}</text></view>
+    <view wx:if="{{mode === 'applications' && docs.length}}" class="zj-list"><block wx:for="{{docs}}" wx:key="key"><template is="zj-application" data="{{item, archive: true}}" /></block></view>
+    <view wx:elif="{{mode === 'signups' && docs.length}}" class="zj-list">
+      <view wx:for="{{docs}}" wx:key="key" class="zj-application records-receipt {{item.archived ? 'zj-record-archived' : ''}}" hover-class="{{item.page ? 'zj-pressed' : 'none'}}" bindtap="openReceipt" data-page="{{item.page}}" data-params="{{item.params}}" aria-role="{{item.page ? 'link' : 'text'}}" aria-label="{{item.title}}，{{item.statusLabel}}">
+        <view class="zj-row">
+          <text class="zj-small">{{item.when}}</text>
+          <text class="zj-pill zj-pill-{{item.statusTone}}">{{item.statusLabel}}</text>
+        </view>
+        <text class="zj-card-title">{{item.title}}</text>
+        <text class="zj-small">提交于 {{item.submitted}}<block wx:if="{{item.updated}}"> · 更新于 {{item.updated}}</block></text>
+        <view wx:if="{{item.archiveTarget}}" class="zj-archive-row">
+          <text wx:if="{{item.archived}}" class="zj-archived-tag">已归档</text>
+          <button class="zj-archive" catchtap="setArchive" data-target="{{item.archiveTarget}}" data-archived="{{item.archived}}" disabled="{{item.archiving}}" loading="{{item.archiving}}" aria-label="{{item.archived ? '撤销归档' : '归档'}}：{{item.title}}">{{item.archived ? '撤销归档' : '归档'}}</button>
+        </view>
+      </view>
+    </view>
+    <template wx:elif="{{mode === 'signups'}}" is="zj-empty" data="{{title: '还没有报名记录', body: '报名开放的活动会标注「报名开放」。', icon: '🎫', action: '查看活动', page: 'events'}}" />
+    <template wx:else is="zj-empty" data="{{title: '还没有申请记录', body: '社群管理员、骨干招新、建队与入队申请都会记录在这里。', icon: '📮'}}" />
+    <text wx:if="{{loadMoreError}}" class="error" aria-role="alert">{{loadMoreError}}</text>
+    <button wx:if="{{hasMore}}" class="secondary records-more" bindtap="loadMore" loading="{{loadingMore}}" disabled="{{loadingMore}}">{{loadMoreError ? '重试加载更多' : '加载更多'}}</button>
+    <text wx:if="{{docs.length && !hasMore}}" class="result-caption records-end">— 已展示全部记录 —</text>
+  </block>
+</view>

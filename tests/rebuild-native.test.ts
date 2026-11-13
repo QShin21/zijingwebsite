@@ -16,11 +16,12 @@ function navigationHarness(depth = 1) {
 
 describe('Native rebuild: route and rendering contracts, not an official WeChat compiler', () => {
   it('keeps every existing native route (explore as a redirect) and the five V2 tabs', () => {
-    // 28 V2 routes plus the native activity seating page (member map + reviewer workbench).
-    expect(app.pages).toHaveLength(29);
+    // 28 V2 routes plus the native activity seating page (member map + reviewer workbench)
+    // and the personal records page (全部报名 / 全部申请 with archive restore).
+    expect(app.pages).toHaveLength(30);
     for (const route of ['detail', 'list', 'fixed', 'community', 'signup', 'team', 'team-honors', 'staff', 'explore'])
       expect(app.pages).toContain('pages/' + route + '/index');
-    for (const route of ['teams', 'team-home', 'recruitment', 'showcase-new', 'activity-seating']) expect(app.pages).toContain('pages/' + route + '/index');
+    for (const route of ['teams', 'team-home', 'recruitment', 'showcase-new', 'activity-seating', 'records']) expect(app.pages).toContain('pages/' + route + '/index');
     expect(app.tabBar.list.map(tab => tab.pagePath)).toEqual(['home', 'events', 'communities', 'teams', 'account'].map(name => 'pages/' + name + '/index'));
     expect(app.tabBar.list.map(tab => (tab as unknown as { text: string }).text)).toEqual(['主场', '日程', '社群', '代表队', '我的']);
     for (const route of app.pages) {

@@ -87,6 +87,8 @@ function event(card) {
     deadline: card.signup.state === 'open' && card.signup.deadline && !card.signup.viewerSubmitted ? deadline(card.signup.deadline) : '',
     promoted: card.promoted, demo: card.demo, ended: card.state === 'ended' || card.state === 'cancelled',
     coverSrc: card.cover ? card.cover.src : '', page: target.page, params: target.params,
+    // Personal archive target for 我的赛程; it never changes the signup itself.
+    archiveTarget: card.key, archived: false, archiving: false,
   };
 }
 function articleTarget(card) {
@@ -147,7 +149,17 @@ function recruitment(card) {
 }
 function application(item) {
   return { key: item.key, category: item.categoryLabel, title: item.title, statusLabel: item.statusLabel, tone: item.tone, next: item.next, href: item.href, web: item.webOnly === true,
-    steps: item.steps.map((step, index) => ({ label: step.label, state: step.state, index: index + 1 })) };
+    steps: item.steps.map((step, index) => ({ label: step.label, state: step.state, index: index + 1 })),
+    archiveTarget: item.key, archived: item.archived === true, archiving: false };
+}
+// 全部报名 rows. archiveTarget mirrors EventCard.key; archiving only hides the activity from 我的赛程.
+function receipt(card) {
+  const view = card.event ? event(card.event) : null;
+  return { key: card.key, title: card.eventTitle, event: view, when: view ? view.when : '活动已撤下',
+    submitted: dateTime(card.submittedAt), updated: card.updatedAt !== card.submittedAt ? dateTime(card.updatedAt) : '',
+    statusLabel: card.editable ? '可修改' : card.event ? '已提交' : '活动已撤下', statusTone: card.editable ? 'success' : 'neutral',
+    page: view ? view.page : '', params: view ? view.params : null,
+    archiveTarget: typeof card.archiveTarget === 'string' ? card.archiveTarget : '', archived: card.archived === true, archiving: false };
 }
 function groupByDay(views) {
   const groups = [];
@@ -164,4 +176,4 @@ function today(beijingDate) {
   return parts[1] + '月' + parts[2] + '日 ' + WEEK[new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])).getUTCDay()];
 }
 module.exports = { get, post, query, beijing, dayLabel, dateText, dateTime, shortDate, range, countdown, deadline, initial,
-  event, article, showcase, honor, feed, community, team, recruitment, application, groupByDay, today };
+  event, article, showcase, honor, feed, community, team, recruitment, application, receipt, groupByDay, today };

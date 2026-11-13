@@ -6,6 +6,7 @@ import { LogoutButton } from "@/components/account-pages/AuthForms";
 import { pageNumber, read, readOptional, single, type Search } from "@/components/v2/data";
 import { ButtonLink, CommunityChip, EmptyState, KeyValues, LinkTabs, Pager, Section, Wrap } from "@/components/v2/ui";
 import { ApplicationCard, MatchCard, MembershipCard, QueueGrid, ReceiptRow, TodoList } from "@/components/v2/cards";
+import { ArchiveButton } from "@/components/v2/ArchiveButton";
 import { empty } from "@/components/v2/copy";
 import { initial } from "@/components/v2/format";
 import layout from "@/components/v2/layout.module.css";
@@ -95,11 +96,20 @@ export default async function Account({ searchParams }: { searchParams: Search }
           <h2 id={view === "signups" ? "signups-title" : "applications-title"} className={styles.viewTitle}>
             {view === "signups" ? "全部报名" : "全部申请"}
           </h2>
+          <p className={styles.archiveHint}>
+            {view === "signups"
+              ? "归档仅从“我的赛程”隐藏该活动，不会取消报名；已归档的活动可在此撤销归档。"
+              : "归档仅从“申请进度”隐藏该申请，不会撤回申请或改变审核状态；已归档的申请可在此撤销归档。"}
+          </p>
           {signups &&
             (signups.docs.length ? (
               <ul className={`${layout.list} ${layout.panel}`}>
                 {signups.docs.map((receipt) => (
-                  <ReceiptRow key={receipt.key} receipt={receipt} />
+                  <ReceiptRow
+                    key={receipt.key}
+                    receipt={receipt}
+                    archive={receipt.archiveTarget ? <ArchiveButton target={receipt.archiveTarget} archived={receipt.archived} title={receipt.eventTitle} variant="text" /> : undefined}
+                  />
                 ))}
               </ul>
             ) : (
@@ -112,7 +122,7 @@ export default async function Account({ searchParams }: { searchParams: Search }
             (applications.docs.length ? (
               <div className={layout.grid2}>
                 {applications.docs.map((item) => (
-                  <ApplicationCard key={item.key} item={item} />
+                  <ApplicationCard key={item.key} item={item} archive={<ArchiveButton target={item.key} archived={item.archived} title={item.title} variant="text" />} />
                 ))}
               </div>
             ) : (
@@ -159,12 +169,19 @@ export default async function Account({ searchParams }: { searchParams: Search }
               )}
             </Section>
             <Section id="upcoming" title="我的赛程" more={{ href: "/account?view=signups", label: "全部报名" }}>
+              {me.counts.archivedUpcoming > 0 && (
+                <p className={styles.archiveHint}>已归档 {me.counts.archivedUpcoming} 项赛程，可在“全部报名”中查看并撤销归档。</p>
+              )}
               {me.upcoming.length ? (
                 <div className={styles.list}>
                   {me.upcoming.map((event) => (
-                    <MatchCard key={event.key} event={event} />
+                    <MatchCard key={event.key} event={event} archive={<ArchiveButton target={event.key} archived={false} title={event.title} />} />
                   ))}
                 </div>
+              ) : me.counts.archivedUpcoming > 0 ? (
+                <EmptyState title="近期赛程均已归档" icon="ticket" compact actions={<ButtonLink href="/account?view=signups" tone="ghost" size="small">查看全部报名</ButtonLink>}>
+                  报名仍然有效，撤销归档后会重新显示在这里。
+                </EmptyState>
               ) : (
                 <EmptyState title={empty.mySignups.title} icon="ticket" compact actions={<ButtonLink href="/events" tone="ghost" size="small">查看可报名活动</ButtonLink>}>
                   {empty.mySignups.body}
@@ -172,12 +189,19 @@ export default async function Account({ searchParams }: { searchParams: Search }
               )}
             </Section>
             {campus && <Section id="applications" title="申请进度" more={{ href: "/account?view=applications", label: "全部申请" }}>
+              {me.counts.archivedApplications > 0 && (
+                <p className={styles.archiveHint}>已归档 {me.counts.archivedApplications} 项申请，可在“全部申请”中查看并撤销归档。</p>
+              )}
               {me.applications.length ? (
                 <div className={layout.grid2}>
                   {me.applications.map((item) => (
-                    <ApplicationCard key={item.key} item={item} />
+                    <ApplicationCard key={item.key} item={item} archive={<ArchiveButton target={item.key} archived={false} title={item.title} variant="text" />} />
                   ))}
                 </div>
+              ) : me.counts.archivedApplications > 0 ? (
+                <EmptyState title="申请均已归档" icon="inbox" compact actions={<ButtonLink href="/account?view=applications" tone="ghost" size="small">查看全部申请</ButtonLink>}>
+                  归档不会撤回申请，撤销归档后会重新显示在这里。
+                </EmptyState>
               ) : (
                 <EmptyState title="还没有申请记录" icon="inbox" compact actions={<ButtonLink href="/join" tone="ghost" size="small">了解加入方式</ButtonLink>}>
                   社群管理员、骨干招新、建队与入队申请都会记录在这里。

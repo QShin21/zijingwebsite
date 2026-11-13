@@ -38,6 +38,9 @@ export async function GET() {
     await db.pool.query("SELECT activity_key,candidates,winners,history,revision,drawn_by FROM event_signup_lotteries LIMIT 0");
     const lotteryMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261113_000500_activity_signup_lotteries"]);
     if (lotteryMigration.rowCount !== 1) throw new Error("Required activity lottery migration unavailable");
+    await db.pool.query("SELECT user_id,target FROM personal_archives LIMIT 0");
+    const archiveMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261113_000800_personal_archives"]);
+    if (archiveMigration.rowCount !== 1) throw new Error("Required personal archive migration unavailable");
     await db.pool.query("SELECT key FROM auth_codes LIMIT 0");
     await db.pool.query("SELECT key FROM auth_rate_limits LIMIT 0");
     await db.pool.query("SELECT department, affiliation FROM users LIMIT 0");

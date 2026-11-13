@@ -28,7 +28,8 @@
     "pages/recruitment/index",
     "pages/showcase-new/index",
     "pages/explore/index",
-    "pages/activity-seating/index"
+    "pages/activity-seating/index",
+    "pages/records/index"
   ],
   "window": {
     "navigationBarTitleText": "竞在紫荆",

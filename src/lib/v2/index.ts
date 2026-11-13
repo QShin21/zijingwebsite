@@ -9,6 +9,7 @@ export { getTeams, getTeam, getHonors } from "./teams";
 export { getRecruitmentCenter } from "./recruitment";
 export { getMe, getMySignups, getMyApplications, getManage } from "./account";
 export { getMySeatReceipts } from "../activity-seating";
+export { setArchive } from "./archives";
 export { getFixedPage } from "./pages";
 export { getImage, signImages } from "./images";
 export { createUpload, createShowcase, reviewShowcase } from "./writes";

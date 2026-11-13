@@ -1,0 +1,6 @@
+/* 全部报名 / 全部申请：本人记录与归档恢复。 */
+.records-v2 { padding-top: 0; }
+.records-head { margin-top: 28rpx; }
+.records-receipt { gap: 12rpx; }
+.mini-page .records-more { display: block; width: 100%; margin-top: 20rpx; }
+.records-end { text-align: center; }

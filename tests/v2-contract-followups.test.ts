@@ -13,7 +13,9 @@ const leader = { ...actor, roles: ["president"] } as User;
 const game = { id: 8, title: "合成社群", slug: "synthetic", summary: "简介", _status: "published" };
 function payload(user: User | null = actor) {
   return { findByID: vi.fn(async () => user), count: vi.fn(async () => ({ totalDocs: 0 })),
-    find: vi.fn(async (args: Record<string, unknown>) => ({ docs: args.collection === "games" ? [game] : [], totalDocs: 0 })) } as unknown as Payload;
+    find: vi.fn(async (args: Record<string, unknown>) => ({ docs: args.collection === "games" ? [game] : [], totalDocs: 0 })),
+    // Personal archive preferences (personal_archives): none for this synthetic account.
+    db: { pool: { query: vi.fn(async () => ({ rows: [] })) } } } as unknown as Payload;
 }
 describe("V2 backend follow-up contracts (synthetic Local API)", () => {
   it("header reads one game and counts, no body, officers or child-content lists; viewer matches detail", async () => {

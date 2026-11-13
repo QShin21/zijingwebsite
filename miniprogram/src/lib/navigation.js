@@ -37,6 +37,9 @@ function website(path) {
   if (path === '/teams') return go('teams');
   if (path === '/join/teams' || path === '/teams/recruitment' || /^\/teams\/recruitment#/.test(path)) return go('recruitment');
   if (path === '/teams/manage') return go('team');
+  // 全部报名 / 全部申请（含已归档记录与撤销归档）。
+  const records = /^\/account\?view=(signups|applications|history)(?:[&#].*)?$/.exec(path);
+  if (records) return go('records', { mode: records[1] === 'signups' ? 'signups' : 'applications' });
   if (/^\/account(?:[?#].*)?$/.test(path)) return go('account');
   if (/^\/events\?scope=mine/.test(path)) return go('events');
   const communityApply = /^\/community\/apply\?edit=([1-9]\d*)$/.exec(path);

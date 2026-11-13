@@ -121,11 +121,16 @@ export type ApplicationItem = {
   tone: "neutral" | "info" | "warning" | "success" | "danger";
   href: string; webOnly: boolean; updatedAt: ISODateTime; next: string;
   steps: { label: string; state: "done" | "current" | "todo" }[];
+  archived: boolean; // 本人展示偏好：已从“我的”总览隐藏；不影响申请状态
 };
 export type SignupReceiptCard = {
   key: string; eventTitle: string; event: EventCard | null; // 活动已撤下时为 null
   submittedAt: ISODateTime; updatedAt: ISODateTime; href: string; editable: boolean;
+  archiveTarget: string | null; // "club:12" | "community:34"，与 EventCard.key 一致
+  archived: boolean;            // 本人展示偏好：已从“我的赛程”隐藏；不取消报名
 };
+/** POST /api/v2/me/archive 的返回；仅本人展示偏好。 */
+export type ArchiveResult = { target: string; archived: boolean };
 export type MembershipView = {
   id: ID; team: TeamRef; status: "active" | "left" | "revoked";
   joinedAt: ISODateTime | null; leftAt: ISODateTime | null;
@@ -220,8 +225,8 @@ export type UploadReceipt = { id: ID; purpose: "showcase" | "publication"; width
 export type MeResponse = {
   viewer: Viewer;
   todo: TodoItem[];                 // 退回待补充、入队草稿、荣誉退回；以及各审核队列（count>0 时）
-  upcoming: EventCard[];            // 已报名且未结束，≤ 5
-  applications: ApplicationItem[];  // 进行中优先，≤ 8
+  upcoming: EventCard[];            // 已报名、未结束且未归档，≤ 5（归档过滤在截断前完成）
+  applications: ApplicationItem[];  // 未归档，进行中优先，≤ 8（归档过滤在截断前完成）
   memberships: MembershipView[];
-  counts: { signups: number; applications: number };
+  counts: { signups: number; applications: number; archivedApplications: number; archivedUpcoming: number };
 };
