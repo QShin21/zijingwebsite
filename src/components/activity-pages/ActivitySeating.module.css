@@ -125,6 +125,35 @@
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
+.tickets, .ticketManager {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+.ticketManager {
+  padding: 18px;
+  border: 1px solid var(--z-line);
+  border-radius: var(--z-radius-small);
+  background: var(--z-raised);
+}
+.ticketCard {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  min-width: 0;
+}
+.ticketCard img {
+  display: block;
+  width: auto;
+  max-width: min(100%, 480px);
+  max-height: 620px;
+  object-fit: contain;
+  background: white;
+}
+.ticketCard a { color: var(--z-action); font-weight: 800; }
+.ticketUpload { display: grid; gap: 8px; font-weight: 800; }
+.ticketUpload input { max-width: 100%; }
+.ticketErrors { margin: 0; padding-left: 1.3em; overflow-wrap: anywhere; }
 .badge {
   display: inline-flex;
   align-items: center;

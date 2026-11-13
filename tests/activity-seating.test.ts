@@ -13,6 +13,8 @@ import type { User } from "@/payload-types";
 import * as route from "@/app/(frontend)/api/activities/[kind]/[id]/seating/route";
 import { POST as uploadProof } from "@/app/(frontend)/api/activities/[kind]/[id]/seating/proofs/route";
 import * as proofRoute from "@/app/(frontend)/api/activities/[kind]/[id]/seating/proofs/[proof]/route";
+import * as ticketRoute from "@/app/(frontend)/api/activities/[kind]/[id]/seating/tickets/route";
+import * as ticketImageRoute from "@/app/(frontend)/api/activities/[kind]/[id]/seating/tickets/[seat]/route";
 
 const locator = vi.hoisted(() => ({ cms: vi.fn() }));
 vi.mock("../src/lib/content", () => ({ cms: locator.cms }));
@@ -959,4 +961,66 @@ it("随机申请待审核时，活动结束或关闭后仍能修改数量和凭�
   const changed = await edit(activity, first, { id: mine.id, revision: 0, mode: "random", count: 3, phone: "13800138000", proofs: [secondProof] });
   expect(changed.status).toBe(200);
   expect((await changed.json()).mine).toMatchObject({ status: "pending", seats: [], requestedCount: 3, revision: 1 });
+});
+
+it("座位票据按活动和当前确认的座位分发，支持先上传、补传、替换和换座", async () => {
+  const activity = await extraActivity("seat-tickets");
+  const other = await extraActivity("seat-tickets-other", "community-posts");
+  const uploadTicket = async (who: Actor | undefined, filename: string, bytes: Uint8Array<ArrayBuffer> = picture, activityArg = activity) => {
+    const form = new FormData();
+    form.set("file", new File([bytes], filename, { type: "image/png" }));
+    form.set("filename", filename);
+    return ticketRoute.POST(request(activityArg, "POST", who, form, "/tickets"), context(activityArg));
+  };
+  const ticket = (who: Actor | undefined, seat: string, activityArg = activity) => ticketImageRoute.GET(
+    request(activityArg, "GET", who, undefined, "/tickets/" + seat),
+    { params: context(activityArg).params.then(params => ({ ...params, seat })) },
+  );
+  const list = (who?: Actor) => ticketRoute.GET(request(activity, "GET", who, undefined, "/tickets"), context(activity));
+  expect((await uploadTicket(first, "01排01座.png")).status).toBe(403);
+  expect((await uploadTicket(otherReviewer, "01排01座.png")).status).toBe(403);
+  expect((await list()).status).toBe(401);
+  expect((await uploadTicket(reviewer, "01排99座.png")).status).toBe(400);
+  expect((await uploadTicket(reviewer, "01排01座.jpg")).status).toBe(400);
+  expect((await uploadTicket(reviewer, "../01排01座.png")).status).toBe(400);
+  expect((await uploadTicket(reviewer, "01排01座.png")).status).toBe(201);
+  expect((await list(reviewer).then(response => response.json())).seats).toEqual(["1-1"]);
+  expect((await ticket(undefined, "1-1")).status).toBe(401);
+  expect((await ticket(first, "1-1")).status).toBe(404);
+  expect((await ticket(reviewer, "1-1")).status).toBe(200);
+  expect((await ticket(reviewer, "1-1", other)).status).toBe(404);
+
+  const proof = await added(activity, first);
+  const pending = (await (await submit(activity, first, ["1-1", "1-2"], [proof])).json()).mine;
+  expect((await map(activity, first)).ticketImages).toEqual([]);
+  expect((await ticket(first, "1-1")).status).toBe(404);
+  expect((await decide(activity, reviewer, pending.id, "confirmed")).status).toBe(200);
+  let state = await map(activity, first);
+  expect(state.ticketImages).toMatchObject([{ seat: "1-1", extension: "png" }]);
+  const image = await ticket(first, "1-1");
+  expect(image.status).toBe(200);
+  expect(image.headers.get("cache-control")).toContain("no-store");
+  expect(image.headers.get("content-type")).toBe("image/png");
+  expect(new Uint8Array(await image.arrayBuffer())).toEqual(picture);
+  expect((await ticket(second, "1-1")).status).toBe(404);
+  expect((await uploadTicket(reviewer, "01排02座.png")).status).toBe(201);
+  state = await map(activity, first);
+  expect(state.ticketImages.map(item => item.seat).sort()).toEqual(["1-1", "1-2"]);
+  const oldVersion = state.ticketImages.find(item => item.seat === "1-1")!.version;
+  const replacement = new Uint8Array(await sharp(picture).jpeg().toBuffer());
+  expect((await uploadTicket(reviewer, "01排01座.jpg", replacement)).status).toBe(201);
+  state = await map(activity, first);
+  expect(state.ticketImages.find(item => item.seat === "1-1")).toMatchObject({ extension: "jpg" });
+  expect(state.ticketImages.find(item => item.seat === "1-1")!.version).not.toBe(oldVersion);
+  expect(new Uint8Array(await (await ticket(first, "1-1")).arrayBuffer())).toEqual(replacement);
+
+  expect((await uploadTicket(reviewer, "01排03座.png")).status).toBe(201);
+  expect((await changeSeats(activity, reviewer, pending.id, state.mine!.revision, "confirmed", ["1-2", "1-3"])).status).toBe(200);
+  state = await map(activity, first);
+  expect(state.ticketImages.map(item => item.seat).sort()).toEqual(["1-2", "1-3"]);
+  expect((await ticket(first, "1-1")).status).toBe(404);
+  expect((await ticket(first, "1-3")).status).toBe(200);
+  expect((await revokeOne(activity, reviewer, pending.id, state.mine!.revision, "1-3")).status).toBe(200);
+  expect((await ticket(first, "1-3")).status).toBe(404);
+  expect((await ticket(first, "1-2")).status).toBe(200);
 });

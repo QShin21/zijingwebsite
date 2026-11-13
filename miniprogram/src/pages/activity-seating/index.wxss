@@ -97,3 +97,6 @@
 
 .seat-page .seat-opening { padding: 12px 0; border-bottom: 1px solid var(--z-line); }
 .seat-page .seat-picker { padding: 10px; border: 1px solid var(--z-line); border-radius: 6px; }
+.seat-ticket-manager, .seat-tickets, .seat-ticket { display: flex; flex-direction: column; gap: 16rpx; }
+.seat-ticket { padding-top: 16rpx; border-top: 1rpx solid var(--z-line); }
+.seat-ticket-image { width: 100%; max-width: 640rpx; background: #fff; }

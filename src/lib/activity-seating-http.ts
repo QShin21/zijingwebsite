@@ -5,7 +5,7 @@ import { activityId, activityKind } from "./activity-signups";
 import { cms } from "./content";
 import { boundedBody, siteRequestHeaders } from "./site-request";
 import { applicationError } from "./application-error";
-import { seatProofBytes, seatStatusLabels, type SeatStatus, type SeatingKind } from "./activity-seating-model";
+import { seatProofBytes, seatTicketBytes, seatStatusLabels, type SeatStatus, type SeatingKind } from "./activity-seating-model";
 
 export const seatResponseHeaders = {
   "Cache-Control": "private, no-store",
@@ -58,6 +58,19 @@ export async function seatingUpload(request: Request) {
   if (files.length !== 1 || !(files[0] instanceof File))
     throw new APIError("每次请上传一张图片", 400);
   return files[0];
+}
+
+export async function seatingTicketUpload(request: Request) {
+  if (!request.headers.get("content-type")?.startsWith("multipart/form-data;"))
+    throw new APIError("请选择 JPG 或 PNG 票据图片", 415);
+  const body = await boundedBody(request, seatTicketBytes + 32 * 1024);
+  const form = await new Request(request.url, { method: "POST", headers: request.headers, body }).formData()
+    .catch(() => { throw new APIError("图片上传格式无效", 400); });
+  const files = form.getAll("file");
+  const names = form.getAll("filename");
+  if (files.length !== 1 || !(files[0] instanceof File) || names.length > 1 || (names.length && typeof names[0] !== "string"))
+    throw new APIError("每次请上传一张票据图片", 400);
+  return { file: files[0], filename: names[0] as string | undefined ?? files[0].name };
 }
 
 export function seatingReviewFilter(query: URLSearchParams) {

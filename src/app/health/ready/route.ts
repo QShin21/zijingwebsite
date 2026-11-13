@@ -79,6 +79,7 @@ export async function GET() {
     await db.pool.query("SELECT seating_id,request_id,seat,added_by,added_at,revision FROM activity_seat_additions LIMIT 0");
     await db.pool.query("SELECT seating_id,member_id,status,phone,seats,allocation_mode,requested_count,revision,cancelled_at,revoked_at,revoked_by FROM activity_seat_requests LIMIT 0");
     await db.pool.query("SELECT id,seating_id,member_id,request_id,picture FROM activity_seat_proofs LIMIT 0");
+    await db.pool.query("SELECT seating_id,seat,picture,mime,version FROM activity_seat_tickets LIMIT 0");
     const seatingMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261112_000000_activity_seating"]);
     if (seatingMigration.rowCount !== 1) throw new Error("Required activity seating migration unavailable");
     const scheduleMigration = await db.pool.query("SELECT 1 FROM payload_migrations WHERE name=$1", ["20261112_010000_activity_seating_schedule"]);

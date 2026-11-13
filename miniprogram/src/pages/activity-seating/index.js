@@ -28,7 +28,7 @@ const memberOf = user => (user && user.id ? String(user.id) : '');
 const step = zoom => zooms[zoom].size + GAP;
 const boardWidth = (rows, zoom) => Math.max(...rows.map(row => row.offset + row.count)) * step(zoom) + 24;
 // Everything private or account-bound that must disappear when the account changes.
-const cleared = () => ({ rows: [], chips: [], selected: [], phone: '', drafts: [], mine: null, docs: [], counts: null, busy: '', error: '', notice: '', proofError: '', proofNotice: '',
+const cleared = () => ({ rows: [], chips: [], selected: [], phone: '', drafts: [], mine: null, tickets: [], ticketSeats: [], ticketUploadErrors: [], docs: [], counts: null, busy: '', error: '', notice: '', proofError: '', proofNotice: '',
   editable: false, editing: false, editRevision: null, editProofs: [], canEditMine: false, loggedIn: false, canReview: false, enabled: false, mode: 'selection', requestedCount: 1, open: false, scheduled: false, opensAt: null, openingLabel: '', openingDate: '', openingTime: '', title: '', loadError: '', selectedBlocked: 0, selectedAvailable: 0, requestNumber: null, existingCount: 0, seatReview: null, inspectedSeat: '', changeReady: false });
 
 function seatCell(id, number, taken, picked, accent, blocked, manage, own) {
@@ -61,7 +61,7 @@ function reviewDoc(row) {
 Page(withVisualTheme({
   data: { review: false, manage: false, adding: false, changing: false, changeReady: false, requestNumber: null, existingCount: 0, seatReview: null, inspectedSeat: '', kind: '', title: '', loading: true, busy: '', error: '', loadError: '', notice: '', proofError: '', proofNotice: '', needsLogin: false,
     enabled: false, mode: 'selection', requestedCount: 1, open: false, scheduled: false, opensAt: null, openingLabel: '', openingDate: '', openingTime: '', loggedIn: false, canReview: false, editable: false, editing: false, editRevision: null, editProofs: [], canEditMine: false, counts: null,
-    rows: [], boardWidth: 0, zoom: 1, zoomLabel: zooms[1].label, selected: [], selectedBlocked: 0, selectedAvailable: 0, chips: [], phone: '', drafts: [], mine: null,
+    rows: [], boardWidth: 0, zoom: 1, zoomLabel: zooms[1].label, selected: [], selectedBlocked: 0, selectedAvailable: 0, chips: [], phone: '', drafts: [], mine: null, tickets: [], ticketSeats: [], ticketUploadErrors: [],
     seatLimit: 10, proofLimit: 10, proofMB: 8,
     filters, status: 'pending', statusLabel: labels.pending, pageNumber: 1, hasNextPage: false, docs: [] },
   ...actions,
@@ -147,7 +147,9 @@ Page(withVisualTheme({
         this.setData({ ...cleared(), loadError: '无权管理此活动的座位' });
         return;
       }
-      if (review) this.showReview(data); else if (this.data.adding || this.data.changing) this.showAssignment(data); else this.showState(data);
+      if (review) { this.showReview(data); void this.loadTicketList(read, revision); }
+      else if (this.data.adding || this.data.changing) this.showAssignment(data);
+      else { this.showState(data); if (!this.data.manage) void this.loadTicketImages(data, read, revision); }
     } catch (cause) {
       if (!this.reading(read, revision)) return;
       const message = (cause && cause.message) || '选座信息读取失败，请重试';
@@ -183,6 +185,90 @@ Page(withVisualTheme({
       selected, selectedBlocked: 0, selectedAvailable: 0, chips: chipsFor(selected), counts: showMap ? counts(data) : null, seatReview: null, inspectedSeat: '',
       rows: showMap && (data.enabled || manage || editing) ? this.layout(data, selected, this.data.zoom, editing) : [], boardWidth: showMap && (data.enabled || manage || editing) ? boardWidth(data.rows, this.data.zoom) : 0 });
     this.scheduleModeRefresh();
+  },
+  async loadTicketList(read, revision) {
+    try {
+      const result = await http.request(this._endpoint + '/tickets', { required: true, raw: true });
+      if (this.reading(read, revision)) this.setData({ ticketSeats: Array.isArray(result.seats) ? result.seats : [] });
+    } catch (cause) {
+      if (this.reading(read, revision)) this.setData({ ticketSeats: [], ticketUploadErrors: [(cause && cause.message) || '票据清单读取失败'] });
+    }
+  },
+  async loadTicketImages(data, read, revision) {
+    const mine = data.mine;
+    if (!mine || mine.status !== 'confirmed') { this.setData({ tickets: [] }); return; }
+    const versions = new Map((data.ticketImages || []).map(item => [item.seat, item.version]));
+    const previous = this.data.tickets || [];
+    const tickets = (mine.seats || []).map(seat => {
+      const version = versions.get(seat) || '';
+      const prior = previous.find(item => item.seat === seat && item.version === version);
+      return { seat, label: seatLabel(seat), version, path: prior && prior.path || '', failed: false };
+    });
+    this.setData({ tickets });
+    await Promise.all(tickets.filter(ticket => ticket.version && !ticket.path).map(async ticket => {
+      let path = '';
+      try { path = await http.download(this._endpoint + '/tickets/' + encodeURIComponent(ticket.seat) + '?v=' + encodeURIComponent(ticket.version)); }
+      catch { /* Keep a retry hint on the receipt. */ }
+      if (!this.reading(read, revision)) return;
+      const updated = this.data.tickets.map(item => item.seat === ticket.seat && item.version === ticket.version
+        ? { ...item, path, failed: !path } : item);
+      this.setData({ tickets: updated });
+    }));
+  },
+  previewTicket(event) {
+    const seat = String(event.currentTarget.dataset.seat || '');
+    const ticket = (this.data.tickets || []).find(item => item.seat === seat && item.path);
+    if (!ticket || !this.data.mine || this.data.mine.status !== 'confirmed') return;
+    this._external = true;
+    wx.previewImage({ current: ticket.path, urls: [ticket.path], fail: () => { this._external = false; } });
+  },
+  saveTicket(event) {
+    const seat = String(event.currentTarget.dataset.seat || '');
+    const ticket = (this.data.tickets || []).find(item => item.seat === seat && item.path);
+    if (!ticket || !this.data.mine || this.data.mine.status !== 'confirmed') return;
+    return this.work('正在保存票据', async revision => {
+      await privacy.authorize();
+      if (!this.current(revision) || !(this.data.tickets || []).some(item => item.seat === seat && item.version === ticket.version && item.path === ticket.path)) return false;
+      await new Promise((resolve, reject) => wx.saveImageToPhotosAlbum({ filePath: ticket.path, success: resolve,
+        fail: () => reject(new Error('保存失败，请检查微信的相册权限后重试')) }));
+      if (this.current(revision)) this.setData({ notice: ticket.label + '的票据已保存到相册。' });
+      return false;
+    }, false);
+  },
+  chooseTickets() {
+    if (!this.data.review || this.data.busy || this.data.loading || typeof wx.chooseMessageFile !== 'function') return;
+    return this.work('正在上传票据', async revision => {
+      this.setData({ ticketUploadErrors: [] });
+      await privacy.authorize();
+      if (!this.current(revision)) return false;
+      this._external = true;
+      const selected = await new Promise((resolve, reject) => wx.chooseMessageFile({ count: 100, type: 'file', extension: ['jpg', 'jpeg', 'png'],
+        success: result => resolve(result.tempFiles || []), fail: result => {
+          if (/cancel/i.test(result && result.errMsg || '')) resolve([]);
+          else reject(new Error('选择文件失败，请重新选择'));
+        } }));
+      if (!selected.length || !this.current(revision)) return false;
+      const counts = {};
+      for (const file of selected) {
+        const match = /^(\d{1,2})排(\d{1,2})座\.(jpg|jpeg|png)$/i.exec(file.name || '');
+        if (match) { const seat = Number(match[1]) + '-' + Number(match[2]); counts[seat] = (counts[seat] || 0) + 1; }
+      }
+      const errors = []; let saved = 0;
+      for (const file of selected) {
+        if (!this.current(revision)) return false;
+        const match = /^(\d{1,2})排(\d{1,2})座\.(jpg|jpeg|png)$/i.exec(file.name || '');
+        const seat = match && (Number(match[1]) + '-' + Number(match[2]));
+        if (!match || !file.path) { errors.push((file.name || '文件') + '：文件名无效'); continue; }
+        if (counts[seat] > 1) { errors.push(file.name + '：本次选择中同一座位有多个文件'); continue; }
+        if (!file.size || file.size > 8 * 1024 * 1024) { errors.push(file.name + '：单张图片最多 8 MB'); continue; }
+        try {
+          await http.upload(this._endpoint + '/tickets', file.path, { raw: true, formData: { filename: file.name } });
+          saved++;
+        } catch (cause) { errors.push(file.name + '：' + ((cause && cause.message) || '上传失败')); }
+      }
+      if (this.current(revision)) this.setData({ notice: '已保存 ' + saved + ' 张票据' + (errors.length ? '，' + errors.length + ' 张未完成' : '') + '。', ticketUploadErrors: errors });
+      return true;
+    }, true);
   },
   showReview(data) {
     const opensAt = data.opensAt || null;

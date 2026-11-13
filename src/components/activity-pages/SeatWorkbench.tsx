@@ -20,6 +20,7 @@ import { EmptyState, KeyValues, StatusPill, buttonClass, type Tone } from "@/com
 import { formatDateTime } from "@/components/v2/format";
 import work from "@/components/v2/work.module.css";
 import { SeatLegend, SeatMap, SeatSelection, SeatZoom } from "./ActivitySeating";
+import { SeatTicketManager } from "./SeatTicketManager";
 import { SeatRequestError, seatJSON, seatRequest } from "./seat-request";
 import styles from "./ActivitySeating.module.css";
 
@@ -551,6 +552,8 @@ export function SeatWorkbench({ kind, id }: { kind: SeatingKind; id: number }) {
           </div>
         </section>
       )}
+
+      {data && <SeatTicketManager endpoint={endpoint} disabled={disabled} />}
 
       {counts && (
         <ul className={work.stats} aria-label="座位概况">

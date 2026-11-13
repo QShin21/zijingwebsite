@@ -50,6 +50,13 @@
           <button class="secondary" bindtap="openManage" disabled="{{busy || loading}}">管理座位和查看申请</button>
         </view>
       </view>
+      <view class="zj-sheet seat-ticket-manager">
+        <text class="zj-sheet-title">座位电子票据</text>
+        <text class="zj-form-hint">从微信聊天文件中批量选择 JPG 或 PNG，文件名例如 01排01座.jpg。单张最多 8 MB；重新上传会更新对应座位的票据。</text>
+        <text class="zj-form-hint">已上传 {{ticketSeats.length}} 个座位的票据，已确认座位的成员可在回执查看和保存。</text>
+        <button class="secondary" bindtap="chooseTickets" disabled="{{busy || loading}}">选择票据文件</button>
+        <text wx:for="{{ticketUploadErrors}}" wx:key="index" class="zj-callout zj-callout-warning">{{item}}</text>
+      </view>
       <view class="zj-segments seat-filters" aria-role="tablist">
         <button wx:for="{{filters}}" wx:key="status" class="zj-segment {{status === item.status ? 'active' : ''}}" data-status="{{item.status}}" bindtap="filter" disabled="{{busy || loading}}" aria-role="tab" aria-selected="{{status === item.status}}">{{item.label}}</button>
       </view>
@@ -102,6 +109,17 @@
         <view class="zj-record-head"><text class="zj-sheet-title">我的选座申请</text><text class="zj-pill zj-pill-{{mine.tone}}">{{mine.label}}</text></view>
         <text class="seat-receipt-seats">{{mine.seats || (mine.count + ' 个座位')}}</text>
         <text class="zj-form-hint">{{mine.status === 'pending' ? (mine.seats ? '座位已为你保留，等待管理员核对凭证后锁定。' : '申请等待审核，通过后可查看座位。') : mine.status === 'confirmed' ? '审核已通过，座位已锁定。' : mine.status === 'cancelled' ? '申请已取消，座位已释放。' : mine.status === 'revoked' ? '管理员已撤销确认，座位已释放。' : editable ? '申请已驳回，座位已释放；可以重新选座并提交凭证。' : '申请已驳回，座位已释放。'}}</text>
+        <view wx:if="{{mine.status === 'confirmed'}}" class="seat-tickets">
+          <text class="field-label">座位电子票据</text>
+          <view wx:for="{{tickets}}" wx:key="seat" class="seat-ticket">
+            <text class="field-label">{{item.label}}</text>
+            <image wx:if="{{item.path}}" class="seat-ticket-image" src="{{item.path}}" mode="widthFix" data-seat="{{item.seat}}" bindtap="previewTicket" aria-label="{{item.label}}电子票据" />
+            <button wx:if="{{item.path}}" class="secondary" data-seat="{{item.seat}}" bindtap="saveTicket" disabled="{{busy || loading}}">保存票据到相册</button>
+            <text wx:elif="{{item.failed}}" class="zj-form-hint">票据读取失败，请刷新重试。</text>
+            <text wx:elif="{{item.version}}" class="zj-form-hint">正在读取票据…</text>
+            <text wx:else class="zj-form-hint">票据上传后将在这里显示。</text>
+          </view>
+        </view>
         <view wx:if="{{canEditMine && !editing}}" class="zj-record-actions"><button class="primary" bindtap="startEdit" disabled="{{busy || loading}}">修改申请</button></view>
         <view wx:if="{{mine.status === 'pending'}}" class="zj-record-actions"><button class="secondary" bindtap="cancelRequest" disabled="{{busy || loading}}">取消选座申请</button></view>
       </view>

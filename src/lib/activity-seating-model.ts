@@ -6,6 +6,7 @@ export type SeatingMode = "selection" | "random";
 export const seatLimit = 10;
 export const seatProofLimit = 10;
 export const seatProofBytes = 8 * 1024 * 1024;
+export const seatTicketBytes = 8 * 1024 * 1024;
 export const seatStatusLabels: Record<SeatStatus, string> = {
   pending: "待审核",
   confirmed: "已确认",
@@ -37,6 +38,13 @@ export function seatLabel(seat: string) {
 export const seatKeys = seatRows.flatMap(({ row, count }) =>
   Array.from({ length: count }, (_, index) => `${row}-${index + 1}`),
 );
+export function seatTicketFilename(filename: string) {
+  const match = /^(\d{1,2})排(\d{1,2})座\.(jpg|jpeg|png)$/i.exec(filename.trim());
+  if (!match) return null;
+  const seat = `${Number(match[1])}-${Number(match[2])}`;
+  if (!seatKeys.includes(seat)) return null;
+  return { seat, format: match[3].toLowerCase() === "png" ? "png" : "jpeg" } as const;
+}
 export const seatPhonePattern = /^\+?[1-9]\d{6,14}$/;
 export const seatProofID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
@@ -88,6 +96,7 @@ export type SeatingState = SeatingAvailability & {
   occupancy: Partial<Record<string, "pending" | "confirmed">>;
   blockedSeats: string[];
   mine: SeatRequest | null;
+  ticketImages: { seat: string; version: string; extension: "jpg" | "png" }[];
   mineDetails: { phone: string; proofs: string[]; canEdit: boolean } | null;
   drafts: string[];
 };

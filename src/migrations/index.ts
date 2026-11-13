@@ -35,6 +35,7 @@ import * as migration_20260927_182940_community_showcase from './20260927_182940
 
 import * as contentAudience from "./20261113_000400_content_audience";
 import * as activitySignupLotteries from "./20261113_000500_activity_signup_lotteries";
+import * as activitySeatTickets from "./20261113_000600_activity_seat_tickets";
 
 export const migrations = [
 
@@ -107,4 +108,5 @@ export const migrations = [
   { up: restoreEditedPromotions.up, down: restoreEditedPromotions.down, name: "20261113_000300_restore_edited_promotions" },
   { up: contentAudience.up, down: contentAudience.down, name: "20261113_000400_content_audience" },
   { up: activitySignupLotteries.up, down: activitySignupLotteries.down, name: "20261113_000500_activity_signup_lotteries" },
+  { up: activitySeatTickets.up, down: activitySeatTickets.down, name: "20261113_000600_activity_seat_tickets" },
 ];

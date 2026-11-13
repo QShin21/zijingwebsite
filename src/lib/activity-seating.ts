@@ -2,9 +2,10 @@
 import { randomUUID } from "node:crypto";
 import type { PostgresAdapter } from "@payloadcms/db-postgres";
 import { APIError, type Payload } from "payload";
+import sharp from "sharp";
 import type { User } from "@/payload-types";
 import {
-  seatKeys, seatLimit, seatPhonePattern, seatProofBytes, seatProofID, seatProofLimit, seatRows,
+  seatKeys, seatLimit, seatPhonePattern, seatProofBytes, seatProofID, seatProofLimit, seatRows, seatTicketBytes, seatTicketFilename,
   type SeatDecision, type SeatRequest, type SeatReview, type SeatStatus, type SeatingKind, type SeatingMode, type SeatingState,
   type SeatAssignment, type SeatingAvailability, type SeatingWorkbench,
 } from "./activity-seating-model";
@@ -253,7 +254,7 @@ export async function seatingState(p: Payload, activity: SeatActivity, user: Use
     const state: SeatingState = {
       ...availability(activity, setting), loggedIn,
       canReview: canReviewActivitySeats(user, activity.game), title: activity.title, rows: seatRows,
-      seatLimit, proofLimit: seatProofLimit, proofBytes: seatProofBytes, occupancy: {}, blockedSeats: [], mine: null, mineDetails: null, drafts: [],
+      seatLimit, proofLimit: seatProofLimit, proofBytes: seatProofBytes, occupancy: {}, blockedSeats: [], mine: null, ticketImages: [], mineDetails: null, drafts: [],
     };
     if (!setting) return state;
     const mine = loggedIn ? await client.query<RequestRow & { phone: string }>(
@@ -286,6 +287,13 @@ export async function seatingState(p: Payload, activity: SeatActivity, user: Use
     for (const seat of state.blockedSeats) state.occupancy[seat] = "confirmed";
     if (own) {
       state.mine = state.canReview ? requestDTO(own) : memberRequestDTO(own, setting.mode);
+    }
+    if (own?.status === "confirmed") {
+      const tickets = await client.query<{ seat: string; version: string; extension: "jpg" | "png" }>(`
+        SELECT t.seat, t.version::text AS version, CASE t.mime WHEN 'image/png' THEN 'png' ELSE 'jpg' END AS extension FROM activity_seat_tickets t
+        JOIN activity_seat_claims c ON c.seating_id = t.seating_id AND c.seat = t.seat
+        WHERE t.seating_id = $1 AND c.request_id = $2`, [setting.id, own.id]);
+      state.ticketImages = tickets.rows;
     }
     if (pending) state.mineDetails = { phone: own.phone, proofs: proofs?.rows.map(({ id }) => id) || [],
       canEdit: true };
@@ -327,7 +335,7 @@ export async function seatingReviewMap(p: Payload, activity: SeatActivity, user:
   const result: SeatingState = {
     ...availability(activity, setting), loggedIn: true, canReview: true, title: activity.title, rows: seatRows,
     seatLimit, proofLimit: seatProofLimit, proofBytes: seatProofBytes, occupancy: {}, blockedSeats: [],
-    mine: null, mineDetails: null, drafts: [],
+    mine: null, ticketImages: [], mineDetails: null, drafts: [],
   };
   if (!setting) return result;
   const [claims, blocks] = await Promise.all([
@@ -794,6 +802,71 @@ export async function decideSeats(
     );
     return { status: decision };
   });
+}
+
+export async function seatTicketList(p: Payload, activity: SeatActivity, user: User | null) {
+  const actor = await requireReviewer(p, activity, user);
+  activity = await seatActivity(p, activity.kind, activity.id, actor);
+  requirePublic(activity);
+  if (!canReviewActivitySeats(actor, activity.game)) throw new APIError("无权管理此活动的座位票据", 403);
+  const setting = await scope(p, activity);
+  if (!setting) return { seats: [] as string[] };
+  const result = await pool(p).query<{ seat: string }>(
+    "SELECT seat FROM activity_seat_tickets WHERE seating_id = $1 ORDER BY seat", [setting.id],
+  );
+  return { seats: result.rows.map(row => row.seat) };
+}
+
+export async function uploadSeatTicket(p: Payload, activity: SeatActivity, user: User | null, file: File, filename: string) {
+  const actor = await requireReviewer(p, activity, user);
+  requirePublic(activity);
+  const match = seatTicketFilename(filename);
+  if (!match) throw new APIError("文件名须为有效座位，例如 01排01座.jpg 或 01排01座.png", 400);
+  if (!file.size || file.size > seatTicketBytes) throw new APIError("单张票据图片最多 8 MB", 400);
+  const picture = Buffer.from(await file.arrayBuffer());
+  try {
+    const image = sharp(picture, { limitInputPixels: 20_000_000, animated: false });
+    const metadata = await image.metadata();
+    if (metadata.format !== match.format || !metadata.width || !metadata.height || (metadata.pages || 1) !== 1)
+      throw new Error("Invalid image format");
+    await image.stats();
+  } catch {
+    throw new APIError("请上传文件名与内容一致的静态 JPG 或 PNG 图片", 400);
+  }
+  return transaction(p, async client => {
+    const current = await lockedActivity(p, activity, actor, client);
+    requirePublic(current.activity);
+    assertLockedReviewer(current.activity, current.actor);
+    const column = scopeColumn(current.activity);
+    await client.query(`INSERT INTO activity_seatings (${column}, enabled) VALUES ($1, false) ON CONFLICT (${column}) DO NOTHING`, [activity.id]);
+    const setting = await scope(p, current.activity, client);
+    if (!setting) throw new APIError("活动选座设置暂不可用", 409);
+    const version = randomUUID();
+    await client.query(`INSERT INTO activity_seat_tickets (seating_id, seat, picture, mime, version, uploaded_by)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      ON CONFLICT (seating_id, seat) DO UPDATE SET picture = EXCLUDED.picture, mime = EXCLUDED.mime,
+        version = EXCLUDED.version, uploaded_by = EXCLUDED.uploaded_by, updated_at = now()`,
+      [setting.id, match.seat, picture, `image/${match.format}`, version, current.actor.id]);
+    return { seat: match.seat, version };
+  });
+}
+
+export async function seatTicketImage(p: Payload, activity: SeatActivity, user: User | null, seat: string) {
+  const actor = await requireMember(p, user);
+  activity = await seatActivity(p, activity.kind, activity.id, actor);
+  requirePublic(activity);
+  if (!validSeats.has(seat)) throw new APIError("票据不存在", 404);
+  const setting = await scope(p, activity);
+  if (!setting) throw new APIError("票据不存在", 404);
+  const result = await pool(p).query<{ picture: Buffer; mime: string }>(`
+    SELECT t.picture, t.mime FROM activity_seat_tickets t
+    WHERE t.seating_id = $1 AND t.seat = $2 AND ($4::boolean OR EXISTS (
+      SELECT 1 FROM activity_seat_claims c JOIN activity_seat_requests r
+        ON r.seating_id = c.seating_id AND r.id = c.request_id
+      WHERE c.seating_id = t.seating_id AND c.seat = t.seat AND r.member_id = $3 AND r.status = 'confirmed'
+    ))`, [setting.id, seat, actor.id, canReviewActivitySeats(actor, activity.game)]);
+  if (!result.rows[0]) throw new APIError("票据不存在", 404);
+  return result.rows[0];
 }
 
 export async function uploadSeatProof(p: Payload, activity: SeatActivity, user: User | null, file: File) {

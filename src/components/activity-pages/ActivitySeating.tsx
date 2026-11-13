@@ -226,7 +226,7 @@ export function SeatSelection({
 }
 
 /** The member's own request: seats and status only, never phone numbers or proofs. */
-export function SeatReceipt({ mine, editable }: { mine: Pick<SeatRequest, "seats" | "status"> & Partial<Pick<SeatRequest, "requestedCount">>; editable: boolean }) {
+export function SeatReceipt({ mine, editable, endpoint, ticketImages = [] }: { mine: Pick<SeatRequest, "seats" | "status"> & Partial<Pick<SeatRequest, "requestedCount">>; editable: boolean; endpoint?: string; ticketImages?: SeatingState["ticketImages"] }) {
   return (
     <div className={styles.receipt} data-status={mine.status}>
       <p className={styles.receiptHead}>
@@ -238,6 +238,21 @@ export function SeatReceipt({ mine, editable }: { mine: Pick<SeatRequest, "seats
       <p className={styles.receiptSeats}>{mine.seats.length ? mine.seats.map(seatLabel).join("、") : `${mine.requestedCount ?? 0} 个座位`}</p>
       {mine.status === "pending" && <p className={styles.hint}>{mine.seats.length ? "座位已为你保留，等待管理员核对凭证后锁定。" : "申请等待审核，通过后可查看座位。"}</p>}
       {mine.status === "confirmed" && <p className={styles.hint}>审核已通过，座位已锁定。</p>}
+      {mine.status === "confirmed" && endpoint && <div className={styles.tickets}>
+        <strong>座位电子票据</strong>
+        {mine.seats.map(seat => {
+          const ticket = ticketImages.find(item => item.seat === seat);
+          const href = ticket ? `${endpoint}/tickets/${encodeURIComponent(seat)}?v=${encodeURIComponent(ticket.version)}` : "";
+          return <div className={styles.ticketCard} key={seat}>
+            <strong>{seatLabel(seat)}</strong>
+            {ticket ? <>
+              {/* Images are private, same-origin, and served only to the current seat owner or reviewer. */}
+              <img src={href} alt={`${seatLabel(seat)}电子票据`} loading="lazy" />
+              <a href={href} download={`${seatLabel(seat)}电子票据.${ticket.extension}`}>保存票据图片</a>
+            </> : <p className={styles.hint}>票据上传后将在这里显示。</p>}
+          </div>;
+        })}
+      </div>}
       {mine.status === "rejected" && (
         <p className={styles.hint}>{editable ? "申请已驳回，座位已释放；可以重新选座并提交凭证。" : "申请已驳回，座位已释放。"}</p>
       )}
@@ -560,7 +575,7 @@ export function ActivitySeating({ kind, id, returnTo }: { kind: SeatingKind; id:
         </div>
       </header>
 
-      {state.mine && <SeatReceipt mine={state.mine} editable={editable} />}
+      {state.mine && <SeatReceipt mine={state.mine} editable={editable} endpoint={endpoint} ticketImages={state.ticketImages || []} />}
       {state.mine?.status === "pending" && state.mineDetails?.canEdit && !activeEdit && (
         <div><button type="button" className={buttonClass("primary", "small")} disabled={Boolean(busy)} onClick={startEdit}>修改申请</button></div>
       )}

@@ -78,6 +78,9 @@
     ]
   },
   "style": "v2",
+  "permission": {
+    "scope.writePhotosAlbum": { "desc": "用于将本人座位电子票据保存到相册" }
+  },
   "sitemapLocation": "sitemap.json",
   "networkTimeout": {
     "request": 70000,
