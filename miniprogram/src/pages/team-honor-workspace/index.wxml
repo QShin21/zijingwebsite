@@ -12,7 +12,7 @@
   </view>
   <template is="feedback" data="{{needsLogin}}" />
   <block wx:if="{{!needsLogin}}">
-    <view class="zj-segments" aria-role="tablist"><button class="zj-segment {{view === 'mine' ? 'active' : ''}}" bindtap="view" data-view="mine" disabled="{{busy || loading}}">我的记录</button><button wx:if="{{actions.review}}" class="zj-segment {{view === 'review' ? 'active' : ''}}" bindtap="view" data-view="review" disabled="{{busy || loading}}">社群审核</button></view>
+    <view class="zj-segments" aria-role="tablist"><button class="zj-segment {{view === 'mine' ? 'active' : ''}}" bindtap="view" data-view="mine" disabled="{{busy || loading}}" aria-role="tab" aria-selected="{{view === 'mine'}}">我的记录</button><button wx:if="{{actions.review}}" class="zj-segment {{view === 'review' ? 'active' : ''}}" bindtap="view" data-view="review" disabled="{{busy || loading}}" aria-role="tab" aria-selected="{{view === 'review'}}">社群审核</button></view>
     <view wx:if="{{view === 'mine' && actions.create && teams.length}}" class="honor-ws-create"><button class="accent" bindtap="create" disabled="{{busy || loading || !ready}}">＋ 新建荣誉投稿</button><text class="zj-form-hint">现任队员可投稿，由本社群其他有权限的管理员审核。</text></view>
     <text wx:if="{{view === 'mine' && ready && !teams.length}}" class="zj-callout">当前暂无可投稿的有效队伍，本人历史记录仍保留。</text>
     <text wx:if="{{busy}}" class="zj-callout">本次确认、读取或保存尚未结束，请稍候。</text>

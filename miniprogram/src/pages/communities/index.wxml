@@ -17,7 +17,20 @@
     <template wx:elif="{{error}}" is="zj-error" data="{{error}}" />
     <block wx:elif="{{docs.length}}">
       <view class="zj-grid2">
-        <block wx:for="{{docs}}" wx:key="key"><template is="zj-community" data="{{item, img}}" /></block>
+        <view wx:for="{{docs}}" wx:key="key" class="zj-card zj-community" hover-class="zj-pressed" bindtap="openPage" data-page="{{item.page}}" data-params="{{item.params}}" aria-role="link" aria-label="{{item.title}}社群">
+          <view class="zj-cover" style="--hue: {{item.hue}}">
+            <view class="communities-icon" aria-hidden="true">
+              <image wx:if="{{item.coverKey && img[item.coverKey]}}" class="communities-icon-image" src="{{img[item.coverKey]}}" mode="aspectFit" lazy-load binderror="imageError" data-key="{{item.coverKey}}" data-url="{{img[item.coverKey]}}" />
+              <text wx:else class="communities-icon-initial">{{item.initial}}</text>
+            </view>
+          </view>
+          <view class="zj-card-body">
+            <text class="zj-card-title">{{item.title}}</text>
+            <text wx:if="{{item.summary}}" class="zj-card-summary zj-clamp">{{item.summary}}</text>
+            <text class="zj-small">{{item.facts}}</text>
+            <text wx:if="{{item.officer}}" class="zj-tag zj-tag-accent">我是管理员</text>
+          </view>
+        </view>
       </view>
       <text wx:if="{{loadMoreError && !loading}}" class="error">{{loadMoreError}}</text>
       <button wx:if="{{hasMore || loadMoreError}}" class="secondary communities-more" bindtap="onReachBottom" disabled="{{loadingMore}}">{{loadingMore ? '加载中…' : (loadMoreError ? '重试加载更多' : '加载更多')}}</button>

@@ -11,6 +11,7 @@ import { formatDate } from "@/lib/rules";
 import { TaskFrame, TaskNote } from "@/components/v2/TaskFrame";
 import { ButtonLink, EmptyState, KeyValues, Notice, Section, StatusPill, buttonClass, type Tone } from "@/components/v2/ui";
 import work from "@/components/v2/work.module.css";
+import { teamLoginHref } from "../../auth-return";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "队伍工作台", robots: { index: false, follow: false } };
@@ -27,13 +28,14 @@ export default async function ManageTeam({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ edit?: string; create?: string; page?: string; status?: string; membersPage?: string; batchesPage?: string }>;
 }) {
+  const id = positiveID((await params).id);
+  if (!id) notFound();
+  const query = await searchParams;
   const p = await cms(),
     { user } = await p.auth({ headers: await headers() });
-  if (!user) redirect("/login");
-  const id = positiveID((await params).id);
-  if (!id || !(await canManageTeam(p, user, id))) notFound();
-  const query = await searchParams,
-    page = teamPage(query.page);
+  if (!user) redirect(teamLoginHref(`/teams/manage/${id}`, query));
+  if (!(await canManageTeam(p, user, id))) notFound();
+  const page = teamPage(query.page);
   const team = await p.findByID({ collection: "teams", id, user: null, overrideAccess: false, draft: false, depth: 0 });
   const established = await isEstablishedTeam(p, id);
   const batches = await p.find({

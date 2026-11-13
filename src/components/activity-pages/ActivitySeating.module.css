@@ -1,9 +1,7 @@
 /*
  * Activity seating — member map, reviewer workbench and the synthetic visual specimen.
- * Obsidian Arena: the surrounding card follows the light/dark theme tokens, while the
- * seat map always sits on the stage surface (dark in both themes) so the four seat
- * states keep one high-contrast reading. States differ by shape/pattern as well as hue:
- * outline (可选), filled + ring (已选), amber hatching (待审核), slashed solid (已确认).
+ * The stage surface follows the palette. Seat states use contrasting colors for both
+ * light and dark surfaces, with patterns as well as hue to distinguish their meanings.
  */
 
 .section {
@@ -148,7 +146,7 @@
   color: var(--z-paper);
 }
 
-/* ---------- Stage map block (dark in both themes) ---------- */
+/* ---------- Stage map block ---------- */
 .mapBlock {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -359,20 +357,20 @@
 }
 .seat[data-state="available"],
 .swatch[data-state="available"] {
-  border-color: rgba(241, 238, 246, 0.44);
-  background: rgba(241, 238, 246, 0.06);
-  color: rgba(241, 238, 246, 0.8);
+  border-color: #a69db5;
+  background: #302a42;
+  color: #f1eef6;
 }
 .row[data-accent] .seat[data-state="available"],
 .swatch[data-state="available"][data-accent] {
-  border-color: rgba(240, 192, 96, 0.78);
-  background: rgba(240, 192, 96, 0.09);
-  color: #f6dca6;
+  border-color: #e5b65b;
+  background: #4c3a25;
+  color: #ffefc9;
 }
 .seat[data-state="selected"],
 .swatch[data-state="selected"] {
   border-color: #f3d6fa;
-  background: linear-gradient(180deg, #b44bc8, #7a128e);
+  background: linear-gradient(180deg, #8b349d, #69147b);
   box-shadow:
     0 0 0 2px rgba(214, 155, 227, 0.38),
     0 6px 16px -4px rgba(180, 75, 200, 0.8);
@@ -381,16 +379,16 @@
 .seat[data-state="pending"],
 .swatch[data-state="pending"] {
   border-color: #f0c060;
-  background: repeating-linear-gradient(135deg, rgba(240, 192, 96, 0.44) 0 3px, rgba(240, 192, 96, 0.12) 3px 6px);
-  color: #fbe7bd;
+  background: repeating-linear-gradient(135deg, #6b4b1b 0 3px, #4f3718 3px 6px);
+  color: #fff2d7;
 }
 .seat[data-state="confirmed"],
 .swatch[data-state="confirmed"] {
-  border-color: #6a6280;
+  border-color: #a69db5;
   background:
-    linear-gradient(135deg, transparent 43%, rgba(241, 238, 246, 0.3) 43% 57%, transparent 57%),
+    linear-gradient(135deg, transparent 43%, #5b5366 43% 57%, transparent 57%),
     #3b3549;
-  color: rgba(241, 238, 246, 0.62);
+  color: #f9f4ff;
 }
 .seat[data-state="blocked"],
 .swatch[data-state="blocked"] {
@@ -401,6 +399,62 @@
 .seat[data-state="blocked"][data-picked] {
   outline: 2px solid #f3d6fa;
   outline-offset: 2px;
+}
+:global(:root[data-z-theme="light"]) .seat[data-state="available"],
+:global(:root[data-z-theme="light"]) .swatch[data-state="available"] {
+  border-color: #586475;
+  background: #f6f8fb;
+  color: #293542;
+}
+:global(:root[data-z-theme="light"]) .row[data-accent] .seat[data-state="available"],
+:global(:root[data-z-theme="light"]) .swatch[data-state="available"][data-accent] {
+  border-color: #8a5b10;
+  background: #ffedbf;
+  color: #553800;
+}
+:global(:root[data-z-theme="light"]) .seat[data-state="selected"],
+:global(:root[data-z-theme="light"]) .swatch[data-state="selected"] {
+  border-color: #5c1d6b;
+  box-shadow: 0 0 0 2px rgba(109, 32, 128, 0.3);
+}
+:global(:root[data-z-theme="light"]) .seat[data-state="pending"],
+:global(:root[data-z-theme="light"]) .swatch[data-state="pending"] {
+  border-color: #80500b;
+  background: repeating-linear-gradient(135deg, #f2d69e 0 3px, #fff1d5 3px 6px);
+  color: #513500;
+}
+:global(:root[data-z-theme="light"]) .seat[data-state="confirmed"],
+:global(:root[data-z-theme="light"]) .swatch[data-state="confirmed"] {
+  border-color: #5b5366;
+}
+:global(:root[data-z-theme="light"]) .seat[data-state="blocked"],
+:global(:root[data-z-theme="light"]) .swatch[data-state="blocked"] {
+  border-color: #963c4b;
+}
+:global(:root[data-z-theme="light"]) .seat[data-state="blocked"][data-picked] {
+  outline-color: #5c1d6b;
+}
+:global(:root[data-z-theme="light"]) .legend {
+  color: var(--z-stage-ink);
+}
+:global(:root[data-z-theme="light"]) .stageArc {
+  border-color: var(--z-accent);
+  box-shadow: 0 -8px 20px -8px color-mix(in srgb, var(--z-accent) 55%, transparent);
+}
+:global(:root[data-z-theme="light"]) .zoom {
+  background: rgba(36, 48, 43, 0.04);
+}
+:global(:root[data-z-theme="light"]) .zoom button:hover:enabled {
+  background: rgba(36, 48, 43, 0.1);
+}
+:global(:root[data-z-theme="light"]) .viewport {
+  scrollbar-color: rgba(36, 48, 43, 0.55) rgba(36, 48, 43, 0.08);
+}
+:global(:root[data-z-theme="light"]) .viewport::-webkit-scrollbar-track {
+  background: rgba(36, 48, 43, 0.08);
+}
+:global(:root[data-z-theme="light"]) .viewport::-webkit-scrollbar-thumb {
+  background: rgba(36, 48, 43, 0.55);
 }
 .seat:enabled {
   cursor: pointer;

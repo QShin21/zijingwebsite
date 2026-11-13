@@ -2,8 +2,8 @@
   position: relative;
   overflow: hidden;
   background:
-    repeating-radial-gradient(ellipse at 82% 130%, transparent 0 58px, rgba(241, 238, 246, 0.08) 59px 60px, transparent 61px 64px), linear-gradient(100deg, transparent 52%, rgba(239, 214, 245, 0.08) 64%, transparent 76%),
-    radial-gradient(60% 120% at 100% 0%, hsl(calc(var(--hue) + 40) 85% 55% / 0.4), transparent 60%),
+    repeating-radial-gradient(ellipse at 82% 130%, transparent 0 58px, rgba(241, 238, 246, 0.03) 59px 60px, transparent 61px 64px), linear-gradient(100deg, transparent 52%, rgba(239, 214, 245, 0.04) 64%, transparent 76%),
+    radial-gradient(60% 120% at 100% 0%, hsl(calc(var(--hue) + 40) 85% 55% / 0.08), transparent 60%),
     linear-gradient(130deg, var(--z-stage-2), var(--z-stage) 70%);
   color: var(--z-stage-ink);
 }
@@ -22,7 +22,7 @@
   font-weight: 700;
 }
 .crumbs a:hover {
-  color: var(--z-accent);
+  color: var(--z-stage-ink);
 }
 .identity {
   display: flex;
@@ -85,7 +85,7 @@
   background: rgba(255, 255, 255, 0.06);
 }
 .stats strong {
-  color: var(--z-accent);
+  color: var(--z-stage-ink);
   font-family: var(--z-num);
   font-size: clamp(28px, 4vw, 40px);
   font-weight: 800;
@@ -131,11 +131,20 @@
   border-radius: var(--z-radius);
   background: var(--z-surface);
 }
+.profile > span {
+  flex: 0 0 auto;
+}
+.profile > div {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .profile h3 {
   font-size: 18px;
 }
 .position {
-  display: inline-flex;
+  display: inline-block;
+  max-width: 100%;
   margin-top: 4px;
   padding: 1px 10px;
   border-radius: var(--z-radius-pill);
@@ -154,6 +163,10 @@
   display: grid;
   gap: 8px;
   margin: 10px 0 0;
+}
+.positionPanel {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .positionFacts dt {
   color: var(--z-muted);

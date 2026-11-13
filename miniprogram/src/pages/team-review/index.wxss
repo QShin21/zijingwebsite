@@ -21,5 +21,5 @@
 .team-review-batches { margin-top: 12rpx; }
 .team-review-dates { display: flex; gap: 12rpx; }
 .team-review-date { flex: 1; display: flex; flex-direction: column; gap: 4rpx; padding: 12rpx 16rpx; border-radius: 18rpx; background: var(--z-stage); color: var(--z-stage-ink); font-size: 25rpx; font-weight: 800; }
-.team-review-date-label { color: var(--z-accent); font-size: 21rpx; font-weight: 900; }
+.team-review-date-label { color: var(--z-stage-accent, var(--z-stage-ink)); font-size: 21rpx; font-weight: 900; }
 .team-review-lifecycle { margin-top: 28rpx; gap: 12rpx; }

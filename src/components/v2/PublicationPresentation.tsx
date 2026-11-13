@@ -13,7 +13,7 @@ export function PublicationPresentation({ presentation, images, text }: { presen
       : <figure key={position}><img src={block.image.src} alt={block.image.alt || "文章配图"} loading="lazy" /></figure>)}
   </div>;
   const current = Math.min(index, images.length - 1);
-  return <div className={styles.galleryLayout}>
+  return <div className={images.length > 0 ? `${styles.galleryLayout} ${styles.galleryLayoutWithImages}` : styles.galleryLayout}>
     {images.length > 0 && <div className={styles.gallery} onTouchStart={event => { start.current = event.touches[0]?.clientX ?? null; }}
       onTouchEnd={event => { const end = event.changedTouches[0]?.clientX; if (start.current != null && end != null && Math.abs(end - start.current) > 45) setIndex(value => Math.max(0, Math.min(images.length - 1, value + (end < start.current! ? 1 : -1)))); start.current = null; }}>
       <figure><img src={images[current].src} alt={images[current].alt || `第 ${current + 1} 张图片`} /></figure>

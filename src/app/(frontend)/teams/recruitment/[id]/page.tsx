@@ -6,15 +6,16 @@ import { teamRecruitmentInfo, teamJoinReceipt } from "@/lib/team-core";
 import { positiveID } from "@/lib/team-memberships";
 import { TaskFrame, TaskNote } from "@/components/v2/TaskFrame";
 import { StatusPill } from "@/components/v2/ui";
+import { teamLoginHref } from "../../auth-return";
 
 export const dynamic = "force-dynamic";
 
 export default async function Recruitment({ params }: { params: Promise<{ id: string }> }) {
-  const p = await cms(),
-    { user } = await p.auth({ headers: await headers() });
-  if (!user) redirect("/login");
   const id = positiveID((await params).id);
   if (!id) notFound();
+  const p = await cms(),
+    { user } = await p.auth({ headers: await headers() });
+  if (!user) redirect(teamLoginHref(`/teams/recruitment/${id}`));
   const info = await teamRecruitmentInfo(p, user, id).catch(() => null);
   if (!info) notFound();
   return (

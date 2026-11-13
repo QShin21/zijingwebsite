@@ -327,6 +327,11 @@ hr {
 .questionnaire-invalid {
   border-color: var(--z-danger) !important;
 }
+input[type="file"] {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
 .member-form input[type="file"] {
   padding: 12px;
   border: 1.5px dashed var(--z-field-border);

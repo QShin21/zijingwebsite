@@ -19,7 +19,7 @@ button::after { border: 0; }
 .title { display: block; font-size: 52rpx; line-height: 1.2; font-weight: 900; letter-spacing: -1rpx; word-break: break-word; }
 .subtitle { display: block; color: var(--z-muted); font-size: 29rpx; line-height: 1.75; margin-top: 16rpx; word-break: break-word; }
 .page-heading { padding: 36rpx 32rpx 36rpx; margin: 0 -32rpx 28rpx; background: linear-gradient(160deg, var(--z-stage) 0%, var(--z-stage2) 100%); color: var(--z-stage-ink); border-radius: 0 0 40rpx 40rpx; }
-.page-heading .eyebrow { color: var(--z-accent); }
+.page-heading .eyebrow { color: var(--z-stage-accent, var(--z-stage-ink)); }
 .page-heading .subtitle { color: var(--z-stage-muted); max-width: 36em; }
 .page-heading .meta, .page-heading .muted { color: var(--z-stage-muted); }
 .section { margin-top: 44rpx; }
@@ -74,7 +74,7 @@ input::placeholder, textarea::placeholder { color: var(--z-muted); opacity: 1; }
 .consent { display: flex; gap: 16rpx; align-items: flex-start; padding: 24rpx; margin: 24rpx 0; border: 3rpx solid var(--z-line); border-radius: 24rpx; background: var(--z-surface); color: var(--z-text); font-size: 28rpx; line-height: 1.8; }
 .consent checkbox, .consent switch, .choice checkbox, .choice radio { flex-shrink: 0; }
 .privacy-note, .branch-notice { display: block; padding: 24rpx; margin-top: 24rpx; border-left: 8rpx solid var(--z-primary); border-radius: 0 20rpx 20rpx 0; background: var(--z-tint); color: var(--z-text); font-size: 27rpx; line-height: 1.8; }
-.error { display: block; width: 100%; margin: 22rpx 0; padding: 22rpx 26rpx; border: 1rpx solid var(--z-danger-line); border-radius: 24rpx; background: var(--z-danger-bg); color: var(--z-danger); line-height: 1.8; font-size: 28rpx; font-weight: 700; word-break: break-word; }
+.error { display: block; box-sizing: border-box; width: 100%; margin: 22rpx 0; padding: 22rpx 26rpx; border: 1rpx solid var(--z-danger-line); border-radius: 24rpx; background: var(--z-danger-bg); color: var(--z-danger); line-height: 1.8; font-size: 28rpx; font-weight: 700; word-break: break-word; }
 .state, .empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14rpx; padding: 48rpx 32rpx; margin: 24rpx 0; border: 3rpx dashed var(--z-line-strong); border-radius: 32rpx; background: var(--z-surface); }
 .state-title { display: block; font-size: 33rpx; line-height: 1.5; font-weight: 900; }
 .state button { margin-top: 8rpx; min-width: 240rpx; }
@@ -97,7 +97,7 @@ video, .evidence-video, .honor-video, .showcase-video { display: block; width: 1
 .reading-body { margin-top: 32rpx; font-size: 31rpx; line-height: 1.85; }
 .directory-row { display: flex; align-items: center; gap: 22rpx; width: 100%; padding: 26rpx 28rpx; margin-bottom: 16rpx; border: 1rpx solid var(--z-line); border-radius: 28rpx; background: var(--z-surface); }
 .mini-page button.directory-row { display: flex; padding: 26rpx 28rpx; border: 1rpx solid var(--z-line); border-radius: 28rpx; text-align: left; font-weight: 400; }
-.directory-index { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 64rpx; height: 64rpx; border-radius: 20rpx; background: var(--z-stage); color: var(--z-accent); font-size: 26rpx; font-weight: 900; }
+.directory-index { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 64rpx; height: 64rpx; border-radius: 20rpx; background: var(--z-stage); color: var(--z-stage-accent, var(--z-stage-ink)); font-size: 26rpx; font-weight: 900; }
 .directory-main { flex: 1; min-width: 0; }
 .directory-title { display: block; color: var(--z-text); font-size: 32rpx; line-height: 1.5; font-weight: 800; }
 .directory-main .muted { margin-top: 6rpx; }
@@ -190,11 +190,16 @@ video, .evidence-video, .honor-video, .showcase-video { display: block; width: 1
   .muted, .field-note, .card-summary { font-size: 14px; }
   .timeline-step { font-size: 13px; }
   .meta, .badge, .eyebrow, .bottom-note, .section-kicker, .timeline-number, .record-id { font-size: 12px; }
-  .mini-page { padding-left: 24rpx; padding-right: 24rpx; }
   .content-record-date { width: 112rpx; font-size: 12px; }
   .content-record .card-summary, .meta-line, .fact-label, .result-caption { font-size: 14px; }
   .content-record .card-title, .shortcut-title, .fact-value { font-size: 16px; }
   .content-record .date-label { font-size: 12px; }
+  .zj-small, .zj-card-summary, .zj-form-hint, .zj-hero-lead, .zj-stage-lead,
+  .zj-kv-label, .zj-kv-value, .zj-callout { font-size: 14px; }
+  .zj-date-month, .zj-date-week, .zj-date-chip-label, .zj-hero-meta, .zj-hero-kicker,
+  .mini-page .account-kicker, .mini-page .account-role, .mini-page .account-email,
+  .mini-page .staff-deadline-label, .mini-page .staff-process-step { font-size: 12px; }
+  .mini-page .zj-hero-back, .mini-page .zj-segment { font-size: 15px; }
 }
 
 /* ===== 像素校园 (2026-11-13): square plates, dark outlines and hard shadows; same tokens as the web palettes. ===== */

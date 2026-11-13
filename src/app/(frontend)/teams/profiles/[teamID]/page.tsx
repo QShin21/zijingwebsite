@@ -6,6 +6,7 @@ import { profileTeam } from "@/lib/team-profiles";
 import { teamProfileID } from "@/lib/team-profiles-model";
 import { TeamProfilesPanel } from "@/components/team-profiles/TeamProfilesPanel";
 import { TaskFrame, TaskNote } from "@/components/v2/TaskFrame";
+import { teamLoginHref } from "../../auth-return";
 
 export const metadata = { title: "我的队内简介", robots: { index: false, follow: false } };
 
@@ -18,7 +19,7 @@ export default async function Page({ params }: { params: Promise<{ teamID: strin
   }
   const p = await cms(),
     { user } = await p.auth({ headers: await headers() });
-  if (!canParticipate(user)) redirect("/login");
+  if (!canParticipate(user)) redirect(teamLoginHref(`/teams/profiles/${teamID}`));
   const team = await profileTeam(p, teamID).catch(() => notFound());
   return (
     <TaskFrame

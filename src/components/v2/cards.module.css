@@ -403,8 +403,7 @@
   transition: transform 600ms var(--z-ease);
 }
 .article:hover .articleCover img,
-.showcase:hover .showcaseMedia img,
-.community:hover .cover img {
+.showcase:hover .showcaseMedia img {
   transform: scale(1.05);
 }
 .articleBadge {
@@ -1002,7 +1001,7 @@
 }
 /* Trophy cards: gold rim light, deep plum field. */
 .cover { background: radial-gradient(ellipse at 50% 35%, hsl(var(--hue) 45% 35% / .5), transparent 75%), linear-gradient(150deg, #171922, #0b0c12); }
-.gameIcon { display: grid; place-items: center; width: 44%; aspect-ratio: 1; color: #fff; }
+.gameIcon { display: grid; place-items: center; width: min(52%, 180px); aspect-ratio: 1; color: #fff; }
 .cover .gameIcon img { position: static; width: 100%; height: 100%; object-fit: contain; border-radius: 20%; filter: drop-shadow(0 10px 18px #0005); }
 .honor {
   border-color: rgba(240, 192, 96, 0.28);
@@ -1172,14 +1171,22 @@
   border-radius: 0;
 }
 .gameIcon {
-  padding: 6px;
+  overflow: hidden;
+  padding: 4px;
   border: 3px solid var(--z-px-outline);
-  background: color-mix(in srgb, #ffffff 92%, hsl(var(--hue) 50% 50%));
+  background: #757575;
   box-shadow: 4px 4px 0 0 rgba(0, 0, 0, 0.35);
 }
 .cover .gameIcon img {
   border-radius: 0;
-  filter: none;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.65));
+}
+.cover .gameIcon img[src^="/api/game-icons/default/"] {
+  transform: scale(1.25);
+}
+.gameIcon svg {
+  width: 72%;
+  height: 72%;
 }
 .articleCover,
 .showcaseMedia {
@@ -1299,6 +1306,10 @@
   border-width: 1px;
   border-radius: var(--z-radius-small);
   box-shadow: none;
+}
+:global(:root[data-z-palette="simple"]) .cover {
+  border-color: var(--z-line);
+  background: var(--z-stage);
 }
 
 /* ===== Fable 阶段 (2026-11-13): accent edge light on hover/focus for card plates. ===== */

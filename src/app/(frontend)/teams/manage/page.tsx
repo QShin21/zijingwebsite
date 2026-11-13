@@ -10,6 +10,7 @@ import { teamLifecycleLabels } from "@/lib/team-core";
 import { TaskFrame, TaskNote } from "@/components/v2/TaskFrame";
 import { ButtonLink, EmptyState, Section, StatusPill, buttonClass, type Tone } from "@/components/v2/ui";
 import work from "@/components/v2/work.module.css";
+import { teamLoginHref } from "../auth-return";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "代表队工作台", robots: { index: false, follow: false } };
@@ -21,12 +22,12 @@ export default async function Manage({
 }: {
   searchParams: Promise<{ game?: string; page?: string; reviewPage?: string }>;
 }) {
+  const query = await searchParams;
   const p = await cms(),
     { user } = await p.auth({ headers: await headers() });
-  if (!user) redirect("/login");
+  if (!user) redirect(teamLoginHref("/teams/manage", query));
   const actor = await currentTeamActor(p, user),
-    scope = communityIDs(actor, "handleJoins"),
-    query = await searchParams;
+    scope = communityIDs(actor, "handleJoins");
   const page = teamPage(query.page);
   const reviewPage = teamPage(query.reviewPage);
   const games = await p.find({

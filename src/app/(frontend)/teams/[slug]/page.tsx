@@ -147,7 +147,7 @@ export default async function Team({ params }: Props) {
           <Section id="positions" title="位置与要求">
             <div className={layout.grid2}>
               {detail.positions.map((position, index) => (
-                <article key={`${position.name}-${index}`} className={layout.panel}>
+                <article key={`${position.name}-${index}`} className={`${layout.panel} ${styles.positionPanel}`}>
                   <h3>{position.name}</h3>
                   <dl className={styles.positionFacts}>
                     {position.duties && (

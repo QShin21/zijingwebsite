@@ -68,7 +68,7 @@
       <template is="zj-section" data="{{title: '我的队伍'}}" />
       <view wx:if="{{me.memberships.length}}" class="zj-list">
         <view wx:for="{{me.memberships}}" wx:key="id" class="account-team">
-          <view class="row"><text class="account-todo-title" bindtap="openTeam" data-slug="{{item.slug}}" aria-role="link">{{item.title}} ›</text><text class="zj-pill {{item.active ? 'zj-pill-success' : 'zj-pill-neutral'}}">{{item.status}}</text></view>
+          <view class="row"><button class="account-team-link" bindtap="openTeam" data-slug="{{item.slug}}" aria-role="link">{{item.title}} ›</button><text class="zj-pill {{item.active ? 'zj-pill-success' : 'zj-pill-neutral'}}">{{item.status}}</text></view>
           <view wx:if="{{item.active}}" class="account-team-actions">
             <button wx:if="{{item.actions.editProfile}}" class="secondary" bindtap="openTeamPage" data-page="team-profiles" data-team="{{item.teamID}}">编辑我的简介</button>
             <button wx:if="{{item.actions.submitHonor}}" class="secondary" bindtap="openTeamPage" data-page="team-honor-workspace" data-team="{{item.teamID}}">投稿荣誉</button>

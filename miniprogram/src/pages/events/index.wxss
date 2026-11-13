@@ -1,1 +1,2 @@
 .mini-page .zj-more-button { display: block; width: 100%; margin-top: 12rpx; }
+.events-range-group { display: inline-flex; vertical-align: middle; }

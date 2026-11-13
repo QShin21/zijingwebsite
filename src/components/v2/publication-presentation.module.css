@@ -12,4 +12,4 @@
 .text, .article p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.85; }
 .article { display: grid; gap: 16px; min-width: 0; }
 .article img { display: block; max-width: 100%; width: auto; height: auto; margin: auto; }
-@media (min-width: 960px) { .galleryLayout { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); align-items: start; } }
+@media (min-width: 960px) { .galleryLayoutWithImages { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); align-items: start; } }

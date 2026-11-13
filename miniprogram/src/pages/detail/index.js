@@ -62,8 +62,8 @@ Page(withVisualTheme({
         const refs = layout.mode === 'article' ? layout.blocks.filter(block => block.type === 'image').map(block => block.image) : detail.images;
         const entries = await Promise.all([...new Set(refs.map(image => image.src))].map(async src => [src, await images.load(src)]));
         const urls = Object.fromEntries(entries);
-        presentation = { mode: layout.mode, images: (detail.images || []).map(image => ({ url: urls[image.src] || '', alt: image.alt || '' })),
-          blocks: (layout.blocks || []).map(block => block.type === 'image' ? { type: 'image', url: urls[block.image.src] || '', alt: block.image.alt || '' } : block) };
+        presentation = { mode: layout.mode, ticket, images: (detail.images || []).map((image, index) => ({ index, url: urls[image.src] || '', alt: image.alt || '' })),
+          blocks: (layout.blocks || []).map((block, index) => block.type === 'image' ? { index, type: 'image', url: urls[block.image.src] || '', alt: block.image.alt || '' } : { ...block, index }) };
       }
       const rendered = typeof doc.body === 'object' ? render(doc.body) : { nodes: [], links: [] };
       const coverImage = await coverPromise;
@@ -127,6 +127,18 @@ Page(withVisualTheme({
     else if (role === 'qr' && this.data.qr && this.data.qr.url === url) this.setData({ qrFailed: true });
     else if (role === 'photo' && this.data.photos[index] && this.data.photos[index].url === url)
       this.setData({ photos: this.data.photos.map((photo, photoIndex) => photoIndex === Number(index) ? { ...photo, failed: true } : photo) });
+    else if (role === 'publication-gallery' || role === 'publication-article') {
+      const presentation = this.data.presentation;
+      const mode = role === 'publication-gallery' ? 'gallery' : 'article';
+      const field = mode === 'gallery' ? 'images' : 'blocks';
+      const position = Number(index);
+      const ticket = Number(event.currentTarget.dataset.ticket);
+      if (!presentation || presentation.mode !== mode || ticket !== this._ticket || ticket !== presentation.ticket ||
+          !Number.isInteger(position) || position < 0 || !presentation[field][position] ||
+          (mode === 'article' && presentation[field][position].type !== 'image') || presentation[field][position].url !== url) return;
+      const updated = presentation[field].map((item, itemIndex) => itemIndex === position ? { ...item, failed: true } : item);
+      this.setData({ presentation: { ...presentation, [field]: updated } });
+    }
   },
   nativeCoverError(event) {
     if (this._hidden || this._unloaded) return;

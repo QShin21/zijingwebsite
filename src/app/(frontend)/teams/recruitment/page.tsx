@@ -16,6 +16,7 @@ import { TaskNote } from "@/components/v2/TaskFrame";
 import { empty } from "@/components/v2/copy";
 import layout from "@/components/v2/layout.module.css";
 import work from "@/components/v2/work.module.css";
+import { teamLoginHref } from "../auth-return";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "选拔中心" };
@@ -23,11 +24,11 @@ export const metadata = { title: "选拔中心" };
 const applicationTone: Record<string, Tone> = { draft: "neutral", pending: "info", returned: "warning", approved: "success", rejected: "danger", withdrawn: "neutral" };
 
 export default async function Recruitment({ searchParams }: { searchParams: Promise<{ page?: string; ownPage?: string; membersPage?: string }> }) {
+  const query = await searchParams;
   const p = await cms(),
     { user } = await p.auth({ headers: await headers() });
-  if (!user) redirect("/login");
-  const query = await searchParams,
-    page = teamPage(query.page);
+  if (!user) redirect(teamLoginHref("/teams/recruitment", query));
+  const page = teamPage(query.page);
   const batches = await p.find({
     collection: "team-recruitments",
     user,

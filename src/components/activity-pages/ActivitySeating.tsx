@@ -132,8 +132,8 @@ export function SeatMap({
       role="group"
       aria-label={label}
       onKeyDown={moveFocus}
-      // A read-only map has no enabled seats, so the scroll box itself takes focus for keyboard scrolling.
-      tabIndex={editable ? undefined : 0}
+      // Give keyboard users a scroll target when no seat can receive focus.
+      tabIndex={!editable || !first ? 0 : undefined}
       style={{ "--seat-size": `${seatZooms[zoom] ?? seatZooms[1]}px`, "--seat-gap": `${seatGap}px` } as CSSProperties}
     >
       <div className={styles.board}>

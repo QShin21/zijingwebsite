@@ -6,8 +6,8 @@
 .staff-process { display: flex; gap: 10rpx; margin-top: 10rpx; }
 .staff-process-step { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6rpx; padding: 14rpx 6rpx; border: 1rpx solid var(--z-stage-line); border-radius: 20rpx; background: rgba(255, 255, 255, .06); font-size: 22rpx; font-weight: 800; text-align: center; }
 .staff-step-number { display: flex; align-items: center; justify-content: center; width: 44rpx; height: 44rpx; border-radius: 50%; background: var(--z-accent); color: var(--z-on-accent); font-size: 24rpx; font-weight: 900; }
-.staff-deadline { display: flex; align-items: center; gap: 14rpx; padding: 14rpx 18rpx; border-radius: 20rpx; background: var(--z-stage); color: var(--z-stage-ink); }
-.staff-deadline-label { color: var(--z-accent); font-size: 22rpx; font-weight: 900; }
-.staff-deadline-value { font-size: 28rpx; font-weight: 800; }
+.staff-deadline { display: flex; align-items: center; flex-wrap: wrap; gap: 14rpx; padding: 14rpx 18rpx; border-radius: 20rpx; background: var(--z-stage); color: var(--z-stage-ink); }
+.staff-deadline-label { color: var(--z-stage-accent, var(--z-stage-ink)); font-size: 22rpx; font-weight: 900; }
+.staff-deadline-value { min-width: 0; word-break: break-word; overflow-wrap: anywhere; font-size: 28rpx; font-weight: 800; }
 .mini-page .staff-review-link { align-self: flex-start; }
 .mini-page .staff-more { display: block; width: 100%; margin-top: 16rpx; }

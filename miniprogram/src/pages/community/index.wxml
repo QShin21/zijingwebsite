@@ -2,7 +2,8 @@
 <import src="../../templates/common.wxml" />
 <import src="../../templates/native.wxml" />
 <view class="page mini-page community-v2 {{theme === 'dark' ? 'zj-dark' : ''}}">
-  <view class="zj-hero zj-hero-hue community-hero" style="--hue: {{game.id ? game.id * 137 % 360 : 262}}">
+  <view class="zj-hero community-hero">
+    <image wx:if="{{scene}}" class="community-hero-scene" src="{{scene}}" mode="aspectFill" aria-hidden="true" />
     <view class="zj-hero-inner">
       <button class="zj-hero-back" bindtap="back">‹ 返回</button>
       <block wx:if="{{!loading && !error && !needsLogin}}">

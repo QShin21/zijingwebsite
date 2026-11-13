@@ -9,7 +9,7 @@
 .team-dates { display: flex; gap: 12rpx; }
 .team-date { flex: 1; display: flex; flex-direction: column; gap: 4rpx; padding: 14rpx 18rpx; border-radius: 20rpx; background: var(--z-stage); color: var(--z-stage-ink); }
 .team-date-end { border-top: 6rpx solid var(--z-accent); }
-.team-date-label { color: var(--z-accent); font-size: 22rpx; font-weight: 900; }
+.team-date-label { color: var(--z-stage-accent, var(--z-stage-ink)); font-size: 22rpx; font-weight: 900; }
 .team-date-value { font-size: 26rpx; font-weight: 800; }
 .team-label { display: block; font-weight: 900; }
 .mini-page .team-wide { display: block; width: 100%; margin-top: 8rpx; }

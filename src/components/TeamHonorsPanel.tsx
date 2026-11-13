@@ -14,6 +14,8 @@ import { TeamHonorRecordCard } from "./TeamHonorRecord";
 import { TeamHonorEditor } from "./TeamHonorEditor";
 import { CommunityPager } from "./CommunityPager";
 import { teamHonorQuery, teamHonorSubmissionHref } from "./TeamHonorNavigation";
+import { safeReturnPath } from "./account-pages/auth-return";
+import { LoginWall } from "./v2/ui";
 import styles from "./team-pages/TeamPages.module.css";
 import { TeamSectionHeading } from "./team-pages/TeamPageParts";
 
@@ -34,6 +36,17 @@ export async function TeamHonorsPanel({
   game?: number;
 }) {
   const signedIn = canParticipate(user);
+  if (view !== "public" && !signedIn) {
+    const query = teamHonorQuery({ view, page, team, game });
+    const returnTo = safeReturnPath(`/teams/honors?${query}`, "/teams/honors");
+    return (
+      <section className={styles.workspace} aria-label="代表队荣誉">
+        <LoginWall title={view === "review" ? "登录后查看荣誉审核" : "登录后查看我的投稿"} returnTo={returnTo}>
+          登录后将返回当前荣誉视图。
+        </LoginWall>
+      </section>
+    );
+  }
   const privateView = view !== "public" && signedIn;
   const reviewer = honorCanReview(user);
   const archives = privateView

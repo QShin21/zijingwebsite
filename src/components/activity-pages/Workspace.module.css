@@ -48,6 +48,41 @@
   font-size: 13px;
   font-weight: 700;
 }
+.taskTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--z-line);
+}
+.taskTabs button {
+  min-height: 44px;
+  padding: 9px 16px;
+  border: 1.5px solid var(--z-line-strong);
+  border-radius: var(--z-radius-small);
+  background: var(--z-raised);
+  color: var(--z-ink);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.taskTabs button:hover {
+  border-color: var(--z-action);
+  background: var(--z-tint);
+}
+.taskTabs button[aria-pressed="true"] {
+  border-color: var(--z-action);
+  background: var(--z-action);
+  color: var(--z-action-ink);
+}
+.taskTabs button[aria-pressed="true"]:hover {
+  background: var(--z-action-hover);
+}
+.taskTabs button:focus-visible {
+  outline: 3px solid var(--z-focus);
+  outline-offset: 2px;
+}
 .supportText {
   color: var(--z-muted);
   font-size: 14px;
@@ -232,6 +267,11 @@
 .pagination a:hover {
   border-color: var(--z-action);
   color: var(--z-action);
+}
+@media (max-width: 560px) {
+  .taskTabs button {
+    flex: 1 1 120px;
+  }
 }
 @media (min-width: 960px) {
   .reviewLayout {

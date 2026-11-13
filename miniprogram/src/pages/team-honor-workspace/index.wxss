@@ -5,8 +5,9 @@
 .honor-workspace-v2 { padding-top: 0; }
 .honor-ws-create { display: flex; flex-direction: column; gap: 8rpx; margin-bottom: 8rpx; }
 .honor-ws-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16rpx; }
-.honor-ws-trophy { display: flex; flex-direction: column; padding: 14rpx 20rpx; border-radius: 20rpx; background: linear-gradient(165deg, var(--z-stage2), var(--z-stage)); color: var(--z-stage-ink); }
-.honor-ws-placing { color: var(--z-accent); font-size: 32rpx; font-weight: 900; }
+.honor-ws-trophy { display: flex; flex: 0 1 auto; flex-direction: column; min-width: 0; max-width: 100%; box-sizing: border-box; padding: 14rpx 20rpx; border-radius: 20rpx; background: linear-gradient(165deg, var(--z-stage2), var(--z-stage)); color: var(--z-stage-ink); }
+.honor-ws-head > .zj-pill { flex-shrink: 0; }
+.honor-ws-placing { min-width: 0; max-width: 100%; color: var(--z-stage-accent, var(--z-stage-ink)); font-size: 32rpx; font-weight: 900; word-break: break-all; }
 .honor-ws-date { color: var(--z-stage-muted); font-size: 22rpx; font-weight: 800; }
 .honor-ws-label { display: block; font-weight: 900; }
 .honor-ws-open { border-color: var(--z-primary); box-shadow: 0 16rpx 48rpx rgba(28, 18, 64, .12); }

@@ -1,6 +1,6 @@
 <page-meta page-style="{{themePageStyle}}" />
 <import src="../../templates/common.wxml" />
-<view class="page mini-page seat-page {{theme === 'dark' ? 'zj-dark' : ''}}">
+<view class="page mini-page seat-page {{theme === 'dark' ? 'zj-dark' : ''}} {{palette === 'simple' ? 'seat-page-simple' : ''}}">
   <view class="zj-hero seat-hero">
     <view class="zj-stage-stripes"></view>
     <view class="zj-hero-inner">
@@ -138,11 +138,11 @@
             <text wx:for="{{rows}}" wx:key="row" class="seat-row-number {{item.accent ? 'accent' : ''}}" aria-label="第 {{item.row}} 排">{{item.row}}</text>
           </view>
           <scroll-view scroll-x enhanced class="seat-scroll">
-            <view class="seat-grid" style="width: {{boardWidth}}rpx;">
+            <view class="seat-grid" style="width: {{boardWidth}}px;">
               <view class="seat-stage"><view class="seat-stage-arc"></view><text class="seat-stage-label">舞台 · 屏幕</text></view>
-              <view wx:for="{{rows}}" wx:key="row" wx:for-item="row" class="seat-row {{row.accent ? 'accent' : ''}}" style="padding-left: {{row.indent}}rpx;">
-                <view wx:for="{{row.seats}}" wx:key="id" wx:for-item="seat" class="seat {{seat.style}} {{seat.picked ? 'chosen' : ''}}" data-seat="{{seat.id}}" bindtap="toggle"
-                  aria-role="button" aria-label="{{seat.label}}" aria-disabled="{{!editable || seat.locked || (mode === 'random' && !manage && !adding && !changing)}}" aria-selected="{{seat.picked}}">{{seat.number}}</view>
+              <view wx:for="{{rows}}" wx:key="row" wx:for-item="row" class="seat-row {{row.accent ? 'accent' : ''}}" style="padding-left: {{row.indent}}px;">
+                <button wx:for="{{row.seats}}" wx:key="id" wx:for-item="seat" class="seat {{seat.style}} {{seat.picked ? 'chosen' : ''}}" data-seat="{{seat.id}}" bindtap="toggle" hover-class="none"
+                  aria-label="{{seat.label}}" aria-disabled="{{busy || loading || !editable || seat.locked || (mode === 'random' && !manage && !adding && !changing)}}" aria-selected="{{seat.picked}}">{{seat.number}}</button>
               </view>
             </view>
           </scroll-view>

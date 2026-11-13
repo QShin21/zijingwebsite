@@ -13,8 +13,10 @@
     <button class="zj-segment {{scope === 'mine' ? 'active' : ''}}" bindtap="setScope" data-scope="mine" aria-selected="{{scope === 'mine'}}">已报名</button>
   </view>
   <view class="chips">
-    <button class="chip {{range === 'upcoming' ? 'active' : ''}}" bindtap="setRange" data-range="upcoming">即将开始</button>
-    <button class="chip {{range === 'past' ? 'active' : ''}}" bindtap="setRange" data-range="past">已结束</button>
+    <view class="events-range-group" aria-role="radiogroup" aria-label="活动时间">
+      <button class="chip {{range === 'upcoming' ? 'active' : ''}}" bindtap="setRange" data-range="upcoming" aria-role="radio" aria-checked="{{range === 'upcoming'}}" aria-label="即将开始，{{range === 'upcoming' ? '已选中' : '未选中'}}">即将开始</button>
+      <button class="chip {{range === 'past' ? 'active' : ''}}" bindtap="setRange" data-range="past" aria-role="radio" aria-checked="{{range === 'past'}}" aria-label="已结束，{{range === 'past' ? '已选中' : '未选中'}}">已结束</button>
+    </view>
     <button class="chip {{signupOpen ? 'active' : ''}}" bindtap="toggleSignupOpen" aria-role="checkbox" aria-checked="{{signupOpen}}" disabled="{{loading}}">可报名</button>
   </view>
   <template wx:if="{{loading}}" is="zj-loading" />

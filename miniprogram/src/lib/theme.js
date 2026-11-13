@@ -10,13 +10,15 @@ const modes = choices.map(choice => choice.id);
 const generated = require('./design-tokens');
 const tokens = {
   ...generated.tokens,
+  light: { ...generated.tokens.light, stageAccent: '#9be8c4' },
+  dark: { ...generated.tokens.dark, stageAccent: '#ff8fc8' },
   summer: { ...generated.tokens.dark, page: '#0f2530', surface: '#16323f', raised: '#1d3f4e', text: '#eef8f3', muted: '#b9d3d3',
     primary: '#8fe8c9', primaryHover: '#b4f3dc', onPrimary: '#0b2a24', tint: '#1f4655', accent: '#ffd36e', onAccent: '#2a2208',
     line: '#2c5262', lineStrong: '#5a8796', field: '#0c1f28', fieldBorder: '#7fa8b4', focus: '#ffd36e',
-    stage: '#08202a', stage2: '#0f3240', stageInk: '#eef8f3', stageMuted: '#b6d0cf', stageLine: 'rgba(238,248,243,.15)' },
+    stage: '#08202a', stage2: '#0f3240', stageAccent: '#ffd36e', stageInk: '#eef8f3', stageMuted: '#b6d0cf', stageLine: 'rgba(238,248,243,.15)' },
   simple: { ...generated.tokens.light, page: '#f7f7f5', surface: '#ffffff', text: '#1c1c21', muted: '#57585f', tint: '#efe9f4',
     primary: '#5a2d82', accent: '#5a2d82', line: '#e3e3e0', lineStrong: '#c4c4c0', field: '#ffffff', fieldBorder: '#77777e',
-    stage: '#f0edf4', stage2: '#f0edf4', stageInk: '#1c1c21', stageMuted: '#57585f', stageLine: '#c4c4c0' },
+    stage: '#f0edf4', stage2: '#f0edf4', stageAccent: '#5a2d82', stageInk: '#1c1c21', stageMuted: '#57585f', stageLine: '#c4c4c0' },
 };
 const chrome = {
   ...generated.chrome,

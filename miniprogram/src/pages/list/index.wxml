@@ -28,7 +28,7 @@
       <picker wx:if="{{collection === 'honors'}}" range="{{years}}" value="{{yearIndex}}" bindchange="changeYear"><view class="list-picker"><text class="zj-small">赛事年份</text><text class="list-picker-value">{{year}} ▾</text></view></picker>
       <picker range="{{games}}" range-key="title" value="{{gameIndex}}" bindchange="changeGame"><view class="list-picker"><text class="zj-small">游戏项目</text><text class="list-picker-value">{{games[gameIndex].title}} ▾</text></view></picker>
     </view>
-    <scroll-view wx:if="{{collection === 'recruitment'}}" scroll-x class="chips"><button wx:for="{{kinds}}" wx:key="*this" class="chip {{kind === item ? 'active' : ''}}" bindtap="changeKind" data-kind="{{item}}">{{item}}</button></scroll-view>
+    <scroll-view wx:if="{{collection === 'recruitment'}}" scroll-x class="chips" aria-role="radiogroup" aria-label="招新分类"><button wx:for="{{kinds}}" wx:key="*this" class="chip {{kind === item ? 'active' : ''}}" bindtap="changeKind" data-kind="{{item}}" aria-role="radio" aria-checked="{{kind === item}}" aria-label="{{item}}，{{kind === item ? '已选中' : '未选中'}}">{{item}}</button></scroll-view>
     <button wx:if="{{search || yearIndex || gameIndex || kind !== '全部'}}" class="plain list-clear" bindtap="clearFilters">清除筛选</button>
   </view>
 

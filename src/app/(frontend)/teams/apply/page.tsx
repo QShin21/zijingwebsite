@@ -10,6 +10,7 @@ import { TaskFrame, TaskNote } from "@/components/v2/TaskFrame";
 import { EmptyState, Notice, StatusPill, type Tone, buttonClass } from "@/components/v2/ui";
 import { formatDateTime } from "@/components/v2/format";
 import styles from "./apply.module.css";
+import { teamLoginHref } from "../auth-return";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "申请建立代表队" };
@@ -17,11 +18,11 @@ export const metadata = { title: "申请建立代表队" };
 const tone: Record<string, Tone> = { pending: "info", approved: "success", returned: "warning", rejected: "danger", withdrawn: "neutral" };
 
 export default async function Apply({ searchParams }: { searchParams: Promise<{ edit?: string; page?: string }> }) {
+  const query = await searchParams;
   const p = await cms(),
     { user } = await p.auth({ headers: await headers() });
-  if (!user) redirect("/login");
-  const actor = await currentTeamActor(p, user),
-    query = await searchParams;
+  if (!user) redirect(teamLoginHref("/teams/apply", query));
+  const actor = await currentTeamActor(p, user);
   const games = await p.find({ collection: "games", user: null, overrideAccess: false, draft: false, depth: 0, pagination: false, select: { title: true } });
   const allowed = games.docs.filter((game) => canProposeTeam(actor, game.id));
   const applications = await p.find({

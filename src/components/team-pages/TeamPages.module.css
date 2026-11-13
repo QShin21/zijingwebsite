@@ -587,7 +587,7 @@
   padding: 18px;
   border-radius: var(--z-radius);
   background:
-    radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--z-action) 40%, transparent), transparent 60%),
+    radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--z-action) 15%, transparent), transparent 60%),
     linear-gradient(165deg, var(--z-stage-2), var(--z-stage));
   color: var(--z-stage-ink);
 }
@@ -595,13 +595,15 @@
   color: var(--z-stage-ink);
 }
 .archiveRecord a:hover {
-  color: var(--z-accent);
+  color: var(--z-stage-ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .archiveRecord p {
   color: var(--z-stage-muted);
 }
 .archiveAward {
-  color: var(--z-accent);
+  color: var(--z-stage-ink);
   font-family: var(--z-num);
   font-size: 22px;
   font-weight: 900;

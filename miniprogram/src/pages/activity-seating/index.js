@@ -16,8 +16,9 @@ const { actions } = require('../../lib/page');
 const labels = { pending: '待审核', confirmed: '已确认', rejected: '已驳回', cancelled: '已取消', revoked: '已撤销', blocked: '未开放' };
 const tones = { pending: 'warning', confirmed: 'success', rejected: 'neutral', cancelled: 'neutral', revoked: 'neutral' };
 const filters = ['pending', 'confirmed', 'rejected', 'cancelled', 'revoked'].map(status => ({ status, label: labels[status] }));
-const zooms = [{ size: 36, label: '紧凑' }, { size: 52, label: '标准' }, { size: 68, label: '放大' }];
-const GAP = 8; // rpx between seats; keep in step with .seat margin-right in index.wxss
+// Pixel-sized targets stay usable on narrow phones; match the zoom rules and gap in index.wxss.
+const zooms = [{ size: 44, label: '紧凑' }, { size: 52, label: '标准' }, { size: 60, label: '放大' }];
+const GAP = 6; // px between seats, shared by row indents and board width
 const phonePattern = /^\+?[1-9]\d{6,14}$/;
 const proofPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const seatLabel = value => { const parts = String(value).split('-'); return parts[0] + '排' + parts[1] + '座'; };
