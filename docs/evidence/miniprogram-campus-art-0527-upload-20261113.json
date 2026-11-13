@@ -1,0 +1,22 @@
+{
+  "uploadedAt": "2026-11-13T23:02:36+08:00",
+  "revision": "cbe44562b978fa84fa5da53c49c91ed2cb8c3115",
+  "artworkRevision": "13ec1994807203fca8e003f095ccf26059c5951c",
+  "miniProgram": {
+    "version": "0.5.27",
+    "platformStatus": "developmentVersionUploaded",
+    "officialTool": "WeChat Developer Tools CLI",
+    "sizeBytes": 1014775,
+    "reviewSubmittedByThisTask": false,
+    "publicReleaseByThisTask": false,
+    "reviewAndReleaseStatus": "not checked: the existing WeChat platform tab and Edge window timed out during computer-use connection"
+  },
+  "verification": {
+    "miniProgramCheck": "Passed: 29 pages, 213 source files, 1338747 bytes; domain checking enabled.",
+    "designTokens": "32 generated design outputs matched.",
+    "targetedTests": "Six files, 47 tests passed, including campus-scene fallback, lifecycle, native page contracts, seating, tickets and layout interactions.",
+    "officialUpload": "The official CLI returned upload success and a fresh positive-sized output receipt.",
+    "officialSimulatorAndRealDevice": "not tested",
+    "websiteDeployment": "No website or database change in this release."
+  }
+}
