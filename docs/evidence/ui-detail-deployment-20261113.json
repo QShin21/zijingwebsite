@@ -1,0 +1,36 @@
+{
+  "web": {
+    "revision": "597ab466e41db268a2dd5dcb0e7dc50e9d6e3f96",
+    "deployedAt": "2026-11-13T16:33:14+08:00",
+    "buildId": "m9GfQxD_W5LfbffDlXJPJ",
+    "release": "/srv/zijingwebsite/releases/ui-detail-20261113-597ab46",
+    "previousRelease": "/srv/zijingwebsite/releases/campus-compat-20261113-c154b06",
+    "rollback": "/srv/zijingwebsite/backups/ui-detail-20261113-597ab46/rollback.sh",
+    "migration": "none; migration source and dependency lock match previous release",
+    "candidateAndProductionReadiness": "passed",
+    "publicHealth": "ready",
+    "publicHomeLoginPrivacyHttp": 200,
+    "publicHomepageCssMatchesBuild": 3,
+    "startupConnectionRetries": "initial connection attempts failed while services started; subsequent checks passed"
+  },
+  "miniapp": {
+    "revision": "597ab466e41db268a2dd5dcb0e7dc50e9d6e3f96",
+    "version": "0.5.21",
+    "uploadedAt": "2026-11-13T16:33:41+08:00",
+    "packageBytes": 856216,
+    "developmentUpload": "success",
+    "reviewSubmitted": false,
+    "published": false,
+    "realDevice": "not tested"
+  },
+  "verification": {
+    "targetedTestsPassed": 221,
+    "legacyTests": "16 failures and 111 passes; failing test names match the e61a837 baseline",
+    "miniappStaticCheck": "passed: 29 pages",
+    "changedFilesLint": "passed",
+    "cleanSnapshotTypecheck": "passed",
+    "productionBuild": "passed",
+    "visualChecks": "synthetic browser layouts and theme contrast; mini-program WXML/WXSS compiler checks",
+    "authenticatedProductionFlows": "not tested"
+  }
+}
