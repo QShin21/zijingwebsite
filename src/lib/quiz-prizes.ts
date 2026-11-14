@@ -194,10 +194,13 @@ export async function quizAction(user: User, data: Record<string, unknown>) {
     if (["open-round", "close-round", "settle-round"].includes(action)) {
       const row = await roundFor(client, eventID, data.roundId);
       if (action === "open-round") {
-        if (event.status !== "published" || row.status !== "draft") fail("请先发布活动并检查轮次状态", 409);
+        if (event.status === "archived") fail("活动已结束，请先在活动管理中重新开放", 409);
+        if (row.status !== "draft") fail("轮次状态已变化，请刷新后重试", 409);
         if (row.closes_at && new Date(row.closes_at).getTime() <= Date.now()) fail("截止时间需要晚于当前时间", 400);
         const count = await client.query<{ n: number }>("SELECT count(*)::int AS n FROM quiz_prizes WHERE event_id=$1", [eventID]);
         if (!count.rows[0].n) fail("请先设置共享奖池", 400);
+        // The first open operation publishes its draft event in the same transaction.
+        if (event.status === "draft") await client.query("UPDATE quiz_events SET status='published',updated_at=now() WHERE id=$1", [eventID]);
         await client.query("UPDATE quiz_rounds SET status='open' WHERE id=$1", [row.id]);
       } else if (action === "close-round") {
         if (row.status !== "open") fail("本轮状态已变化，请刷新", 409);

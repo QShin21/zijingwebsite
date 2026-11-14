@@ -77,3 +77,22 @@ it("切换账号后丢弃前一账号迟到的读取并清除选择", async () =
   expect(page.data.detail.event.title).toBe("合成活动");
   expect(page.data.detail.rounds[0].questions[0].options[1].selected).toBe(false);
 });
+
+it("原生管理：开放结果与错误显示在当前轮次", async () => {
+  const view = detail(); view.event = { ...event, status: "draft" }; view.rounds[0].status = "draft";
+  let fail = true;
+  const { page } = harness(async (path, options) => {
+    if (options.method === "POST") {
+      if (fail) throw new Error("请先设置共享奖池");
+      view.event.status = "published"; view.rounds[0].status = "open"; return { saved: true };
+    }
+    return path.includes("event=") ? view : { admin: true, events: [view.event] };
+  });
+  page.onLoad({ event: "7" }); await page.onShow();
+  await page.roundAction(tap({ action: "open-round", id: 5 }));
+  expect(page.data.detail.rounds[0].feedback).toMatchObject({ type: "error", message: "请先设置共享奖池" });
+  fail = false;
+  await page.roundAction(tap({ action: "open-round", id: 5 }));
+  expect(page.data.detail.event.status).toBe("published");
+  expect(page.data.detail.rounds[0]).toMatchObject({ status: "open", feedback: { type: "success", message: "本轮已开放，可以开始作答。" } });
+});

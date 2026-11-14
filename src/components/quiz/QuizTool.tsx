@@ -13,6 +13,7 @@ type Detail = { admin: boolean; event: Event; prizes: Prize[]; rounds: Round[];
   winners: { round_id: number; user_id: number | null; name: string; prize: string; drawn_at: string }[] };
 type Listing = { admin: boolean; events: Event[] };
 type Send = (data: Record<string, unknown>, confirm?: string) => Promise<boolean>;
+type RoundFeedback = { roundId: number; type: "error" | "success"; text: string };
 
 async function request<T>(path: string, data?: Record<string, unknown>): Promise<T> {
   const response = await fetch(path, data ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) } : { cache: "no-store" });
@@ -81,8 +82,11 @@ function RoundEditor({ round, send, done }: { round?: Round; send: Send; done?: 
   </form>;
 }
 
-function RoundCard({ round, admin, active, send }: { round: Round; admin: boolean; active: boolean; send: Send }) {
+function RoundCard({ round, admin, eventStatus, busy, pendingRound, feedback, send }: {
+  round: Round; admin: boolean; eventStatus: string; busy: boolean; pendingRound: number | null; feedback: RoundFeedback | null; send: Send;
+}) {
   const t = useT();
+  const active = eventStatus === "published";
   const [selected, setSelected] = useState<Record<number, number>>({}), [correct, setCorrect] = useState<Record<number, number>>({}), [editing, setEditing] = useState(false);
   const states: Record<string, string> = { draft: t("草稿", "Draft"), open: t("作答中", "Open"), closed: t("已截止", "Closed"), settled: t("已公布答案", "Results published") };
   function selectedAnswers(values: Record<number, number>) { return round.questions.map((_, i) => values[i] ?? null); }
@@ -91,7 +95,8 @@ function RoundCard({ round, admin, active, send }: { round: Round; admin: boolea
       <span>{t(`答对 ${round.threshold} 题可抽奖`, `${round.threshold} correct to draw`)}</span></div>
     {round.closesAt && <p>{t("截止：", "Deadline: ")}{displayDate(round.closesAt)}</p>}
     {admin && <p>{t(`已提交 ${round.submissionCount ?? 0} 人`, `${round.submissionCount ?? 0} submissions`)}</p>}
-    {editing ? <RoundEditor round={round} send={send} done={() => setEditing(false)} /> : <>
+    {editing ? <><RoundEditor round={round} send={send} done={() => setEditing(false)} />
+      {feedback?.roundId === round.id && <p className={feedback.type === "error" ? styles.error : styles.message} role={feedback.type === "error" ? "alert" : "status"}>{feedback.text}</p>}</> : <>
       {round.questions.map((q, i) => <fieldset key={i} className={styles.question}><legend>{i + 1}. {q.prompt}</legend>
         {q.options.map((option, j) => <label key={j} className={styles.option}>
           {round.status === "open" && !round.entry && active && <input type="radio" name={`round-${round.id}-${i}`} checked={selected[i] === j} onChange={() => setSelected({ ...selected, [i]: j })} />}
@@ -106,12 +111,18 @@ function RoundCard({ round, admin, active, send }: { round: Round; admin: boolea
       </fieldset>)}
       {round.entry ? <p className={styles.result}>{round.entry.score === null ? t("已提交，等待公布答案。", "Submitted; waiting for results.") :
         t(`答对 ${round.entry.score} 题。`, `${round.entry.score} correct.`)} {round.entry.prize ? t(`获得：${round.entry.prize}`, `Prize: ${round.entry.prize}`) : ""}</p> : null}
+      {admin && round.status === "draft" && eventStatus === "draft" && <p className={styles.hint}>{t("开放本轮时会同时发布活动。", "Opening this round will also publish the event.")}</p>}
+      {admin && round.status === "draft" && eventStatus === "archived" && <p className={styles.hint}>{t("活动已结束，请先在活动管理中重新开放。", "Reopen the event in event management first.")}</p>}
+      {feedback?.roundId === round.id && <p className={feedback.type === "error" ? styles.error : styles.message} role={feedback.type === "error" ? "alert" : "status"}>{feedback.text}</p>}
+      {busy && pendingRound === round.id && <p role="status">{t("正在处理…", "Working…")}</p>}
       <div className={styles.actions}>
-        {round.status === "open" && !round.entry && active && <button onClick={() => void send({ action: "submit", roundId: round.id, answers: selectedAnswers(selected) }, t("确认提交？提交后不能修改。", "Submit your answers? They cannot be changed."))}>{t("提交竞猜", "Submit answers")}</button>}
-        {round.entry?.eligible && !round.entry.prize && active && <button onClick={() => void send({ action: "draw", roundId: round.id })}>{t("抽取奖品", "Draw a prize")}</button>}
-        {admin && round.status === "draft" && <><button onClick={() => setEditing(true)}>{t("编辑轮次", "Edit round")}</button><button onClick={() => void send({ action: "open-round", roundId: round.id }, t("开放后题目与门槛将锁定，确认开放？", "Open this round and lock its questions?"))}>{t("开放竞猜", "Open round")}</button></>}
-        {admin && round.status === "open" && <button onClick={() => void send({ action: "close-round", roundId: round.id }, t("确认截止本轮？", "Close this round?"))}>{t("截止竞猜", "Close round")}</button>}
-        {admin && round.status === "closed" && <button onClick={() => void send({ action: "settle-round", roundId: round.id, answers: selectedAnswers(correct) }, t("确认公布答案？公布后答案将锁定。", "Publish and lock the correct answers?"))}>{t("公布答案", "Publish answers")}</button>}
+        {round.status === "open" && !round.entry && active && <button disabled={busy} onClick={() => void send({ action: "submit", roundId: round.id, answers: selectedAnswers(selected) }, t("确认提交？提交后不能修改。", "Submit your answers? They cannot be changed."))}>{t("提交竞猜", "Submit answers")}</button>}
+        {round.entry?.eligible && !round.entry.prize && active && <button disabled={busy} onClick={() => void send({ action: "draw", roundId: round.id })}>{t("抽取奖品", "Draw a prize")}</button>}
+        {admin && round.status === "draft" && <><button disabled={busy} onClick={() => setEditing(true)}>{t("编辑轮次", "Edit round")}</button><button disabled={busy || eventStatus === "archived"} onClick={() => void send({ action: "open-round", roundId: round.id }, eventStatus === "draft"
+          ? t("开放本轮将同时发布活动，并锁定题目和门槛。确认开放？", "Opening this round will publish the event and lock its questions. Continue?")
+          : t("开放后题目与门槛将锁定，确认开放？", "Open this round and lock its questions?"))}>{t("开放竞猜", "Open round")}</button></>}
+        {admin && round.status === "open" && <button disabled={busy} onClick={() => void send({ action: "close-round", roundId: round.id }, t("确认截止本轮？", "Close this round?"))}>{t("截止竞猜", "Close round")}</button>}
+        {admin && round.status === "closed" && <button disabled={busy} onClick={() => void send({ action: "settle-round", roundId: round.id, answers: selectedAnswers(correct) }, t("确认公布答案？公布后答案将锁定。", "Publish and lock the correct answers?"))}>{t("公布答案", "Publish answers")}</button>}
       </div>
     </>}
   </article>;
@@ -122,27 +133,37 @@ export function QuizTool() {
   const [listing, setListing] = useState<Listing | null>(null), [detail, setDetail] = useState<Detail | null>(null);
   const [eventID, setEventID] = useState<number | null>(null), [loading, setLoading] = useState(true), [busy, setBusy] = useState(false);
   const [error, setError] = useState(""), [message, setMessage] = useState("");
+  const [roundFeedback, setRoundFeedback] = useState<RoundFeedback | null>(null), [pendingRound, setPendingRound] = useState<number | null>(null);
   const [title, setTitle] = useState(""), [description, setDescription] = useState(""), [prizeName, setPrizeName] = useState(""), [quantity, setQuantity] = useState("1");
   const load = useCallback(async (id: number | null) => {
     setLoading(true); setError("");
-    try { const list = await request<Listing>("/api/quiz"); setListing(list); setDetail(id ? await request<Detail>(`/api/quiz?event=${id}`) : null); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "加载失败"); }
+    try { const list = await request<Listing>("/api/quiz"); setListing(list); setDetail(id ? await request<Detail>(`/api/quiz?event=${id}`) : null); return true; }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "加载失败"); return false; }
     finally { setLoading(false); }
   }, []);
   useEffect(() => { const param = new URLSearchParams(window.location.search).get("event"); const id = param && /^[1-9]\d*$/.test(param) ? Number(param) : null; setEventID(id); void load(id); }, [load]);
-  function select(id: number | null) { setEventID(id); setDetail(null); setMessage(""); window.history.replaceState(null, "", id ? `/quiz?event=${id}` : "/quiz"); void load(id); }
+  function select(id: number | null) { setEventID(id); setDetail(null); setMessage(""); setRoundFeedback(null); window.history.replaceState(null, "", id ? `/quiz?event=${id}` : "/quiz"); void load(id); }
   const send: Send = async (data, confirm) => {
     if (busy || (confirm && !window.confirm(confirm))) return false;
-    setBusy(true); setError(""); setMessage("");
+    const roundId = typeof data.roundId === "number" ? data.roundId : null;
+    setBusy(true); setPendingRound(roundId); setError(""); setMessage(""); setRoundFeedback(null);
     try {
       const result = await request<{ id?: number; prize?: string }>("/api/quiz", { ...data, ...(eventID ? { eventId: eventID } : {}) });
-      if (result.prize) setMessage(t(`抽奖结果：${result.prize}`, `Your prize: ${result.prize}`));
-      else setMessage(t("操作完成。", "Saved."));
-      if (data.action === "create-event" && result.id) { setTitle(""); setDescription(""); select(result.id); }
-      else await load(eventID);
+      const success = result.prize ? t(`抽奖结果：${result.prize}`, `Your prize: ${result.prize}`)
+        : data.action === "open-round" ? t("本轮已开放，可以开始作答。", "This round is open for answers.") : t("操作完成。", "Saved.");
+      if (data.action === "create-event" && result.id) { setTitle(""); setDescription(""); select(result.id); setMessage(success); }
+      else {
+        const refreshed = await load(eventID);
+        const notice = refreshed ? success : t("操作已提交，请刷新页面核对最新状态。", "The action was submitted; refresh to check the current status.");
+        if (roundId) setRoundFeedback({ roundId, type: "success", text: notice }); else setMessage(notice);
+      }
       return true;
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "操作失败"); return false; }
-    finally { setBusy(false); }
+    } catch (cause) {
+      const notice = cause instanceof Error ? cause.message : "操作失败";
+      if (roundId) setRoundFeedback({ roundId, type: "error", text: notice }); else setError(notice);
+      return false;
+    }
+    finally { setPendingRound(null); setBusy(false); }
   };
   function create(e: FormEvent) { e.preventDefault(); void send({ action: "create-event", title, description }); }
   const admin = detail?.admin ?? listing?.admin ?? false;
@@ -176,7 +197,7 @@ export function QuizTool() {
               <label>{t("数量", "Quantity")}<input required type="number" min="1" max="100000" value={quantity} onChange={e => setQuantity(e.target.value)} /></label><button>{t("加入奖池", "Add prize")}</button>
             </form></details>}
         </section>
-        <section><h2>{t("竞猜轮次", "Quiz rounds")}</h2>{detail.rounds.length ? detail.rounds.map(round => <RoundCard key={`${round.id}-${round.status}`} round={round} active={detail.event.status === "published"} admin={admin} send={send} />) : <p>{t("轮次正在筹备。", "Rounds are being prepared.")}</p>}</section>
+        <section><h2>{t("竞猜轮次", "Quiz rounds")}</h2>{detail.rounds.length ? detail.rounds.map(round => <RoundCard key={`${round.id}-${round.status}`} round={round} eventStatus={detail.event.status} admin={admin} busy={busy} pendingRound={pendingRound} feedback={roundFeedback} send={send} />) : <p>{t("轮次正在筹备。", "Rounds are being prepared.")}</p>}</section>
         {admin && <><section className={styles.card}><h2>{t("新增竞猜轮次", "Add a round")}</h2><p>{t("每题为单选题；开放后题目和门槛锁定。", "Each question has one answer; opening locks the questions and threshold.")}</p><RoundEditor send={send} /></section>
           <section className={styles.card}><h2>{t("中奖记录", "Prize records")}</h2>{detail.winners.length ? <ul className={styles.prizes}>{detail.winners.map((record, i) => <li key={`${record.round_id}-${record.user_id}-${i}`}><span>{record.name} · {detail.rounds.find(round => round.id === record.round_id)?.title}</span><strong>{record.prize}</strong></li>)}</ul> : <p>{t("暂时没有中奖记录。", "No prizes drawn yet.")}</p>}</section></>}
       </>}

@@ -29,4 +29,5 @@
 .card details > .inline { padding: .55rem 0; }
 .message, .result { background: #e7f4e9; color: #204c2b; border-radius: 10px; padding: .8rem; }
 .error { background: #fff0ee; color: #902e27; border-radius: 10px; padding: .8rem; }
+.hint { color: var(--z-muted); font-size: .9rem; }
 @media (max-width: 600px) { .card { border-radius: 12px; } .inline label { min-width: 100%; } .actions button { flex: 1 1 auto; } }

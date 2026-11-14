@@ -60,11 +60,15 @@
           </block>
         </view>
         <view wx:if="{{round.entry}}" class="quiz-note"><text wx:if="{{round.entry.score === null}}">{{t.submitted}}</text><text wx:else>{{t.score}}：{{round.entry.score}}</text><text wx:if="{{round.entry.prize}}"> · {{t.prize}}：{{round.entry.prize}}</text></view>
+        <text wx:if="{{detail.admin && round.status === 'draft' && detail.event.status === 'draft'}}" class="quiz-muted">{{t.openDraftHint}}</text>
+        <text wx:if="{{detail.admin && round.status === 'draft' && detail.event.status === 'archived'}}" class="quiz-muted">{{t.openArchivedHint}}</text>
+        <view wx:if="{{round.feedback}}" class="{{round.feedback.type === 'error' ? 'quiz-error' : 'quiz-note'}}" aria-role="{{round.feedback.type === 'error' ? 'alert' : 'status'}}">{{round.feedback.message}}</view>
+        <text wx:if="{{busy && pendingRound === round.id}}" class="quiz-muted">{{t.working}}</text>
         <view class="quiz-actions">
           <button wx:if="{{round.status === 'open' && !round.entry && detail.event.status === 'published'}}" class="primary" bindtap="roundAction" data-action="submit" data-id="{{round.id}}" disabled="{{busy}}">{{t.submit}}</button>
           <button wx:if="{{round.entry.eligible && !round.entry.prize && detail.event.status === 'published'}}" class="primary" bindtap="roundAction" data-action="draw" data-id="{{round.id}}" disabled="{{busy}}">{{t.draw}}</button>
           <button wx:if="{{detail.admin && round.status === 'draft'}}" class="secondary" bindtap="editRound" data-id="{{round.id}}">{{t.editRound}}</button>
-          <button wx:if="{{detail.admin && round.status === 'draft'}}" class="primary" bindtap="roundAction" data-action="open-round" data-id="{{round.id}}" disabled="{{busy}}">{{t.openRound}}</button>
+          <button wx:if="{{detail.admin && round.status === 'draft'}}" class="primary" bindtap="roundAction" data-action="open-round" data-id="{{round.id}}" disabled="{{busy || detail.event.status === 'archived'}}">{{t.openRound}}</button>
           <button wx:if="{{detail.admin && round.status === 'open'}}" class="secondary" bindtap="roundAction" data-action="close-round" data-id="{{round.id}}" disabled="{{busy}}">{{t.closeRound}}</button>
           <button wx:if="{{detail.admin && round.status === 'closed'}}" class="primary" bindtap="roundAction" data-action="settle-round" data-id="{{round.id}}" disabled="{{busy}}">{{t.publishAnswers}}</button>
         </view>

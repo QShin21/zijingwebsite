@@ -38,7 +38,7 @@ async function settle(id: number, round: number) {
   await action(admin, id, round, "close-round");
   await action(admin, id, round, "settle-round", { answers: [0, 1] });
 }
-const request = (token?: string, body?: unknown, origin = "http://localhost:3000") => new Request("http://localhost:3000/api/quiz", {
+const request = (token?: string, body?: unknown, origin = process.env.SERVER_URL || "http://localhost:3000") => new Request("http://localhost:3000/api/quiz", {
   method: body === undefined ? "GET" : "POST", headers: { ...(token ? { authorization: `JWT ${token}` } : {}), origin, "content-type": "application/json" },
   ...(body === undefined ? {} : { body: JSON.stringify(body) }),
 });
@@ -72,6 +72,31 @@ describe("竞猜与共享奖池：隔离 PostgreSQL", () => {
     expect((await POST(request(tokens[0], { action: "add-prize", eventId: draft.id, name: "x", quantity: 1 }))).status).toBe(403);
     expect((await POST(request(undefined, { action: "create-event" }, "https://example.invalid"))).status).toBe(403);
     const response = await GET(request(adminToken)); expect(response.status).toBe(200); expect(response.headers.get("cache-control")).toContain("no-store");
+  });
+  it("首次开放草稿轮次时同步发布活动，前置校验失败时两者保持草稿", async () => {
+    const { id } = await quizAction(admin, { action: "create-event", title: "待开放活动", description: "" }) as { id: number };
+    const { id: round } = await quizAction(admin, { action: "save-round", eventId: id, title: "待开放轮次", threshold: 1, questions: qs }) as { id: number };
+    const payload = { action: "open-round", eventId: id, roundId: round };
+    const missingPrize = await POST(request(adminToken, payload));
+    expect(missingPrize.status).toBe(400);
+    expect((await missingPrize.json()).error).toContain("请先设置共享奖池");
+    const before = await quizEvent(admin, id);
+    expect(before.event.status).toBe("draft"); expect(before.rounds[0].status).toBe("draft");
+    await quizAction(admin, { action: "add-prize", eventId: id, name: "合成奖品", quantity: 1 });
+    expect((await POST(request(adminToken, payload))).status).toBe(200);
+    const after = await quizEvent(members[0], id);
+    expect(after.event.status).toBe("published"); expect(after.rounds[0].status).toBe("open");
+  });
+  it("已截止时间及已归档活动阻止开放并保留原状态", async () => {
+    const { id } = await quizAction(admin, { action: "create-event", title: "有效期测试", description: "" }) as { id: number };
+    await quizAction(admin, { action: "add-prize", eventId: id, name: "合成奖品", quantity: 1 });
+    const { id: round } = await quizAction(admin, { action: "save-round", eventId: id, title: "已过期", threshold: 1, questions: qs,
+      closesAt: new Date(Date.now() - 60000).toISOString() }) as { id: number };
+    await expect(action(admin, id, round, "open-round")).rejects.toMatchObject({ status: 400 });
+    expect((await quizEvent(admin, id)).event.status).toBe("draft");
+    await quizAction(admin, { action: "update-event", eventId: id, title: "有效期测试", description: "", status: "archived" });
+    await expect(action(admin, id, round, "open-round")).rejects.toMatchObject({ status: 409 });
+    expect((await quizEvent(admin, id)).rounds[0].status).toBe("draft");
   });
   it("截止前隐藏答案、只接受完整作答一次，开放后锁定题目", async () => {
     const { id, round } = await createEvent();
@@ -167,6 +192,32 @@ describe("竞猜与共享奖池：隔离 PostgreSQL", () => {
         expect(overflow.scroll).toBeLessThanOrEqual(overflow.viewport);
         expect(overflow.elements).toEqual([]);
       }
+    } finally { await context.close(); await browser.close(); }
+  }, 60000);
+  it.runIf(Boolean(process.env.QUIZ_BROWSER_ORIGIN))("网页管理员从草稿直接开放，奖池缺失时在轮次按钮旁显示原因", async () => {
+    const { chromium } = await import("@playwright/test");
+    const { id } = await quizAction(admin, { action: "create-event", title: "浏览器草稿", description: "" }) as { id: number };
+    const { id: round } = await quizAction(admin, { action: "save-round", eventId: id, title: "浏览器轮次", threshold: 1, questions: qs }) as { id: number };
+    const browser = await chromium.launch({ headless: true });
+    const origin = process.env.QUIZ_BROWSER_ORIGIN!;
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await context.addCookies([{ name: "payload-token", value: adminToken, url: origin }]);
+    const page = await context.newPage();
+    const dialogs: string[] = [];
+    page.on("dialog", dialog => { dialogs.push(dialog.message()); void dialog.accept(); });
+    try {
+      await page.goto(`${origin}/quiz?event=${id}`, { waitUntil: "domcontentloaded" });
+      const card = page.locator("article").filter({ has: page.getByRole("heading", { name: "浏览器轮次" }) });
+      await card.getByRole("button", { name: "开放竞猜" }).click();
+      await card.getByRole("alert").waitFor();
+      expect(await card.getByRole("alert").textContent()).toContain("请先设置共享奖池");
+      expect((await quizEvent(admin, id)).event.status).toBe("draft");
+      await quizAction(admin, { action: "add-prize", eventId: id, name: "合成奖品", quantity: 1 });
+      await card.getByRole("button", { name: "开放竞猜" }).click();
+      await card.getByText("本轮已开放，可以开始作答。").waitFor();
+      expect(dialogs).toHaveLength(2); expect(dialogs[0]).toContain("同时发布活动");
+      const result = await quizEvent(members[0], id);
+      expect(result.event.status).toBe("published"); expect(result.rounds.find(item => item.id === round)?.status).toBe("open");
     } finally { await context.close(); await browser.close(); }
   }, 60000);
 });
