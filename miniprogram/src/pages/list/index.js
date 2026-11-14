@@ -7,6 +7,7 @@ const club = require('../../lib/club');
 const session = require('../../lib/session');
 const reading = require('../../lib/native-reading');
 const { actions, error, labels } = require('../../lib/page');
+const englishOverlay = (() => { try { const value = require('../../lib/english-overlay'); if (value && typeof value.list === 'function') return value; } catch { /* Harnesses may omit the overlay module; Chinese text stays. */ } return null; })();
 const i18n = (() => { try { const value = require('../../lib/i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { t: zh => zh, message: value => value, locale: () => 'zh', bind() {}, unbind() {}, navTitle() {}, subscribe: () => () => {} }; })();
 const kindsEn = { '全部': 'All', '普通社员': 'Members', '代表队选拔': 'Team trials', '骨干招新': 'Staff recruitment' };
 const allGames = () => ({ id: '', title: i18n.t('全部项目', 'All games') });
@@ -84,7 +85,7 @@ Page(withVisualTheme({
         game: this.data.games[this.data.gameIndex] && this.data.games[this.data.gameIndex].id,
         year: this.data.collection === 'honors' && this.data.year !== '全部年份' ? this.data.year : undefined });
       // English mode: titles/summaries from the same-permission V2 read (cached English only).
-      const listed = await require('../../lib/english-overlay').list(this.data.collection, result.docs);
+      const listed = englishOverlay ? await englishOverlay.list(this.data.collection, result.docs) : result.docs;
       const docs = (this.data.collection === 'announcements' ? listed : await cms.decorate(listed)).map(reading.entry);
       if (ticket !== this._ticket) return;
       this.setData({ loading: false, loadingMore: false, docs: more ? this.data.docs.concat(docs) : docs, page: result.page, hasMore: result.hasNextPage });

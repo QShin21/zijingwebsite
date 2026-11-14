@@ -13,6 +13,7 @@ const video = require('../../lib/video');
 const reading = require('../../lib/native-reading');
 const images = require('../../lib/v2-images');
 const { actions, error } = require('../../lib/page');
+const englishOverlay = (() => { try { const value = require('../../lib/english-overlay'); if (value && typeof value.list === 'function') return value; } catch { /* Harnesses may omit the overlay module; Chinese text stays. */ } return null; })();
 const i18n = (() => { try { const value = require('../../lib/i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { t: zh => zh, message: value => value, locale: () => 'zh', bind() {}, navTitle() {}, unbind() {}, subscribe: () => () => {} }; })();
 const text = {
   back: ['‹ 返回', '‹ Back'], verified: ['已核验', 'Verified'], demo: ['演示资料', 'Demo'], start: ['开始', 'Starts'],
@@ -91,9 +92,13 @@ Page(withVisualTheme({
       const detail = scoped ? await cms.publishedDetail(collection, id, slug, category) : null;
       let doc = detail ? detail.doc : social ? await cms.socialDetail(collection, id) : await cms.detail(collection, id, slug);
       // English mode, REST-read records (albums, teams, communities): text from the same-permission V2 read.
-      if (!detail && !social) {
-        const english = await require('../../lib/english-overlay').detail(collection, doc);
+      if (!detail && !social && englishOverlay) {
+        const english = await englishOverlay.detail(collection, doc);
         if (english) doc = { ...doc, title: english.title, summary: english.summary, ...(english.body ? { body: english.body } : {}) };
+        if (collection === 'albums') {
+          const photos = await englishOverlay.captions(doc);
+          if (photos) doc = { ...doc, photos };
+        }
       }
       const layout = detail?.presentation || (detail?.images?.length ? { mode: 'gallery', blocks: [] } : null);
       const coverPromise = detail ? images.media(detail.cover) : cms.media(doc.cover);

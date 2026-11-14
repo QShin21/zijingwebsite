@@ -1,6 +1,6 @@
 import type { Locale } from "../i18n/locale";
 import type { SignupForm } from "../signup-schema";
-import { formDisplay, Overlay, type FormDisplay, type TranslatableCollection } from "./segments";
+import { formDisplay, Overlay, siteDocumentId, type FormDisplay, type TranslatableCollection } from "./segments";
 import { loadOverlays } from "./store";
 
 /*
@@ -10,17 +10,12 @@ import { loadOverlays } from "./store";
  * IDs, slugs, hrefs, states, dates, option values and every other field stay untouched.
  */
 type Ref = { collection: TranslatableCollection; id: number };
-type Shape = "item" | "community" | "team" | "communityCard" | "teamCard" | "communityDetail" | "teamDetail" | "page" | null;
+type Shape = "home" | "item" | "community" | "team" | "communityCard" | "teamCard" | "communityDetail" | "teamDetail" | "page" | null;
 
 function itemRef(value: Record<string, unknown>): Ref | null {
   const ref = value.ref as Record<string, unknown> | undefined;
   if (!ref || typeof ref !== "object") return null;
-  if (ref.type === "honor" && typeof ref.key === "string") {
-    // Key from the honor wall projection: "team-honor-records:<id>". Legacy archive
-    // entries ("honors:<id>") are not cached and stay Chinese.
-    const match = /^team-honor-records:(\d+)$/.exec(ref.key);
-    return match ? { collection: "team-honor-records", id: Number(match[1]) } : null;
-  }
+  if (ref.type === "honor" && typeof ref.key === "string") return honorKeyRef(ref.key);
   if (typeof ref.id !== "number") return null;
   if (ref.type === "event") return { collection: ref.source === "club" ? "events" : "community-posts", id: ref.id };
   if (ref.type === "announcement") return { collection: "announcements", id: ref.id };
@@ -28,11 +23,20 @@ function itemRef(value: Record<string, unknown>): Ref | null {
   if (ref.type === "news") return { collection: "news", id: ref.id };
   if (ref.type === "album") return { collection: "albums", id: ref.id };
   if (ref.type === "showcase") return { collection: "community-showcase", id: ref.id };
+  if (ref.type === "staffBatch") return { collection: "staff-batches", id: ref.id };
+  if (ref.type === "teamRecruitment") return { collection: "team-recruitments", id: ref.id };
   return null;
+}
+/** Honor wall keys: "team-honor-records:<id>" (current records) and "honors:<id>" (verified legacy). */
+export function honorKeyRef(value: string): Ref | null {
+  const match = /^(team-honor-records|honors):(\d+)$/.exec(value);
+  return match ? { collection: match[1] as "team-honor-records" | "honors", id: Number(match[2]) } : null;
 }
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 /** CommunityRef { id, slug, title, hue } and TeamRef { id, slug, title, community } are recognized by shape. */
 function shapeOf(value: Record<string, unknown>): Shape {
+  // HomeResponse: { sections, site: { heroTitle, heroSubtitle, heroAction, footer, ... } }.
+  if (Array.isArray(value.sections) && isRecord(value.site) && "heroTitle" in value.site && "footer" in value.site) return "home";
   if (itemRef(value)) return "item";
   if (typeof value.id === "number" && typeof value.slug === "string" && typeof value.title === "string") {
     if (typeof value.hue === "number") return "community";
@@ -47,6 +51,7 @@ function shapeOf(value: Record<string, unknown>): Shape {
 }
 function refFor(value: Record<string, unknown>, shape: Shape): Ref | null {
   switch (shape) {
+    case "home": return { collection: "site", id: siteDocumentId };
     case "item": return itemRef(value);
     case "community": return { collection: "games", id: value.id as number };
     case "team": return { collection: "teams", id: value.id as number };
@@ -76,7 +81,7 @@ function collect(value: unknown, refs: Ref[], depth = 0) {
 const replaceable: Record<Exclude<Shape, null>, readonly string[]> = {
   item: ["title", "summary", "location", "body", "competition", "placing", "description"],
   community: ["title"], team: ["title"], communityCard: ["summary"], teamCard: ["summary"],
-  communityDetail: [], teamDetail: [], page: ["title"],
+  communityDetail: [], teamDetail: [], page: ["title"], home: [],
 };
 
 function transform(value: unknown, overlays: Map<string, Overlay>, depth = 0): unknown {
@@ -88,6 +93,12 @@ function transform(value: unknown, overlays: Map<string, Overlay>, depth = 0): u
   const shape = shapeOf(source);
   const ref = refFor(source, shape);
   const overlay = ref && overlays.get(key(ref));
+  if (overlay && shape === "home") {
+    const site = result.site as Record<string, unknown>;
+    const action = isRecord(site.heroAction) ? { ...site.heroAction, label: overlay.text(site.heroAction.label) } : site.heroAction;
+    result.site = { ...site, heroTitle: overlay.text(site.heroTitle), heroSubtitle: overlay.text(site.heroSubtitle), footer: overlay.text(site.footer), heroAction: action };
+    result.sections = (result.sections as unknown[]).map((section) => isRecord(section) && typeof section.title === "string" ? { ...section, title: overlay.text(section.title) } : section);
+  }
   if (overlay && shape) {
     for (const field of replaceable[shape]) if (typeof source[field] === "string") result[field] = overlay.text(source[field]);
     // Showcase cards carry image captions (albums use the detail photo page below).
@@ -132,17 +143,18 @@ export async function localizeView<T>(value: T, locale: Locale): Promise<T> {
 
 /**
  * Honor archive DTO (`/api/team-honor-archives/<team>`, used by the mini program): records
- * carry the same "team-honor-records:<id>" key as the V2 cards but no `ref`. Only title,
- * competition, placing and description of those records are replaced.
+ * carry the same "team-honor-records:<id>" / "honors:<id>" keys as the V2 cards but no
+ * `ref`. Only title, competition, placing and description of those records are replaced;
+ * media, source links and keys are unchanged.
  */
 export async function localizeHonorArchive<T extends { records?: Record<string, unknown>[] }>(archive: T, locale: Locale): Promise<T> {
   if (locale !== "en" || !archive || !Array.isArray(archive.records)) return archive;
   const ids = archive.records.flatMap((record) => {
-    const match = typeof record.key === "string" ? /^team-honor-records:(\d+)$/.exec(record.key) : null;
-    return match ? [Number(match[1])] : [];
+    const ref = typeof record.key === "string" ? honorKeyRef(record.key) : null;
+    return ref ? [ref] : [];
   });
   if (!ids.length) return archive;
-  const overlays = await loadOverlays(ids.map((id) => ({ collection: "team-honor-records" as const, id })));
+  const overlays = await loadOverlays(ids);
   if (!overlays.size) return archive;
   return { ...archive, records: archive.records.map((record) => {
     const overlay = typeof record.key === "string" ? overlays.get(record.key) : undefined;
@@ -165,4 +177,19 @@ export async function localizedTitle(collection: TranslatableCollection, id: num
   if (locale !== "en") return title;
   const overlay = (await loadOverlays([{ collection, id }])).get(`${collection}:${id}`);
   return overlay ? overlay.text(title) : title;
+}
+
+/** Public home texts from the site settings global (layout footer and SEO description). */
+export async function localizedSiteTexts<T extends { footer?: string | null; description?: string | null }>(site: T, locale: Locale): Promise<T> {
+  if (locale !== "en") return site;
+  const overlay = (await loadOverlays([{ collection: "site", id: siteDocumentId }])).get(`site:${siteDocumentId}`);
+  if (!overlay) return site;
+  return { ...site, footer: overlay.text(site.footer ?? null), description: overlay.text(site.description ?? null) };
+}
+
+/** Title and description of a recruitment batch detail page (already read with its access rules). */
+export async function localizedBatchTexts(collection: "staff-batches" | "team-recruitments", id: number, texts: { title: string; description: string | null }, locale: Locale) {
+  if (locale !== "en") return texts;
+  const overlay = (await loadOverlays([{ collection, id }])).get(`${collection}:${id}`);
+  return overlay ? { title: overlay.text(texts.title), description: overlay.text(texts.description) } : texts;
 }

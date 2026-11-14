@@ -21,10 +21,16 @@ export type TranslatableCollection =
   | "events" | "announcements" | "community-posts"
   // 2026-11-14 public content: news, albums, fixed pages (except privacy), community and
   // team introductions, visible showcase posts and approved honor records.
-  | "news" | "albums" | "pages" | "games" | "teams" | "community-showcase" | "team-honor-records";
+  | "news" | "albums" | "pages" | "games" | "teams" | "community-showcase" | "team-honor-records"
+  // 2026-11-14 (2): verified legacy honors, recruitment batch notices and the public home
+  // texts of the site settings global (stored with doc_id 1).
+  | "honors" | "staff-batches" | "team-recruitments" | "site";
 export const translatableCollections: readonly TranslatableCollection[] = [
   "events", "announcements", "community-posts", "news", "albums", "pages", "games", "teams", "community-showcase", "team-honor-records",
+  "honors", "staff-batches", "team-recruitments", "site",
 ];
+/** The site settings global is one document; its cache row uses this id. */
+export const siteDocumentId = 1;
 /**
  * Explicit field allowlist per collection: only these fields are ever read for translation
  * (store.ts selects exactly these) and sent to the provider. Contact details, QR codes,
@@ -42,12 +48,24 @@ export const translationFields: Record<TranslatableCollection, readonly string[]
   teams: ["title", "summary", "body"],
   "community-showcase": ["title", "body"],
   "team-honor-records": ["title", "competition", "placing", "description"],
+  // Legacy honor wall entries: summary is shown as the description. Source URL, season,
+  // division, slug and media stay out.
+  honors: ["title", "competition", "placing", "summary"],
+  // Published batch notice only; the application form and answers are never read.
+  "staff-batches": ["title", "description"],
+  // Title and the public intro of the batch form (the worker sends only form.intro;
+  // question labels, applicants and answers are never sent).
+  "team-recruitments": ["title", "signupForm"],
+  // Public home texts only; contacts, navigation, URLs and media stay out.
+  site: ["heroTitle", "heroSubtitle", "heroButtonLabel", "footer", "description", "homeSections"],
 };
 /** Fields that decide whether a document is public; read with the allowlist, never sent. */
 export const publicationFields: Record<TranslatableCollection, readonly string[]> = {
   events: ["_status"], announcements: ["_status"], "community-posts": ["status", "category"],
   news: ["_status"], albums: ["_status"], pages: ["_status"], games: ["_status"], teams: ["_status"],
   "community-showcase": ["status"], "team-honor-records": ["state"],
+  honors: ["_status", "verified", "team"], "staff-batches": ["state"], "team-recruitments": ["status", "team"],
+  site: [], // a global has no publication state; its public read access is unconditional
 };
 /** Stored per segment: `{ [hash]: english }`. */
 export type TranslationTable = Record<string, string>;
@@ -99,6 +117,16 @@ export function sourceTexts(collection: TranslatableCollection, doc: Record<stri
   // Values exactly as the V2 projections display them (trimmed where they trim).
   const trimmed = (value: unknown) => (typeof value === "string" ? value.trim() : value);
   if (collection === "pages" && doc.key === "privacy") return []; // legal text: Chinese is authoritative
+  // Projected sources (store.ts builds these from the public projections): plain fields.
+  const plain: Partial<Record<TranslatableCollection, unknown[]>> = {
+    honors: [doc.title, doc.competition, doc.placing, doc.summary, trimmed(doc.summary)],
+    "staff-batches": [doc.title, doc.description, trimmed(doc.description)],
+    "team-recruitments": [doc.title, doc.intro, trimmed(doc.intro)],
+    site: [doc.heroTitle, trimmed(doc.heroTitle), doc.heroSubtitle, trimmed(doc.heroSubtitle), doc.heroButtonLabel, trimmed(doc.heroButtonLabel),
+      doc.footer, trimmed(doc.footer), doc.description,
+      ...(Array.isArray(doc.homeSections) ? (doc.homeSections as Record<string, unknown>[]).map((section) => trimmed(section?.title)) : [])],
+  };
+  if (plain[collection]) return unique(plain[collection]!);
   const texts: unknown[] = [doc.title, trimmed(doc.summary), trimmed(doc.location)];
   if (collection === "events") texts.push(trimmed(doc.requirements), trimmed(doc.channelText));
   if (collection === "team-honor-records") texts.push(doc.competition, doc.placing, trimmed(doc.description));
@@ -122,6 +150,10 @@ export function sourceTexts(collection: TranslatableCollection, doc: Record<stri
     }
   } else texts.push(...lexicalTexts(doc.body));
   if (collection === "events" || collection === "community-posts") texts.push(...formTexts(doc.signupForm));
+  return unique(texts);
+}
+
+function unique(texts: unknown[]): string[] {
   const unique: string[] = [];
   const seen = new Set<string>();
   let total = 0;

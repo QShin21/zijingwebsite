@@ -1,3 +1,4 @@
+import { localizedBatchTexts } from "@/lib/content-translation/localize";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { cms } from "@/lib/content";
@@ -23,11 +24,13 @@ export default async function Batch({ params }: { params: Promise<{ id: string }
   const receipt = !batch ? (await ownStaffReceiptHeaders(p, user, batchID).catch(() => null))?.docs[0] : null;
   if (!batch && !receipt) notFound();
   const batchState = batch ? staffWindow(batch) : null;
+  // English: cached translation of the published batch title/notice (same row, same access).
+  const shown = batch ? await localizedBatchTexts("staff-batches", batchID, { title: batch.title, description: batch.description || null }, locale) : null;
   return (
     <TaskFrame
       eyebrow={t("STAFF · 执行部／宣传部", "STAFF · Operations / Publicity")}
-      title={batch?.title ?? receipt!.batchTitle}
-      description={batch ? batch.description || t("本批次招收执行部及宣传部骨干，具体安排以批次说明为准。", "This batch recruits Operations and Publicity staff; details follow the batch notes.") : t("批次已撤下，仅可查看回执", "This batch was taken down; only your receipt is available")}
+      title={shown?.title ?? receipt!.batchTitle}
+      description={batch ? shown?.description || t("本批次招收执行部及宣传部骨干，具体安排以批次说明为准。", "This batch recruits Operations and Publicity staff; details follow the batch notes.") : t("批次已撤下，仅可查看回执", "This batch was taken down; only your receipt is available")}
       back={{ href: "/join/staff", label: t("骨干招新", "Staff recruitment") }}
       steps={[t("阅读批次", "Read batch"), t("填写申请", "Fill in"), t("核对提交", "Review & submit"), t("查看回执", "View receipt")]}
       aside={

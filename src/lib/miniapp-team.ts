@@ -1,3 +1,5 @@
+import { localizedBatchTexts } from "./content-translation/localize";
+import { requestLocale } from "./i18n/locale";
 import { APIError, type Payload } from "payload";
 import type { Team, TeamEstablishmentApplication, TeamJoinApplication, TeamMembership, TeamRecruitment, User } from "../payload-types";
 import { canUseCampus, canPublish, communityIDs } from "./rules";
@@ -188,7 +190,11 @@ export async function miniappTeamGET(p: Payload, request: Request, path: string)
     const id = teamID(recruitment[1]), info = await ctx.info(id);
     if (!info) throw new APIError("招新批次不存在或当前不可读取", 404);
     const team = teamID(info.doc.team), [actions, member] = await Promise.all([recruitmentActions(ctx, id), ctx.membership(team)]);
-    return { title: info.doc.title, teamID: team, recruitmentID: id, state: info.state, form: info.form, version: info.version,
+    // English: cached title/intro of this published batch; the form itself is unchanged and
+    // `display.intro` follows the questionnaire display contract (labels stay original).
+    const shown = await localizedBatchTexts("team-recruitments", id, { title: info.doc.title, description: info.form.intro || null }, requestLocale(request));
+    const display = shown.description && shown.description !== (info.form.intro || null) ? { display: { locale: "en", intro: shown.description, questions: {} } } : {};
+    return { ...display, title: shown.title, teamID: team, recruitmentID: id, state: info.state, form: info.form, version: info.version,
       application: teamJoinReceipt(info.own), actions, membership: member ? membershipReceipt(member, ctx.user) : null,
       readOnly: Boolean(info.readOnly), readonly: Boolean(info.readOnly) || !actions.draft && !actions.submit,
       historyNote: info.readOnly ? "此回执展示本人原提交的表单快照；当前批次不可读取，历史申请只读。" : "" };

@@ -11,7 +11,7 @@ if (process.env.BILINGUAL_TEST !== "isolated" || url.hostname !== "127.0.0.1" ||
 const p = await getPayload({ config });
 await p.db.migrate();
 // Simulate a database from before this feature: remove the new migration, keep everything else.
-await p.db.drizzle.execute(sql`DELETE FROM payload_migrations WHERE name IN ('20261113_000900_content_translations', '20261114_001000_content_translation_sources')`);
+await p.db.drizzle.execute(sql`DELETE FROM payload_migrations WHERE name IN ('20261113_000900_content_translations', '20261114_001000_content_translation_sources', '20261114_001100_content_translation_more_sources')`);
 await p.db.drizzle.execute(sql`DROP TABLE content_translations`);
 const event = await p.create({ collection: "events", overrideAccess: true, context: { system: true, manageSignupForm: true },
   data: { title: "合成旧活动", slug: "bilingual-legacy-event", _status: "published", audience: "campus",
@@ -19,7 +19,7 @@ const event = await p.create({ collection: "events", overrideAccess: true, conte
 const census = async () => ({
   events: (await p.db.drizzle.execute(sql`SELECT id, title, audience, signup_form FROM events ORDER BY id`)).rows,
   versions: (await p.db.drizzle.execute(sql`SELECT count(*)::int AS n FROM _events_v`)).rows,
-  migrations: (await p.db.drizzle.execute(sql`SELECT name FROM payload_migrations WHERE name NOT IN ('20261113_000900_content_translations', '20261114_001000_content_translation_sources') ORDER BY id`)).rows,
+  migrations: (await p.db.drizzle.execute(sql`SELECT name FROM payload_migrations WHERE name NOT IN ('20261113_000900_content_translations', '20261114_001000_content_translation_sources', '20261114_001100_content_translation_more_sources') ORDER BY id`)).rows,
 });
 const before = await census();
 await p.db.migrate();
@@ -33,5 +33,5 @@ const legacy = await p.findByID({ collection: "events", id: event.id, overrideAc
 assert.equal(legacy.title, "合成旧活动");
 const { GET } = await import("../src/app/health/ready/route");
 assert.equal((await GET()).status, 200, "readiness check passes after upgrade");
-console.log(JSON.stringify({ upgrade: "PASS", preservedEvents: before.events.length, migrations: before.migrations.length + 2 }));
+console.log(JSON.stringify({ upgrade: "PASS", preservedEvents: before.events.length, migrations: before.migrations.length + 3 }));
 process.exit(0);

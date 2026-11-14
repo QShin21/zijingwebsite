@@ -21,7 +21,8 @@ describe("field allowlist", () => {
     const sensitive = /contact|qr|author|email|phone|note|answer|ticket|proof|video|member|roster|profile|snapshot|submitted|review|position|season|image/i;
     for (const collection of translatableCollections) {
       for (const field of translationFields[collection]) expect(field, `${collection}.${field}`).not.toMatch(sensitive);
-      expect(publicationFields[collection].length).toBeGreaterThan(0);
+      // Every collection has a publication state, except the always-public site global.
+      if (collection !== "site") expect(publicationFields[collection].length).toBeGreaterThan(0);
     }
   });
 
@@ -112,5 +113,35 @@ describe("stable English for server errors", () => {
     expect(localizeError("某个少见的业务提示", "en", { status: 502 })).toBe("The service is temporarily unavailable. Please try again later. (某个少见的业务提示)");
     expect(localizeError("某个少见的业务提示", "en", {})).toBe("The action could not be completed. (某个少见的业务提示)");
     expect(localizeError("Already English", "en", { status: 400 })).toBe("Already English");
+  });
+});
+
+describe("remaining public sources", () => {
+  it("projected sources keep to their allowlist", () => {
+    expect(sourceTexts("honors", { title: "旧荣誉", competition: "旧赛事", placing: "旧名次", summary: " 旧说明 ", sourceURL: "https://example.invalid", slug: "x" }))
+      .toEqual(["旧荣誉", "旧赛事", "旧名次", " 旧说明 ", "旧说明"]);
+    expect(sourceTexts("staff-batches", { title: "批次", description: "说明", signupForm: { intro: "隐私说明含微信号" } })).toEqual(["批次", "说明"]);
+    expect(sourceTexts("team-recruitments", { title: "选拔", intro: "选拔说明", signupForm: { questions: [{ label: "游戏 ID" }] } })).toEqual(["选拔", "选拔说明"]);
+    expect(sourceTexts("site", { heroTitle: "首屏", footer: "页脚", homeSections: [{ title: "近期活动" }], contacts: [{ text: "微信号" }], name: "社团名" }))
+      .toEqual(["首屏", "页脚", "近期活动"]);
+  });
+  it("home, recruitment cards and legacy honor keys receive English", async () => {
+    const { localizeView } = await import("../src/lib/content-translation/localize");
+    overlays.clear();
+    overlays.set("site:1", overlayOf("首屏", "副标题", "按钮", "页脚", "近期活动"));
+    overlays.set("staff-batches:4", overlayOf("骨干批次", "骨干说明"));
+    overlays.set("team-recruitments:6", overlayOf("选拔批次", "选拔说明"));
+    overlays.set("honors:9", overlayOf("旧荣誉", "旧说明"));
+    const result = await localizeView({
+      home: { sections: [{ kind: "upcoming", enabled: true, title: "近期活动" }], site: { name: "紫荆", heroTitle: "首屏", heroSubtitle: "副标题", heroImage: null, heroAction: { label: "按钮", href: "/join" }, footer: "页脚" } },
+      staff: { key: "staff:4", ref: { type: "staffBatch", id: 4 }, title: "骨干批次", summary: "骨干说明", href: "/join/staff/batches/4" },
+      team: { key: "team:6", ref: { type: "teamRecruitment", id: 6 }, title: "选拔批次", summary: "选拔说明" },
+      legacy: { key: "honors:9", ref: { type: "honor", key: "honors:9", team: "t" }, title: "旧荣誉", description: "旧说明", competition: "未缓存" },
+    }, "en");
+    expect(result.home.site).toMatchObject({ name: "紫荆", heroTitle: english("首屏"), heroSubtitle: english("副标题"), footer: english("页脚"), heroAction: { label: english("按钮"), href: "/join" } });
+    expect(result.home.sections[0]).toEqual({ kind: "upcoming", enabled: true, title: english("近期活动") });
+    expect(result.staff).toMatchObject({ title: english("骨干批次"), summary: english("骨干说明"), href: "/join/staff/batches/4" });
+    expect(result.team).toMatchObject({ title: english("选拔批次"), summary: english("选拔说明") });
+    expect(result.legacy).toMatchObject({ title: english("旧荣誉"), description: english("旧说明"), competition: "未缓存" });
   });
 });

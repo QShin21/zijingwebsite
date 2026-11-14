@@ -1,3 +1,4 @@
+import { queueTranslationAfterChange, removeTranslationAfterDelete } from "../lib/content-translation/hooks";
 import {
   APIError,
   type Access,
@@ -125,7 +126,8 @@ function workflow(
         "仅通过代表队网页工作台操作；成员录取不会授予平台或社群权限。",
     },
     access: { read, create: write, update: write, delete: () => false },
-    hooks: { beforeChange: [guard], afterChange: audit },
+    hooks: { beforeChange: [guard], afterChange: slug === "team-recruitments" ? [...audit!, queueTranslationAfterChange("team-recruitments")] : audit,
+      ...(slug === "team-recruitments" ? { afterDelete: [removeTranslationAfterDelete("team-recruitments")] } : {}) },
     fields,
   };
 }

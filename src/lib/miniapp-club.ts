@@ -1,3 +1,5 @@
+import { localizedBatchTexts } from "./content-translation/localize";
+import { requestLocale, type Locale } from "./i18n/locale";
 import { APIError, type Payload } from "payload";
 import type { CommunityApplication, StaffApplication, StaffBatch, User } from "../payload-types";
 import { canManageStaffRecruitment, canParticipate, canUseCampus, canReviewCommunityApplication, relationID } from "./rules";
@@ -51,6 +53,11 @@ function staffReceipt(row: StaffApplication) {
     batchTitle: row.batchTitle, department: row.department, status: row.status, formVersion: row.formVersion,
     questions: row.questions, answers: row.answers, feedback: row.feedback, createdAt: row.createdAt, updatedAt: row.updatedAt };
 }
+/** English title/description of published staff batches (cached translations only). */
+async function localizedBatches<T extends { id: number; title: string; description?: string | null }>(rows: T[], locale: Locale): Promise<T[]> {
+  if (locale !== "en") return rows;
+  return Promise.all(rows.map(async (row) => ({ ...row, ...(await localizedBatchTexts("staff-batches", row.id, { title: row.title, description: row.description ?? null }, locale)) })));
+}
 function staffBatchReceipt(batch: Pick<StaffBatch, "id" | "title" | "description" | "startAt" | "endAt" | "state" | "signupForm">) {
   return { id: batch.id, title: batch.title, description: batch.description, startAt: batch.startAt, endAt: batch.endAt, state: staffWindow(batch) };
 }
@@ -62,7 +69,7 @@ export async function miniappClubGET(p: Payload, request: Request, path: string)
       canUseCampus(viewer) ? currentStaffBatches(p) : [],
       promotedContent(p, "event", 6, viewer), promotedContent(p, "notice", 6, viewer), promotedContent(p, "showcase", 6, viewer),
     ]);
-    return { staffBatches: batches.map(staffBatchReceipt), promotions: { event, notice, showcase } };
+    return { staffBatches: await localizedBatches(batches.map(staffBatchReceipt), requestLocale(request)), promotions: { event, notice, showcase } };
   }
   const user = await currentUser(p, request);
   if (!canUseCampus(user)) throw new APIError("此栏目仅面向清华账号", 403);
@@ -70,7 +77,7 @@ export async function miniappClubGET(p: Payload, request: Request, path: string)
     const result = await p.find({ collection: "staff-batches", overrideAccess: false, user: null, depth: 0, limit: 12,
       page: pageNumber(new URL(request.url).searchParams), sort: "-createdAt",
       select: { title: true, description: true, state: true, startAt: true, endAt: true, signupForm: true } });
-    return pageResult(result, result.docs.map(staffBatchReceipt));
+    return pageResult(result, await localizedBatches(result.docs.map(staffBatchReceipt), requestLocale(request)));
   }
   const query = new URL(request.url).searchParams;
   if (path === "workbench") return { reviewCommunity: canReviewCommunityApplication(user), reviewStaff: canManageStaffRecruitment(user) };
@@ -88,7 +95,8 @@ export async function miniappClubGET(p: Payload, request: Request, path: string)
     const form = batch ? staffForm(batch.signupForm) : null;
     const version = form ? formVersion(form) : application!.formVersion, state = batch ? staffWindow(batch) : "批次已撤下，仅可查看回执";
     const open = state === "申请开放", final = Boolean(application && ["accepted", "rejected"].includes(application.status));
-    return { title: batch?.title ?? application!.batchTitle, description: batch?.description, startAt: batch?.startAt, endAt: batch?.endAt,
+    const shown = batch ? await localizedBatchTexts("staff-batches", batchID, { title: batch.title, description: batch.description || null }, requestLocale(request)) : null;
+    return { title: shown?.title ?? application!.batchTitle, description: shown ? shown.description ?? batch!.description : undefined, startAt: batch?.startAt, endAt: batch?.endAt,
       form, version, state, loggedIn: true, draftKey: batch ? "staff:" + batchID + ":" + user.id + ":" + version : undefined,
       application: application ? staffReceipt(application) : null,
       actions: { submit: open && (!application || application.status === "withdrawn"), edit: open && Boolean(application) && !final,

@@ -14,6 +14,8 @@ const lists = {
   albums: { path: 'feed', query: { kind: 'albums' }, pick: entry => entry.kind === 'article' && entry.item && entry.item.ref && entry.item.ref.type === 'album' ? { id: entry.item.ref.id, title: entry.item.title, summary: entry.item.summary } : null },
   games: { path: 'communities', query: {}, pick: card => card && card.community ? { id: card.community.id, title: card.community.title, summary: card.summary } : null },
   teams: { path: 'teams', query: {}, pick: card => card && card.team ? { id: card.team.id, title: card.team.title, summary: card.summary } : null },
+  // Verified legacy honors: V2 honor cards carry key "honors:<id>"; summary is shown as description.
+  honors: { path: 'honors', query: {}, pick: card => { const match = card && typeof card.key === 'string' ? /^honors:(\d+)$/.exec(card.key) : null; return match ? { id: Number(match[1]), title: card.title, summary: card.description } : null; } },
 };
 const MAX_PAGES = 3;
 
@@ -63,6 +65,45 @@ async function detail(collection, doc) {
   } catch { return null; }
 }
 
+/**
+ * English captions for a REST album's photos, matched by the stable photo row id that both
+ * reads expose (`photos[].id`). Ids seen more than once in the V2 pages or in the REST
+ * photos are ignored, photos
+ * without an id or without a match keep the original caption, and order never matters, so a
+ * caption can never move to another picture. Bounded: ≤ 4 V2 pages of 50 (albums hold ≤ 200).
+ */
+async function captions(doc) {
+  if (!english() || !doc || !Array.isArray(doc.photos) || !doc.photos.length || !(doc.slug || doc.id)) return null;
+  const found = {}, duplicate = {};
+  try {
+    for (let page = 1; page <= 4; page++) {
+      const value = await v2.get('articles/album/' + encodeURIComponent(doc.slug || doc.id), { page, photoLimit: 50 }, { required: true });
+      const photos = value && value.photos;
+      if (!photos || !Array.isArray(photos.docs)) break;
+      photos.docs.forEach(photo => {
+        if (!photo || typeof photo.id !== 'string' || !photo.id) return;
+        if (Object.prototype.hasOwnProperty.call(found, photo.id)) duplicate[photo.id] = true;
+        found[photo.id] = photo.caption;
+      });
+      if (!photos.hasNextPage) break;
+    }
+  } catch { return null; }
+  // Ids repeated in the page's own REST photos are equally ambiguous: those photos keep
+  // their original captions too.
+  const seen = {};
+  doc.photos.forEach(photo => {
+    const id = photo && typeof photo.id === 'string' ? photo.id : '';
+    if (!id) return;
+    if (seen[id]) duplicate[id] = true;
+    seen[id] = true;
+  });
+  return doc.photos.map(photo => {
+    const id = photo && typeof photo.id === 'string' ? photo.id : '';
+    const english = id && !duplicate[id] && Object.prototype.hasOwnProperty.call(found, id) ? found[id] : null;
+    return typeof english === 'string' && english ? { ...photo, caption: english } : photo;
+  });
+}
+
 /** English title/body for showcase records of a REST list, via the community showcase read. */
 async function showcase(slug, docs) {
   if (!english() || !slug || !Array.isArray(docs) || !docs.length) return docs;
@@ -91,4 +132,4 @@ async function posts(slug, docs) {
   } catch { return docs; }
 }
 
-module.exports = { list, detail, showcase, posts, MAX_PAGES };
+module.exports = { list, detail, showcase, posts, captions, MAX_PAGES };

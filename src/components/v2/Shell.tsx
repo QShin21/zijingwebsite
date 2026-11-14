@@ -124,7 +124,7 @@ export function Footer({ name, footer, campus = false, locale = "zh" }: { name: 
         <div className={styles.footerBrand}>
           <p className={styles.footerKicker}>{t("紫荆赛场 · MATCHDAY", "ZIJING ARENA · MATCHDAY")}</p>
           <strong>{name}</strong>
-          <p>{locale === "en" ? "Tsinghua University Zijing Esports Club. Play together, win for real." : footer || "清华大学学生紫荆电竞社。一起玩，认真赢。"}</p>
+          <p>{locale === "en" ? (footer && !/[㐀-鿿]/.test(footer) ? footer : "Tsinghua University Zijing Esports Club. Play together, win for real.") : footer || "清华大学学生紫荆电竞社。一起玩，认真赢。"}</p>
         </div>
         <nav className={styles.footerNav} aria-label={t("页脚", "Footer")}>
           <div>

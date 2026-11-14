@@ -662,3 +662,112 @@ describe("backfill estimate matches the worker's batching", () => {
     expect(store.plannedCalls([])).toBe(0);
   });
 });
+
+describe("remaining public sources (legacy honors, recruitment batches, site texts)", () => {
+  it("verified legacy honors use the honor wall projection; unverified ones are never sent", async () => {
+    const { seedHonorCoreChain } = await import("./team-honor-core-fixtures");
+    const game = (await p.create({ collection: "games", overrideAccess: true, context: { system: true, skipTranslation: true },
+      data: { title: "合成旧荣誉社群", slug: `bilingual-legacy-game-${stamp}`, _status: "published" } as never })).id as number;
+    const chain = await seedHonorCoreChain(p, game, president, [member], `legacy-${stamp}`);
+    const legacy = async (title: string, verified: boolean) => (await p.create({ collection: "honors", overrideAccess: true, context: { system: true },
+      data: { title, slug: `bilingual-legacy-${stamp}-${randomBytes(3).toString("hex")}`, team: chain.team.id, game, competition: "合成旧赛事", placing: "合成旧名次",
+        summary: "合成旧说明", sourceURL: "https://example.invalid/proof", verified, _status: "published" } as never })).id as number;
+    const verified = await legacy("合成已核验旧荣誉", true);
+    const unverified = await legacy("合成未核验旧荣誉", false);
+    expect((await drain("honors", verified))?.status).toBe("done");
+    expect(await store.readQueueRow("honors", unverified)).toBeNull();
+    const batch = calls.find((entry) => Object.values(entry).includes("合成已核验旧荣誉"))!;
+    expect(Object.values(batch).sort()).toEqual(["合成已核验旧荣誉", "合成旧赛事", "合成旧名次", "合成旧说明"].sort());
+    expect(sent().join("|")).not.toMatch(/合成未核验旧荣誉|example\.invalid/);
+    // Web honor cards and the mini program archive show English for "honors:<id>"; key and source link unchanged.
+    const en = await (await v2(`honors?team=${chain.team.id}`, "en", memberToken)).json();
+    expect(en.docs.find((card: { key: string }) => card.key === `honors:${verified}`)).toMatchObject({ title: english("合成已核验旧荣誉"), description: english("合成旧说明") });
+    const { GET: archiveRoute } = await import("../src/app/(frontend)/api/team-honor-archives/[team]/route");
+    const archive = await (await archiveRoute(new Request(`http://localhost:3000/api/team-honor-archives/${chain.team.id}`, { headers: { "x-zijing-locale": "en" } }),
+      { params: Promise.resolve({ team: String(chain.team.id) }) })).json();
+    const record = archive.records.find((item: { key: string }) => item.key === `honors:${verified}`);
+    expect(record).toMatchObject({ title: english("合成已核验旧荣誉"), competition: english("合成旧赛事"), legacy: true });
+    expect(record.sourceHref).toMatch(/^\/honors\//);
+    // Unverifying withdraws the English (no provider call).
+    calls = [];
+    await p.update({ collection: "honors", id: verified, overrideAccess: true, context: { system: true }, data: { verified: false } as never });
+    expect((await drain("honors", verified))?.status).toBe("obsolete");
+    expect(calls).toHaveLength(0);
+  });
+
+  it("staff batches send only title and description of open/closed batches; drafts never", async () => {
+    const { saveStaffBatch } = await import("../src/lib/staff-recruitment");
+    const { defaultStaffForm } = await import("../src/lib/staff-recruitment-model");
+    const draft = await saveStaffBatch(p, president, null, null, { title: "合成草稿批次", description: "合成草稿说明", state: "draft", signupForm: defaultStaffForm }) as { id: number };
+    expect(await store.readQueueRow("staff-batches", draft.id)).toBeNull();
+    const open = await saveStaffBatch(p, president, draft.id, (await p.findByID({ collection: "staff-batches", id: draft.id, overrideAccess: true })).updatedAt,
+      { title: "合成开放批次", description: "合成批次说明", state: "open", endAt: new Date(Date.now() + 7 * 86400000).toISOString(), signupForm: defaultStaffForm }) as { id: number };
+    expect((await drain("staff-batches", open.id))?.status).toBe("done");
+    const batch = calls.find((entry) => Object.values(entry).includes("合成开放批次"))!;
+    expect(Object.values(batch).sort()).toEqual(["合成开放批次", "合成批次说明"].sort());
+    expect(sent().join("|")).not.toMatch(/合成草稿|叶佳鑫|yejx/); // privacy text of the form is never sent
+    const center = await (await v2("recruitment", "en", memberToken)).json();
+    expect(JSON.stringify(center)).toContain(english("合成开放批次"));
+  });
+
+  it("team recruitment batches send the title and public form intro, never question labels or answers", async () => {
+    const { seedHonorCoreChain } = await import("./team-honor-core-fixtures");
+    const game = (await p.create({ collection: "games", overrideAccess: true, context: { system: true, skipTranslation: true },
+      data: { title: "合成选拔社群", slug: `bilingual-tryout-game-${stamp}`, _status: "published" } as never })).id as number;
+    const chain = await seedHonorCoreChain(p, game, president, [member], `tryout-${stamp}`);
+    const { defaultTeamForm } = await import("../src/lib/team-recruitment-form");
+    const questionLabels = defaultTeamForm.questions.map((question) => question.label);
+    await p.update({ collection: "team-recruitments", id: chain.recruitment.id, overrideAccess: true, user: president, context: { system: true, teamCoreWrite: true },
+      data: { signupForm: { ...defaultTeamForm, intro: "合成选拔说明" } } as never });
+    expect((await drain("team-recruitments", chain.recruitment.id as number))?.status).toBe("done");
+    const batch = calls.find((entry) => Object.values(entry).includes("合成权威来源批次"))!;
+    expect(Object.values(batch).sort()).toEqual(["合成权威来源批次", "合成选拔说明"].sort());
+    expect(sent().join("|")).not.toMatch(/合成测试确认|合成权威成员来源/);
+    for (const label of questionLabels) expect(Object.values(batch)).not.toContain(label);
+    const center = await (await v2("recruitment", "en", memberToken)).json();
+    expect(JSON.stringify(center)).toContain(english("合成权威来源批次"));
+  });
+
+  it("site settings: only public home texts are sent, versioned by content hash, applied to the home response", async () => {
+    calls = [];
+    await p.updateGlobal({ slug: "site", overrideAccess: true, context: { system: true },
+      data: { heroTitle: "合成首屏标题", heroSubtitle: "合成首屏副标题", heroButtonLabel: "合成按钮", heroButtonURL: "/join", footer: "合成页脚",
+        description: "合成站点描述", contacts: [{ label: "合成联系人", text: "合成微信号 synthetic-wechat" }] } as never });
+    expect((await drain("site", 1))?.status).toBe("done");
+    expect(sent()).toEqual(expect.arrayContaining(["合成首屏标题", "合成首屏副标题", "合成按钮", "合成页脚", "合成站点描述"]));
+    expect(sent().join("|")).not.toMatch(/合成联系人|synthetic-wechat|\/join/);
+    const home = await (await v2("home", "en")).json();
+    expect(home.site).toMatchObject({ heroTitle: english("合成首屏标题"), heroSubtitle: english("合成首屏副标题"), footer: english("合成页脚") });
+    expect(home.site.heroAction).toMatchObject({ label: english("合成按钮"), href: "/join" });
+    expect((await (await v2("home")).json()).site.heroTitle).toBe("合成首屏标题");
+    // A changed text is re-sent; unchanged texts reuse the cache; stale English is never shown.
+    calls = [];
+    await p.updateGlobal({ slug: "site", overrideAccess: true, context: { system: true }, data: { heroTitle: "合成新首屏标题" } as never });
+    expect((await (await v2("home", "en")).json()).site.heroTitle).toBe("合成新首屏标题");
+    await drain("site", 1);
+    expect(sent()).toEqual(["合成新首屏标题"]);
+    const report = await store.backfill(p, { collections: ["site"], limit: 10 });
+    expect(report).toMatchObject({ examined: 1, wouldQueue: 0 });
+  });
+
+  it("a temporary failure inside the honor projection is retried, not marked obsolete", async () => {
+    const { teamHonorService } = await import("../src/lib/team-honor-service");
+    const row = (await p.find({ collection: "team-honor-records", overrideAccess: true, depth: 0, limit: 1, where: { state: { equals: "approved" } } })).docs[0];
+    if (!row) throw new Error("expected an approved synthetic honor from the previous suite");
+    // Make the record eligible again for this check (the earlier test archived its team).
+    await p.db.drizzle.execute(sql`UPDATE teams SET archived = false WHERE id = ${Number(row.team)}`);
+    const spy = vi.spyOn(teamHonorService, "publicRecord").mockResolvedValue(null); // what a swallowed DB error looks like
+    try {
+      await store.markTranslation(p.db.drizzle as never, "team-honor-records", row.id as number);
+      await p.db.drizzle.execute(sql`UPDATE content_translations SET next_attempt_at = now() WHERE collection = 'team-honor-records' AND doc_id = ${row.id}`);
+      await store.processTranslationQueue({ payload: p });
+      const queued = await store.readQueueRow("team-honor-records", row.id as number);
+      expect(queued?.status).toBe("pending");
+      expect(queued?.error_code).toBe("read");
+    } finally {
+      spy.mockRestore();
+    }
+    // With the projection available again the job completes.
+    expect((await drain("team-honor-records", row.id as number))?.status).toBe("done");
+  });
+});

@@ -1,3 +1,4 @@
+import { queueTranslationAfterChange, removeTranslationAfterDelete } from "../lib/content-translation/hooks";
 import { APIError, type CollectionConfig, type FieldAccess, type PayloadRequest, type Where } from "payload";
 import { canUseCampus, canManageStaffRecruitment, type Identity } from "../lib/rules";
 
@@ -21,7 +22,7 @@ export const StaffBatches: CollectionConfig = {
   hooks: { beforeChange: [({ req, data }) => {
     if (!req.transactionID || req.context.staffBatchWrite !== true || !canManageStaffRecruitment(req.user as Identity)) throw new APIError("请从骨干招新管理工作台操作", 403);
     return data;
-  }] },
+  }], afterChange: [queueTranslationAfterChange("staff-batches")], afterDelete: [removeTranslationAfterDelete("staff-batches")] },
   fields: [
     { name: "title", type: "text", required: true, maxLength: 120 },
     { name: "description", type: "textarea", maxLength: 5000 },

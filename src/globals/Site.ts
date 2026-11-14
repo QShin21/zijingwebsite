@@ -1,4 +1,5 @@
 import type { GlobalConfig } from "payload";
+import { queueSiteTranslationAfterChange } from "../lib/content-translation/hooks";
 import { publisher } from "../access";
 import { safeURL } from "../lib/rules";
 import { defaultHomeSections, validateHomeSections } from "../lib/v2/home-sections";
@@ -22,6 +23,8 @@ export const Site: GlobalConfig = {
         });
         return doc;
       },
+      // English cache of the public home texts (hero, footer, SEO description, section titles).
+      queueSiteTranslationAfterChange,
     ],
   },
   fields: [

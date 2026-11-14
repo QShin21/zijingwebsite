@@ -2,7 +2,7 @@ import { createHmac, randomUUID } from "node:crypto";
 import { Pool } from "pg";
 import type { Payload } from "payload";
 import { sql } from "@payloadcms/db-postgres";
-import { Overlay, publicationFields, sourceHash, sourceTexts, textHash, translatableCollections, translationFields, type TranslatableCollection, type TranslationTable } from "./segments";
+import { Overlay, siteDocumentId, publicationFields, sourceHash, sourceTexts, textHash, translatableCollections, translationFields, type TranslatableCollection, type TranslationTable } from "./segments";
 import { TranslationError, translateWithQuestionnaireAI, translationAvailability, type Translator } from "./translator";
 import { publishedForTranslation } from "./published";
 
@@ -151,8 +151,79 @@ async function publicHonorSource(p: Payload, id: number): Promise<Record<string,
   if (!raw || (raw as { state?: unknown }).state !== "approved") return null;
   const { teamHonorService } = await import("../team-honor-service");
   const record = await teamHonorService.publicRecord(p, id);
-  return record ? { state: "approved", title: record.title, competition: record.competition, placing: record.placing, description: record.description } : null;
+  if (record) return { state: "approved", title: record.title, competition: record.competition, placing: record.placing, description: record.description };
+  // publicRecord() maps every read failure to null. Re-check its conditions here without
+  // swallowing errors: only a confirmed ineligible record becomes obsolete; if everything
+  // still looks eligible, the null came from a temporary failure and the job is retried.
+  await confirmHonorIneligible(p, id);
+  return null;
 }
+async function confirmHonorIneligible(p: Payload, id: number) {
+  const { currentHonorVersion } = await import("../team-honor-service");
+  const row = await p.findByID({ collection: "team-honor-records", id, overrideAccess: true, depth: 0, disableErrors: true }) as Record<string, unknown> | null;
+  if (!row || row.state !== "approved" || !row.approvedVersion) return;
+  const teamID = Number(typeof row.team === "object" && row.team ? (row.team as { id: unknown }).id : row.team);
+  const gameID = Number(typeof row.game === "object" && row.game ? (row.game as { id: unknown }).id : row.game);
+  const team = await p.findByID({ collection: "teams", id: teamID, overrideAccess: true, draft: false, depth: 0, disableErrors: true,
+    select: { _status: true, archived: true, game: true, teamStatus: true } as never }) as Record<string, unknown> | null;
+  const teamGame = team ? Number(typeof team.game === "object" && team.game ? (team.game as { id: unknown }).id : team.game) : NaN;
+  // Same conditions as readPublicHonorTeam(), read without swallowing errors.
+  if (!team || team._status !== "published" || team.archived || team.teamStatus === "archived" || teamGame !== gameID) return;
+  const game = await p.findByID({ collection: "games", id: gameID, overrideAccess: true, draft: false, depth: 0, disableErrors: true,
+    select: { _status: true, archived: true } as never }) as Record<string, unknown> | null;
+  if (!game || game._status !== "published" || game.archived) return;
+  let version: string;
+  try {
+    version = (await currentHonorVersion(row as never)).version;
+  } catch (error) {
+    // Invalid stored evidence is a definite (non-temporary) ineligibility.
+    if ((error as { status?: number }).status === 409) return;
+    throw error;
+  }
+  if (version !== row.approvedVersion) return;
+  throw new Error("honor public projection unavailable");
+}
+
+/** Verified legacy honors: their original honor-wall public projection (archives()). */
+async function legacyHonorSource(p: Payload, id: number): Promise<Record<string, unknown> | null> {
+  const raw = await p.findByID({ collection: "honors", id, overrideAccess: true, draft: false, depth: 0, disableErrors: true, select: { _status: true, verified: true, team: true } as never }) as Record<string, unknown> | null;
+  if (!raw || raw._status !== "published" || raw.verified !== true) return null;
+  const team = Number(typeof raw.team === "object" && raw.team ? (raw.team as { id: unknown }).id : raw.team);
+  if (!Number.isSafeInteger(team) || team <= 0) return null;
+  const { teamHonorService } = await import("../team-honor-service");
+  // archives() throws on database errors, so a temporary fault is retried.
+  const record = (await teamHonorService.archives(p, { team })).flatMap((archive) => archive.records).find((item) => item.key === `honors:${id}`);
+  return record ? { _status: "published", verified: true, title: record.title, competition: record.competition, placing: record.placing, summary: record.description } : null;
+}
+/** Staff batches: open or closed batches are publicly listed; title and description only. */
+async function staffBatchSource(p: Payload, id: number): Promise<Record<string, unknown> | null> {
+  const row = await p.findByID({ collection: "staff-batches", id, overrideAccess: true, depth: 0, disableErrors: true, select: { title: true, description: true, state: true } as never }) as Record<string, unknown> | null;
+  return row && ["open", "closed"].includes(String(row.state)) ? { state: row.state, title: row.title, description: row.description } : null;
+}
+/** Team recruitment batches: the public card projection (established public team, open/closed). */
+async function teamRecruitmentSource(p: Payload, id: number): Promise<Record<string, unknown> | null> {
+  const { teamRecruitmentCard, teamRecruitmentFields } = await import("../v2/recruitment");
+  const row = await p.findByID({ collection: "team-recruitments", id, overrideAccess: true, depth: 0, disableErrors: true,
+    select: Object.fromEntries(teamRecruitmentFields.map((field) => [field, true])) as never }) as Record<string, unknown> | null;
+  if (!row) return null;
+  const card = await teamRecruitmentCard(p, row as never);
+  if (!card) return null;
+  const { normalizeTeamForm } = await import("../team-core");
+  let intro: unknown = null;
+  try { intro = normalizeTeamForm(row.signupForm).intro; } catch { /* card already rejected invalid forms */ }
+  return { status: row.status, title: card.title, intro: typeof intro === "string" ? intro : card.summary };
+}
+/** Site settings: public home texts only (global read access is public). */
+async function siteSource(p: Payload): Promise<Record<string, unknown>> {
+  const site = await p.findGlobal({ slug: "site", overrideAccess: true, depth: 0,
+    select: { heroTitle: true, heroSubtitle: true, heroButtonLabel: true, footer: true, description: true, homeSections: true } as never }) as unknown as Record<string, unknown>;
+  const sections = Array.isArray(site.homeSections) ? (site.homeSections as Record<string, unknown>[]).map((section) => ({ title: section?.title })) : [];
+  return { heroTitle: site.heroTitle, heroSubtitle: site.heroSubtitle, heroButtonLabel: site.heroButtonLabel, footer: site.footer, description: site.description, homeSections: sections };
+}
+const projected: Partial<Record<TranslatableCollection, (p: Payload, id: number) => Promise<Record<string, unknown> | null>>> = {
+  "team-honor-records": publicHonorSource, honors: legacyHonorSource, "staff-batches": staffBatchSource,
+  "team-recruitments": teamRecruitmentSource, site: (p) => siteSource(p),
+};
 
 // Exactly the allowlisted text fields plus the publication-state fields.
 const selects = Object.fromEntries(translatableCollections.map((collection) => [collection,
@@ -165,8 +236,9 @@ const selects = Object.fromEntries(translatableCollections.map((collection) => [
  * instead of treating a temporary fault as an unpublish.
  */
 export async function publishedSource(p: Payload, collection: TranslatableCollection, id: number): Promise<Record<string, unknown> | null> {
-  if (collection === "team-honor-records") return publicHonorSource(p, id);
-  const doc = await p.findByID({ collection, id, overrideAccess: true, draft: false, depth: 0, disableErrors: true, select: selects[collection] as never });
+  const project = projected[collection];
+  if (project) return project(p, id);
+  const doc = await p.findByID({ collection: collection as Exclude<TranslatableCollection, "site">, id, overrideAccess: true, draft: false, depth: 0, disableErrors: true, select: selects[collection] as never });
   return doc && publishedForTranslation(collection, doc as Record<string, unknown>) ? (doc as Record<string, unknown>) : null;
 }
 
@@ -377,9 +449,12 @@ export async function backfill(p: Payload, options: BackfillOptions = {}): Promi
     let afterId = options.after && index === start && options.after.collection === collection ? options.after.id : 0;
     for (;;) {
       if (report.examined >= limit) { report.next = { collection, id: afterId }; return report; }
-      const page = await p.find({ collection, overrideAccess: true, draft: false, depth: 0, pagination: false,
-        limit: Math.min(pageSize, limit - report.examined), sort: "id", where: { id: { greater_than: afterId } } as never,
-        select: selects[collection] as never }) as unknown as { docs: Record<string, unknown>[] };
+      // The site global is a single document (id 1); everything else is paged by id.
+      const page = collection === "site"
+        ? { docs: afterId < siteDocumentId ? [{ id: siteDocumentId }] : [] }
+        : await p.find({ collection, overrideAccess: true, draft: false, depth: 0, pagination: false,
+          limit: Math.min(pageSize, limit - report.examined), sort: "id", where: { id: { greater_than: afterId } } as never,
+          select: selects[collection] as never }) as unknown as { docs: Record<string, unknown>[] };
       if (!page.docs.length) break;
       const ids = page.docs.map((doc) => Number(doc.id));
       const rows = await db().query<{ doc_id: number; status: string; source_hash: string | null; translations: TranslationTable }>(
@@ -390,8 +465,8 @@ export async function backfill(p: Payload, options: BackfillOptions = {}): Promi
         const id = Number(listed.id);
         afterId = id;
         report.examined++; stats.examined++;
-        // Honors are re-read through their public projection (same rule as the worker).
-        const doc = collection === "team-honor-records" ? await publicHonorSource(p, id) : listed;
+        // Projected sources are re-read through their public projection (same rule as the worker).
+        const doc = projected[collection] ? await projected[collection]!(p, id) : listed;
         if (!doc || !publishedForTranslation(collection, doc)) { report.notPublic++; continue; }
         const texts = sourceTexts(collection, doc);
         if (!texts.length) { report.empty++; continue; }

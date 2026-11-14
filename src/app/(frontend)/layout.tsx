@@ -9,6 +9,7 @@ import { themeColors, themeCookieName, themeFromPreference, themeScheme } from "
 import { pixelFont } from "@/components/v2/pixel-font";
 import { ClientEffects } from "@/components/v2/ClientEffects";
 import shell from "@/components/v2/Shell.module.css";
+import { localizedSiteTexts } from "@/lib/content-translation/localize";
 import { LocaleProvider } from "@/components/i18n/LocaleProvider";
 import { englishSiteName, htmlLang, localeCookieName, parseLocale, translator } from "@/lib/i18n/locale";
 import "./tokens.css";
@@ -24,11 +25,13 @@ export async function generateViewport(): Promise<Viewport> {
 
 export async function generateMetadata(): Promise<Metadata> {
   const [s, store] = await Promise.all([site(), cookies()]);
-  const name = parseLocale(store.get(localeCookieName)?.value) === "en" ? englishSiteName : s.name;
+  const locale = parseLocale(store.get(localeCookieName)?.value);
+  const name = locale === "en" ? englishSiteName : s.name;
+  const texts = await localizedSiteTexts({ description: s.description ?? null }, locale);
   return {
     metadataBase: new URL(serverURL),
     title: { default: name, template: `%s | ${name}` },
-    description: s.description || undefined,
+    description: texts.description || undefined,
     robots:
       process.env.APP_ENV === "production"
         ? { index: true, follow: true }
@@ -59,7 +62,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
           <main id="main" tabIndex={-1} className={shell.main}>
             {children}
           </main>
-          <Footer name={name} footer={s.footer} campus={campus} locale={locale} />
+          <Footer name={name} footer={(await localizedSiteTexts({ footer: s.footer ?? null }, locale)).footer} campus={campus} locale={locale} />
           <MobileTabs signedIn={Boolean(viewer)} campus={campus} locale={locale} />
           <ClientEffects />
         </LocaleProvider>

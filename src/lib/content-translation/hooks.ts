@@ -1,6 +1,6 @@
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, PayloadRequest } from "payload";
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, GlobalAfterChangeHook, PayloadRequest } from "payload";
 import { sql, type PostgresAdapter } from "@payloadcms/db-postgres";
-import type { TranslatableCollection } from "./segments";
+import { siteDocumentId, type TranslatableCollection } from "./segments";
 import { publishedForTranslation } from "./published";
 import { translationAvailability } from "./translator";
 
@@ -51,6 +51,19 @@ export function queueTranslationAfterChange(collection: TranslatableCollection):
     return doc;
   };
 }
+
+/** Site settings global: every save re-marks its public home texts (doc id 1). */
+export const queueSiteTranslationAfterChange: GlobalAfterChangeHook = async ({ doc, req }) => {
+  if (req.context?.skipTranslation === true || translationAvailability() !== "enabled") return doc;
+  try {
+    const { markTranslation, kickTranslationQueue } = await import("./store");
+    await withExecutor(req, (executor) => markTranslation(executor, "site", siteDocumentId));
+    setTimeout(() => kickTranslationQueue(0), 1500).unref?.();
+  } catch {
+    console.warn("Content translation queue unavailable", "site");
+  }
+  return doc;
+};
 
 export function removeTranslationAfterDelete(collection: TranslatableCollection): CollectionAfterDeleteHook {
   return async ({ id, req }) => {

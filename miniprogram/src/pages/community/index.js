@@ -14,6 +14,7 @@ const { render } = require('../../lib/richtext');
 const { actions, protect } = require('../../lib/page');
 const video = require('../../lib/video');
 const { hasContactImage } = require('../../lib/native-presentation');
+const englishOverlay = (() => { try { const value = require('../../lib/english-overlay'); if (value && typeof value.list === 'function') return value; } catch { /* Harnesses may omit the overlay module; Chinese text stays. */ } return null; })();
 const i18n = (() => { try { const value = require('../../lib/i18n'); if (value && typeof value.t === 'function') return value; } catch { /* Harnesses may omit the locale module. */ } return { t: zh => zh, message: value => value, locale: () => 'zh', bind() {}, navTitle() {}, unbind() {}, subscribe: () => () => {} }; })();
 const text = {
   back: ['‹ 返回', '‹ Back'], crestFallback: ['紫', 'Z'], kicker: ['游戏社群', 'Game community'],
@@ -169,8 +170,7 @@ Page(withVisualTheme({
       if (!this.valid(scope) || ticket !== this._areaTicket) return;
       if (!result || !Array.isArray(result.docs)) throw new Error(i18n.t('社群内容暂不可用，请重试', 'Community content is unavailable. Please retry.'));
       // English mode: titles (and showcase text) from the same-permission V2 community reads.
-      const overlay = require('../../lib/english-overlay');
-      const listed = area === 'showcase' ? await overlay.showcase(this.data.game.slug, result.docs) : await overlay.posts(this.data.game.slug, result.docs);
+      const listed = !englishOverlay ? result.docs : area === 'showcase' ? await englishOverlay.showcase(this.data.game.slug, result.docs) : await englishOverlay.posts(this.data.game.slug, result.docs);
       if (!this.valid(scope) || ticket !== this._areaTicket) return;
       const docs = [];
       for (const doc of listed) {

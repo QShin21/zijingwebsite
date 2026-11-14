@@ -186,7 +186,7 @@ export type ArticleDetail = {
   article: ArticleCard; body: unknown | null; bodyText: string | null; images: ImageRef[];
   presentation?: PublicationPresentation | null;
   sections: { id: string; heading: string; text: string }[];
-  photos: Page<{ image: ImageRef; caption: string | null }> | null; // album 分页，limit 12
+  photos: Page<{ id: string | null; image: ImageRef; caption: string | null }> | null; // album 分页，limit 12（photoLimit ≤ 50）；id 为相册图片行的稳定 ID
   related: { event: EventCard | null; team: TeamRef | null };
 };
 

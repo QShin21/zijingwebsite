@@ -1,3 +1,4 @@
+import { localizedBatchTexts } from "@/lib/content-translation/localize";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cms } from "@/lib/content";
@@ -20,12 +21,13 @@ export default async function Recruitment({ params }: { params: Promise<{ id: st
   if (!user) redirect(teamLoginHref(`/teams/recruitment/${id}`));
   const info = await teamRecruitmentInfo(p, user, id).catch(() => null);
   if (!info) notFound();
-  const { t } = await getT();
+  const { t, locale } = await getT();
+  const shown = await localizedBatchTexts("team-recruitments", id, { title: info.doc.title, description: info.form.intro || null }, locale);
   return (
     <TaskFrame
       eyebrow={t("TRYOUTS · 代表队选拔", "TRYOUTS · Team tryouts")}
-      title={info.doc.title}
-      description={info.form.intro || t("填写游戏经历与训练安排，由本社群管理员人工选拔。", "Describe your game experience and training availability; community admins select players manually.")}
+      title={shown.title}
+      description={shown.description || t("填写游戏经历与训练安排，由本社群管理员人工选拔。", "Describe your game experience and training availability; community admins select players manually.")}
       back={{ href: "/teams/recruitment", label: t("选拔中心", "Tryout center") }}
       steps={[t("阅读要求", "Read requirements"), t("填写申请", "Fill in"), t("核对提交", "Review & submit"), t("人工选拔", "Manual selection")]}
       aside={
