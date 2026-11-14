@@ -1,0 +1,39 @@
+{
+  "deployedAt": "2026-11-14T11:45:11+08:00",
+  "revision": "1990af9b795c7170aad893876f53f79bb81a665d",
+  "previousRevision": "33bf92e88771d6106988ab77ee70cbfe9a2c33a9",
+  "buildId": "Nk6RvMJNQIEPMqdfr-PzY",
+  "release": "/srv/zijingwebsite/releases/quiz-open-20261114-1990af9",
+  "migration": "none; migration files and dependency lock match the prior release",
+  "issue": "Opening a round under a draft event was rejected; the error appeared at the page top, outside the administrator's current view.",
+  "behavior": "A successful first open publishes the event and opens its draft round in one transaction; local feedback reports progress, success or the specific failure near the round.",
+  "backup": {
+    "storage": "server-local",
+    "snapshot": "/srv/zijingwebsite/backups/quiz-open-20261114-1990af9/database-quiesced/zijing-2026-11-14T03-44-33.166Z",
+    "rollback": "/srv/zijingwebsite/backups/quiz-open-20261114-1990af9/rollback.sh",
+    "offsiteConfigured": false,
+    "restoreVerified": false,
+    "note": "The initial online backup detected writes and was not used; a consistent backup completed while the website was briefly stopped."
+  },
+  "quizCountsBeforeAndAfterCutover": { "events": 1, "prizes": 8, "rounds": 1, "entries": 0 },
+  "verification": {
+    "syntheticDatabaseAndBrowser": "Twelve isolated tests passed, including opening a draft event, atomic failure when prizes are absent or deadline expired, archived event rejection, and a real administrator browser flow with inline error feedback.",
+    "miniProgram": "Fifty-one targeted native and language tests passed; the 31-page package check and official developer-tool upload passed.",
+    "productionBuild": "Production webpack build and type checking passed using synthetic build settings; deployable output was scanned for synthetic credentials.",
+    "candidateAndProduction": "Readiness, public pages, quiz JavaScript digest, anonymous read/write boundaries and cross-origin write rejection passed.",
+    "public": "Homepage, login, readiness, privacy and FreeKill homepage returned 200. Quiz JavaScript SHA-256 matched; anonymous quiz reads and writes returned 401, and cross-origin writes returned 403.",
+    "existingData": "Quiz event, prize, round and submission counts matched before and after cutover. The existing event and round were still drafts at the post-deployment read-only check.",
+    "authenticatedProductionOpen": "not executed; the administrator can refresh and open the existing round",
+    "officialSimulatorAndRealDevice": "not tested"
+  },
+  "miniProgram": {
+    "version": "0.5.30",
+    "revision": "1990af9b795c7170aad893876f53f79bb81a665d",
+    "uploadedAt": "2026-11-14T11:41:56+08:00",
+    "platformStatus": "developmentVersionUploaded",
+    "officialTool": "WeChat Developer Tools CLI",
+    "sizeBytes": 1234494,
+    "reviewSubmitted": false,
+    "publicReleaseExecuted": false
+  }
+}

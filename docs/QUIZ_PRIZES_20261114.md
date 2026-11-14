@@ -26,4 +26,4 @@
 - `node scripts/verify-quiz-database.mjs --browser` 还会启动本地候选服务，在移动宽度浏览器完成作答、公布结果和抽奖。
 - 小程序页面检查与原生页面测试使用 `pnpm miniapp:check`、`pnpm exec vitest run tests/miniapp-quiz.test.ts tests/miniapp-i18n.test.ts`。
 - 应用 `33bf92e` 已于北京时间 10:08:17 部署，微信 0.5.29 已上传开发版。正式账号线上操作、小程序模拟器和真机尚未核验；微信审核及正式发布尚未执行。详见[部署记录](evidence/quiz-prizes-deployment-20261114.json)。
-- 2026-11-14：修复草稿活动点击「开放竞猜」后未在按钮附近显示拒绝原因的问题；开放首轮时同步发布活动，操作状态和失败原因显示在当前轮次。
+- 2026-11-14 11:45：修复草稿活动点击「开放竞猜」后未在按钮附近显示拒绝原因的问题；开放首轮时同步发布活动，操作状态和失败原因显示在当前轮次。应用 `1990af9` 已部署，小程序 0.5.30 已上传开发版，见[修复发布记录](evidence/quiz-open-fix-deployment-20261114.json)。
