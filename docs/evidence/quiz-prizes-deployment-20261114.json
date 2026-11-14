@@ -1,0 +1,50 @@
+{
+  "deployedAt": "2026-11-14T10:08:17+08:00",
+  "revision": "33bf92e88771d6106988ab77ee70cbfe9a2c33a9",
+  "previousRevision": "a50d1a18470b0e850ac5e0d9d1443451b3bb9ab3",
+  "buildId": "wsVigljZTzyjCwvlKC4Mg",
+  "release": "/srv/zijingwebsite/releases/quiz-prizes-20261114-33bf92e",
+  "migrations": [
+    "20261113_000900_content_translations",
+    "20261114_001000_content_translation_sources",
+    "20261114_001100_content_translation_more_sources",
+    "20261114_001200_quiz_prizes"
+  ],
+  "backup": {
+    "storage": "server-local",
+    "snapshot": "/srv/zijingwebsite/backups/quiz-prizes-20261114-33bf92e/database/zijing-2026-11-14T02-07-38.416Z",
+    "rollback": "/srv/zijingwebsite/backups/quiz-prizes-20261114-33bf92e/rollback.sh",
+    "rollbackBehavior": "Restores the previous application and retains the additive tables and production data.",
+    "offsiteConfigured": false,
+    "restoreVerified": false
+  },
+  "existingCountsBeforeAndAfterMigration": { "users": 726, "signups": 538, "seats": 170, "claims": 276, "tickets": 360 },
+  "verification": {
+    "syntheticDatabase": "All migrations applied in isolated PostgreSQL; nine integration cases passed, including admin and personal permissions, deadline, result secrecy, repeated requests, shared inventory, concurrent draws and a real browser flow.",
+    "browser": "Synthetic account completed answers, settlement and draw in Chromium; widths 320, 390, 768 and 1440 had no detected horizontal overflow.",
+    "miniProgramTests": "Fifty targeted native and language tests passed; static package check passed for 31 pages and 225 files.",
+    "build": "Production webpack build from the exact application revision passed in a clean source archive with synthetic build credentials. Deployable output was scanned for synthetic secrets.",
+    "migration": "All four pending migrations were registered once, the new quiz and translation tables started empty, and the listed existing record counts matched.",
+    "candidateAndProduction": "Readiness, homepage, login, privacy, the quiz JavaScript SHA-256, anonymous quiz read/write and cross-origin write boundaries passed.",
+    "public": "Homepage, login, readiness, privacy and the separate FreeKill homepage returned 200; the quiz resource digest matched; anonymous reads/writes returned 401 with private no-store; cross-origin write returned 403; the quiz page redirected anonymous visitors to login.",
+    "candidateCleanup": "Candidate port 3101 was free after cutover.",
+    "authenticatedProductionFlow": "not tested",
+    "officialSimulatorAndRealDevice": "not tested"
+  },
+  "translation": {
+    "scope": "Deploys the preceding main-branch bilingual implementation and its three migrations.",
+    "workerEnabled": true,
+    "historicalBackfillRun": false,
+    "realTranslationQualityVerified": false
+  },
+  "miniProgram": {
+    "version": "0.5.29",
+    "revision": "33bf92e88771d6106988ab77ee70cbfe9a2c33a9",
+    "uploadedAt": "2026-11-14T10:06:35+08:00",
+    "platformStatus": "developmentVersionUploaded",
+    "officialTool": "WeChat Developer Tools CLI",
+    "sizeBytes": 1232520,
+    "reviewSubmitted": false,
+    "publicReleaseExecuted": false
+  }
+}

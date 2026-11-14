@@ -25,4 +25,4 @@
 - `node scripts/verify-quiz-database.mjs` 使用临时 PostgreSQL 和合成账号，执行现有全部迁移及竞猜事务、权限、时限和并发检查。
 - `node scripts/verify-quiz-database.mjs --browser` 还会启动本地候选服务，在移动宽度浏览器完成作答、公布结果和抽奖。
 - 小程序页面检查与原生页面测试使用 `pnpm miniapp:check`、`pnpm exec vitest run tests/miniapp-quiz.test.ts tests/miniapp-i18n.test.ts`。
-- 小程序版本：0.5.29。实际仓库、服务器和微信上传状态以本次部署记录为准。
+- 应用 `33bf92e` 已于北京时间 10:08:17 部署，微信 0.5.29 已上传开发版。正式账号线上操作、小程序模拟器和真机尚未核验；微信审核及正式发布尚未执行。详见[部署记录](evidence/quiz-prizes-deployment-20261114.json)。
