@@ -1,0 +1,95 @@
+<page-meta page-style="{{themePageStyle}}" />
+<view class="page mini-page quiz-page {{theme === 'dark' ? 'zj-dark' : ''}}">
+  <view class="quiz-hero"><text class="quiz-kicker">QUIZ &amp; PRIZES</text><text class="quiz-title">{{t.title}}</text><text class="quiz-lead">{{t.lead}}</text></view>
+  <view wx:if="{{loading}}" class="quiz-note">{{t.loading}}</view>
+  <view wx:if="{{error}}" class="quiz-error"><text>{{error}}</text><button class="secondary" bindtap="load">{{t.retry}}</button></view>
+  <view wx:if="{{notice}}" class="quiz-note">{{notice}}</view>
+  <button wx:if="{{!loggedIn}}" class="primary" bindtap="login">{{t.login}}</button>
+  <block wx:if="{{loggedIn}}">
+    <button wx:if="{{eventId}}" class="secondary quiz-back" bindtap="back">{{t.back}}</button>
+    <block wx:if="{{!eventId && listing}}">
+      <view class="quiz-card"><text class="quiz-heading">{{t.events}}</text>
+        <view wx:if="{{listing.events.length}}" wx:for="{{listing.events}}" wx:key="id" wx:for-item="event" class="quiz-event" bindtap="openEvent" data-id="{{event.id}}">
+          <text class="quiz-strong">{{event.title}}</text><text>{{event.description}}</text><text class="quiz-muted">{{event.status === 'draft' ? t.draft : event.status === 'archived' ? t.archived : t.published}} ›</text>
+        </view><text wx:if="{{!listing.events.length}}" class="quiz-muted">{{t.empty}}</text>
+      </view>
+      <view wx:if="{{listing.admin}}" class="quiz-card"><text class="quiz-heading">{{t.create}}</text>
+        <text class="quiz-label">{{t.eventName}}</text><input value="{{createTitle}}" data-field="createTitle" bindinput="input" maxlength="120" />
+        <text class="quiz-label">{{t.description}}</text><textarea value="{{createDescription}}" data-field="createDescription" bindinput="input" maxlength="2000" />
+        <button class="primary" bindtap="createEvent" disabled="{{busy}}">{{t.createDraft}}</button>
+      </view>
+    </block>
+    <block wx:if="{{detail}}">
+      <view class="quiz-card"><text class="quiz-badge">{{detail.event.status === 'draft' ? t.draft : detail.event.status === 'archived' ? t.archived : t.published}}</text>
+        <text class="quiz-heading">{{detail.event.title}}</text><text>{{detail.event.description}}</text>
+        <view wx:if="{{detail.admin}}" class="quiz-admin"><text class="quiz-subheading">{{t.manage}}</text>
+          <text class="quiz-label">{{t.eventName}}</text><input value="{{adminTitle}}" data-field="adminTitle" bindinput="input" maxlength="120" />
+          <text class="quiz-label">{{t.description}}</text><textarea value="{{adminDescription}}" data-field="adminDescription" bindinput="input" maxlength="2000" />
+          <view class="quiz-actions"><button class="secondary" bindtap="updateEvent" disabled="{{busy}}">{{t.saveEvent}}</button>
+            <button wx:if="{{detail.event.status === 'draft'}}" class="primary" bindtap="updateEvent" data-status="published" disabled="{{busy}}">{{t.publish}}</button>
+            <button wx:if="{{detail.event.status === 'published'}}" class="secondary" bindtap="updateEvent" data-status="archived" disabled="{{busy}}">{{t.archive}}</button>
+            <button wx:if="{{detail.event.status === 'archived'}}" class="primary" bindtap="updateEvent" data-status="published" disabled="{{busy}}">{{t.reopen}}</button></view>
+        </view>
+      </view>
+      <view class="quiz-card"><text class="quiz-heading">{{t.pool}}</text><text class="quiz-muted">{{t.poolNote}}</text>
+        <text wx:if="{{!detail.prizes.length}}" class="quiz-muted">{{t.noPrizes}}</text>
+        <view wx:for="{{detail.prizes}}" wx:key="id" wx:for-item="prize" class="quiz-prize"><text class="quiz-strong">{{prize.name}}</text><text>{{t.remaining}} {{prize.remaining}} / {{prize.quantity}}</text>
+          <view wx:if="{{detail.admin}}" class="quiz-admin"><text class="quiz-label">{{t.prizeName}}</text><input value="{{prizeEdits[prize.id].name}}" data-id="{{prize.id}}" data-field="name" bindinput="prizeInput" maxlength="120" />
+            <text class="quiz-label">{{t.total}}</text><input type="number" value="{{prizeEdits[prize.id].quantity}}" data-id="{{prize.id}}" data-field="quantity" bindinput="prizeInput" />
+            <button class="secondary" bindtap="savePrize" data-id="{{prize.id}}" disabled="{{busy}}">{{t.savePrize}}</button></view>
+        </view>
+        <view wx:if="{{detail.admin}}" class="quiz-admin"><text class="quiz-label">{{t.prizeName}}</text><input value="{{prizeName}}" data-field="prizeName" bindinput="input" maxlength="120" />
+          <text class="quiz-label">{{t.total}}</text><input type="number" value="{{prizeQuantity}}" data-field="prizeQuantity" bindinput="input" /><button class="primary" bindtap="addPrize" disabled="{{busy}}">{{t.addPrize}}</button>
+        </view>
+      </view>
+      <text class="quiz-section-heading">{{t.rounds}}</text><text wx:if="{{!detail.rounds.length}}" class="quiz-muted">{{t.noRounds}}</text>
+      <view wx:for="{{detail.rounds}}" wx:key="id" wx:for-item="round" class="quiz-card">
+        <text class="quiz-badge">{{round.status === 'draft' ? t.draft : round.status === 'open' ? t.open : round.status === 'closed' ? t.closed : t.settled}}</text>
+        <text class="quiz-heading">{{round.title}}</text><text>{{t.required}}：{{round.threshold}}</text>
+        <text wx:if="{{round.closesAt}}" class="quiz-muted">{{t.cutoff}}：{{round.closesLabel}}</text>
+        <text wx:if="{{detail.admin}}" class="quiz-muted">{{t.submissions}}：{{round.submissionCount}}</text>
+        <view wx:for="{{round.questions}}" wx:key="index" wx:for-item="question" wx:for-index="qi" class="quiz-question">
+          <text class="quiz-strong">{{qi + 1}}. {{question.prompt}}</text>
+          <view wx:for="{{question.options}}" wx:key="index" wx:for-item="option" class="quiz-option {{option.selected ? 'selected' : ''}}"
+            bindtap="choose" data-id="{{round.id}}" data-q="{{qi}}" data-option="{{option.index}}" data-type="choice">
+            <text>{{option.label}}</text><text wx:if="{{option.mine}}" class="quiz-tag">{{t.myChoice}}</text><text wx:if="{{option.isCorrect}}" class="quiz-tag">{{t.correct}}</text>
+          </view>
+          <block wx:if="{{detail.admin && round.status === 'closed'}}"><text class="quiz-label">{{t.chooseCorrect}}</text>
+            <view wx:for="{{question.options}}" wx:key="index" wx:for-item="option" class="quiz-option {{option.keySelected ? 'selected' : ''}}"
+              bindtap="choose" data-id="{{round.id}}" data-q="{{qi}}" data-option="{{option.index}}" data-type="key">{{option.label}}</view>
+          </block>
+        </view>
+        <view wx:if="{{round.entry}}" class="quiz-note"><text wx:if="{{round.entry.score === null}}">{{t.submitted}}</text><text wx:else>{{t.score}}：{{round.entry.score}}</text><text wx:if="{{round.entry.prize}}"> · {{t.prize}}：{{round.entry.prize}}</text></view>
+        <view class="quiz-actions">
+          <button wx:if="{{round.status === 'open' && !round.entry && detail.event.status === 'published'}}" class="primary" bindtap="roundAction" data-action="submit" data-id="{{round.id}}" disabled="{{busy}}">{{t.submit}}</button>
+          <button wx:if="{{round.entry.eligible && !round.entry.prize && detail.event.status === 'published'}}" class="primary" bindtap="roundAction" data-action="draw" data-id="{{round.id}}" disabled="{{busy}}">{{t.draw}}</button>
+          <button wx:if="{{detail.admin && round.status === 'draft'}}" class="secondary" bindtap="editRound" data-id="{{round.id}}">{{t.editRound}}</button>
+          <button wx:if="{{detail.admin && round.status === 'draft'}}" class="primary" bindtap="roundAction" data-action="open-round" data-id="{{round.id}}" disabled="{{busy}}">{{t.openRound}}</button>
+          <button wx:if="{{detail.admin && round.status === 'open'}}" class="secondary" bindtap="roundAction" data-action="close-round" data-id="{{round.id}}" disabled="{{busy}}">{{t.closeRound}}</button>
+          <button wx:if="{{detail.admin && round.status === 'closed'}}" class="primary" bindtap="roundAction" data-action="settle-round" data-id="{{round.id}}" disabled="{{busy}}">{{t.publishAnswers}}</button>
+        </view>
+      </view>
+      <view wx:if="{{detail.admin}}" class="quiz-card"><text class="quiz-heading">{{editingRound ? t.editRound : t.addRound}}</text>
+        <text class="quiz-label">{{t.roundName}}</text><input value="{{roundForm.title}}" data-field="title" bindinput="roundInput" maxlength="120" />
+        <text class="quiz-label">{{t.required}}</text><input type="number" value="{{roundForm.threshold}}" data-field="threshold" bindinput="roundInput" />
+        <picker mode="date" value="{{roundForm.date}}" data-field="date" bindchange="roundInput"><view class="quiz-picker">{{t.optionalDate}}：{{roundForm.date || '—'}}</view></picker>
+        <picker mode="time" value="{{roundForm.time}}" data-field="time" bindchange="roundInput"><view class="quiz-picker">{{t.optionalTime}}：{{roundForm.time || '—'}}</view></picker>
+        <button class="secondary" bindtap="clearDate">{{t.clearDate}}</button>
+        <view wx:for="{{roundForm.questions}}" wx:key="index" wx:for-item="question" wx:for-index="qi" class="quiz-question">
+          <text class="quiz-label">{{t.question}} {{qi + 1}}</text><input value="{{question.prompt}}" data-q="{{qi}}" bindinput="questionInput" maxlength="300" />
+          <view wx:for="{{question.options}}" wx:key="index" wx:for-item="option" wx:for-index="oi"><text class="quiz-label">{{t.option}} {{oi + 1}}</text>
+            <input value="{{option}}" data-q="{{qi}}" data-option="{{oi}}" bindinput="questionInput" maxlength="160" />
+            <button wx:if="{{question.options.length > 2}}" class="secondary" bindtap="removeOption" data-q="{{qi}}" data-option="{{oi}}">{{t.removeOption}}</button>
+          </view>
+          <view class="quiz-actions"><button wx:if="{{question.options.length < 8}}" class="secondary" bindtap="addOption" data-q="{{qi}}">{{t.addOption}}</button>
+            <button wx:if="{{roundForm.questions.length > 1}}" class="secondary" bindtap="removeQuestion" data-q="{{qi}}">{{t.removeQuestion}}</button></view>
+        </view>
+        <view class="quiz-actions"><button wx:if="{{roundForm.questions.length < 30}}" class="secondary" bindtap="addQuestion">{{t.addQuestion}}</button><button class="primary" bindtap="saveRound" disabled="{{busy}}">{{t.saveRound}}</button>
+          <button wx:if="{{editingRound}}" class="secondary" bindtap="cancelEdit">{{t.cancelEdit}}</button></view>
+      </view>
+      <view wx:if="{{detail.admin}}" class="quiz-card"><text class="quiz-heading">{{t.winners}}</text><text wx:if="{{!detail.winners.length}}" class="quiz-muted">{{t.noWinners}}</text>
+        <view wx:for="{{detail.winners}}" wx:key="index" class="quiz-prize"><text>{{item.name}}</text><text>{{item.prize}}</text></view>
+      </view>
+    </block>
+  </block>
+</view>

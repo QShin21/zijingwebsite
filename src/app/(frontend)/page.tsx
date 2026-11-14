@@ -367,6 +367,9 @@ export default async function Home() {
               {t("查看日程", "View schedule")}
             </ButtonLink>
           )}
+          <ButtonLink href="/quiz" tone="stage">
+            {t("竞猜与抽奖", "Quiz & prize draw")}
+          </ButtonLink>
         </HeroActions>
         {home.me && (
           <ul className={styles.scoreboard} aria-label={t("我的主场", "My home")}>

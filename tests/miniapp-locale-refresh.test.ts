@@ -24,7 +24,7 @@ function harness(overrides: Record<string, Mod> = {}) {
   let definition: Mod | null = null;
   function load(file: string): Mod {
     const resolved = file.endsWith('.js') ? file : file + '.js';
-    const key = path.relative(root, resolved);
+    const key = path.relative(root, resolved).split(path.sep).join('/');
     if (overrides[key]) return overrides[key];
     if (cache.has(resolved)) return cache.get(resolved)!.exports;
     const module = { exports: {} as Mod };

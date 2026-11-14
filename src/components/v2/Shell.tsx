@@ -136,6 +136,7 @@ export function Footer({ name, footer, campus = false, locale = "zh" }: { name: 
           <div>
             <p>{t("参与", "Take part")}</p>
             <Link href="/events">{t("日程", "Schedule")}</Link>
+            <Link href="/quiz">{t("竞猜与抽奖", "Quiz & prize draw")}</Link>
             <Link href="/join">{t("加入紫荆", "Join Zijing")}</Link>
             {campus && <Link href="/join/staff">{t("骨干招新", "Staff recruitment")}</Link>}
           </div>

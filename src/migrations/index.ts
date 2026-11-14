@@ -41,6 +41,7 @@ import * as personalArchives from "./20261113_000800_personal_archives";
 import * as contentTranslations from "./20261113_000900_content_translations";
 import * as contentTranslationSources from "./20261114_001000_content_translation_sources";
 import * as contentTranslationMoreSources from "./20261114_001100_content_translation_more_sources";
+import * as quizPrizes from "./20261114_001200_quiz_prizes";
 
 export const migrations = [
 
@@ -119,4 +120,5 @@ export const migrations = [
   { up: contentTranslations.up, down: contentTranslations.down, name: "20261113_000900_content_translations" },
   { up: contentTranslationSources.up, down: contentTranslationSources.down, name: "20261114_001000_content_translation_sources" },
   { up: contentTranslationMoreSources.up, down: contentTranslationMoreSources.down, name: "20261114_001100_content_translation_more_sources" },
+  { up: quizPrizes.up, down: quizPrizes.down, name: "20261114_001200_quiz_prizes" },
 ];

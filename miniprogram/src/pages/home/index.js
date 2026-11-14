@@ -17,6 +17,7 @@ const text = {
   itemsSuffix: [' 项', ' items'], eventsSuffix: [' 场', ' events'],
   spotlight: ['✦ 焦点活动', '✦ Spotlight'], joinTitle: ['注册后报名活动', 'Create an account to sign up for events'],
   register: ['注册账号', 'Create account'], loginExisting: ['已有账号，登录', 'Have an account? Sign in'],
+  quiz: ['竞猜与抽奖', 'Quiz & prize draw'],
   fullSchedule: ['完整日程', 'Full schedule'], upcomingEmptyTitle: ['近期暂无安排', 'Nothing scheduled soon'],
   upcomingEmptyBody: ['活动发布后会显示在这里。', 'Events will appear here once published.'], browseCommunities: ['浏览社群', 'Browse communities'],
   trialsCenter: ['选拔中心', 'Trials center'], allAnnouncements: ['全部公告', 'All notices'],
@@ -46,6 +47,7 @@ Page(withVisualTheme({
   retry: function () { return this.load(); },
   login: function () { wx.navigateTo({ url: '/pages/auth/index?mode=login' }); },
   register: function () { wx.navigateTo({ url: '/pages/auth/index?mode=register' }); },
+  openQuiz: function () { wx.navigateTo({ url: '/pages/quiz/index' }); },
   openPage: function (event) { require('../../lib/navigation').go(event.currentTarget.dataset.page, event.currentTarget.dataset.params || {}); },
   openWebsite: function (event) { require('../../lib/navigation').website(event.currentTarget.dataset.url); },
   // V2 card images: one re-sign for an expired ticket, then the text fallback.

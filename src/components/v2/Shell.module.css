@@ -374,6 +374,14 @@
     display: none;
   }
 }
+@media (max-width: 639px) {
+  .barInner { gap: 8px; }
+  .brand { flex: 1 1 0; min-width: 0; }
+  .mark { flex: 0 0 auto; }
+  .wordmark { min-width: 0; overflow: hidden; }
+  .wordmark strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .barActions { gap: 4px; }
+}
 
 /* ===== V3 黑曜竞技场: obsidian broadcast HUD (top bar, tab bar, footer) in both themes. ===== */
 .bar {

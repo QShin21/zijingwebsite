@@ -1,0 +1,24 @@
+.quiz-page { padding-bottom: 80rpx; }
+.quiz-hero { display: flex; flex-direction: column; gap: 12rpx; margin: 0 0 24rpx; padding: 38rpx 28rpx; border-radius: 24rpx; color: #fff; background: linear-gradient(135deg, #332040, #6c387d); }
+.quiz-kicker { color: #ead4a2; font-size: 22rpx; letter-spacing: 3rpx; font-weight: 800; }
+.quiz-title { font-size: 42rpx; font-weight: 900; }
+.quiz-lead { font-size: 26rpx; line-height: 1.6; }
+.quiz-card { display: flex; flex-direction: column; gap: 12rpx; margin: 20rpx 0; padding: 26rpx; border: 1rpx solid var(--z-line); border-radius: 22rpx; background: var(--z-surface); color: var(--z-text); }
+.quiz-heading, .quiz-section-heading { display: block; font-size: 34rpx; font-weight: 900; }
+.quiz-subheading, .quiz-strong { font-weight: 800; }
+.quiz-muted { color: var(--z-muted); font-size: 25rpx; line-height: 1.5; }
+.quiz-badge { align-self: flex-start; padding: 6rpx 16rpx; border-radius: 99rpx; background: #eadcf1; color: #542b6c; font-size: 22rpx; font-weight: 800; }
+.quiz-card input, .quiz-card textarea, .quiz-picker { box-sizing: border-box; width: 100%; min-height: 80rpx; padding: 16rpx; border: 1rpx solid var(--z-line); border-radius: 10rpx; background: var(--z-surface); color: var(--z-text); }
+.quiz-card textarea { height: 150rpx; }
+.quiz-label { display: block; margin-top: 12rpx; font-weight: 700; font-size: 25rpx; }
+.quiz-admin, .quiz-question { display: flex; flex-direction: column; gap: 10rpx; margin-top: 14rpx; padding-top: 18rpx; border-top: 1rpx solid var(--z-line); }
+.quiz-event, .quiz-prize { display: flex; flex-direction: column; gap: 8rpx; padding: 18rpx 0; border-bottom: 1rpx solid var(--z-line); }
+.quiz-option { display: flex; flex-wrap: wrap; gap: 10rpx; padding: 16rpx; border: 2rpx solid var(--z-line); border-radius: 12rpx; }
+.quiz-option.selected { border-color: #8a459e; background: #efe3f3; color: #3d194b; }
+.quiz-tag { color: #713886; font-size: 22rpx; font-weight: 800; }
+.quiz-actions { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 12rpx; }
+.quiz-actions button { flex: 1 1 40%; margin: 0; }
+.quiz-card > button, .quiz-admin > button, .quiz-question button { margin-top: 12rpx; }
+.quiz-note, .quiz-error { margin: 16rpx 0; padding: 18rpx; border-radius: 12rpx; background: #e7f4e9; color: #204c2b; }
+.quiz-error { background: #fff0ee; color: #902e27; }
+.quiz-back { margin: 10rpx 0; }

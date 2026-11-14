@@ -16,6 +16,7 @@
       <text class="zj-stage-lead">{{home ? home.subtitle : t.heroSubtitle}}</text>
       <view class="zj-stage-actions">
         <button class="accent" bindtap="openPage" data-page="events">{{t.viewSchedule}}</button>
+        <button class="zj-stage-ghost" bindtap="openQuiz">{{t.quiz}}</button>
         <button wx:if="{{user}}" class="zj-stage-ghost" bindtap="openPage" data-page="account">{{home.campus ? t.myTodo : t.mySignups}}</button>
         <button wx:else class="zj-stage-ghost" bindtap="login">{{t.login}}</button>
       </view>
